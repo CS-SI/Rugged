@@ -1,0 +1,13 @@
+<component>
+  <fileSets>
+    <fileSet>
+      <outputDirectory>/licenses</outputDirectory>  
+      <includes>
+       <include>LICENSE.txt</include>
+       <include>NOTICE.txt</include>
+       <include>Apache-Commons-Math-LICENSE.txt</include>
+       <include>Orekit-LICENSE.txt</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</component>

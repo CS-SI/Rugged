@@ -1,0 +1,8 @@
+RUGGED
+Copyright 2014 CS Systèmes d'Information
+
+This product includes software developed by
+CS Systèmes d'Information (http://www.c-s.fr/)
+
+This product depends on software developed by
+The Apache Software Foundation (http://www.apache.org/)

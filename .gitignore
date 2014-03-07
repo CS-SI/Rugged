@@ -1,0 +1,7 @@
+bin
+.classpath
+.project
+.settings
+rugged-api/target
+rugged-core/target
+rugged-geotiff/target

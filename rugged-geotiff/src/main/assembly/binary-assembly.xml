@@ -1,0 +1,20 @@
+<assembly>
+  <id>bin</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <dependencySets>  
+    <dependencySet>  
+      <outputDirectory>/lib</outputDirectory>
+      <excludes>
+        <exclude>org.orekit:rugged</exclude>
+      </excludes>
+      <unpack>false</unpack>  
+    </dependencySet>  
+  </dependencySets>  
+  <componentDescriptors>
+    <componentDescriptor>src/main/assembly/misc-files.xml</componentDescriptor>
+    <componentDescriptor>src/main/assembly/jar-files.xml</componentDescriptor>
+  </componentDescriptors>
+</assembly>
+
