@@ -1,0 +1,87 @@
+' Copyright 2013-2014 CS Systèmes d'Information
+' Licensed to CS Systèmes d'Information (CS) under one or more
+' contributor license agreements.  See the NOTICE file distributed with
+' this work for additional information regarding copyright ownership.
+' CS licenses this file to You under the Apache License, Version 2.0
+' (the "License"); you may not use this file except in compliance with
+' the License.  You may obtain a copy of the License at
+'
+'   http://www.apache.org/licenses/LICENSE-2.0
+'
+' Unless required by applicable law or agreed to in writing, software
+' distributed under the License is distributed on an "AS IS" BASIS,
+' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+' See the License for the specific language governing permissions and
+' limitations under the License.
+
+@startuml
+
+  skinparam svek                                true
+  skinparam NoteBackgroundColor                 #F3EFEB
+  skinparam NoteBorderColor                     #691616
+  skinparam NoteFontColor                       #691616
+  skinparam SequenceActorBorderColor            #6A584B
+  skinparam SequenceParticipantBackgroundColor  #F3EFEB/CCC9C5
+  skinparam SequenceParticipantBorderColor      #6A584B
+  skinparam SequenceLifeLineBackgroundColor     #CCC9C5/F3EFEB
+  skinparam SequenceLifeLineBorderColor         #6A584B
+  skinparam SequenceArrowColor                  #6A584B
+  skinparam SequenceBorderColor                 #6A584B
+  skinparam SequenceFontSize                    11
+
+  hide footbox
+
+  participant "Application" as A
+  participant "Interface" as I
+  participant "Rugged" as R
+  participant "Orekit" as O
+  participant "Math" as M
+
+  activate A
+  A  -> I : inverseLocalization(φ, λ)
+     activate I
+       I  -> R : inverseLocalization(φ, λ)
+       activate R
+         R  -> R : elevation(φ, λ)
+         activate R
+            R -> I : DEM callback
+            I --> R : DEM raw data cell
+            R --> R : h(φ, λ)
+         deactivate R
+         R -> O : convert(ellipsoid, φ, λ, h)
+         activate O
+           O --> R : P(φ, λ, h) in Earth frame
+         deactivate O
+         R -> R : createSwathOffset(P, interpolator)
+         activate R
+           R --> R : function f(t)
+         deactivate R
+         R -> M : solve f(t₀) = 0
+         activate M
+           M --> R : evaluate f(t)
+           activate R
+             R -> R : apply combined transform provider at date
+             R --> M : f(t)
+           deactivate R
+           M --> R : evaluate f(t)
+           activate R
+             R -> R : apply combined transform provider at date
+             R --> M : f(t)
+           deactivate R
+           M --> R : evaluate f(t)
+           activate R
+             R -> R : apply combined transform provider at date
+             R --> M : f(t)
+           deactivate R
+           M --> R : t₀
+         deactivate M
+         R -> R : apply combined transform provider at date
+          R -> R : apply inverse time stamping model
+          R -> R : locate pixel in line for solved geometry
+          R --> I : pixel coordinates
+       deactivate R
+        I --> A : pixel coordinates
+    deactivate I         
+  deactivate A
+
+@enduml

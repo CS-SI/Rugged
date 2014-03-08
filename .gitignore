@@ -2,6 +2,7 @@ bin
 .classpath
 .project
 .settings
+target
 rugged-api/target
 rugged-core/target
 rugged-geotiff/target

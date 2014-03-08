@@ -1,0 +1,70 @@
+' Copyright 2013-2014 CS Systèmes d'Information
+' Licensed to CS Systèmes d'Information (CS) under one or more
+' contributor license agreements.  See the NOTICE file distributed with
+' this work for additional information regarding copyright ownership.
+' CS licenses this file to You under the Apache License, Version 2.0
+' (the "License"); you may not use this file except in compliance with
+' the License.  You may obtain a copy of the License at
+'
+'   http://www.apache.org/licenses/LICENSE-2.0
+'
+' Unless required by applicable law or agreed to in writing, software
+' distributed under the License is distributed on an "AS IS" BASIS,
+' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+' See the License for the specific language governing permissions and
+' limitations under the License.
+
+@startuml
+
+  skinparam svek                                true
+  skinparam NoteBackgroundColor                 #F3EFEB
+  skinparam NoteBorderColor                     #691616
+  skinparam NoteFontColor                       #691616
+  skinparam SequenceActorBorderColor            #6A584B
+  skinparam SequenceParticipantBackgroundColor  #F3EFEB/CCC9C5
+  skinparam SequenceParticipantBorderColor      #6A584B
+  skinparam SequenceLifeLineBackgroundColor     #CCC9C5/F3EFEB
+  skinparam SequenceLifeLineBorderColor         #6A584B
+  skinparam SequenceArrowColor                  #6A584B
+  skinparam SequenceBorderColor                 #6A584B
+  skinparam SequenceFontSize                    11
+
+  hide footbox
+
+  participant "Application" as A
+  participant "Interface" as I
+  participant "Rugged" as R
+  participant "Orekit" as O
+
+  activate A
+  A  -> I : directLocalization(line)
+     activate I
+       I  -> R : directLocalization(line)
+       activate R
+         R -> R : apply time stamping model
+         R -> R : apply combined transform provider at date
+         R -> R : loop over line pixels pₖ
+         activate R
+           R -> O : convert(line-of-sight)
+           activate O
+             O --> R : line-of-sight in Earth frame
+           deactivate O
+           R -> O : intersection(ellipsoid, line-of-sight)
+           activate O
+             O --> R : geodetic point
+           deactivate O
+           R -> R : DEM intersection
+           activate R
+              R -> I : DEM callback
+              I --> R : DEM raw data cell
+              R --> R : φₖ, λₖ, hₖ
+           deactivate R
+            R --> R : list(φₖ, λₖ, hₖ)
+         deactivate R
+         R --> I : list(φₖ, λₖ, hₖ)
+       deactivate R
+       I  --> A : list(φₖ, λₖ, hₖ)
+     deactivate I
+  deactivate A
+
+@enduml
