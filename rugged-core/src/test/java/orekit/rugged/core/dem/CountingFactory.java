@@ -14,17 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.dem;
+package orekit.rugged.core.dem;
 
+import org.orekit.rugged.core.dem.SimpleTile;
+import org.orekit.rugged.core.dem.TileFactory;
 
-/** Interface representing a factory for raster tile.
- * @param <T> Type of tiles.
- * @author Luc Maisonobe
- */
-public interface TileFactory<T extends Tile> {
+public class CountingFactory implements TileFactory<SimpleTile> {
 
-    /** Create an empty tile.
-     */
-    T createTile();
+    private int count;
+
+    public CountingFactory() {
+        count = 0;
+    }
+
+    public SimpleTile createTile() {
+        ++count;
+        return new SimpleTile();
+    }
+
+    public int getCount() {
+        return count;
+    }
 
 }
