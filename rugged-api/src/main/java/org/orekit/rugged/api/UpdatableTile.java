@@ -22,14 +22,14 @@ package org.orekit.rugged.api;
 public interface UpdatableTile {
 
     /** Set the tile global geometry.
-     * @param referenceLatitude reference latitude
-     * @param referenceLongitude reference longitude
+     * @param minLatitude minimum latitude
+     * @param minLongitude minimum longitude
      * @param latitudeStep step in latitude (size of one raster element)
      * @param longitudeStep step in longitude (size of one raster element)
      * @param latitudeRows number of latitude rows
      * @param longitudeColumns number of longitude columns
      */
-    void setGeometry(double referenceLatitude, double referenceLongitude,
+    void setGeometry(double minLatitude, double minLongitude,
                      double latitudeStep, double longitudeStep,
                      int latitudeRows, int longitudeColumns);
 
