@@ -25,8 +25,8 @@ public class SimpleTileTest {
     @Test
     public void testEmpty() {
         SimpleTile tile = new SimpleTile();
-        Assert.assertEquals(0, tile.getReferenceLatitude(), 1.0e-10);
-        Assert.assertEquals(0, tile.getReferenceLongitude(), 1.0e-10);
+        Assert.assertEquals(0, tile.getMinimumLatitude(), 1.0e-10);
+        Assert.assertEquals(0, tile.getMinimumLongitude(), 1.0e-10);
         Assert.assertEquals(0, tile.getLatitudeStep(), 1.0e-10);
         Assert.assertEquals(0, tile.getLongitudeStep(), 1.0e-10);
         Assert.assertEquals(0, tile.getLatitudeRows());
@@ -44,13 +44,18 @@ public class SimpleTileTest {
             }
         }
 
-        Assert.assertEquals(1.0, tile.getReferenceLatitude(), 1.0e-10);
-        Assert.assertEquals(2.0, tile.getReferenceLongitude(), 1.0e-10);
+        Assert.assertEquals(1.0, tile.getMinimumLatitude(), 1.0e-10);
+        Assert.assertEquals(2.0, tile.getMinimumLongitude(), 1.0e-10);
         Assert.assertEquals(0.1, tile.getLatitudeStep(), 1.0e-10);
         Assert.assertEquals(0.2, tile.getLongitudeStep(), 1.0e-10);
         Assert.assertEquals(100, tile.getLatitudeRows());
         Assert.assertEquals(200, tile.getLongitudeColumns());
 
+        Assert.assertTrue(tile.covers(  6.0, 22.0));
+        Assert.assertFalse(tile.covers( 0.0, 22.0));
+        Assert.assertFalse(tile.covers(12.0, 22.0));
+        Assert.assertFalse(tile.covers( 6.0,  1.0));
+        Assert.assertFalse(tile.covers( 6.0, 43.0));
 
         for (int i = 0; i < tile.getLatitudeRows(); ++i) {
             for (int j = 0; j < tile.getLongitudeColumns(); ++j) {

@@ -16,18 +16,18 @@
  */
 package org.orekit.rugged.core.dem;
 
-import org.orekit.rugged.api.UpdatableTile;
+import org.apache.commons.math3.util.FastMath;
 
-/** Simple implementation of a {@link UpdatableTile}.
+/** Simple implementation of a {@link Tile}.
  * @author Luc Maisonobe
  */
 public class SimpleTile implements Tile {
 
-    /** Reference latitude. */
-    private double referenceLatitude;
+    /** Minimum latitude. */
+    private double minLatitude;
 
-    /** Reference longitude. */
-    private double referenceLongitude;
+    /** Minimum longitude. */
+    private double minLongitude;
 
     /** Step in latitude (size of one raster element). */
     private double latitudeStep;
@@ -54,16 +54,16 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public void setGeometry(final double referenceLatitude, final double referenceLongitude,
-                     final double latitudeStep, final double longitudeStep,
-                     final int latitudeRows, final int longitudeColumns) {
-        this.referenceLatitude  = referenceLatitude;
-        this.referenceLongitude = referenceLongitude;
-        this.latitudeStep       = latitudeStep;
-        this.longitudeStep      = longitudeStep;
-        this.latitudeRows       = latitudeRows;
-        this.longitudeColumns   = longitudeColumns;
-        this.elevations         = new double[latitudeRows * longitudeColumns];
+    public void setGeometry(final double minLatitude, final double minLongitude,
+                            final double latitudeStep, final double longitudeStep,
+                            final int latitudeRows, final int longitudeColumns) {
+        this.minLatitude      = minLatitude;
+        this.minLongitude     = minLongitude;
+        this.latitudeStep     = latitudeStep;
+        this.longitudeStep    = longitudeStep;
+        this.latitudeRows     = latitudeRows;
+        this.longitudeColumns = longitudeColumns;
+        this.elevations       = new double[latitudeRows * longitudeColumns];
     }
 
     /** {@inheritDoc} */
@@ -76,14 +76,14 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public double getReferenceLatitude() {
-        return referenceLatitude;
+    public double getMinimumLatitude() {
+        return minLatitude;
     }
 
     /** {@inheritDoc} */
     @Override
-    public double getReferenceLongitude() {
-        return referenceLongitude;
+    public double getMinimumLongitude() {
+        return minLongitude;
     }
 
     /** {@inheritDoc} */
@@ -118,6 +118,15 @@ public class SimpleTile implements Tile {
         return elevations[latitudeIndex * longitudeColumns + longitudeIndex];
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean covers(final double latitude, final double longitude) {
+        final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
+        final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
+        return latitudeIndex  >= 0 && latitudeIndex  < latitudeRows &&
+               longitudeIndex >= 0 && longitudeIndex < longitudeColumns;
+    }
+
     /** Check indices.
      * @param latitudeIndex
      * @param longitudeIndex
@@ -125,7 +134,7 @@ public class SimpleTile implements Tile {
      */
     private void checkIndices(int latitudeIndex, int longitudeIndex)
         throws IllegalArgumentException {
-        if (latitudeIndex < 0 || latitudeIndex >= latitudeRows ||
+        if (latitudeIndex  < 0 || latitudeIndex  >= latitudeRows ||
             longitudeIndex < 0 || longitudeIndex >= longitudeColumns) {
             throw new IllegalArgumentException();
         }        

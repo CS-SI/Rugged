@@ -23,15 +23,15 @@ import org.orekit.rugged.api.UpdatableTile;
  */
 public interface Tile extends UpdatableTile {
 
-    /** Get reference latitude.
-     * @return reference latitude
+    /** Get minimum latitude.
+     * @return minimum latitude
      */
-    double getReferenceLatitude();
+    double getMinimumLatitude();
 
-    /** Get reference longitude.
-     * @return reference longitude
+    /** Get minimum longitude.
+     * @return minimum longitude
      */
-    double getReferenceLongitude();
+    double getMinimumLongitude();
 
     /** Get step in latitude (size of one raster element).
      * @return step in latitude
@@ -61,5 +61,12 @@ public interface Tile extends UpdatableTile {
      */
     double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
         throws IllegalArgumentException;
+
+    /** Check if a tile covers a ground point.
+     * @param latitude ground point latitude
+     * @param longitude ground point longitude
+     * @return true if the tile covers the ground point
+     */
+    boolean covers(double latitude, double longitude);
 
 }
