@@ -21,13 +21,14 @@ import org.apache.commons.math3.random.Well19937a;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.core.dem.SimpleTile;
 import org.orekit.rugged.core.dem.TilesCache;
 
 public class TilesCacheTest {
 
     @Test
-    public void testSingleTile() {
+    public void testSingleTile() throws RuggedException {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory,
                 new ConstantElevationUpdater(FastMath.toRadians(3.0), 10, 10.0), 1000);
@@ -40,7 +41,7 @@ public class TilesCacheTest {
     }
 
     @Test
-    public void testEviction() {
+    public void testEviction() throws RuggedException {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory,
                 new ConstantElevationUpdater(FastMath.toRadians(1.0), 10, 10.0), 12);
@@ -85,7 +86,7 @@ public class TilesCacheTest {
     }
 
     @Test
-    public void testExactEnd() {
+    public void testExactEnd() throws RuggedException {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache =
                 new TilesCache<SimpleTile>(factory,
@@ -109,7 +110,7 @@ public class TilesCacheTest {
     }
 
     @Test
-    public void testNonContiguousFill() {
+    public void testNonContiguousFill() throws RuggedException {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache =
                 new TilesCache<SimpleTile>(factory,

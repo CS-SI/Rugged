@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
 
 /** Cache for Digital Elevation Model {@link Tile tiles}.
@@ -68,8 +69,10 @@ public class TilesCache<T extends Tile> {
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return tile covering the ground point
+     * @exception RuggedException if newly created tile cannot be updated
      */
-    public T getTile(final double latitude, final double longitude) {
+    public T getTile(final double latitude, final double longitude)
+        throws RuggedException {
         return getStrip(latitude, longitude).getTile(latitude, longitude);
     }
 
@@ -77,8 +80,10 @@ public class TilesCache<T extends Tile> {
      * @param latitude latitude of the point
      * @param longitude longitude of the point
      * @return new tile covering the point
+     * @exception RuggedException if tile cannot be updated
      */
-    private T createTile(final double latitude, final double longitude) {
+    private T createTile(final double latitude, final double longitude)
+        throws RuggedException {
 
         if (evictionCache[next] != null) {
             // the tile we are creating will evict this older tile
@@ -106,8 +111,10 @@ public class TilesCache<T extends Tile> {
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return strip covering the ground point
+     * @exception RuggedException if tile cannot be updated
      */
-    private TilesStrip getStrip(final double latitude, final double longitude) {
+    private TilesStrip getStrip(final double latitude, final double longitude)
+        throws RuggedException {
 
         // look for a strip at the specified latitude
         final int index = Collections.binarySearch(searchCache, new BasicLatitudeProvider(latitude),
@@ -238,8 +245,10 @@ public class TilesCache<T extends Tile> {
          * @param latitude ground point latitude
          * @param longitude ground point longitude
          * @return strip covering the ground point
+         * @exception RuggedException if tile cannot be updated
          */
-        public T getTile(final double latitude, final double longitude) {
+        public T getTile(final double latitude, final double longitude)
+            throws RuggedException {
 
             // look for a tile at the specified longitude
             final int index = Collections.binarySearch(tiles, new BasicLongitudeProvider(longitude),

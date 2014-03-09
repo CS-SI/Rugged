@@ -18,7 +18,10 @@ package orekit.rugged.core.dem;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.core.dem.SimpleTile;
+import org.orekit.rugged.core.dem.Tile;
 
 public class SimpleTileTest {
 
@@ -34,7 +37,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testUpdate() {
+    public void testUpdate() throws RuggedException {
 
         SimpleTile tile = new SimpleTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
@@ -63,6 +66,30 @@ public class SimpleTileTest {
             }
         }
 
+    }
+
+    @Test
+    public void testOutOfBounds() throws RuggedException {
+
+        SimpleTile tile = new SimpleTile();
+        tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
+        tile.setElevation(50, 100, 1000.0);
+        checkOutOfBound( -1, 100, tile);
+        checkOutOfBound(100, 100, tile);
+        checkOutOfBound( 50,  -1, tile);
+        checkOutOfBound( 50, 200, tile);
+    }
+
+    private void checkOutOfBound(int i, int j, Tile tile) {
+        try {
+            tile.setElevation(i, j, 1000.0);
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TILE_INDICES, re.getSpecifier());
+            Assert.assertEquals(i,                              ((Integer) re.getParts()[0]).intValue());
+            Assert.assertEquals(j,                              ((Integer) re.getParts()[1]).intValue());
+            Assert.assertEquals(tile.getLatitudeRows() - 1,     ((Integer) re.getParts()[2]).intValue());
+            Assert.assertEquals(tile.getLongitudeColumns() - 1, ((Integer) re.getParts()[3]).intValue());
+        }
     }
 
 }

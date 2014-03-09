@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.core.dem;
 
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.UpdatableTile;
 
 /** Interface representing a raster tile.
@@ -57,10 +58,10 @@ public interface Tile extends UpdatableTile {
      * @param latitudeIndex
      * @param longitudeIndex
      * @return elevation
-     * @exception IllegalArgumentException if indices are out of bound
+     * @exception RuggedException if indices are out of bound
      */
     double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
-        throws IllegalArgumentException;
+        throws RuggedException;
 
     /** Check if a tile covers a ground point.
      * @param latitude ground point latitude

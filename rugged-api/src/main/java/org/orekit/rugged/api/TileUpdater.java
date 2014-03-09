@@ -30,7 +30,9 @@ public interface TileUpdater {
      * @param latitude latitude that must be covered by the tile
      * @param longitude longitude that must be covered by the tile
      * @param tile to update
+     * @exception RuggedException if tile cannot be updated
      */
-    void updateTile(double latitude, double longitude, UpdatableTile tile);
+    void updateTile(double latitude, double longitude, UpdatableTile tile)
+        throws RuggedException;
 
 }

@@ -37,9 +37,9 @@ public interface UpdatableTile {
      * @param latitudeIndex index of latitude (row index)
      * @param longitudeIndex index of longitude (column index)
      * @param elevation elevation (m)
-     * @exception IllegalArgumentException if indices are out of bound
+     * @exception RuggedException if indices are out of bound
      */
     void setElevation(int latitudeIndex, int longitudeIndex, double elevation)
-        throws IllegalArgumentException;
+        throws RuggedException;
 
 }

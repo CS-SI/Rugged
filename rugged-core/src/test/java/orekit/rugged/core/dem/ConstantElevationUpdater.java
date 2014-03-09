@@ -17,6 +17,7 @@
 package orekit.rugged.core.dem;
 
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.api.UpdatableTile;
 
@@ -32,7 +33,8 @@ public class ConstantElevationUpdater implements TileUpdater {
         this.elevation = elevation;
     }
 
-    public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+    public void updateTile(double latitude, double longitude, UpdatableTile tile)
+        throws RuggedException {
         tile.setGeometry(size * FastMath.floor(latitude / size),
                          size * FastMath.floor(longitude / size),
                          size / n, size / n, n, n);

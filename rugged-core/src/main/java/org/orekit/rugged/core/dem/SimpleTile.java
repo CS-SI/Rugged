@@ -17,6 +17,8 @@
 package org.orekit.rugged.core.dem;
 
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.api.RuggedMessages;
 
 /** Simple implementation of a {@link Tile}.
  * @author Luc Maisonobe
@@ -69,7 +71,7 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public void setElevation(final int latitudeIndex, final int longitudeIndex,
-                             final double elevation) throws IllegalArgumentException {
+                             final double elevation) throws RuggedException {
         checkIndices(latitudeIndex, longitudeIndex);
         elevations[latitudeIndex * longitudeColumns + longitudeIndex] = elevation;
     }
@@ -113,7 +115,7 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
-        throws IllegalArgumentException {
+        throws RuggedException {
         checkIndices(latitudeIndex, longitudeIndex);
         return elevations[latitudeIndex * longitudeColumns + longitudeIndex];
     }
@@ -133,10 +135,12 @@ public class SimpleTile implements Tile {
      * @exception IllegalArgumentException if indices are out of bound
      */
     private void checkIndices(int latitudeIndex, int longitudeIndex)
-        throws IllegalArgumentException {
+        throws RuggedException {
         if (latitudeIndex  < 0 || latitudeIndex  >= latitudeRows ||
             longitudeIndex < 0 || longitudeIndex >= longitudeColumns) {
-            throw new IllegalArgumentException();
+            throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
+                                      latitudeIndex, longitudeIndex,
+                                      latitudeRows - 1, longitudeColumns - 1);
         }        
     }
 
