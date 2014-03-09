@@ -14,29 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package orekit.rugged.core.dem;
+package org.orekit.rugged.core.dem;
 
-import org.orekit.rugged.core.dem.SimpleTile;
-import org.orekit.rugged.core.dem.SimpleTileFactory;
 import org.orekit.rugged.core.dem.TileFactory;
 
-public class CountingFactory implements TileFactory<SimpleTile> {
+/** Simple implementation of a {@link TileFactory} for {@link SimpleTile}.
+ * @author Luc Maisonobe
+ */
+public class SimpleTileFactory implements TileFactory<SimpleTile> {
 
-    private int count;
-    private TileFactory<SimpleTile> rawFactory;
-
-    public CountingFactory() {
-        count = 0;
-        rawFactory = new SimpleTileFactory();
-    }
-
+    /** {@inheritDoc} */
+    @Override
     public SimpleTile createTile() {
-        ++count;
-        return rawFactory.createTile();
-    }
-
-    public int getCount() {
-        return count;
+        return new SimpleTile();
     }
 
 }

@@ -19,6 +19,7 @@ package org.orekit.rugged.core.dem;
 import org.orekit.rugged.api.RuggedException;
 
 /** Simple implementation of a {@link Tile}.
+ * @see SimpleTileFactory
  * @author Luc Maisonobe
  */
 public class SimpleTile extends AbstractTile {
@@ -31,7 +32,7 @@ public class SimpleTile extends AbstractTile {
      * Creates an empty tile.
      * </p>
      */
-    public SimpleTile() {
+    SimpleTile() {
     }
 
     /** {@inheritDoc} */

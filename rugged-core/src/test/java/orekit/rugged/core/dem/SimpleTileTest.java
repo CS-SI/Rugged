@@ -21,13 +21,14 @@ import org.junit.Test;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.core.dem.SimpleTile;
+import org.orekit.rugged.core.dem.SimpleTileFactory;
 import org.orekit.rugged.core.dem.Tile;
 
 public class SimpleTileTest {
 
     @Test
     public void testEmpty() {
-        SimpleTile tile = new SimpleTile();
+        SimpleTile tile = new SimpleTileFactory().createTile();
         Assert.assertEquals(0, tile.getMinimumLatitude(), 1.0e-10);
         Assert.assertEquals(0, tile.getMinimumLongitude(), 1.0e-10);
         Assert.assertEquals(0, tile.getLatitudeStep(), 1.0e-10);
@@ -39,7 +40,7 @@ public class SimpleTileTest {
     @Test
     public void testUpdate() throws RuggedException {
 
-        SimpleTile tile = new SimpleTile();
+        SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
         for (int i = 0; i < tile.getLatitudeRows(); ++i) {
             for (int j = 0; j < tile.getLongitudeColumns(); ++j) {
@@ -71,7 +72,7 @@ public class SimpleTileTest {
     @Test
     public void testOutOfBounds() throws RuggedException {
 
-        SimpleTile tile = new SimpleTile();
+        SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
         tile.setElevation(50, 100, 1000.0);
         checkOutOfBound( -1, 100, tile);
