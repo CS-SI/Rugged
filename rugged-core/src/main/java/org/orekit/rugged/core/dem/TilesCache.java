@@ -98,6 +98,7 @@ public class TilesCache<T extends Tile> {
         // create the tile and retrieve its data
         final T tile = factory.createTile();
         updater.updateTile(latitude, longitude, tile);
+        tile.tileUpdateCompleted();
 
         // store the tile in the eviction cache
         evictionCache[next] = tile;

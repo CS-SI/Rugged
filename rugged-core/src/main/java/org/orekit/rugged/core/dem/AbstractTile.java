@@ -66,6 +66,12 @@ public abstract class AbstractTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
+    public void tileUpdateCompleted() throws RuggedException {
+        // do nothing by default
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public double getMinimumLatitude() {
         return minLatitude;
     }
