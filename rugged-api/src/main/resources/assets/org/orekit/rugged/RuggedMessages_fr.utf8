@@ -2,4 +2,7 @@
 INTERNAL_ERROR = erreur interne, contactez la maintenance à {0}
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
-OUT_OF_TILE_INDICES = aucune donnée aux indices {0}, {1}], la tuile ne couvre que de [0, 0] à [{2}, {3}] inclus
+OUT_OF_TILE_INDICES = aucune donnée aux indices [{0}, {1}], la tuile ne couvre que de [0, 0] à [{2}, {3}] inclus
+
+# general context has not been initialized
+UNINITIALIZED_CONTEXT = le contexte général n''a pas été initialisé

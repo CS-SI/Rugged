@@ -16,10 +16,49 @@
  */
 package org.orekit.rugged.api;
 
+import java.io.File;
+import java.util.List;
+
 /** Main interface to Rugged library.
  * @author Luc Maisonobe
  */
 public interface Rugged {
+
+    /** Enumerate for ellipsoid. */
+    enum Ellipsoid {
+        GRS80, WGS84, IERS96, IERS2003
+    }
+
+    /** Enumerate for inertial frames. */
+    enum InertialFrame {
+        GCRF, EME2000, MOD, TOD, VEIS1950
+    }
+
+    /** Enumerate for body rotating frames. */
+    enum BodyRotatingFrame {
+        ITRF, GTOD
+    }
+
+    /** Set up general context.
+     * <p>
+     * This method is the first one that must be called, otherwise the
+     * other methods will fail due to uninitialized context.
+     * </p>
+     * @param orekitDataDir top directory for Orekit data
+     * @param ellipsoid reference ellipsoid
+     * @param inertialFrameName inertial frame
+     * @param bodyRotatingFrame body rotating frame
+     * @param positionsVelocities satellite position and velocity
+     * @param pvInterpolationOrder order to use for position/velocity interpolation
+     * @param quaternions satellite quaternions
+     * @param aInterpolationOrder order to use for attitude interpolation
+     * @exception RuggedException if data needed for some frame cannot be loaded
+     */
+    void setGeneralContext(File orekitDataDir, Ellipsoid ellipsoid,
+                           InertialFrame inertialFrame, BodyRotatingFrame bodyRotatingFrame,
+                           List<SatellitePV> positionsVelocities, int pvInterpolationOrder,
+                           List<SatelliteQ> quaternions, int aInterpolationOrder)
+        throws RuggedException;
 
     /** Set up the tiles management.
      * @param updater updater used to load Digital Elevation Model tiles
@@ -30,23 +69,25 @@ public interface Rugged {
     /** Direct localization of a sensor line.
      * @param sensorName name of the sensor
      * @param lineNumber number of the line to localize on ground
-     * @param algorithm algorithm to use for line-of-sight/DEM intersection computation
      * @return ground position of all pixels of the specified sensor line
-     * @exception RuggedException if line cannot be localized
+     * @exception RuggedException if line cannot be localized,
+     * if {@link #setGeneralContext(File, InertialFrame, BodyRotatingFrame, Ellipsoid)} has
+     * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
+     * been called beforehand
      */
-    GroundPoint[] directLocalization(String sensorName, int lineNumber,
-                                     LineOfSightAlgorithm algorithm)
+    GroundPoint[] directLocalization(String sensorName, int lineNumber)
         throws RuggedException;
 
     /** Inverse localization of a ground point.
      * @param sensorName name of the sensor
      * @param ground point to localize
-     * @param algorithm algorithm to use for line-of-sight/DEM intersection computation
      * @return sensor pixel seeing ground point
-     * @exception RuggedException if line cannot be localized
+     * @exception RuggedException if line cannot be localized,
+     * if {@link #setGeneralContext(File, InertialFrame, BodyRotatingFrame, Ellipsoid)} has
+     * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
+     * been called beforehand
      */
-    SensorPixel inverseLocalization(String sensorName, GroundPoint groundPoint,
-                                    LineOfSightAlgorithm algorithm)
+    SensorPixel inverseLocalization(String sensorName, GroundPoint groundPoint)
         throws RuggedException;
 
 }

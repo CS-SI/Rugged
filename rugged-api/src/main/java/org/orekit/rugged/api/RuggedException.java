@@ -62,7 +62,6 @@ public class RuggedException extends Exception {
 
     /** Copy constructor.
      * @param exception exception to copy from
-     * @since 5.1
      */
     public RuggedException(final RuggedException exception) {
         super(exception);
