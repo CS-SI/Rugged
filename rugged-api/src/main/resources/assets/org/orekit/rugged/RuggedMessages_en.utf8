@@ -1,0 +1,5 @@
+# internal error, contact maintenance at {0}
+INTERNAL_ERROR = internal error, contact maintenance at {0}
+
+# no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
+OUT_OF_TILE_INDICES = no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
