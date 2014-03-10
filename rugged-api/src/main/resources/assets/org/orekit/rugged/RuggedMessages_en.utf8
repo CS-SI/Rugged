@@ -6,3 +6,6 @@ OUT_OF_TILE_INDICES = no data at indices [{0}, {1}], tile only covers from [0, 0
 
 # general context has not been initialized
 UNINITIALIZED_CONTEXT = general context has not been initialized
+
+# tile is empty: {0} ⨉ {1}
+EMPTY_TILE = tile is empty: {0} ⨉ {1}

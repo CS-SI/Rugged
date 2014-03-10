@@ -27,7 +27,7 @@ import org.orekit.rugged.core.dem.Tile;
 public class SimpleTileTest {
 
     @Test
-    public void testEmpty() {
+    public void testNotConfigured() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         Assert.assertEquals(0, tile.getMinimumLatitude(), 1.0e-10);
         Assert.assertEquals(0, tile.getMinimumLongitude(), 1.0e-10);
@@ -35,6 +35,27 @@ public class SimpleTileTest {
         Assert.assertEquals(0, tile.getLongitudeStep(), 1.0e-10);
         Assert.assertEquals(0, tile.getLatitudeRows());
         Assert.assertEquals(0, tile.getLongitudeColumns());
+    }
+
+    @Test
+    public void testEmpty() {
+        SimpleTile tile = new SimpleTileFactory().createTile();
+        try {
+            tile.setGeometry(1.0, 2.0, 0.1, 0.2, 0, 200);
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.EMPTY_TILE, re.getSpecifier());
+            Assert.assertEquals(  0, ((Integer) re.getParts()[0]).intValue());
+            Assert.assertEquals(200, ((Integer) re.getParts()[1]).intValue());
+        }
+        try {
+            tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 0);
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.EMPTY_TILE, re.getSpecifier());
+            Assert.assertEquals(100, ((Integer) re.getParts()[0]).intValue());
+            Assert.assertEquals(  0, ((Integer) re.getParts()[1]).intValue());
+        }
     }
 
     @Test

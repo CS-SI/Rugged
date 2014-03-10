@@ -66,7 +66,8 @@ public class SimpleTile implements Tile {
     @Override
     public void setGeometry(final double minLatitude, final double minLongitude,
                             final double latitudeStep, final double longitudeStep,
-                            final int latitudeRows, final int longitudeColumns) {
+                            final int latitudeRows, final int longitudeColumns)
+        throws RuggedException {
         this.minLatitude      = minLatitude;
         this.minLongitude     = minLongitude;
         this.latitudeStep     = latitudeStep;
@@ -75,7 +76,12 @@ public class SimpleTile implements Tile {
         this.longitudeColumns = longitudeColumns;
         this.minElevation     = Double.POSITIVE_INFINITY;
         this.maxElevation     = Double.NEGATIVE_INFINITY;
+
+        if (latitudeRows < 1 || longitudeColumns < 1) {
+            throw new RuggedException(RuggedMessages.EMPTY_TILE, latitudeRows, longitudeColumns);
+        }
         this.elevations = new double[latitudeRows * longitudeColumns];
+
     }
 
     /** {@inheritDoc} */

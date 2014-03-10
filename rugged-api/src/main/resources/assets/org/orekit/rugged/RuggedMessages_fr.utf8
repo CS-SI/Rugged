@@ -6,3 +6,6 @@ OUT_OF_TILE_INDICES = aucune donnée aux indices [{0}, {1}], la tuile ne couvre 
 
 # general context has not been initialized
 UNINITIALIZED_CONTEXT = le contexte général n''a pas été initialisé
+
+# tile is empty: {0} ⨉ {1}
+EMPTY_TILE = la tuile est vide : {0} ⨉ {1}

@@ -28,10 +28,12 @@ public interface UpdatableTile {
      * @param longitudeStep step in longitude (size of one raster element)
      * @param latitudeRows number of latitude rows
      * @param longitudeColumns number of longitude columns
+     * @exception RuggedException if tile is empty (zero rows or columns)
      */
     void setGeometry(double minLatitude, double minLongitude,
                      double latitudeStep, double longitudeStep,
-                     int latitudeRows, int longitudeColumns);
+                     int latitudeRows, int longitudeColumns)
+        throws RuggedException;
 
     /** Set the elevation for one raster element.
      * @param latitudeIndex index of latitude (row index)
