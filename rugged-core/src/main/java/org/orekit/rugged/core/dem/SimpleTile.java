@@ -87,6 +87,18 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public void tileUpdateCompleted() throws RuggedException {
+        processUpdatedElevation(elevations);
+    }
+
+    /** Process elevation array at completion.
+     * </p>
+     * This method is called at tile update completion, it is
+     * expected to be overridden by subclasses. The default
+     * implementation does nothing.
+     * </p>
+     * @param elevations elevations array
+     */
+    protected void processUpdatedElevation(final double[] elevations) {
         // do nothing by default
     }
 

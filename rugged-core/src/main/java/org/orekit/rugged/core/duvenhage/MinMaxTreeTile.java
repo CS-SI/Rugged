@@ -16,7 +16,9 @@
  */
 package org.orekit.rugged.core.duvenhage;
 
-import org.orekit.rugged.api.RuggedException;
+import org.apache.commons.math3.analysis.BivariateFunction;
+import org.apache.commons.math3.analysis.function.Max;
+import org.apache.commons.math3.analysis.function.Min;
 import org.orekit.rugged.core.dem.SimpleTile;
 import org.orekit.rugged.core.dem.Tile;
 
@@ -25,6 +27,21 @@ import org.orekit.rugged.core.dem.Tile;
  * @author Luc Maisonobe
  */
 public class MinMaxTreeTile extends SimpleTile {
+
+    /** Min kd-tree. */
+    private double[] minTree;
+
+    /** Max kd-tree. */
+    private double[] maxTree;
+
+    /** Start indices of tree levels. */
+    private int[] start;
+
+    /** Number of rows of tree levels. */
+    private int[] rows;
+
+    /** Number of columns of tree levels. */
+    private int[] columns;
 
     /** Simple constructor.
      * <p>
@@ -36,9 +53,201 @@ public class MinMaxTreeTile extends SimpleTile {
 
     /** {@inheritDoc} */
     @Override
-    public void tileUpdateCompleted() throws RuggedException {
-        // TODO: compute min/max tree
-        throw RuggedException.createInternalError(null);
+    protected void processUpdatedElevation(final double[] elevations) {
+
+        // set up the levels
+        final int size = setLevels(0, getLatitudeRows(), getLongitudeColumns());
+        minTree = new double[size];
+        maxTree = new double[size];
+
+        // compute min/max trees
+        applyRecursively(minTree, 0, getLatitudeRows(), getLongitudeColumns(),
+                         new Min(), elevations, 0);
+        applyRecursively(maxTree, 0, getLatitudeRows(), getLongitudeColumns(),
+                         new Max(), elevations, 0);
+
+    }
+
+    /** Get the number of kd-tree levels (not counting raw elevations).
+     * @return number of kd-tree levels
+     * @see #getMinElevation(int, int, int)
+     * @see #getMaxElevation(int, int, int)
+     */
+    public int getLevels() {
+        return start.length;
+    }
+
+    /** Get the minimum elevation at some level tree.
+     * @param i row index of the pixel
+     * @param j column index of the pixel
+     * @param level tree level
+     * @return minimum elevation
+     * @see #getLevels()
+     * @see #getMaxElevation(int, int, int)
+     */
+    public double getMinElevation(final int i, final int j, final int level) {
+
+        // compute row index in level merged array
+        final int levelI = i >> ((level + 1) / 2);
+        final int levelJ = j >> ((level + 2) / 2);
+
+        return minTree[start[level] + levelI * columns[level] + levelJ];
+
+    }
+
+    /** Get the maximum elevation at some level tree.
+     * @param i row index of the pixel
+     * @param j column index of the pixel
+     * @param level tree level
+     * @return maximum elevation
+     * @see #getLevels()
+     * @see #getMinElevation(int, int, int)
+     */
+    public double getMaxElevation(final int i, final int j, final int level) {
+
+        // compute row index in level merged array
+        final int levelI = i >> ((level + 1) / 2);
+        final int levelJ = j >> (level / 2);
+
+        return maxTree[start[level] + levelI * columns[level] + levelJ];
+
+    }
+
+    /** Recursive setting of tree levels.
+     * <p>
+     * The following algorithms works for any array shape, even with
+     * rows or columns which are not powers of 2 or with one
+     * dimension much larger than the other. As an example, starting
+     * from a 107 ⨉ 19 array, we get the following 9 levels, for a
+     * total of 2187 elements in both trees:
+     * </p>
+     * <p>
+     * <table border="0">
+     * <tr BGCOLOR="#EEEEFF"><font size="+1">
+     *     <td>Level</td>   <td>Dimension</td>  <td>Start index</td>  <td>End index</td></font></tr>
+     * <tr>   <td>8</td>     <td>  7 ⨉  1</td>       <td>   0</td>        <td>  6</td> </tr>
+     * <tr>   <td>7</td>     <td>  7 ⨉  2</td>       <td>   7</td>        <td> 20</td> </tr>
+     * <tr>   <td>6</td>     <td> 14 ⨉  2</td>       <td>  21</td>        <td> 48</td> </tr>
+     * <tr>   <td>5</td>     <td> 14 ⨉  3</td>       <td>  49</td>        <td> 90</td> </tr>
+     * <tr>   <td>4</td>     <td> 27 ⨉  3</td>       <td>  91</td>        <td>171</td> </tr>
+     * <tr>   <td>3</td>     <td> 27 ⨉  5</td>       <td> 172</td>        <td>306</td> </tr>
+     * <tr>   <td>2</td>     <td> 54 ⨉  5</td>       <td> 307</td>        <td>576</td> </tr>
+     * <tr>   <td>1</td>     <td> 54 ⨉ 10</td>      <td> 577</td>        <td>1116</td> </tr>
+     * <tr>   <td>0</td>     <td>107 ⨉ 10</td>      <td>1117</td>        <td>2186</td> </tr>
+     * </table>
+     * </p>
+     * @param level current level (counting from leafs to root)
+     * @param levelRows number of rows at current level
+     * @param levelColumns number of columns at current level
+     * @return size cumulative size from current level to root
+     */
+    private int setLevels(final int level, final int levelRows, final int levelColumns) {
+
+        if (levelRows == 1 || levelColumns == 1) {
+            // we have found root, stop recursion
+            start              = new int[level];
+            rows               = new int[level];
+            columns            = new int[level];
+            start[level - 1]   = 0;
+            rows[level - 1]    = levelRows;
+            columns[level - 1] = levelColumns;
+            return levelRows * levelColumns;
+        }
+
+        final int size;
+        if ((level & 0x1) == 0) {
+            // columns merging
+            size = setLevels(level + 1, levelRows, (levelColumns + 1) / 2);
+        } else {
+            // rows merging
+            size = setLevels(level + 1, (levelRows + 1) / 2, levelColumns);
+        }
+
+        if (level > 0) {
+            // store current level characteristics
+            start[level - 1]   = size;
+            rows[level - 1]    = levelRows;
+            columns[level - 1] = levelColumns;
+            return size + levelRows * levelColumns;
+        } else {
+            // we don't count the elements at leaf as they are not stored
+            // in the min/max trees
+            return size;
+        }
+
+    }
+
+    /** Recursive application of a function.
+     * @param tree to fill-up with the recursive applications
+     * @param level current level
+     * @param levelRows number of rows at current level
+     * @param levelColumns number of columns at current level
+     * @param f function to apply
+     * @param base base array from which function arguments are drawn
+     * @param first index of the first element to consider in base array
+     */
+    private void applyRecursively(final double[] tree,
+                                  final int level, final int levelRows, final int levelColumns,
+                                  final BivariateFunction f,
+                                  final double[] base, final int first) {
+        if ((level & 0x1) != (start.length & 0x1)) {
+
+            // merge columns pairs
+            int           iTree       = start[level];
+            int           iBase       = first;
+            final int     nextColumns = (levelColumns + 1) / 2;
+            final boolean odd         = (levelColumns & 0x1) != 0;
+            for (int i = 0; i < levelRows; ++i) {
+
+                // regular pairs
+                int jEnd = odd ? nextColumns - 1 : nextColumns;
+                for (int j = 0; j < jEnd; ++j) {
+                    tree[iTree++] = f.value(base[iBase], base[iBase + 1]);
+                    iBase += 2;
+                }
+
+                if (odd) {
+                    // last column
+                    tree[iTree++] = base[iBase++];
+                }
+
+
+            }
+
+            if (level < start.length - 1) {
+                applyRecursively(tree, level + 1, levelRows, nextColumns, f, tree, start[level]);
+            }
+
+        } else {
+
+            // merge rows pairs
+            int           iTree    = start[level];
+            int           iBase    = first;
+            final int     nextRows = (levelRows + 1) / 2;
+            final boolean odd      = (levelRows & 0x1) != 0;
+
+            // regular pairs
+            int iEnd = odd ? nextRows - 1 : nextRows;
+            for (int i = 0; i < iEnd; ++i) {
+
+                for (int j = 0; j < levelColumns; ++j) {
+                    tree[iTree++] = f.value(base[iBase], base[iBase + levelColumns]);
+                    iBase++;
+                }
+                iBase += levelColumns;
+
+            }
+
+            if (odd) {
+                // last row
+                System.arraycopy(base, iBase, tree, iTree, levelColumns);
+            }
+
+            if (level < start.length - 1) {
+                applyRecursively(tree, level + 1, nextRows, levelColumns, f, tree, start[level]);
+            }
+
+        }
     }
 
 }
