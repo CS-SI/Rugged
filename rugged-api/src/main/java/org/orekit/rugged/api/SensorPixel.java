@@ -30,10 +30,10 @@ public class SensorPixel implements Serializable {
     private static final long serialVersionUID = 20140309L;
 
     /** Line number. */
-    private final int lineNumber;
+    private final double lineNumber;
 
     /** Pixel number. */
-    private final int pixelNumber;
+    private final double pixelNumber;
 
     /**
      * Build a new instance.
@@ -41,7 +41,7 @@ public class SensorPixel implements Serializable {
      * @param lineNumber line number
      * @param pixelNumber pixel number
      */
-    public SensorPixel(final int lineNumber, final int pixelNumber) {
+    public SensorPixel(final double lineNumber, final double pixelNumber) {
         this.lineNumber  = lineNumber;
         this.pixelNumber = pixelNumber;
     }
@@ -49,14 +49,14 @@ public class SensorPixel implements Serializable {
     /** Get the line number.
      * @return line number
      */
-    public int getLineNumber() {
+    public double getLineNumber() {
         return lineNumber;
     }
 
     /** Get the pixel number.
      * @return pixel number
      */
-    public int getPixelNumber() {
+    public double getPixelNumber() {
         return pixelNumber;
     }
 
