@@ -17,17 +17,14 @@
 package org.orekit.rugged.core.duvenhage;
 
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.core.dem.AbstractTile;
+import org.orekit.rugged.core.dem.SimpleTile;
 import org.orekit.rugged.core.dem.Tile;
 
 /** Simple implementation of a {@link Tile} with a min/max kd tree.
  * @see MinMaxTreeTileFactory
  * @author Luc Maisonobe
  */
-public class MinMaxTreeTile extends AbstractTile {
-
-    /** Elevation array. */
-    private double[] elevations;
+public class MinMaxTreeTile extends SimpleTile {
 
     /** Simple constructor.
      * <p>
@@ -39,31 +36,9 @@ public class MinMaxTreeTile extends AbstractTile {
 
     /** {@inheritDoc} */
     @Override
-    protected void doSetGeometry(final double minLatitude, final double minLongitude,
-                                 final double latitudeStep, final double longitudeStep,
-                                 final int latitudeRows, final int longitudeColumns) {
-        this.elevations = new double[latitudeRows * longitudeColumns];
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public void tileUpdateCompleted() throws RuggedException {
         // TODO: compute min/max tree
         throw RuggedException.createInternalError(null);
     }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void doSetElevation(final int latitudeIndex, final int longitudeIndex,
-                                  final double elevation) {
-        elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex] = elevation;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected double doGetElevationAtIndices(int latitudeIndex, int longitudeIndex) {
-        return elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex];
-    }
-
 
 }

@@ -16,12 +16,40 @@
  */
 package org.orekit.rugged.core.dem;
 
+import org.apache.commons.math3.util.FastMath;
+import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.api.RuggedMessages;
+
 
 /** Simple implementation of a {@link Tile}.
  * @see SimpleTileFactory
  * @author Luc Maisonobe
  */
-public class SimpleTile extends AbstractTile {
+public class SimpleTile implements Tile {
+
+    /** Minimum latitude. */
+    private double minLatitude;
+
+    /** Minimum longitude. */
+    private double minLongitude;
+
+    /** Step in latitude (size of one raster element). */
+    private double latitudeStep;
+
+    /** Step in longitude (size of one raster element). */
+    private double longitudeStep;
+
+    /** Number of latitude rows. */
+    private int latitudeRows;
+
+    /** Number of longitude columns. */
+    private int longitudeColumns;
+
+    /** Minimum elevation. */
+    private double minElevation;
+
+    /** Maximum elevation. */
+    private double maxElevation;
 
     /** Elevation array. */
     private double[] elevations;
@@ -31,28 +59,117 @@ public class SimpleTile extends AbstractTile {
      * Creates an empty tile.
      * </p>
      */
-    SimpleTile() {
+    protected SimpleTile() {
     }
 
     /** {@inheritDoc} */
     @Override
-    protected void doSetGeometry(final double minLatitude, final double minLongitude,
-                                 final double latitudeStep, final double longitudeStep,
-                                 final int latitudeRows, final int longitudeColumns) {
+    public void setGeometry(final double minLatitude, final double minLongitude,
+                            final double latitudeStep, final double longitudeStep,
+                            final int latitudeRows, final int longitudeColumns) {
+        this.minLatitude      = minLatitude;
+        this.minLongitude     = minLongitude;
+        this.latitudeStep     = latitudeStep;
+        this.longitudeStep    = longitudeStep;
+        this.latitudeRows     = latitudeRows;
+        this.longitudeColumns = longitudeColumns;
+        this.minElevation     = Double.POSITIVE_INFINITY;
+        this.maxElevation     = Double.NEGATIVE_INFINITY;
         this.elevations = new double[latitudeRows * longitudeColumns];
     }
 
     /** {@inheritDoc} */
     @Override
-    protected void doSetElevation(final int latitudeIndex, final int longitudeIndex,
-                                  final double elevation) {
+    public void tileUpdateCompleted() throws RuggedException {
+        // do nothing by default
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getMinimumLatitude() {
+        return minLatitude;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getMinimumLongitude() {
+        return minLongitude;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getLatitudeStep() {
+        return latitudeStep;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getLongitudeStep() {
+        return longitudeStep;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getLatitudeRows() {
+        return latitudeRows;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getLongitudeColumns() {
+        return longitudeColumns;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getMinElevation() {
+        return minElevation;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getMaxElevation() {
+        return maxElevation;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setElevation(final int latitudeIndex, final int longitudeIndex,
+                             final double elevation) throws RuggedException {
+        checkIndices(latitudeIndex, longitudeIndex);
+        minElevation = FastMath.min(minElevation, elevation);
+        maxElevation = FastMath.max(maxElevation, elevation);
         elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex] = elevation;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected double doGetElevationAtIndices(int latitudeIndex, int longitudeIndex) {
+    public double getElevationAtIndices(int latitudeIndex, int longitudeIndex) {
         return elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex];
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean covers(final double latitude, final double longitude) {
+        final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
+        final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
+        return latitudeIndex  >= 0 && latitudeIndex  < latitudeRows &&
+               longitudeIndex >= 0 && longitudeIndex < longitudeColumns;
+    }
+
+    /** Check indices.
+     * @param latitudeIndex
+     * @param longitudeIndex
+     * @exception IllegalArgumentException if indices are out of bound
+     */
+    private void checkIndices(int latitudeIndex, int longitudeIndex)
+        throws RuggedException {
+        if (latitudeIndex  < 0 || latitudeIndex  >= latitudeRows ||
+            longitudeIndex < 0 || longitudeIndex >= longitudeColumns) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
+                                      latitudeIndex, longitudeIndex,
+                                      latitudeRows - 1, longitudeColumns - 1);
+        }        
     }
 
 }
