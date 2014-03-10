@@ -39,11 +39,9 @@ public class MinMaxTreeTile extends AbstractTile {
 
     /** {@inheritDoc} */
     @Override
-    public void setGeometry(final double minLatitude, final double minLongitude,
-                            final double latitudeStep, final double longitudeStep,
-                            final int latitudeRows, final int longitudeColumns) {
-        super.setGeometry(minLatitude, minLongitude, latitudeStep, longitudeStep,
-                          latitudeRows, longitudeColumns);
+    protected void doSetGeometry(final double minLatitude, final double minLongitude,
+                                 final double latitudeStep, final double longitudeStep,
+                                 final int latitudeRows, final int longitudeColumns) {
         this.elevations = new double[latitudeRows * longitudeColumns];
     }
 
@@ -56,18 +54,16 @@ public class MinMaxTreeTile extends AbstractTile {
 
     /** {@inheritDoc} */
     @Override
-    public void setElevation(final int latitudeIndex, final int longitudeIndex,
-                             final double elevation) throws RuggedException {
-        checkIndices(latitudeIndex, longitudeIndex);
+    protected void doSetElevation(final int latitudeIndex, final int longitudeIndex,
+                                  final double elevation) {
         elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex] = elevation;
     }
 
     /** {@inheritDoc} */
     @Override
-    public double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
-        throws RuggedException {
-        checkIndices(latitudeIndex, longitudeIndex);
+    protected double doGetElevationAtIndices(int latitudeIndex, int longitudeIndex) {
         return elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex];
     }
+
 
 }

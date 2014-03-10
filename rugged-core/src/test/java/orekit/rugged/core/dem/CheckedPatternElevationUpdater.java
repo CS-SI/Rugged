@@ -21,16 +21,18 @@ import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.api.UpdatableTile;
 
-public class ConstantElevationUpdater implements TileUpdater {
+public class CheckedPatternElevationUpdater implements TileUpdater {
 
     private double size;
     private int    n;
-    private double elevation;
+    private double elevation1;
+    private double elevation2;
 
-    public ConstantElevationUpdater(double size, int n, double elevation) {
-        this.size      = size;
-        this.n         = n;
-        this.elevation = elevation;
+    public CheckedPatternElevationUpdater(double size, int n, double elevation1, double elevation2) {
+        this.size       = size;
+        this.n          = n;
+        this.elevation1 = elevation1;
+        this.elevation2 = elevation2;
     }
 
     public void updateTile(double latitude, double longitude, UpdatableTile tile)
@@ -40,7 +42,7 @@ public class ConstantElevationUpdater implements TileUpdater {
                          size / n, size / n, n, n);
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
-                tile.setElevation(i, j, elevation);
+                tile.setElevation(i, j, (((i ^ j) & 0x1) == 0) ? elevation1 : elevation2);
             }
         }
     }

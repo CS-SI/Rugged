@@ -43,6 +43,12 @@ public abstract class AbstractTile implements Tile {
     /** Number of longitude columns. */
     private int longitudeColumns;
 
+    /** Minimum elevation. */
+    private double minElevation;
+
+    /** Maximum elevation. */
+    private double maxElevation;
+
     /** Simple constructor.
      * <p>
      * Creates an empty tile.
@@ -62,7 +68,26 @@ public abstract class AbstractTile implements Tile {
         this.longitudeStep    = longitudeStep;
         this.latitudeRows     = latitudeRows;
         this.longitudeColumns = longitudeColumns;
+        this.minElevation     = Double.POSITIVE_INFINITY;
+        this.maxElevation     = Double.NEGATIVE_INFINITY;
+        doSetGeometry(minLatitude, minLongitude, latitudeStep, longitudeStep, latitudeRows, longitudeColumns);
     }
+
+    /** Set the tile global geometry.
+     * <p>
+     * This method is called by {@link #setGeometry(double, double, double,
+     * double, int, int)} after boilerplate processing has been performed.
+     * </p>
+     * @param minLatitude minimum latitude
+     * @param minLongitude minimum longitude
+     * @param latitudeStep step in latitude (size of one raster element)
+     * @param longitudeStep step in longitude (size of one raster element)
+     * @param latitudeRows number of latitude rows
+     * @param longitudeColumns number of longitude columns
+     */
+    protected abstract void doSetGeometry(double minLatitude, double minLongitude,
+                                          double latitudeStep, double longitudeStep,
+                                          int latitudeRows, int longitudeColumns);
 
     /** {@inheritDoc} */
     @Override
@@ -108,6 +133,61 @@ public abstract class AbstractTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
+    public double getMinElevation() {
+        return minElevation;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getMaxElevation() {
+        return maxElevation;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setElevation(final int latitudeIndex, final int longitudeIndex,
+                             final double elevation) throws RuggedException {
+        checkIndices(latitudeIndex, longitudeIndex);
+        minElevation = FastMath.min(minElevation, elevation);
+        maxElevation = FastMath.max(maxElevation, elevation);
+        doSetElevation(latitudeIndex, longitudeIndex, elevation);
+    }
+
+    /** Set the elevation for one raster element.
+     * <p>
+     * This method is called by {@link #setElevation(int, int, double)} after
+     * boilerplate processing has been performed, including indices checks.
+     * </p>
+     * @param latitudeIndex index of latitude (row index)
+     * @param longitudeIndex index of longitude (column index)
+     * @param elevation elevation (m)
+     * @exception RuggedException if indices are out of bound
+     */
+    protected abstract void doSetElevation(int latitudeIndex, int longitudeIndex, double elevation)
+        throws RuggedException;
+
+    /** {@inheritDoc} */
+    @Override
+    public double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
+        throws RuggedException {
+        checkIndices(latitudeIndex, longitudeIndex);
+        return doGetElevationAtIndices(latitudeIndex, longitudeIndex);
+    }
+
+    /** Get the elevation of an exact grid point.
+     * <p>
+     * This method is called by {@link #getElevationAtIndices(int, int)} after
+     * boilerplate processing has been performed, including indices checks.
+     * </p>
+     * @param latitudeIndex
+     * @param longitudeIndex
+     * @return elevation
+     */
+    protected abstract double doGetElevationAtIndices(int latitudeIndex, int longitudeIndex)
+        throws RuggedException;
+
+    /** {@inheritDoc} */
+    @Override
     public boolean covers(final double latitude, final double longitude) {
         final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
         final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
@@ -120,7 +200,7 @@ public abstract class AbstractTile implements Tile {
      * @param longitudeIndex
      * @exception IllegalArgumentException if indices are out of bound
      */
-    protected void checkIndices(int latitudeIndex, int longitudeIndex)
+    private void checkIndices(int latitudeIndex, int longitudeIndex)
         throws RuggedException {
         if (latitudeIndex  < 0 || latitudeIndex  >= latitudeRows ||
             longitudeIndex < 0 || longitudeIndex >= longitudeColumns) {

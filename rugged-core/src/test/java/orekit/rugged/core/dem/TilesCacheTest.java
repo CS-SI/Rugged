@@ -31,20 +31,22 @@ public class TilesCacheTest {
     public void testSingleTile() throws RuggedException {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory,
-                new ConstantElevationUpdater(FastMath.toRadians(3.0), 10, 10.0), 1000);
+                new CheckedPatternElevationUpdater(FastMath.toRadians(3.0), 10, 10.0, 20.0), 1000);
         SimpleTile tile = cache.getTile(FastMath.toRadians(-23.2), FastMath.toRadians(137.5));
         Assert.assertEquals(1, factory.getCount());
         Assert.assertEquals(-24.0, FastMath.toDegrees(tile.getMinimumLatitude()),  1.0e-10);
         Assert.assertEquals(135.0, FastMath.toDegrees(tile.getMinimumLongitude()), 1.0e-10);
         Assert.assertEquals(  0.3, FastMath.toDegrees(tile.getLatitudeStep()),     1.0e-10);
         Assert.assertEquals(  0.3, FastMath.toDegrees(tile.getLongitudeStep()),    1.0e-10);
+        Assert.assertEquals(10.0, tile.getMinElevation(), 1.0e-10);
+        Assert.assertEquals(20.0, tile.getMaxElevation(), 1.0e-10);
     }
 
     @Test
     public void testEviction() throws RuggedException {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory,
-                new ConstantElevationUpdater(FastMath.toRadians(1.0), 10, 10.0), 12);
+                new CheckedPatternElevationUpdater(FastMath.toRadians(1.0), 10, 10.0, 20.0), 12);
 
         // fill up the 12 tiles we can keep in cache
         for (int i = 0; i < 4; ++i) {
@@ -90,7 +92,7 @@ public class TilesCacheTest {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache =
                 new TilesCache<SimpleTile>(factory,
-                                           new ConstantElevationUpdater(0.125, 8, 10.0),
+                                           new CheckedPatternElevationUpdater(0.125, 8, 10.0, 20.0),
                                            12);
 
         SimpleTile regularTile = cache.getTile(0.2, 0.6);
@@ -99,6 +101,8 @@ public class TilesCacheTest {
         Assert.assertEquals(0.5,      regularTile.getMinimumLongitude(), 1.0e-10);
         Assert.assertEquals(0.015625, regularTile.getLatitudeStep(),     1.0e-10);
         Assert.assertEquals(0.015625, regularTile.getLongitudeStep(),    1.0e-10);
+        Assert.assertEquals(10.0,     regularTile.getMinElevation(),     1.0e-10);
+        Assert.assertEquals(20.0,     regularTile.getMaxElevation(),     1.0e-10);
 
         SimpleTile tileAtEnd = cache.getTile(0.250, 0.625);
         Assert.assertEquals(1, factory.getCount());
@@ -106,6 +110,8 @@ public class TilesCacheTest {
         Assert.assertEquals(0.5,      tileAtEnd.getMinimumLongitude(), 1.0e-10);
         Assert.assertEquals(0.015625, tileAtEnd.getLatitudeStep(),     1.0e-10);
         Assert.assertEquals(0.015625, tileAtEnd.getLongitudeStep(),    1.0e-10);
+        Assert.assertEquals(10.0,     tileAtEnd.getMinElevation(),     1.0e-10);
+        Assert.assertEquals(20.0,     tileAtEnd.getMaxElevation(),     1.0e-10);
 
     }
 
@@ -114,7 +120,7 @@ public class TilesCacheTest {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache =
                 new TilesCache<SimpleTile>(factory,
-                                           new ConstantElevationUpdater(FastMath.toRadians(1.0), 10, 10.0),
+                                           new CheckedPatternElevationUpdater(FastMath.toRadians(1.0), 10, 10.0, 20.0),
                                            16);
 
         cache.getTile(FastMath.toRadians(1.5), FastMath.toRadians(0.5));
