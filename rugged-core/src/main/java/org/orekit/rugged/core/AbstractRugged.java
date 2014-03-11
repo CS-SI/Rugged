@@ -18,8 +18,11 @@ package org.orekit.rugged.core;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.attitudes.Attitude;
@@ -36,15 +39,13 @@ import org.orekit.orbits.CartesianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.api.GroundPoint;
+import org.orekit.rugged.api.PixelLOS;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.api.SatellitePV;
 import org.orekit.rugged.api.SatelliteQ;
 import org.orekit.rugged.api.SensorPixel;
-import org.orekit.rugged.api.Rugged.BodyRotatingFrame;
-import org.orekit.rugged.api.Rugged.Ellipsoid;
-import org.orekit.rugged.api.Rugged.InertialFrame;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -62,6 +63,9 @@ public abstract class AbstractRugged implements Rugged {
     /** UTC time scale. */
     private TimeScale utc;
 
+    /** Reference date. */
+    private AbsoluteDate referenceDate;
+
     /** Inertial frame. */
     private Frame frame;
 
@@ -74,14 +78,18 @@ public abstract class AbstractRugged implements Rugged {
     /** Attitude propagator/interpolator. */
     private AttitudeProvider aProvider;
 
+    /** Sensors. */
+    private final Map<String, List<Line>> sensors;
+
     /** Simple constructor.
      */
     protected AbstractRugged() {
+        sensors = new HashMap<String, List<Line>>();
     }
 
     /** {@inheritDoc} */
     @Override
-    public  void setGeneralContext(final File orekitDataDir,
+    public  void setGeneralContext(final File orekitDataDir, final String referenceDate,
                                    final Ellipsoid ellipsoid,
                                    final InertialFrame inertialFrame,
                                    final BodyRotatingFrame bodyRotatingFrame,
@@ -89,11 +97,12 @@ public abstract class AbstractRugged implements Rugged {
                                    final List<SatelliteQ> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         try {
-            utc        = selectTimeScale(orekitDataDir);
-            frame      = selectInertialFrame(inertialFrame);
-            shape      = selectEllipsoid(ellipsoid, selectBodyRotatingFrame(bodyRotatingFrame));
-            pvProvider = selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder);
-            aProvider  = selectAttitudeProvider(quaternions, aInterpolationOrder);
+            utc                = selectTimeScale(orekitDataDir);
+            this.referenceDate = new AbsoluteDate(referenceDate, utc);
+            frame              = selectInertialFrame(inertialFrame);
+            shape              = selectEllipsoid(ellipsoid, selectBodyRotatingFrame(bodyRotatingFrame));
+            pvProvider         = selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder);
+            aProvider          = selectAttitudeProvider(quaternions, aInterpolationOrder);
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
         }
@@ -105,26 +114,45 @@ public abstract class AbstractRugged implements Rugged {
      * other methods will fail due to uninitialized context.
      * </p>
      * @param orekitDataDir top directory for Orekit data
+     * @param referenceDate reference date
      * @param ellipsoid reference ellipsoid
      * @param inertialFrameName inertial frame
      * @param bodyRotatingFrame body rotating frame
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public void setGeneralContext(final File orekitDataDir, final Ellipsoid ellipsoid,
+    public void setGeneralContext(final File orekitDataDir, final AbsoluteDate referenceDate,
+                                  final Ellipsoid ellipsoid,
                                   final InertialFrame inertialFrame,
                                   final BodyRotatingFrame bodyRotatingFrame,
                                   final Propagator propagator)
         throws RuggedException {
         try {
-            utc        = selectTimeScale(orekitDataDir);
-            frame      = selectInertialFrame(inertialFrame);
-            shape      = selectEllipsoid(ellipsoid, selectBodyRotatingFrame(bodyRotatingFrame));
-            pvProvider = propagator;
-            aProvider  = propagator.getAttitudeProvider();
+            utc                = selectTimeScale(orekitDataDir);
+            this.referenceDate = referenceDate;
+            frame              = selectInertialFrame(inertialFrame);
+            shape              = selectEllipsoid(ellipsoid, selectBodyRotatingFrame(bodyRotatingFrame));
+            pvProvider         = propagator;
+            aProvider          = propagator.getAttitudeProvider();
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setSensor(final String sensorName, final List<PixelLOS> linesOfSigth) {
+        final List<Line> los = new ArrayList<Line>(linesOfSigth.size());
+        for (final PixelLOS plos : linesOfSigth) {
+            los.add(new Line(new Vector3D(plos.getPx(),
+                                          plos.getPy(),
+                                          plos.getPz()),
+                             new Vector3D(plos.getPx() + plos.getDx(),
+                                          plos.getPy() + plos.getDy(),
+                                          plos.getPz() + plos.getDz()),
+                             1.0e-3));
+        }
+        sensors.put(sensorName, los);
     }
 
     /** Select time scale Orekit data.
@@ -228,7 +256,7 @@ public abstract class AbstractRugged implements Rugged {
         // set up the attitude provider
         final List<Attitude> attitudes = new ArrayList<Attitude>(quaternions.size());
         for (final SatelliteQ sq : quaternions) {
-            final AbsoluteDate date = new AbsoluteDate(sq.getDate(), utc);
+            final AbsoluteDate date = referenceDate.shiftedBy(sq.getDate());
             final Rotation rotation = new Rotation(sq.getQ0(), sq.getQ1(), sq.getQ2(), sq.getQ3(), true);
             attitudes.add(new Attitude(date, frame, rotation, Vector3D.ZERO));
         }
@@ -248,7 +276,7 @@ public abstract class AbstractRugged implements Rugged {
         // set up the ephemeris
         final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
         for (final SatellitePV pv : positionsVelocities) {
-            final AbsoluteDate date    = new AbsoluteDate(pv.getDate(), utc);
+            final AbsoluteDate date    = referenceDate.shiftedBy(pv.getDate());
             final Vector3D position    = new Vector3D(pv.getPx(), pv.getPy(), pv.getPz());
             final Vector3D velocity    = new Vector3D(pv.getVx(), pv.getVy(), pv.getVz());
             final CartesianOrbit orbit = new CartesianOrbit(new PVCoordinates(position, velocity),

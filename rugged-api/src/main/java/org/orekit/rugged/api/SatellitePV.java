@@ -29,8 +29,8 @@ public class SatellitePV implements Serializable {
     /** Serializable UID. */
     private static final long serialVersionUID = 20140309L;
 
-    /** UTC date. */
-    private final String date;
+    /** Date offset from reference (s). */
+    private final double date;
 
     /** Position along x axis(m). */
     private final double px;
@@ -53,7 +53,7 @@ public class SatellitePV implements Serializable {
     /**
      * Build a new instance.
      *
-     * @param date UTC date
+     * @param date date offset from reference (s)
      * @param px position along x axis (m)
      * @param py position along y axis (m)
      * @param pz position along z axis (m)
@@ -61,7 +61,7 @@ public class SatellitePV implements Serializable {
      * @param vy velocity along y axis (m/s)
      * @param vz velocity along z axis (m/s)
      */
-    public SatellitePV(final String date,
+    public SatellitePV(final double date,
                        final double px, final double py, final double pz,
                        final double vx, final double vy, final double vz) {
         this.date = date;
@@ -73,10 +73,10 @@ public class SatellitePV implements Serializable {
         this.vz   = vz;
     }
 
-    /** Get the UTC date.
-     * @return utc date
+    /** Get the date offset from reference.
+     * @return date offset from reference
      */
-    public String getDate() {
+    public double getDate() {
         return date;
     }
 

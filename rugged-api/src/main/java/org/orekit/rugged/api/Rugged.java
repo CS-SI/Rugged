@@ -45,6 +45,8 @@ public interface Rugged {
      * other methods will fail due to uninitialized context.
      * </p>
      * @param orekitDataDir top directory for Orekit data
+     * @param referenceDate reference date from which all other dates
+     * are computed
      * @param ellipsoid reference ellipsoid
      * @param inertialFrameName inertial frame
      * @param bodyRotatingFrame body rotating frame
@@ -54,7 +56,7 @@ public interface Rugged {
      * @param aInterpolationOrder order to use for attitude interpolation
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    void setGeneralContext(File orekitDataDir, Ellipsoid ellipsoid,
+    void setGeneralContext(File orekitDataDir, String referenceDate, Ellipsoid ellipsoid,
                            InertialFrame inertialFrame, BodyRotatingFrame bodyRotatingFrame,
                            List<SatellitePV> positionsVelocities, int pvInterpolationOrder,
                            List<SatelliteQ> quaternions, int aInterpolationOrder)

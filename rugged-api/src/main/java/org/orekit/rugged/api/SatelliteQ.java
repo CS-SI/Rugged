@@ -29,8 +29,8 @@ public class SatelliteQ implements Serializable {
     /** Serializable UID. */
     private static final long serialVersionUID = 20140309L;
 
-    /** UTC date. */
-    private final String date;
+    /** Date offset from reference (s). */
+    private final double date;
 
     /** Scalar component. */
     private final double q0;
@@ -47,13 +47,13 @@ public class SatelliteQ implements Serializable {
     /**
      * Build a new instance.
      *
-     * @param date UTC date
+     * @param date date offset from reference (s)
      * @param q0 scalar component
      * @param q1 first vectorial component
      * @param q2 second vectorial component
      * @param q3 third vectorial component
      */
-    public SatelliteQ(final String date,
+    public SatelliteQ(final double date,
                       final double q0, final double q1, final double q2, final double q3) {
         this.date = date;
         this.q0   = q0;
@@ -62,10 +62,10 @@ public class SatelliteQ implements Serializable {
         this.q3   = q3;
     }
 
-    /** Get the UTC date.
-     * @return utc date
+    /** Get the date offset from reference.
+     * @return date offset from reference
      */
-    public String getDate() {
+    public double getDate() {
         return date;
     }
 
