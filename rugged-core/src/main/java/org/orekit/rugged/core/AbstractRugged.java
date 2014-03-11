@@ -308,6 +308,7 @@ public abstract class AbstractRugged implements Rugged {
         throws RuggedException {
 
         checkContext();
+        final Sensor sensor = getSensor(sensorName);
 
         // TODO: implement direct localization
         throw RuggedException.createInternalError(null);
@@ -320,6 +321,7 @@ public abstract class AbstractRugged implements Rugged {
         throws RuggedException {
 
         checkContext();
+        final Sensor sensor = getSensor(sensorName);
 
         // TODO: implement direct localization
         throw RuggedException.createInternalError(null);
@@ -333,6 +335,19 @@ public abstract class AbstractRugged implements Rugged {
         if (frame == null) {
             throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT);
         }
+    }
+
+    /** Get a sensor.
+     * @param sensorName sensor name
+     * @return selected sensor
+     * @exception RuggedException if sensor is not known
+     */
+    private Sensor getSensor(final String sensorName) throws RuggedException {
+        final Sensor sensor = sensors.get(sensorName);
+        if (sensor == null) {
+            throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+        }
+        return sensor;
     }
 
     /** Local container for sensor data. */

@@ -53,7 +53,8 @@ public enum RuggedMessages implements Localizable {
     INTERNAL_ERROR("internal error, contact maintenance at {0}"),
     OUT_OF_TILE_INDICES("no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)"),
     UNINITIALIZED_CONTEXT("general context has not been initialized"),
-    EMPTY_TILE("tile is empty: {0} ⨉ {1}");
+    EMPTY_TILE("tile is empty: {0} ⨉ {1}"),
+    UNKNOWN_SENSOR("unknown sensor {0}");
 
     // CHECKSTYLE: resume JavadocVariable check
 

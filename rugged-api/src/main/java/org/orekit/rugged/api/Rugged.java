@@ -82,7 +82,7 @@ public interface Rugged {
      * @exception RuggedException if line cannot be localized,
      * if {@link #setGeneralContext(File, InertialFrame, BodyRotatingFrame, Ellipsoid)} has
      * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
-     * been called beforehand
+     * been called beforehand, or sensor is unknown
      */
     GroundPoint[] directLocalization(String sensorName, int lineNumber)
         throws RuggedException;
@@ -94,7 +94,7 @@ public interface Rugged {
      * @exception RuggedException if line cannot be localized,
      * if {@link #setGeneralContext(File, InertialFrame, BodyRotatingFrame, Ellipsoid)} has
      * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
-     * been called beforehand
+     * been called beforehand, or sensor is unknown
      */
     SensorPixel inverseLocalization(String sensorName, GroundPoint groundPoint)
         throws RuggedException;

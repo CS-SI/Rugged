@@ -9,3 +9,6 @@ UNINITIALIZED_CONTEXT = le contexte général n''a pas été initialisé
 
 # tile is empty: {0} ⨉ {1}
 EMPTY_TILE = la tuile est vide : {0} ⨉ {1}
+
+# unknown sensor {0}
+UNKNOWN_SENSOR = capteur {0} inconnu
