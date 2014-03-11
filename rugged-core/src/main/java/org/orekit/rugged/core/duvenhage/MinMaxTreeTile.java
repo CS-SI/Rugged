@@ -69,6 +69,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * @return number of kd-tree levels
      * @see #getMinElevation(int, int, int)
      * @see #getMaxElevation(int, int, int)
+     * @see #getMergeLevel(int, int, int, int)
      */
     public int getLevels() {
         return start.length;
@@ -81,6 +82,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * @return minimum elevation
      * @see #getLevels()
      * @see #getMaxElevation(int, int, int)
+     * @see #getMergeLevel(int, int, int, int)
      */
     public double getMinElevation(final int i, final int j, final int level) {
 
@@ -103,6 +105,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * @return maximum elevation
      * @see #getLevels()
      * @see #getMinElevation(int, int, int)
+     * @see #getMergeLevel(int, int, int, int)
      */
     public double getMaxElevation(final int i, final int j, final int level) {
 
@@ -115,6 +118,40 @@ public class MinMaxTreeTile extends SimpleTile {
         final int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
         return maxTree[start[level] + levelI * levelC + levelJ];
+
+    }
+
+    /** Get the largest level at which two pixels are merged in the same min/max sub-tile.
+     * @param i1 row index of first pixel
+     * @param j1 column index of first pixel
+     * @param i2 row index of second pixel
+     * @param j2 column index of sedonc pixel
+     * @return largest level at which two pixels are merged in the same min/max sub-tile,
+     * or negative if they are never merged in the same sub-tile
+     * @see #getLevels()
+     * @see #getMinElevation(int, int, int)
+     * @see #getMaxElevation(int, int, int)
+     */
+    public int getMergeLevel(final int i1, final int j1, final int i2, final int j2) {
+
+        int largest = -1;
+
+        for (int level = 0; level < start.length; ++level) {
+            // compute indices in level merged array
+            final int k        = start.length - level;
+            final int rowShift = k / 2;
+            final int colShift = (k + 1) / 2;
+            final int levelI1  = i1 >> rowShift;
+            final int levelJ1  = j1 >> colShift;
+            final int levelI2  = i2 >> rowShift;
+            final int levelJ2  = j2 >> colShift;
+            if (levelI1 != levelI2 || levelJ1 != levelJ2) {
+                return largest;
+            }
+            largest = level;
+        }
+
+        return largest;
 
     }
 

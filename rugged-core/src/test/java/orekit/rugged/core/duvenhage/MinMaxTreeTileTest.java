@@ -31,9 +31,7 @@ public class MinMaxTreeTileTest {
     public void testSizeTall()
         throws RuggedException, SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
-        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
-        tile.setGeometry(1.0, 2.0, 0.1, 0.2, 107, 19);
-        tile.tileUpdateCompleted();
+        MinMaxTreeTile tile = createTile(107, 19);
         Assert.assertEquals(9, tile.getLevels());
 
         Field startField = MinMaxTreeTile.class.getDeclaredField("start");
@@ -62,9 +60,7 @@ public class MinMaxTreeTileTest {
     public void testSizeFat()
         throws RuggedException, SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
-        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
-        tile.setGeometry(1.0, 2.0, 0.1, 0.2, 4, 7);
-        tile.tileUpdateCompleted();
+        MinMaxTreeTile tile = createTile(4, 7);
         Assert.assertEquals(4, tile.getLevels());
 
         Field startField = MinMaxTreeTile.class.getDeclaredField("start");
@@ -86,61 +82,100 @@ public class MinMaxTreeTileTest {
 
     @Test
     public void testSinglePixel() throws RuggedException {
-        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
-        tile.setGeometry(1.0, 2.0, 0.1, 0.2, 1, 1);
-        tile.setElevation(0, 0, 2.5);
-        tile.tileUpdateCompleted();
-        Assert.assertEquals(0, tile.getLevels());
+        Assert.assertEquals(0, createTile(1, 1).getLevels());
     }
 
     @Test
     public void testMinMax() throws RuggedException {
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
-                checkMinMax(nbRows, nbColumns);
+
+                MinMaxTreeTile tile = createTile(nbRows, nbColumns);
+
+                for (int level = 0; level < tile.getLevels(); level++) {
+                    for (int row = 0; row < nbRows; row++) {
+                        for (int column = 0; column < nbColumns; column++) {
+
+                            // reference min and max
+                            int[] neighbors = neighbors(row, column, nbRows, nbColumns, tile.getLevels() - level);
+                            double min = Double.POSITIVE_INFINITY;
+                            double max = Double.NEGATIVE_INFINITY;
+                            for (int i = neighbors[0]; i < neighbors[1]; ++i) {
+                                for (int j = neighbors[2]; j < neighbors[3]; ++j) {
+                                    double pixelValue = tile.getElevationAtIndices(i, j);
+                                    min = FastMath.min(min, pixelValue);
+                                    max = FastMath.max(max, pixelValue);
+                                }
+                            }
+
+                            Assert.assertEquals(min, tile.getMinElevation(row, column, level), 1.0e-10 * min);
+                            Assert.assertEquals(max, tile.getMaxElevation(row, column, level), 1.0e-10 * max);
+                        }
+                    }
+                }
             }
         }
     }
 
-    private void checkMinMax(int nbRows, int nbColumns)
-        throws RuggedException {
+    @Test
+    public void testMergeLarge() throws RuggedException {
+        MinMaxTreeTile tile = createTile(1201, 1201);
+        Assert.assertEquals(21, tile.getLevels());
+        Assert.assertEquals( 7, tile.getMergeLevel(703, 97, 765, 59));
+    }
 
-        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
-        tile.setGeometry(1.0, 2.0, 0.1, 0.2, nbRows, nbColumns);
-        for (int i = 0; i < nbRows; ++i) {
-            for (int j = 0; j < nbColumns; ++j) {
-                tile.setElevation(i, j, i + 0.01 * j);
-            }
-        }
-        tile.tileUpdateCompleted();
+    @Test
+    public void testMergeLevel() throws RuggedException {
+        for (int nbRows = 1; nbRows < 20; nbRows++) {
+            for (int nbColumns = 1; nbColumns < 20; nbColumns++) {
 
-        for (int level = 0; level < tile.getLevels(); level++) {
-            for (int row = 0; row < nbRows; row++) {
-                for (int column = 0; column < nbColumns; column++) {
+                MinMaxTreeTile tile = createTile(nbRows, nbColumns);
 
-                    // reference min and max
-                    int[] neighbors = neighbors(row, column, nbRows, nbColumns, tile.getLevels() - level);
-                    double min = Double.POSITIVE_INFINITY;
-                    double max = Double.NEGATIVE_INFINITY;
-                    for (int i = neighbors[0]; i < neighbors[1]; ++i) {
-                        for (int j = neighbors[2]; j < neighbors[3]; ++j) {
-                            double pixelValue = tile.getElevationAtIndices(i, j);
-                            min = FastMath.min(min, pixelValue);
-                            max = FastMath.max(max, pixelValue);
+                for (int i1 = 0; i1 < nbRows; i1++) {
+                    for (int j1 = 0; j1 < nbColumns; j1++) {
+                        for (int i2 = 0; i2 < nbRows; i2++) {
+                            for (int j2 = 0; j2 < nbColumns; j2++) {
+
+                                int level = tile.getMergeLevel(i1, j1, i2, j2);
+                                if (level > 0) {
+                                    int[] neighbors1 = neighbors(i1, j1, nbRows, nbColumns, tile.getLevels() - level);
+                                    int[] neighbors2 = neighbors(i2, j2, nbRows, nbColumns, tile.getLevels() - level);
+                                    for (int k = 0; k < neighbors1.length; ++k) {
+                                        Assert.assertTrue(neighbors1[0] == neighbors2[0] &&
+                                                          neighbors1[1] == neighbors2[1] &&
+                                                          neighbors1[2] == neighbors2[2] &&
+                                                          neighbors1[3] == neighbors2[3]);
+                                    }
+                                }
+                                if (level + 1 < tile.getLevels()) {
+                                    int[] neighbors1 = neighbors(i1, j1, nbRows, nbColumns, tile.getLevels() - (level + 1));
+                                    int[] neighbors2 = neighbors(i2, j2, nbRows, nbColumns, tile.getLevels() - (level + 1));
+                                    for (int k = 0; k < neighbors1.length; ++k) {
+                                        if ((neighbors1[0] == neighbors2[0] &&
+                                                neighbors1[1] == neighbors2[1] &&
+                                                neighbors1[2] == neighbors2[2] &&
+                                                neighbors1[3] == neighbors2[3])) {
+                                            tile.getMergeLevel(i1, j1, i2, j2);
+                                        }
+                                        Assert.assertFalse(neighbors1[0] == neighbors2[0] &&
+                                                           neighbors1[1] == neighbors2[1] &&
+                                                           neighbors1[2] == neighbors2[2] &&
+                                                           neighbors1[3] == neighbors2[3]);
+                                    }
+                                }
+                            }
                         }
                     }
-
-                    Assert.assertEquals(min, tile.getMinElevation(row, column, level), 1.0e-10 * min);
-                    Assert.assertEquals(max, tile.getMaxElevation(row, column, level), 1.0e-10 * max);
                 }
             }
         }
-
     }
 
     private int[] neighbors(int row, int column, int nbRows, int nbColumns, int stages) {
 
         // poor man identification of neighbors cells merged together with specified cell
+        // this identification is intentionally independent of the MinMaxTreeTile class,
+        // for testing purposes
         int rMin  = row;
         int rN    = 1;
         int rMask = -1;
@@ -167,6 +202,18 @@ public class MinMaxTreeTileTest {
             cMin, FastMath.min(cMin + cN, nbColumns)
         };
 
+    }
+
+    private MinMaxTreeTile createTile(int nbRows, int nbColumns) throws RuggedException {
+        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
+        tile.setGeometry(1.0, 2.0, 0.1, 0.2, nbRows, nbColumns);
+        for (int i = 0; i < nbRows; ++i) {
+            for (int j = 0; j < nbColumns; ++j) {
+                tile.setElevation(i, j, i + 0.01 * j);
+            }
+        }
+        tile.tileUpdateCompleted();
+        return tile;
     }
 
 }
