@@ -42,15 +42,14 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
     /** {@inheritDoc} */
     @Override
-    public void setUpTilesManagement(TileUpdater updater, int maxCachedTiles) {
+    public void setUpTilesManagement(final TileUpdater updater, final int maxCachedTiles) {
         cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(),
                                                updater, maxCachedTiles);
     }
 
     /** {@inheritDoc} */
     @Override
-    public GroundPoint intersection(double latitude0, double longitude0,
-                                    Vector3D direction) {
+    public GroundPoint intersection(final double latitude0, final double longitude0, final Vector3D direction) {
         // TODO: compute intersection
         return null;
     }
