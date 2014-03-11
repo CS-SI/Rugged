@@ -84,7 +84,7 @@ public interface Rugged {
      * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
      * been called beforehand, or sensor is unknown
      */
-    GroundPoint[] directLocalization(String sensorName, int lineNumber)
+    GroundPoint[] directLocalization(String sensorName, double lineNumber)
         throws RuggedException;
 
     /** Inverse localization of a ground point.
