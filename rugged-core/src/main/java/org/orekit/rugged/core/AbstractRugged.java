@@ -304,15 +304,26 @@ public abstract class AbstractRugged implements Rugged {
 
     /** {@inheritDoc} */
     @Override
-    public GroundPoint[] directLocalization(String sensorName, int lineNumber)
+    public GroundPoint[] directLocalization(String sensorName, double lineNumber)
         throws RuggedException {
+        try {
 
-        checkContext();
-        final Sensor sensor = getSensor(sensorName);
+            checkContext();
 
-        // TODO: implement direct localization
-        throw RuggedException.createInternalError(null);
+            // select the sensor
+            final Sensor sensor = getSensor(sensorName);
 
+            // find the spacecraft state when line is active
+            final AbsoluteDate date = referenceDate.shiftedBy(sensor.getDatationModel().getDate(lineNumber));
+            final PVCoordinates pv  = pvProvider.getPVCoordinates(date, shape.getBodyFrame());
+            final Attitude attitude = aProvider.getAttitude(pvProvider, date, shape.getBodyFrame());
+
+            // TODO: implement direct localization
+            throw RuggedException.createInternalError(null);
+
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
     }
 
     /** {@inheritDoc} */
