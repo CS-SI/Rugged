@@ -39,6 +39,7 @@ import org.orekit.orbits.CartesianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.api.GroundPoint;
+import org.orekit.rugged.api.LineDatation;
 import org.orekit.rugged.api.PixelLOS;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedException;
@@ -79,12 +80,12 @@ public abstract class AbstractRugged implements Rugged {
     private AttitudeProvider aProvider;
 
     /** Sensors. */
-    private final Map<String, List<Line>> sensors;
+    private final Map<String, Sensor> sensors;
 
     /** Simple constructor.
      */
     protected AbstractRugged() {
-        sensors = new HashMap<String, List<Line>>();
+        sensors = new HashMap<String, Sensor>();
     }
 
     /** {@inheritDoc} */
@@ -141,7 +142,7 @@ public abstract class AbstractRugged implements Rugged {
 
     /** {@inheritDoc} */
     @Override
-    public void setSensor(final String sensorName, final List<PixelLOS> linesOfSigth) {
+    public void setSensor(final String sensorName, final List<PixelLOS> linesOfSigth, final LineDatation datationModel) {
         final List<Line> los = new ArrayList<Line>(linesOfSigth.size());
         for (final PixelLOS plos : linesOfSigth) {
             los.add(new Line(new Vector3D(plos.getPx(),
@@ -152,7 +153,7 @@ public abstract class AbstractRugged implements Rugged {
                                           plos.getPz() + plos.getDz()),
                              1.0e-3));
         }
-        sensors.put(sensorName, los);
+        sensors.put(sensorName, new Sensor(sensorName, los, datationModel));
     }
 
     /** Select time scale Orekit data.
@@ -334,4 +335,49 @@ public abstract class AbstractRugged implements Rugged {
         }
     }
 
+    /** Local container for sensor data. */
+    private static class Sensor {
+
+        /** Name of the sensor. */
+        private String name;
+
+        /** Pixels lines-of-sight. */
+        private List<Line> los;
+
+        /** Datation model. */
+        private LineDatation datationModel;
+
+        /** Simple constructor.
+         * @param name name of the sensor
+         * @param los pixels lines-of-sight
+         * @param datationModel datation model
+         */
+        public Sensor(final String name, final List<Line> los, final LineDatation datationModel) {
+            this.name          = name;
+            this.los           = los;
+            this.datationModel = datationModel;
+        }
+
+        /** Get the name of the sensor.
+         * @preturn name of the sensor
+         */
+        public String getName() {
+            return name;
+        }
+
+        /** Get the pixels lines-of-sight.
+         * @return pixels lines-of-sight
+         */
+        public List<Line> getLos() {
+            return los;
+        }
+
+        /** Get the datation model.
+         * @return datation model
+         */
+        public LineDatation getDatationModel() {
+            return datationModel;
+        }
+
+    }
 }

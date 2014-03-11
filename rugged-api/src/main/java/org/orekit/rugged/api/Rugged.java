@@ -68,6 +68,13 @@ public interface Rugged {
      */
     void setUpTilesManagement(TileUpdater updater, int maxCachedTiles);
 
+    /** Set up sensor model.
+     * @param sensorName name of the sensor.
+     * @param linesOfSigth lines of sight for each pixels
+     * @param datationModel model to use for dating sensor lines
+     */
+    void setSensor(String sensorName, List<PixelLOS> linesOfSigth, LineDatation datationModel);
+
     /** Direct localization of a sensor line.
      * @param sensorName name of the sensor
      * @param lineNumber number of the line to localize on ground
