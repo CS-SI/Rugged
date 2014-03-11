@@ -37,12 +37,6 @@ public class MinMaxTreeTile extends SimpleTile {
     /** Start indices of tree levels. */
     private int[] start;
 
-    /** Number of rows of tree levels. */
-    private int[] rows;
-
-    /** Number of columns of tree levels. */
-    private int[] columns;
-
     /** Simple constructor.
      * <p>
      * Creates an empty tile.
@@ -55,16 +49,19 @@ public class MinMaxTreeTile extends SimpleTile {
     @Override
     protected void processUpdatedElevation(final double[] elevations) {
 
+        final int nbRows = getLatitudeRows();
+        final int nbCols = getLongitudeColumns();
+
         // set up the levels
-        final int size = setLevels(0, getLatitudeRows(), getLongitudeColumns());
+        final int size = setLevels(0, nbRows, nbCols);
         minTree = new double[size];
         maxTree = new double[size];
 
         // compute min/max trees
-        applyRecursively(minTree, 0, getLatitudeRows(), getLongitudeColumns(),
-                         new Min(), elevations, 0);
-        applyRecursively(maxTree, 0, getLatitudeRows(), getLongitudeColumns(),
-                         new Max(), elevations, 0);
+        if (start.length > 0) {
+            applyRecursively(minTree, start.length - 1, nbRows, nbCols, new Min(), elevations, 0);
+            applyRecursively(maxTree, start.length - 1, nbRows, nbCols, new Max(), elevations, 0);
+        }
 
     }
 
@@ -87,11 +84,15 @@ public class MinMaxTreeTile extends SimpleTile {
      */
     public double getMinElevation(final int i, final int j, final int level) {
 
-        // compute row index in level merged array
-        final int levelI = i >> ((level + 1) / 2);
-        final int levelJ = j >> ((level + 2) / 2);
+        // compute indices in level merged array
+        final int k        = start.length - level;
+        final int rowShift = k / 2;
+        final int colShift = (k + 1) / 2;
+        final int levelI   = i >> rowShift;
+        final int levelJ   = j >> colShift;
+        final int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
-        return minTree[start[level] + levelI * columns[level] + levelJ];
+        return minTree[start[level] + levelI * levelC + levelJ];
 
     }
 
@@ -105,11 +106,15 @@ public class MinMaxTreeTile extends SimpleTile {
      */
     public double getMaxElevation(final int i, final int j, final int level) {
 
-        // compute row index in level merged array
-        final int levelI = i >> ((level + 1) / 2);
-        final int levelJ = j >> (level / 2);
+        // compute indices in level merged array
+        final int k        = start.length - level;
+        final int rowShift = k / 2;
+        final int colShift = (k + 1) / 2;
+        final int levelI   = i >> rowShift;
+        final int levelJ   = j >> colShift;
+        final int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
-        return maxTree[start[level] + levelI * columns[level] + levelJ];
+        return maxTree[start[level] + levelI * levelC + levelJ];
 
     }
 
@@ -125,53 +130,49 @@ public class MinMaxTreeTile extends SimpleTile {
      * <table border="0">
      * <tr BGCOLOR="#EEEEFF"><font size="+1">
      *     <td>Level</td>   <td>Dimension</td>  <td>Start index</td>  <td>End index</td></font></tr>
-     * <tr>   <td>8</td>     <td>  7 ⨉  1</td>       <td>   0</td>        <td>  6</td> </tr>
-     * <tr>   <td>7</td>     <td>  7 ⨉  2</td>       <td>   7</td>        <td> 20</td> </tr>
-     * <tr>   <td>6</td>     <td> 14 ⨉  2</td>       <td>  21</td>        <td> 48</td> </tr>
-     * <tr>   <td>5</td>     <td> 14 ⨉  3</td>       <td>  49</td>        <td> 90</td> </tr>
+     * <tr>   <td>0</td>     <td>  7 ⨉  1</td>       <td>   0</td>        <td>  6</td> </tr>
+     * <tr>   <td>1</td>     <td>  7 ⨉  2</td>       <td>   7</td>        <td> 20</td> </tr>
+     * <tr>   <td>2</td>     <td> 14 ⨉  2</td>       <td>  21</td>        <td> 48</td> </tr>
+     * <tr>   <td>3</td>     <td> 14 ⨉  3</td>       <td>  49</td>        <td> 90</td> </tr>
      * <tr>   <td>4</td>     <td> 27 ⨉  3</td>       <td>  91</td>        <td>171</td> </tr>
-     * <tr>   <td>3</td>     <td> 27 ⨉  5</td>       <td> 172</td>        <td>306</td> </tr>
-     * <tr>   <td>2</td>     <td> 54 ⨉  5</td>       <td> 307</td>        <td>576</td> </tr>
-     * <tr>   <td>1</td>     <td> 54 ⨉ 10</td>      <td> 577</td>        <td>1116</td> </tr>
-     * <tr>   <td>0</td>     <td>107 ⨉ 10</td>      <td>1117</td>        <td>2186</td> </tr>
+     * <tr>   <td>5</td>     <td> 27 ⨉  5</td>       <td> 172</td>        <td>306</td> </tr>
+     * <tr>   <td>6</td>     <td> 54 ⨉  5</td>       <td> 307</td>        <td>576</td> </tr>
+     * <tr>   <td>7</td>     <td> 54 ⨉ 10</td>      <td> 577</td>        <td>1116</td> </tr>
+     * <tr>   <td>8</td>     <td>107 ⨉ 10</td>      <td>1117</td>        <td>2186</td> </tr>
      * </table>
      * </p>
-     * @param level current level (counting from leafs to root)
-     * @param levelRows number of rows at current level
-     * @param levelColumns number of columns at current level
-     * @return size cumulative size from current level to root
+     * @param stage number of merging stages
+     * @param stageRows number of rows at current stage
+     * @param stageColumns number of columns at current stage
+     * @return size cumulative size from root to current level
      */
-    private int setLevels(final int level, final int levelRows, final int levelColumns) {
+    private int setLevels(final int stage, final int stageRows, final int stageColumns) {
 
-        if (levelRows == 1 || levelColumns == 1) {
+        if (stageRows == 1 || stageColumns == 1) {
             // we have found root, stop recursion
-            start              = new int[level];
-            rows               = new int[level];
-            columns            = new int[level];
-            start[level - 1]   = 0;
-            rows[level - 1]    = levelRows;
-            columns[level - 1] = levelColumns;
-            return levelRows * levelColumns;
+            start   = new int[stage];
+            if (stage > 0) {
+                start[0]   = 0;
+            }
+            return stageRows * stageColumns;
         }
 
         final int size;
-        if ((level & 0x1) == 0) {
+        if ((stage & 0x1) == 0) {
             // columns merging
-            size = setLevels(level + 1, levelRows, (levelColumns + 1) / 2);
+            size = setLevels(stage + 1, stageRows, (stageColumns + 1) / 2);
         } else {
             // rows merging
-            size = setLevels(level + 1, (levelRows + 1) / 2, levelColumns);
+            size = setLevels(stage + 1, (stageRows + 1) / 2, stageColumns);
         }
 
-        if (level > 0) {
+        if (stage > 0) {
             // store current level characteristics
-            start[level - 1]   = size;
-            rows[level - 1]    = levelRows;
-            columns[level - 1] = levelColumns;
-            return size + levelRows * levelColumns;
+            start[start.length     - stage] = size;
+            return size + stageRows * stageColumns;
         } else {
-            // we don't count the elements at leaf as they are not stored
-            // in the min/max trees
+            // we don't count the elements at stage 0 as they are not stored in the
+            // min/max trees (they correspond to the raw elevation, without merging)
             return size;
         }
 
@@ -197,10 +198,10 @@ public class MinMaxTreeTile extends SimpleTile {
             int           iBase       = first;
             final int     nextColumns = (levelColumns + 1) / 2;
             final boolean odd         = (levelColumns & 0x1) != 0;
+            int           jEnd        = odd ? nextColumns - 1 : nextColumns;
             for (int i = 0; i < levelRows; ++i) {
 
                 // regular pairs
-                int jEnd = odd ? nextColumns - 1 : nextColumns;
                 for (int j = 0; j < jEnd; ++j) {
                     tree[iTree++] = f.value(base[iBase], base[iBase + 1]);
                     iBase += 2;
@@ -214,8 +215,8 @@ public class MinMaxTreeTile extends SimpleTile {
 
             }
 
-            if (level < start.length - 1) {
-                applyRecursively(tree, level + 1, levelRows, nextColumns, f, tree, start[level]);
+            if (level > 0) {
+                applyRecursively(tree, level - 1, levelRows, nextColumns, f, tree, start[level]);
             }
 
         } else {
@@ -225,9 +226,9 @@ public class MinMaxTreeTile extends SimpleTile {
             int           iBase    = first;
             final int     nextRows = (levelRows + 1) / 2;
             final boolean odd      = (levelRows & 0x1) != 0;
+            int           iEnd     = odd ? nextRows - 1 : nextRows;
 
             // regular pairs
-            int iEnd = odd ? nextRows - 1 : nextRows;
             for (int i = 0; i < iEnd; ++i) {
 
                 for (int j = 0; j < levelColumns; ++j) {
@@ -243,8 +244,8 @@ public class MinMaxTreeTile extends SimpleTile {
                 System.arraycopy(base, iBase, tree, iTree, levelColumns);
             }
 
-            if (level < start.length - 1) {
-                applyRecursively(tree, level + 1, nextRows, levelColumns, f, tree, start[level]);
+            if (level > 0) {
+                applyRecursively(tree, level - 1, nextRows, levelColumns, f, tree, start[level]);
             }
 
         }
