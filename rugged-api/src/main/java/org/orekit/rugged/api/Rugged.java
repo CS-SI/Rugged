@@ -39,25 +39,31 @@ public interface Rugged {
         ITRF, GTOD
     }
 
+    /** Enumerate for Digital Elevation Model intersection. */
+    enum Algorithm {
+        DUVENHAGE
+    }
+
     /** Set up general context.
      * <p>
      * This method is the first one that must be called, otherwise the
      * other methods will fail due to uninitialized context.
      * </p>
      * @param orekitDataDir top directory for Orekit data
-     * @param referenceDate reference date from which all other dates
-     * are computed
-     * @param ellipsoid reference ellipsoid
-     * @param inertialFrameName inertial frame
-     * @param bodyRotatingFrame body rotating frame
+     * @param referenceDate reference date from which all other dates are computed
+     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
+     * @param ellipsoidID identifier of reference ellipsoid
+     * @param inertialFrameID identifier of inertial frame
+     * @param bodyRotatingFrameID identifier of body rotating frame
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
      * @param aInterpolationOrder order to use for attitude interpolation
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    void setGeneralContext(File orekitDataDir, String referenceDate, Ellipsoid ellipsoid,
-                           InertialFrame inertialFrame, BodyRotatingFrame bodyRotatingFrame,
+    void setGeneralContext(File orekitDataDir, String referenceDate,
+                           Algorithm algorithmID, Ellipsoid ellipsoidID,
+                           InertialFrame inertialFrameID, BodyRotatingFrame bodyRotatingFrameID,
                            List<SatellitePV> positionsVelocities, int pvInterpolationOrder,
                            List<SatelliteQ> quaternions, int aInterpolationOrder)
         throws RuggedException;

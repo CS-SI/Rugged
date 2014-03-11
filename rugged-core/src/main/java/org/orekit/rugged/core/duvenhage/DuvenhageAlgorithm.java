@@ -16,8 +16,10 @@
  */
 package org.orekit.rugged.core.duvenhage;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.api.GroundPoint;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.AbstractRugged;
+import org.orekit.rugged.core.dem.IntersectionAlgorithm;
 import org.orekit.rugged.core.dem.TilesCache;
 
 /** Direct and inverse localization using Duvenhage's algorithm.
@@ -28,14 +30,14 @@ import org.orekit.rugged.core.dem.TilesCache;
  * </p>
  * @author Luc Maisonobe
  */
-public class DuvenhagedRugged extends AbstractRugged {
+public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
     /** Cache for DEM tiles. */
     private TilesCache<MinMaxTreeTile> cache;
 
     /** Simple constructor.
      */
-    public DuvenhagedRugged() {
+    public DuvenhageAlgorithm() {
     }
 
     /** {@inheritDoc} */
@@ -43,6 +45,14 @@ public class DuvenhagedRugged extends AbstractRugged {
     public void setUpTilesManagement(TileUpdater updater, int maxCachedTiles) {
         cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(),
                                                updater, maxCachedTiles);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public GroundPoint intersection(double latitude0, double longitude0,
+                                    Vector3D direction) {
+        // TODO: compute intersection
+        return null;
     }
 
 }

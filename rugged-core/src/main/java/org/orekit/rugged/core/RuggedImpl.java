@@ -29,12 +29,14 @@ import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.bodies.BodyShape;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
+import org.orekit.frames.Transform;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
@@ -47,6 +49,9 @@ import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.api.SatellitePV;
 import org.orekit.rugged.api.SatelliteQ;
 import org.orekit.rugged.api.SensorPixel;
+import org.orekit.rugged.api.TileUpdater;
+import org.orekit.rugged.core.dem.IntersectionAlgorithm;
+import org.orekit.rugged.core.duvenhage.DuvenhageAlgorithm;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -56,10 +61,10 @@ import org.orekit.utils.ImmutableTimeStampedCache;
 import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.PVCoordinatesProvider;
 
-/** Boilerplate part for direct and inverse localization.
+/** Top level Rugged class.
  * @author Luc Maisonobe
  */
-public abstract class AbstractRugged implements Rugged {
+public class RuggedImpl implements Rugged {
 
     /** UTC time scale. */
     private TimeScale utc;
@@ -73,37 +78,48 @@ public abstract class AbstractRugged implements Rugged {
     /** Reference ellipsoid. */
     private BodyShape shape;
 
-    /** Orbit propagator/interpolator. */
-    private PVCoordinatesProvider pvProvider;
-
-    /** Attitude propagator/interpolator. */
-    private AttitudeProvider aProvider;
+    /** Converter between spacecraft and body. */
+    private SpacecraftToObservedBody scToBody;
 
     /** Sensors. */
     private final Map<String, Sensor> sensors;
 
+    /** DEM intersection algorithm. */
+    private IntersectionAlgorithm algorithm;
+
     /** Simple constructor.
      */
-    protected AbstractRugged() {
+    protected RuggedImpl() {
         sensors = new HashMap<String, Sensor>();
     }
 
     /** {@inheritDoc} */
     @Override
     public  void setGeneralContext(final File orekitDataDir, final String referenceDate,
-                                   final Ellipsoid ellipsoid,
-                                   final InertialFrame inertialFrame,
-                                   final BodyRotatingFrame bodyRotatingFrame,
+                                   final Algorithm algorithmID, final Ellipsoid ellipsoidID,
+                                   final InertialFrame inertialFrameID,
+                                   final BodyRotatingFrame bodyRotatingFrameID,
                                    final List<SatellitePV> positionsVelocities, final int pvInterpolationOrder,
                                    final List<SatelliteQ> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         try {
+
+            // time reference
             utc                = selectTimeScale(orekitDataDir);
             this.referenceDate = new AbsoluteDate(referenceDate, utc);
-            frame              = selectInertialFrame(inertialFrame);
-            shape              = selectEllipsoid(ellipsoid, selectBodyRotatingFrame(bodyRotatingFrame));
-            pvProvider         = selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder);
-            aProvider          = selectAttitudeProvider(quaternions, aInterpolationOrder);
+
+            // space reference
+            frame = selectInertialFrame(inertialFrameID);
+            shape = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
+
+            // orbit/attitude to body converter
+            final PVCoordinatesProvider pvProvider = selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder);
+            final AttitudeProvider aProvider = selectAttitudeProvider(quaternions, aInterpolationOrder);
+            scToBody = new SpacecraftToObservedBody(frame, shape.getBodyFrame(), pvProvider, aProvider);
+
+            // intersection algorithm
+            algorithm = selectAlgorithm(algorithmID);
+
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
         }
@@ -115,26 +131,37 @@ public abstract class AbstractRugged implements Rugged {
      * other methods will fail due to uninitialized context.
      * </p>
      * @param orekitDataDir top directory for Orekit data
-     * @param referenceDate reference date
-     * @param ellipsoid reference ellipsoid
-     * @param inertialFrameName inertial frame
-     * @param bodyRotatingFrame body rotating frame
+     * @param referenceDate reference date from which all other dates are computed
+     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
+     * @param ellipsoidID identifier of reference ellipsoid
+     * @param inertialFrameID identifier of inertial frame
+     * @param bodyRotatingFrameID identifier of body rotating frame
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public void setGeneralContext(final File orekitDataDir, final AbsoluteDate referenceDate,
-                                  final Ellipsoid ellipsoid,
-                                  final InertialFrame inertialFrame,
-                                  final BodyRotatingFrame bodyRotatingFrame,
+                                  final Algorithm algorithmID, final Ellipsoid ellipsoidID,
+                                  final InertialFrame inertialFrameID,
+                                  final BodyRotatingFrame bodyRotatingFrameID,
                                   final Propagator propagator)
         throws RuggedException {
         try {
+
+            // time reference
             utc                = selectTimeScale(orekitDataDir);
             this.referenceDate = referenceDate;
-            frame              = selectInertialFrame(inertialFrame);
-            shape              = selectEllipsoid(ellipsoid, selectBodyRotatingFrame(bodyRotatingFrame));
-            pvProvider         = propagator;
-            aProvider          = propagator.getAttitudeProvider();
+
+            // space reference
+            frame = selectInertialFrame(inertialFrameID);
+            shape = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
+
+            // orbit/attitude to body converter
+            scToBody = new SpacecraftToObservedBody(frame, shape.getBodyFrame(),
+                                                    propagator, propagator.getAttitudeProvider());
+
+            // intersection algorithm
+            algorithm = selectAlgorithm(algorithmID);
+
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
         }
@@ -142,18 +169,26 @@ public abstract class AbstractRugged implements Rugged {
 
     /** {@inheritDoc} */
     @Override
+    public void setUpTilesManagement(TileUpdater updater, int maxCachedTiles) {
+        algorithm.setUpTilesManagement(updater, maxCachedTiles);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void setSensor(final String sensorName, final List<PixelLOS> linesOfSigth, final LineDatation datationModel) {
-        final List<Line> los = new ArrayList<Line>(linesOfSigth.size());
+        final List<Vector3D> positions = new ArrayList<Vector3D>(linesOfSigth.size());
+        final List<Line>     los       = new ArrayList<Line>(linesOfSigth.size());
         for (final PixelLOS plos : linesOfSigth) {
-            los.add(new Line(new Vector3D(plos.getPx(),
-                                          plos.getPy(),
-                                          plos.getPz()),
+            Vector3D p = new Vector3D(plos.getPx(), plos.getPy(), plos.getPz());
+            positions.add(p);
+            los.add(new Line(p,
                              new Vector3D(plos.getPx() + plos.getDx(),
                                           plos.getPy() + plos.getDy(),
                                           plos.getPz() + plos.getDz()),
                              1.0e-3));
         }
-        sensors.put(sensorName, new Sensor(sensorName, los, datationModel));
+        final Sensor sensor = new Sensor(sensorName, referenceDate, datationModel, positions, los);
+        sensors.put(sensor.getName(), sensor);
     }
 
     /** Select time scale Orekit data.
@@ -171,7 +206,7 @@ public abstract class AbstractRugged implements Rugged {
     }
 
     /** Select inertial frame.
-     * @param inertialFrameName inertial frame
+     * @param inertialFrameName inertial frame identifier
      * @return inertial frame
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
@@ -198,7 +233,7 @@ public abstract class AbstractRugged implements Rugged {
     }
 
     /** Select body rotating frame.
-     * @param bodyRotatingFrame body rotating frame
+     * @param bodyRotatingFrame body rotating frame identifier
      * @return body rotating frame
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
@@ -219,7 +254,7 @@ public abstract class AbstractRugged implements Rugged {
     }
 
     /** Select ellipsoid.
-     * @param ellipsoid reference ellipsoid
+     * @param ellipsoid reference ellipsoid identifier
      * @param bodyFrame body rotating frame
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
@@ -302,6 +337,23 @@ public abstract class AbstractRugged implements Rugged {
 
     }
 
+    /** Select DEM intersection algorithm.
+     * @param algorithm intersection algorithm identifier
+     * @return selected algorithm
+     */
+    private IntersectionAlgorithm selectAlgorithm(final Algorithm algorithm) {
+        
+        // set up the algorithm
+        switch (algorithm) {
+            case DUVENHAGE :
+                return new DuvenhageAlgorithm();
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
+        }
+
+    }
+
     /** {@inheritDoc} */
     @Override
     public GroundPoint[] directLocalization(String sensorName, double lineNumber)
@@ -313,13 +365,32 @@ public abstract class AbstractRugged implements Rugged {
             // select the sensor
             final Sensor sensor = getSensor(sensorName);
 
-            // find the spacecraft state when line is active
-            final AbsoluteDate date = referenceDate.shiftedBy(sensor.getDatationModel().getDate(lineNumber));
-            final PVCoordinates pv  = pvProvider.getPVCoordinates(date, shape.getBodyFrame());
-            final Attitude attitude = aProvider.getAttitude(pvProvider, date, shape.getBodyFrame());
+            // compute once the transform between spacecraft and observed body
+            final AbsoluteDate date = sensor.getDate(lineNumber);
+            final Transform t = scToBody.getTransform(date);
 
-            // TODO: implement direct localization
-            throw RuggedException.createInternalError(null);
+            // compute localization of each pixel
+            final GroundPoint[] gp = new GroundPoint[sensor.getNbPixels()];
+            for (int i = 0; i < gp.length; ++i) {
+
+                // compute intersection with ellipsoid
+                final Vector3D position = t.transformPosition(sensor.getPosition(i));
+                final Line     line     = t.transformLine(sensor.getLos(i));
+                final GeodeticPoint ellipsoidIntersection =
+                        shape.getIntersectionPoint(line, position, shape.getBodyFrame(), date);
+                final Vector3D directionTopo =
+                        new Vector3D(Vector3D.dotProduct(line.getDirection(), ellipsoidIntersection.getEast()),
+                                     Vector3D.dotProduct(line.getDirection(), ellipsoidIntersection.getNorth()),
+                                     Vector3D.dotProduct(line.getDirection(), ellipsoidIntersection.getZenith()));
+
+                // compute intersection with Digital Elevation Model
+                gp[i] = algorithm.intersection(ellipsoidIntersection.getLatitude(),
+                                               ellipsoidIntersection.getLongitude(),
+                                               directionTopo);
+
+            }
+
+            return gp;
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
@@ -361,49 +432,4 @@ public abstract class AbstractRugged implements Rugged {
         return sensor;
     }
 
-    /** Local container for sensor data. */
-    private static class Sensor {
-
-        /** Name of the sensor. */
-        private String name;
-
-        /** Pixels lines-of-sight. */
-        private List<Line> los;
-
-        /** Datation model. */
-        private LineDatation datationModel;
-
-        /** Simple constructor.
-         * @param name name of the sensor
-         * @param los pixels lines-of-sight
-         * @param datationModel datation model
-         */
-        public Sensor(final String name, final List<Line> los, final LineDatation datationModel) {
-            this.name          = name;
-            this.los           = los;
-            this.datationModel = datationModel;
-        }
-
-        /** Get the name of the sensor.
-         * @preturn name of the sensor
-         */
-        public String getName() {
-            return name;
-        }
-
-        /** Get the pixels lines-of-sight.
-         * @return pixels lines-of-sight
-         */
-        public List<Line> getLos() {
-            return los;
-        }
-
-        /** Get the datation model.
-         * @return datation model
-         */
-        public LineDatation getDatationModel() {
-            return datationModel;
-        }
-
-    }
 }
