@@ -18,10 +18,11 @@ package org.orekit.rugged.core.dem;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.api.GroundPoint;
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
+import org.orekit.rugged.core.ExtendedEllipsoid;
 
-/** Interface for Digital Elevation Model algorithm.
+/** Interface for Digital Elevation Model intersection algorithm.
  * @author Luc Maisonobe
  */
 public interface IntersectionAlgorithm {
@@ -33,12 +34,13 @@ public interface IntersectionAlgorithm {
     void setUpTilesManagement(TileUpdater updater, int maxCachedTiles);
 
     /** Compute intersection of line with Digital Elevation Model.
-     * @param latitude latitude of line arrival at zero altitude
-     * @param longitude longitude of line arrival at zero altitude
-     * @param direction arrival direction in (East, North, Zenith) frame
-     * (the direction is from spacecraft to ground)
+     * @param ellipsoid reference ellipsoid
+     * @param position pixel position in ellipsoid frame
+     * @param los pixel line-of-sight in ellipsoid frame
      * @return point at which the line first enters ground
+     * @exception RuggedException if intersection cannot be found
      */
-    GroundPoint intersection(double latitude0, double longitude0, Vector3D direction);
+    GeodeticPoint intersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los)
+        throws RuggedException;
 
 }

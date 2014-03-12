@@ -14,46 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.duvenhage;
+package org.orekit.rugged.core;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
+import org.orekit.errors.OrekitException;
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.ExtendedEllipsoid;
 import org.orekit.rugged.core.dem.IntersectionAlgorithm;
-import org.orekit.rugged.core.dem.TilesCache;
 
-/** Digital Elevation Model intersection using Duvenhage's algorithm.
+/** Intersection ignoring Digital Elevation Model.
  * <p>
- * The algorithm is described in the 2009 paper:
- * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
- * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
+ * This dummy implementation simply uses the ellipsoid itself.
  * </p>
  * @author Luc Maisonobe
  */
-public class DuvenhageAlgorithm implements IntersectionAlgorithm {
-
-    /** Cache for DEM tiles. */
-    private TilesCache<MinMaxTreeTile> cache;
+public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
 
     /** Simple constructor.
      */
-    public DuvenhageAlgorithm() {
+    public IgnoreDEMAlgorithm() {
     }
 
     /** {@inheritDoc} */
     @Override
     public void setUpTilesManagement(final TileUpdater updater, final int maxCachedTiles) {
-        cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(),
-                                               updater, maxCachedTiles);
+        // we ignore the DEM
     }
 
     /** {@inheritDoc} */
     @Override
     public GeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                      final Vector3D position, final Vector3D los) {
-        // TODO: compute intersection
-        return null;
+                                      final Vector3D position, final Vector3D los)
+        throws RuggedException {
+        try {
+            return ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, 0.0),
+                                       ellipsoid.getBodyFrame(), null);
+        } catch (OrekitException oe) {
+            // this should never happen
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
     }
 
 }
