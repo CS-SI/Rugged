@@ -22,15 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.TabulatedProvider;
-import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
@@ -76,7 +73,7 @@ public class RuggedImpl implements Rugged {
     private Frame frame;
 
     /** Reference ellipsoid. */
-    private BodyShape shape;
+    private ExtendedEllipsoid ellipsoid;
 
     /** Converter between spacecraft and body. */
     private SpacecraftToObservedBody scToBody;
@@ -110,12 +107,12 @@ public class RuggedImpl implements Rugged {
 
             // space reference
             frame = selectInertialFrame(inertialFrameID);
-            shape = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
+            ellipsoid = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
 
             // orbit/attitude to body converter
             final PVCoordinatesProvider pvProvider = selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder);
             final AttitudeProvider aProvider = selectAttitudeProvider(quaternions, aInterpolationOrder);
-            scToBody = new SpacecraftToObservedBody(frame, shape.getBodyFrame(), pvProvider, aProvider);
+            scToBody = new SpacecraftToObservedBody(frame, ellipsoid.getBodyFrame(), pvProvider, aProvider);
 
             // intersection algorithm
             algorithm = selectAlgorithm(algorithmID);
@@ -153,10 +150,10 @@ public class RuggedImpl implements Rugged {
 
             // space reference
             frame = selectInertialFrame(inertialFrameID);
-            shape = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
+            ellipsoid = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
 
             // orbit/attitude to body converter
-            scToBody = new SpacecraftToObservedBody(frame, shape.getBodyFrame(),
+            scToBody = new SpacecraftToObservedBody(frame, ellipsoid.getBodyFrame(),
                                                     propagator, propagator.getAttitudeProvider());
 
             // intersection algorithm
@@ -177,15 +174,10 @@ public class RuggedImpl implements Rugged {
     @Override
     public void setSensor(final String sensorName, final List<PixelLOS> linesOfSigth, final LineDatation datationModel) {
         final List<Vector3D> positions = new ArrayList<Vector3D>(linesOfSigth.size());
-        final List<Line>     los       = new ArrayList<Line>(linesOfSigth.size());
+        final List<Vector3D> los       = new ArrayList<Vector3D>(linesOfSigth.size());
         for (final PixelLOS plos : linesOfSigth) {
-            Vector3D p = new Vector3D(plos.getPx(), plos.getPy(), plos.getPz());
-            positions.add(p);
-            los.add(new Line(p,
-                             new Vector3D(plos.getPx() + plos.getDx(),
-                                          plos.getPy() + plos.getDy(),
-                                          plos.getPz() + plos.getDz()),
-                             1.0e-3));
+            positions.add(new Vector3D(plos.getPx(), plos.getPy(), plos.getPz()));
+            los.add(new Vector3D(plos.getDx(), plos.getDy(), plos.getDz()));
         }
         final Sensor sensor = new Sensor(sensorName, referenceDate, datationModel, positions, los);
         sensors.put(sensor.getName(), sensor);
@@ -258,21 +250,21 @@ public class RuggedImpl implements Rugged {
      * @param bodyFrame body rotating frame
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private BodyShape selectEllipsoid(final Ellipsoid ellipsoid, final Frame bodyFrame)
+    private ExtendedEllipsoid selectEllipsoid(final Ellipsoid ellipsoid, final Frame bodyFrame)
         throws OrekitException {
         
         // set up the ellipsoid
         switch (ellipsoid) {
             case GRS80 :
-                return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
+                return new ExtendedEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
             case WGS84 :
-                return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                return new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                              Constants.WGS84_EARTH_FLATTENING,
                                              bodyFrame);
             case IERS96 :
-                return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
+                return new ExtendedEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
             case IERS2003 :
-                return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
+                return new ExtendedEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
             default :
                 // this should never happen
                 throw RuggedException.createInternalError(null);
@@ -372,22 +364,13 @@ public class RuggedImpl implements Rugged {
             // compute localization of each pixel
             final GroundPoint[] gp = new GroundPoint[sensor.getNbPixels()];
             for (int i = 0; i < gp.length; ++i) {
-
-                // compute intersection with ellipsoid
-                final Vector3D position = t.transformPosition(sensor.getPosition(i));
-                final Line     line     = t.transformLine(sensor.getLos(i));
-                final GeodeticPoint ellipsoidIntersection =
-                        shape.getIntersectionPoint(line, position, shape.getBodyFrame(), date);
-                final Vector3D directionTopo =
-                        new Vector3D(Vector3D.dotProduct(line.getDirection(), ellipsoidIntersection.getEast()),
-                                     Vector3D.dotProduct(line.getDirection(), ellipsoidIntersection.getNorth()),
-                                     Vector3D.dotProduct(line.getDirection(), ellipsoidIntersection.getZenith()));
-
-                // compute intersection with Digital Elevation Model
-                gp[i] = algorithm.intersection(ellipsoidIntersection.getLatitude(),
-                                               ellipsoidIntersection.getLongitude(),
-                                               directionTopo);
-
+               final GeodeticPoint geodetic =
+                       algorithm.intersection(ellipsoid,
+                                              t.transformPosition(sensor.getPosition(i)),
+                                              t.transformVector(sensor.getLos(i)));
+               gp[i] = new GroundPoint(geodetic.getLatitude(),
+                                       geodetic.getLongitude(),
+                                       geodetic.getAltitude());
             }
 
             return gp;

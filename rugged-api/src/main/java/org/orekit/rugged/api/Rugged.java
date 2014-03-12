@@ -41,7 +41,7 @@ public interface Rugged {
 
     /** Enumerate for Digital Elevation Model intersection. */
     enum Algorithm {
-        DUVENHAGE
+        DUVENHAGE, IGNORE_DEM
     }
 
     /** Set up general context.

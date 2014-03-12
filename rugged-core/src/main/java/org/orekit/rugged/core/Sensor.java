@@ -18,7 +18,6 @@ package org.orekit.rugged.core;
 
 import java.util.List;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.api.LineDatation;
 import org.orekit.time.AbsoluteDate;
@@ -41,7 +40,7 @@ class Sensor {
     private final List<Vector3D> positions;
 
     /** Pixels lines-of-sight. */
-    private final List<Line> los;
+    private final List<Vector3D> los;
 
     /** Datation model. */
     private final LineDatation datationModel;
@@ -55,7 +54,7 @@ class Sensor {
      */
     public Sensor(final String name,
                   final AbsoluteDate referenceDate, final LineDatation datationModel,
-                  final List<Vector3D> positions, final List<Line> los) {
+                  final List<Vector3D> positions, final List<Vector3D> los) {
         this.name          = name;
         this.referenceDate = referenceDate;
         this.positions     = positions;
@@ -89,7 +88,7 @@ class Sensor {
      * @param i pixel index (must be between 0 and {@link #getNbPixels()}
      * @return pixel line-of-sight
      */
-    public Line getLos(final int i) {
+    public Vector3D getLos(final int i) {
         return los.get(i);
     }
 
