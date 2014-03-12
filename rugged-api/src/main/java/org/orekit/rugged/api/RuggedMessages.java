@@ -54,7 +54,10 @@ public enum RuggedMessages implements Localizable {
     OUT_OF_TILE_INDICES("no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)"),
     UNINITIALIZED_CONTEXT("general context has not been initialized"),
     EMPTY_TILE("tile is empty: {0} ⨉ {1}"),
-    UNKNOWN_SENSOR("unknown sensor {0}");
+    UNKNOWN_SENSOR("unknown sensor {0}"),
+    LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE("line-of-sight never crosses latitude {0}"),
+    LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE("line-of-sight never crosses longitude {0}"),
+    LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE("line-of-sight never crosses altitude {0}");
 
     // CHECKSTYLE: resume JavadocVariable check
 

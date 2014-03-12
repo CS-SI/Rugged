@@ -12,3 +12,12 @@ EMPTY_TILE = la tuile est vide : {0} ⨉ {1}
 
 # unknown sensor {0}
 UNKNOWN_SENSOR = capteur {0} inconnu
+
+# line-of-sight never crosses latitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE = la ligne de visée ne franchit jamais la latitude {0}
+
+# line-of-sight never crosses longitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = la ligne de visée ne franchit jamais la longitude {0}
+
+# line never crosses altitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = la ligne de visée ne franchit jamais l''altitude {0}

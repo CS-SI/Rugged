@@ -12,3 +12,12 @@ EMPTY_TILE = tile is empty: {0} ⨉ {1}
 
 # unknown sensor {0}
 UNKNOWN_SENSOR = unknown sensor {0}
+
+# line-of-sight never crosses latitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE = line-of-sight never crosses latitude {0}
+
+# line-of-sight never crosses longitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = line-of-sight never crosses longitude {0}
+
+# line never crosses altitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = line-of-sight never crosses altitude {0}
