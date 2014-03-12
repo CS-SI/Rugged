@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package orekit.rugged.core.dem;
+package org.orekit.rugged.core.dem;
 
 import org.junit.Assert;
 import org.junit.Test;
