@@ -24,6 +24,19 @@ import org.orekit.rugged.api.UpdatableTile;
  */
 public interface Tile extends UpdatableTile {
 
+    /** Enumerate for point location with respect to tile. */
+    enum Location {
+        SOUTH_WEST,
+        WEST,
+        NORTH_WEST,
+        NORTH,
+        NORTH_EAST,
+        EAST,
+        SOUTH_EAST,
+        SOUTH,
+        IN_TILE
+    }
+
     /** Hook called at the end of tile update completion.
      * @exception RuggedException if something wrong occurs
      * (missing data ...)
@@ -82,8 +95,8 @@ public interface Tile extends UpdatableTile {
     /** Check if a tile covers a ground point.
      * @param latitude ground point latitude
      * @param longitude ground point longitude
-     * @return true if the tile covers the ground point
+     * @return location of the ground point with respect to tile
      */
-    boolean covers(double latitude, double longitude);
+    Location getLocation(double latitude, double longitude);
 
 }

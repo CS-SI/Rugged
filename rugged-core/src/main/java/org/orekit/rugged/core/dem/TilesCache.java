@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
+import org.orekit.rugged.core.dem.Tile.Location;
 
 /** Cache for Digital Elevation Model {@link Tile tiles}.
  * <p>
@@ -263,7 +264,7 @@ public class TilesCache<T extends Tile> {
 
                 if (insertionPoint < tiles.size()) {
                     final T tile = tiles.get(insertionPoint).getTile();
-                    if (tile.covers(latitude, longitude)) {
+                    if (tile.getLocation(latitude, longitude) == Location.IN_TILE) {
                         // we have found an existing tile
                         return tile;
                     }

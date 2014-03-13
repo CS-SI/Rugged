@@ -168,11 +168,34 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public boolean covers(final double latitude, final double longitude) {
+    public Location getLocation(final double latitude, final double longitude) {
         final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
         final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
-        return latitudeIndex  >= 0 && latitudeIndex  < latitudeRows &&
-               longitudeIndex >= 0 && longitudeIndex < longitudeColumns;
+        if (longitudeIndex < 0) {
+            if (latitudeIndex < 0) {
+                return Location.SOUTH_WEST;
+            } else if (latitudeIndex <= latitudeRows) {
+                return Location.WEST;
+            } else {
+                return Location.NORTH_WEST;
+            }
+        } else if (longitudeIndex <= longitudeColumns) {
+            if (latitudeIndex < 0) {
+                return Location.SOUTH;
+            } else if (latitudeIndex <= latitudeRows) {
+                return Location.IN_TILE;
+            } else {
+                return Location.NORTH;
+            }
+        } else {
+            if (latitudeIndex < 0) {
+                return Location.SOUTH_EAST;
+            } else if (latitudeIndex <= latitudeRows) {
+                return Location.EAST;
+            } else {
+                return Location.NORTH_EAST;
+            }
+        }
     }
 
     /** Check indices.

@@ -23,6 +23,7 @@ import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.core.dem.SimpleTile;
 import org.orekit.rugged.core.dem.SimpleTileFactory;
 import org.orekit.rugged.core.dem.Tile;
+import org.orekit.rugged.core.dem.Tile.Location;
 
 public class SimpleTileTest {
 
@@ -76,12 +77,15 @@ public class SimpleTileTest {
         Assert.assertEquals(100, tile.getLatitudeRows());
         Assert.assertEquals(200, tile.getLongitudeColumns());
 
-        Assert.assertTrue(tile.covers(  6.0, 22.0));
-        Assert.assertFalse(tile.covers( 0.0, 22.0));
-        Assert.assertFalse(tile.covers(12.0, 22.0));
-        Assert.assertFalse(tile.covers( 6.0,  1.0));
-        Assert.assertFalse(tile.covers( 6.0, 43.0));
-
+        Assert.assertEquals(Location.SOUTH_WEST, tile.getLocation( 0.0,  1.0));
+        Assert.assertEquals(Location.WEST,       tile.getLocation( 6.0,  1.0));
+        Assert.assertEquals(Location.NORTH_WEST, tile.getLocation(12.0,  1.0));
+        Assert.assertEquals(Location.SOUTH,      tile.getLocation( 0.0, 22.0));
+        Assert.assertEquals(Location.IN_TILE,    tile.getLocation( 6.0, 22.0));
+        Assert.assertEquals(Location.NORTH,      tile.getLocation(12.0, 22.0));
+        Assert.assertEquals(Location.SOUTH_EAST, tile.getLocation( 0.0, 43.0));
+        Assert.assertEquals(Location.EAST,       tile.getLocation( 6.0, 43.0));
+        Assert.assertEquals(Location.NORTH_EAST, tile.getLocation(12.0, 43.0));
         for (int i = 0; i < tile.getLatitudeRows(); ++i) {
             for (int j = 0; j < tile.getLongitudeColumns(); ++j) {
                 Assert.assertEquals(1000 * i + j, tile.getElevationAtIndices(i, j), 1.0e-10);
