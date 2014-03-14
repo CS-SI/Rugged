@@ -48,10 +48,20 @@ public interface Tile extends UpdatableTile {
      */
     double getMinimumLatitude();
 
+    /** Get maximum latitude.
+     * @return maximum latitude
+     */
+    double getMaximumLatitude();
+
     /** Get minimum longitude.
      * @return minimum longitude
      */
     double getMinimumLongitude();
+
+    /** Get maximum longitude.
+     * @return maximum longitude
+     */
+    double getMaximumLongitude();
 
     /** Get step in latitude (size of one raster element).
      * @return step in latitude

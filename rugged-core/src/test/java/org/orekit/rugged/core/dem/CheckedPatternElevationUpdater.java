@@ -37,12 +37,15 @@ public class CheckedPatternElevationUpdater implements TileUpdater {
 
     public void updateTile(double latitude, double longitude, UpdatableTile tile)
         throws RuggedException {
-        tile.setGeometry(size * FastMath.floor(latitude / size),
-                         size * FastMath.floor(longitude / size),
-                         size / n, size / n, n, n);
+        double step         = size / (n - 1);
+        double minLatitude  = size * FastMath.floor(latitude  / size);
+        double minLongitude = size * FastMath.floor(longitude / size);
+        tile.setGeometry(minLatitude, minLongitude, step, step, n, n);
         for (int i = 0; i < n; ++i) {
+            int p = (int) FastMath.floor((minLatitude + i * step) / step);
             for (int j = 0; j < n; ++j) {
-                tile.setElevation(i, j, (((i ^ j) & 0x1) == 0) ? elevation1 : elevation2);
+                int q = (int) FastMath.floor((minLongitude + j * step) / step);
+                tile.setElevation(i, j, (((p ^ q) & 0x1) == 0) ? elevation1 : elevation2);
             }
         }
     }

@@ -45,8 +45,8 @@ public class TilesCache<T extends Tile> {
     /** Search optimized cache. */
     private List<TilesStrip> searchCache;
 
-    /** Eviction optimized cache. */
-    private T[] evictionCache;
+    /** Eviction queue. */
+    private T[] evictionQueue;
 
     /** Index for next tile. */
     private int next;
@@ -61,8 +61,8 @@ public class TilesCache<T extends Tile> {
         this.updater       = updater;
         this.searchCache   = new ArrayList<TilesStrip>();
         @SuppressWarnings("unchecked")
-        final T[] array    = (T[]) Array.newInstance(Tile.class, maxTiles);
-        this.evictionCache = array;
+        final T[] array    = (T[]) Array.newInstance(Tile.class, maxTiles + 1);
+        this.evictionQueue = array;
         this.next          = 0;
     }
 
@@ -86,26 +86,33 @@ public class TilesCache<T extends Tile> {
     private T createTile(final double latitude, final double longitude)
         throws RuggedException {
 
-        if (evictionCache[next] != null) {
-            // the tile we are creating will evict this older tile
-            // we need to remove it from the search cache too
-            for (final Iterator<TilesStrip> iterator = searchCache.iterator(); iterator.hasNext();) {
-                if (iterator.next().removeTile(evictionCache[next])) {
-                    break;
-                }
-            }
-        }
-
         // create the tile and retrieve its data
         final T tile = factory.createTile();
         updater.updateTile(latitude, longitude, tile);
         tile.tileUpdateCompleted();
 
-        // store the tile in the eviction cache
-        evictionCache[next] = tile;
-        next = (next + 1) % evictionCache.length;
-
         return tile;
+
+    }
+
+    /** Append newly created tile at the end of the eviction queue.
+     * @param tile tile to append to queue
+     */
+    private void appendToEvictionQueue(final T tile) {
+
+        evictionQueue[next] = tile;
+        next                = (next + 1) % evictionQueue.length;
+
+        if (evictionQueue[next] != null) {
+            // the cache is full, we need to evict one tile
+            // from both the eviction cache and the search cache
+            for (final Iterator<TilesStrip> iterator = searchCache.iterator(); iterator.hasNext();) {
+                if (iterator.next().removeTile(evictionQueue[next])) {
+                    evictionQueue[next] = null;
+                    return;
+                }
+            }
+        }
 
     }
 
@@ -137,8 +144,10 @@ public class TilesCache<T extends Tile> {
             }
 
             // no existing strip covers the specified latitude, we need to create a new one
-            final TilesStrip strip = new TilesStrip(createTile(latitude, longitude));
+            final T          tile  = createTile(latitude, longitude);
+            final TilesStrip strip = new TilesStrip(tile);
             searchCache.add(insertionPoint, strip);
+            appendToEvictionQueue(tile);
             return strip;
 
         }
@@ -224,7 +233,7 @@ public class TilesCache<T extends Tile> {
          */
         public TilesStrip(final T tile) {
             minLatitude = tile.getMinimumLatitude();
-            maxLatitude = minLatitude + tile.getLatitudeRows() * tile.getLatitudeStep();
+            maxLatitude = tile.getMaximumLatitude();
             tiles       = new ArrayList<TileDecorator>();
             tiles.add(new TileDecorator(tile));
         }
@@ -273,6 +282,7 @@ public class TilesCache<T extends Tile> {
                 // no existing tile covers the specified ground point, we need to create a new one
                 final T tile = createTile(latitude, longitude);
                 tiles.add(insertionPoint, new TileDecorator(tile));
+                appendToEvictionQueue(tile);
                 return tile;
             }
 
@@ -317,7 +327,7 @@ public class TilesCache<T extends Tile> {
         /** {@inheritDoc} */
         @Override
         public double getLongitude() {
-            return tile.getMinimumLongitude() + tile.getLongitudeColumns() * tile.getLongitudeStep();
+            return tile.getMaximumLongitude();
         }
 
     }

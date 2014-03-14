@@ -110,8 +110,20 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
+    public double getMaximumLatitude() {
+        return minLatitude + latitudeStep * (latitudeRows - 1);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public double getMinimumLongitude() {
         return minLongitude;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getMaximumLongitude() {
+        return minLongitude + longitudeStep * (longitudeColumns - 1);
     }
 
     /** {@inheritDoc} */
@@ -154,7 +166,12 @@ public class SimpleTile implements Tile {
     @Override
     public void setElevation(final int latitudeIndex, final int longitudeIndex,
                              final double elevation) throws RuggedException {
-        checkIndices(latitudeIndex, longitudeIndex);
+        if (latitudeIndex  < 0 || latitudeIndex  > (latitudeRows - 1) ||
+            longitudeIndex < 0 || longitudeIndex > (longitudeColumns - 1)) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
+                                      latitudeIndex, longitudeIndex,
+                                      latitudeRows - 1, longitudeColumns - 1);
+        }        
         minElevation = FastMath.min(minElevation, elevation);
         maxElevation = FastMath.max(maxElevation, elevation);
         elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex] = elevation;
@@ -174,15 +191,15 @@ public class SimpleTile implements Tile {
         if (longitudeIndex < 0) {
             if (latitudeIndex < 0) {
                 return Location.SOUTH_WEST;
-            } else if (latitudeIndex <= latitudeRows) {
+            } else if (latitudeIndex <= (latitudeRows - 2)) {
                 return Location.WEST;
             } else {
                 return Location.NORTH_WEST;
             }
-        } else if (longitudeIndex <= longitudeColumns) {
+        } else if (longitudeIndex <= (longitudeColumns - 2)) {
             if (latitudeIndex < 0) {
                 return Location.SOUTH;
-            } else if (latitudeIndex <= latitudeRows) {
+            } else if (latitudeIndex <= (latitudeRows - 2)) {
                 return Location.IN_TILE;
             } else {
                 return Location.NORTH;
@@ -190,27 +207,12 @@ public class SimpleTile implements Tile {
         } else {
             if (latitudeIndex < 0) {
                 return Location.SOUTH_EAST;
-            } else if (latitudeIndex <= latitudeRows) {
+            } else if (latitudeIndex <= (latitudeRows - 2)) {
                 return Location.EAST;
             } else {
                 return Location.NORTH_EAST;
             }
         }
-    }
-
-    /** Check indices.
-     * @param latitudeIndex
-     * @param longitudeIndex
-     * @exception IllegalArgumentException if indices are out of bound
-     */
-    private void checkIndices(int latitudeIndex, int longitudeIndex)
-        throws RuggedException {
-        if (latitudeIndex  < 0 || latitudeIndex  >= latitudeRows ||
-            longitudeIndex < 0 || longitudeIndex >= longitudeColumns) {
-            throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
-                                      latitudeIndex, longitudeIndex,
-                                      latitudeRows - 1, longitudeColumns - 1);
-        }        
     }
 
 }
