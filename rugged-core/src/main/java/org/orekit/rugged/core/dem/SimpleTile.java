@@ -185,9 +185,21 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
+    public int getLatitudeIndex(double latitude) {
+        return (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getLontitudeIndex(double longitude) {
+        return (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public Location getLocation(final double latitude, final double longitude) {
-        final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
-        final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
+        final int latitudeIndex  = getLatitudeIndex(latitude);
+        final int longitudeIndex = getLontitudeIndex(longitude);
         if (longitudeIndex < 0) {
             if (latitudeIndex < 0) {
                 return Location.SOUTH_WEST;

@@ -83,6 +83,18 @@ public interface Tile extends UpdatableTile {
      */
     int getLongitudeColumns();
 
+    /** Get the latitude index of a point.
+     * @param latitude geodetic latitude
+     * @return latirute index (it may lie outside of the tile!)
+     */
+    int getLatitudeIndex(double latitude);
+
+    /** Get the longitude index of a point.
+     * @param longitude geodetic latitude
+     * @return longitude index (it may lie outside of the tile!)
+     */
+    int getLontitudeIndex(double longitude);
+
     /** Get the minimum elevation in the tile.
      * @return minimum elevation in the tile
      */
