@@ -185,14 +185,62 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
+    public double interpolateElevation(double latitude, double longitude)
+        throws RuggedException {
+
+        final double doubleLatitudeIndex  = getLatitudeIndex(latitude);
+        final double doubleLongitudeIndex = getLontitudeIndex(longitude);
+        final int    latitudeIndex        = (int) FastMath.floor(doubleLatitudeIndex);
+        final int    longitudeIndex       = (int) FastMath.floor(doubleLongitudeIndex);
+        if (latitudeIndex  < 0 || latitudeIndex  >= (latitudeRows - 2) ||
+            longitudeIndex < 0 || longitudeIndex >= (longitudeColumns - 2)) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES,
+                                      FastMath.toDegrees(latitude),
+                                      FastMath.toDegrees(longitude),
+                                      FastMath.toDegrees(getMinimumLatitude()),
+                                      FastMath.toDegrees(getMaximumLatitude()),
+                                      FastMath.toDegrees(getMinimumLongitude()),
+                                      FastMath.toDegrees(getMaximumLongitude()));
+        }
+
+        // bi-linear interpolation
+        final double dLat = doubleLatitudeIndex  - latitudeIndex;
+        final double dLon = doubleLongitudeIndex - longitudeIndex;
+        final double e00  = getElevationAtIndices(latitudeIndex,     longitudeIndex);
+        final double e01  = getElevationAtIndices(latitudeIndex,     longitudeIndex + 1);
+        final double e10  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
+        final double e11  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
+        return (e00 * (1.0 - dLon) + dLon * e01) * (1.0 - dLat) +
+               (e10 * (1.0 - dLon) + dLon * e11) * dLat;
+
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public int getLatitudeIndex(double latitude) {
-        return (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
+        return (int) FastMath.floor(getDoubleLatitudeIndex(latitude));
     }
 
     /** {@inheritDoc} */
     @Override
     public int getLontitudeIndex(double longitude) {
-        return (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
+        return (int) FastMath.floor(getDoubleLontitudeIndex(longitude));
+    }
+
+    /** Get the latitude index of a point.
+     * @param latitude geodetic latitude
+     * @return latirute index (it may lie outside of the tile!)
+     */
+    private double getDoubleLatitudeIndex(double latitude) {
+        return (latitude  - minLatitude)  / latitudeStep;
+    }
+
+    /** Get the longitude index of a point.
+     * @param longitude geodetic latitude
+     * @return longitude index (it may lie outside of the tile!)
+     */
+    private double getDoubleLontitudeIndex(double longitude) {
+        return (longitude - minLongitude) / longitudeStep;
     }
 
     /** {@inheritDoc} */

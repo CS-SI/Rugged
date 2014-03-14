@@ -114,6 +114,15 @@ public interface Tile extends UpdatableTile {
     double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
         throws RuggedException;
 
+    /** Interpolate elevation.
+     * @param latitude ground point latitude
+     * @param longitude ground point longitude
+     * @return interpolated elevation
+     * @exception RuggedException if point does not lie within the tile
+     */
+    double interpolateElevation(double latitude, double longitude)
+        throws RuggedException;
+
     /** Check if a tile covers a ground point.
      * @param latitude ground point latitude
      * @param longitude ground point longitude
