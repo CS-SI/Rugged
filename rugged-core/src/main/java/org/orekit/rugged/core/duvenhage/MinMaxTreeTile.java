@@ -155,6 +155,15 @@ public class MinMaxTreeTile extends SimpleTile {
 
     }
 
+    /** Check if the merging operation between level and level+1 is a column merging.
+     * @param level level to check
+     * @return true if the merging operation between level and level+1 is a column
+     * merging, false if is a row merging
+     */
+    public boolean isColumnMerging(final int level) {
+        return (level & 0x1) != (start.length & 0x1);
+    }
+
     /** Recursive setting of tree levels.
      * <p>
      * The following algorithms works for any array shape, even with
@@ -228,7 +237,8 @@ public class MinMaxTreeTile extends SimpleTile {
                                   final int level, final int levelRows, final int levelColumns,
                                   final BivariateFunction f,
                                   final double[] base, final int first) {
-        if ((level & 0x1) != (start.length & 0x1)) {
+
+        if (isColumnMerging(level)) {
 
             // merge columns pairs
             int           iTree       = start[level];

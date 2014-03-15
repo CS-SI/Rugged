@@ -47,6 +47,16 @@ public class MinMaxTreeTileTest {
         Assert.assertEquals( 577, start[ 7]);
         Assert.assertEquals(1117, start[ 8]);
 
+        Assert.assertTrue(tile.isColumnMerging(8));
+        Assert.assertFalse(tile.isColumnMerging(7));
+        Assert.assertTrue(tile.isColumnMerging(6));
+        Assert.assertFalse(tile.isColumnMerging(5));
+        Assert.assertTrue(tile.isColumnMerging(4));
+        Assert.assertFalse(tile.isColumnMerging(3));
+        Assert.assertTrue(tile.isColumnMerging(2));
+        Assert.assertFalse(tile.isColumnMerging(1));
+        Assert.assertTrue(tile.isColumnMerging(0));
+
         Field minTreeField = MinMaxTreeTile.class.getDeclaredField("minTree");
         minTreeField.setAccessible(true);
         Assert.assertEquals(2187, ((double[]) minTreeField.get(tile)).length);
@@ -70,6 +80,11 @@ public class MinMaxTreeTileTest {
         Assert.assertEquals( 2, start[ 1]);
         Assert.assertEquals( 6, start[ 2]);
         Assert.assertEquals(14, start[ 3]);
+
+        Assert.assertTrue(tile.isColumnMerging(3));
+        Assert.assertFalse(tile.isColumnMerging(2));
+        Assert.assertTrue(tile.isColumnMerging(1));
+        Assert.assertFalse(tile.isColumnMerging(0));
 
         Field minTreeField = MinMaxTreeTile.class.getDeclaredField("minTree");
         minTreeField.setAccessible(true);
