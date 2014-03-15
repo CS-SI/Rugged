@@ -115,10 +115,18 @@ public interface Tile extends UpdatableTile {
         throws RuggedException;
 
     /** Interpolate elevation.
+     * <p>
+     * In order to cope with numerical accuracy issues when computing
+     * points at tile boundary, a slight tolerance (typically 1/8 pixel)
+     * around the tile is allowed. Elevation can therefore be interpolated
+     * (really extrapolated in this case) even for points slightly overshooting
+     * tile boundaries, using the closest tile pixel. Attempting to interpolate
+     * too far from the tile will trigger an exception.
+     * </p>
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return interpolated elevation
-     * @exception RuggedException if point does not lie within the tile
+     * @exception RuggedException if point is farthest from the tile than the tolerance
      */
     double interpolateElevation(double latitude, double longitude)
         throws RuggedException;

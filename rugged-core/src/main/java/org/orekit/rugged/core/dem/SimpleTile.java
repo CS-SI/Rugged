@@ -27,6 +27,9 @@ import org.orekit.rugged.api.RuggedMessages;
  */
 public class SimpleTile implements Tile {
 
+    /** Tolerance used to interpolate points slightly out of tile (in pixels). */
+    private static final double TOLERANCE = 1.0 / 8.0;
+
     /** Minimum latitude. */
     private double minLatitude;
 
@@ -183,17 +186,20 @@ public class SimpleTile implements Tile {
         return elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex];
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritDoc}
+     * <p>
+     * This classes uses an arbitrary 1/8 pixel tolerance for interpolating
+     * slightly out of tile points.
+     * </p>
+     */
     @Override
-    public double interpolateElevation(double latitude, double longitude)
+    public double interpolateElevation(final double latitude, final double longitude)
         throws RuggedException {
 
         final double doubleLatitudeIndex  = getDoubleLatitudeIndex(latitude);
         final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
-        final int    latitudeIndex        = (int) FastMath.floor(doubleLatitudeIndex);
-        final int    longitudeIndex       = (int) FastMath.floor(doubleLongitudeIndex);
-        if (latitudeIndex  < 0 || latitudeIndex  >= (latitudeRows - 2) ||
-            longitudeIndex < 0 || longitudeIndex >= (longitudeColumns - 2)) {
+        if (doubleLatitudeIndex  < -TOLERANCE || doubleLatitudeIndex  >= (latitudeRows - 1 + TOLERANCE) ||
+            doubleLongitudeIndex < -TOLERANCE || doubleLongitudeIndex >= (longitudeColumns - 1 + TOLERANCE)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES,
                                       FastMath.toDegrees(latitude),
                                       FastMath.toDegrees(longitude),
@@ -202,6 +208,13 @@ public class SimpleTile implements Tile {
                                       FastMath.toDegrees(getMinimumLongitude()),
                                       FastMath.toDegrees(getMaximumLongitude()));
         }
+
+        final int latitudeIndex  = FastMath.max(0,
+                                                FastMath.min(latitudeRows - 2,
+                                                             (int) FastMath.floor(doubleLatitudeIndex)));
+        final int longitudeIndex = FastMath.max(0,
+                                                FastMath.min(longitudeColumns - 2,
+                                                             (int) FastMath.floor(doubleLongitudeIndex)));
 
         // bi-linear interpolation
         final double dLat = doubleLatitudeIndex  - latitudeIndex;
