@@ -188,8 +188,8 @@ public class SimpleTile implements Tile {
     public double interpolateElevation(double latitude, double longitude)
         throws RuggedException {
 
-        final double doubleLatitudeIndex  = getLatitudeIndex(latitude);
-        final double doubleLongitudeIndex = getLontitudeIndex(longitude);
+        final double doubleLatitudeIndex  = getDoubleLatitudeIndex(latitude);
+        final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
         final int    latitudeIndex        = (int) FastMath.floor(doubleLatitudeIndex);
         final int    longitudeIndex       = (int) FastMath.floor(doubleLongitudeIndex);
         if (latitudeIndex  < 0 || latitudeIndex  >= (latitudeRows - 2) ||

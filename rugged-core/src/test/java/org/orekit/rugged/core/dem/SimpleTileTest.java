@@ -95,6 +95,19 @@ public class SimpleTileTest {
     }
 
     @Test
+    public void testInterpolation() throws RuggedException {
+        SimpleTile tile = new SimpleTileFactory().createTile();
+        tile.setGeometry(0.0, 0.0, 1.0, 1.0, 50, 50);
+        tile.setElevation(20, 14,  91.0);
+        tile.setElevation(20, 15, 210.0);
+        tile.setElevation(21, 14, 162.0);
+        tile.setElevation(21, 15,  95.0);
+        Assert.assertEquals(150.5, tile.interpolateElevation(20.0, 14.5), 1.0e-10);
+        Assert.assertEquals(128.5, tile.interpolateElevation(21.0, 14.5), 1.0e-10);
+        Assert.assertEquals(146.1, tile.interpolateElevation(20.2, 14.5), 1.0e-10);
+    }
+
+    @Test
     public void testOutOfBounds() throws RuggedException {
 
         SimpleTile tile = new SimpleTileFactory().createTile();
