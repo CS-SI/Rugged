@@ -155,6 +155,32 @@ public class MinMaxTreeTile extends SimpleTile {
 
     }
 
+    /** Get the row at which the two sub-tiles of level+1 were merged to give current level sub-tile.
+     * @param i row index of pixel in current sub-tile
+     * @param level tree level
+     * @return index of row at which higher level sub-tiles were merged
+     * (beware that this may be {@link #getLatitudeRows()} or more if the last row was not
+     * really merged because level+1 sub-tile was not complete)
+     */
+    public int getMergingRow(final int i, final int level) {
+        final int k        = start.length - level;
+        final int rowShift = k / 2;
+        return (i & (-1 << rowShift)) + (1 << (rowShift - 1));
+    }
+
+    /** Get the column at which the two sub-tiles of level+1 were merged to give current level sub-tile.
+     * @param j column index of pixel in current sub-tile
+     * @param level tree level
+     * @return index of column at which higher level sub-tiles were merged
+     * (beware that this may be {@link #getLongitudeColumns()} or more if the last columns was not
+     * really merged because level+1 sub-tile was not complete)
+     */
+    public int getMergingColumn(final int j, final int level) {
+        final int k        = start.length - level;
+        final int colShift = (k + 1) / 2;
+        return (j & (-1 << colShift)) + (1 << (colShift - 1));
+    }
+
     /** Check if the merging operation between level and level+1 is a column merging.
      * @param level level to check
      * @return true if the merging operation between level and level+1 is a column

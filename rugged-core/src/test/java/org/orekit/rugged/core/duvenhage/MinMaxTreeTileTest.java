@@ -186,6 +186,54 @@ public class MinMaxTreeTileTest {
         }
     }
 
+    @Test
+    public void testMergingRow() throws RuggedException {
+        for (int nbRows = 1; nbRows < 25; nbRows++) {
+            for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
+
+                MinMaxTreeTile tile = createTile(nbRows, nbColumns);
+
+                for (int i = 0; i < nbRows; i++) {
+                    for (int level = 0; level < tile.getLevels(); ++level) {
+                        int iMerge = tile.getMergingRow(i, level);
+                        if (iMerge < tile.getLatitudeRows()) {
+                            int levelUp = tile.isColumnMerging(level) ? level + 2 : level + 1;
+                            if (levelUp < tile.getLevels()) {
+                                int[] neighbors1 = neighbors(iMerge - 1, 0, nbRows, nbColumns, tile.getLevels() - levelUp);
+                                int[] neighbors2 = neighbors(iMerge,     0, nbRows, nbColumns, tile.getLevels() - levelUp);
+                                Assert.assertEquals(neighbors1[1], neighbors2[0]);
+                           }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testMergingColumn() throws RuggedException {
+        for (int nbRows = 1; nbRows < 25; nbRows++) {
+            for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
+
+                MinMaxTreeTile tile = createTile(nbRows, nbColumns);
+
+                for (int j = 0; j < nbColumns; j++) {
+                    for (int level = 0; level < tile.getLevels(); ++level) {
+                        int jMerge = tile.getMergingColumn(j, level);
+                        if (jMerge < tile.getLongitudeColumns()) {
+                            int levelUp = tile.isColumnMerging(level) ? level + 1 : level + 2;
+                            if (levelUp < tile.getLevels()) {
+                                int[] neighbors1 = neighbors(0, jMerge - 1, nbRows, nbColumns, tile.getLevels() - levelUp);
+                                int[] neighbors2 = neighbors(0, jMerge,     nbRows, nbColumns, tile.getLevels() - levelUp);
+                                Assert.assertEquals(neighbors1[3], neighbors2[2]);
+                           }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private int[] neighbors(int row, int column, int nbRows, int nbColumns, int stages) {
 
         // poor man identification of neighbors cells merged together with specified cell
