@@ -100,27 +100,47 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 // find where line-of-sight exit tile
                 final LimitPoint exit = findExit(tile, ellipsoid, position, los);
                 final Deque<GeodeticPoint> splitPointsQueue = new ArrayDeque<GeodeticPoint>();
-                splitPointsQueue.push(exit.getPoint());
+                splitPointsQueue.addFirst(exit.getPoint());
 
                 while (!splitPointsQueue.isEmpty()) {
 
-                    final GeodeticPoint next = splitPointsQueue.pop();
+                    final GeodeticPoint next = splitPointsQueue.removeFirst();
                     final int nextLatIndex   = tile.getLatitudeIndex(next.getLatitude());
                     final int nextLonIndex   = tile.getLontitudeIndex(next.getLongitude());
+                    if (currentLatIndex == nextLatIndex && currentLonIndex == nextLonIndex) {
 
-                    // find the largest level in the min/max kd-tree were entry and exit share a sub-tile
-                    int level = tile.getMergeLevel(currentLatIndex, currentLonIndex, nextLatIndex, nextLonIndex);
-                    if (level < 0) {
-                        // TODO: push intermediate points at sub-tiles boundaries on the queue
-                        throw RuggedException.createInternalError(null);
-                    }
+                        // we have narrowed the search down to a single Digital Elevation Model pixel
+                        if (next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex,     nextLonIndex)     ||
+                            next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex,     nextLonIndex + 1) ||
+                            next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex + 1, nextLonIndex)     ||
+                            next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex + 1, nextLonIndex + 1)) {
+                            // TODO: compute intersection
+                            throw RuggedException.createInternalError(null);
+                        } else {
+                            // no intersection on this pixel, we can proceed to next part of the line-of-sight
+                            current = next;
+                        }
 
-                    if (next.getAltitude() >= tile.getMaxElevation(nextLatIndex, nextLonIndex, level)) {
-                        // the line segment is fully above Digital Elevation Model
-                        // we can safely reject it and proceed to next part of the line-of-sight
-                        current = next;
                     } else {
-                        // TODO: split line-of-sight
+
+                        // find the largest level in the min/max kd-tree at which entry and exit share a sub-tile
+                        int level = tile.getMergeLevel(currentLatIndex, currentLonIndex, nextLatIndex, nextLonIndex);
+                        if (level < 0) {
+                            // TODO: push intermediate points at sub-tiles boundaries on the queue
+                            throw RuggedException.createInternalError(null);
+                        } else {
+                            if (next.getAltitude() >= tile.getMaxElevation(nextLatIndex, nextLonIndex, level)) {
+                                // the line-of-sight segment is fully above Digital Elevation Model
+                                // we can safely reject it and proceed to next part of the line-of-sight
+                                current = next;
+                            } else {
+                                // the line-of-sight segment has at least some undecided parts which may
+                                // intersect the Digital Elevation Model, we need to refine the
+                                // search by using a finer-grained level in the min/max kd-tree
+                                // TODO: split line-of-sight
+                            }
+                        }
+
                     }
 
                 }
