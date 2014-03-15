@@ -125,7 +125,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * @param i1 row index of first pixel
      * @param j1 column index of first pixel
      * @param i2 row index of second pixel
-     * @param j2 column index of sedonc pixel
+     * @param j2 column index of second pixel
      * @return largest level at which two pixels are merged in the same min/max sub-tile,
      * or negative if they are never merged in the same sub-tile
      * @see #getLevels()
@@ -161,12 +161,12 @@ public class MinMaxTreeTile extends SimpleTile {
      * rows or columns which are not powers of 2 or with one
      * dimension much larger than the other. As an example, starting
      * from a 107 ⨉ 19 array, we get the following 9 levels, for a
-     * total of 2187 elements in both trees:
+     * total of 2187 elements in each tree:
      * </p>
      * <p>
      * <table border="0">
      * <tr BGCOLOR="#EEEEFF"><font size="+1">
-     *     <td>Level</td>   <td>Dimension</td>  <td>Start index</td>  <td>End index</td></font></tr>
+     *     <td>Level</td>   <td>Dimension</td>  <td>Start index</td>  <td>End index (inclusive)</td></font></tr>
      * <tr>   <td>0</td>     <td>  7 ⨉  1</td>       <td>   0</td>        <td>  6</td> </tr>
      * <tr>   <td>1</td>     <td>  7 ⨉  2</td>       <td>   7</td>        <td> 20</td> </tr>
      * <tr>   <td>2</td>     <td> 14 ⨉  2</td>       <td>  21</td>        <td> 48</td> </tr>
