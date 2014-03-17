@@ -155,39 +155,49 @@ public class MinMaxTreeTile extends SimpleTile {
 
     }
 
-    /** Get the row at which the two sub-tiles of level+1 were merged to give current level sub-tile.
+    /** Get the row at which two sub-tiles at level l are merged to give one sub-tile at level l-1.
+     * <p>
+     * This method is expected to be called for levels for which {@link #isColumnMerging(int)
+     * isColumnMerging(level)} returns {@code false}. Calling it for other levels returns
+     * unspecified results.
+     * </p>
      * @param i row index of pixel in current sub-tile
-     * @param level tree level
+     * @param level tree level to be merged into a lower level
      * @return index of row at which higher level sub-tiles were merged
-     * (beware that this may be {@link #getLatitudeRows()} or more if the last row was not
-     * really merged because level+1 sub-tile was not complete)
+     * (beware that this may be {@link #getLatitudeRows()} or more if the last row is not
+     * really merged because only one pixel is available at this level)
      */
     public int getMergingRow(final int i, final int level) {
-        final int k        = start.length - level;
+        final int k        = start.length + 1 - level;
         final int rowShift = k / 2;
         return (i & (-1 << rowShift)) + (1 << (rowShift - 1));
     }
 
-    /** Get the column at which the two sub-tiles of level+1 were merged to give current level sub-tile.
+    /** Get the column at which two sub-tiles at level l are merged to give one sub-tile at level l-1.
+     * <p>
+     * This method is expected to be called for levels for which {@link #isColumnMerging(int)
+     * isColumnMerging(level)} returns {@code true}. Calling it for other levels returns
+     * unspecified results.
+     * </p>
      * @param j column index of pixel in current sub-tile
-     * @param level tree level
+     * @param level tree level to be merged into a lower level
      * @return index of column at which higher level sub-tiles were merged
-     * (beware that this may be {@link #getLongitudeColumns()} or more if the last columns was not
-     * really merged because level+1 sub-tile was not complete)
+     * (beware that this may be {@link #getLongitudeColumns()} or more if the last column is not
+     * really merged because only one pixel is available at this level)
      */
     public int getMergingColumn(final int j, final int level) {
-        final int k        = start.length - level;
+        final int k        = start.length + 1 - level;
         final int colShift = (k + 1) / 2;
         return (j & (-1 << colShift)) + (1 << (colShift - 1));
     }
 
-    /** Check if the merging operation between level and level+1 is a column merging.
+    /** Check if the merging operation between level and level-1 is a column merging.
      * @param level level to check
-     * @return true if the merging operation between level and level+1 is a column
+     * @return true if the merging operation between level and level-1 is a column
      * merging, false if is a row merging
      */
     public boolean isColumnMerging(final int level) {
-        return (level & 0x1) != (start.length & 0x1);
+        return (level & 0x1) == (start.length & 0x1);
     }
 
     /** Recursive setting of tree levels.
@@ -264,7 +274,7 @@ public class MinMaxTreeTile extends SimpleTile {
                                   final BivariateFunction f,
                                   final double[] base, final int first) {
 
-        if (isColumnMerging(level)) {
+        if (isColumnMerging(level + 1)) {
 
             // merge columns pairs
             int           iTree       = start[level];

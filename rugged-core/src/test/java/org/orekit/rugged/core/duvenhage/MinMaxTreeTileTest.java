@@ -22,8 +22,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.core.duvenhage.MinMaxTreeTile;
-import org.orekit.rugged.core.duvenhage.MinMaxTreeTileFactory;
 
 public class MinMaxTreeTileTest {
 
@@ -47,15 +45,15 @@ public class MinMaxTreeTileTest {
         Assert.assertEquals( 577, start[ 7]);
         Assert.assertEquals(1117, start[ 8]);
 
-        Assert.assertTrue(tile.isColumnMerging(8));
-        Assert.assertFalse(tile.isColumnMerging(7));
-        Assert.assertTrue(tile.isColumnMerging(6));
-        Assert.assertFalse(tile.isColumnMerging(5));
-        Assert.assertTrue(tile.isColumnMerging(4));
-        Assert.assertFalse(tile.isColumnMerging(3));
-        Assert.assertTrue(tile.isColumnMerging(2));
-        Assert.assertFalse(tile.isColumnMerging(1));
-        Assert.assertTrue(tile.isColumnMerging(0));
+        Assert.assertTrue(tile.isColumnMerging(9));
+        Assert.assertFalse(tile.isColumnMerging(8));
+        Assert.assertTrue(tile.isColumnMerging(7));
+        Assert.assertFalse(tile.isColumnMerging(6));
+        Assert.assertTrue(tile.isColumnMerging(5));
+        Assert.assertFalse(tile.isColumnMerging(4));
+        Assert.assertTrue(tile.isColumnMerging(3));
+        Assert.assertFalse(tile.isColumnMerging(2));
+        Assert.assertTrue(tile.isColumnMerging(1));
 
         Field minTreeField = MinMaxTreeTile.class.getDeclaredField("minTree");
         minTreeField.setAccessible(true);
@@ -81,10 +79,10 @@ public class MinMaxTreeTileTest {
         Assert.assertEquals( 6, start[ 2]);
         Assert.assertEquals(14, start[ 3]);
 
-        Assert.assertTrue(tile.isColumnMerging(3));
-        Assert.assertFalse(tile.isColumnMerging(2));
-        Assert.assertTrue(tile.isColumnMerging(1));
-        Assert.assertFalse(tile.isColumnMerging(0));
+        Assert.assertTrue(tile.isColumnMerging(4));
+        Assert.assertFalse(tile.isColumnMerging(3));
+        Assert.assertTrue(tile.isColumnMerging(2));
+        Assert.assertFalse(tile.isColumnMerging(1));
 
         Field minTreeField = MinMaxTreeTile.class.getDeclaredField("minTree");
         minTreeField.setAccessible(true);
@@ -195,14 +193,13 @@ public class MinMaxTreeTileTest {
 
                 for (int i = 0; i < nbRows; i++) {
                     for (int level = 0; level < tile.getLevels(); ++level) {
-                        int iMerge = tile.getMergingRow(i, level);
-                        if (iMerge < tile.getLatitudeRows()) {
-                            int levelUp = tile.isColumnMerging(level) ? level + 2 : level + 1;
-                            if (levelUp < tile.getLevels()) {
-                                int[] neighbors1 = neighbors(iMerge - 1, 0, nbRows, nbColumns, tile.getLevels() - levelUp);
-                                int[] neighbors2 = neighbors(iMerge,     0, nbRows, nbColumns, tile.getLevels() - levelUp);
+                        if (!tile.isColumnMerging(level)) {
+                            int iMerge = tile.getMergingRow(i, level);
+                            if (iMerge < tile.getLatitudeRows()) {
+                                int[] neighbors1 = neighbors(iMerge - 1, 0, nbRows, nbColumns, tile.getLevels() - level);
+                                int[] neighbors2 = neighbors(iMerge,     0, nbRows, nbColumns, tile.getLevels() - level);
                                 Assert.assertEquals(neighbors1[1], neighbors2[0]);
-                           }
+                            }
                         }
                     }
                 }
@@ -219,14 +216,13 @@ public class MinMaxTreeTileTest {
 
                 for (int j = 0; j < nbColumns; j++) {
                     for (int level = 0; level < tile.getLevels(); ++level) {
-                        int jMerge = tile.getMergingColumn(j, level);
-                        if (jMerge < tile.getLongitudeColumns()) {
-                            int levelUp = tile.isColumnMerging(level) ? level + 1 : level + 2;
-                            if (levelUp < tile.getLevels()) {
-                                int[] neighbors1 = neighbors(0, jMerge - 1, nbRows, nbColumns, tile.getLevels() - levelUp);
-                                int[] neighbors2 = neighbors(0, jMerge,     nbRows, nbColumns, tile.getLevels() - levelUp);
+                        if (tile.isColumnMerging(level)) {
+                            int jMerge = tile.getMergingColumn(j, level);
+                            if (jMerge < tile.getLongitudeColumns()) {
+                                int[] neighbors1 = neighbors(0, jMerge - 1, nbRows, nbColumns, tile.getLevels() - level);
+                                int[] neighbors2 = neighbors(0, jMerge,     nbRows, nbColumns, tile.getLevels() - level);
                                 Assert.assertEquals(neighbors1[3], neighbors2[2]);
-                           }
+                            }
                         }
                     }
                 }
