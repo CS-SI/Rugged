@@ -62,6 +62,10 @@ public class MinMaxTreeTileTest {
         maxTreeField.setAccessible(true);
         Assert.assertEquals(2187, ((double[]) maxTreeField.get(tile)).length);
 
+        for (int i = 0; i < tile.getLatitudeRows(); ++i) {
+            Assert.assertEquals(32 * (i / 32) + 16, tile.getMergingRow(i, 0));
+        }
+
     }
 
     @Test
