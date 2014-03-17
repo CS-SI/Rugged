@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.dem;
+package org.orekit.rugged.core.raster;
 
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
-import org.orekit.rugged.core.dem.SimpleTile;
-import org.orekit.rugged.core.dem.SimpleTileFactory;
-import org.orekit.rugged.core.dem.Tile;
-import org.orekit.rugged.core.dem.Tile.Location;
+import org.orekit.rugged.core.raster.SimpleTile;
+import org.orekit.rugged.core.raster.SimpleTileFactory;
+import org.orekit.rugged.core.raster.Tile;
+import org.orekit.rugged.core.raster.Tile.Location;
 
 public class SimpleTileTest {
 

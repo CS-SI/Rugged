@@ -14,19 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.dem;
+package org.orekit.rugged.core.raster;
 
-import org.orekit.rugged.core.dem.TileFactory;
+import org.orekit.rugged.core.raster.SimpleTile;
+import org.orekit.rugged.core.raster.SimpleTileFactory;
+import org.orekit.rugged.core.raster.TileFactory;
 
-/** Simple implementation of a {@link TileFactory} for {@link SimpleTile}.
- * @author Luc Maisonobe
- */
-public class SimpleTileFactory implements TileFactory<SimpleTile> {
+public class CountingFactory implements TileFactory<SimpleTile> {
 
-    /** {@inheritDoc} */
-    @Override
+    private int count;
+    private TileFactory<SimpleTile> rawFactory;
+
+    public CountingFactory() {
+        count = 0;
+        rawFactory = new SimpleTileFactory();
+    }
+
     public SimpleTile createTile() {
-        return new SimpleTile();
+        ++count;
+        return rawFactory.createTile();
+    }
+
+    public int getCount() {
+        return count;
     }
 
 }

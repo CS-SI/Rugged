@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.dem;
+package org.orekit.rugged.core.raster;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937a;
@@ -22,8 +22,8 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.core.dem.SimpleTile;
-import org.orekit.rugged.core.dem.TilesCache;
+import org.orekit.rugged.core.raster.SimpleTile;
+import org.orekit.rugged.core.raster.TilesCache;
 
 public class TilesCacheTest {
 

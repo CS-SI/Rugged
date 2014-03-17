@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.dem;
+package org.orekit.rugged.core.raster;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.dem.Tile.Location;
+import org.orekit.rugged.core.raster.Tile.Location;
 
 /** Cache for Digital Elevation Model {@link Tile tiles}.
  * <p>

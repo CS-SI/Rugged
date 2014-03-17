@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.dem;
+package org.orekit.rugged.core.raster;
 
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.api.RuggedException;

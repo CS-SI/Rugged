@@ -21,7 +21,7 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.dem.IntersectionAlgorithm;
+import org.orekit.rugged.core.raster.IntersectionAlgorithm;
 
 /** Intersection ignoring Digital Elevation Model.
  * <p>

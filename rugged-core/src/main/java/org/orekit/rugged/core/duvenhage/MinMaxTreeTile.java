@@ -19,8 +19,8 @@ package org.orekit.rugged.core.duvenhage;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.function.Max;
 import org.apache.commons.math3.analysis.function.Min;
-import org.orekit.rugged.core.dem.SimpleTile;
-import org.orekit.rugged.core.dem.Tile;
+import org.orekit.rugged.core.raster.SimpleTile;
+import org.orekit.rugged.core.raster.Tile;
 
 /** Simple implementation of a {@link Tile} with a min/max kd tree.
  * @see MinMaxTreeTileFactory
