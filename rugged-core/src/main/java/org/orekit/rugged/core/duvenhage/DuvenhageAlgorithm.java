@@ -99,12 +99,12 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                 // find where line-of-sight exit tile
                 final LimitPoint exit = findExit(tile, ellipsoid, position, los);
-                final Deque<GeodeticPoint> splitPointsQueue = new ArrayDeque<GeodeticPoint>();
-                splitPointsQueue.addFirst(exit.getPoint());
+                final Deque<GeodeticPoint> lineOfSightQueue = new ArrayDeque<GeodeticPoint>();
+                lineOfSightQueue.addFirst(exit.getPoint());
 
-                while (!splitPointsQueue.isEmpty()) {
+                while (!lineOfSightQueue.isEmpty()) {
 
-                    final GeodeticPoint next = splitPointsQueue.removeFirst();
+                    final GeodeticPoint next = lineOfSightQueue.removeFirst();
                     final int nextLatIndex   = tile.getLatitudeIndex(next.getLatitude());
                     final int nextLonIndex   = tile.getLontitudeIndex(next.getLongitude());
                     if (currentLatIndex == nextLatIndex && currentLonIndex == nextLonIndex) {
@@ -124,7 +124,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     } else {
 
                         // find the largest level in the min/max kd-tree at which entry and exit share a sub-tile
-                        int level = tile.getMergeLevel(currentLatIndex, currentLonIndex, nextLatIndex, nextLonIndex);
+                        final int level = tile.getMergeLevel(currentLatIndex, currentLonIndex, nextLatIndex, nextLonIndex);
                         if (level < 0) {
                             // TODO: push intermediate points at sub-tiles boundaries on the queue
                             throw RuggedException.createInternalError(null);
@@ -137,7 +137,35 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                 // the line-of-sight segment has at least some undecided parts which may
                                 // intersect the Digital Elevation Model, we need to refine the
                                 // search by using a finer-grained level in the min/max kd-tree
-                                // TODO: split line-of-sight
+
+                                // push the point back into the queue
+                                lineOfSightQueue.addFirst(next);
+
+                                // increase level to have a more fine-grained min/max raster
+                                // (we go closer to individual pixels, or un-merge the merged min/max)
+                                // this un-merging implies finding the boundary between sub-tiles that
+                                // are merged at level l and not merged at level l+1. This boundary is
+                                // an iso-latitude if the merge is a row merging and is an iso-longitude
+                                // if the merge is a column merging. We therefore first identify the
+                                // row/column corresponding to the merging, then find the intersection of
+                                // the line-of-sight with the iso-surface, then insert this new intermediate
+                                // point in the queue
+                                final Vector3D mergePoint;
+                                if (tile.isColumnMerging(level + 1)) {
+                                    final double longitudeMerge =
+                                            tile.getLongitudeAtIndex(tile.getMergingColumn(currentLonIndex, level + 1));
+                                    mergePoint = ellipsoid.pointAtLongitude(position, los, longitudeMerge);
+                                } else {
+                                    final double latitudeSplit =
+                                            tile.getLatitudeAtIndex(tile.getMergingRow(currentLatIndex, level + 1));
+                                    mergePoint = ellipsoid.pointAtLatitude(position, los, latitudeSplit);
+                                }
+
+                                // push the intermediate point at sub-tile split into the queue
+                                lineOfSightQueue.addFirst(ellipsoid.transform(mergePoint, ellipsoid.getBodyFrame(), null));
+
+                                // the current point remains the same
+
                             }
                         }
 
