@@ -108,25 +108,37 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public double getMinimumLatitude() {
-        return minLatitude;
+        return getLatitudeAtIndex(0);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getLatitudeAtIndex(final int latitudeIndex) {
+        return minLatitude + latitudeStep * latitudeIndex;
     }
 
     /** {@inheritDoc} */
     @Override
     public double getMaximumLatitude() {
-        return minLatitude + latitudeStep * (latitudeRows - 1);
+        return getLatitudeAtIndex(latitudeRows - 1);
     }
 
     /** {@inheritDoc} */
     @Override
     public double getMinimumLongitude() {
-        return minLongitude;
+        return getLongitudeAtIndex(0);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getLongitudeAtIndex(final int longitudeIndex) {
+        return minLongitude + longitudeStep * longitudeIndex;
     }
 
     /** {@inheritDoc} */
     @Override
     public double getMaximumLongitude() {
-        return minLongitude + longitudeStep * (longitudeColumns - 1);
+        return getLongitudeAtIndex(longitudeColumns - 1);
     }
 
     /** {@inheritDoc} */
@@ -242,7 +254,7 @@ public class SimpleTile implements Tile {
 
     /** Get the latitude index of a point.
      * @param latitude geodetic latitude
-     * @return latirute index (it may lie outside of the tile!)
+     * @return latitute index (it may lie outside of the tile!)
      */
     private double getDoubleLatitudeIndex(double latitude) {
         return (latitude  - minLatitude)  / latitudeStep;

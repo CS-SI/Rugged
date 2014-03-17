@@ -48,6 +48,12 @@ public interface Tile extends UpdatableTile {
      */
     double getMinimumLatitude();
 
+    /** Get the latitude at some index.
+     * @param latitudeIndex latitude index
+     * @return latitude at the specified index
+     */
+    double getLatitudeAtIndex(int latitudeIndex);
+
     /** Get maximum latitude.
      * @return maximum latitude
      */
@@ -57,6 +63,12 @@ public interface Tile extends UpdatableTile {
      * @return minimum longitude
      */
     double getMinimumLongitude();
+
+    /** Get the longitude at some index.
+     * @param longitudeIndex longitude index
+     * @return longitude at the specified index
+     */
+    double getLongitudeAtIndex(int longitudeIndex);
 
     /** Get maximum longitude.
      * @return maximum longitude
