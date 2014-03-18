@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
@@ -107,15 +108,14 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     final GeodeticPoint next = lineOfSightQueue.remove(lineOfSightQueue.size() - 1);
                     final int nextLatIndex   = tile.getLatitudeIndex(next.getLatitude());
                     final int nextLonIndex   = tile.getLontitudeIndex(next.getLongitude());
-                    if (currentLatIndex == nextLatIndex && currentLonIndex == nextLonIndex) {
+                    if (FastMath.abs(currentLatIndex - nextLatIndex) <= 1 &&
+                        FastMath.abs(currentLonIndex - nextLonIndex) <= 1) {
 
                         // we have narrowed the search down to a single Digital Elevation Model pixel
-                        if (next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex,     nextLonIndex)     ||
-                            next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex,     nextLonIndex + 1) ||
-                            next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex + 1, nextLonIndex)     ||
-                            next.getAltitude() <= tile.getElevationAtIndices(nextLatIndex + 1, nextLonIndex + 1)) {
-                            // TODO: compute intersection
-                            throw RuggedException.createInternalError(null);
+                        final GeodeticPoint intersection = pixelIntersection(ellipsoid, current, next,
+                                                                             tile, nextLatIndex, nextLonIndex);
+                        if (intersection != null) {
+                            return intersection;
                         } else {
                             // no intersection on this pixel, we can proceed to next part of the line-of-sight
                             current = next;
@@ -235,6 +235,42 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         return crossings;
 
+    }
+
+    /** Find the intersection of a line-of-sight and a Digital Elevation Model pixel.
+     * @param ellipsoid reference ellipsoid
+     * @param pA first point on the line (close to the pixel)
+     * @param pB second point on the line (close to the pixel)
+     * @param tile Digital Elevation Model tile
+     * @param latitudeIndex latitude index of the Digital Elevation Model pixel
+     * @param longitudeIndex longitude index of the Digital Elevation Model pixel
+     * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
+     * if it lies within the pixel, null otherwise
+     * @exception RuggedException if intersection point cannot be computed
+     * @exception OrekitException if intersection point cannot be converted to geodetic coordinates
+     */
+    private GeodeticPoint pixelIntersection(final ExtendedEllipsoid ellipsoid, final GeodeticPoint pA, final GeodeticPoint pB,
+                                            final MinMaxTreeTile tile, final int latitudeIndex, final int longitudeIndex)
+        throws RuggedException, OrekitException {
+
+        // Digital Elevation Mode coordinates at pixel vertices
+        final double x00 = tile.getLongitudeAtIndex(longitudeIndex);
+        final double y00 = tile.getLatitudeAtIndex(latitudeIndex);
+        final double z00 = tile.getElevationAtIndices(latitudeIndex,     longitudeIndex);
+        final double z01 = tile.getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
+        final double z10 = tile.getElevationAtIndices(latitudeIndex,     longitudeIndex + 1);
+        final double z11 = tile.getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
+
+        // line-of-sight coordinates at close points
+        final double dxA = (pA.getLongitude() - x00) / tile.getLongitudeStep();
+        final double dyA = (pA.getLatitude()  - y00) / tile.getLatitudeStep();
+        final double dzA = pA.getAltitude();
+        final double dxB = (pB.getLongitude() - x00) / tile.getLongitudeStep();
+        final double dyB = (pB.getLatitude()  - y00) / tile.getLatitudeStep();
+        final double dzB = pB.getAltitude();
+        
+        // TODO: compute intersection
+        return null;
     }
 
     /** Compute a line-of-sight exit point from a tile.
