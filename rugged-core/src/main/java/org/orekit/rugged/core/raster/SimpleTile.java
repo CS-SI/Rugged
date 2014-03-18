@@ -232,11 +232,11 @@ public class SimpleTile implements Tile {
         final double dLat = doubleLatitudeIndex  - latitudeIndex;
         final double dLon = doubleLongitudeIndex - longitudeIndex;
         final double e00  = getElevationAtIndices(latitudeIndex,     longitudeIndex);
-        final double e01  = getElevationAtIndices(latitudeIndex,     longitudeIndex + 1);
-        final double e10  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
+        final double e10  = getElevationAtIndices(latitudeIndex,     longitudeIndex + 1);
+        final double e01  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
         final double e11  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
-        return (e00 * (1.0 - dLon) + dLon * e01) * (1.0 - dLat) +
-               (e10 * (1.0 - dLon) + dLon * e11) * dLat;
+        return (e00 * (1.0 - dLon) + dLon * e10) * (1.0 - dLat) +
+               (e01 * (1.0 - dLon) + dLon * e11) * dLat;
 
     }
 
