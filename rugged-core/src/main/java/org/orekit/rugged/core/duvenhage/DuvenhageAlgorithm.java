@@ -16,8 +16,8 @@
  */
 package org.orekit.rugged.core.duvenhage;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
@@ -99,12 +99,12 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                 // find where line-of-sight exit tile
                 final LimitPoint exit = findExit(tile, ellipsoid, position, los);
-                final Deque<GeodeticPoint> lineOfSightQueue = new ArrayDeque<GeodeticPoint>();
-                lineOfSightQueue.addFirst(exit.getPoint());
+                final List<GeodeticPoint> lineOfSightQueue = new ArrayList<GeodeticPoint>();
+                lineOfSightQueue.add(exit.getPoint());
 
                 while (!lineOfSightQueue.isEmpty()) {
 
-                    final GeodeticPoint next = lineOfSightQueue.removeFirst();
+                    final GeodeticPoint next = lineOfSightQueue.remove(lineOfSightQueue.size() - 1);
                     final int nextLatIndex   = tile.getLatitudeIndex(next.getLatitude());
                     final int nextLonIndex   = tile.getLontitudeIndex(next.getLongitude());
                     if (currentLatIndex == nextLatIndex && currentLonIndex == nextLonIndex) {
@@ -123,11 +123,15 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                     } else {
 
-                        // find the largest level in the min/max kd-tree at which entry and exit share a sub-tile
+                        // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile
                         final int level = tile.getMergeLevel(currentLatIndex, currentLonIndex, nextLatIndex, nextLonIndex);
                         if (level < 0) {
-                            // TODO: push intermediate points at sub-tiles boundaries on the queue
-                            throw RuggedException.createInternalError(null);
+                            // introduce all intermediate points corresponding to the line-of-sight
+                            // intersecting the boundary between level 0 sub-tiles
+                            lineOfSightQueue.addAll(crossingPoints(ellipsoid, position, los,
+                                                                   tile, 0,
+                                                                   nextLatIndex, nextLonIndex,
+                                                                   currentLatIndex, currentLonIndex));
                         } else {
                             if (next.getAltitude() >= tile.getMaxElevation(nextLatIndex, nextLonIndex, level)) {
                                 // the line-of-sight segment is fully above Digital Elevation Model
@@ -139,30 +143,15 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                 // search by using a finer-grained level in the min/max kd-tree
 
                                 // push the point back into the queue
-                                lineOfSightQueue.addFirst(next);
+                                lineOfSightQueue.add(next);
 
-                                // increase level to have a more fine-grained min/max raster
-                                // (we go closer to individual pixels, or un-merge the merged min/max)
-                                // this un-merging implies finding the boundary between sub-tiles that
-                                // are merged at level l and not merged at level l+1. This boundary is
-                                // an iso-latitude if the merge is a row merging and is an iso-longitude
-                                // if the merge is a column merging. We therefore first identify the
-                                // row/column corresponding to the merging, then find the intersection of
-                                // the line-of-sight with the iso-surface, then insert this new intermediate
-                                // point in the queue
-                                final Vector3D mergePoint;
-                                if (tile.isColumnMerging(level + 1)) {
-                                    final double longitudeMerge =
-                                            tile.getLongitudeAtIndex(tile.getMergingColumn(currentLonIndex, level + 1));
-                                    mergePoint = ellipsoid.pointAtLongitude(position, los, longitudeMerge);
-                                } else {
-                                    final double latitudeSplit =
-                                            tile.getLatitudeAtIndex(tile.getMergingRow(currentLatIndex, level + 1));
-                                    mergePoint = ellipsoid.pointAtLatitude(position, los, latitudeSplit);
-                                }
-
-                                // push the intermediate point at sub-tile split into the queue
-                                lineOfSightQueue.addFirst(ellipsoid.transform(mergePoint, ellipsoid.getBodyFrame(), null));
+                                // introduce all intermediate points corresponding to the line-of-sight
+                                // intersecting the boundary between finer sub-tiles as we go deeper
+                                // in the tree
+                                lineOfSightQueue.addAll(crossingPoints(ellipsoid, position, los,
+                                                                       tile, level,
+                                                                       nextLatIndex, nextLonIndex,
+                                                                       currentLatIndex, currentLonIndex));
 
                                 // the current point remains the same
 
@@ -196,6 +185,56 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+    }
+
+    /** Find the crossing points between sub-tiles.
+     * <p>
+     * When we go deeper in the min/max kd-tree, we get closer to individual pixels,
+     * or un-merge the merged sub-tiles. This un-merging implies finding the boundary
+     * between sub-tiles that are merged at level l and not merged at level l+1.
+     * This boundary is an iso-latitude if the merge is a row merging and is an
+     * iso-longitude if the merge is a column merging.
+     * </p>
+     * @param ellipsoid reference ellipsoid
+     * @param position pixel position in ellipsoid frame
+     * @param los pixel line-of-sight in ellipsoid frame
+     * @param tile Digital Elevation Model tile
+     * @param level merged level
+     * @param nextLatitude latitude index of next point (closer to Earth)
+     * @param nextLongitude longitude index of next point (closer to Earth)
+     * @param currentLatitude latitude index of current point (closer to satellite)
+     * @param currentLongitude longitude index of current point (closer to satellite)
+     * @return point corresponding to line-of-sight crossing the longitude/latitude
+     * limit between the un-merged sub-tiles at level-1
+     * @exception RuggedException if intersection point cannot be computed
+     * @exception OrekitException if intersection point cannot be converted to geodetic coordinates
+     */
+    private List<GeodeticPoint> crossingPoints(final ExtendedEllipsoid ellipsoid, final Vector3D position, final Vector3D los,
+                                               final MinMaxTreeTile tile, final int level,
+                                               final int nextLatitude, final int nextLongitude,
+                                               final int currentLatitude, final int currentLongitude)
+        throws RuggedException, OrekitException {
+
+        final List<GeodeticPoint> crossings = new ArrayList<GeodeticPoint>();
+
+        if (tile.isColumnMerging(level + 1)) {
+            // sub-tiles at current level come from column merging at deeper level
+            for (final int longitudeIndex : tile.getCrossedBoundaryColumns(nextLongitude, currentLongitude, level)) {
+                final double crossingLongitude = tile.getLongitudeAtIndex(longitudeIndex);
+                final Vector3D crossingPoint   = ellipsoid.pointAtLongitude(position, los, crossingLongitude);
+                crossings.add(ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
+            }
+        } else {
+            // sub-tiles at current level come from row merging at deeper level
+            for (final int latitudeIndex : tile.getCrossedBoundaryRows(nextLatitude, currentLatitude, level)) {
+                final double crossingLatitude = tile.getLatitudeAtIndex(latitudeIndex);
+                final Vector3D crossingPoint   = ellipsoid.pointAtLatitude(position, los, crossingLatitude);
+                crossings.add(ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
+            }
+        }
+
+        return crossings;
+
     }
 
     /** Compute a line-of-sight exit point from a tile.

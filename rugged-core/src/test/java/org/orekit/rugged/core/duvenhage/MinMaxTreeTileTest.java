@@ -62,10 +62,6 @@ public class MinMaxTreeTileTest {
         maxTreeField.setAccessible(true);
         Assert.assertEquals(2187, ((double[]) maxTreeField.get(tile)).length);
 
-        for (int i = 0; i < tile.getLatitudeRows(); ++i) {
-            Assert.assertEquals(32 * (i / 32) + 16, tile.getMergingRow(i, 0));
-        }
-
     }
 
     @Test
@@ -189,43 +185,40 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testMergingRow() throws RuggedException {
+    public void testSubTilesLimits() throws RuggedException {
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
 
                 MinMaxTreeTile tile = createTile(nbRows, nbColumns);
 
-                for (int i = 0; i < nbRows; i++) {
-                    for (int level = 0; level < tile.getLevels(); ++level) {
-                        if (!tile.isColumnMerging(level)) {
-                            int iMerge = tile.getMergingRow(i, level);
-                            if (iMerge < tile.getLatitudeRows()) {
-                                int[] neighbors1 = neighbors(iMerge - 1, 0, nbRows, nbColumns, tile.getLevels() - level);
-                                int[] neighbors2 = neighbors(iMerge,     0, nbRows, nbColumns, tile.getLevels() - level);
+                for (int level = 0; level < tile.getLevels(); ++level) {
+                    for (int i1 = 0; i1 < nbRows; ++i1) {
+                        for (int i2 = 0; i2 < nbRows; ++i2) {
+                            int[] crossings = tile.getCrossedBoundaryRows(i1, i2, level);
+                            if (FastMath.abs(i2 - i1) < 2) {
+                                Assert.assertEquals(0, crossings.length);
+                            }
+                            for (int crossed : crossings) {
+                                Assert.assertNotEquals(i1, crossed);
+                                Assert.assertNotEquals(i2, crossed);
+                                int[] neighbors1 = neighbors(crossed - 1, 0, nbRows, nbColumns, tile.getLevels() - level);
+                                int[] neighbors2 = neighbors(crossed,     0, nbRows, nbColumns, tile.getLevels() - level);
                                 Assert.assertEquals(neighbors1[1], neighbors2[0]);
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testMergingColumn() throws RuggedException {
-        for (int nbRows = 1; nbRows < 25; nbRows++) {
-            for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
-
-                MinMaxTreeTile tile = createTile(nbRows, nbColumns);
-
-                for (int j = 0; j < nbColumns; j++) {
-                    for (int level = 0; level < tile.getLevels(); ++level) {
-                        if (tile.isColumnMerging(level)) {
-                            int jMerge = tile.getMergingColumn(j, level);
-                            if (jMerge < tile.getLongitudeColumns()) {
-                                int[] neighbors1 = neighbors(0, jMerge - 1, nbRows, nbColumns, tile.getLevels() - level);
-                                int[] neighbors2 = neighbors(0, jMerge,     nbRows, nbColumns, tile.getLevels() - level);
-                                Assert.assertEquals(neighbors1[3], neighbors2[2]);
+                        for (int j1 = 0; j1 < nbColumns; ++j1) {
+                            for (int j2 = 0; j2 < nbColumns; ++j2) {
+                                int[] crossings = tile.getCrossedBoundaryColumns(j1, j2, level);
+                                if (FastMath.abs(j2 - j1) < 2) {
+                                    Assert.assertEquals(0, crossings.length);
+                                }
+                                for (int crossed : crossings) {
+                                    Assert.assertNotEquals(j1, crossed);
+                                    Assert.assertNotEquals(j2, crossed);
+                                    int[] neighbors1 = neighbors(0, crossed - 1, nbRows, nbColumns, tile.getLevels() - level);
+                                    int[] neighbors2 = neighbors(0, crossed,     nbRows, nbColumns, tile.getLevels() - level);
+                                    Assert.assertEquals(neighbors1[3], neighbors2[2]);
+                                }
                             }
                         }
                     }

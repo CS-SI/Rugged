@@ -19,10 +19,57 @@ package org.orekit.rugged.core.duvenhage;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.function.Max;
 import org.apache.commons.math3.analysis.function.Min;
+import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.core.raster.SimpleTile;
 import org.orekit.rugged.core.raster.Tile;
 
 /** Simple implementation of a {@link Tile} with a min/max kd tree.
+ * <p>
+ * A n level min/max kd-tree contains sub-tiles merging individual pixels
+ * together from coarse-grained (at level 0) to fine-grained (at level n-1).
+ * Level n-1, which is the deepest one, is computed from the raw pixels by
+ * merging adjacent pixels pairs columns (i.e. pixels at indices (i, 2j)
+ * and (i, 2j+1) are merged together by computing and storing the minimum
+ * and maxium in a sub-tile. Level n-1 therefore has the same number of rows
+ * but half the number of columns of the raw tile, and its sub-tiles are
+ * 1 pixel high and 2 pixels wide. Level n-2 is computed from level n-1 by
+ * merging sub-tiles rows. Level n-2 therefore has half the number of rows
+ * and half the number of columns of the raw tile, and its sub-tiles are
+ * 2 pixels high and 2 pixels wide. Level n-3 is again computed by merging
+ * columns, level n-4 merging rows and so on. As depth decreases, the number
+ * of sub-tiles decreases and their size increase. Level 0 is reached when
+ * there is only either one row or one column of large sub-tiles.
+ * </p>
+ * <p>
+ * During the merging process, if at some stage there is an odd number of
+ * rows or columns, then the last sub-tile at next level will not be computed
+ * by merging two rows/columns from the current level, but instead computed by
+ * simply copying the last single row/column. The process is therefore well
+ * defined for any raw tile initial dimensions. A direct consequence is that
+ * the dimension of the sub-tiles in the last row or column may be smaller than
+ * the dimension of regular sub-tiles.
+ * </p>
+ * <p>
+ * If we consider for example a tall 107 ⨉ 19 raw tile, the min/max kd-tree will
+ * have 9 levels:
+ * </p>
+ * <p>
+ * <table border="0">
+ * <tr BGCOLOR="#EEEEFF"><font size="+1">
+ *             <td>Level</td>         <td>Number of sub-tiles</td>    <td>Regular sub-tiles dimension</td></font></tr>
+ * <tr>  <td align="center">8</td>  <td align="center">107 ⨉ 10</td>       <td align="center"> 1 ⨉   2</td> 
+ * <tr>  <td align="center">7</td>  <td align="center"> 54 ⨉ 10</td>       <td align="center"> 2 ⨉   2</td> 
+ * <tr>  <td align="center">6</td>  <td align="center"> 54 ⨉  5</td>        <td align="center"> 2 ⨉  4</td>
+ * <tr>  <td align="center">5</td>  <td align="center"> 27 ⨉  5</td>        <td align="center"> 4 ⨉  4</td>
+ * <tr>  <td align="center">4</td>  <td align="center"> 27 ⨉  3</td>        <td align="center"> 4 ⨉  8</td>
+ * <tr>  <td align="center">3</td>  <td align="center"> 14 ⨉  3</td>        <td align="center"> 8 ⨉  8</td>
+ * <tr>  <td align="center">2</td>  <td align="center"> 14 ⨉  2</td>        <td align="center"> 8 ⨉ 16</td>
+ * <tr>  <td align="center">1</td>  <td align="center">  7 ⨉  2</td>        <td align="center">16 ⨉ 16</td>
+ * <tr>  <td align="center">0</td>  <td align="center">  7 ⨉  1</td>        <td align="center">16 ⨉ 32</td>
+ * </table>
+ * </p>
+
+ * </p>
  * @see MinMaxTreeTileFactory
  * @author Luc Maisonobe
  */
@@ -121,13 +168,13 @@ public class MinMaxTreeTile extends SimpleTile {
 
     }
 
-    /** Get the largest level at which two pixels are merged in the same min/max sub-tile.
+    /** Get the deepest level at which two pixels are merged in the same min/max sub-tile.
      * @param i1 row index of first pixel
      * @param j1 column index of first pixel
      * @param i2 row index of second pixel
      * @param j2 column index of second pixel
-     * @return largest level at which two pixels are merged in the same min/max sub-tile,
-     * or negative if they are never merged in the same sub-tile
+     * @return deepest level at which two pixels are merged in the same min/max sub-tile,
+     * or -1 if they are never merged in the same sub-tile
      * @see #getLevels()
      * @see #getMinElevation(int, int, int)
      * @see #getMaxElevation(int, int, int)
@@ -155,40 +202,76 @@ public class MinMaxTreeTile extends SimpleTile {
 
     }
 
-    /** Get the row at which two sub-tiles at level l are merged to give one sub-tile at level l-1.
+    /** Get the index of sub-tiles start rows crossed.
      * <p>
-     * This method is expected to be called for levels for which {@link #isColumnMerging(int)
-     * isColumnMerging(level)} returns {@code false}. Calling it for other levels returns
-     * unspecified results.
+     * When going from one row to another row at some tree level,
+     * we cross sub-tiles boundaries. This method returns the index
+     * of these boundaries.
      * </p>
-     * @param i row index of pixel in current sub-tile
-     * @param level tree level to be merged into a lower level
-     * @return index of row at which higher level sub-tiles were merged
-     * (beware that this may be {@link #getLatitudeRows()} or more if the last row is not
-     * really merged because only one pixel is available at this level)
+     * @param row1 starting row
+     * @param row2 ending row
+     * @param level tree level
+     * @return indices of rows crossed at sub-tiles boundaries, in crossing order,
+     * excluding the start and end rows themselves even if they are at a sub-tile boundary
      */
-    public int getMergingRow(final int i, final int level) {
-        final int k        = start.length + 1 - level;
-        final int rowShift = k / 2;
-        return (i & (-1 << rowShift)) + (1 << (rowShift - 1));
+    public int[] getCrossedBoundaryRows(final int row1, final int row2, final int level) {
+
+        // number of rows in each sub-tile
+        final int rows  = 1 << ((start.length - level) / 2);
+
+        if (row1 <= row2) {
+            return buildCrossings(rows * (row1 / rows + 1), row2, rows);
+        } else {
+            return buildCrossings(rows * ((row1 - 1) / rows), row2, -rows);
+        }
+
     }
 
-    /** Get the column at which two sub-tiles at level l are merged to give one sub-tile at level l-1.
+    /** Get the index of sub-tiles start columns crossed.
      * <p>
-     * This method is expected to be called for levels for which {@link #isColumnMerging(int)
-     * isColumnMerging(level)} returns {@code true}. Calling it for other levels returns
-     * unspecified results.
+     * When going from one column to another column at some tree level,
+     * we cross sub-tiles boundaries. This method returns the index
+     * of these boundaries.
      * </p>
-     * @param j column index of pixel in current sub-tile
-     * @param level tree level to be merged into a lower level
-     * @return index of column at which higher level sub-tiles were merged
-     * (beware that this may be {@link #getLongitudeColumns()} or more if the last column is not
-     * really merged because only one pixel is available at this level)
+     * @param column1 starting column
+     * @param column2 ending column
+     * @param level tree level
+     * @return indices of columns crossed at sub-tiles boundaries, in crossing order
+     * excluding the start and end columns themselves even if they are at a sub-tile boundary
      */
-    public int getMergingColumn(final int j, final int level) {
-        final int k        = start.length + 1 - level;
-        final int colShift = (k + 1) / 2;
-        return (j & (-1 << colShift)) + (1 << (colShift - 1));
+    public int[] getCrossedBoundaryColumns(final int column1, final int column2, final int level) {
+
+        // number of columns in each sub-tile
+        final int columns  = 1 << ((start.length + 1 - level) / 2);;
+
+        if (column1 <= column2) {
+            return buildCrossings(columns * (column1 / columns + 1), column2,  columns);
+        } else {
+            return buildCrossings(columns * ((column1 - 1) / columns), column2, -columns);
+        }
+
+    }
+
+    /** Build crossings arrays.
+     * @param begin begin crossing index
+     * @param end end crossing index (excluded, if equal to begin, the array is empty)
+     * @param step crossing step (may be negative)
+     * @return indices of rows or columns crossed at sub-tiles boundaries, in crossing order
+     */
+    private int[] buildCrossings(final int begin, final int end, final int step) {
+
+        // allocate array
+        final int[] crossings = new int[FastMath.max(0, (end - begin) / step)];
+
+        // fill it up
+        int crossing = begin;
+        for (int i = 0; i < crossings.length; ++i) {
+            crossings[i] = crossing;
+            crossing    += step;
+        }
+
+        return crossings;
+
     }
 
     /** Check if the merging operation between level and level-1 is a column merging.
