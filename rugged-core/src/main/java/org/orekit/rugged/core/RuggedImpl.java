@@ -184,15 +184,18 @@ public class RuggedImpl implements Rugged {
     }
 
     /** Select time scale Orekit data.
-     * @param orekitDataDir top directory for Orekit data
+     * @param orekitDataDir top directory for Orekit data (if null, Orekit has already been configured)
      * @return utc time scale
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
     private TimeScale selectTimeScale(final File orekitDataDir)
         throws OrekitException {
 
-        // set up Orekit data
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitDataDir));
+        if (orekitDataDir != null) {
+            // set up Orekit data
+            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitDataDir));
+        }
+
         return TimeScalesFactory.getUTC();
 
     }
