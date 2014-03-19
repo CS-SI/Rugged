@@ -164,6 +164,13 @@ public class RuggedImpl implements Rugged {
         }
     }
 
+    /** Get the reference date.
+     * @return reference date
+     */
+    public AbsoluteDate getReferenceDate() {
+        return referenceDate;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setUpTilesManagement(TileUpdater updater, int maxCachedTiles) {
