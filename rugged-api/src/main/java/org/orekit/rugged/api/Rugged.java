@@ -41,7 +41,32 @@ public interface Rugged {
 
     /** Enumerate for Digital Elevation Model intersection. */
     enum Algorithm {
-        DUVENHAGE, IGNORE_DEM
+
+        /** Fast algorithm due to Bernardt Duvenhage.
+         * <p>
+         * The algorithm is described in the 2009 paper:
+         * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
+         * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
+         * </p>
+         */
+        DUVENHAGE,
+
+        /** Basic, <em>very slow</em> algorithm, designed only for tests and validation purposes.
+         * <p>
+         * The algorithm simply computes entry and exit points at high and low altitudes,
+         * and scans all Digital Elevation Models in the sub-tiles defined by these two
+         * corner points. It is not designed for operational use.
+         * </p>
+         */
+        BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY,
+
+        /** Dummy algorithm that simply ignores the Digital Elevation Model.
+         * <p>
+         * Intersections are computed only with respect to the reference ellipsoid.
+         * </p>
+         */
+        IGNORE_DEM_USE_ELLIPSOID
+
     }
 
     /** Set up general context.

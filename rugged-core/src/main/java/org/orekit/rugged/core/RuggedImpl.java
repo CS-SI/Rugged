@@ -339,6 +339,10 @@ public class RuggedImpl implements Rugged {
         switch (algorithm) {
             case DUVENHAGE :
                 return new DuvenhageAlgorithm();
+            case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
+                return new BasicScanAlgorithm();
+            case IGNORE_DEM_USE_ELLIPSOID :
+                return new IgnoreDEMAlgorithm();
             default :
                 // this should never happen
                 throw RuggedException.createInternalError(null);
