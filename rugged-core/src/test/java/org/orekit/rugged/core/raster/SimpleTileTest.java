@@ -19,6 +19,7 @@ package org.orekit.rugged.core.raster;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.core.raster.SimpleTile;
@@ -37,6 +38,8 @@ public class SimpleTileTest {
         Assert.assertEquals(0, tile.getLongitudeStep(), 1.0e-10);
         Assert.assertEquals(0, tile.getLatitudeRows());
         Assert.assertEquals(0, tile.getLongitudeColumns());
+        Assert.assertEquals(0, tile.getMinElevation(), 1.0e-10);
+        Assert.assertEquals(0, tile.getMaxElevation(), 1.0e-10);
     }
 
     @Test
@@ -70,6 +73,7 @@ public class SimpleTileTest {
                 tile.setElevation(i, j, 1000 * i + j);
             }
         }
+        tile.tileUpdateCompleted();
 
         Assert.assertEquals(1.0, tile.getMinimumLatitude(), 1.0e-10);
         Assert.assertEquals(2.0, tile.getMinimumLongitude(), 1.0e-10);
@@ -77,6 +81,8 @@ public class SimpleTileTest {
         Assert.assertEquals(0.2, tile.getLongitudeStep(), 1.0e-10);
         Assert.assertEquals(100, tile.getLatitudeRows());
         Assert.assertEquals(200, tile.getLongitudeColumns());
+        Assert.assertEquals(0.0, tile.getMinElevation(), 1.0e-10);
+        Assert.assertEquals(99199.0, tile.getMaxElevation(), 1.0e-10);
 
         Assert.assertEquals(Location.SOUTH_WEST, tile.getLocation( 0.0,  1.0));
         Assert.assertEquals(Location.WEST,       tile.getLocation( 6.0,  1.0));
@@ -101,6 +107,7 @@ public class SimpleTileTest {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
         tile.setElevation(50, 100, 1000.0);
+        tile.tileUpdateCompleted();
         checkOutOfBound( -1, 100, tile);
         checkOutOfBound(100, 100, tile);
         checkOutOfBound( 50,  -1, tile);
@@ -127,6 +134,7 @@ public class SimpleTileTest {
         tile.setElevation(20, 15, 210.0);
         tile.setElevation(21, 14, 162.0);
         tile.setElevation(21, 15,  95.0);
+        tile.tileUpdateCompleted();
         Assert.assertEquals(150.5, tile.interpolateElevation(20.0, 14.5), 1.0e-10);
         Assert.assertEquals(128.5, tile.interpolateElevation(21.0, 14.5), 1.0e-10);
         Assert.assertEquals(146.1, tile.interpolateElevation(20.2, 14.5), 1.0e-10);
@@ -140,6 +148,7 @@ public class SimpleTileTest {
         tile.setElevation(0, 1, 210.0);
         tile.setElevation(1, 0, 162.0);
         tile.setElevation(1, 1,  95.0);
+        tile.tileUpdateCompleted();
         // the following points are 1/16 pixel out of tile
         Assert.assertEquals(151.875, tile.interpolateElevation(-0.0625,  0.5),    1.0e-10);
         Assert.assertEquals(127.125, tile.interpolateElevation( 1.0625,  0.5),    1.0e-10);
@@ -155,11 +164,91 @@ public class SimpleTileTest {
         tile.setElevation(0, 1, 210.0);
         tile.setElevation(1, 0, 162.0);
         tile.setElevation(1, 1,  95.0);
+        tile.tileUpdateCompleted();
         // the following points are 3/16 pixel out of tile
         checkOutOfBound(-0.1875,  0.5,    tile);
         checkOutOfBound( 1.1875,  0.5,    tile);
         checkOutOfBound( 0.5,    -0.1875, tile);
         checkOutOfBound( 0.5,     1.1875, tile);
+    }
+
+    @Test
+    public void testPixelIntersection() throws RuggedException {
+        SimpleTile tile = new SimpleTileFactory().createTile();
+        tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
+        tile.setElevation(20, 14,  91.0);
+        tile.setElevation(20, 15, 210.0);
+        tile.setElevation(21, 14, 162.0);
+        tile.setElevation(21, 15,  95.0);
+        tile.tileUpdateCompleted();
+        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
+                                              tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
+                                              300.0);
+        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
+                                              tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
+                                              10.0);
+        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, gpB, 20, 14);
+        checkInLine(gpA, gpB, gpIAB);
+        checkOnTile(tile, gpIAB);
+        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, gpA, 20, 14);
+        checkInLine(gpA, gpB, gpIBA);
+        checkOnTile(tile, gpIBA);
+
+        Assert.assertEquals(gpIAB.getLatitude(),  gpIBA.getLatitude(),  1.0e-10);
+        Assert.assertEquals(gpIAB.getLongitude(), gpIBA.getLongitude(), 1.0e-10);
+        Assert.assertEquals(gpIAB.getAltitude(),  gpIBA.getAltitude(),  1.0e-10);
+
+    }
+
+    @Test
+    public void testPixelIntersection2Solutions() throws RuggedException {
+        SimpleTile tile = new SimpleTileFactory().createTile();
+        tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
+        tile.setElevation(20, 14,  91.0);
+        tile.setElevation(20, 15, 210.0);
+        tile.setElevation(21, 14, 162.0);
+        tile.setElevation(21, 15,  95.0);
+        tile.tileUpdateCompleted();
+        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
+                                              tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
+                                              120.0);
+        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
+                                              tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
+                                              130.0);
+
+        // the line from gpA to gpB should traverse the DEM twice within the tile
+        // we use the points in the two different orders to retrieve both solutions
+        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, gpB, 20, 14);
+        checkInLine(gpA, gpB, gpIAB);
+        checkOnTile(tile, gpIAB);
+        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, gpA, 20, 14);
+        checkInLine(gpA, gpB, gpIBA);
+        checkOnTile(tile, gpIBA);
+
+        // the two solutions are different
+        Assert.assertEquals(120.231, gpIAB.getAltitude(), 1.0e-3);
+        Assert.assertEquals(130.081, gpIBA.getAltitude(), 1.0e-3);
+
+    }
+
+    @Test
+    public void testPixelIntersectionNoSolutions() throws RuggedException {
+        SimpleTile tile = new SimpleTileFactory().createTile();
+        tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
+        tile.setElevation(20, 14,  91.0);
+        tile.setElevation(20, 15, 210.0);
+        tile.setElevation(21, 14, 162.0);
+        tile.setElevation(21, 15,  95.0);
+        tile.tileUpdateCompleted();
+        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
+                                              tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
+                                              180.0);
+        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
+                                              tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
+                                              190.0);
+
+        Assert.assertNull(tile.pixelIntersection(gpA, gpB, 20, 14));
+
     }
 
     private void checkOutOfBound(double latitude, double longitude, Tile tile) {
@@ -186,6 +275,27 @@ public class SimpleTileTest {
                                 ((Double) re.getParts()[5]).doubleValue(),
                                 1.0e-10);
         }
+    }
+
+    private void checkInLine(GeodeticPoint gpA, GeodeticPoint gpB, GeodeticPoint gpI) {
+
+        double t = (gpI.getAltitude() - gpA.getAltitude()) / (gpB.getAltitude() - gpA.getAltitude());
+
+        Assert.assertEquals(gpI.getLatitude(),
+                            gpA.getLatitude() * (1 - t) + gpB.getLatitude() * t,
+                            1.0e-10);
+
+        Assert.assertEquals(gpI.getLongitude(),
+                            gpA.getLongitude() * (1 - t) + gpB.getLongitude() * t,
+                            1.0e-10);
+
+    }
+
+    private void checkOnTile(Tile tile, GeodeticPoint gpI)
+        throws RuggedException {
+        Assert.assertEquals(gpI.getAltitude(),
+                            tile.interpolateElevation(gpI.getLatitude(), gpI.getLongitude()),
+                            1.0e-10);
     }
 
 }

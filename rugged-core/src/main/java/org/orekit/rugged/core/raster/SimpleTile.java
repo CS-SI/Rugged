@@ -17,6 +17,7 @@
 package org.orekit.rugged.core.raster;
 
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 
@@ -242,13 +243,100 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
+    public GeodeticPoint pixelIntersection(final GeodeticPoint pA, final GeodeticPoint pB,
+                                           final int latitudeIndex, final int longitudeIndex)
+        throws RuggedException {
+
+        // Digital Elevation Mode coordinates at pixel vertices
+        final double x00 = getLongitudeAtIndex(longitudeIndex);
+        final double y00 = getLatitudeAtIndex(latitudeIndex);
+        final double z00 = getElevationAtIndices(latitudeIndex,     longitudeIndex);
+        final double z01 = getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
+        final double z10 = getElevationAtIndices(latitudeIndex,     longitudeIndex + 1);
+        final double z11 = getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
+
+        // line-of-sight coordinates at close points
+        final double dxA = (pA.getLongitude() - x00) / longitudeStep;
+        final double dyA = (pA.getLatitude()  - y00) / latitudeStep;
+        final double dzA = pA.getAltitude();
+        final double dxB = (pB.getLongitude() - x00) / longitudeStep;
+        final double dyB = (pB.getLatitude()  - y00) / latitudeStep;
+        final double dzB = pB.getAltitude();
+        
+        // points along line-of-sight can be defined as a linear combination
+        // between pA and pB depending on free variable t: p(t) = pA * (1 - t) + pB * t.
+        // As the point latitude and longitude are linear with respect to t,
+        // and as Digital Elevation Model is quadratic with respect to latitude
+        // and longitude, the altitude of DEM at same horizontal position as
+        // point is quadratic in t:
+        // z_DEM(t) = u t² + v t + w
+        final double u = (dxA - dxB) * (dyA - dyB) * (z00 - z10 - z01 + z11);
+        final double v = ((dxA - dxB) * (1 - dyA) + (dyA - dyB) * (1 - dxA)) * z00 +
+                         (dxA * (dyA - dyB) - (dxA - dxB) * (1 - dyA)) * z10 +
+                         (dyA * (dxA - dxB) - (dyA - dyB) * (1 - dxA)) * z01 +
+                         ((dxB - dxA) * dyA + (dyB - dyA) * dxA) * z11;
+        final double w = (1 - dxA) * ((1 - dyA) * z00 + dyA * z01) +
+                         dxA       * ((1 - dyA) * z10 + dyA * z11);
+
+        // subtract linear z from line-of-sight
+        // z_DEM(t) - z_LOS(t) = a t² + b t + c
+        final double a = u;
+        final double b = v + dzA - dzB;
+        final double c = w - dzA;
+
+        // solve the quadratic equation
+        final double b2  = b * b;
+        final double fac = 4 * a * c;
+        if (b2 < fac) {
+            // no intersection at all
+            return null;
+        }
+        final double s  = FastMath.sqrt(b2 - fac);
+        final double t1 = (b < 0) ? (s - b) / (2 * a) : -2 * c / (b + s);
+        final double t2 = c / (a * t1);
+
+        final double dx1 = dxA  * (1 - t1) + dxB  * t1;
+        final double dy1 = dyA  * (1 - t1) + dyB  * t1;
+        final GeodeticPoint p1;
+        if (dx1 >= 0 && dx1 <= 1 && dy1 >= 0 && dy1 <= 1) {
+            p1 = new GeodeticPoint(pA.getLatitude()  * (1 - t1) + pB.getLatitude()  * t1,
+                                   pA.getLongitude() * (1 - t1) + pB.getLongitude() * t1,
+                                   pA.getAltitude()  * (1 - t1) + pB.getAltitude()  * t1);
+        } else {
+            p1    = null;
+        }
+
+        final double dx2 = dxA  * (1 - t2) + dxB  * t2;
+        final double dy2 = dyA  * (1 - t2) + dyB  * t2;
+        final GeodeticPoint p2;
+        if (dx2 >= 0 && dx2 <= 1 && dy2 >= 0 && dy2 <= 1) {
+            p2 = new GeodeticPoint(pA.getLatitude()  * (1 - t2) + pB.getLatitude()  * t2,
+                                   pA.getLongitude() * (1 - t2) + pB.getLongitude() * t2,
+                                   pA.getAltitude()  * (1 - t2) + pB.getAltitude()  * t2);
+        } else {
+            p2    = null;
+        }
+
+        // select the first point along line-of-sight
+        if (p1 == null) {
+            return p2;
+        } else if (p2 == null) {
+            return p1;
+        } else {
+            return t1 <= t2 ? p1 : p2;
+        }
+
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public int getLatitudeIndex(double latitude) {
         return (int) FastMath.floor(getDoubleLatitudeIndex(latitude));
     }
 
     /** {@inheritDoc} */
     @Override
-    public int getLontitudeIndex(double longitude) {
+    public int getLongitudeIndex(double longitude) {
         return (int) FastMath.floor(getDoubleLontitudeIndex(longitude));
     }
 
@@ -272,7 +360,7 @@ public class SimpleTile implements Tile {
     @Override
     public Location getLocation(final double latitude, final double longitude) {
         final int latitudeIndex  = getLatitudeIndex(latitude);
-        final int longitudeIndex = getLontitudeIndex(longitude);
+        final int longitudeIndex = getLongitudeIndex(longitude);
         if (longitudeIndex < 0) {
             if (latitudeIndex < 0) {
                 return Location.SOUTH_WEST;

@@ -112,7 +112,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                         // we have narrowed the search down to a single Digital Elevation Model pixel
                         final GeodeticPoint intersection =
-                                tile.pixelIntersection(ellipsoid, current, next, nextLatIndex, nextLonIndex);
+                                tile.pixelIntersection(current, next, nextLatIndex, nextLonIndex);
                         if (intersection != null) {
                             return intersection;
                         } else {

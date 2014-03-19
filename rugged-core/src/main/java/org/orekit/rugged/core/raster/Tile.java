@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.core.raster;
 
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.UpdatableTile;
 
@@ -105,7 +106,7 @@ public interface Tile extends UpdatableTile {
      * @param longitude geodetic latitude
      * @return longitude index (it may lie outside of the tile!)
      */
-    int getLontitudeIndex(double longitude);
+    int getLongitudeIndex(double longitude);
 
     /** Get the minimum elevation in the tile.
      * @return minimum elevation in the tile
@@ -141,6 +142,20 @@ public interface Tile extends UpdatableTile {
      * @exception RuggedException if point is farthest from the tile than the tolerance
      */
     double interpolateElevation(double latitude, double longitude)
+        throws RuggedException;
+
+    /** Find the intersection of a line-of-sight and a Digital Elevation Model pixel.
+     * @param pA first point on the line (closer to satellite)
+     * @param pB second point on the line (closer to ground)
+     * @param latitudeIndex latitude index of the Digital Elevation Model pixel
+     * @param longitudeIndex longitude index of the Digital Elevation Model pixel
+     * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
+     * if it lies within the pixel, null otherwise
+     * @exception RuggedException if intersection point cannot be computed
+     * @exception OrekitException if intersection point cannot be converted to geodetic coordinates
+     */
+    GeodeticPoint pixelIntersection(GeodeticPoint pA, GeodeticPoint pB,
+                                    int latitudeIndex, int longitudeIndex)
         throws RuggedException;
 
     /** Check if a tile covers a ground point.
