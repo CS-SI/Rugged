@@ -28,8 +28,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.NadirPointing;
+import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
@@ -41,6 +43,7 @@ import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.CircularOrbit;
+import org.orekit.orbits.Orbit;
 import org.orekit.orbits.OrbitType;
 import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
@@ -50,6 +53,8 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.SatellitePV;
 import org.orekit.rugged.api.SatelliteQ;
+import org.orekit.rugged.core.raster.CliffsElevationUpdater;
+import org.orekit.rugged.core.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;
@@ -126,7 +131,10 @@ public class RuggedImplTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        Propagator propagator = createPropagator();
+        BodyShape  earth                                  = createEarth();
+        NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
+        Orbit      orbit                                  = createOrbit(gravityField);
+        Propagator propagator                             = createPropagator(earth, gravityField, orbit);
 
         RuggedImpl rugged = new RuggedImpl();
         rugged.setGeneralContext(null,
@@ -141,10 +149,73 @@ public class RuggedImplTest {
 
     }
 
-   private Propagator createPropagator()
-       throws OrekitException {
+    @Test
+    public void testMayonVolcano()
+        throws RuggedException, OrekitException, URISyntaxException {
 
-       // the following orbital parameters have been computed using
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        BodyShape  earth                                  = createEarth();
+        NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
+        Orbit      orbit                                  = createOrbit(gravityField);
+        Propagator propagator                             = createPropagator(earth, gravityField, orbit);
+
+        // Mayon Volcano location according to Wikipedia: 13°15′24″N 123°41′6″E
+        GeodeticPoint summit =
+                new GeodeticPoint(FastMath.toRadians(13.25667), FastMath.toRadians(123.685), 2463.0);
+        VolcanicConeElevationUpdater updater =
+                new VolcanicConeElevationUpdater(summit,
+                                                 FastMath.toRadians(30.0), 16.0,
+                                                 FastMath.toRadians(1.0), 1201);
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-06T02:27:16.139", TimeScalesFactory.getUTC());
+
+        // TODO: test the direct localization
+
+    }
+
+    @Test
+    public void testCliffsOfMoher()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth                                  = createEarth();
+        NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
+        Orbit      orbit                                  = createOrbit(gravityField);
+        Propagator propagator                             = createPropagator(earth, gravityField, orbit);
+
+        // cliffs of Moher location according to Wikipedia: 52°56′10″N 9°28′15″ W
+        GeodeticPoint north = new GeodeticPoint(FastMath.toRadians(52.9984),
+                                                FastMath.toRadians(-9.4072),
+                                                120.0);
+        GeodeticPoint south = new GeodeticPoint(FastMath.toRadians(52.9625),
+                                                FastMath.toRadians(-9.4369),
+                                                120.0);
+        CliffsElevationUpdater updater = new CliffsElevationUpdater(north, south,
+                                                                    120.0, 0.0,
+                                                                    FastMath.toRadians(1.0), 1201);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:50:05.778", TimeScalesFactory.getUTC());
+
+        // TODO: test the direct localization
+
+    }
+
+    private BodyShape createEarth()
+       throws OrekitException {
+        return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                               Constants.WGS84_EARTH_FLATTENING,
+                                               FramesFactory.getITRF(IERSConventions.IERS_2010, true));
+    }
+
+    private NormalizedSphericalHarmonicsProvider createGravityField()
+        throws OrekitException {
+        return GravityFieldFactory.getNormalizedProvider(12, 12);
+    }
+
+    private Orbit createOrbit(NormalizedSphericalHarmonicsProvider gravityField)
+        throws OrekitException {
+        // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
         //
         //  orbit.date                          = 2012-01-01T00:00:00.000
@@ -156,21 +227,26 @@ public class RuggedImplTest {
         //  gravity.field.degree                = 12
         //  gravity.field.order                 = 12
         AbsoluteDate date = new AbsoluteDate("2012-01-01T00:00:00.000", TimeScalesFactory.getUTC());
-        NormalizedSphericalHarmonicsProvider gravityField = GravityFieldFactory.getNormalizedProvider(12, 12);
         Frame eme2000 = FramesFactory.getEME2000();
-        Frame itrf    = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-        CircularOrbit orbit = new CircularOrbit(7173352.811913891,
-                                                -4.029194321683225E-4, 0.0013530362644647786,
-                                                FastMath.toRadians(98.63218182243709),
-                                                FastMath.toRadians(77.55565567747836),
-                                                FastMath.PI, PositionAngle.TRUE,
-                                                eme2000, date, gravityField.getMu());
+        return new CircularOrbit(7173352.811913891,
+                                 -4.029194321683225E-4, 0.0013530362644647786,
+                                 FastMath.toRadians(98.63218182243709),
+                                 FastMath.toRadians(77.55565567747836),
+                                 FastMath.PI, PositionAngle.TRUE,
+                                 eme2000, date, gravityField.getMu());
+    }
 
-        BodyShape earth = new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                               Constants.WGS84_EARTH_FLATTENING,
-                                               itrf);
-        AttitudeProvider provider = new NadirPointing(earth);
-        SpacecraftState state = new SpacecraftState(orbit, provider.getAttitude(orbit, date, orbit.getFrame()), 1180.0);
+    private Propagator createPropagator(BodyShape earth,
+                                        NormalizedSphericalHarmonicsProvider gravityField,
+                                        Orbit orbit)
+        throws OrekitException {
+
+        AttitudeProvider yawCompensation = new YawCompensation(new NadirPointing(earth));
+        SpacecraftState state = new SpacecraftState(orbit,
+                                                    yawCompensation.getAttitude(orbit,
+                                                                                orbit.getDate(),
+                                                                                orbit.getFrame()),
+                                                    1180.0);
 
         // numerical model for improving orbit
         OrbitType type = OrbitType.CIRCULAR;
@@ -181,14 +257,15 @@ public class RuggedImplTest {
                                                tolerances[0], tolerances[1]);
         integrator.setInitialStepSize(1.0e-2 * orbit.getKeplerianPeriod());
         NumericalPropagator numericalPropagator = new NumericalPropagator(integrator);
-        numericalPropagator.addForceModel(new HolmesFeatherstoneAttractionModel(itrf, gravityField));
+        numericalPropagator.addForceModel(new HolmesFeatherstoneAttractionModel(earth.getBodyFrame(), gravityField));
         numericalPropagator.addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getSun()));
         numericalPropagator.addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getMoon()));
         numericalPropagator.setOrbitType(type);
         numericalPropagator.setInitialState(state);
-        numericalPropagator.setAttitudeProvider(provider);
+        numericalPropagator.setAttitudeProvider(yawCompensation);
         return numericalPropagator;
 
     }
 
 }
+
