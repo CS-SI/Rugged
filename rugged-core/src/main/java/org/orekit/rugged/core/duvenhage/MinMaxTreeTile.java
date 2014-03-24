@@ -220,9 +220,11 @@ public class MinMaxTreeTile extends SimpleTile {
         final int rows  = 1 << ((start.length - level) / 2);
 
         if (row1 <= row2) {
-            return buildCrossings(rows * (row1 / rows + 1), row2, rows);
+            final int nextMultiple = row1 + rows - (row1 % rows);
+            return buildCrossings(nextMultiple, row2, rows);
         } else {
-            return buildCrossings(rows * ((row1 - 1) / rows), row2, -rows);
+            final int previousMultiple = row1 - 1 - ((row1 - 1) % rows);
+            return buildCrossings(previousMultiple, row2, -rows);
         }
 
     }
@@ -245,9 +247,11 @@ public class MinMaxTreeTile extends SimpleTile {
         final int columns  = 1 << ((start.length + 1 - level) / 2);;
 
         if (column1 <= column2) {
-            return buildCrossings(columns * (column1 / columns + 1), column2,  columns);
+            final int nextMultiple = column1 + columns - (column1 % columns);
+            return buildCrossings(nextMultiple, column2,  columns);
         } else {
-            return buildCrossings(columns * ((column1 - 1) / columns), column2, -columns);
+            final int previousMultiple = column1 - 1 - ((column1 - 1) % columns);
+            return buildCrossings(previousMultiple, column2, -columns);
         }
 
     }
@@ -261,7 +265,8 @@ public class MinMaxTreeTile extends SimpleTile {
     private int[] buildCrossings(final int begin, final int end, final int step) {
 
         // allocate array
-        final int[] crossings = new int[FastMath.max(0, (end - begin) / step)];
+        final int n = FastMath.max(0, (end - begin + step + ((step > 0) ? -1 : +1)) / step);
+        final int[] crossings = new int[n];
 
         // fill it up
         int crossing = begin;

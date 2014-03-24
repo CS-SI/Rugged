@@ -192,34 +192,24 @@ public class MinMaxTreeTileTest {
                 MinMaxTreeTile tile = createTile(nbRows, nbColumns);
 
                 for (int level = 0; level < tile.getLevels(); ++level) {
+                    int[] neighbors = neighbors(0, 0, nbRows, nbColumns, tile.getLevels() - level);
+                    int subTileRows = neighbors[1] - neighbors[0];
+                    int subTileCols = neighbors[3] - neighbors[2];
                     for (int i1 = 0; i1 < nbRows; ++i1) {
                         for (int i2 = 0; i2 < nbRows; ++i2) {
                             int[] crossings = tile.getCrossedBoundaryRows(i1, i2, level);
-                            if (FastMath.abs(i2 - i1) < 2) {
-                                Assert.assertEquals(0, crossings.length);
-                            }
-                            for (int crossed : crossings) {
-                                Assert.assertNotEquals(i1, crossed);
-                                Assert.assertNotEquals(i2, crossed);
-                                int[] neighbors1 = neighbors(crossed - 1, 0, nbRows, nbColumns, tile.getLevels() - level);
-                                int[] neighbors2 = neighbors(crossed,     0, nbRows, nbColumns, tile.getLevels() - level);
-                                Assert.assertEquals(neighbors1[1], neighbors2[0]);
-                            }
+                            int[] ref       = multiples(i1, i2, subTileRows);
+                            Assert.assertArrayEquals(ref, crossings);
                         }
-                        for (int j1 = 0; j1 < nbColumns; ++j1) {
-                            for (int j2 = 0; j2 < nbColumns; ++j2) {
-                                int[] crossings = tile.getCrossedBoundaryColumns(j1, j2, level);
-                                if (FastMath.abs(j2 - j1) < 2) {
-                                    Assert.assertEquals(0, crossings.length);
-                                }
-                                for (int crossed : crossings) {
-                                    Assert.assertNotEquals(j1, crossed);
-                                    Assert.assertNotEquals(j2, crossed);
-                                    int[] neighbors1 = neighbors(0, crossed - 1, nbRows, nbColumns, tile.getLevels() - level);
-                                    int[] neighbors2 = neighbors(0, crossed,     nbRows, nbColumns, tile.getLevels() - level);
-                                    Assert.assertEquals(neighbors1[3], neighbors2[2]);
-                                }
+                    }
+                    for (int j1 = 0; j1 < nbColumns; ++j1) {
+                        for (int j2 = 0; j2 < nbColumns; ++j2) {
+                            int[] crossings = tile.getCrossedBoundaryColumns(j1, j2, level);
+                            int[] ref       = multiples(j1, j2, subTileCols);
+                            if (ref.length != crossings.length) {
+                                crossings = tile.getCrossedBoundaryColumns(j1, j2, level);
                             }
+                            Assert.assertArrayEquals(ref, crossings);
                         }
                     }
                 }
@@ -257,6 +247,41 @@ public class MinMaxTreeTileTest {
             rMin, FastMath.min(rMin + rN, nbRows),
             cMin, FastMath.min(cMin + cN, nbColumns)
         };
+
+    }
+
+    private int[] multiples(int k1, int k2, int n) {
+
+        // poor man identification of rows/columns crossings
+        // this identification is intentionally independent of the MinMaxTreeTile class,
+        // for testing purposes
+
+        // intentionally dumb way of counting multiples of n
+        int count = 0;
+        for (int k = FastMath.min(k1, k2) + 1; k < FastMath.max(k1, k2); ++k) {
+            if (k % n == 0) {
+                ++count;
+            }
+        }
+
+        int[] multiples = new int[count];
+        int index = 0;
+        for (int k = FastMath.min(k1, k2) + 1; k < FastMath.max(k1, k2); ++k) {
+            if (k % n == 0) {
+                multiples[index++] = k;
+            }
+        }
+
+        if (k1 > k2) {
+            // revert the array
+            for (int i = 0; i < count / 2; ++i) {
+                int tmp = multiples[i];
+                multiples[i] = multiples[count - 1 - i];
+                multiples[count - 1 - i] = tmp;
+            }
+        }
+
+        return multiples;
 
     }
 
