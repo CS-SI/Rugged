@@ -58,8 +58,8 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     @Override
     public void setUpTilesManagement(final TileUpdater updater, final int maxCachedTiles) {
         cache = new TilesCache<SimpleTile>(new SimpleTileFactory(), updater, maxCachedTiles);
-        hMin  = 0;
-        hMax  = 0;
+        hMin  = Double.POSITIVE_INFINITY;
+        hMax  = Double.NEGATIVE_INFINITY;
     }
 
     /** {@inheritDoc} */
@@ -81,12 +81,12 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
                 scannedTiles.clear();
                 // compute entry and exit points
-                entryPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, hMin),
+                entryPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMin) ? 0.0 : hMin),
                                                  ellipsoid.getBodyFrame(), null);
                 final SimpleTile entryTile = cache.getTile(entryPoint.getLatitude(), entryPoint.getLongitude());
                 addIfNotPresent(scannedTiles, entryTile);
 
-                exitPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, hMax),
+                exitPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMax) ? 0.0 : hMax),
                                                 ellipsoid.getBodyFrame(), null);
                 final SimpleTile exitTile = cache.getTile(exitPoint.getLatitude(), exitPoint.getLongitude());
                 addIfNotPresent(scannedTiles, entryTile);
@@ -120,7 +120,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
                     for (int j = longitudeIndex(tile, minLongitude); j < longitudeIndex(tile, maxLongitude); ++j) {
                         GeodeticPoint gp = tile.pixelIntersection(entryPoint, exitPoint, i, j);
                         if (gp != null) {
-                            final Vector3D point = ellipsoid.transform(intersectionGP);
+                            final Vector3D point = ellipsoid.transform(gp);
                             final double dot = Vector3D.dotProduct(point.subtract(position), los);
                             if (dot < intersectionDot) {
                                 intersectionGP  = gp;
@@ -156,7 +156,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
             }
 
             // check maximum altitude
-            if (tile.getMaxElevation() < hMax) {
+            if (tile.getMaxElevation() > hMax) {
                 hMax          = tile.getMaxElevation();
                 changedMinMax = true;
             }
