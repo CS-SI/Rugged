@@ -209,10 +209,9 @@ public class MinMaxTreeTile extends SimpleTile {
      * of these boundaries.
      * </p>
      * @param row1 starting row
-     * @param row2 ending row
+     * @param row2 ending row (excluded)
      * @param level tree level
-     * @return indices of rows crossed at sub-tiles boundaries, in crossing order,
-     * excluding the start and end rows themselves even if they are at a sub-tile boundary
+     * @return indices of rows crossed at sub-tiles boundaries, in crossing order
      */
     public int[] getCrossedBoundaryRows(final int row1, final int row2, final int level) {
 
@@ -220,11 +219,11 @@ public class MinMaxTreeTile extends SimpleTile {
         final int rows  = 1 << ((start.length - level) / 2);
 
         if (row1 <= row2) {
-            final int nextMultiple = row1 + rows - (row1 % rows);
-            return buildCrossings(nextMultiple, row2, rows);
+            return buildCrossings((row1 + rows - 1) - ((row1 + rows - 1) % rows),
+                                  row2, rows);
         } else {
-            final int previousMultiple = row1 - 1 - ((row1 - 1) % rows);
-            return buildCrossings(previousMultiple, row2, -rows);
+            return buildCrossings(row1 -(row1 % rows),
+                                  row2, -rows);
         }
 
     }
@@ -236,10 +235,9 @@ public class MinMaxTreeTile extends SimpleTile {
      * of these boundaries.
      * </p>
      * @param column1 starting column
-     * @param column2 ending column
+     * @param column2 ending column (excluded)
      * @param level tree level
      * @return indices of columns crossed at sub-tiles boundaries, in crossing order
-     * excluding the start and end columns themselves even if they are at a sub-tile boundary
      */
     public int[] getCrossedBoundaryColumns(final int column1, final int column2, final int level) {
 
@@ -247,11 +245,11 @@ public class MinMaxTreeTile extends SimpleTile {
         final int columns  = 1 << ((start.length + 1 - level) / 2);;
 
         if (column1 <= column2) {
-            final int nextMultiple = column1 + columns - (column1 % columns);
-            return buildCrossings(nextMultiple, column2,  columns);
+            return buildCrossings((column1 + columns - 1) - ((column1 + columns - 1) % columns),
+                                  column2,  columns);
         } else {
-            final int previousMultiple = column1 - 1 - ((column1 - 1) % columns);
-            return buildCrossings(previousMultiple, column2, -columns);
+            return buildCrossings(column1 - (column1 % columns),
+                                  column2, -columns);
         }
 
     }

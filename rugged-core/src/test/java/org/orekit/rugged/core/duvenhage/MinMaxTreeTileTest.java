@@ -206,9 +206,6 @@ public class MinMaxTreeTileTest {
                         for (int j2 = 0; j2 < nbColumns; ++j2) {
                             int[] crossings = tile.getCrossedBoundaryColumns(j1, j2, level);
                             int[] ref       = multiples(j1, j2, subTileCols);
-                            if (ref.length != crossings.length) {
-                                crossings = tile.getCrossedBoundaryColumns(j1, j2, level);
-                            }
                             Assert.assertArrayEquals(ref, crossings);
                         }
                     }
@@ -257,8 +254,10 @@ public class MinMaxTreeTileTest {
         // for testing purposes
 
         // intentionally dumb way of counting multiples of n
+        int kS = (k1 <= k2) ? k1 : (k2 + 1);
+        int kE = (k1 <= k2) ? k2 : (k1 + 1);
         int count = 0;
-        for (int k = FastMath.min(k1, k2) + 1; k < FastMath.max(k1, k2); ++k) {
+        for (int k = kS; k < kE; ++k) {
             if (k % n == 0) {
                 ++count;
             }
@@ -266,7 +265,7 @@ public class MinMaxTreeTileTest {
 
         int[] multiples = new int[count];
         int index = 0;
-        for (int k = FastMath.min(k1, k2) + 1; k < FastMath.max(k1, k2); ++k) {
+        for (int k = kS; k < kE; ++k) {
             if (k % n == 0) {
                 multiples[index++] = k;
             }

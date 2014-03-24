@@ -16,9 +16,6 @@
  */
 package org.orekit.rugged.core.duvenhage;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
@@ -94,89 +91,42 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             // loop along the path
             while (true) {
 
-                int currentLatIndex = tile.getLatitudeIndex(current.getLatitude());
-                int currentLonIndex = tile.getLongitudeIndex(current.getLongitude());
-
                 // find where line-of-sight exit tile
                 final LimitPoint exit = findExit(tile, ellipsoid, position, los);
-                final List<GeodeticPoint> lineOfSightQueue = new ArrayList<GeodeticPoint>();
-                lineOfSightQueue.add(exit.getPoint());
 
-                while (!lineOfSightQueue.isEmpty()) {
+                final GeodeticPoint intersection =
+                        recurseIntersection(ellipsoid, position, los, tile,
+                                            current,
+                                            tile.getLatitudeIndex(current.getLatitude()),
+                                            tile.getLongitudeIndex(current.getLongitude()),
+                                            exit.getPoint(),
+                                            tile.getLatitudeIndex(exit.getPoint().getLatitude()),
+                                            tile.getLongitudeIndex(exit.getPoint().getLongitude()));
 
-                    final GeodeticPoint next = lineOfSightQueue.remove(lineOfSightQueue.size() - 1);
-                    final int nextLatIndex   = tile.getLatitudeIndex(next.getLatitude());
-                    final int nextLonIndex   = tile.getLongitudeIndex(next.getLongitude());
-                    if (FastMath.abs(currentLatIndex - nextLatIndex) <= 1 &&
-                        FastMath.abs(currentLonIndex - nextLonIndex) <= 1) {
+                if (intersection != null) {
+                    // we have found the intersection
+                    return intersection;
+                } else if (exit.atSide()) {
+                    // no intersection on this tile, we can proceed to next part of the line-of-sight
 
-                        // we have narrowed the search down to a single Digital Elevation Model pixel
-                        final GeodeticPoint intersection =
-                                tile.pixelIntersection(current, next, nextLatIndex, nextLonIndex);
-                        if (intersection != null) {
-                            return intersection;
-                        } else {
-                            // no intersection on this pixel, we can proceed to next part of the line-of-sight
-                            current = next;
-                        }
+                    // select next tile after current point
+                    final Vector3D forward = new Vector3D(1.0, ellipsoid.transform(exit.getPoint()), STEP, los);
+                    current = ellipsoid.transform(forward, ellipsoid.getBodyFrame(), null);
+                    tile = cache.getTile(current.getLatitude(), current.getLongitude());
 
-                    } else {
-
-                        // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile
-                        final int level = tile.getMergeLevel(currentLatIndex, currentLonIndex, nextLatIndex, nextLonIndex);
-                        if (level < 0) {
-                            // introduce all intermediate points corresponding to the line-of-sight
-                            // intersecting the boundary between level 0 sub-tiles
-                            lineOfSightQueue.addAll(crossingPoints(ellipsoid, position, los,
-                                                                   tile, 0,
-                                                                   currentLatIndex, currentLonIndex,
-                                                                   nextLatIndex, nextLonIndex));
-                        } else {
-                            if (next.getAltitude() >= tile.getMaxElevation(nextLatIndex, nextLonIndex, level)) {
-                                // the line-of-sight segment is fully above Digital Elevation Model
-                                // we can safely reject it and proceed to next part of the line-of-sight
-                                current = next;
-                            } else {
-                                // the line-of-sight segment has at least some undecided parts which may
-                                // intersect the Digital Elevation Model, we need to refine the
-                                // search by using a finer-grained level in the min/max kd-tree
-
-                                // push the point back into the queue
-                                lineOfSightQueue.add(next);
-
-                                // introduce all intermediate points corresponding to the line-of-sight
-                                // intersecting the boundary between finer sub-tiles as we go deeper
-                                // in the tree
-                                lineOfSightQueue.addAll(crossingPoints(ellipsoid, position, los,
-                                                                       tile, level,
-                                                                       currentLatIndex, currentLonIndex,
-                                                                       nextLatIndex, nextLonIndex));
-
-                                // the current point remains the same
-
-                            }
-                        }
-
+                    if (tile.interpolateElevation(current.getLatitude(), current.getLongitude()) <= current.getAltitude()) {
+                        // extremely rare case! The line-of-sight traversed the Digital Elevation Model
+                        // during the very short forward step we used to move to next tile
+                        // we consider this point to be OK
+                        return current;
                     }
 
-                }
-
-                if (!exit.atSide()) {
+                } else {
                     // this should never happen
                     // we should have left the loop with an intersection point
                     throw RuggedException.createInternalError(null);                    
                 }
 
-                // select next tile after current point
-                final Vector3D forward = new Vector3D(1.0, ellipsoid.transform(current), STEP, los);
-                current = ellipsoid.transform(forward, ellipsoid.getBodyFrame(), null);
-                tile = cache.getTile(current.getLatitude(), current.getLongitude());
-                if (tile.interpolateElevation(current.getLatitude(), current.getLongitude()) <= current.getAltitude()) {
-                    // extremely rare case! The line-of-sight traversed the Digital Elevation Model
-                    // during the very short forward step we used to move to next tile
-                    // we consider this point to be OK
-                    return current;
-                }
 
             }
 
@@ -186,53 +136,110 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         }
     }
 
-    /** Find the crossing points between sub-tiles.
-     * <p>
-     * When we go deeper in the min/max kd-tree, we get closer to individual pixels,
-     * or un-merge the merged sub-tiles. This un-merging implies finding the boundaries
-     * between sub-tiles that are merged at level l and not merged at level l+1.
-     * These boundaries are iso-latitude if the merge is a rows merging and are
-     * iso-longitude if the merge is a columns merging.
-     * </p>
+    /** Compute intersection of line with Digital Elevation Model in a sub-tile.
      * @param ellipsoid reference ellipsoid
      * @param position pixel position in ellipsoid frame
      * @param los pixel line-of-sight in ellipsoid frame
      * @param tile Digital Elevation Model tile
-     * @param level merged level
-     * @param currentLatitude latitude index of current point (closer to observer)
-     * @param currentLongitude longitude index of current point (closer to observer)
-     * @param nextLatitude latitude index of next point (closer to ellipsoid)
-     * @param nextLongitude longitude index of next point (closer to ellipsoid)
-     * @return points corresponding to line-of-sight sub-tiles crossings, in
-     * <em>reversed</em> line-of-sight order
-     * @exception RuggedException if intersection point cannot be computed
-     * @exception OrekitException if intersection point cannot be converted to geodetic coordinates
+     * @param entry line-of-sight entry point in the sub-tile
+     * @param entryLat index to use for interpolating entry point elevation
+     * @param entryLon index to use for interpolating entry point elevation
+     * @param exit line-of-sight exit point from the sub-tile
+     * @param exitLat index to use for interpolating exit point elevation
+     * @param exitLon index to use for interpolating exit point elevation
+     * @return point at which the line first enters ground, or null if does not enter
+     * ground in the search sub-tile
+     * @exception RuggedException if intersection cannot be found
+     * @exception OrekitException if points cannot be converted to geodetic coordinates
      */
-    private List<GeodeticPoint> crossingPoints(final ExtendedEllipsoid ellipsoid, final Vector3D position, final Vector3D los,
-                                               final MinMaxTreeTile tile, final int level,
-                                               final int currentLatitude, final int currentLongitude,
-                                               final int nextLatitude, final int nextLongitude)
+    private GeodeticPoint recurseIntersection(final ExtendedEllipsoid ellipsoid,
+                                              final Vector3D position, final Vector3D los,
+                                              final MinMaxTreeTile tile,
+                                              final GeodeticPoint entry, final int entryLat, final int entryLon,
+                                              final GeodeticPoint exit, final int exitLat, final int exitLon)
         throws RuggedException, OrekitException {
 
-        final List<GeodeticPoint> crossings = new ArrayList<GeodeticPoint>();
+        if (FastMath.abs(entryLat - exitLat) < 1 && FastMath.abs(entryLon - exitLon) < 1) {
+            // we have narrowed the search down to a single Digital Elevation Model pixel
+            return tile.pixelIntersection(entry, exit, exitLat, exitLon);
+        }
 
+        // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile
+        final int level = tile.getMergeLevel(entryLat, entryLon, exitLat, exitLon);
+        if (level >= 0  && exit.getAltitude() >= tile.getMaxElevation(exitLat, exitLon, level)) {
+            // the line-of-sight segment is fully above Digital Elevation Model
+            // we can safely reject it and proceed to next part of the line-of-sight
+            return null;
+        }
+
+        GeodeticPoint previousGP  = entry;
+        int           previousLat = entryLat;
+        int           previousLon = entryLon;
+
+        // introduce all intermediate points corresponding to the line-of-sight
+        // intersecting the boundary between level 0 sub-tiles
         if (tile.isColumnMerging(level + 1)) {
-            // sub-tiles at current level come from column merging at deeper level
-            for (final int longitudeIndex : tile.getCrossedBoundaryColumns(currentLongitude, nextLongitude, level + 1)) {
-                final double crossingLongitude = tile.getLongitudeAtIndex(longitudeIndex);
-                final Vector3D crossingPoint   = ellipsoid.pointAtLongitude(position, los, crossingLongitude);
-                crossings.add(0, ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
+            // recurse through longitude crossings
+            for (final int crossingLon : tile.getCrossedBoundaryColumns(previousLon, exitLon, level + 1)) {
+
+                // compute segment endpoints
+                final Vector3D      crossingP    = ellipsoid.pointAtLongitude(position, los,
+                                                                              tile.getLongitudeAtIndex(crossingLon));
+                final GeodeticPoint crossingGP   = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                final int           crossingLat  = tile.getLatitudeIndex(crossingGP.getLatitude());
+
+                // adjust indices as the crossing point is by definition between the sub-tiles
+                final int crossingLonBefore = crossingLon - (entryLon <= exitLon ? 1 : 0);
+                final int crossingLonAfter  = crossingLon - (entryLon <= exitLon ? 0 : 1);
+
+                // look for intersection
+                final GeodeticPoint intersection = recurseIntersection(ellipsoid, position, los, tile,
+                                                                       previousGP, previousLat, previousLon,
+                                                                       crossingGP, crossingLat, crossingLonBefore);
+                if (intersection != null) {
+                    return intersection;
+                }
+
+                // prepare next segment
+                previousGP  = crossingGP;
+                previousLat = crossingLat;
+                previousLon = crossingLonAfter;
+
             }
         } else {
-            // sub-tiles at current level come from row merging at deeper level
-            for (final int latitudeIndex : tile.getCrossedBoundaryRows(currentLatitude, nextLatitude, level + 1)) {
-                final double crossingLatitude = tile.getLatitudeAtIndex(latitudeIndex);
-                final Vector3D crossingPoint  = ellipsoid.pointAtLatitude(position, los, crossingLatitude);
-                crossings.add(0, ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
+            // recurse through latitude crossings
+            for (final int crossingLat : tile.getCrossedBoundaryRows(previousLat, exitLat, level + 1)) {
+
+                // compute segment endpoints
+                final Vector3D      crossingP    = ellipsoid.pointAtLatitude(position, los,
+                                                                             tile.getLatitudeAtIndex(crossingLat));
+                final GeodeticPoint crossingGP   = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                final int           crossingLon  = tile.getLongitudeIndex(crossingGP.getLongitude());
+
+                // adjust indices as the crossing point is by definition between the sub-tiles
+                final int crossingLatBefore = crossingLat - (entryLat <= exitLat ? 1 : 0);
+                final int crossingLatAfter  = crossingLat - (entryLat <= exitLat ? 0 : 1);
+
+                // look for intersection
+                final GeodeticPoint intersection = recurseIntersection(ellipsoid, position, los, tile,
+                                                                       previousGP, previousLat, previousLon,
+                                                                       crossingGP, crossingLatBefore, crossingLon);
+                if (intersection != null) {
+                    return intersection;
+                }
+
+                // prepare next segment
+                previousGP  = crossingGP;
+                previousLat = crossingLatAfter;
+                previousLon = crossingLon;
+
             }
         }
 
-        return crossings;
+        // last part of the segment, up to exit point
+        return recurseIntersection(ellipsoid, position, los, tile,
+                                   previousGP, previousLat, previousLon,
+                                   exit, exitLat, exitLon);
 
     }
 
