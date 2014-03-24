@@ -129,8 +129,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                             // intersecting the boundary between level 0 sub-tiles
                             lineOfSightQueue.addAll(crossingPoints(ellipsoid, position, los,
                                                                    tile, 0,
-                                                                   nextLatIndex, nextLonIndex,
-                                                                   currentLatIndex, currentLonIndex));
+                                                                   currentLatIndex, currentLonIndex,
+                                                                   nextLatIndex, nextLonIndex));
                         } else {
                             if (next.getAltitude() >= tile.getMaxElevation(nextLatIndex, nextLonIndex, level)) {
                                 // the line-of-sight segment is fully above Digital Elevation Model
@@ -149,8 +149,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                 // in the tree
                                 lineOfSightQueue.addAll(crossingPoints(ellipsoid, position, los,
                                                                        tile, level,
-                                                                       nextLatIndex, nextLonIndex,
-                                                                       currentLatIndex, currentLonIndex));
+                                                                       currentLatIndex, currentLonIndex,
+                                                                       nextLatIndex, nextLonIndex));
 
                                 // the current point remains the same
 
@@ -189,46 +189,46 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     /** Find the crossing points between sub-tiles.
      * <p>
      * When we go deeper in the min/max kd-tree, we get closer to individual pixels,
-     * or un-merge the merged sub-tiles. This un-merging implies finding the boundary
+     * or un-merge the merged sub-tiles. This un-merging implies finding the boundaries
      * between sub-tiles that are merged at level l and not merged at level l+1.
-     * This boundary is an iso-latitude if the merge is a row merging and is an
-     * iso-longitude if the merge is a column merging.
+     * These boundaries are iso-latitude if the merge is a rows merging and are
+     * iso-longitude if the merge is a columns merging.
      * </p>
      * @param ellipsoid reference ellipsoid
      * @param position pixel position in ellipsoid frame
      * @param los pixel line-of-sight in ellipsoid frame
      * @param tile Digital Elevation Model tile
      * @param level merged level
-     * @param nextLatitude latitude index of next point (closer to Earth)
-     * @param nextLongitude longitude index of next point (closer to Earth)
-     * @param currentLatitude latitude index of current point (closer to satellite)
-     * @param currentLongitude longitude index of current point (closer to satellite)
-     * @return point corresponding to line-of-sight crossing the longitude/latitude
-     * limit between the un-merged sub-tiles at level-1
+     * @param currentLatitude latitude index of current point (closer to observer)
+     * @param currentLongitude longitude index of current point (closer to observer)
+     * @param nextLatitude latitude index of next point (closer to ellipsoid)
+     * @param nextLongitude longitude index of next point (closer to ellipsoid)
+     * @return points corresponding to line-of-sight sub-tiles crossings, in
+     * <em>reversed</em> line-of-sight order
      * @exception RuggedException if intersection point cannot be computed
      * @exception OrekitException if intersection point cannot be converted to geodetic coordinates
      */
     private List<GeodeticPoint> crossingPoints(final ExtendedEllipsoid ellipsoid, final Vector3D position, final Vector3D los,
                                                final MinMaxTreeTile tile, final int level,
-                                               final int nextLatitude, final int nextLongitude,
-                                               final int currentLatitude, final int currentLongitude)
+                                               final int currentLatitude, final int currentLongitude,
+                                               final int nextLatitude, final int nextLongitude)
         throws RuggedException, OrekitException {
 
         final List<GeodeticPoint> crossings = new ArrayList<GeodeticPoint>();
 
         if (tile.isColumnMerging(level + 1)) {
             // sub-tiles at current level come from column merging at deeper level
-            for (final int longitudeIndex : tile.getCrossedBoundaryColumns(nextLongitude, currentLongitude, level)) {
+            for (final int longitudeIndex : tile.getCrossedBoundaryColumns(currentLongitude, nextLongitude, level + 1)) {
                 final double crossingLongitude = tile.getLongitudeAtIndex(longitudeIndex);
                 final Vector3D crossingPoint   = ellipsoid.pointAtLongitude(position, los, crossingLongitude);
-                crossings.add(ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
+                crossings.add(0, ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
             }
         } else {
             // sub-tiles at current level come from row merging at deeper level
-            for (final int latitudeIndex : tile.getCrossedBoundaryRows(nextLatitude, currentLatitude, level)) {
+            for (final int latitudeIndex : tile.getCrossedBoundaryRows(currentLatitude, nextLatitude, level + 1)) {
                 final double crossingLatitude = tile.getLatitudeAtIndex(latitudeIndex);
-                final Vector3D crossingPoint   = ellipsoid.pointAtLatitude(position, los, crossingLatitude);
-                crossings.add(ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
+                final Vector3D crossingPoint  = ellipsoid.pointAtLatitude(position, los, crossingLatitude);
+                crossings.add(0, ellipsoid.transform(crossingPoint, ellipsoid.getBodyFrame(), null));
             }
         }
 
