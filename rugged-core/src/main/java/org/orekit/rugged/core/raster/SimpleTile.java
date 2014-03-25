@@ -17,6 +17,7 @@
 package org.orekit.rugged.core.raster;
 
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Precision;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
@@ -284,38 +285,30 @@ public class SimpleTile implements Tile {
         final double b = v + dzA - dzB;
         final double c = w - dzA;
 
-        // solve the quadratic equation
-        final double b2  = b * b;
-        final double fac = 4 * a * c;
-        if (b2 < fac) {
-            // no intersection at all
-            return null;
-        }
-        final double s  = FastMath.sqrt(b2 - fac);
-        final double t1 = (b < 0) ? (s - b) / (2 * a) : -2 * c / (b + s);
-        final double t2 = c / (a * t1);
-
-        final double dx1 = dxA  * (1 - t1) + dxB  * t1;
-        final double dy1 = dyA  * (1 - t1) + dyB  * t1;
-        final GeodeticPoint p1;
-        if (dx1 >= 0 && dx1 <= 1 && dy1 >= 0 && dy1 <= 1) {
-            p1 = new GeodeticPoint(pA.getLatitude()  * (1 - t1) + pB.getLatitude()  * t1,
-                                   pA.getLongitude() * (1 - t1) + pB.getLongitude() * t1,
-                                   pA.getAltitude()  * (1 - t1) + pB.getAltitude()  * t1);
+        // solve the equation
+        final double t1;
+        final double t2;
+        if (FastMath.abs(a) <= Precision.EPSILON * FastMath.abs(c)) {
+            // the equation degenerates to a linear (or constant) equation
+            double t = -c / b;
+            t1 = Double.isNaN(t) ? 0.0 : t;
+            t2 = Double.POSITIVE_INFINITY;
         } else {
-            p1    = null;
+            // the equation is quadratic
+            final double b2  = b * b;
+            final double fac = 4 * a * c;
+            if (b2 < fac) {
+                // no intersection at all
+                return null;
+            }
+            final double s = FastMath.sqrt(b2 - fac);
+            t1 = (b < 0) ? (s - b) / (2 * a) : -2 * c / (b + s);
+            t2 = c / (a * t1);
+
         }
 
-        final double dx2 = dxA  * (1 - t2) + dxB  * t2;
-        final double dy2 = dyA  * (1 - t2) + dyB  * t2;
-        final GeodeticPoint p2;
-        if (dx2 >= 0 && dx2 <= 1 && dy2 >= 0 && dy2 <= 1) {
-            p2 = new GeodeticPoint(pA.getLatitude()  * (1 - t2) + pB.getLatitude()  * t2,
-                                   pA.getLongitude() * (1 - t2) + pB.getLongitude() * t2,
-                                   pA.getAltitude()  * (1 - t2) + pB.getAltitude()  * t2);
-        } else {
-            p2    = null;
-        }
+        final GeodeticPoint p1 = interpolate(t1, pA, dxA, dyA, pB, dxB, dyB);
+        final GeodeticPoint p2 = interpolate(t2, pA, dxA, dyA, pB, dxB, dyB);
 
         // select the first point along line-of-sight
         if (p1 == null) {
@@ -327,6 +320,29 @@ public class SimpleTile implements Tile {
         }
 
     }
+
+    /** Interpolate point on line.
+     * 
+     */
+    private GeodeticPoint interpolate(final double t,
+                                      final GeodeticPoint pA, final double dxA, final double dyA,
+                                      final GeodeticPoint pB, final double dxB, final double dyB) {
+
+        if (Double.isInfinite(t)) {
+            return null;
+        }
+
+        final double dx = dxA  * (1 - t) + dxB  * t;
+        final double dy = dyA  * (1 - t) + dyB  * t;
+        if (dx >= 0 && dx <= 1 && dy >= 0 && dy <= 1) {
+            return new GeodeticPoint(pA.getLatitude()  * (1 - t) + pB.getLatitude()  * t,
+                                     pA.getLongitude() * (1 - t) + pB.getLongitude() * t,
+                                     pA.getAltitude()  * (1 - t) + pB.getAltitude()  * t);
+        } else {
+            return null;
+        }
+
+    }                              
 
     /** {@inheritDoc} */
     @Override
