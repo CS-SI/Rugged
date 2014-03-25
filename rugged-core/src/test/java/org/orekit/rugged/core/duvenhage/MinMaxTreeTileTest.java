@@ -113,8 +113,8 @@ public class MinMaxTreeTileTest {
                             int[] neighbors = neighbors(row, column, nbRows, nbColumns, tile.getLevels() - level);
                             double min = Double.POSITIVE_INFINITY;
                             double max = Double.NEGATIVE_INFINITY;
-                            for (int i = neighbors[0]; i < neighbors[1]; ++i) {
-                                for (int j = neighbors[2]; j < neighbors[3]; ++j) {
+                            for (int i = neighbors[0]; i < FastMath.min(neighbors[1] + 1, nbRows); ++i) {
+                                for (int j = neighbors[2]; j < FastMath.min(neighbors[3] + 1, nbColumns); ++j) {
                                     double pixelValue = tile.getElevationAtIndices(i, j);
                                     min = FastMath.min(min, pixelValue);
                                     max = FastMath.max(max, pixelValue);

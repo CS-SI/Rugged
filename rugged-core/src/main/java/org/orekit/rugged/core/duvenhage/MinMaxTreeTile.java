@@ -106,11 +106,15 @@ public class MinMaxTreeTile extends SimpleTile {
 
         // compute min/max trees
         if (start.length > 0) {
-            // TODO: we need to pre-process pixels so the min/max of *interpolation* is used
-            // now, we consider a single corner in each pixel, but all four corners
-            // contributes to the min/max at interpolation stage
-            applyRecursively(minTree, start.length - 1, nbRows, nbCols, new Min(), elevations, 0);
-            applyRecursively(maxTree, start.length - 1, nbRows, nbCols, new Max(), elevations, 0);
+
+            final double[] preprocessed = new double[elevations.length];
+
+            preprocess(preprocessed, elevations, nbRows, nbCols, new Min());
+            applyRecursively(minTree, start.length - 1, nbRows, nbCols, new Min(), preprocessed, 0);
+
+            preprocess(preprocessed, elevations, nbRows, nbCols, new Max());
+            applyRecursively(maxTree, start.length - 1, nbRows, nbCols, new Max(), preprocessed, 0);
+
         }
 
     }
@@ -357,8 +361,50 @@ public class MinMaxTreeTile extends SimpleTile {
 
     }
 
+    /** Preprocess recursive application of a function.
+     * <p>
+     * At start, the min/max should be computed for each pixel using the four corners values.
+     * </p>
+     * @param preprocessed preprocessed array to fill up
+     * @param elevations raw elevations te preprocess
+     * @param nbRows number of rows
+     * @param nbCols number of columns
+     * @param f function to apply
+     */
+    private void preprocess(final double[] preprocessed, final double[] elevations,
+                            final int nbRows, final int nbCols,
+                            final BivariateFunction f) {
+
+        int k = 0;
+
+        for (int i = 0; i < nbRows - 1; ++i) {
+
+            // regular elements with both a column at right and a row below
+            for (int j = 0; j < nbCols - 1; ++j) {
+                preprocessed[k] = f.value(f.value(elevations[k],          elevations[k + 1]),
+                                          f.value(elevations[k + nbCols], elevations[k + nbCols + 1]));
+                k++;
+            }
+
+            // last column elements, lacking a right column
+            preprocessed[k] = f.value(elevations[k], elevations[k + nbCols]);
+            k++;
+
+        }
+
+        // last row elements, lacking a below row
+        for (int j = 0; j < nbCols - 1; ++j) {
+            preprocessed[k] = f.value(elevations[k], elevations[k + 1]);
+            k++;
+        }
+
+        // last element
+        preprocessed[k] = elevations[k];
+
+    }
+
     /** Recursive application of a function.
-     * @param tree to fill-up with the recursive applications
+     * @param tree tree to fill-up with the recursive applications
      * @param level current level
      * @param levelRows number of rows at current level
      * @param levelColumns number of columns at current level
