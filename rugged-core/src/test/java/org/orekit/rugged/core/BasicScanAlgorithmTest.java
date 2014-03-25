@@ -214,7 +214,7 @@ public class BasicScanAlgorithmTest {
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
         GeodeticPoint result   = basicScan.intersection(earth, position, los);
-        Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 0.03);
+        Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 1.0e-10);
 
     }
 

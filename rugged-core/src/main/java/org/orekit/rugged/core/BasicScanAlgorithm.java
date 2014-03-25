@@ -81,12 +81,12 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
                 scannedTiles.clear();
                 // compute entry and exit points
-                entryPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMin) ? 0.0 : hMin),
+                entryPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMax) ? 0.0 : hMax),
                                                  ellipsoid.getBodyFrame(), null);
                 final SimpleTile entryTile = cache.getTile(entryPoint.getLatitude(), entryPoint.getLongitude());
                 addIfNotPresent(scannedTiles, entryTile);
 
-                exitPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMax) ? 0.0 : hMax),
+                exitPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMin) ? 0.0 : hMin),
                                                 ellipsoid.getBodyFrame(), null);
                 final SimpleTile exitTile = cache.getTile(exitPoint.getLatitude(), exitPoint.getLongitude());
                 addIfNotPresent(scannedTiles, entryTile);
@@ -116,8 +116,8 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
             GeodeticPoint intersectionGP = null;
             double intersectionDot = Double.POSITIVE_INFINITY;
             for (final SimpleTile tile : scannedTiles) {
-                for (int i = latitudeIndex(tile, minLatitude); i < latitudeIndex(tile, maxLatitude); ++i) {
-                    for (int j = longitudeIndex(tile, minLongitude); j < longitudeIndex(tile, maxLongitude); ++j) {
+                for (int i = latitudeIndex(tile, minLatitude); i <= latitudeIndex(tile, maxLatitude); ++i) {
+                    for (int j = longitudeIndex(tile, minLongitude); j <= longitudeIndex(tile, maxLongitude); ++j) {
                         GeodeticPoint gp = tile.pixelIntersection(entryPoint, exitPoint, i, j);
                         if (gp != null) {
                             final Vector3D point = ellipsoid.transform(gp);
