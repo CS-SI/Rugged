@@ -19,6 +19,7 @@ package org.orekit.rugged.core;
 import java.io.File;
 import java.net.URISyntaxException;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.After;
@@ -174,6 +175,24 @@ public class ExtendedEllipsoidTest {
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, re.getSpecifier());
             Assert.assertEquals(altitude, re.getParts()[0]);
+        }
+
+    }
+
+    @Test
+    public void testConvertLOS() throws RuggedException, OrekitException {
+
+        GeodeticPoint gp   = new GeodeticPoint(-0.2, 1.8, 2400.0);
+        Vector3D p         = ellipsoid.transform(gp);
+        Vector3D los       = new Vector3D(-1, -2, -3);
+        Vector3D converted = ellipsoid.convertLos(gp, los);
+        Line line = new Line(p, new Vector3D(1.0, p, 1000, los), 1.0e-10);
+
+        for (double delta = 0; delta < 100.0; delta += 0.1) {
+            GeodeticPoint shifted = new GeodeticPoint(gp.getLatitude()  + delta * converted.getY(),
+                                                      gp.getLongitude() + delta * converted.getX(),
+                                                      gp.getAltitude()  + delta * converted.getZ());
+            Assert.assertEquals(0.0, line.distance(ellipsoid.transform(shifted)), 1.0e-3);
         }
 
     }

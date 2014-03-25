@@ -36,6 +36,12 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     /** Convergence threshold for {@link #pointAtAltitude(Vector3D, Vector3D, double)}. */
     private static final double ALTITUDE_CONVERGENCE = 1.0e-3;
 
+    /** Equatorial radius power 2. */
+    private final double a2;
+
+    /** Polar radius power 2. */
+    private final double b2;
+
     /** Simple constructor.
      * @param ae equatorial radius
      * @param f the flattening (f = (a-b)/a)
@@ -44,6 +50,9 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      */
     public ExtendedEllipsoid(final double ae, final double f, final Frame bodyFrame) {
         super(ae, f, bodyFrame);
+        a2 = ae * ae;
+        final double b = ae * (1.0 - f);
+        b2 = b * b;
     }
 
     /** Get point at some latitude along a pixel line of sight.
@@ -188,6 +197,36 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
             // this should never happen
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+    }
+
+    /** Convert a line-of-sight from Cartesian to topocentric.
+     * @param point geodetic point on the line-of-sight
+     * @param los line-of-sight, not necessarily normalized (in body frame and Cartesian coordinates)
+     * @return line-of-sight in topocentric frame (East, North, Zenith) of the point,
+     * scaled to match radians in the horizontal plane and meters along the vertical axis
+     */
+    public Vector3D convertLos(final GeodeticPoint point, final Vector3D los)
+        throws OrekitException {
+
+        // Cartesian coordinates of the topocentric frame origin
+        final Vector3D p3D = transform(point);
+
+        // local radius of curvature in the East-West direction (parallel)
+        final double r     = FastMath.hypot(p3D.getX(), p3D.getY());
+
+        // local radius of curvature in the North-South direction (meridian)
+        final double b2r   = b2 * r;
+        final double b4r2  = b2r * b2r;
+        final double a2z   = a2 * p3D.getZ();
+        final double a4z2  = a2z * a2z;
+        final double q     = a4z2 + b4r2;
+        final double rho   = q * FastMath.sqrt(q) / (b2 * a4z2 + a2 * b4r2);
+
+        final double norm = los.getNorm();
+        return new Vector3D(Vector3D.dotProduct(los, point.getEast())   / (norm * r),
+                            Vector3D.dotProduct(los, point.getNorth())  / (norm * rho),
+                            Vector3D.dotProduct(los, point.getZenith()) / norm);
+
     }
 
 }
