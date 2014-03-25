@@ -157,16 +157,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                               final GeodeticPoint exit, final int exitLat, final int exitLon)
         throws RuggedException, OrekitException {
 
-        System.out.println(entryLat + " " + entryLon + " / " + exitLat + " " + exitLon);
         if (entryLat == exitLat && entryLon == exitLon) {
             // we have narrowed the search down to a single Digital Elevation Model pixel
-            return tile.pixelIntersection(entry, exit, exitLat, exitLon);
+            return tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los), exitLat, exitLon);
         }
 
         // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile
         final int level = tile.getMergeLevel(entryLat, entryLon, exitLat, exitLon);
-        System.out.println("level = " + level + ", min = " + tile.getMinElevation(exitLat, exitLon, level) +
-                           ", max = " + tile.getMaxElevation(exitLat, exitLon, level));
         if (level >= 0  && exit.getAltitude() >= tile.getMaxElevation(exitLat, exitLon, level)) {
             // the line-of-sight segment is fully above Digital Elevation Model
             // we can safely reject it and proceed to next part of the line-of-sight
@@ -320,9 +317,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @param position pixel position in ellipsoid frame
      * @return either p1 or p2, depending on which is closest to position
      */
-   private Vector3D selectClosest(Vector3D p1, Vector3D p2, Vector3D position) {
-       return Vector3D.distance(p1, position) <= Vector3D.distance(p2, position) ? p1 : p2;
-   }
+    private Vector3D selectClosest(Vector3D p1, Vector3D p2, Vector3D position) {
+        return Vector3D.distance(p1, position) <= Vector3D.distance(p2, position) ? p1 : p2;
+    }
 
     /** Point at tile boundary. */
     private static class LimitPoint {

@@ -118,7 +118,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
             for (final SimpleTile tile : scannedTiles) {
                 for (int i = latitudeIndex(tile, minLatitude); i <= latitudeIndex(tile, maxLatitude); ++i) {
                     for (int j = longitudeIndex(tile, minLongitude); j <= longitudeIndex(tile, maxLongitude); ++j) {
-                        GeodeticPoint gp = tile.pixelIntersection(entryPoint, exitPoint, i, j);
+                        GeodeticPoint gp = tile.pixelIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
                         if (gp != null) {
                             final Vector3D point = ellipsoid.transform(gp);
                             final double dot = Vector3D.dotProduct(point.subtract(position), los);

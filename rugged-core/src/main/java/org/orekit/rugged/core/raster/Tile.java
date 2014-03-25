@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.core.raster;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.UpdatableTile;
@@ -145,8 +146,9 @@ public interface Tile extends UpdatableTile {
         throws RuggedException;
 
     /** Find the intersection of a line-of-sight and a Digital Elevation Model pixel.
-     * @param pA first point on the line (closer to satellite)
-     * @param pB second point on the line (closer to ground)
+     * @param p point on the line
+     * @param los line-of-sight, in the topocentric frame (East, North, Zenith) of the point,
+     * scaled to match radians in the horizontal plane and meters along the vertical axis
      * @param latitudeIndex latitude index of the Digital Elevation Model pixel
      * @param longitudeIndex longitude index of the Digital Elevation Model pixel
      * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
@@ -154,7 +156,7 @@ public interface Tile extends UpdatableTile {
      * @exception RuggedException if intersection point cannot be computed
      * @exception OrekitException if intersection point cannot be converted to geodetic coordinates
      */
-    GeodeticPoint pixelIntersection(GeodeticPoint pA, GeodeticPoint pB,
+    GeodeticPoint pixelIntersection(GeodeticPoint p, Vector3D los,
                                     int latitudeIndex, int longitudeIndex)
         throws RuggedException;
 

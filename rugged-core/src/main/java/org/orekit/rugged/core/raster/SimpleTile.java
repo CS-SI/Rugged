@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.core.raster;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.orekit.bodies.GeodeticPoint;
@@ -244,7 +245,7 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint pixelIntersection(final GeodeticPoint pA, final GeodeticPoint pB,
+    public GeodeticPoint pixelIntersection(final GeodeticPoint p, final Vector3D los,
                                            final int latitudeIndex, final int longitudeIndex)
         throws RuggedException {
 
@@ -257,15 +258,15 @@ public class SimpleTile implements Tile {
         final double z11 = getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
 
         // line-of-sight coordinates at close points
-        final double dxA = (pA.getLongitude() - x00) / longitudeStep;
-        final double dyA = (pA.getLatitude()  - y00) / latitudeStep;
-        final double dzA = pA.getAltitude();
-        final double dxB = (pB.getLongitude() - x00) / longitudeStep;
-        final double dyB = (pB.getLatitude()  - y00) / latitudeStep;
-        final double dzB = pB.getAltitude();
+        final double dxA = (p.getLongitude() - x00) / longitudeStep;
+        final double dyA = (p.getLatitude()  - y00) / latitudeStep;
+        final double dzA = p.getAltitude();
+        final double dxB = dxA + los.getX() / longitudeStep;
+        final double dyB = dyA + los.getY() / latitudeStep;
+        final double dzB = dzA + los.getZ();
         
-        // points along line-of-sight can be defined as a linear combination
-        // between pA and pB depending on free variable t: p(t) = pA * (1 - t) + pB * t.
+        // points along line-of-sight can be defined as a linear progression
+        // along the line depending on free variable t: p(t) = p + t * los.
         // As the point latitude and longitude are linear with respect to t,
         // and as Digital Elevation Model is quadratic with respect to latitude
         // and longitude, the altitude of DEM at same horizontal position as
@@ -307,8 +308,8 @@ public class SimpleTile implements Tile {
 
         }
 
-        final GeodeticPoint p1 = interpolate(t1, pA, dxA, dyA, pB, dxB, dyB);
-        final GeodeticPoint p2 = interpolate(t2, pA, dxA, dyA, pB, dxB, dyB);
+        final GeodeticPoint p1 = interpolate(t1, p, dxA, dyA, los);
+        final GeodeticPoint p2 = interpolate(t2, p, dxA, dyA, los);
 
         // select the first point along line-of-sight
         if (p1 == null) {
@@ -321,23 +322,28 @@ public class SimpleTile implements Tile {
 
     }
 
-    /** Interpolate point on line.
-     * 
+    /** Interpolate point along a line.
+     * @param t abscissa along the line
+     * @param p start point
+     * @param dxP relative coordinate of the start point with respect to current pixel
+     * @param dyP relative coordinate of the start point with respect to current pixel
+     * @param los direction of the line-of-sight, in geodetic space
+     * @return interpolated point along the line
      */
-    private GeodeticPoint interpolate(final double t,
-                                      final GeodeticPoint pA, final double dxA, final double dyA,
-                                      final GeodeticPoint pB, final double dxB, final double dyB) {
+    private GeodeticPoint interpolate(final double t, final GeodeticPoint p,
+                                      final double dxP, final double dyP,
+                                      final Vector3D los) {
 
         if (Double.isInfinite(t)) {
             return null;
         }
 
-        final double dx = dxA  * (1 - t) + dxB  * t;
-        final double dy = dyA  * (1 - t) + dyB  * t;
+        final double dx = dxP + t * los.getX() / longitudeStep;
+        final double dy = dyP + t * los.getY() / latitudeStep;
         if (dx >= 0 && dx <= 1 && dy >= 0 && dy <= 1) {
-            return new GeodeticPoint(pA.getLatitude()  * (1 - t) + pB.getLatitude()  * t,
-                                     pA.getLongitude() * (1 - t) + pB.getLongitude() * t,
-                                     pA.getAltitude()  * (1 - t) + pB.getAltitude()  * t);
+            return new GeodeticPoint(p.getLatitude()  + t * los.getY(),
+                                     p.getLongitude() + t * los.getX(),
+                                     p.getAltitude()  + t * los.getZ());
         } else {
             return null;
         }

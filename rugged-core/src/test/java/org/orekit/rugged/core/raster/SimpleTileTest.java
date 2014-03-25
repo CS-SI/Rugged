@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.core.raster;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
@@ -187,10 +188,10 @@ public class SimpleTileTest {
         GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
                                               tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
                                               10.0);
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, gpB, 20, 14);
+        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 20, 14);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, gpA, 20, 14);
+        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 20, 14);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -218,10 +219,10 @@ public class SimpleTileTest {
 
         // the line from gpA to gpB should traverse the DEM twice within the tile
         // we use the points in the two different orders to retrieve both solutions
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, gpB, 20, 14);
+        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 20, 14);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, gpA, 20, 14);
+        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 20, 14);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -247,7 +248,7 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
                                               190.0);
 
-        Assert.assertNull(tile.pixelIntersection(gpA, gpB, 20, 14));
+        Assert.assertNull(tile.pixelIntersection(gpA, los(gpA, gpB), 20, 14));
 
     }
 
@@ -267,10 +268,10 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               20.0);
 
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, gpB, 0, 0);
+        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, gpA, 0, 0);
+        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 0, 0);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -296,7 +297,7 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               55.0);
 
-       Assert.assertNull(tile.pixelIntersection(gpA, gpB, 0, 0));
+       Assert.assertNull(tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0));
 
     }
 
@@ -316,7 +317,7 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               50.0);
 
-        Assert.assertNull(tile.pixelIntersection(gpA, gpB, 0, 0));
+        Assert.assertNull(tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0));
 
     }
 
@@ -336,10 +337,10 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               37.5);
 
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, gpB, 0, 0);
+        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, gpA, 0, 0);
+        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 0, 0);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -350,6 +351,16 @@ public class SimpleTileTest {
         Assert.assertEquals(gpIBA.getLongitude(), gpB.getLongitude(), 1.0e-10);
         Assert.assertEquals(gpIBA.getAltitude(),  gpB.getAltitude(),  1.0e-10);
 
+    }
+
+    private Vector3D los(GeodeticPoint gpA, GeodeticPoint gpB) {
+        // this is a crude conversion into geodetic space
+        // intended *only* for the purposes of these tests
+        // it considers the geodetic space *is* perfectly Cartesian
+        // in the East, North, Zenith frame
+        return new Vector3D(gpB.getLongitude() - gpA.getLongitude(),
+                            gpB.getLatitude()  - gpA.getLatitude(),
+                            gpB.getAltitude()  - gpA.getAltitude());
     }
 
     private void checkOutOfBound(double latitude, double longitude, Tile tile) {
