@@ -340,7 +340,7 @@ public class SimpleTile implements Tile {
 
         final double dx = dxP + t * los.getX() / longitudeStep;
         final double dy = dyP + t * los.getY() / latitudeStep;
-        if (dx >= 0 && dx <= 1 && dy >= 0 && dy <= 1) {
+        if (dx >= -TOLERANCE && dx <= 1 + TOLERANCE && dy >= -TOLERANCE && dy <= 1 + TOLERANCE) {
             return new GeodeticPoint(p.getLatitude()  + t * los.getY(),
                                      p.getLongitude() + t * los.getX(),
                                      p.getAltitude()  + t * los.getZ());
