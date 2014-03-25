@@ -254,8 +254,8 @@ public class MinMaxTreeTileTest {
         // for testing purposes
 
         // intentionally dumb way of counting multiples of n
-        int kS = (k1 <= k2) ? k1 : (k2 + 1);
-        int kE = (k1 <= k2) ? k2 : (k1 + 1);
+        int kS = FastMath.min(k1, k2);
+        int kE = FastMath.max(k1, k2) + 1;
         int count = 0;
         for (int k = kS; k < kE; ++k) {
             if (k % n == 0) {

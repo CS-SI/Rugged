@@ -106,6 +106,9 @@ public class MinMaxTreeTile extends SimpleTile {
 
         // compute min/max trees
         if (start.length > 0) {
+            // TODO: we need to pre-process pixels so the min/max of *interpolation* is used
+            // now, we consider a single corner in each pixel, but all four corners
+            // contributes to the min/max at interpolation stage
             applyRecursively(minTree, start.length - 1, nbRows, nbCols, new Min(), elevations, 0);
             applyRecursively(maxTree, start.length - 1, nbRows, nbCols, new Max(), elevations, 0);
         }
@@ -209,22 +212,22 @@ public class MinMaxTreeTile extends SimpleTile {
      * of these boundaries.
      * </p>
      * @param row1 starting row
-     * @param row2 ending row (excluded)
+     * @param row2 ending row
      * @param level tree level
-     * @return indices of rows crossed at sub-tiles boundaries, in crossing order
+     * @return indices of rows crossed at sub-tiles boundaries, in crossing order,
+     * the endpoints <em>are</em> included (i.e. if {@code row1} or {@code row2} are
+     * boundary rows, they will be in returned array)
      */
     public int[] getCrossedBoundaryRows(final int row1, final int row2, final int level) {
 
         // number of rows in each sub-tile
-        final int rows  = 1 << ((start.length - level) / 2);
+        final int rows = 1 << ((start.length - level) / 2);
 
-        if (row1 <= row2) {
-            return buildCrossings((row1 + rows - 1) - ((row1 + rows - 1) % rows),
-                                  row2, rows);
-        } else {
-            return buildCrossings(row1 -(row1 % rows),
-                                  row2, -rows);
-        }
+        // build the crossings in ascending order
+        final int min = FastMath.min(row1, row2);
+        final int max = FastMath.max(row1, row2) + 1;
+        return buildCrossings((min + rows - 1) - ((min + rows - 1) % rows), max, rows,
+                              row1 <= row2);
 
     }
 
@@ -237,30 +240,31 @@ public class MinMaxTreeTile extends SimpleTile {
      * @param column1 starting column
      * @param column2 ending column (excluded)
      * @param level tree level
-     * @return indices of columns crossed at sub-tiles boundaries, in crossing order
+     * @return indices of columns crossed at sub-tiles boundaries, in crossing order,
+     * the endpoints <em>are</em> included (i.e. if {@code column1} or {@code column2} are
+     * boundary columns, they will be in returned array)
      */
     public int[] getCrossedBoundaryColumns(final int column1, final int column2, final int level) {
 
         // number of columns in each sub-tile
-        final int columns  = 1 << ((start.length + 1 - level) / 2);;
+        final int columns  = 1 << ((start.length + 1 - level) / 2);
 
-        if (column1 <= column2) {
-            return buildCrossings((column1 + columns - 1) - ((column1 + columns - 1) % columns),
-                                  column2,  columns);
-        } else {
-            return buildCrossings(column1 - (column1 % columns),
-                                  column2, -columns);
-        }
+        // build the crossings in ascending order
+        final int min = FastMath.min(column1, column2);
+        final int max = FastMath.max(column1, column2) + 1;
+        return buildCrossings((min + columns - 1) - ((min + columns - 1) % columns), max, columns,
+                              column1 <= column2);
 
     }
 
     /** Build crossings arrays.
      * @param begin begin crossing index
      * @param end end crossing index (excluded, if equal to begin, the array is empty)
-     * @param step crossing step (may be negative)
+     * @param step crossing step
+     * @param ascending if true, the crossings must be in ascending order
      * @return indices of rows or columns crossed at sub-tiles boundaries, in crossing order
      */
-    private int[] buildCrossings(final int begin, final int end, final int step) {
+    private int[] buildCrossings(final int begin, final int end, final int step, final boolean ascending) {
 
         // allocate array
         final int n = FastMath.max(0, (end - begin + step + ((step > 0) ? -1 : +1)) / step);
@@ -268,9 +272,16 @@ public class MinMaxTreeTile extends SimpleTile {
 
         // fill it up
         int crossing = begin;
-        for (int i = 0; i < crossings.length; ++i) {
-            crossings[i] = crossing;
-            crossing    += step;
+        if (ascending) {
+            for (int i = 0; i < crossings.length; ++i) {
+                crossings[i] = crossing;
+                crossing += step;
+            }
+        } else {
+            for (int i = 0; i < crossings.length; ++i) {
+                crossings[crossings.length - 1 - i] = crossing;
+                crossing += step;
+            }
         }
 
         return crossings;

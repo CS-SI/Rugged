@@ -65,6 +65,8 @@ public class DuvenhageAlgorithmTest {
                                                                FastMath.toRadians(1.0), 1201);
 
         // test point approximately 1.6km North-North-West and 800 meters below volcano summit
+        // note that this test point is EXACTLY at a pixel corner, and even at corners of
+        // middle level (12 and above) sub-tiles
         double latitude  = FastMath.toRadians(13.27);
         double longitude = FastMath.toRadians(123.68);
         MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
@@ -126,7 +128,7 @@ public class DuvenhageAlgorithmTest {
         GeodeticPoint result   = duvenhage.intersection(earth, position, los);
         Assert.assertEquals(groundGP.getLatitude(),  result.getLatitude(),  1.0e-10);
         Assert.assertEquals(groundGP.getLongitude(), result.getLongitude(), 1.0e-10);
-        Assert.assertEquals(groundGP.getAltitude(),  result.getAltitude(),  1.0e-10);
+        Assert.assertEquals(groundGP.getAltitude(),  result.getAltitude(),  1.0e-9);
 
     }
 
@@ -216,7 +218,7 @@ public class DuvenhageAlgorithmTest {
         GeodeticPoint result   = duvenhage.intersection(earth, position, los);
         Assert.assertEquals(groundGP.getLatitude(),  result.getLatitude(),  1.0e-10);
         Assert.assertEquals(groundGP.getLongitude(), result.getLongitude(), 1.0e-10);
-        Assert.assertEquals(groundGP.getAltitude(),  result.getAltitude(),  1.0e-10);
+        Assert.assertEquals(groundGP.getAltitude(),  result.getAltitude(),  1.0e-9);
 
     }
 

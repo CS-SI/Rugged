@@ -17,7 +17,6 @@
 package org.orekit.rugged.core.duvenhage;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
@@ -152,20 +151,22 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @exception RuggedException if intersection cannot be found
      * @exception OrekitException if points cannot be converted to geodetic coordinates
      */
-    private GeodeticPoint recurseIntersection(final ExtendedEllipsoid ellipsoid,
-                                              final Vector3D position, final Vector3D los,
-                                              final MinMaxTreeTile tile,
+    private GeodeticPoint recurseIntersection(final ExtendedEllipsoid ellipsoid, final Vector3D position,
+                                              final Vector3D los, final MinMaxTreeTile tile,
                                               final GeodeticPoint entry, final int entryLat, final int entryLon,
                                               final GeodeticPoint exit, final int exitLat, final int exitLon)
         throws RuggedException, OrekitException {
 
-        if (FastMath.abs(entryLat - exitLat) < 1 && FastMath.abs(entryLon - exitLon) < 1) {
+        System.out.println(entryLat + " " + entryLon + " / " + exitLat + " " + exitLon);
+        if (entryLat == exitLat && entryLon == exitLon) {
             // we have narrowed the search down to a single Digital Elevation Model pixel
             return tile.pixelIntersection(entry, exit, exitLat, exitLon);
         }
 
         // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile
         final int level = tile.getMergeLevel(entryLat, entryLon, exitLat, exitLon);
+        System.out.println("level = " + level + ", min = " + tile.getMinElevation(exitLat, exitLon, level) +
+                           ", max = " + tile.getMaxElevation(exitLat, exitLon, level));
         if (level >= 0  && exit.getAltitude() >= tile.getMaxElevation(exitLat, exitLon, level)) {
             // the line-of-sight segment is fully above Digital Elevation Model
             // we can safely reject it and proceed to next part of the line-of-sight
@@ -180,7 +181,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         // intersecting the boundary between level 0 sub-tiles
         if (tile.isColumnMerging(level + 1)) {
             // recurse through longitude crossings
-            for (final int crossingLon : tile.getCrossedBoundaryColumns(previousLon, exitLon, level + 1)) {
+
+            int[] crossings = tile.getCrossedBoundaryColumns(previousLon, exitLon, level + 1);
+            for (final int crossingLon : crossings) {
 
                 // compute segment endpoints
                 final Vector3D      crossingP    = ellipsoid.pointAtLongitude(position, los,
@@ -208,7 +211,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             }
         } else {
             // recurse through latitude crossings
-            for (final int crossingLat : tile.getCrossedBoundaryRows(previousLat, exitLat, level + 1)) {
+            int[] crossings = tile.getCrossedBoundaryRows(previousLat, exitLat, level + 1);
+            for (final int crossingLat : crossings) {
 
                 // compute segment endpoints
                 final Vector3D      crossingP    = ellipsoid.pointAtLatitude(position, los,
