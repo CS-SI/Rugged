@@ -159,7 +159,16 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         if (entryLat == exitLat && entryLon == exitLon) {
             // we have narrowed the search down to a single Digital Elevation Model pixel
-            return tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los), exitLat, exitLon);
+            GeodeticPoint intersection = tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los), exitLat, exitLon);
+            if (intersection != null) {
+                // improve the point, by projecting it back on the 3D line, fixing the small body curvature at pixel level
+                final Vector3D      delta     = ellipsoid.transform(intersection).subtract(position);
+                final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                                                    ellipsoid.getBodyFrame(), null);
+                intersection = tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los), exitLat, exitLon);
+            }
+            return intersection;
         }
 
         // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile

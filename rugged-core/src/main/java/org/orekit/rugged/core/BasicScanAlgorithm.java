@@ -120,12 +120,21 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
                     for (int j = longitudeIndex(tile, minLongitude); j <= longitudeIndex(tile, maxLongitude); ++j) {
                         GeodeticPoint gp = tile.pixelIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
                         if (gp != null) {
+
+                            // improve the point, by projecting it back on the 3D line, fixing the small body curvature at pixel level
+                            final Vector3D      delta     = ellipsoid.transform(gp).subtract(position);
+                            final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                            final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                                                                ellipsoid.getBodyFrame(), null);
+                            gp = tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los), i, j);
+
                             final Vector3D point = ellipsoid.transform(gp);
                             final double dot = Vector3D.dotProduct(point.subtract(position), los);
                             if (dot < intersectionDot) {
                                 intersectionGP  = gp;
                                 intersectionDot = dot;
                             }
+
                         }
                     }                    
                 }
