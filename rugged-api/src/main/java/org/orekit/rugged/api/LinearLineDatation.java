@@ -16,22 +16,40 @@
  */
 package org.orekit.rugged.api;
 
-/** Interface representing line datation model.
- * @see LinearLineDatation
+
+/** Linear model for {@link LineDatation line datation}.
+ * <p>
+ * Instances of this class are guaranteed to be immutable.
+ * </p>
  * @author Luc Maisonobe
  */
-public interface LineDatation {
+public class LinearLineDatation implements LineDatation {
 
-    /** Get the date for a given line.
-     * @param param lineNumber line number
-     * @return date, as an offset in seconds from reference date
-     */
-    double getDate(double lineNumber);
+    /** Line number at reference date. */
+    private final double line0;
 
-    /** Get the line for a given date.
-     * @param date, as an offset in seconds from reference date
-     * @return line number
+    /** Rate of lines scanning (lines / seconds). */
+    private final double rate;
+
+    /** Simple constructor
+     * @param line0 line number at reference date
+     * @param rate rate of lines scanning (lines / seconds)
      */
-    double getLine(double date);
+    public LinearLineDatation(final double line0, final double rate) {
+        this.line0 = line0;
+        this.rate  = rate;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getDate(double lineNumber) {
+        return (lineNumber - line0) / rate;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getLine(double date) {
+        return line0 + rate * date;
+    }
 
 }
