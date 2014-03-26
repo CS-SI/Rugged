@@ -72,7 +72,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             while (current == null) {
 
                 // find where line-of-sight crosses tile max altitude
-                final Vector3D entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
+                final Vector3D entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation() + STEP);
                 if (Vector3D.dotProduct(entryP.subtract(position), los) < 0) {
                     // the entry point is behind spacecraft!
                     throw new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT);
@@ -267,7 +267,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         throws RuggedException, OrekitException {
 
         // look for an exit at bottom
-        Vector3D exitP = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
+        Vector3D exitP = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation() - STEP);
         GeodeticPoint exitGP = ellipsoid.transform(exitP, ellipsoid.getBodyFrame(), null);
 
         switch (tile.getLocation(exitGP.getLatitude(), exitGP.getLongitude())) {

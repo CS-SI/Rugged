@@ -149,7 +149,7 @@ public abstract class AbstractAlgorithmTest {
 
     }
 
-    private void setUpMayonVolcanoContext()
+    protected void setUpMayonVolcanoContext()
         throws RuggedException, OrekitException {
 
         // Mayon Volcano location according to Wikipedia: 13°15′24″N 123°41′6″E
@@ -196,7 +196,7 @@ public abstract class AbstractAlgorithmTest {
 
     }
 
-    private void setUpCliffsOfMoherContext()
+    protected void setUpCliffsOfMoherContext()
         throws RuggedException, OrekitException {
 
         // cliffs of Moher location according to Wikipedia: 52°56′10″N 9°28′15″ W
@@ -267,8 +267,8 @@ public abstract class AbstractAlgorithmTest {
         state     = null;
     }
 
-    private ExtendedEllipsoid earth;
-    private TileUpdater       updater;
-    private SpacecraftState   state;
+    protected ExtendedEllipsoid earth;
+    protected TileUpdater       updater;
+    protected SpacecraftState   state;
 
 }

@@ -17,6 +17,12 @@
 package org.orekit.rugged.core.duvenhage;
 
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.junit.Assert;
+import org.junit.Test;
+import org.orekit.bodies.GeodeticPoint;
+import org.orekit.errors.OrekitException;
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.core.AbstractAlgorithmTest;
 import org.orekit.rugged.core.raster.IntersectionAlgorithm;
 
@@ -24,6 +30,21 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 
     protected IntersectionAlgorithm createAlgorithm() {
         return new DuvenhageAlgorithm();
+    }
+
+    @Test
+    public void testNumericalIssueAtTileExit() throws RuggedException, OrekitException {
+        setUpMayonVolcanoContext();
+        final IntersectionAlgorithm algorithm = createAlgorithm();
+        algorithm.setUpTilesManagement(updater, 8);
+        GeodeticPoint intersection = algorithm.intersection(earth,
+                                                            new Vector3D(-3787079.6453602533,
+                                                                          5856784.405679551,
+                                                                          1655869.0582939098),
+                                                            new Vector3D( 0.5127552821932051,
+                                                                         -0.8254313129088879,
+                                                                         -0.2361041470463311));
+        Assert.assertEquals(16.0, intersection.getAltitude(), 1.0e-10);
     }
 
 }
