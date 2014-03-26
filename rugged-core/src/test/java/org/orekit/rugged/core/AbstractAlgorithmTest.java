@@ -20,6 +20,7 @@ package org.orekit.rugged.core;
 import java.io.File;
 import java.net.URISyntaxException;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
@@ -86,6 +87,7 @@ public abstract class AbstractAlgorithmTest {
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
         GeodeticPoint result   = algorithm.intersection(earth, position, los);
+        checkIntersection(position, los, result);
         Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
     }
@@ -111,6 +113,7 @@ public abstract class AbstractAlgorithmTest {
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
         GeodeticPoint result   = algorithm.intersection(earth, position, los);
+        checkIntersection(position, los, result);
         Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
     }
@@ -145,7 +148,23 @@ public abstract class AbstractAlgorithmTest {
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
         GeodeticPoint result   = algorithm.intersection(earth, position, los);
+        checkIntersection(position, los, result);
         Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
+
+    }
+
+    protected void checkIntersection(Vector3D position, Vector3D los, GeodeticPoint intersection)
+        throws RuggedException {
+
+        // check the point is on the line
+        Line line = new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12);
+        Assert.assertEquals(0.0, line.distance(earth.transform(intersection)), 3.0e-9);
+
+        // check the point is on the Digital Elevation Model
+        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
+        updater.updateTile(intersection.getLatitude(), intersection.getLongitude(), tile);
+        Assert.assertEquals(tile.interpolateElevation(intersection.getLatitude(), intersection.getLongitude()),
+                            intersection.getAltitude(), 2.0e-9);
 
     }
 

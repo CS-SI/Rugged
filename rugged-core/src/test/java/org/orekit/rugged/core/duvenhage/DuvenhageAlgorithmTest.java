@@ -18,7 +18,6 @@ package org.orekit.rugged.core.duvenhage;
 
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
@@ -37,14 +36,21 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm algorithm = createAlgorithm();
         algorithm.setUpTilesManagement(updater, 8);
-        GeodeticPoint intersection = algorithm.intersection(earth,
-                                                            new Vector3D(-3787079.6453602533,
-                                                                          5856784.405679551,
-                                                                          1655869.0582939098),
-                                                            new Vector3D( 0.5127552821932051,
-                                                                         -0.8254313129088879,
-                                                                         -0.2361041470463311));
-        Assert.assertEquals(16.0, intersection.getAltitude(), 1.0e-10);
+        Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
+        Vector3D los = new Vector3D( 0.5127552821932051, -0.8254313129088879, -0.2361041470463311);
+        GeodeticPoint intersection = algorithm.intersection(earth, position, los);
+        checkIntersection(position, los, intersection);
+    }
+
+    @Test
+    public void testCrossingBeforeLineSegmentStart() throws RuggedException, OrekitException {
+        setUpMayonVolcanoContext();
+        final IntersectionAlgorithm algorithm = createAlgorithm();
+        algorithm.setUpTilesManagement(updater, 8);
+        Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
+        Vector3D los = new Vector3D( 0.42804005978915904, -0.8670291034054828, -0.2550338037664377);
+        GeodeticPoint intersection = algorithm.intersection(earth, position, los);
+        checkIntersection(position, los, intersection);
     }
 
 }
