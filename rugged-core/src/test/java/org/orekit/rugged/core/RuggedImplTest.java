@@ -18,10 +18,16 @@ package org.orekit.rugged.core;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
@@ -49,6 +55,10 @@ import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
+import org.orekit.rugged.api.GroundPoint;
+import org.orekit.rugged.api.LineDatation;
+import org.orekit.rugged.api.LinearLineDatation;
+import org.orekit.rugged.api.PixelLOS;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.SatellitePV;
@@ -167,9 +177,46 @@ public class RuggedImplTest {
                 new VolcanicConeElevationUpdater(summit,
                                                  FastMath.toRadians(30.0), 16.0,
                                                  FastMath.toRadians(1.0), 1201);
-        AbsoluteDate crossing = new AbsoluteDate("2012-01-06T02:27:16.139", TimeScalesFactory.getUTC());
+        final AbsoluteDate crossing = new AbsoluteDate("2012-01-06T02:27:16.139", TimeScalesFactory.getUTC());
 
-        // TODO: test the direct localization
+        RuggedImpl rugged = new RuggedImpl();
+        rugged.setGeneralContext(null,
+                                 crossing,
+                                 Rugged.Algorithm.DUVENHAGE,
+                                 Rugged.Ellipsoid.WGS84,
+                                 Rugged.InertialFrame.EME2000,
+                                 Rugged.BodyRotatingFrame.ITRF,
+                                 propagator);
+        rugged.setUpTilesManagement(updater, 8);
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 4800 pixels
+        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                       FastMath.toRadians(10.0), 4800);
+
+        // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(1000.0, 1.0 / 1.5e-3);
+
+        rugged.setSensor("line", los, lineDatation);
+
+        try {
+            PrintStream out = new PrintStream(new File(new File(System.getProperty("user.home")), "x.dat"));
+            long t0 = System.currentTimeMillis();
+            for (double line = -1400; line < 3400; line++) {
+                GroundPoint[] gp = rugged.directLocalization("line", line);
+                for (int i = 0; i < gp.length; ++i) {
+                    out.format(Locale.US, "%6.1f %3d %9.3f%n", line, i, gp[i].getAltitude());
+                }
+                out.println();
+                System.out.println(line);
+            }
+            long t1 = System.currentTimeMillis();
+            out.close();
+            System.out.println((t1 - t0) + " ms");
+        } catch (IOException ioe) {
+            Assert.fail(ioe.getLocalizedMessage());
+        }
 
     }
 
@@ -265,6 +312,18 @@ public class RuggedImplTest {
         numericalPropagator.setAttitudeProvider(yawCompensation);
         return numericalPropagator;
 
+    }
+
+    private List<PixelLOS> createLOS(Vector3D offset, Vector3D center, Vector3D normal,
+                                     double halfAperture, int n) {
+        List<PixelLOS> list = new ArrayList<PixelLOS>(n);
+        for (int i = 0; i < n; ++i) {
+            double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
+            Vector3D los = new Rotation(normal, alpha).applyTo(center);
+            list.add(new PixelLOS(offset.getX(), offset.getY(), offset.getZ(),
+                                  los.getX(),    los.getY(),    los.getZ()));
+        }
+        return list;
     }
 
 }
