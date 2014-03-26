@@ -168,7 +168,6 @@ public class RuggedImplTest {
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField);
-        Propagator propagator                             = createPropagator(earth, gravityField, orbit);
 
         // Mayon Volcano location according to Wikipedia: 13°15′24″N 123°41′6″E
         GeodeticPoint summit =
@@ -179,6 +178,23 @@ public class RuggedImplTest {
                                                  FastMath.toRadians(1.0), 1201);
         final AbsoluteDate crossing = new AbsoluteDate("2012-01-06T02:27:16.139", TimeScalesFactory.getUTC());
 
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
+        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                       FastMath.toRadians(10.0), 960);
+
+        // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(1000.0, 1.0 / 1.5e-3);
+        double firstLine = 520;
+        double lastLine  = 1480;
+
+        Propagator propagator = createPropagator(earth, gravityField, orbit);
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.setEphemerisMode();
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        Propagator ephemeris = propagator.getGeneratedEphemeris();
+
         RuggedImpl rugged = new RuggedImpl();
         rugged.setGeneralContext(null,
                                  crossing,
@@ -186,34 +202,29 @@ public class RuggedImplTest {
                                  Rugged.Ellipsoid.WGS84,
                                  Rugged.InertialFrame.EME2000,
                                  Rugged.BodyRotatingFrame.ITRF,
-                                 propagator);
+                                 ephemeris);
         rugged.setUpTilesManagement(updater, 8);
-
-        // one line sensor
-        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 4800 pixels
-        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                       FastMath.toRadians(10.0), 4800);
-
-        // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
-        LineDatation lineDatation = new LinearLineDatation(1000.0, 1.0 / 1.5e-3);
 
         rugged.setSensor("line", los, lineDatation);
 
         try {
             PrintStream out = new PrintStream(new File(new File(System.getProperty("user.home")), "x.dat"));
             long t0 = System.currentTimeMillis();
-            for (double line = -1400; line < 3400; line++) {
+            int pixels = 0;
+            for (double line = firstLine; line < lastLine; line++) {
                 GroundPoint[] gp = rugged.directLocalization("line", line);
                 for (int i = 0; i < gp.length; ++i) {
                     out.format(Locale.US, "%6.1f %3d %9.3f%n", line, i, gp[i].getAltitude());
                 }
+                pixels += los.size();
                 out.println();
-                System.out.println(line);
+                if  (line % 20 == 0) {
+                    System.out.println(line);
+                }
             }
             long t1 = System.currentTimeMillis();
             out.close();
-            System.out.println((t1 - t0) + " ms");
+            System.out.println((pixels / (1.0e-3 * (t1 - t0))) + " pixels/s");
         } catch (IOException ioe) {
             Assert.fail(ioe.getLocalizedMessage());
         }
