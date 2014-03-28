@@ -157,10 +157,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     private GeodeticPoint recurseIntersection(final ExtendedEllipsoid ellipsoid,
                                               final Vector3D position, final Vector3D los,
                                               final MinMaxTreeTile tile,
-                                              final GeodeticPoint entry,
-                                              final int entryLat, final int entryLon,
-                                              final GeodeticPoint exit,
-                                              final int exitLat, final int exitLon)
+                                              final GeodeticPoint entry, final int entryLat, final int entryLon,
+                                              final GeodeticPoint exit, final int exitLat, final int exitLon)
         throws RuggedException, OrekitException {
 
         if (entryLat == exitLat && entryLon == exitLon) {
@@ -168,7 +166,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             GeodeticPoint intersection = tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los),
                                                                 exitLat, exitLon);
             if (intersection != null) {
-                // improve the point, by projecting it back on the 3D line, fixing the small body curvature at pixel level
+                // improve the point, by projecting it back on the 3D line,
+                // fixing the small body curvature remaining at pixel level
                 final Vector3D      delta     = ellipsoid.transform(intersection).subtract(position);
                 final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
                 final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
