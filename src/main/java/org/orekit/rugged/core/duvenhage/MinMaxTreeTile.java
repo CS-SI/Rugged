@@ -55,8 +55,8 @@ import org.orekit.rugged.core.raster.SimpleTile;
  * </p>
  * <p>
  * <table border="0">
- * <tr BGCOLOR="#EEEEFF"><font size="+1">
- *             <td>Level</td>         <td>Number of sub-tiles</td>    <td>Regular sub-tiles dimension</td></font></tr>
+ * <tr BGCOLOR="#EEEEFF">
+ *             <td>Level</td>         <td>Number of sub-tiles</td>    <td>Regular sub-tiles dimension</td></tr>
  * <tr>  <td align="center">8</td>  <td align="center">107 ⨉ 10</td>       <td align="center"> 1 ⨉   2</td>
  * <tr>  <td align="center">7</td>  <td align="center"> 54 ⨉ 10</td>       <td align="center"> 2 ⨉   2</td>
  * <tr>  <td align="center">6</td>  <td align="center"> 54 ⨉  5</td>        <td align="center"> 2 ⨉  4</td>
@@ -310,8 +310,8 @@ public class MinMaxTreeTile extends SimpleTile {
      * </p>
      * <p>
      * <table border="0">
-     * <tr BGCOLOR="#EEEEFF"><font size="+1">
-     *     <td>Level</td>   <td>Dimension</td>  <td>Start index</td>  <td>End index (inclusive)</td></font></tr>
+     * <tr BGCOLOR="#EEEEFF">
+     *     <td>Level</td>   <td>Dimension</td>  <td>Start index</td>  <td>End index (inclusive)</td></tr>
      * <tr>   <td>0</td>     <td>  7 ⨉  1</td>       <td>   0</td>        <td>  6</td> </tr>
      * <tr>   <td>1</td>     <td>  7 ⨉  2</td>       <td>   7</td>        <td> 20</td> </tr>
      * <tr>   <td>2</td>     <td> 14 ⨉  2</td>       <td>  21</td>        <td> 48</td> </tr>
