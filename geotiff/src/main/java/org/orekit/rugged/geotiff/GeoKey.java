@@ -17,9 +17,13 @@
 package org.orekit.rugged.geotiff;
 
 
-
+/** Enumerate for GeoTIFF keys.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.2">GeoTIFF specification, section 6.2</a>
+ * @author Luc Maisonobe
+ */
 enum GeoKey {
 
+    // CHECKSTYLE: stop JavadocVariable check
     GT_MODEL_TYPE(1024),
     GT_RASTER_TYPE(1025),
     GT_CITATION(1026),
@@ -68,6 +72,7 @@ enum GeoKey {
     VERTICAL_CITATION(4097),
     VERTICAL_DATUM(4098),
     VERTICAL_UNITS(4099);
+    // CHECKSTYLE: resume JavadocVariable check
 
     /** Key ID. */
     private final int id;

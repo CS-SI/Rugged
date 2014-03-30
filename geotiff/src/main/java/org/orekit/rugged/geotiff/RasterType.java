@@ -17,11 +17,17 @@
 package org.orekit.rugged.geotiff;
 
 
+/** Enumerate for raster types.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.2">GeoTIFF specification, section 6.3.1.2</a>
+ * @author Luc Maisonobe
+ */
 enum RasterType {
 
+    // CHECKSTYLE: stop JavadocVariable check
     UNDEFINED(0),
     RASTER_PIXEL_IS_AREA(1),
     RASTER_PIXEL_IS_POINT(2);
+    // CHECKSTYLE: resume JavadocVariable check
 
     /** Type ID. */
     private final int id;

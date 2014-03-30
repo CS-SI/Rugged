@@ -17,8 +17,13 @@
 package org.orekit.rugged.geotiff;
 
 
+/** Enumerate for linear units.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.3">GeoTIFF specification, section 6.3.1.3</a>
+ * @author Luc Maisonobe
+ */
 enum LinearUnits {
 
+    // CHECKSTYLE: stop JavadocVariable check
     METER(9001),
     FOOT(9002),
     FOOT_US_SURVEY(9003),
@@ -34,6 +39,7 @@ enum LinearUnits {
     YARD_INDIAN(9013),
     FATHOM(9014),
     MILE_INTERNATIONAL_NAUTICAL(9015);
+    // CHECKSTYLE: resume JavadocVariable check
 
     /** Units ID. */
     private final int id;

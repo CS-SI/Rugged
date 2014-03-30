@@ -17,12 +17,18 @@
 package org.orekit.rugged.geotiff;
 
 
+/** Enumerate for model type.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.1">GeoTIFF specification, section 6.3.1.1</a>
+ * @author Luc Maisonobe
+ */
 enum ModelType {
 
+    // CHECKSTYLE: stop JavadocVariable check
     UNDEFINED(0),
     PROJECTED(1),
     GEOGRAPHIC(2),
     GEOCENTRIC(3);
+    // CHECKSTYLE: resume JavadocVariable check
 
     /** Type ID. */
     private final int id;

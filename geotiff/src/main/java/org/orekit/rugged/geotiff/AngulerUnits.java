@@ -16,9 +16,13 @@
  */
 package org.orekit.rugged.geotiff;
 
-
+/** Enumerate for angular units.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.4">GeoTIFF specification, section 6.3.1.4</a>
+ * @author Luc Maisonobe
+ */
 enum AngulerUnits {
 
+    // CHECKSTYLE: stop JavadocVariable check
     RADIAN(9101),
     DEGREE(9102),
     ARC_MINUTE(9103),
@@ -27,6 +31,7 @@ enum AngulerUnits {
     GON(9106),
     DMS(9107),
     DMS_HEMISPHERE(9108);
+    // CHECKSTYLE: resume JavadocVariable check
 
     /** Units ID. */
     private final int id;

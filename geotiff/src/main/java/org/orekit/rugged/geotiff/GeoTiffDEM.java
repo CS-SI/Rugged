@@ -102,37 +102,37 @@ public class GeoTiffDEM {
         pixelsScales = content.findField(GeoTiffTagConstants.EXIF_TAG_MODEL_PIXEL_SCALE_TAG).getDoubleArrayValue();
         tiePoint     = content.findField(GeoTiffTagConstants.EXIF_TAG_MODEL_TIEPOINT_TAG).getDoubleArrayValue();
 
-        TiffField geoAsciiParams  = content.findField(GeoTiffTagConstants.EXIF_TAG_GEO_ASCII_PARAMS_TAG);
-        TiffField geoDoubleParams = content.findField(GeoTiffTagConstants.EXIF_TAG_GEO_DOUBLE_PARAMS_TAG);
-        int[] geoKeyDirectory     = content.findField(GeoTiffTagConstants.EXIF_TAG_GEO_KEY_DIRECTORY_TAG).getIntArrayValue();
-        int keyDirectoryVersion = geoKeyDirectory[0];
-        int keyRevision         = geoKeyDirectory[1];
-        int minorRevision       = geoKeyDirectory[2];
-        int numberOfKeys        = geoKeyDirectory[3];
+        final TiffField geoAsciiParams  = content.findField(GeoTiffTagConstants.EXIF_TAG_GEO_ASCII_PARAMS_TAG);
+        final TiffField geoDoubleParams = content.findField(GeoTiffTagConstants.EXIF_TAG_GEO_DOUBLE_PARAMS_TAG);
+        final int[] geoKeyDirectory     = content.findField(GeoTiffTagConstants.EXIF_TAG_GEO_KEY_DIRECTORY_TAG).getIntArrayValue();
+        final int keyDirectoryVersion = geoKeyDirectory[0];
+        final int keyRevision         = geoKeyDirectory[1];
+        final int minorRevision       = geoKeyDirectory[2];
+        final int numberOfKeys        = geoKeyDirectory[3];
         for (int i = 0; i < numberOfKeys; ++i) {
-            GeoKey geoKey   = GeoKey.getKey(geoKeyDirectory[4 * i + 4]);
-            int location    = geoKeyDirectory[4 * i + 5];
-            int count       = geoKeyDirectory[4 * i + 6];
-            int valueOffset = geoKeyDirectory[4 * i + 7];
+            final GeoKey geoKey   = GeoKey.getKey(geoKeyDirectory[4 * i + 4]);
+            final int location    = geoKeyDirectory[4 * i + 5];
+            final int count       = geoKeyDirectory[4 * i + 6];
+            final int valueOffset = geoKeyDirectory[4 * i + 7];
             switch(geoKey) {
-                case GT_MODEL_TYPE:
-                    modelType = ModelType.getType(getShort(geoKey, location, count, valueOffset));
-                    break;
-                case GT_RASTER_TYPE:
-                    rasterType = RasterType.getType(getShort(geoKey, location, count, valueOffset));
-                    break;
-                case GEOGRAPHIC_TYPE:
-                    csType = GeographicCoordinateSystemType.getType(getShort(geoKey, location, count, valueOffset));
-                    break;
-                case GEOG_LINEAR_UNITS:
-                    linearUnits = LinearUnits.getUnits(getShort(geoKey, location, count, valueOffset));
-                    break;
-                case GEOG_ANGULAR_UNITS:
-                    angulerUnits = AngulerUnits.getUnits(getShort(geoKey, location, count, valueOffset));
-                    break;
-                default:
-                    // TODO: support the other geo keys
-                    throw new ImageReadException(geoKey + " unsupported for now");
+            case GT_MODEL_TYPE:
+                modelType = ModelType.getType(getShort(geoKey, location, count, valueOffset));
+                break;
+            case GT_RASTER_TYPE:
+                rasterType = RasterType.getType(getShort(geoKey, location, count, valueOffset));
+                break;
+            case GEOGRAPHIC_TYPE:
+                csType = GeographicCoordinateSystemType.getType(getShort(geoKey, location, count, valueOffset));
+                break;
+            case GEOG_LINEAR_UNITS:
+                linearUnits = LinearUnits.getUnits(getShort(geoKey, location, count, valueOffset));
+                break;
+            case GEOG_ANGULAR_UNITS:
+                angulerUnits = AngulerUnits.getUnits(getShort(geoKey, location, count, valueOffset));
+                break;
+            default:
+                // TODO: support the other geo keys
+                throw new ImageReadException(geoKey + " unsupported for now");
             }
         }
 
@@ -143,6 +143,7 @@ public class GeoTiffDEM {
      * @param location location of the short
      * @param count number of elements
      * @param valueOffset offset of the value
+     * @return short value
      * @exception ImageReadException if value cannot be retrieved
      */
     private int getShort(final GeoKey key, final int location, final int count, final int valueOffset)

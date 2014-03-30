@@ -17,8 +17,13 @@
 package org.orekit.rugged.geotiff;
 
 
+/** Enumerate for geographic coordinate system type.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.2.1">GeoTIFF specification, section 6.3.2.1</a>
+ * @author Luc Maisonobe
+ */
 enum GeographicCoordinateSystemType {
 
+    // CHECKSTYLE: stop JavadocVariable check
     GCS_UNDEFINED(0),
     GCS_ADINDAN(4201),
     GCS_AGD66(4202),
@@ -188,6 +193,7 @@ enum GeographicCoordinateSystemType {
     GCSE_OSU91A(4033),
     GCSE_CLARKE1880(4034),
     GCSE_SPHERE(4035);
+    // CHECKSTYLE: resume JavadocVariable check
 
     /** Type ID. */
     private final int id;
