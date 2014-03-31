@@ -16,6 +16,8 @@
  */
 package org.orekit.rugged.geotiff;
 
+import org.apache.commons.math3.util.FastMath;
+
 /** Enumerate for angular units.
  * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.4">GeoTIFF specification, section 6.3.1.4</a>
  * @author Luc Maisonobe
@@ -23,14 +25,70 @@ package org.orekit.rugged.geotiff;
 enum AngulerUnits {
 
     // CHECKSTYLE: stop JavadocVariable check
-    RADIAN(9101),
-    DEGREE(9102),
-    ARC_MINUTE(9103),
-    ARC_SECOND(9104),
-    GRAD(9105),
-    GON(9106),
-    DMS(9107),
-    DMS_HEMISPHERE(9108);
+    RADIAN(9101) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            return raw;
+        }
+    },
+
+    DEGREE(9102) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            return FastMath.toRadians(raw);
+        }
+    },
+
+    ARC_MINUTE(9103) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            return FastMath.toRadians(raw / 60.0);
+        }
+    },
+
+    ARC_SECOND(9104) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            return FastMath.toRadians(raw / 3600.0);
+        }
+    },
+
+    GRAD(9105) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            return FastMath.PI * raw / 200.0;
+        }
+    },
+
+    GON(9106) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            return GRAD.toRadians(raw);
+        }
+    },
+
+    DMS(9107) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            throw new UnsupportedOperationException();
+        }
+    },
+
+    DMS_HEMISPHERE(9108) {
+        /** {@inheritDoc} */
+        @Override
+        public double toRadians(final double raw) {
+            throw new UnsupportedOperationException();
+        }
+    };
+
     // CHECKSTYLE: resume JavadocVariable check
 
     /** Units ID. */
@@ -42,6 +100,12 @@ enum AngulerUnits {
     private AngulerUnits(final int id) {
         this.id = id;
     }
+
+    /** Convert an angle to radians.
+     * @param raw angle, in instance units
+     * @return angle in radians
+     */
+    public abstract double toRadians(final double raw);
 
     /** Get the units corresponding to an id.
      * @param id type id

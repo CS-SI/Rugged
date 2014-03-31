@@ -1,0 +1,23 @@
+# no Digital Elevation Model data for point {0}, {1}
+NO_DEM_DATA_FOR_POINT = pas de données de Modèle Numérique de Terrain pour le point {0}, {1}
+
+# error parsing file {0}: {1}
+ERROR_PARSING_FILE = erreur lors de l''analyse du fichier {0} : {1}
+
+# missing pixel scale GeoTIFF tag in file {0}
+MISSING_PIXEL_SCALE = méta-donnée « pixel scale » GeoTIFF manquante dans le fichier {0}
+
+# missing tie point GeoTIFF tag in file {0}
+MISSING_TIE_POINT = méta-donnée « tie point » GeoTIFF manquante dans le fichier {0}
+
+# unsupported GeoTIFF version {0}/{1}.{2} in file {3} (expected {4}/{5}.{6})
+UNSUPPORTED_GEOTIFF_VERSION = version GeoTIFF {0}/{1}.{2} du fichier {3} non prise en compte (version attendue : {4}/{5}.{6})
+
+# unable to retrieve value for key {0} in file {1}
+UNABLE_TO_RETRIEVE_VALUE_FOR_KEY = impossible de récupérer la valeur pour le clef {0} dans le fichier {1}
+
+# unexpected GeoTIFF key {0} in file {1}
+UNEXPECTED_GEOKEY = clef GeoTIFF {0} inattendue dans le fichier {1}
+
+# GeoTIFF key {0} in file {1} has unexpected value {2} (expected {3})
+UNEXPECTED_GEOKEY_VALUE = la clef GeoTIFF {0} du fichier {1} a la valeur inattendue {2} (valeur attendue : {3})

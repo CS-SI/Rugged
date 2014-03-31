@@ -3,6 +3,6 @@ bin
 .project
 .settings
 target
-rugged-api/target
-rugged-core/target
-rugged-geotiff/target
+geotiff/target
+geotiff/src/test/resources/org/orekit/rugged/geotiff/ASTGTM2_*.zip
+
