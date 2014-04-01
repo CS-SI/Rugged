@@ -1,5 +1,5 @@
-# no Digital Elevation Model data for point {0}, {1}
-NO_DEM_DATA_FOR_POINT = no Digital Elevation Model data for point {0}, {1}
+# no Digital Elevation Model data for point {0}, {1} (should be in file {2})
+NO_DEM_DATA_FOR_POINT = no Digital Elevation Model data for point {0}, {1} (should be in file {2})
 
 # error parsing file {0}: {1}
 ERROR_PARSING_FILE = error parsing file {0}: {1}

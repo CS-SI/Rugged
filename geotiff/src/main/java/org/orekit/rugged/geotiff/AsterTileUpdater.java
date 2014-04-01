@@ -68,7 +68,8 @@ public class AsterTileUpdater implements TileUpdater {
             final File file = new File(directory, name);
             if (!file.exists()) {
                 throw new RuggedException(AsterMessages.NO_DEM_DATA_FOR_POINT,
-                                          FastMath.toDegrees(latitude), FastMath.toDegrees(longitude));
+                                          FastMath.toDegrees(latitude), FastMath.toDegrees(longitude),
+                                          name);
             }
 
             final ZipFile zipFile = new ZipFile(file);

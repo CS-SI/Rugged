@@ -50,7 +50,7 @@ public enum AsterMessages implements Localizable {
 
     // CHECKSTYLE: stop JavadocVariable check
 
-    NO_DEM_DATA_FOR_POINT("no Digital Elevation Model data for point {0}, {1}"),
+    NO_DEM_DATA_FOR_POINT("no Digital Elevation Model data for point {0}, {1} (should be in file {2})"),
     ERROR_PARSING_FILE("error parsing file {0}: {1}"),
     MISSING_PIXEL_SCALE("missing pixel scale GeoTIFF tag in file {0}"),
     MISSING_TIE_POINT("missing tie point GeoTIFF tag in file {0}"),
