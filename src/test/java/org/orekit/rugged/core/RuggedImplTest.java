@@ -19,8 +19,10 @@ package org.orekit.rugged.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +33,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
@@ -71,6 +75,9 @@ import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 
 public class RuggedImplTest {
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
     public void testSetContextWithoutOrekit()
@@ -163,6 +170,9 @@ public class RuggedImplTest {
     public void testMayonVolcano()
         throws RuggedException, OrekitException, URISyntaxException {
 
+        long t0 = System.currentTimeMillis();
+        int dimension = 2000;
+
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
@@ -182,12 +192,12 @@ public class RuggedImplTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                       FastMath.toRadians(10.0), 960);
+                                       FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
-        LineDatation lineDatation = new LinearLineDatation(1000.0, 1.0 / 1.5e-3);
-        double firstLine = 520;
-        double lastLine  = 1480;
+        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
 
         Propagator propagator = createPropagator(earth, gravityField, orbit);
         propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
@@ -208,23 +218,37 @@ public class RuggedImplTest {
         rugged.setLineSensor("line", los, lineDatation);
 
         try {
-            PrintStream out = new PrintStream(new File(new File(System.getProperty("user.home")), "x.dat"));
-            long t0 = System.currentTimeMillis();
+
+            int              size   = (lastLine - firstLine) * los.size() * 3 * Integer.SIZE;
+            RandomAccessFile out    = new RandomAccessFile(tempFolder.newFile(), "rw");
+            MappedByteBuffer buffer = out.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
+
+            long t1 = System.currentTimeMillis();
             int pixels = 0;
             for (double line = firstLine; line < lastLine; line++) {
                 GroundPoint[] gp = rugged.directLocalization("line", line);
                 for (int i = 0; i < gp.length; ++i) {
-                    out.format(Locale.US, "%6.1f %3d %9.3f%n", line, i, gp[i].getAltitude());
+                    final int latCode = (int) FastMath.rint(FastMath.scalb(gp[i].getLatitude(),  29));
+                    final int lonCode = (int) FastMath.rint(FastMath.scalb(gp[i].getLongitude(), 29));
+                    final int altCode = (int) FastMath.rint(FastMath.scalb(gp[i].getAltitude(),  17));
+                    buffer.putInt(latCode);
+                    buffer.putInt(lonCode);
+                    buffer.putInt(altCode);
                 }
                 pixels += los.size();
-                out.println();
-                if  (line % 20 == 0) {
-                    System.out.println(line);
+                if  (line % 100 == 0) {
+                    System.out.format(Locale.US, "%5.0f%n", line);
                 }
             }
-            long t1 = System.currentTimeMillis();
+            long t2 = System.currentTimeMillis();
             out.close();
-            System.out.println((pixels / (1.0e-3 * (t1 - t0))) + " pixels/s");
+            int sizeM = size / (1024 * 1024);
+            System.out.format(Locale.US,
+                              "%n%n%5dx%5d:%n" +
+                              "  Orekit initialization and DEM creation   : %5.1fs%n" +
+                              "  direct localization and %3dM grid writing: %5.1fs (%.0f px/s)%n",
+                              lastLine - firstLine, los.size(),
+                              1.0e-3 *(t1 - t0), sizeM, 1.0e-3 *(t2 - t1), pixels / (1.0e-3 * (t2 - t1)));
         } catch (IOException ioe) {
             Assert.fail(ioe.getLocalizedMessage());
         }
