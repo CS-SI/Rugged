@@ -21,18 +21,14 @@ import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
-import org.orekit.frames.TransformProvider;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.PVCoordinatesProvider;
 
-/** Transform provider from Spacecraft frame to observed body frame.
+/** Provider for observation transforms.
  * @author Luc Maisonobe
  */
-class SpacecraftToObservedBody implements TransformProvider {
-
-    /** Serializable UID. */
-    private static final long serialVersionUID = 20140311L;
+class SpacecraftToObservedBody {
 
     /** Inertial frame. */
     private Frame inertialFrame;
@@ -61,9 +57,12 @@ class SpacecraftToObservedBody implements TransformProvider {
         this.aProvider     = aProvider;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public Transform getTransform(final AbsoluteDate date)
+    /** Get transform from spacecraft to inertial frame.
+     * @param date date of the transform
+     * @return transform from spacecraft to inertial frame
+     * @exception OrekitException if spacecraft position or attitude cannot be computed at date
+     */
+    public Transform getScToInertial(final AbsoluteDate date)
         throws OrekitException {
 
         // propagate/interpolate orbit and attitude
@@ -71,15 +70,22 @@ class SpacecraftToObservedBody implements TransformProvider {
         final Attitude attitude   = aProvider.getAttitude(pvProvider, date, inertialFrame);
 
         // compute transform from spacecraft frame to inertial frame
-        final Transform scToInert = new Transform(date,
+        return new Transform(date,
                                                   new Transform(date, attitude.getOrientation().revert()),
                                                   new Transform(date, pv));
 
-        // compute transform from inertial frame to body frame
-        final Transform inertToBody = inertialFrame.getTransformTo(bodyFrame, date);
+    }
 
-        // combine transforms
-        return new Transform(date, scToInert, inertToBody);
+    /** Get transform from inertial frame to body frame.
+     * @param date date of the transform
+     * @return transform from inertial frame to body frame
+     * @exception OrekitException if frames cannot be computed at date
+     */
+    public Transform getInertialToBody(final AbsoluteDate date)
+        throws OrekitException {
+
+        // compute transform from inertial frame to body frame
+        return inertialFrame.getTransformTo(bodyFrame, date);
 
     }
 

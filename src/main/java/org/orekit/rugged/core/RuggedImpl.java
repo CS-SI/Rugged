@@ -374,17 +374,27 @@ public class RuggedImpl implements Rugged {
             // select the sensor
             final Sensor sensor = getSensor(sensorName);
 
-            // compute once the transform between spacecraft and observed body
-            final AbsoluteDate date = sensor.getDate(lineNumber);
-            final Transform t = scToBody.getTransform(date);
+            // compute the approximate transform between spacecraft and observed body
+            final AbsoluteDate date        = sensor.getDate(lineNumber);
+            final Transform    scToInert   = scToBody.getScToInertial(date);
+            final Transform    inertToBody = scToBody.getInertialToBody(date);
+            final Transform    approximate = new Transform(date, scToInert, inertToBody);
 
             // compute localization of each pixel
             final GroundPoint[] gp = new GroundPoint[sensor.getNbPixels()];
             for (int i = 0; i < gp.length; ++i) {
+
+                // fix light travel time
+                final Vector3D  sP     = approximate.transformPosition(sensor.getPosition(i));
+                final Vector3D  sL     = approximate.transformVector(sensor.getLos(i));
+                final Vector3D  eP     = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
+                final double    deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
+                final Transform fixed  = new Transform(date, scToInert, inertToBody.shiftedBy(-deltaT));
+
                 final GeodeticPoint geodetic =
                         algorithm.intersection(ellipsoid,
-                                               t.transformPosition(sensor.getPosition(i)),
-                                               t.transformVector(sensor.getLos(i)));
+                                               fixed.transformPosition(sensor.getPosition(i)),
+                                               fixed.transformVector(sensor.getLos(i)));
                 gp[i] = new GroundPoint(geodetic.getLatitude(),
                                         geodetic.getLongitude(),
                                         geodetic.getAltitude());
