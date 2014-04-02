@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.core;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
@@ -143,6 +144,18 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         // compute point
         return new Vector3D(1, position, -Vector3D.dotProduct(position, normal) / d, los);
 
+    }
+
+    /** Get point on ground along a pixel line of sight.
+     * @param position pixel position (in body frame)
+     * @param los pixel line-of-sight, not necessarily normalized (in body frame)
+     * @return point on ground
+     * @exception OrekitException if no such point exists (typically line-of-sight missing body)
+     */
+    public GeodeticPoint pointOnGround(final Vector3D position, final Vector3D los)
+        throws OrekitException {
+        return getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),
+                                    position, getBodyFrame(), null);
     }
 
     /** Get point at some altitude along a pixel line of sight.

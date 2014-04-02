@@ -48,8 +48,7 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
                                       final Vector3D position, final Vector3D los)
         throws RuggedException {
         try {
-            return ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, 0.0),
-                                       ellipsoid.getBodyFrame(), null);
+            return ellipsoid.pointOnGround(position, los);
         } catch (OrekitException oe) {
             // this should never happen
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
