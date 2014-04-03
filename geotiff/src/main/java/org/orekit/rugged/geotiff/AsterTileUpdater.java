@@ -216,15 +216,16 @@ public class AsterTileUpdater implements TileUpdater {
                              latitudeRows, longitudeColumns);
 
             // read the raster data
-            final int msb = reader.getByteOrder() == ByteOrder.BIG_ENDIAN ? 0 : 1;
-            final int lsb = reader.getByteOrder() == ByteOrder.BIG_ENDIAN ? 1 : 0;
+            final int msbOffset = reader.getByteOrder() == ByteOrder.BIG_ENDIAN ? 0 : 1;
+            final int lsbOffset = reader.getByteOrder() == ByteOrder.BIG_ENDIAN ? 1 : 0;
             int i = 0;
             for (final TiffDirectory tiffDirectory : contents.directories) {
                 for (final TiffDirectory.ImageDataElement element : tiffDirectory.getTiffRawImageDataElements()) {
                     final byte[] bytes = source.getBlock(element.offset, element.length);
                     for (int longitudeIndex = 0; longitudeIndex < longitudeColumns; ++longitudeIndex) {
-                        final int elevation = (bytes[2 * longitudeIndex + msb] << 8) |
-                                bytes[2 * longitudeIndex + 1 + lsb];
+                        final int msb = bytes[2 * longitudeIndex + msbOffset];
+                        final int lsb = 0xff & bytes[2 * longitudeIndex + lsbOffset];
+                        final int elevation = (msb << 8) | lsb;
                         tile.setElevation(latitudeRows - 1 - i, longitudeIndex, elevation);
                     }
                     i++;
