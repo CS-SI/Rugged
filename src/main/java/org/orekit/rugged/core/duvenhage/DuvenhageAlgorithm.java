@@ -96,7 +96,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final LimitPoint exit = findExit(tile, ellipsoid, position, los);
 
                 final GeodeticPoint intersection =
-                        recurseIntersection(ellipsoid, position, los, tile,
+                        recurseIntersection(0, ellipsoid, position, los, tile,
                                             current,
                                             tile.getLatitudeIndex(current.getLatitude()),
                                             tile.getLongitudeIndex(current.getLongitude()),
@@ -138,6 +138,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     }
 
     /** Compute intersection of line with Digital Elevation Model in a sub-tile.
+     * @param recursion depth
      * @param ellipsoid reference ellipsoid
      * @param position pixel position in ellipsoid frame
      * @param los pixel line-of-sight in ellipsoid frame
@@ -153,12 +154,24 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @exception RuggedException if intersection cannot be found
      * @exception OrekitException if points cannot be converted to geodetic coordinates
      */
-    private GeodeticPoint recurseIntersection(final ExtendedEllipsoid ellipsoid,
+    private GeodeticPoint recurseIntersection(final int depth, final ExtendedEllipsoid ellipsoid,
                                               final Vector3D position, final Vector3D los,
                                               final MinMaxTreeTile tile,
                                               final GeodeticPoint entry, final int entryLat, final int entryLon,
                                               final GeodeticPoint exit, final int exitLat, final int exitLon)
         throws RuggedException, OrekitException {
+
+        if (depth > 30) {
+            // this should never happen
+            throw RuggedException.createInternalError(null);
+        }
+
+        if (FastMath.min(entryLat, exitLat) < 0 || FastMath.max(entryLat, exitLat) >= tile.getLatitudeRows() ||
+            FastMath.min(entryLon, exitLon) < 0 || FastMath.max(entryLon, exitLon) >= tile.getLongitudeColumns()) {
+            // search segment is outside of tile (probably due to the 1 offset with respect
+            // to a boundary crossing index when splitting line-of-sight in the caller
+            return null;
+        }
 
         if (entryLat == exitLat && entryLon == exitLon) {
             // we have narrowed the search down to a single Digital Elevation Model pixel
@@ -211,7 +224,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     final int crossingLonAfter  = crossingLon - (entryLon <= exitLon ? 0 : 1);
 
                     // look for intersection
-                    final GeodeticPoint intersection = recurseIntersection(ellipsoid, position, los, tile,
+                    final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
                                                                            previousGP, previousLat, previousLon,
                                                                            crossingGP, crossingLat, crossingLonBefore);
                     if (intersection != null) {
@@ -246,7 +259,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     final int crossingLatAfter  = crossingLat - (entryLat <= exitLat ? 0 : 1);
 
                     // look for intersection
-                    final GeodeticPoint intersection = recurseIntersection(ellipsoid, position, los, tile,
+                    final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
                                                                            previousGP, previousLat, previousLon,
                                                                            crossingGP, crossingLatBefore, crossingLon);
                     if (intersection != null) {
@@ -264,7 +277,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         }
 
         // last part of the segment, up to exit point
-        return recurseIntersection(ellipsoid, position, los, tile,
+        return recurseIntersection(depth + 1, ellipsoid, position, los, tile,
                                    previousGP, previousLat, previousLon,
                                    exit, exitLat, exitLon);
 
