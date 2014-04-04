@@ -115,7 +115,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     current = ellipsoid.transform(forward, ellipsoid.getBodyFrame(), null);
                     tile = cache.getTile(current.getLatitude(), current.getLongitude());
 
-                    if (tile.interpolateElevation(current.getLatitude(), current.getLongitude()) <= current.getAltitude()) {
+                    if (tile.interpolateElevation(current.getLatitude(), current.getLongitude()) >= current.getAltitude()) {
                         // extremely rare case! The line-of-sight traversed the Digital Elevation Model
                         // during the very short forward step we used to move to next tile
                         // we consider this point to be OK
