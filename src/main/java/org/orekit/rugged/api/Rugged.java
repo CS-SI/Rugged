@@ -67,6 +67,9 @@ public interface Rugged {
         /** Constant for International Terrestrial Reference Frame. */
         ITRF,
 
+        /** Constant for International Terrestrial Reference Frame based on older equinox paradigm. */
+        ITRF_EQUINOX,
+
         /** Constant for Geocentric True Of Date frame. */
         GTOD
 

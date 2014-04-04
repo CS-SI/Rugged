@@ -246,6 +246,8 @@ public class RuggedImpl implements Rugged {
         switch (bodyRotatingFrame) {
         case ITRF :
             return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+        case ITRF_EQUINOX :
+            return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
         case GTOD :
             return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
         default :
