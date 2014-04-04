@@ -29,7 +29,7 @@
 
     package api #DDEBD8
       interface UpdatableTile {
-        +setGeometry(φref, λref, δφ, δλ, rows, columns)
+        +setGeometry(φ₀, λ₀, δφ, δλ, rows, columns)
         +setElevation(i, j, h)
       }
       interface TileUpdater {
@@ -38,7 +38,7 @@
       UpdatableTile <-- TileUpdater : updates
     end package
 
-    package dem #DDEBD8
+    package raster #DDEBD8
      interface Tile
      class SpecializedTile
       interface "TileFactory<T extends Tile>" as TileFactory_T_ {

@@ -40,28 +40,29 @@
     A -> I : init
     activate I
       I -> I : loadModels
-      I -> R : initiliaze(sensors, ephemeris)
+      I -> I : unfoldOpticalPath
+      activate I
+      deactivate I
+      I -> R : setGeneralContext(algorithm, frames, ellipsoid, ephemeris)
       activate R
-        R -> R : unfoldOpticalPath(sensors)
+        R -> O : createInterpolator(ephemeris)
+        activate O
+          O --> R : interpolating propagator
+        deactivate O
+        R -> R : createTransformProvider(interpolator)
         activate R
-          R -> O : composeTransforms
-          activate O
-            O --> R : sensors transforms
-          deactivate O
-        deactivate R
-       R -> O : createPropagator(ephemeris)
-         activate O
-           O --> R : interpolating propagator
-          deactivate O
-       R -> O : createTransformProvider(sensors transforms, propagator)
-         activate O
-           O --> R : combined TransformProvider with caching feature
-         deactivate O
+         deactivate R
       deactivate R
-      I -> R : registerLineTimeStampingModel
+      I -> R : setLineSensor(sensorName, pixels, datationModel)
       activate R
       deactivate R
-      I -> R : registerDEMCallback
+      I -> R : setLineSensor(sensorName, pixels, datationModel)
+      activate R
+      deactivate R
+      I -> R : setLineSensor(sensorName, pixels, datationModel)
+      activate R
+      deactivate R
+      I -> R : setUpTilesManagement(tileUpdater, maxCachedTiles)
       activate R
       deactivate R
     deactivate I

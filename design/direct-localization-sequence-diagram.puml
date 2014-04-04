@@ -34,32 +34,45 @@
   participant "Application" as A
   participant "Interface" as I
   participant "Rugged" as R
+  participant "Algorithm" as G
   participant "Orekit" as O
 
   activate A
-  A  -> I : directLocalization(line)
+  A  -> I : directLocalization(name, number)
      activate I
-       I  -> R : directLocalization(line)
+       I  -> R : directLocalization(name, number)
        activate R
          R -> R : apply time stamping model
          R -> R : apply combined transform provider at date
          R -> R : loop over line pixels pₖ
          activate R
-           R -> O : convert(line-of-sight)
-           activate O
-             O --> R : line-of-sight in Earth frame
-           deactivate O
            R -> O : intersection(ellipsoid, line-of-sight)
-           activate O
-             O --> R : geodetic point
-           deactivate O
-           R -> R : DEM intersection
+           R -> R : fix speed of light delay in transforms
            activate R
-              R -> I : DEM callback
-              I --> R : DEM raw data cell
-              R --> R : φₖ, λₖ, hₖ
            deactivate R
-            R --> R : list(φₖ, λₖ, hₖ)
+           R -> G : intersection(ellipsoid, line-of-sight)
+           activate G
+             G -> O  : conversions
+             G -> R : elevation(φₖ, λₖ)
+             activate R
+               R -> I : DEM callback
+               I --> R : DEM raw data cell
+               R --> G : h(φₖ, λₖ)
+             deactivate R
+             G -> O  : conversions
+             G -> R : elevation(φₖ, λₖ)
+             activate R
+               R --> G : h(φₖ, λₖ)
+             deactivate R
+             G -> O  : conversions
+             G -> R : elevation(φₖ, λₖ)
+             activate R
+               R --> G : h(φₖ, λₖ)
+             deactivate R
+             G -> O  : conversions
+             G --> R : φₖ, λₖ, hₖ
+           deactivate G
+           R --> R : list(φₖ, λₖ, hₖ)
          deactivate R
          R --> I : list(φₖ, λₖ, hₖ)
        deactivate R

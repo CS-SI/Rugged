@@ -46,11 +46,7 @@
       activate O
       O --> R : Earth to inertial transform
       deactivate O
-    R -> O : compose transforms
-      activate O
-      O --> R : spacecraft to Earth transform
-      deactivate O
-      R --> C : spacecraft to Earth transform
+    R --> C : spacecraft to inertial, inertial to Earth
     deactivate R
   deactivate C
 
