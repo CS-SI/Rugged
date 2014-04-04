@@ -138,7 +138,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     }
 
     /** Compute intersection of line with Digital Elevation Model in a sub-tile.
-     * @param recursion depth
+     * @param depth recursion depth
      * @param ellipsoid reference ellipsoid
      * @param position pixel position in ellipsoid frame
      * @param los pixel line-of-sight in ellipsoid frame
