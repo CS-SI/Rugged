@@ -37,7 +37,6 @@ import org.orekit.frames.Transform;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
-import org.orekit.rugged.api.GroundPoint;
 import org.orekit.rugged.api.LineDatation;
 import org.orekit.rugged.api.PixelLOS;
 import org.orekit.rugged.api.Rugged;
@@ -367,7 +366,7 @@ public class RuggedImpl implements Rugged {
 
     /** {@inheritDoc} */
     @Override
-    public GroundPoint[] directLocalization(final String sensorName, final double lineNumber)
+    public GeodeticPoint[] directLocalization(final String sensorName, final double lineNumber)
         throws RuggedException {
         try {
 
@@ -383,7 +382,7 @@ public class RuggedImpl implements Rugged {
             final Transform    approximate = new Transform(date, scToInert, inertToBody);
 
             // compute localization of each pixel
-            final GroundPoint[] gp = new GroundPoint[sensor.getNbPixels()];
+            final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
             for (int i = 0; i < gp.length; ++i) {
 
                 // fix light travel time
@@ -393,13 +392,9 @@ public class RuggedImpl implements Rugged {
                 final double    deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
                 final Transform fixed  = new Transform(date, scToInert, inertToBody.shiftedBy(-deltaT));
 
-                final GeodeticPoint geodetic =
-                        algorithm.intersection(ellipsoid,
+                gp[i] = algorithm.intersection(ellipsoid,
                                                fixed.transformPosition(sensor.getPosition(i)),
                                                fixed.transformVector(sensor.getLos(i)));
-                gp[i] = new GroundPoint(geodetic.getLatitude(),
-                                        geodetic.getLongitude(),
-                                        geodetic.getAltitude());
             }
 
             return gp;
@@ -411,7 +406,7 @@ public class RuggedImpl implements Rugged {
 
     /** {@inheritDoc} */
     @Override
-    public SensorPixel inverseLocalization(final String sensorName, final GroundPoint groundPoint)
+    public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint groundPoint)
         throws RuggedException {
 
         checkContext();

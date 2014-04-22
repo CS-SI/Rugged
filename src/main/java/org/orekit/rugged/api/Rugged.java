@@ -19,6 +19,8 @@ package org.orekit.rugged.api;
 import java.io.File;
 import java.util.List;
 
+import org.orekit.bodies.GeodeticPoint;
+
 /** Main interface to Rugged library.
  * @author Luc Maisonobe
  */
@@ -151,7 +153,7 @@ public interface Rugged {
      * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
      * been called beforehand, or sensor is unknown
      */
-    GroundPoint[] directLocalization(String name, double lineNumber)
+    GeodeticPoint[] directLocalization(String name, double lineNumber)
         throws RuggedException;
 
     /** Inverse localization of a ground point.
@@ -163,7 +165,7 @@ public interface Rugged {
      * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
      * been called beforehand, or sensor is unknown
      */
-    SensorPixel inverseLocalization(String name, GroundPoint groundPoint)
+    SensorPixel inverseLocalization(String name, GeodeticPoint groundPoint)
         throws RuggedException;
 
 }

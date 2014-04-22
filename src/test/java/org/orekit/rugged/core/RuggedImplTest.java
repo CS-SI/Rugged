@@ -59,7 +59,6 @@ import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.rugged.api.GroundPoint;
 import org.orekit.rugged.api.LineDatation;
 import org.orekit.rugged.api.LinearLineDatation;
 import org.orekit.rugged.api.PixelLOS;
@@ -226,7 +225,7 @@ public class RuggedImplTest {
             long t1 = System.currentTimeMillis();
             int pixels = 0;
             for (double line = firstLine; line < lastLine; line++) {
-                GroundPoint[] gp = rugged.directLocalization("line", line);
+                GeodeticPoint[] gp = rugged.directLocalization("line", line);
                 for (int i = 0; i < gp.length; ++i) {
                     final int latCode = (int) FastMath.rint(FastMath.scalb(gp[i].getLatitude(),  29));
                     final int lonCode = (int) FastMath.rint(FastMath.scalb(gp[i].getLongitude(), 29));
