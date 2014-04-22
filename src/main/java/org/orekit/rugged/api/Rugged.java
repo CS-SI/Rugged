@@ -56,35 +56,28 @@ import org.orekit.utils.PVCoordinatesProvider;
 public class Rugged {
 
     /** Reference date. */
-    private AbsoluteDate referenceDate;
+    private final AbsoluteDate referenceDate;
 
     /** Inertial frame. */
-    private Frame frame;
+    private final Frame frame;
 
     /** Reference ellipsoid. */
-    private ExtendedEllipsoid ellipsoid;
+    private final ExtendedEllipsoid ellipsoid;
 
     /** Converter between spacecraft and body. */
-    private SpacecraftToObservedBody scToBody;
+    private final SpacecraftToObservedBody scToBody;
 
     /** Sensors. */
     private final Map<String, Sensor> sensors;
 
     /** DEM intersection algorithm. */
-    private IntersectionAlgorithm algorithm;
+    private final IntersectionAlgorithm algorithm;
 
-    /** Simple constructor.
-     */
-    protected Rugged() {
-        sensors = new HashMap<String, Sensor>();
-    }
-
-    /** Set up general context.
+    /** Build a configured instance.
      * <p>
      * This method is the first one that must be called, otherwise the
      * other methods will fail due to uninitialized context.
      * </p>
-     * @param orekitDataDir top directory for Orekit data
      * @param referenceDate reference date from which all other dates are computed
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoidID identifier of reference ellipsoid
@@ -96,12 +89,11 @@ public class Rugged {
      * @param aInterpolationOrder order to use for attitude interpolation
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public  void setGeneralContext(final AbsoluteDate newReferenceDate,
-                                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
-                                   final InertialFrameId inertialFrameID,
-                                   final BodyRotatingFrameId bodyRotatingFrameID,
-                                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
-                                   final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
+    public Rugged(final AbsoluteDate newReferenceDate,
+                  final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
+                  final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
+                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
+                  final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         try {
 
@@ -120,12 +112,14 @@ public class Rugged {
             // intersection algorithm
             algorithm = selectAlgorithm(algorithmID);
 
+            sensors = new HashMap<String, Sensor>();
+
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
         }
     }
 
-    /** Set up general context.
+    /** Build a configured instance.
      * <p>
      * This method is the first one that must be called, otherwise the
      * other methods will fail due to uninitialized context.
@@ -138,11 +132,10 @@ public class Rugged {
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public void setGeneralContext(final AbsoluteDate newReferenceDate,
-                                  final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
-                                  final InertialFrameId inertialFrameID,
-                                  final BodyRotatingFrameId bodyRotatingFrameID,
-                                  final Propagator propagator)
+    public Rugged(final AbsoluteDate newReferenceDate,
+                  final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
+                  final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
+                  final Propagator propagator)
         throws RuggedException {
         try {
 
@@ -159,6 +152,8 @@ public class Rugged {
 
             // intersection algorithm
             algorithm = selectAlgorithm(algorithmID);
+
+            sensors = new HashMap<String, Sensor>();
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());

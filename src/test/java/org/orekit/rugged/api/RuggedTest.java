@@ -138,13 +138,12 @@ public class RuggedTest {
             createQ(t0,19.000, 0.522119033749, -0.395304129256,  0.577847874330,  0.487050504694),
             createQ(t0,20.000, 0.522421006719, -0.395049578765,  0.577574493570,  0.487257453954));
 
-        Rugged rugged = new Rugged();
-        rugged.setGeneralContext(t0,
-                                 AlgorithmId.DUVENHAGE,
-                                 EllipsoidId.WGS84,
-                                 InertialFrameId.EME2000,
-                                 BodyRotatingFrameId.ITRF,
-                                 pv, 8, q, 8);
+        Rugged rugged = new Rugged(t0,
+                                   AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84,
+                                   InertialFrameId.EME2000,
+                                   BodyRotatingFrameId.ITRF,
+                                   pv, 8, q, 8);
 
         Assert.assertEquals(new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC()),
                             rugged.getReferenceDate());
@@ -162,13 +161,12 @@ public class RuggedTest {
         Orbit      orbit                                  = createOrbit(gravityField);
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
 
-        Rugged rugged = new Rugged();
-        rugged.setGeneralContext(propagator.getInitialState().getDate(),
-                                 AlgorithmId.DUVENHAGE,
-                                 EllipsoidId.WGS84,
-                                 InertialFrameId.EME2000,
-                                 BodyRotatingFrameId.ITRF,
-                                 propagator);
+        Rugged rugged = new Rugged(propagator.getInitialState().getDate(),
+                                   AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84,
+                                   InertialFrameId.EME2000,
+                                   BodyRotatingFrameId.ITRF,
+                                   propagator);
 
         Assert.assertEquals(propagator.getInitialState().getDate(), rugged.getReferenceDate());
 
@@ -213,13 +211,12 @@ public class RuggedTest {
         propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
         Propagator ephemeris = propagator.getGeneratedEphemeris();
 
-        Rugged rugged = new Rugged();
-        rugged.setGeneralContext(crossing,
-                                 AlgorithmId.DUVENHAGE,
-                                 EllipsoidId.WGS84,
-                                 InertialFrameId.EME2000,
-                                 BodyRotatingFrameId.ITRF,
-                                 ephemeris);
+        Rugged rugged = new Rugged(crossing,
+                                   AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84,
+                                   InertialFrameId.EME2000,
+                                   BodyRotatingFrameId.ITRF,
+                                   ephemeris);
         rugged.setUpTilesManagement(updater, 8);
 
         rugged.setLineSensor("line", los, lineDatation);
