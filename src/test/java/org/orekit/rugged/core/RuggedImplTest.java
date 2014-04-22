@@ -60,6 +60,10 @@ import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
+import org.orekit.rugged.api.AlgorithmId;
+import org.orekit.rugged.api.BodyRotatingFrameId;
+import org.orekit.rugged.api.EllipsoidId;
+import org.orekit.rugged.api.InertialFrameId;
 import org.orekit.rugged.api.LineDatation;
 import org.orekit.rugged.api.LinearLineDatation;
 import org.orekit.rugged.api.PixelLOS;
@@ -136,10 +140,10 @@ public class RuggedImplTest {
 
         RuggedImpl rugged = new RuggedImpl();
         rugged.setGeneralContext(t0,
-                                 Rugged.Algorithm.DUVENHAGE,
-                                 Rugged.Ellipsoid.WGS84,
-                                 Rugged.InertialFrame.EME2000,
-                                 Rugged.BodyRotatingFrame.ITRF,
+                                 AlgorithmId.DUVENHAGE,
+                                 EllipsoidId.WGS84,
+                                 InertialFrameId.EME2000,
+                                 BodyRotatingFrameId.ITRF,
                                  pv, 8, q, 8);
 
         Assert.assertEquals(new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC()),
@@ -160,10 +164,10 @@ public class RuggedImplTest {
 
         RuggedImpl rugged = new RuggedImpl();
         rugged.setGeneralContext(propagator.getInitialState().getDate(),
-                                 Rugged.Algorithm.DUVENHAGE,
-                                 Rugged.Ellipsoid.WGS84,
-                                 Rugged.InertialFrame.EME2000,
-                                 Rugged.BodyRotatingFrame.ITRF,
+                                 AlgorithmId.DUVENHAGE,
+                                 EllipsoidId.WGS84,
+                                 InertialFrameId.EME2000,
+                                 BodyRotatingFrameId.ITRF,
                                  propagator);
 
         Assert.assertEquals(propagator.getInitialState().getDate(), rugged.getReferenceDate());
@@ -211,10 +215,10 @@ public class RuggedImplTest {
 
         RuggedImpl rugged = new RuggedImpl();
         rugged.setGeneralContext(crossing,
-                                 Rugged.Algorithm.DUVENHAGE,
-                                 Rugged.Ellipsoid.WGS84,
-                                 Rugged.InertialFrame.EME2000,
-                                 Rugged.BodyRotatingFrame.ITRF,
+                                 AlgorithmId.DUVENHAGE,
+                                 EllipsoidId.WGS84,
+                                 InertialFrameId.EME2000,
+                                 BodyRotatingFrameId.ITRF,
                                  ephemeris);
         rugged.setUpTilesManagement(updater, 8);
 

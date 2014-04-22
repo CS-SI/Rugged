@@ -35,6 +35,10 @@ import org.orekit.frames.Transform;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
+import org.orekit.rugged.api.AlgorithmId;
+import org.orekit.rugged.api.BodyRotatingFrameId;
+import org.orekit.rugged.api.EllipsoidId;
+import org.orekit.rugged.api.InertialFrameId;
 import org.orekit.rugged.api.LineDatation;
 import org.orekit.rugged.api.PixelLOS;
 import org.orekit.rugged.api.Rugged;
@@ -83,9 +87,9 @@ public class RuggedImpl implements Rugged {
     /** {@inheritDoc} */
     @Override
     public  void setGeneralContext(final AbsoluteDate newReferenceDate,
-                                   final Algorithm algorithmID, final Ellipsoid ellipsoidID,
-                                   final InertialFrame inertialFrameID,
-                                   final BodyRotatingFrame bodyRotatingFrameID,
+                                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
+                                   final InertialFrameId inertialFrameID,
+                                   final BodyRotatingFrameId bodyRotatingFrameID,
                                    final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
                                    final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
@@ -125,9 +129,9 @@ public class RuggedImpl implements Rugged {
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public void setGeneralContext(final AbsoluteDate newReferenceDate,
-                                  final Algorithm algorithmID, final Ellipsoid ellipsoidID,
-                                  final InertialFrame inertialFrameID,
-                                  final BodyRotatingFrame bodyRotatingFrameID,
+                                  final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
+                                  final InertialFrameId inertialFrameID,
+                                  final BodyRotatingFrameId bodyRotatingFrameID,
                                   final Propagator propagator)
         throws RuggedException {
         try {
@@ -182,7 +186,7 @@ public class RuggedImpl implements Rugged {
      * @return inertial frame
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private Frame selectInertialFrame(final InertialFrame inertialFrame)
+    private Frame selectInertialFrame(final InertialFrameId inertialFrame)
         throws OrekitException {
 
         // set up the inertial frame
@@ -209,7 +213,7 @@ public class RuggedImpl implements Rugged {
      * @return body rotating frame
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private Frame selectBodyRotatingFrame(final BodyRotatingFrame bodyRotatingFrame)
+    private Frame selectBodyRotatingFrame(final BodyRotatingFrameId bodyRotatingFrame)
         throws OrekitException {
 
         // set up the rotating frame
@@ -233,7 +237,7 @@ public class RuggedImpl implements Rugged {
      * @return selected ellipsoid
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private ExtendedEllipsoid selectEllipsoid(final Ellipsoid ellipsoidID, final Frame bodyFrame)
+    private ExtendedEllipsoid selectEllipsoid(final EllipsoidId ellipsoidID, final Frame bodyFrame)
         throws OrekitException {
 
         // set up the ellipsoid
@@ -312,7 +316,7 @@ public class RuggedImpl implements Rugged {
      * @param algorithmID intersection algorithm identifier
      * @return selected algorithm
      */
-    private IntersectionAlgorithm selectAlgorithm(final Algorithm algorithmID) {
+    private IntersectionAlgorithm selectAlgorithm(final AlgorithmId algorithmID) {
 
         // set up the algorithm
         switch (algorithmID) {

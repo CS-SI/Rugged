@@ -30,87 +30,6 @@ import org.orekit.utils.PVCoordinates;
  */
 public interface Rugged {
 
-    /** Enumerate for ellipsoid. */
-    enum Ellipsoid {
-
-        /** Constant for GRS 80 ellipsoid. */
-        GRS80,
-
-        /** Constant for WGS 84 ellipsoid. */
-        WGS84,
-
-        /** Constant for IERS 96 ellipsoid. */
-        IERS96,
-
-        /** Constant for IERS 2003 ellipsoid. */
-        IERS2003
-
-    }
-
-    /** Enumerate for inertial frames. */
-    enum InertialFrame {
-
-        /** Constant for Geocentric Celestial Reference Frame. */
-        GCRF,
-
-        /** Constant for Earth Mean Equator 2000 frame (aka J2000). */
-        EME2000,
-
-        /** Constant for Mean Of Date frame, with IERS 96 conventions (Lieske precession). */
-        MOD,
-
-        /** Constant for True Of Date frame, with IERS 96 conventions (Wahr nutation). */
-        TOD,
-
-        /** Constant for Veis 1950 frame. */
-        VEIS1950
-
-    }
-
-    /** Enumerate for body rotating frames. */
-    enum BodyRotatingFrame {
-
-        /** Constant for International Terrestrial Reference Frame. */
-        ITRF,
-
-        /** Constant for International Terrestrial Reference Frame based on older equinox paradigm. */
-        ITRF_EQUINOX,
-
-        /** Constant for Geocentric True Of Date frame. */
-        GTOD
-
-    }
-
-    /** Enumerate for Digital Elevation Model intersection. */
-    enum Algorithm {
-
-        /** Fast algorithm due to Bernardt Duvenhage.
-         * <p>
-         * The algorithm is described in the 2009 paper:
-         * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
-         * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
-         * </p>
-         */
-        DUVENHAGE,
-
-        /** Basic, <em>very slow</em> algorithm, designed only for tests and validation purposes.
-         * <p>
-         * The algorithm simply computes entry and exit points at high and low altitudes,
-         * and scans all Digital Elevation Models in the sub-tiles defined by these two
-         * corner points. It is not designed for operational use.
-         * </p>
-         */
-        BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY,
-
-        /** Dummy algorithm that simply ignores the Digital Elevation Model.
-         * <p>
-         * Intersections are computed only with respect to the reference ellipsoid.
-         * </p>
-         */
-        IGNORE_DEM_USE_ELLIPSOID
-
-    }
-
     /** Set up general context.
      * <p>
      * This method is the first one that must be called, otherwise the
@@ -129,8 +48,8 @@ public interface Rugged {
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     void setGeneralContext(AbsoluteDate referenceDate,
-                           Algorithm algorithmID, Ellipsoid ellipsoidID,
-                           InertialFrame inertialFrameID, BodyRotatingFrame bodyRotatingFrameID,
+                           AlgorithmId algorithmID, EllipsoidId ellipsoidID,
+                           InertialFrameId inertialFrameID, BodyRotatingFrameId bodyRotatingFrameID,
                            List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, int pvInterpolationOrder,
                            List<Pair<AbsoluteDate, Rotation>> quaternions, int aInterpolationOrder)
         throws RuggedException;
