@@ -73,6 +73,9 @@ public class Rugged {
     /** DEM intersection algorithm. */
     private final IntersectionAlgorithm algorithm;
 
+    /** Flag for fixing light travel time. */
+    private final boolean fixLightTravelTime;
+
     /** Build a configured instance.
      * <p>
      * This method is the first one that must be called, otherwise the
@@ -85,6 +88,8 @@ public class Rugged {
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
      * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param fixLightTravelTime if true, light travel time should be fixed when computing
+     * direct and inverse localization
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
@@ -95,6 +100,7 @@ public class Rugged {
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
+                  final boolean fixLightTravelTime,
                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
                   final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
@@ -114,6 +120,7 @@ public class Rugged {
 
             // intersection algorithm
             algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+            this.fixLightTravelTime = fixLightTravelTime;
 
             sensors = new HashMap<String, Sensor>();
 
@@ -134,6 +141,8 @@ public class Rugged {
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
      * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param fixLightTravelTime if true, light travel time should be fixed when computing
+     * direct and inverse localization
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
@@ -141,6 +150,7 @@ public class Rugged {
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
+                  final boolean fixLightTravelTime,
                   final Propagator propagator)
         throws RuggedException {
         try {
@@ -158,6 +168,7 @@ public class Rugged {
 
             // intersection algorithm
             algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+            this.fixLightTravelTime = fixLightTravelTime;
 
             sensors = new HashMap<String, Sensor>();
 
@@ -372,12 +383,17 @@ public class Rugged {
             final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
             for (int i = 0; i < gp.length; ++i) {
 
-                // fix light travel time
-                final Vector3D  sP     = approximate.transformPosition(sensor.getPosition(i));
-                final Vector3D  sL     = approximate.transformVector(sensor.getLos(i));
-                final Vector3D  eP     = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
-                final double    deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
-                final Transform fixed  = new Transform(date, scToInert, inertToBody.shiftedBy(-deltaT));
+                final Transform fixed;
+                if (fixLightTravelTime) {
+                    // fix light travel time
+                    final Vector3D sP     = approximate.transformPosition(sensor.getPosition(i));
+                    final Vector3D sL     = approximate.transformVector(sensor.getLos(i));
+                    final Vector3D eP     = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
+                    final double   deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
+                    fixed = new Transform(date, scToInert, inertToBody.shiftedBy(-deltaT));
+                } else {
+                    fixed = new Transform(date, scToInert, inertToBody);
+                }
 
                 gp[i] = algorithm.intersection(ellipsoid,
                                                fixed.transformPosition(sensor.getPosition(i)),

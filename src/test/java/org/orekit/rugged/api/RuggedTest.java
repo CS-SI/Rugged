@@ -148,7 +148,7 @@ public class RuggedTest {
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   pv, 8, q, 8);
+                                   true, pv, 8, q, 8);
 
         Assert.assertEquals(new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC()),
                             rugged.getReferenceDate());
@@ -176,7 +176,7 @@ public class RuggedTest {
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   propagator);
+                                   true, propagator);
 
         Assert.assertEquals(propagator.getInitialState().getDate(), rugged.getReferenceDate());
 
@@ -226,7 +226,7 @@ public class RuggedTest {
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   ephemeris);
+                                   true, ephemeris);
 
         rugged.setLineSensor("line", los, lineDatation);
 
