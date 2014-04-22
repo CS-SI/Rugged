@@ -28,7 +28,7 @@ import org.orekit.utils.PVCoordinatesProvider;
 /** Provider for observation transforms.
  * @author Luc Maisonobe
  */
-class SpacecraftToObservedBody {
+public class SpacecraftToObservedBody {
 
     /** Inertial frame. */
     private Frame inertialFrame;
@@ -48,9 +48,9 @@ class SpacecraftToObservedBody {
      * @param pvProvider orbit propagator/interpolator
      * @param aProvider attitude propagator/interpolator
      */
-    protected SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
-                                       final PVCoordinatesProvider pvProvider,
-                                       final AttitudeProvider aProvider) {
+    public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
+                                    final PVCoordinatesProvider pvProvider,
+                                    final AttitudeProvider aProvider) {
         this.inertialFrame = inertialFrame;
         this.bodyFrame     = bodyFrame;
         this.pvProvider    = pvProvider;

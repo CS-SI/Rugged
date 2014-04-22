@@ -28,7 +28,7 @@ import org.orekit.time.AbsoluteDate;
  * </p>
  * @author Luc Maisonobe
  */
-class Sensor {
+public class Sensor {
 
     /** Name of the sensor. */
     private final String name;

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core;
+package org.orekit.rugged.api;
 
 
 import java.io.File;
@@ -77,7 +77,7 @@ import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 import org.orekit.utils.PVCoordinates;
 
-public class RuggedImplTest {
+public class RuggedTest {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
@@ -138,7 +138,7 @@ public class RuggedImplTest {
             createQ(t0,19.000, 0.522119033749, -0.395304129256,  0.577847874330,  0.487050504694),
             createQ(t0,20.000, 0.522421006719, -0.395049578765,  0.577574493570,  0.487257453954));
 
-        RuggedImpl rugged = new RuggedImpl();
+        Rugged rugged = new Rugged();
         rugged.setGeneralContext(t0,
                                  AlgorithmId.DUVENHAGE,
                                  EllipsoidId.WGS84,
@@ -162,7 +162,7 @@ public class RuggedImplTest {
         Orbit      orbit                                  = createOrbit(gravityField);
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
 
-        RuggedImpl rugged = new RuggedImpl();
+        Rugged rugged = new Rugged();
         rugged.setGeneralContext(propagator.getInitialState().getDate(),
                                  AlgorithmId.DUVENHAGE,
                                  EllipsoidId.WGS84,
@@ -213,7 +213,7 @@ public class RuggedImplTest {
         propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
         Propagator ephemeris = propagator.getGeneratedEphemeris();
 
-        RuggedImpl rugged = new RuggedImpl();
+        Rugged rugged = new Rugged();
         rugged.setGeneralContext(crossing,
                                  AlgorithmId.DUVENHAGE,
                                  EllipsoidId.WGS84,
