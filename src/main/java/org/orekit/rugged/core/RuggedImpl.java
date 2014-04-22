@@ -16,7 +16,6 @@
  */
 package org.orekit.rugged.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +23,11 @@ import java.util.Map;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.Pair;
 import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
-import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
@@ -42,15 +40,11 @@ import org.orekit.rugged.api.PixelLOS;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
-import org.orekit.rugged.api.SatellitePV;
-import org.orekit.rugged.api.SatelliteQ;
 import org.orekit.rugged.api.SensorPixel;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.core.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.core.raster.IntersectionAlgorithm;
 import org.orekit.time.AbsoluteDate;
-import org.orekit.time.TimeScale;
-import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 import org.orekit.utils.ImmutableTimeStampedCache;
@@ -61,9 +55,6 @@ import org.orekit.utils.PVCoordinatesProvider;
  * @author Luc Maisonobe
  */
 public class RuggedImpl implements Rugged {
-
-    /** UTC time scale. */
-    private TimeScale utc;
 
     /** Reference date. */
     private AbsoluteDate referenceDate;
@@ -91,18 +82,17 @@ public class RuggedImpl implements Rugged {
 
     /** {@inheritDoc} */
     @Override
-    public  void setGeneralContext(final File orekitDataDir, final String newReferenceDate,
+    public  void setGeneralContext(final AbsoluteDate newReferenceDate,
                                    final Algorithm algorithmID, final Ellipsoid ellipsoidID,
                                    final InertialFrame inertialFrameID,
                                    final BodyRotatingFrame bodyRotatingFrameID,
-                                   final List<SatellitePV> positionsVelocities, final int pvInterpolationOrder,
-                                   final List<SatelliteQ> quaternions, final int aInterpolationOrder)
+                                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
+                                   final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         try {
 
             // time reference
-            utc                = selectTimeScale(orekitDataDir);
-            this.referenceDate = new AbsoluteDate(newReferenceDate, utc);
+            this.referenceDate = newReferenceDate;
 
             // space reference
             frame = selectInertialFrame(inertialFrameID);
@@ -126,7 +116,6 @@ public class RuggedImpl implements Rugged {
      * This method is the first one that must be called, otherwise the
      * other methods will fail due to uninitialized context.
      * </p>
-     * @param orekitDataDir top directory for Orekit data
      * @param newReferenceDate reference date from which all other dates are computed
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoidID identifier of reference ellipsoid
@@ -135,7 +124,7 @@ public class RuggedImpl implements Rugged {
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public void setGeneralContext(final File orekitDataDir, final AbsoluteDate newReferenceDate,
+    public void setGeneralContext(final AbsoluteDate newReferenceDate,
                                   final Algorithm algorithmID, final Ellipsoid ellipsoidID,
                                   final InertialFrame inertialFrameID,
                                   final BodyRotatingFrame bodyRotatingFrameID,
@@ -144,7 +133,6 @@ public class RuggedImpl implements Rugged {
         try {
 
             // time reference
-            utc                = selectTimeScale(orekitDataDir);
             this.referenceDate = newReferenceDate;
 
             // space reference
@@ -187,23 +175,6 @@ public class RuggedImpl implements Rugged {
         }
         final Sensor sensor = new Sensor(sensorName, referenceDate, datationModel, positions, los);
         sensors.put(sensor.getName(), sensor);
-    }
-
-    /** Select time scale Orekit data.
-     * @param orekitDataDir top directory for Orekit data (if null, Orekit has already been configured)
-     * @return utc time scale
-     * @exception OrekitException if data needed for some frame cannot be loaded
-     */
-    private TimeScale selectTimeScale(final File orekitDataDir)
-        throws OrekitException {
-
-        if (orekitDataDir != null) {
-            // set up Orekit data
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitDataDir));
-        }
-
-        return TimeScalesFactory.getUTC();
-
     }
 
     /** Select inertial frame.
@@ -290,16 +261,14 @@ public class RuggedImpl implements Rugged {
      * @return selected attitude provider
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private AttitudeProvider selectAttitudeProvider(final List<SatelliteQ> quaternions,
+    private AttitudeProvider selectAttitudeProvider(final List<Pair<AbsoluteDate, Rotation>> quaternions,
                                                     final int interpolationOrder)
         throws OrekitException {
 
         // set up the attitude provider
         final List<Attitude> attitudes = new ArrayList<Attitude>(quaternions.size());
-        for (final SatelliteQ sq : quaternions) {
-            final AbsoluteDate date = referenceDate.shiftedBy(sq.getDate());
-            final Rotation rotation = new Rotation(sq.getQ0(), sq.getQ1(), sq.getQ2(), sq.getQ3(), true);
-            attitudes.add(new Attitude(date, frame, rotation, Vector3D.ZERO));
+        for (final Pair<AbsoluteDate, Rotation> q : quaternions) {
+            attitudes.add(new Attitude(q.getFirst(), frame, q.getSecond(), Vector3D.ZERO));
         }
         return new TabulatedProvider(attitudes, interpolationOrder, false);
 
@@ -311,18 +280,14 @@ public class RuggedImpl implements Rugged {
      * @return selected position/velocity provider
      * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private PVCoordinatesProvider selectPVCoordinatesProvider(final List<SatellitePV> positionsVelocities,
+    private PVCoordinatesProvider selectPVCoordinatesProvider(final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
                                                               final int interpolationOrder)
         throws OrekitException {
 
         // set up the ephemeris
         final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
-        for (final SatellitePV pv : positionsVelocities) {
-            final AbsoluteDate date    = referenceDate.shiftedBy(pv.getDate());
-            final Vector3D position    = new Vector3D(pv.getPx(), pv.getPy(), pv.getPz());
-            final Vector3D velocity    = new Vector3D(pv.getVx(), pv.getVy(), pv.getVz());
-            final CartesianOrbit orbit = new CartesianOrbit(new PVCoordinates(position, velocity),
-                                                            frame, date, Constants.EIGEN5C_EARTH_MU);
+        for (final Pair<AbsoluteDate, PVCoordinates> pv : positionsVelocities) {
+            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), frame, pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
             orbits.add(orbit);
         }
 

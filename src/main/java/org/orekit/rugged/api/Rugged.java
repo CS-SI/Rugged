@@ -19,7 +19,11 @@ package org.orekit.rugged.api;
 import java.io.File;
 import java.util.List;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
+import org.orekit.time.AbsoluteDate;
+import org.orekit.utils.PVCoordinates;
 
 /** Main interface to Rugged library.
  * @author Luc Maisonobe
@@ -124,11 +128,11 @@ public interface Rugged {
      * @param aInterpolationOrder order to use for attitude interpolation
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    void setGeneralContext(File orekitDataDir, String referenceDate,
+    void setGeneralContext(AbsoluteDate referenceDate,
                            Algorithm algorithmID, Ellipsoid ellipsoidID,
                            InertialFrame inertialFrameID, BodyRotatingFrame bodyRotatingFrameID,
-                           List<SatellitePV> positionsVelocities, int pvInterpolationOrder,
-                           List<SatelliteQ> quaternions, int aInterpolationOrder)
+                           List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, int pvInterpolationOrder,
+                           List<Pair<AbsoluteDate, Rotation>> quaternions, int aInterpolationOrder)
         throws RuggedException;
 
     /** Set up the tiles management.
