@@ -52,7 +52,7 @@ import org.orekit.utils.PVCoordinates;
 
 public abstract class AbstractAlgorithmTest {
 
-    protected abstract IntersectionAlgorithm createAlgorithm();
+    protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles);
 
     @Test
     public void testMayonVolcanoOnSubTileCorner()
@@ -71,8 +71,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm();
-        algorithm.setUpTilesManagement(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
 
         // preliminary check: the point has been chosen in the spacecraft (YZ) plane
         Transform earthToSpacecraft = new Transform(state.getDate(),
@@ -106,8 +105,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm();
-        algorithm.setUpTilesManagement(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
 
         // test direct localization
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
@@ -133,8 +131,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm();
-        algorithm.setUpTilesManagement(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
 
         // preliminary check: the point has been chosen in the spacecraft (YZ) plane
         Transform earthToSpacecraft = new Transform(state.getDate(),

@@ -17,12 +17,13 @@
 package org.orekit.rugged.core;
 
 
+import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.core.raster.IntersectionAlgorithm;
 
 public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
 
-    public IntersectionAlgorithm createAlgorithm() {
-        return new BasicScanAlgorithm();
+    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
+        return new BasicScanAlgorithm(updater, maxCachedTiles);
     }
 
 }

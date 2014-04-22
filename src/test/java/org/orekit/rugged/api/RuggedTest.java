@@ -138,7 +138,12 @@ public class RuggedTest {
             createQ(t0,19.000, 0.522119033749, -0.395304129256,  0.577847874330,  0.487050504694),
             createQ(t0,20.000, 0.522421006719, -0.395049578765,  0.577574493570,  0.487257453954));
 
-        Rugged rugged = new Rugged(t0,
+        TileUpdater updater =
+                new VolcanicConeElevationUpdater(new GeodeticPoint(FastMath.toRadians(13.25667), FastMath.toRadians(123.685), 2463.0),
+                                                 FastMath.toRadians(30.0), 16.0,
+                                                 FastMath.toRadians(1.0), 1201);
+
+        Rugged rugged = new Rugged(t0, updater, 8,
                                    AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
@@ -161,7 +166,12 @@ public class RuggedTest {
         Orbit      orbit                                  = createOrbit(gravityField);
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
 
-        Rugged rugged = new Rugged(propagator.getInitialState().getDate(),
+        TileUpdater updater =
+                new VolcanicConeElevationUpdater(new GeodeticPoint(FastMath.toRadians(13.25667), FastMath.toRadians(123.685), 2463.0),
+                                                 FastMath.toRadians(30.0), 16.0,
+                                                 FastMath.toRadians(1.0), 1201);
+
+        Rugged rugged = new Rugged(propagator.getInitialState().getDate(), updater, 8,
                                    AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
@@ -211,13 +221,12 @@ public class RuggedTest {
         propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
         Propagator ephemeris = propagator.getGeneratedEphemeris();
 
-        Rugged rugged = new Rugged(crossing,
+        Rugged rugged = new Rugged(crossing, updater, 8,
                                    AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
                                    ephemeris);
-        rugged.setUpTilesManagement(updater, 8);
 
         rugged.setLineSensor("line", los, lineDatation);
 

@@ -42,16 +42,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     private static final double STEP = 0.01;
 
     /** Cache for DEM tiles. */
-    private TilesCache<MinMaxTreeTile> cache;
+    private final TilesCache<MinMaxTreeTile> cache;
 
     /** Simple constructor.
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
      */
-    public DuvenhageAlgorithm() {
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setUpTilesManagement(final TileUpdater updater, final int maxCachedTiles) {
+    public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
         cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
     }
 

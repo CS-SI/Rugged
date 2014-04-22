@@ -41,7 +41,7 @@ import org.orekit.rugged.core.raster.TilesCache;
 public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
     /** Cache for DEM tiles. */
-    private TilesCache<SimpleTile> cache;
+    private final TilesCache<SimpleTile> cache;
 
     /** Minimum altitude encountered. */
     private double hMin;
@@ -50,13 +50,10 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     private double hMax;
 
     /** Simple constructor.
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
      */
-    public BasicScanAlgorithm() {
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setUpTilesManagement(final TileUpdater updater, final int maxCachedTiles) {
+    public BasicScanAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
         cache = new TilesCache<SimpleTile>(new SimpleTileFactory(), updater, maxCachedTiles);
         hMin  = Double.POSITIVE_INFINITY;
         hMax  = Double.NEGATIVE_INFINITY;

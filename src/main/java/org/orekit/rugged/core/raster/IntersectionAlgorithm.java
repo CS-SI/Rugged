@@ -19,19 +19,12 @@ package org.orekit.rugged.core.raster;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.core.ExtendedEllipsoid;
 
 /** Interface for Digital Elevation Model intersection algorithm.
  * @author Luc Maisonobe
  */
 public interface IntersectionAlgorithm {
-
-    /** Set up the tiles management.
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     */
-    void setUpTilesManagement(TileUpdater updater, int maxCachedTiles);
 
     /** Compute intersection of line with Digital Elevation Model.
      * @param ellipsoid reference ellipsoid

@@ -20,7 +20,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.core.raster.IntersectionAlgorithm;
 
 /** Intersection ignoring Digital Elevation Model.
@@ -34,12 +33,6 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
     /** Simple constructor.
      */
     public IgnoreDEMAlgorithm() {
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setUpTilesManagement(final TileUpdater updater, final int maxCachedTiles) {
-        // we ignore the DEM
     }
 
     /** {@inheritDoc} */

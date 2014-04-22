@@ -79,6 +79,8 @@ public class Rugged {
      * other methods will fail due to uninitialized context.
      * </p>
      * @param referenceDate reference date from which all other dates are computed
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
@@ -90,6 +92,7 @@ public class Rugged {
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public Rugged(final AbsoluteDate newReferenceDate,
+                  final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
@@ -110,7 +113,7 @@ public class Rugged {
             scToBody = new SpacecraftToObservedBody(frame, ellipsoid.getBodyFrame(), pvProvider, aProvider);
 
             // intersection algorithm
-            algorithm = selectAlgorithm(algorithmID);
+            algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
 
             sensors = new HashMap<String, Sensor>();
 
@@ -125,6 +128,8 @@ public class Rugged {
      * other methods will fail due to uninitialized context.
      * </p>
      * @param newReferenceDate reference date from which all other dates are computed
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
@@ -133,6 +138,7 @@ public class Rugged {
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public Rugged(final AbsoluteDate newReferenceDate,
+                  final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
                   final Propagator propagator)
@@ -151,7 +157,7 @@ public class Rugged {
                                                     propagator, propagator.getAttitudeProvider());
 
             // intersection algorithm
-            algorithm = selectAlgorithm(algorithmID);
+            algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
 
             sensors = new HashMap<String, Sensor>();
 
@@ -165,14 +171,6 @@ public class Rugged {
      */
     public AbsoluteDate getReferenceDate() {
         return referenceDate;
-    }
-
-    /** Set up the tiles management.
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     */
-    public void setUpTilesManagement(final TileUpdater updater, final int maxCachedTiles) {
-        algorithm.setUpTilesManagement(updater, maxCachedTiles);
     }
 
     /** Set up line sensor model.
@@ -324,16 +322,19 @@ public class Rugged {
 
     /** Select DEM intersection algorithm.
      * @param algorithmID intersection algorithm identifier
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
      * @return selected algorithm
      */
-    private IntersectionAlgorithm selectAlgorithm(final AlgorithmId algorithmID) {
+    private IntersectionAlgorithm selectAlgorithm(final AlgorithmId algorithmID,
+                                                  final TileUpdater updater, final int maxCachedTiles) {
 
         // set up the algorithm
         switch (algorithmID) {
         case DUVENHAGE :
-            return new DuvenhageAlgorithm();
+            return new DuvenhageAlgorithm(updater, maxCachedTiles);
         case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-            return new BasicScanAlgorithm();
+            return new BasicScanAlgorithm(updater, maxCachedTiles);
         case IGNORE_DEM_USE_ELLIPSOID :
             return new IgnoreDEMAlgorithm();
         default :
