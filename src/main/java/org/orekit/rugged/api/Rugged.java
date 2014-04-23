@@ -16,7 +16,6 @@
  */
 package org.orekit.rugged.api;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,7 +95,7 @@ public class Rugged {
      * @param aInterpolationOrder order to use for attitude interpolation
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public Rugged(final AbsoluteDate newReferenceDate,
+    public Rugged(final AbsoluteDate referenceDate,
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
@@ -107,7 +106,7 @@ public class Rugged {
         try {
 
             // time reference
-            this.referenceDate = newReferenceDate;
+            this.referenceDate = referenceDate;
 
             // space reference
             frame = selectInertialFrame(inertialFrameID);
@@ -185,8 +184,8 @@ public class Rugged {
     }
 
     /** Set up line sensor model.
-     * @param name name of the line sensor.
-     * @param pixels lines of sight for each pixels
+     * @param sensorName name of the line sensor.
+     * @param linesOfSigth lines of sight for each pixels
      * @param datationModel model to use for dating sensor lines
      */
     public void setLineSensor(final String sensorName, final List<PixelLOS> linesOfSigth, final LineDatation datationModel) {
@@ -356,7 +355,7 @@ public class Rugged {
     }
 
     /** Direct localization of a sensor line.
-     * @param name name of the line sensor
+     * @param sensorName name of the line sensor
      * @param lineNumber number of the line to localize on ground
      * @return ground position of all pixels of the specified sensor line
      * @exception RuggedException if line cannot be localized,
@@ -408,7 +407,7 @@ public class Rugged {
     }
 
     /** Inverse localization of a ground point.
-     * @param name name of the line  sensor
+     * @param sensorName name of the line  sensor
      * @param groundPoint ground point to localize
      * @return sensor pixel seeing ground point
      * @exception RuggedException if line cannot be localized,
