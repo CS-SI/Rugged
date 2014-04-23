@@ -72,14 +72,14 @@ public class Rugged {
     /** DEM intersection algorithm. */
     private final IntersectionAlgorithm algorithm;
 
-    /** Flag for fixing light travel time. */
-    private boolean lightTravelTimeCompensated;
+    /** Flag for light time correction. */
+    private boolean lightTimeCorrection;
 
     /** Build a configured instance.
      * <p>
-     * By default, the instance compensates light travel time, an explicit call
-     * to {@link #setLightTravelTimeCompensated(boolean) setLightTravelTimeCompensated}
-     * can be made after construction if it should not be compensated.
+     * By default, the instance performs light time correction, an explicit call
+     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
+     * can be made after construction if light time should not be corrected.
      * </p>
      * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
@@ -120,7 +120,7 @@ public class Rugged {
             algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
 
             sensors = new HashMap<String, Sensor>();
-            setLightTravelTimeCompensated(true);
+            setLightTimeCorrection(true);
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -129,9 +129,9 @@ public class Rugged {
 
     /** Build a configured instance.
      * <p>
-     * By default, the instance compensates light travel time, an explicit call
-     * to {@link #setLightTravelTimeCompensated(boolean) setLightTravelTimeCompensated}
-     * can be made after construction if it should not be compensated.
+     * By default, the instance performs light time correction, an explicit call
+     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
+     * can be made after construction if light time should not be corrected.
      * </p>
      * @param newReferenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
@@ -166,7 +166,7 @@ public class Rugged {
             algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
 
             sensors = new HashMap<String, Sensor>();
-            setLightTravelTimeCompensated(true);
+            setLightTimeCorrection(true);
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -180,28 +180,28 @@ public class Rugged {
         return referenceDate;
     }
 
-    /** Set flag for compensating light travel time.
+    /** Set flag for light time correction.
      * <p>
-     * This methods set the flag for compensating or not light travel time
-     * between ground and spacecraft. Compensating this delay improves localization
+     * This methods set the flag for compensating or not light time between
+     * ground and spacecraft. Compensating this delay improves localization
      * accuracy and is enabled by default. Not compensating it is mainly useful
      * for validation purposes against system that do not compensate it.
      * </p>
-     * @param lightTravelTimeCompensated if true, the light travel time between ground
+     * @param lightTimeCorrection if true, the light travel time between ground
      * and spacecraft is compensated for more accurate localization
-     * @see #isLightTravelTimeCompensated()
+     * @see #isLightTimeCorrected()
      */
-    public void setLightTravelTimeCompensated(final boolean lightTravelTimeCompensated) {
-        this.lightTravelTimeCompensated = lightTravelTimeCompensated;
+    public void setLightTimeCorrection(final boolean lightTimeCorrection) {
+        this.lightTimeCorrection = lightTimeCorrection;
     }
 
-    /** Get flag for compensating light travel time.
-     * @return true if the light travel time between ground
-     * and spacecraft is compensated for more accurate localization
-     * @see #setLightTravelTimeCompensated(boolean)
+    /** Get flag for light time correction.
+     * @return true if the light time between ground and spacecraft is
+     * compensated for more accurate localization
+     * @see #setLightTimeCorrection(boolean)
      */
-    public boolean isLightTravelTimeCompensated() {
-        return lightTravelTimeCompensated;
+    public boolean isLightTimeCorrected() {
+        return lightTimeCorrection;
     }
 
     /** Set up line sensor model.
@@ -404,14 +404,15 @@ public class Rugged {
             for (int i = 0; i < gp.length; ++i) {
 
                 final Transform fixed;
-                if (lightTravelTimeCompensated) {
-                    // fix light travel time
+                if (lightTimeCorrection) {
+                    // compensate light travel time
                     final Vector3D sP     = approximate.transformPosition(sensor.getPosition(i));
                     final Vector3D sL     = approximate.transformVector(sensor.getLos(i));
                     final Vector3D eP     = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
                     final double   deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
                     fixed = new Transform(date, scToInert, inertToBody.shiftedBy(-deltaT));
                 } else {
+                    // don't compensate light travel time
                     fixed = new Transform(date, scToInert, inertToBody);
                 }
 

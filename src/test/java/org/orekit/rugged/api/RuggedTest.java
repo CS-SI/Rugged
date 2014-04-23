@@ -152,9 +152,9 @@ public class RuggedTest {
 
         Assert.assertEquals(new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC()),
                             rugged.getReferenceDate());
-        Assert.assertTrue(rugged.isLightTravelTimeCompensated());
-        rugged.setLightTravelTimeCompensated(false);
-        Assert.assertFalse(rugged.isLightTravelTimeCompensated());
+        Assert.assertTrue(rugged.isLightTimeCorrected());
+        rugged.setLightTimeCorrection(false);
+        Assert.assertFalse(rugged.isLightTimeCorrected());
 
     }
 
@@ -182,9 +182,9 @@ public class RuggedTest {
                                    propagator);
 
         Assert.assertEquals(propagator.getInitialState().getDate(), rugged.getReferenceDate());
-        Assert.assertTrue(rugged.isLightTravelTimeCompensated());
-        rugged.setLightTravelTimeCompensated(false);
-        Assert.assertFalse(rugged.isLightTravelTimeCompensated());
+        Assert.assertTrue(rugged.isLightTimeCorrected());
+        rugged.setLightTimeCorrection(false);
+        Assert.assertFalse(rugged.isLightTimeCorrected());
 
     }
 
