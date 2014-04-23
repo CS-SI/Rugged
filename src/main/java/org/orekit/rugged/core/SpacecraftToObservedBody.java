@@ -66,13 +66,13 @@ public class SpacecraftToObservedBody {
         throws OrekitException {
 
         // propagate/interpolate orbit and attitude
-        final PVCoordinates pv    = pvProvider.getPVCoordinates(date, inertialFrame);
-        final Attitude attitude   = aProvider.getAttitude(pvProvider, date, inertialFrame);
+        final PVCoordinates pv  = pvProvider.getPVCoordinates(date, inertialFrame);
+        final Attitude attitude = aProvider.getAttitude(pvProvider, date, inertialFrame);
 
         // compute transform from spacecraft frame to inertial frame
         return new Transform(date,
-                                                  new Transform(date, attitude.getOrientation().revert()),
-                                                  new Transform(date, pv));
+                             new Transform(date, attitude.getOrientation().revert()),
+                             new Transform(date, pv));
 
     }
 
