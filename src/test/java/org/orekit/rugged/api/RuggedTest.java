@@ -148,10 +148,13 @@ public class RuggedTest {
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   true, pv, 8, q, 8);
+                                   pv, 8, q, 8);
 
         Assert.assertEquals(new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC()),
                             rugged.getReferenceDate());
+        Assert.assertTrue(rugged.isLightTravelTimeCompensated());
+        rugged.setLightTravelTimeCompensated(false);
+        Assert.assertFalse(rugged.isLightTravelTimeCompensated());
 
     }
 
@@ -176,9 +179,12 @@ public class RuggedTest {
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   true, propagator);
+                                   propagator);
 
         Assert.assertEquals(propagator.getInitialState().getDate(), rugged.getReferenceDate());
+        Assert.assertTrue(rugged.isLightTravelTimeCompensated());
+        rugged.setLightTravelTimeCompensated(false);
+        Assert.assertFalse(rugged.isLightTravelTimeCompensated());
 
     }
 
@@ -226,7 +232,7 @@ public class RuggedTest {
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   true, ephemeris);
+                                   ephemeris);
 
         rugged.setLineSensor("line", los, lineDatation);
 

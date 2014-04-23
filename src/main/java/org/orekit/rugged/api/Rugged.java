@@ -73,12 +73,13 @@ public class Rugged {
     private final IntersectionAlgorithm algorithm;
 
     /** Flag for fixing light travel time. */
-    private final boolean fixLightTravelTime;
+    private boolean lightTravelTimeCompensated;
 
     /** Build a configured instance.
      * <p>
-     * This method is the first one that must be called, otherwise the
-     * other methods will fail due to uninitialized context.
+     * By default, the instance compensates light travel time, an explicit call
+     * to {@link #setLightTravelTimeCompensated(boolean) setLightTravelTimeCompensated}
+     * can be made after construction if it should not be compensated.
      * </p>
      * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
@@ -87,8 +88,6 @@ public class Rugged {
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
      * @param bodyRotatingFrameID identifier of body rotating frame
-     * @param fixLightTravelTime if true, light travel time should be fixed when computing
-     * direct and inverse localization
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
@@ -99,9 +98,9 @@ public class Rugged {
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final boolean fixLightTravelTime,
-                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
-                  final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
+                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
+                  final int pvInterpolationOrder, final List<Pair<AbsoluteDate, Rotation>> quaternions,
+                  final int aInterpolationOrder)
         throws RuggedException {
         try {
 
@@ -119,9 +118,9 @@ public class Rugged {
 
             // intersection algorithm
             algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
-            this.fixLightTravelTime = fixLightTravelTime;
 
             sensors = new HashMap<String, Sensor>();
+            setLightTravelTimeCompensated(true);
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -130,8 +129,9 @@ public class Rugged {
 
     /** Build a configured instance.
      * <p>
-     * This method is the first one that must be called, otherwise the
-     * other methods will fail due to uninitialized context.
+     * By default, the instance compensates light travel time, an explicit call
+     * to {@link #setLightTravelTimeCompensated(boolean) setLightTravelTimeCompensated}
+     * can be made after construction if it should not be compensated.
      * </p>
      * @param newReferenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
@@ -140,8 +140,6 @@ public class Rugged {
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
      * @param bodyRotatingFrameID identifier of body rotating frame
-     * @param fixLightTravelTime if true, light travel time should be fixed when computing
-     * direct and inverse localization
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
@@ -149,7 +147,6 @@ public class Rugged {
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final boolean fixLightTravelTime,
                   final Propagator propagator)
         throws RuggedException {
         try {
@@ -167,9 +164,9 @@ public class Rugged {
 
             // intersection algorithm
             algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
-            this.fixLightTravelTime = fixLightTravelTime;
 
             sensors = new HashMap<String, Sensor>();
+            setLightTravelTimeCompensated(true);
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -181,6 +178,30 @@ public class Rugged {
      */
     public AbsoluteDate getReferenceDate() {
         return referenceDate;
+    }
+
+    /** Set flag for compensating light travel time.
+     * <p>
+     * This methods set the flag for compensating or not light travel time
+     * between ground and spacecraft. Compensating this delay improves localization
+     * accuracy and is enabled by default. Not compensating it is mainly useful
+     * for validation purposes against system that do not compensate it.
+     * </p>
+     * @param lightTravelTimeCompensated if true, the light travel time between ground
+     * and spacecraft is compensated for more accurate localization
+     * @see #isLightTravelTimeCompensated()
+     */
+    public void setLightTravelTimeCompensated(final boolean lightTravelTimeCompensated) {
+        this.lightTravelTimeCompensated = lightTravelTimeCompensated;
+    }
+
+    /** Get flag for compensating light travel time.
+     * @return true if the light travel time between ground
+     * and spacecraft is compensated for more accurate localization
+     * @see #setLightTravelTimeCompensated(boolean)
+     */
+    public boolean isLightTravelTimeCompensated() {
+        return lightTravelTimeCompensated;
     }
 
     /** Set up line sensor model.
@@ -383,7 +404,7 @@ public class Rugged {
             for (int i = 0; i < gp.length; ++i) {
 
                 final Transform fixed;
-                if (fixLightTravelTime) {
+                if (lightTravelTimeCompensated) {
                     // fix light travel time
                     final Vector3D sP     = approximate.transformPosition(sensor.getPosition(i));
                     final Vector3D sL     = approximate.transformVector(sensor.getLos(i));
