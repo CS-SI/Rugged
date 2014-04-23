@@ -75,11 +75,17 @@ public class Rugged {
     /** Flag for light time correction. */
     private boolean lightTimeCorrection;
 
+    /** Flag for aberration of light correction. */
+    private boolean aberrationOfLightCorrection;
+
     /** Build a configured instance.
      * <p>
-     * By default, the instance performs light time correction, an explicit call
+     * By default, the instance performs both light time correction (which refers
+     * to ground point motion with respect to inertial frame) and aberration of
+     * light correction (which refers to spacecraft proper velocity). Explicit calls
      * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * can be made after construction if light time should not be corrected.
+     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
+     * can be made after construction if these phenomena should not be corrected.
      * </p>
      * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
@@ -121,6 +127,7 @@ public class Rugged {
 
             sensors = new HashMap<String, Sensor>();
             setLightTimeCorrection(true);
+            setAberrationOfLightCorrection(true);
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -129,9 +136,12 @@ public class Rugged {
 
     /** Build a configured instance.
      * <p>
-     * By default, the instance performs light time correction, an explicit call
+     * By default, the instance performs both light time correction (which refers
+     * to ground point motion with respect to inertial frame) and aberration of
+     * light correction (which refers to spacecraft proper velocity). Explicit calls
      * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * can be made after construction if light time should not be corrected.
+     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
+     * can be made after construction if these phenomena should not be corrected.
      * </p>
      * @param newReferenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
@@ -167,6 +177,7 @@ public class Rugged {
 
             sensors = new HashMap<String, Sensor>();
             setLightTimeCorrection(true);
+            setAberrationOfLightCorrection(true);
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -204,6 +215,35 @@ public class Rugged {
         return lightTimeCorrection;
     }
 
+    /** Set flag for aberration of light correction.
+     * <p>
+     * This methods set the flag for compensating or not aberration of light,
+     * which is velocity composition between light and spacecraft when the
+     * light from ground points reaches the sensor.
+     * Compensating this velocity composition improves localization
+     * accuracy and is enabled by default. Not compensating it is useful
+     * in two cases: for validation purposes against system that do not
+     * compensate it or when the pixels line of sight already include the
+     * correction.
+     * </p>
+     * @param aberrationOfLightCorrection if true, the aberration of light
+     * is corrected for more accurate localization
+     * @see #isAberrationOfLightCorrected()
+     * @see #setLineSensor(String, List, LineDatation)
+     */
+    public void setAberrationOfLightCorrection(final boolean aberrationOfLightCorrection) {
+        this.aberrationOfLightCorrection = aberrationOfLightCorrection;
+    }
+
+    /** Get flag for aberration of light correction.
+     * @return true if the aberration of light time is corrected
+     * for more accurate localization
+     * @see #setAberrationOfLightCorrection(boolean)
+     */
+    public boolean isAberrationOfLightCorrected() {
+        return aberrationOfLightCorrection;
+    }
+
     /** Set up line sensor model.
      * @param sensorName name of the line sensor.
      * @param linesOfSigth lines of sight for each pixels
@@ -214,7 +254,7 @@ public class Rugged {
         final List<Vector3D> los       = new ArrayList<Vector3D>(linesOfSigth.size());
         for (final PixelLOS plos : linesOfSigth) {
             positions.add(new Vector3D(plos.getPx(), plos.getPy(), plos.getPz()));
-            los.add(new Vector3D(plos.getDx(), plos.getDy(), plos.getDz()));
+            los.add(new Vector3D(plos.getDx(), plos.getDy(), plos.getDz()).normalize());
         }
         final Sensor sensor = new Sensor(sensorName, referenceDate, datationModel, positions, los);
         sensors.put(sensor.getName(), sensor);
@@ -403,22 +443,40 @@ public class Rugged {
             final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
             for (int i = 0; i < gp.length; ++i) {
 
-                final Transform fixed;
+                final Vector3D pInert = scToInert.transformPosition(sensor.getPosition(i));
+                final Vector3D lInert;
+                if (aberrationOfLightCorrection) {
+                    // apply aberration of light correction
+                    // as the spacecraft velocity is small with respect to speed of light,
+                    // we use classical velocity addition and not relativistic velocity addition
+                    final Vector3D spacecraftVelocity = scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
+                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, scToInert.transformVector(sensor.getLos(i)),
+                                          1.0, spacecraftVelocity).normalize();
+                } else {
+                    lInert = scToInert.transformVector(sensor.getLos(i));
+                    // don't apply aberration of light correction
+                }
+
+                final Vector3D pBody;
+                final Vector3D lBody;
                 if (lightTimeCorrection) {
-                    // compensate light travel time
+                    // apply light time correction
                     final Vector3D sP     = approximate.transformPosition(sensor.getPosition(i));
                     final Vector3D sL     = approximate.transformVector(sensor.getLos(i));
                     final Vector3D eP     = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
                     final double   deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
-                    fixed = new Transform(date, scToInert, inertToBody.shiftedBy(-deltaT));
+                    final Transform shifted = inertToBody.shiftedBy(-deltaT);
+                    pBody = shifted.transformPosition(pInert);
+                    lBody = shifted.transformVector(lInert);
                 } else {
-                    // don't compensate light travel time
-                    fixed = new Transform(date, scToInert, inertToBody);
+                    // don't apply light time correction
+                    pBody = inertToBody.transformPosition(pInert);
+                    lBody = inertToBody.transformVector(lInert);
                 }
 
-                gp[i] = algorithm.intersection(ellipsoid,
-                                               fixed.transformPosition(sensor.getPosition(i)),
-                                               fixed.transformVector(sensor.getLos(i)));
+                // compute DEM intersection
+                gp[i] = algorithm.intersection(ellipsoid, pBody, lBody);
+
             }
 
             return gp;

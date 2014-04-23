@@ -59,17 +59,8 @@ import org.orekit.orbits.OrbitType;
 import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.rugged.api.AlgorithmId;
-import org.orekit.rugged.api.BodyRotatingFrameId;
-import org.orekit.rugged.api.EllipsoidId;
-import org.orekit.rugged.api.InertialFrameId;
-import org.orekit.rugged.api.LineDatation;
-import org.orekit.rugged.api.LinearLineDatation;
-import org.orekit.rugged.api.PixelLOS;
-import org.orekit.rugged.api.Rugged;
-import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.core.raster.CliffsElevationUpdater;
 import org.orekit.rugged.core.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -155,6 +146,9 @@ public class RuggedTest {
         Assert.assertTrue(rugged.isLightTimeCorrected());
         rugged.setLightTimeCorrection(false);
         Assert.assertFalse(rugged.isLightTimeCorrected());
+        Assert.assertTrue(rugged.isAberrationOfLightCorrected());
+        rugged.setAberrationOfLightCorrection(false);
+        Assert.assertFalse(rugged.isAberrationOfLightCorrected());
 
     }
 
@@ -166,7 +160,7 @@ public class RuggedTest {
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
-        Orbit      orbit                                  = createOrbit(gravityField);
+        Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
 
         TileUpdater updater =
@@ -185,6 +179,9 @@ public class RuggedTest {
         Assert.assertTrue(rugged.isLightTimeCorrected());
         rugged.setLightTimeCorrection(false);
         Assert.assertFalse(rugged.isLightTimeCorrected());
+        Assert.assertTrue(rugged.isAberrationOfLightCorrected());
+        rugged.setAberrationOfLightCorrection(false);
+        Assert.assertFalse(rugged.isAberrationOfLightCorrected());
 
     }
 
@@ -199,7 +196,7 @@ public class RuggedTest {
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
-        Orbit      orbit                                  = createOrbit(gravityField);
+        Orbit      orbit                                  = createOrbit(gravityField.getMu());
 
         // Mayon Volcano location according to Wikipedia: 13°15′24″N 123°41′6″E
         GeodeticPoint summit =
@@ -233,6 +230,8 @@ public class RuggedTest {
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
                                    ephemeris);
+        rugged.setLightTimeCorrection(true);
+        rugged.setAberrationOfLightCorrection(true);
 
         rugged.setLineSensor("line", los, lineDatation);
 
@@ -275,30 +274,116 @@ public class RuggedTest {
     }
 
     @Test
-    public void testCliffsOfMoher()
+    public void testLightTimeCorrection()
         throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth                                  = createEarth();
-        NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
-        Orbit      orbit                                  = createOrbit(gravityField);
-        Propagator propagator                             = createPropagator(earth, gravityField, orbit);
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
 
-        // cliffs of Moher location according to Wikipedia: 52°56′10″N 9°28′15″ W
-        GeodeticPoint north = new GeodeticPoint(FastMath.toRadians(52.9984),
-                                                FastMath.toRadians(-9.4072),
-                                                120.0);
-        GeodeticPoint south = new GeodeticPoint(FastMath.toRadians(52.9625),
-                                                FastMath.toRadians(-9.4369),
-                                                120.0);
-        CliffsElevationUpdater updater = new CliffsElevationUpdater(north, south,
-                                                                    120.0, 0.0,
-                                                                    FastMath.toRadians(1.0), 1201);
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:21:15.000", TimeScalesFactory.getUTC());
 
-        AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:50:05.778", TimeScalesFactory.getUTC());
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
+        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                       FastMath.toRadians(10.0), dimension);
 
-        // TODO: test the direct localization
+        // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+
+        Propagator propagator = new KeplerianPropagator(orbit);
+        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.setEphemerisMode();
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        Propagator ephemeris = propagator.getGeneratedEphemeris();
+
+        Rugged rugged = new Rugged(crossing, null, -1,
+                                   AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
+                                   EllipsoidId.WGS84,
+                                   InertialFrameId.EME2000,
+                                   BodyRotatingFrameId.ITRF,
+                                   ephemeris);
+
+        rugged.setLineSensor("line", los, lineDatation);
+
+        rugged.setLightTimeCorrection(true);
+        rugged.setAberrationOfLightCorrection(false);
+        GeodeticPoint[] gpWithLightTimeCorrection = rugged.directLocalization("line", 200);
+
+        rugged.setLightTimeCorrection(false);
+        rugged.setAberrationOfLightCorrection(false);
+        GeodeticPoint[] gpWithoutLightTimeCorrection = rugged.directLocalization("line", 200);
+
+        for (int i = 0; i < gpWithLightTimeCorrection.length; ++i) {
+            Vector3D pWith    = earth.transform(gpWithLightTimeCorrection[i]);
+            Vector3D pWithout = earth.transform(gpWithoutLightTimeCorrection[i]);
+            Assert.assertTrue(Vector3D.distance(pWith, pWithout) > 1.23);
+            Assert.assertTrue(Vector3D.distance(pWith, pWithout) < 1.27);
+        }
+
+    }
+
+    @Test
+    public void testAberrationOfLightCorrection()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 400;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:46:35.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
+        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                       FastMath.toRadians(10.0), dimension);
+
+        // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+
+        Propagator propagator = new KeplerianPropagator(orbit);
+        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.setEphemerisMode();
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        Propagator ephemeris = propagator.getGeneratedEphemeris();
+
+        Rugged rugged = new Rugged(crossing, null, -1,
+                                   AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
+                                   EllipsoidId.WGS84,
+                                   InertialFrameId.EME2000,
+                                   BodyRotatingFrameId.ITRF,
+                                   ephemeris);
+
+        rugged.setLineSensor("line", los, lineDatation);
+
+        rugged.setLightTimeCorrection(false);
+        rugged.setAberrationOfLightCorrection(true);
+        GeodeticPoint[] gpWithAberrationOfLightCorrection = rugged.directLocalization("line", 200);
+
+        rugged.setLightTimeCorrection(false);
+        rugged.setAberrationOfLightCorrection(false);
+        GeodeticPoint[] gpWithoutAberrationOfLightCorrection = rugged.directLocalization("line", 200);
+
+        for (int i = 0; i < gpWithAberrationOfLightCorrection.length; ++i) {
+            Vector3D pWith    = earth.transform(gpWithAberrationOfLightCorrection[i]);
+            Vector3D pWithout = earth.transform(gpWithoutAberrationOfLightCorrection[i]);
+            Assert.assertTrue(Vector3D.distance(pWith, pWithout) > 20.0);
+            Assert.assertTrue(Vector3D.distance(pWith, pWithout) < 20.5);
+        }
 
     }
 
@@ -314,7 +399,7 @@ public class RuggedTest {
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
 
-    private Orbit createOrbit(NormalizedSphericalHarmonicsProvider gravityField)
+    private Orbit createOrbit(double mu)
         throws OrekitException {
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
@@ -334,7 +419,7 @@ public class RuggedTest {
                                  FastMath.toRadians(98.63218182243709),
                                  FastMath.toRadians(77.55565567747836),
                                  FastMath.PI, PositionAngle.TRUE,
-                                 eme2000, date, gravityField.getMu());
+                                 eme2000, date, mu);
     }
 
     private Propagator createPropagator(BodyShape earth,
