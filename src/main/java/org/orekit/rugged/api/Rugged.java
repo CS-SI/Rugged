@@ -28,6 +28,7 @@ import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.bodies.GeodeticPoint;
+import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
@@ -58,7 +59,7 @@ public class Rugged {
     private final AbsoluteDate referenceDate;
 
     /** Inertial frame. */
-    private final Frame frame;
+    private final Frame inertialFrame;
 
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
@@ -108,30 +109,10 @@ public class Rugged {
                   final int pvInterpolationOrder, final List<Pair<AbsoluteDate, Rotation>> quaternions,
                   final int aInterpolationOrder)
         throws RuggedException {
-        try {
-
-            // time reference
-            this.referenceDate = referenceDate;
-
-            // space reference
-            frame = selectInertialFrame(inertialFrameID);
-            ellipsoid = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
-
-            // orbit/attitude to body converter
-            final PVCoordinatesProvider pvProvider = selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder);
-            final AttitudeProvider aProvider = selectAttitudeProvider(quaternions, aInterpolationOrder);
-            scToBody = new SpacecraftToObservedBody(frame, ellipsoid.getBodyFrame(), pvProvider, aProvider);
-
-            // intersection algorithm
-            algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
-
-            sensors = new HashMap<String, Sensor>();
-            setLightTimeCorrection(true);
-            setAberrationOfLightCorrection(true);
-
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
-        }
+        this(referenceDate, updater, maxCachedTiles, algorithmID,
+             selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
+             selectInertialFrame(inertialFrameID),
+             positionsVelocities, pvInterpolationOrder, quaternions, aInterpolationOrder);
     }
 
     /** Build a configured instance.
@@ -143,7 +124,42 @@ public class Rugged {
      * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
      * can be made after construction if these phenomena should not be corrected.
      * </p>
-     * @param newReferenceDate reference date from which all other dates are computed
+     * @param referenceDate reference date from which all other dates are computed
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
+     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
+     * @param ellipsoidID identifier of reference ellipsoid
+     * @param inertialFrameID identifier of inertial frame
+     * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param positionsVelocities satellite position and velocity
+     * @param pvInterpolationOrder order to use for position/velocity interpolation
+     * @param quaternions satellite quaternions
+     * @param aInterpolationOrder order to use for attitude interpolation
+     * @exception RuggedException if data needed for some frame cannot be loaded
+     */
+    public Rugged(final AbsoluteDate referenceDate,
+                  final TileUpdater updater, final int maxCachedTiles,
+                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
+                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
+                  final int pvInterpolationOrder, final List<Pair<AbsoluteDate, Rotation>> quaternions,
+                  final int aInterpolationOrder)
+        throws RuggedException {
+        this(referenceDate, updater, maxCachedTiles, algorithmID,
+             extend(ellipsoid), inertialFrame,
+             selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder, inertialFrame),
+             selectAttitudeProvider(quaternions, aInterpolationOrder, inertialFrame));
+    }
+
+    /** Build a configured instance.
+     * <p>
+     * By default, the instance performs both light time correction (which refers
+     * to ground point motion with respect to inertial frame) and aberration of
+     * light correction (which refers to spacecraft proper velocity). Explicit calls
+     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
+     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
+     * can be made after construction if these phenomena should not be corrected.
+     * </p>
+     * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
@@ -153,35 +169,81 @@ public class Rugged {
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public Rugged(final AbsoluteDate newReferenceDate,
+    public Rugged(final AbsoluteDate referenceDate,
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
                   final Propagator propagator)
         throws RuggedException {
-        try {
+        this(referenceDate, updater, maxCachedTiles, algorithmID,
+             selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
+             selectInertialFrame(inertialFrameID), propagator);
+    }
 
-            // time reference
-            this.referenceDate = newReferenceDate;
+    /** Build a configured instance.
+     * <p>
+     * By default, the instance performs both light time correction (which refers
+     * to ground point motion with respect to inertial frame) and aberration of
+     * light correction (which refers to spacecraft proper velocity). Explicit calls
+     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
+     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
+     * can be made after construction if these phenomena should not be corrected.
+     * </p>
+     * @param referenceDate reference date from which all other dates are computed
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
+     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
+     * @param ellipsoid f reference ellipsoid
+     * @param inertialFrame inertial frame
+     * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param propagator global propagator
+     * @exception RuggedException if data needed for some frame cannot be loaded
+     */
+    public Rugged(final AbsoluteDate referenceDate,
+                  final TileUpdater updater, final int maxCachedTiles,
+                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid,
+                  final Frame inertialFrame, final Propagator propagator)
+        throws RuggedException {
+        this(referenceDate, updater, maxCachedTiles, algorithmID,
+             extend(ellipsoid), inertialFrame,
+             propagator, propagator.getAttitudeProvider());
+    }
 
-            // space reference
-            frame = selectInertialFrame(inertialFrameID);
-            ellipsoid = selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID));
+    /** Low level private constructor.
+     * @param referenceDate reference date from which all other dates are computed
+     * @param updater updater used to load Digital Elevation Model tiles
+     * @param maxCachedTiles maximum number of tiles stored in the cache
+     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
+     * @param ellipsoid f reference ellipsoid
+     * @param inertialFrame inertial frame
+     * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param pvProvider orbit propagator/interpolator
+     * @param aProvider attitude propagator/interpolator
+     * @exception RuggedException if data needed for some frame cannot be loaded
+     */
+    private Rugged(final AbsoluteDate referenceDate,
+                  final TileUpdater updater, final int maxCachedTiles, final AlgorithmId algorithmID,
+                  final ExtendedEllipsoid ellipsoid, final Frame inertialFrame,
+                  final PVCoordinatesProvider pvProvider, final AttitudeProvider aProvider)
+        throws RuggedException {
 
-            // orbit/attitude to body converter
-            scToBody = new SpacecraftToObservedBody(frame, ellipsoid.getBodyFrame(),
-                                                    propagator, propagator.getAttitudeProvider());
+        // time reference
+        this.referenceDate = referenceDate;
 
-            // intersection algorithm
-            algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+        // space reference
+        this.inertialFrame = inertialFrame;
+        this.ellipsoid     = ellipsoid;
 
-            sensors = new HashMap<String, Sensor>();
-            setLightTimeCorrection(true);
-            setAberrationOfLightCorrection(true);
+        // orbit/attitude to body converter
+        this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(), pvProvider, aProvider);
 
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
-        }
+        // intersection algorithm
+        this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+
+        this.sensors = new HashMap<String, Sensor>();
+        setLightTimeCorrection(true);
+        setAberrationOfLightCorrection(true);
+
     }
 
     /** Get the reference date.
@@ -261,28 +323,32 @@ public class Rugged {
     }
 
     /** Select inertial frame.
-     * @param inertialFrame inertial frame identifier
+     * @param inertialFrameId inertial frame identifier
      * @return inertial frame
-     * @exception OrekitException if data needed for some frame cannot be loaded
+     * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    private Frame selectInertialFrame(final InertialFrameId inertialFrame)
-        throws OrekitException {
+    private static Frame selectInertialFrame(final InertialFrameId inertialFrameId)
+        throws RuggedException {
 
-        // set up the inertial frame
-        switch (inertialFrame) {
-        case GCRF :
-            return FramesFactory.getGCRF();
-        case EME2000 :
-            return FramesFactory.getEME2000();
-        case MOD :
-            return FramesFactory.getMOD(IERSConventions.IERS_1996);
-        case TOD :
-            return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
-        case VEIS1950 :
-            return FramesFactory.getVeis1950();
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
+        try {
+            // set up the inertial frame
+            switch (inertialFrameId) {
+            case GCRF :
+                return FramesFactory.getGCRF();
+            case EME2000 :
+                return FramesFactory.getEME2000();
+            case MOD :
+                return FramesFactory.getMOD(IERSConventions.IERS_1996);
+            case TOD :
+                return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
+            case VEIS1950 :
+                return FramesFactory.getVeis1950();
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
+            }
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
         }
 
     }
@@ -290,22 +356,26 @@ public class Rugged {
     /** Select body rotating frame.
      * @param bodyRotatingFrame body rotating frame identifier
      * @return body rotating frame
-     * @exception OrekitException if data needed for some frame cannot be loaded
+     * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    private Frame selectBodyRotatingFrame(final BodyRotatingFrameId bodyRotatingFrame)
-        throws OrekitException {
+    private static Frame selectBodyRotatingFrame(final BodyRotatingFrameId bodyRotatingFrame)
+        throws RuggedException {
 
-        // set up the rotating frame
-        switch (bodyRotatingFrame) {
-        case ITRF :
-            return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-        case ITRF_EQUINOX :
-            return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
-        case GTOD :
-            return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
+        try {
+            // set up the rotating frame
+            switch (bodyRotatingFrame) {
+            case ITRF :
+                return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+            case ITRF_EQUINOX :
+                return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
+            case GTOD :
+                return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
+            }
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
         }
 
     }
@@ -314,23 +384,21 @@ public class Rugged {
      * @param ellipsoidID reference ellipsoid identifier
      * @param bodyFrame body rotating frame
      * @return selected ellipsoid
-     * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private ExtendedEllipsoid selectEllipsoid(final EllipsoidId ellipsoidID, final Frame bodyFrame)
-        throws OrekitException {
+    private static OneAxisEllipsoid selectEllipsoid(final EllipsoidId ellipsoidID, final Frame bodyFrame) {
 
         // set up the ellipsoid
         switch (ellipsoidID) {
         case GRS80 :
-            return new ExtendedEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
+            return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
         case WGS84 :
-            return new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                         Constants.WGS84_EARTH_FLATTENING,
-                                         bodyFrame);
+            return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                        Constants.WGS84_EARTH_FLATTENING,
+                                        bodyFrame);
         case IERS96 :
-            return new ExtendedEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
+            return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
         case IERS2003 :
-            return new ExtendedEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
+            return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
         default :
             // this should never happen
             throw RuggedException.createInternalError(null);
@@ -338,20 +406,29 @@ public class Rugged {
 
     }
 
+    /** Convert a {@link OneAxisEllipsoid} into a {@link ExtendedEllipsoid}
+     * @param ellipsoid ellpsoid to extend
+     * @return extended ellipsoid
+     */
+    private static ExtendedEllipsoid extend(final OneAxisEllipsoid ellipsoid) {
+        return new ExtendedEllipsoid(ellipsoid.getEquatorialRadius(),
+                                     ellipsoid.getFlattening(),
+                                     ellipsoid.getBodyFrame());
+    }
+
     /** Select attitude provider.
      * @param quaternions satellite quaternions
      * @param interpolationOrder order to use for interpolation
+     * @param inertialFrame inertial frame where position and velocity are defined
      * @return selected attitude provider
-     * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private AttitudeProvider selectAttitudeProvider(final List<Pair<AbsoluteDate, Rotation>> quaternions,
-                                                    final int interpolationOrder)
-        throws OrekitException {
+    private static AttitudeProvider selectAttitudeProvider(final List<Pair<AbsoluteDate, Rotation>> quaternions,
+                                                           final int interpolationOrder, final Frame inertialFrame) {
 
         // set up the attitude provider
         final List<Attitude> attitudes = new ArrayList<Attitude>(quaternions.size());
         for (final Pair<AbsoluteDate, Rotation> q : quaternions) {
-            attitudes.add(new Attitude(q.getFirst(), frame, q.getSecond(), Vector3D.ZERO));
+            attitudes.add(new Attitude(q.getFirst(), inertialFrame, q.getSecond(), Vector3D.ZERO));
         }
         return new TabulatedProvider(attitudes, interpolationOrder, false);
 
@@ -360,17 +437,16 @@ public class Rugged {
     /** Select position/velocity provider.
      * @param positionsVelocities satellite position and velocity
      * @param interpolationOrder order to use for interpolation
+     * @param inertialFrame inertial frame where position and velocity are defined
      * @return selected position/velocity provider
-     * @exception OrekitException if data needed for some frame cannot be loaded
      */
-    private PVCoordinatesProvider selectPVCoordinatesProvider(final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
-                                                              final int interpolationOrder)
-        throws OrekitException {
+    private static PVCoordinatesProvider selectPVCoordinatesProvider(final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
+                                                                     final int interpolationOrder, final Frame inertialFrame) {
 
         // set up the ephemeris
         final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
         for (final Pair<AbsoluteDate, PVCoordinates> pv : positionsVelocities) {
-            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), frame, pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
+            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), inertialFrame, pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
             orbits.add(orbit);
         }
 
@@ -381,7 +457,7 @@ public class Rugged {
             /** {@inhritDoc} */
             @Override
             public PVCoordinates getPVCoordinates(final AbsoluteDate date, final Frame f)
-                throws OrekitException {
+                    throws OrekitException {
                 final List<Orbit> sample = cache.getNeighbors(date);
                 final Orbit interpolated = sample.get(0).interpolate(date, sample);
                 return interpolated.getPVCoordinates(date, f);
@@ -419,10 +495,7 @@ public class Rugged {
      * @param sensorName name of the line sensor
      * @param lineNumber number of the line to localize on ground
      * @return ground position of all pixels of the specified sensor line
-     * @exception RuggedException if line cannot be localized,
-     * if {@link #setGeneralContext(File, InertialFrame, BodyRotatingFrame, Ellipsoid)} has
-     * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
-     * been called beforehand, or sensor is unknown
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
     public GeodeticPoint[] directLocalization(final String sensorName, final double lineNumber)
         throws RuggedException {
@@ -490,10 +563,7 @@ public class Rugged {
      * @param sensorName name of the line  sensor
      * @param groundPoint ground point to localize
      * @return sensor pixel seeing ground point
-     * @exception RuggedException if line cannot be localized,
-     * if {@link #setGeneralContext(File, InertialFrame, BodyRotatingFrame, Ellipsoid)} has
-     * not been called beforehand, or if {@link #setOrbitAndAttitude(List, List)} has not
-     * been called beforehand, or sensor is unknown
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
     public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint groundPoint)
         throws RuggedException {
@@ -510,7 +580,7 @@ public class Rugged {
      * @exception RuggedException if context has not been initialized
      */
     private void checkContext() throws RuggedException {
-        if (frame == null) {
+        if (inertialFrame == null) {
             throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT);
         }
     }
