@@ -195,7 +195,6 @@ public class Rugged {
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid f reference ellipsoid
      * @param inertialFrame inertial frame
-     * @param bodyRotatingFrameID identifier of body rotating frame
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
@@ -216,7 +215,6 @@ public class Rugged {
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid f reference ellipsoid
      * @param inertialFrame inertial frame
-     * @param bodyRotatingFrameID identifier of body rotating frame
      * @param pvProvider orbit propagator/interpolator
      * @param aProvider attitude propagator/interpolator
      * @exception RuggedException if data needed for some frame cannot be loaded
