@@ -25,8 +25,6 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.orekit.rugged.api.LineDatation;
 import org.orekit.time.AbsoluteDate;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-
 /** Container for sensor data.
  * <p>
  * Instances of this class are guaranteed to be immutable.
