@@ -19,8 +19,13 @@ package org.orekit.rugged.core;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.orekit.rugged.api.LineDatation;
 import org.orekit.time.AbsoluteDate;
+
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 /** Container for sensor data.
  * <p>
@@ -45,6 +50,12 @@ public class Sensor {
     /** Datation model. */
     private final LineDatation datationModel;
 
+    /** Mean plane normal. */
+    private final Vector3D normal;
+
+    /** Mean plane reference point. */
+    private final Vector3D referencePoint;
+
     /** Simple constructor.
      * @param name name of the sensor
      * @param referenceDate reference date
@@ -55,11 +66,51 @@ public class Sensor {
     public Sensor(final String name,
                   final AbsoluteDate referenceDate, final LineDatation datationModel,
                   final List<Vector3D> positions, final List<Vector3D> los) {
+
         this.name          = name;
         this.referenceDate = referenceDate;
         this.positions     = positions;
         this.los           = los;
         this.datationModel = datationModel;
+
+        // we consider the viewing directions as a point cloud
+        // and want to find the plane that best fits it
+
+        // start by finding the centroid
+        // (which will also be our plane reference point)
+        double centroidX = 0;
+        double centroidY = 0;
+        double centroidZ = 0;
+        for (int i = 0; i < los.size(); ++i) {
+            final Vector3D p = positions.get(i);
+            final Vector3D l = los.get(i);
+            centroidX += p.getX() + l.getX();
+            centroidY += p.getY() + l.getY();
+            centroidZ += p.getZ() + l.getZ();
+        }
+        centroidX /= los.size();
+        centroidY /= los.size();
+        centroidZ /= los.size();
+        referencePoint = new Vector3D(centroidX, centroidY, centroidZ);
+
+        // build a centered data matrix
+        RealMatrix matrix = MatrixUtils.createRealMatrix(3, los.size());
+        for (int i = 0; i < los.size(); ++i) {
+            final Vector3D p = positions.get(i);
+            final Vector3D l = los.get(i);
+            matrix.setEntry(0, i, p.getX() + l.getX() - centroidX);
+            matrix.setEntry(1, i, p.getY() + l.getY() - centroidY);
+            matrix.setEntry(2, i, p.getZ() + l.getZ() - centroidZ);
+        }
+
+        // compute Singular Value Decomposition
+        final SingularValueDecomposition svd = new SingularValueDecomposition(matrix);
+
+        // extract the left singular vector corresponding to least singular value
+        // (i.e. last vector since Apache Commons Math returns the values
+        //  in non-increasing order)
+        normal = new Vector3D(svd.getU().getColumn(2)).normalize();
+
     }
 
     /** Get the name of the sensor.
@@ -106,6 +157,20 @@ public class Sensor {
      */
     public double getLine(final AbsoluteDate date) {
         return datationModel.getLine(date.durationFrom(referenceDate));
+    }
+
+    /** Get the mean plane normal.
+     * @return mean plane normal
+     */
+    public Vector3D getMeanPlaneNormal() {
+        return normal;
+    }
+
+    /** Get the mean plane reference point.
+     * @return mean plane reference point
+     */
+    public Vector3D getMeanPlaneReferencePoint() {
+        return referencePoint;
     }
 
 }
