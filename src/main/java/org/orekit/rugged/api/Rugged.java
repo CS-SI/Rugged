@@ -512,6 +512,9 @@ public class Rugged {
             final Transform    inertToBody = scToBody.getInertialToBody(date);
             final Transform    approximate = new Transform(date, scToInert, inertToBody);
 
+            final Vector3D spacecraftVelocity =
+                    scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
+
             // compute localization of each pixel
             final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
             for (int i = 0; i < gp.length; ++i) {
@@ -522,7 +525,6 @@ public class Rugged {
                     // apply aberration of light correction
                     // as the spacecraft velocity is small with respect to speed of light,
                     // we use classical velocity addition and not relativistic velocity addition
-                    final Vector3D spacecraftVelocity = scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
                     lInert = new Vector3D(Constants.SPEED_OF_LIGHT, scToInert.transformVector(sensor.getLos(i)),
                                           1.0, spacecraftVelocity).normalize();
                 } else {
