@@ -249,13 +249,17 @@ public class SimpleTile implements Tile {
                                            final int latitudeIndex, final int longitudeIndex)
         throws RuggedException {
 
+        // ensure neighboring pixels to not fall out of tile
+        final int iLat  = FastMath.max(0, FastMath.min(latitudeRows     - 2, latitudeIndex));
+        final int jLong = FastMath.max(0, FastMath.min(longitudeColumns - 2, longitudeIndex));
+
         // Digital Elevation Mode coordinates at pixel vertices
-        final double x00 = getLongitudeAtIndex(longitudeIndex);
-        final double y00 = getLatitudeAtIndex(latitudeIndex);
-        final double z00 = getElevationAtIndices(latitudeIndex,     longitudeIndex);
-        final double z01 = getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
-        final double z10 = getElevationAtIndices(latitudeIndex,     longitudeIndex + 1);
-        final double z11 = getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
+        final double x00 = getLongitudeAtIndex(jLong);
+        final double y00 = getLatitudeAtIndex(iLat);
+        final double z00 = getElevationAtIndices(iLat,     jLong);
+        final double z01 = getElevationAtIndices(iLat + 1, jLong);
+        final double z10 = getElevationAtIndices(iLat,     jLong + 1);
+        final double z11 = getElevationAtIndices(iLat + 1, jLong + 1);
 
         // line-of-sight coordinates at close points
         final double dxA = (p.getLongitude() - x00) / longitudeStep;
