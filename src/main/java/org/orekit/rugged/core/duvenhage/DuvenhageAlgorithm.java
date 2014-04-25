@@ -174,13 +174,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             throw RuggedException.createInternalError(null);
         }
 
-        if (FastMath.min(entryLat, exitLat) < 0 || FastMath.max(entryLat, exitLat) >= tile.getLatitudeRows() ||
-            FastMath.min(entryLon, exitLon) < 0 || FastMath.max(entryLon, exitLon) >= tile.getLongitudeColumns()) {
-            // search segment is outside of tile (probably due to the 1 offset with respect
-            // to a boundary crossing index when splitting line-of-sight in the caller
-            return null;
-        }
-
         if (entryLat == exitLat && entryLon == exitLon) {
             // we have narrowed the search down to a single Digital Elevation Model pixel
             GeodeticPoint intersection = tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los),
