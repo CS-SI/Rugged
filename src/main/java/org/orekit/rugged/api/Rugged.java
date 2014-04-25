@@ -128,9 +128,8 @@ public class Rugged {
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoidID identifier of reference ellipsoid
-     * @param inertialFrameID identifier of inertial frame
-     * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param ellipsoid reference ellipsoid
+     * @param inertialFrame inertial frame
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
@@ -404,7 +403,7 @@ public class Rugged {
 
     }
 
-    /** Convert a {@link OneAxisEllipsoid} into a {@link ExtendedEllipsoid}
+    /** Convert a {@link OneAxisEllipsoid} into a {@link ExtendedEllipsoid}.
      * @param ellipsoid ellpsoid to extend
      * @return extended ellipsoid
      */
@@ -444,7 +443,8 @@ public class Rugged {
         // set up the ephemeris
         final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
         for (final Pair<AbsoluteDate, PVCoordinates> pv : positionsVelocities) {
-            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), inertialFrame, pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
+            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), inertialFrame,
+                                                            pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
             orbits.add(orbit);
         }
 
@@ -455,7 +455,7 @@ public class Rugged {
             /** {@inhritDoc} */
             @Override
             public PVCoordinates getPVCoordinates(final AbsoluteDate date, final Frame f)
-                    throws OrekitException {
+                throws OrekitException {
                 final List<Orbit> sample = cache.getNeighbors(date);
                 final Orbit interpolated = sample.get(0).interpolate(date, sample);
                 return interpolated.getPVCoordinates(date, f);
@@ -477,7 +477,9 @@ public class Rugged {
         // set up the algorithm
         switch (algorithmID) {
         case DUVENHAGE :
-            return new DuvenhageAlgorithm(updater, maxCachedTiles);
+            return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+        case DUVENHAGE_FLAT_BODY :
+            return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
         case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
             return new BasicScanAlgorithm(updater, maxCachedTiles);
         case IGNORE_DEM_USE_ELLIPSOID :

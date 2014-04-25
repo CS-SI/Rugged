@@ -29,7 +29,7 @@ import org.orekit.rugged.core.raster.IntersectionAlgorithm;
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 
     protected IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        return new DuvenhageAlgorithm(updater, maxCachedTiles);
+        return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
     }
 
     @Test

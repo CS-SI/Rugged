@@ -44,12 +44,23 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     /** Cache for DEM tiles. */
     private final TilesCache<MinMaxTreeTile> cache;
 
+    /** Flag for flat-body hypothesis. */
+    private final boolean flatBody;
+
     /** Simple constructor.
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
+     * @param flatBody if true, the body is considered flat, i.e. lines computed
+     * from entry/exit points in the DEM are considered to be straight lines also
+     * in geodetic coordinates. The sagitta resulting from real ellipsoid curvature
+     * is therefore <em>not</em> corrected in this case. As this computation is not
+     * costly (a few percents overhead), it is not recommended to set this parameter
+     * to {@code true}. This flag is mainly intended for comparison purposes with other systems.
      */
-    public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
+    public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles,
+                              final boolean flatBody) {
+        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
+        this.flatBody = flatBody;
     }
 
     /** {@inheritDoc} */
@@ -174,7 +185,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             // we have narrowed the search down to a single Digital Elevation Model pixel
             GeodeticPoint intersection = tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los),
                                                                 exitLat, exitLon);
-            if (intersection != null) {
+            if (intersection != null && !flatBody) {
                 // improve the point, by projecting it back on the 3D line,
                 // fixing the small body curvature remaining at pixel level
                 final Vector3D      delta     = ellipsoid.transform(intersection).subtract(position);
@@ -212,20 +223,34 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (longitude >= FastMath.min(entry.getLongitude(), exit.getLongitude()) &&
                     longitude <= FastMath.max(entry.getLongitude(), exit.getLongitude())) {
 
-                    final Vector3D      crossingP    = ellipsoid.pointAtLongitude(position, los, longitude);
-                    final GeodeticPoint crossingGP   = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
-                    final int           crossingLat  = tile.getLatitudeIndex(crossingGP.getLatitude());
+                    final GeodeticPoint crossingGP;
+                    if (flatBody) {
+                        // linear approximation of crossing point
+                        final double d  = exit.getLongitude() - entry.getLongitude();
+                        final double cN = (exit.getLongitude() - longitude) / d;
+                        final double cX = (longitude - entry.getLongitude()) / d;
+                        crossingGP = new GeodeticPoint(cN * entry.getLatitude() + cX * exit.getLatitude(),
+                                                       longitude,
+                                                       cN * entry.getAltitude() + cX * exit.getAltitude());
+                    } else {
+                        // full computation of crossing point
+                        final Vector3D crossingP = ellipsoid.pointAtLongitude(position, los, longitude);
+                        crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                    }
+                    final int crossingLat = tile.getLatitudeIndex(crossingGP.getLatitude());
 
                     // adjust indices as the crossing point is by definition between the sub-tiles
                     final int crossingLonBefore = crossingLon - (entryLon <= exitLon ? 1 : 0);
                     final int crossingLonAfter  = crossingLon - (entryLon <= exitLon ? 0 : 1);
 
-                    // look for intersection
-                    final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
-                                                                           previousGP, previousLat, previousLon,
-                                                                           crossingGP, crossingLat, crossingLonBefore);
-                    if (intersection != null) {
-                        return intersection;
+                    if (inRange(crossingLonBefore, entryLon, exitLon)) {
+                        // look for intersection
+                        final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                                                                               previousGP, previousLat, previousLon,
+                                                                               crossingGP, crossingLat, crossingLonBefore);
+                        if (intersection != null) {
+                            return intersection;
+                        }
                     }
 
                     // prepare next segment
@@ -246,21 +271,35 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (latitude >= FastMath.min(entry.getLatitude(), exit.getLatitude()) &&
                     latitude <= FastMath.max(entry.getLatitude(), exit.getLatitude())) {
 
-                    final Vector3D      crossingP    = ellipsoid.pointAtLatitude(position, los,
-                                                                                 tile.getLatitudeAtIndex(crossingLat));
-                    final GeodeticPoint crossingGP   = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
-                    final int           crossingLon  = tile.getLongitudeIndex(crossingGP.getLongitude());
+                    final GeodeticPoint crossingGP;
+                    if (flatBody) {
+                        // linear approximation of crossing point
+                        final double d  = exit.getLatitude() - entry.getLatitude();
+                        final double cN = (exit.getLatitude() - latitude) / d;
+                        final double cX = (latitude - entry.getLatitude()) / d;
+                        crossingGP = new GeodeticPoint(latitude,
+                                                       cN * entry.getLongitude() + cX * exit.getLongitude(),
+                                                       cN * entry.getAltitude()  + cX * exit.getAltitude());
+                    } else {
+                        // full computation of crossing point
+                        final Vector3D crossingP = ellipsoid.pointAtLatitude(position, los,
+                                                                             tile.getLatitudeAtIndex(crossingLat));
+                        crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                    }
+                    final int crossingLon = tile.getLongitudeIndex(crossingGP.getLongitude());
 
                     // adjust indices as the crossing point is by definition between the sub-tiles
                     final int crossingLatBefore = crossingLat - (entryLat <= exitLat ? 1 : 0);
                     final int crossingLatAfter  = crossingLat - (entryLat <= exitLat ? 0 : 1);
 
-                    // look for intersection
-                    final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
-                                                                           previousGP, previousLat, previousLon,
-                                                                           crossingGP, crossingLatBefore, crossingLon);
-                    if (intersection != null) {
-                        return intersection;
+                    if (inRange(crossingLatBefore, entryLat, exitLat)) {
+                        // look for intersection
+                        final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                                                                               previousGP, previousLat, previousLon,
+                                                                               crossingGP, crossingLatBefore, crossingLon);
+                        if (intersection != null) {
+                            return intersection;
+                        }
                     }
 
                     // prepare next segment
@@ -273,11 +312,25 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             }
         }
 
-        // last part of the segment, up to exit point
-        return recurseIntersection(depth + 1, ellipsoid, position, los, tile,
-                                   previousGP, previousLat, previousLon,
-                                   exit, exitLat, exitLon);
+        if (inRange(previousLat, entryLat, exitLat) && inRange(previousLon, entryLon, exitLon)) {
+            // last part of the segment, up to exit point
+            return recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                                       previousGP, previousLat, previousLon,
+                                       exit, exitLat, exitLon);
+        } else {
+            return null;
+        }
 
+    }
+
+    /** Check if an index is inside a range.
+     * @param i index to check
+     * @param a first bound of the range (may be either below or above b)
+     * @param b second bound of the range (may be either below or above a)
+     * @return true if i is between a and b (inclusive)
+     */
+    private boolean inRange(final int i, final int a, final int b) {
+        return i >= FastMath.min(a, b) && i <= FastMath.max(a, b);
     }
 
     /** Compute a line-of-sight exit point from a tile.

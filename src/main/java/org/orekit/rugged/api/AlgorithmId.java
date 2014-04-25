@@ -31,6 +31,23 @@ public enum AlgorithmId {
      */
     DUVENHAGE,
 
+    /** Fast algorithm due to Bernardt Duvenhage.
+     * <p>
+     * The algorithm is described in the 2009 paper:
+     * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
+     * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
+     * </p>
+     * <p>
+     * This version of the duvenhage's algorithm considers the body to be flat, i.e. lines computed
+     * from entry/exit points in the Digital Elevation Model are considered to be straight lines
+     * also in geodetic coordinates. The sagitta resulting from real ellipsoid curvature is therefore
+     * <em>not</em> corrected in this case. As this computation is not costly (a few percents overhead),
+     * the full {@link #DUVENHAGE} is recommended instead of this one. This choice is mainly intended
+     * for comparison purposes with other systems.
+     * </p>
+     */
+    DUVENHAGE_FLAT_BODY,
+
     /** Basic, <em>very slow</em> algorithm, designed only for tests and validation purposes.
      * <p>
      * The algorithm simply computes entry and exit points at high and low altitudes,

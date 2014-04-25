@@ -31,6 +31,7 @@ import java.util.Locale;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
 import org.junit.Assert;
@@ -61,6 +62,7 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
+import org.orekit.rugged.core.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.core.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -384,6 +386,73 @@ public class RuggedTest {
             Assert.assertTrue(Vector3D.distance(pWith, pWithout) > 20.0);
             Assert.assertTrue(Vector3D.distance(pWith, pWithout) < 20.5);
         }
+
+    }
+
+    @Test
+    public void testFlatBodyCorrection()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 200;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
+        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2),
+                                       new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                       Vector3D.PLUS_I,
+                                       FastMath.toRadians(1.0), dimension);
+
+        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+
+        Propagator propagator = new KeplerianPropagator(orbit);
+        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.setEphemerisMode();
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        Propagator ephemeris = propagator.getGeneratedEphemeris();
+
+        TileUpdater updater =
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
+
+        Rugged ruggedFull = new Rugged(crossing, updater, 8,
+                                       AlgorithmId.DUVENHAGE,
+                                       EllipsoidId.WGS84,
+                                       InertialFrameId.EME2000,
+                                       BodyRotatingFrameId.ITRF,
+                                       ephemeris);
+        ruggedFull.setLineSensor("line", los, lineDatation);
+        GeodeticPoint[] gpWithFlatBodyCorrection = ruggedFull.directLocalization("line", 100);
+
+        Rugged ruggedFlat = new Rugged(crossing, updater, 8,
+                                       AlgorithmId.DUVENHAGE_FLAT_BODY,
+                                       EllipsoidId.WGS84,
+                                       InertialFrameId.EME2000,
+                                       BodyRotatingFrameId.ITRF,
+                                       ephemeris);
+        ruggedFlat.setLineSensor("line", los, lineDatation);
+        GeodeticPoint[] gpWithoutFlatBodyCorrection = ruggedFlat.directLocalization("line", 100);
+
+        SummaryStatistics stats = new SummaryStatistics();
+        for (int i = 0; i < gpWithFlatBodyCorrection.length; ++i) {
+            Vector3D pWith    = earth.transform(gpWithFlatBodyCorrection[i]);
+            Vector3D pWithout = earth.transform(gpWithoutFlatBodyCorrection[i]);
+            stats.addValue(Vector3D.distance(pWith, pWithout));
+        }
+        Assert.assertEquals(0.005, stats.getMin(),  1.0e-3);
+        Assert.assertEquals(6.503, stats.getMax(),  1.0e-3);
+        Assert.assertEquals(2.199, stats.getMean(), 1.0e-3);
 
     }
 
