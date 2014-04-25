@@ -92,7 +92,7 @@ public class Sensor {
         referencePoint = new Vector3D(centroidX, centroidY, centroidZ);
 
         // build a centered data matrix
-        RealMatrix matrix = MatrixUtils.createRealMatrix(3, los.size());
+        final RealMatrix matrix = MatrixUtils.createRealMatrix(3, los.size());
         for (int i = 0; i < los.size(); ++i) {
             final Vector3D p = positions.get(i);
             final Vector3D l = los.get(i);
