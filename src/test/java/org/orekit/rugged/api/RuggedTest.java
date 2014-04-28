@@ -456,6 +456,62 @@ public class RuggedTest {
 
     }
 
+    @Test
+    public void testInverseLocalization()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 200;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
+        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2),
+                                       new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                       Vector3D.PLUS_I,
+                                       FastMath.toRadians(1.0), dimension);
+
+        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+
+        Propagator propagator = new KeplerianPropagator(orbit);
+        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.setEphemerisMode();
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        Propagator ephemeris = propagator.getGeneratedEphemeris();
+
+        TileUpdater updater =
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
+
+        Rugged rugged = new Rugged(crossing, updater, 8,
+                                   AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84,
+                                   InertialFrameId.EME2000,
+                                   BodyRotatingFrameId.ITRF,
+                                   ephemeris);
+        rugged.setLineSensor("line", los, lineDatation);
+        GeodeticPoint[] gp = rugged.directLocalization("line", 100.24);
+
+        GeodeticPoint target =
+                new GeodeticPoint(0.75 * gp[17].getLatitude()  + 0.25 * gp[18].getLatitude(),
+                                  0.75 * gp[17].getLongitude() + 0.25 * gp[18].getLongitude(),
+                                  0.75 * gp[17].getAltitude()  + 0.25 * gp[18].getAltitude());
+        SensorPixel sp = rugged.inverseLocalization("line", target, 0.0, 200.0);
+        Assert.assertEquals(100.24, sp.getLineNumber(),  1.0e-10);
+        Assert.assertEquals( 17.25, sp.getPixelNumber(), 1.0e-10);
+
+    }
+
     private BodyShape createEarth()
        throws OrekitException {
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,

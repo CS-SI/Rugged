@@ -21,8 +21,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
+import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
+import org.apache.commons.math3.exception.NoBracketingException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
 import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
@@ -30,6 +36,7 @@ import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
+import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
@@ -54,6 +61,12 @@ import org.orekit.utils.PVCoordinatesProvider;
  * @author Luc Maisonobe
  */
 public class Rugged {
+
+    /** Absolute accuracy to use for inverse localization. */
+    private static final double INVERSE_LOCALIZATION_ACCURACY = 1.0e-4;
+
+    /** Maximum number of evaluations for inverse localization. */
+    private static final int INVERSE_LOCALIZATION_MAX_EVAL = 1000;
 
     /** Reference date. */
     private final AbsoluteDate referenceDate;
@@ -528,8 +541,8 @@ public class Rugged {
                     lInert = new Vector3D(Constants.SPEED_OF_LIGHT, scToInert.transformVector(sensor.getLos(i)),
                                           1.0, spacecraftVelocity).normalize();
                 } else {
-                    lInert = scToInert.transformVector(sensor.getLos(i));
                     // don't apply aberration of light correction
+                    lInert = scToInert.transformVector(sensor.getLos(i));
                 }
 
                 final Vector3D pBody;
@@ -564,17 +577,162 @@ public class Rugged {
     /** Inverse localization of a ground point.
      * @param sensorName name of the line  sensor
      * @param groundPoint ground point to localize
-     * @return sensor pixel seeing ground point
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @return sensor pixel seeing ground point, or null if ground point cannot
+     * be seen between the prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint groundPoint)
+    public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint groundPoint,
+                                           final double minLine, final double maxLine)
         throws RuggedException {
+        try {
 
-        checkContext();
-        final Sensor sensor = getSensor(sensorName);
+            checkContext();
+            final Sensor   sensor = getSensor(sensorName);
+            final Vector3D target = ellipsoid.transform(groundPoint);
+            final UnivariateSolver solver = new BracketingNthOrderBrentSolver(INVERSE_LOCALIZATION_ACCURACY, 5);
 
-        // TODO: implement direct localization
-        throw RuggedException.createInternalError(null);
+            // find the line at which ground point crosses sensor mean plane
+            final SensorMeanPlaneCrossing planeCrossing = new SensorMeanPlaneCrossing(sensor, target);
+            final double meanLine = solver.solve(INVERSE_LOCALIZATION_MAX_EVAL, planeCrossing, minLine, maxLine);
+            final Vector3D targetDirection = planeCrossing.targetDirection(meanLine);
+
+            // find the pixel along the line
+            final double meanPixel = solver.solve(INVERSE_LOCALIZATION_MAX_EVAL,
+                                                  new SensorPixelCrossing(sensor, targetDirection),
+                                                  0, sensor.getNbPixels());
+
+            // TODO: fix pixel offset with respect to mean sensor plane
+            final double fixedLine  = meanLine;
+            final double fixedPixel = meanPixel;
+
+            return new SensorPixel(fixedLine, fixedPixel);
+
+        } catch (NoBracketingException nbe) {
+            // there are no solutions in the search interval
+            return null;
+        } catch (TooManyEvaluationsException tmee) {
+            throw new RuggedException(tmee);
+        } catch (OrekitExceptionWrapper oew) {
+            final OrekitException oe = oew.getException();
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
+    }
+
+    /** Local class for finding when ground point crosses mean sensor plane. */
+    private class SensorMeanPlaneCrossing implements UnivariateFunction {
+
+        /** Line sensor. */
+        private final Sensor sensor;
+
+        /** Target ground point. */
+        private final Vector3D target;
+
+        /** Simple constructor.
+         * @param sensor sensor to consider
+         * @param target target ground point
+         */
+        public SensorMeanPlaneCrossing(final Sensor sensor, final Vector3D target) {
+            this.sensor = sensor;
+            this.target = target;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public double value(final double lineNumber) throws OrekitExceptionWrapper {
+            // the target crosses the mean plane if it orthogonal to the normal vector
+            return Vector3D.dotProduct(targetDirection(lineNumber), sensor.getMeanPlaneNormal());
+        }
+
+        /** Compute target point direction in spacecraft frame, at line acquisition time.
+         * @param lineNumber line being acquired
+         * @return target point direction in spacecraft frame
+         * @exception OrekitExceptionWrapper if some frame conversion fails
+         */
+        public Vector3D targetDirection(final double lineNumber) throws OrekitExceptionWrapper {
+            try {
+
+                // compute the transform between spacecraft and observed body
+                final AbsoluteDate date         = sensor.getDate(lineNumber);
+                final Transform    bodyToInert  = scToBody.getInertialToBody(date).getInverse();
+                final Transform    scToInert    = scToBody.getScToInertial(date);
+                final Vector3D     meanRefInert = scToInert.transformPosition(sensor.getMeanPlaneReferencePoint());
+
+                final Transform shifted;
+                if (lightTimeCorrection) {
+                    // apply light time correction
+                    final Vector3D iT     = bodyToInert.transformPosition(target);
+                    final double   deltaT = meanRefInert.distance(iT) / Constants.SPEED_OF_LIGHT;
+                    shifted = bodyToInert.shiftedBy(-deltaT);
+                } else {
+                    // don't apply light time correction
+                    shifted = bodyToInert;
+                }
+                final Vector3D targetInert = shifted.transformPosition(target);
+
+                Vector3D lInert;
+                if (aberrationOfLightCorrection) {
+                    // apply aberration of light correction
+                    // as the spacecraft velocity is small with respect to speed of light,
+                    // we use classical velocity addition and not relativistic velocity addition
+                    final Vector3D spacecraftVelocity =
+                            scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
+                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, targetInert.subtract(meanRefInert).normalize(),
+                                          1.0, spacecraftVelocity).normalize();
+                } else {
+                    // don't apply aberration of light correction
+                    lInert = targetInert.subtract(meanRefInert).normalize();
+                }
+
+                // direction of the target point in spacecraft frame
+                return scToInert.getInverse().transformVector(lInert);
+
+            } catch (OrekitException oe) {
+                throw new OrekitExceptionWrapper(oe);
+            }
+        }
+
+    }
+
+    /** Local class for finding when ground point crosses pixel along sensor line. */
+    private class SensorPixelCrossing implements UnivariateFunction {
+
+        /** Line sensor. */
+        private final Sensor sensor;
+
+        /** Cross direction in spacecraft frame. */
+        private final Vector3D cross;
+
+        /** Simple constructor.
+         * @param sensor sensor to consider
+         * @param targetDirection target direction in spacecraft frame
+         */
+        public SensorPixelCrossing(final Sensor sensor, final Vector3D targetDirection) {
+            this.sensor = sensor;
+            this.cross  = Vector3D.crossProduct(sensor.getMeanPlaneNormal(), targetDirection).normalize();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public double value(final double x) {
+            return Vector3D.dotProduct(cross, getLOS(x));
+        }
+
+        /** Interpolate sensor pixels at some pixel index.
+         * @param x pixel index
+         * @return interpolated direction for specified index
+         */
+        public Vector3D getLOS(final double x) {
+
+            // find surrounding pixels
+            final int iInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(x)));
+            final int iSup = iInf + 1;
+
+            // interpolate
+            return new Vector3D(iSup - x, sensor.getLos(iInf), x - iInf, sensor.getLos(iSup)).normalize();
+
+        }
 
     }
 
