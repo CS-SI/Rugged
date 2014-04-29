@@ -484,7 +484,7 @@ public class RuggedTest {
         double referenceLine = 100.00;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
 
-        for (int i = 1; i < gp.length; ++i) {
+        for (int i = 0; i < gp.length; ++i) {
             SensorPixel sp = rugged.inverseLocalization("line", gp[i], 0, dimension);
             Assert.assertEquals(referenceLine, sp.getLineNumber(),  3.0e-9);
             Assert.assertEquals(i,             sp.getPixelNumber(), 8.0e-5);

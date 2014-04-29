@@ -569,7 +569,7 @@ public class Rugged {
             // find the pixel along the line
             final double meanPixel = solver.solve(INVERSE_LOCALIZATION_MAX_EVAL,
                                                   new SensorPixelCrossing(sensor, targetDirection),
-                                                  0, sensor.getNbPixels());
+                                                  -1.0, sensor.getNbPixels());
 
             // TODO: fix pixel offset with respect to mean sensor plane
             final double fixedLine  = meanLine;
