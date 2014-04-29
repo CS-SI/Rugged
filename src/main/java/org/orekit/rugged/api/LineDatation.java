@@ -16,6 +16,8 @@
  */
 package org.orekit.rugged.api;
 
+import org.orekit.time.AbsoluteDate;
+
 /** Interface representing line datation model.
  * @see LinearLineDatation
  * @author Luc Maisonobe
@@ -24,14 +26,14 @@ public interface LineDatation {
 
     /** Get the date for a given line.
      * @param lineNumber line number
-     * @return date, as an offset in seconds from reference date
+     * @return date at which line is acquired
      */
-    double getDate(double lineNumber);
+    AbsoluteDate getDate(double lineNumber);
 
     /** Get the line for a given date.
-     * @param date date, as an offset in seconds from reference date
+     * @param date date
      * @return line number
      */
-    double getLine(double date);
+    double getLine(AbsoluteDate date);
 
 }

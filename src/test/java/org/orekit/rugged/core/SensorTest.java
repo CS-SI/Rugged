@@ -47,8 +47,8 @@ public class SensorTest {
             los.add(new Vector3D(FastMath.cos(alpha), fovCenter, FastMath.sin(alpha), cross));
         }
 
-        final Sensor sensor = new Sensor("perfect line", AbsoluteDate.J2000_EPOCH,
-                                         new LinearLineDatation(0.0, 1.0 / 1.5e-3), positions, los);
+        final Sensor sensor = new Sensor("perfect line",
+                                         new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3), positions, los);
 
         Assert.assertEquals("perfect line", sensor.getName());
         Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
@@ -80,8 +80,8 @@ public class SensorTest {
             los.add(new Vector3D(cA * cD, fovCenter, sA * cD, cross, sD, normal));
         }
 
-        final Sensor sensor = new Sensor("noisy line", AbsoluteDate.J2000_EPOCH,
-                                         new LinearLineDatation(0.0, 1.0 / 1.5e-3), positions, los);
+        final Sensor sensor = new Sensor("noisy line",
+                                         new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3), positions, los);
 
         Assert.assertEquals("noisy line", sensor.getName());
         Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));

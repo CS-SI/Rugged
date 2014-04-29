@@ -36,9 +36,6 @@ public class Sensor {
     /** Name of the sensor. */
     private final String name;
 
-    /** Reference date. */
-    private final AbsoluteDate referenceDate;
-
     /** Pixels positions. */
     private final List<Vector3D> positions;
 
@@ -61,12 +58,10 @@ public class Sensor {
      * @param los pixels lines-of-sight
      * @param datationModel datation model
      */
-    public Sensor(final String name,
-                  final AbsoluteDate referenceDate, final LineDatation datationModel,
+    public Sensor(final String name, final LineDatation datationModel,
                   final List<Vector3D> positions, final List<Vector3D> los) {
 
         this.name          = name;
-        this.referenceDate = referenceDate;
         this.positions     = positions;
         this.los           = los;
         this.datationModel = datationModel;
@@ -146,7 +141,7 @@ public class Sensor {
      * @return date corresponding to line number
      */
     public AbsoluteDate getDate(final double lineNumber) {
-        return referenceDate.shiftedBy(datationModel.getDate(lineNumber));
+        return datationModel.getDate(lineNumber);
     }
 
     /** Get the line number.
@@ -154,7 +149,7 @@ public class Sensor {
      * @return line number corresponding to date
      */
     public double getLine(final AbsoluteDate date) {
-        return datationModel.getLine(date.durationFrom(referenceDate));
+        return datationModel.getLine(date);
     }
 
     /** Get the mean plane normal.

@@ -140,15 +140,13 @@ public class RuggedTest {
                                                  FastMath.toRadians(30.0), 16.0,
                                                  FastMath.toRadians(1.0), 1201);
 
-        Rugged rugged = new Rugged(t0, updater, 8,
+        Rugged rugged = new Rugged(updater, 8,
                                    AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
                                    pv, 8, q, 8);
 
-        Assert.assertEquals(new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC()),
-                            rugged.getReferenceDate());
         Assert.assertTrue(rugged.isLightTimeCorrected());
         rugged.setLightTimeCorrection(false);
         Assert.assertFalse(rugged.isLightTimeCorrected());
@@ -174,14 +172,13 @@ public class RuggedTest {
                                                  FastMath.toRadians(30.0), 16.0,
                                                  FastMath.toRadians(1.0), 1201);
 
-        Rugged rugged = new Rugged(propagator.getInitialState().getDate(), updater, 8,
+        Rugged rugged = new Rugged(updater, 8,
                                    AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
                                    propagator);
 
-        Assert.assertEquals(propagator.getInitialState().getDate(), rugged.getReferenceDate());
         Assert.assertTrue(rugged.isLightTimeCorrected());
         rugged.setLightTimeCorrection(false);
         Assert.assertFalse(rugged.isLightTimeCorrected());
@@ -220,17 +217,17 @@ public class RuggedTest {
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
-        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
 
         Propagator propagator = createPropagator(earth, gravityField, orbit);
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
         propagator.setEphemerisMode();
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
         Propagator ephemeris = propagator.getGeneratedEphemeris();
 
-        Rugged rugged = new Rugged(crossing, updater, 8,
+        Rugged rugged = new Rugged(updater, 8,
                                    AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
@@ -299,17 +296,17 @@ public class RuggedTest {
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
-        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
 
-        Rugged rugged = new Rugged(crossing, null, -1,
+        Rugged rugged = new Rugged(null, -1,
                                    AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
-                                   orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
+                                   orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
+                                   orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
         rugged.setLineSensor("line", los, lineDatation);
 
@@ -350,17 +347,17 @@ public class RuggedTest {
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
-        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
 
-        Rugged rugged = new Rugged(crossing, null, -1,
+        Rugged rugged = new Rugged(null, -1,
                                    AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
-                                   orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
+                                   orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
+                                   orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
         rugged.setLineSensor("line", los, lineDatation);
 
@@ -403,7 +400,7 @@ public class RuggedTest {
                                        FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
-        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
 
@@ -411,23 +408,23 @@ public class RuggedTest {
                 new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
                                            FastMath.toRadians(1.0), 257);
 
-        Rugged ruggedFull = new Rugged(crossing, updater, 8,
+        Rugged ruggedFull = new Rugged(updater, 8,
                                        AlgorithmId.DUVENHAGE,
                                        EllipsoidId.WGS84,
                                        InertialFrameId.EME2000,
                                        BodyRotatingFrameId.ITRF,
-                                       orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
-                                       orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
+                                       orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
+                                       orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         ruggedFull.setLineSensor("line", los, lineDatation);
         GeodeticPoint[] gpWithFlatBodyCorrection = ruggedFull.directLocalization("line", 100);
 
-        Rugged ruggedFlat = new Rugged(crossing, updater, 8,
+        Rugged ruggedFlat = new Rugged(updater, 8,
                                        AlgorithmId.DUVENHAGE_FLAT_BODY,
                                        EllipsoidId.WGS84,
                                        InertialFrameId.EME2000,
                                        BodyRotatingFrameId.ITRF,
-                                       orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
-                                       orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
+                                       orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
+                                       orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         ruggedFlat.setLineSensor("line", los, lineDatation);
         GeodeticPoint[] gpWithoutFlatBodyCorrection = ruggedFlat.directLocalization("line", 100);
 
@@ -465,7 +462,7 @@ public class RuggedTest {
                                        FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
-        LineDatation lineDatation = new LinearLineDatation(dimension / 2, 1.0 / 1.5e-3);
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
 
@@ -473,24 +470,24 @@ public class RuggedTest {
                 new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
                                            FastMath.toRadians(1.0), 257);
 
-        Rugged rugged = new Rugged(crossing, updater, 8,
+        Rugged rugged = new Rugged(updater, 8,
                                    AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
-                                   orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
+                                   orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
+                                   orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         rugged.setLightTimeCorrection(false);
         rugged.setAberrationOfLightCorrection(false);
         rugged.setLineSensor("line", los, lineDatation);
 
-        double referenceLine  = 100.00;
+        double referenceLine = 100.00;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
 
         for (int i = 1; i < gp.length; ++i) {
             SensorPixel sp = rugged.inverseLocalization("line", gp[i], 0, dimension);
-            Assert.assertEquals(referenceLine,  sp.getLineNumber(),  3.0e-9);
-            Assert.assertEquals(i,              sp.getPixelNumber(), 8.0e-5);
+            Assert.assertEquals(referenceLine, sp.getLineNumber(),  3.0e-9);
+            Assert.assertEquals(i,             sp.getPixelNumber(), 8.0e-5);
         }
 
     }
@@ -586,13 +583,13 @@ public class RuggedTest {
         return new Pair<AbsoluteDate, Rotation>(t0.shiftedBy(dt), new Rotation(q0, q1, q2, q3, true));
     }
 
-    private List<Pair<AbsoluteDate, PVCoordinates>> orbitToPV(Orbit orbit, BodyShape earth, LineDatation lineDatation,
-                                                              AbsoluteDate crossing, int firstLine, int lastLine,
+    private List<Pair<AbsoluteDate, PVCoordinates>> orbitToPV(Orbit orbit, BodyShape earth,
+                                                              LineDatation lineDatation, int firstLine, int lastLine,
                                                               double step)
         throws PropagationException {
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
         final List<Pair<AbsoluteDate, PVCoordinates>> list = new ArrayList<Pair<AbsoluteDate, PVCoordinates>>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
             public void init(SpacecraftState s0, AbsoluteDate t) {
@@ -602,17 +599,17 @@ public class RuggedTest {
                                                                currentState.getPVCoordinates()));
             }
         });
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
         return list;
     }
 
-    private List<Pair<AbsoluteDate, Rotation>> orbitToQ(Orbit orbit, BodyShape earth, LineDatation lineDatation,
-                                                        AbsoluteDate crossing, int firstLine, int lastLine,
+    private List<Pair<AbsoluteDate, Rotation>> orbitToQ(Orbit orbit, BodyShape earth,
+                                                        LineDatation lineDatation, int firstLine, int lastLine,
                                                         double step)
         throws PropagationException {
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
         final List<Pair<AbsoluteDate, Rotation>> list = new ArrayList<Pair<AbsoluteDate, Rotation>>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
             public void init(SpacecraftState s0, AbsoluteDate t) {
@@ -622,7 +619,7 @@ public class RuggedTest {
                                                           currentState.getAttitude().getRotation()));
             }
         });
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
         return list;
     }
 

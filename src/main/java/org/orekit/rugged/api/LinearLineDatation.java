@@ -16,6 +16,8 @@
  */
 package org.orekit.rugged.api;
 
+import org.orekit.time.AbsoluteDate;
+
 
 /** Linear model for {@link LineDatation line datation}.
  * <p>
@@ -25,31 +27,37 @@ package org.orekit.rugged.api;
  */
 public class LinearLineDatation implements LineDatation {
 
+    /** Reference date. */
+    private final AbsoluteDate referenceDate;
+
     /** Line number at reference date. */
-    private final double line0;
+    private final double referenceLine;
 
     /** Rate of lines scanning (lines / seconds). */
     private final double rate;
 
     /** Simple constructor.
-     * @param line0 line number at reference date
+     * @param referenceDate reference date
+     * @param referenceLine line number at reference date
      * @param rate rate of lines scanning (lines / seconds)
      */
-    public LinearLineDatation(final double line0, final double rate) {
-        this.line0 = line0;
-        this.rate  = rate;
+    public LinearLineDatation(final AbsoluteDate referenceDate, final double referenceLine,
+                              final double rate) {
+        this.referenceDate = referenceDate;
+        this.referenceLine = referenceLine;
+        this.rate          = rate;
     }
 
     /** {@inheritDoc} */
     @Override
-    public double getDate(final double lineNumber) {
-        return (lineNumber - line0) / rate;
+    public AbsoluteDate getDate(final double lineNumber) {
+        return referenceDate.shiftedBy((lineNumber - referenceLine) / rate);
     }
 
     /** {@inheritDoc} */
     @Override
-    public double getLine(final double date) {
-        return line0 + rate * date;
+    public double getLine(final AbsoluteDate date) {
+        return referenceLine + rate * date.durationFrom(referenceDate);
     }
 
 }

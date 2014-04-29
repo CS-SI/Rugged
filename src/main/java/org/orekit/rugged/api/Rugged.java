@@ -68,9 +68,6 @@ public class Rugged {
     /** Maximum number of evaluations for inverse localization. */
     private static final int INVERSE_LOCALIZATION_MAX_EVAL = 1000;
 
-    /** Reference date. */
-    private final AbsoluteDate referenceDate;
-
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
 
@@ -98,7 +95,6 @@ public class Rugged {
      * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
      * can be made after construction if these phenomena should not be corrected.
      * </p>
-     * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
@@ -111,14 +107,13 @@ public class Rugged {
      * @param aInterpolationOrder order to use for attitude interpolation
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public Rugged(final AbsoluteDate referenceDate,
-                  final TileUpdater updater, final int maxCachedTiles,
+    public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
                   final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
-        this(referenceDate, updater, maxCachedTiles, algorithmID,
+        this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
              selectInertialFrame(inertialFrameID),
              positionsVelocities, pvInterpolationOrder, quaternions, aInterpolationOrder);
@@ -133,7 +128,6 @@ public class Rugged {
      * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
      * can be made after construction if these phenomena should not be corrected.
      * </p>
-     * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
@@ -145,13 +139,12 @@ public class Rugged {
      * @param aInterpolationOrder order to use for attitude interpolation
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public Rugged(final AbsoluteDate referenceDate,
-                  final TileUpdater updater, final int maxCachedTiles,
+    public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
                   final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
-        this(referenceDate, updater, maxCachedTiles, algorithmID,
+        this(updater, maxCachedTiles, algorithmID,
              extend(ellipsoid), inertialFrame,
              selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder, inertialFrame),
              selectAttitudeProvider(quaternions, aInterpolationOrder, inertialFrame));
@@ -166,7 +159,6 @@ public class Rugged {
      * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
      * can be made after construction if these phenomena should not be corrected.
      * </p>
-     * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
@@ -176,13 +168,12 @@ public class Rugged {
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public Rugged(final AbsoluteDate referenceDate,
-                  final TileUpdater updater, final int maxCachedTiles,
+    public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
                   final Propagator propagator)
         throws RuggedException {
-        this(referenceDate, updater, maxCachedTiles, algorithmID,
+        this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
              selectInertialFrame(inertialFrameID), propagator);
     }
@@ -196,7 +187,6 @@ public class Rugged {
      * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
      * can be made after construction if these phenomena should not be corrected.
      * </p>
-     * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
@@ -205,18 +195,16 @@ public class Rugged {
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    public Rugged(final AbsoluteDate referenceDate,
-                  final TileUpdater updater, final int maxCachedTiles,
+    public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid,
                   final Frame inertialFrame, final Propagator propagator)
         throws RuggedException {
-        this(referenceDate, updater, maxCachedTiles, algorithmID,
+        this(updater, maxCachedTiles, algorithmID,
              extend(ellipsoid), inertialFrame,
              propagator, propagator.getAttitudeProvider());
     }
 
     /** Low level private constructor.
-     * @param referenceDate reference date from which all other dates are computed
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
@@ -226,14 +214,10 @@ public class Rugged {
      * @param aProvider attitude propagator/interpolator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    private Rugged(final AbsoluteDate referenceDate,
-                  final TileUpdater updater, final int maxCachedTiles, final AlgorithmId algorithmID,
-                  final ExtendedEllipsoid ellipsoid, final Frame inertialFrame,
-                  final PVCoordinatesProvider pvProvider, final AttitudeProvider aProvider)
+    private Rugged(final TileUpdater updater, final int maxCachedTiles, final AlgorithmId algorithmID,
+                   final ExtendedEllipsoid ellipsoid, final Frame inertialFrame,
+                   final PVCoordinatesProvider pvProvider, final AttitudeProvider aProvider)
         throws RuggedException {
-
-        // time reference
-        this.referenceDate = referenceDate;
 
         // space reference
         this.ellipsoid     = ellipsoid;
@@ -248,13 +232,6 @@ public class Rugged {
         setLightTimeCorrection(true);
         setAberrationOfLightCorrection(true);
 
-    }
-
-    /** Get the reference date.
-     * @return reference date
-     */
-    public AbsoluteDate getReferenceDate() {
-        return referenceDate;
     }
 
     /** Set flag for light time correction.
@@ -322,7 +299,7 @@ public class Rugged {
             positions.add(new Vector3D(plos.getPx(), plos.getPy(), plos.getPz()));
             los.add(new Vector3D(plos.getDx(), plos.getDy(), plos.getDz()).normalize());
         }
-        final Sensor sensor = new Sensor(sensorName, referenceDate, datationModel, positions, los);
+        final Sensor sensor = new Sensor(sensorName, datationModel, positions, los);
         sensors.put(sensor.getName(), sensor);
     }
 
