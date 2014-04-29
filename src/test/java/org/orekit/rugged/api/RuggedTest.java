@@ -48,6 +48,7 @@ import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
+import org.orekit.errors.PropagationException;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
@@ -62,6 +63,7 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
+import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.core.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.core.raster.SimpleTileFactory;
 import org.orekit.rugged.core.raster.Tile;
@@ -301,19 +303,13 @@ public class RuggedTest {
         int firstLine = 0;
         int lastLine  = dimension;
 
-        Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
-        propagator.setEphemerisMode();
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
-        Propagator ephemeris = propagator.getGeneratedEphemeris();
-
         Rugged rugged = new Rugged(crossing, null, -1,
                                    AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   ephemeris);
+                                   orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
+                                   orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
 
         rugged.setLineSensor("line", los, lineDatation);
 
@@ -358,19 +354,13 @@ public class RuggedTest {
         int firstLine = 0;
         int lastLine  = dimension;
 
-        Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
-        propagator.setEphemerisMode();
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
-        Propagator ephemeris = propagator.getGeneratedEphemeris();
-
         Rugged rugged = new Rugged(crossing, null, -1,
                                    AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   ephemeris);
+                                   orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
+                                   orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
 
         rugged.setLineSensor("line", los, lineDatation);
 
@@ -417,13 +407,6 @@ public class RuggedTest {
         int firstLine = 0;
         int lastLine  = dimension;
 
-        Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
-        propagator.setEphemerisMode();
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
-        Propagator ephemeris = propagator.getGeneratedEphemeris();
-
         TileUpdater updater =
                 new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
                                            FastMath.toRadians(1.0), 257);
@@ -433,7 +416,8 @@ public class RuggedTest {
                                        EllipsoidId.WGS84,
                                        InertialFrameId.EME2000,
                                        BodyRotatingFrameId.ITRF,
-                                       ephemeris);
+                                       orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
+                                       orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
         ruggedFull.setLineSensor("line", los, lineDatation);
         GeodeticPoint[] gpWithFlatBodyCorrection = ruggedFull.directLocalization("line", 100);
 
@@ -442,7 +426,8 @@ public class RuggedTest {
                                        EllipsoidId.WGS84,
                                        InertialFrameId.EME2000,
                                        BodyRotatingFrameId.ITRF,
-                                       ephemeris);
+                                       orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
+                                       orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
         ruggedFlat.setLineSensor("line", los, lineDatation);
         GeodeticPoint[] gpWithoutFlatBodyCorrection = ruggedFlat.directLocalization("line", 100);
 
@@ -484,13 +469,6 @@ public class RuggedTest {
         int firstLine = 0;
         int lastLine  = dimension;
 
-        Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
-        propagator.setEphemerisMode();
-        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
-        Propagator ephemeris = propagator.getGeneratedEphemeris();
-
         TileUpdater updater =
                 new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
                                            FastMath.toRadians(1.0), 257);
@@ -500,7 +478,8 @@ public class RuggedTest {
                                    EllipsoidId.WGS84,
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
-                                   ephemeris);
+                                   orbitToPV(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 8,
+                                   orbitToQ(orbit, earth, lineDatation, crossing, firstLine, lastLine, 0.25), 2);
         rugged.setLightTimeCorrection(false);
         rugged.setAberrationOfLightCorrection(false);
         rugged.setLineSensor("line", los, lineDatation);
@@ -605,6 +584,46 @@ public class RuggedTest {
     private Pair<AbsoluteDate, Rotation> createQ(AbsoluteDate t0, double dt,
                                                        double q0, double q1, double q2, double q3) {
         return new Pair<AbsoluteDate, Rotation>(t0.shiftedBy(dt), new Rotation(q0, q1, q2, q3, true));
+    }
+
+    private List<Pair<AbsoluteDate, PVCoordinates>> orbitToPV(Orbit orbit, BodyShape earth, LineDatation lineDatation,
+                                                              AbsoluteDate crossing, int firstLine, int lastLine,
+                                                              double step)
+        throws PropagationException {
+        Propagator propagator = new KeplerianPropagator(orbit);
+        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        final List<Pair<AbsoluteDate, PVCoordinates>> list = new ArrayList<Pair<AbsoluteDate, PVCoordinates>>();
+        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
+            public void init(SpacecraftState s0, AbsoluteDate t) {
+            }   
+            public void handleStep(SpacecraftState currentState, boolean isLast) {
+                list.add(new Pair<AbsoluteDate, PVCoordinates>(currentState.getDate(),
+                                                               currentState.getPVCoordinates()));
+            }
+        });
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        return list;
+    }
+
+    private List<Pair<AbsoluteDate, Rotation>> orbitToQ(Orbit orbit, BodyShape earth, LineDatation lineDatation,
+                                                        AbsoluteDate crossing, int firstLine, int lastLine,
+                                                        double step)
+        throws PropagationException {
+        Propagator propagator = new KeplerianPropagator(orbit);
+        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(firstLine) - 1.0));
+        final List<Pair<AbsoluteDate, Rotation>> list = new ArrayList<Pair<AbsoluteDate, Rotation>>();
+        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
+            public void init(SpacecraftState s0, AbsoluteDate t) {
+            }   
+            public void handleStep(SpacecraftState currentState, boolean isLast) {
+                list.add(new Pair<AbsoluteDate, Rotation>(currentState.getDate(),
+                                                          currentState.getAttitude().getRotation()));
+            }
+        });
+        propagator.propagate(crossing.shiftedBy(lineDatation.getDate(lastLine) + 1.0));
+        return list;
     }
 
 }
