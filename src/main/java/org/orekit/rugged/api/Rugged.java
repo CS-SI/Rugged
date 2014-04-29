@@ -118,9 +118,8 @@ public class Rugged {
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
-                  final int pvInterpolationOrder, final List<Pair<AbsoluteDate, Rotation>> quaternions,
-                  final int aInterpolationOrder)
+                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
+                  final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         this(referenceDate, updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
@@ -152,9 +151,8 @@ public class Rugged {
     public Rugged(final AbsoluteDate referenceDate,
                   final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
-                  final int pvInterpolationOrder, final List<Pair<AbsoluteDate, Rotation>> quaternions,
-                  final int aInterpolationOrder)
+                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
+                  final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         this(referenceDate, updater, maxCachedTiles, algorithmID,
              extend(ellipsoid), inertialFrame,
