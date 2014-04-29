@@ -71,9 +71,6 @@ public class Rugged {
     /** Reference date. */
     private final AbsoluteDate referenceDate;
 
-    /** Inertial frame. */
-    private final Frame inertialFrame;
-
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
 
@@ -239,7 +236,6 @@ public class Rugged {
         this.referenceDate = referenceDate;
 
         // space reference
-        this.inertialFrame = inertialFrame;
         this.ellipsoid     = ellipsoid;
 
         // orbit/attitude to body converter
@@ -512,8 +508,6 @@ public class Rugged {
         throws RuggedException {
         try {
 
-            checkContext();
-
             // select the sensor
             final Sensor sensor = getSensor(sensorName);
 
@@ -586,7 +580,6 @@ public class Rugged {
         throws RuggedException {
         try {
 
-            checkContext();
             final Sensor   sensor = getSensor(sensorName);
             final Vector3D target = ellipsoid.transform(groundPoint);
             final UnivariateSolver solver = new BracketingNthOrderBrentSolver(0.0, INVERSE_LOCALIZATION_ACCURACY, 5);
@@ -732,15 +725,6 @@ public class Rugged {
 
         }
 
-    }
-
-    /** Check if context has been initialized.
-     * @exception RuggedException if context has not been initialized
-     */
-    private void checkContext() throws RuggedException {
-        if (inertialFrame == null) {
-            throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT);
-        }
     }
 
     /** Get a sensor.
