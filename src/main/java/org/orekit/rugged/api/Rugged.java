@@ -63,7 +63,7 @@ import org.orekit.utils.PVCoordinatesProvider;
 public class Rugged {
 
     /** Absolute accuracy to use for inverse localization. */
-    private static final double INVERSE_LOCALIZATION_ACCURACY = 1.0e-4;
+    private static final double INVERSE_LOCALIZATION_ACCURACY = 1.0e-8;
 
     /** Maximum number of evaluations for inverse localization. */
     private static final int INVERSE_LOCALIZATION_MAX_EVAL = 1000;
@@ -591,7 +591,7 @@ public class Rugged {
             checkContext();
             final Sensor   sensor = getSensor(sensorName);
             final Vector3D target = ellipsoid.transform(groundPoint);
-            final UnivariateSolver solver = new BracketingNthOrderBrentSolver(INVERSE_LOCALIZATION_ACCURACY, 5);
+            final UnivariateSolver solver = new BracketingNthOrderBrentSolver(0.0, INVERSE_LOCALIZATION_ACCURACY, 5);
 
             // find the line at which ground point crosses sensor mean plane
             final SensorMeanPlaneCrossing planeCrossing = new SensorMeanPlaneCrossing(sensor, target);
@@ -642,7 +642,7 @@ public class Rugged {
         @Override
         public double value(final double lineNumber) throws OrekitExceptionWrapper {
             // the target crosses the mean plane if it orthogonal to the normal vector
-            return Vector3D.dotProduct(targetDirection(lineNumber), sensor.getMeanPlaneNormal());
+            return Vector3D.angle(targetDirection(lineNumber), sensor.getMeanPlaneNormal()) - 0.5 * FastMath.PI;
         }
 
         /** Compute target point direction in spacecraft frame, at line acquisition time.
@@ -716,7 +716,7 @@ public class Rugged {
         /** {@inheritDoc} */
         @Override
         public double value(final double x) {
-            return Vector3D.dotProduct(cross, getLOS(x));
+            return Vector3D.angle(cross, getLOS(x)) - 0.5 * FastMath.PI;
         }
 
         /** Interpolate sensor pixels at some pixel index.

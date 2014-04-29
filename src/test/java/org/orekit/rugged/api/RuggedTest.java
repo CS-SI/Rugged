@@ -63,6 +63,8 @@ import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.rugged.core.raster.RandomLandscapeUpdater;
+import org.orekit.rugged.core.raster.SimpleTileFactory;
+import org.orekit.rugged.core.raster.Tile;
 import org.orekit.rugged.core.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -499,16 +501,18 @@ public class RuggedTest {
                                    InertialFrameId.EME2000,
                                    BodyRotatingFrameId.ITRF,
                                    ephemeris);
+        rugged.setLightTimeCorrection(false);
+        rugged.setAberrationOfLightCorrection(false);
         rugged.setLineSensor("line", los, lineDatation);
-        GeodeticPoint[] gp = rugged.directLocalization("line", 100.24);
 
-        GeodeticPoint target =
-                new GeodeticPoint(0.75 * gp[17].getLatitude()  + 0.25 * gp[18].getLatitude(),
-                                  0.75 * gp[17].getLongitude() + 0.25 * gp[18].getLongitude(),
-                                  0.75 * gp[17].getAltitude()  + 0.25 * gp[18].getAltitude());
-        SensorPixel sp = rugged.inverseLocalization("line", target, 0.0, 200.0);
-        Assert.assertEquals(100.24, sp.getLineNumber(),  1.0e-10);
-        Assert.assertEquals( 17.25, sp.getPixelNumber(), 1.0e-10);
+        double referenceLine  = 100.00;
+        GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
+
+        for (int i = 1; i < gp.length; ++i) {
+            SensorPixel sp = rugged.inverseLocalization("line", gp[i], 0, dimension);
+            Assert.assertEquals(referenceLine,  sp.getLineNumber(),  3.0e-9);
+            Assert.assertEquals(i,              sp.getPixelNumber(), 8.0e-5);
+        }
 
     }
 
