@@ -53,7 +53,6 @@ public class Sensor {
 
     /** Simple constructor.
      * @param name name of the sensor
-     * @param referenceDate reference date
      * @param positions pixels positions
      * @param los pixels lines-of-sight
      * @param datationModel datation model
