@@ -79,7 +79,7 @@ public class ExtendedEllipsoidTest {
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
 
         for (double latitude = -d.getDelta() + 1.0e-6; latitude < d.getDelta(); latitude += 0.1) {
-            GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtLatitude(p, d, latitude),
+            GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtLatitude(p, d, latitude, p),
                                                    ellipsoid.getBodyFrame(), null);
             Assert.assertEquals(latitude, gp.getLatitude(), 1.0e-12);
         }
@@ -87,19 +87,57 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeTwoPointsInGoodNappe() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeTwoPointsSameSide() throws RuggedException, OrekitException {
+
+        // the line of sight is almost parallel an iso-latitude cone generatrix
+        // the spacecraft is at latitude lTarget - 0.951", and altitude 794.6km
+        // so at a latitude slightly less than the target
+        // the line of sight crosses the latitude cone first about 70km along line of sight
+        // (so still at a very high altitude) and a second time about 798km along line of sight,
+        // only a few hundreds meters above allipsoid
+        // Note that this happens despite the line of sight is not along nadir, the longitudes
+        // of the spacecraft and crossing points span in a 0.88° wide longitude range
+        Vector3D position     = new Vector3D(-748528.2769999998, -5451658.432000002, 4587158.354);
+        Vector3D los          = new Vector3D(0.010713435156834539, 0.7688536080293823, -0.6393350856376809);
+        double h              = ellipsoid.transform(position, ellipsoid.getBodyFrame(), null).getAltitude();
+        double lTarget        = 0.6978408125890662;
+
+        // spacecraft is in LEO
+        Assert.assertEquals(h, 794652.782, 0.001);
+
+        Vector3D pHigh        = ellipsoid.pointAtLatitude(position, los, lTarget, position);
+        GeodeticPoint gpHigh  = ellipsoid.transform(pHigh, ellipsoid.getBodyFrame(), null);
+        Assert.assertEquals(lTarget, gpHigh.getLatitude(), 1.0e-12);
+        // first crossing point is high, but below spacecraft and along positive line of sight
+        Assert.assertEquals(724335.409, gpHigh.getAltitude(), 0.001);
+        Assert.assertTrue(Vector3D.dotProduct(pHigh.subtract(position), los) > 0);
+
+        Vector3D pLow         = ellipsoid.pointAtLatitude(position, los, lTarget,
+                                                          new Vector3D(1, position, 900000, los));
+        GeodeticPoint gpLow   = ellipsoid.transform(pLow, ellipsoid.getBodyFrame(), null);
+        Assert.assertEquals(lTarget, gpLow.getLatitude(), 1.0e-12);
+        // second crossing point is almost on ground, also along positive line of sight
+        Assert.assertEquals(492.804, gpLow.getAltitude(), 0.001);
+        Assert.assertTrue(Vector3D.dotProduct(pLow.subtract(position), los) > 0);
+
+    }
+
+    @Test
+    public void testPointAtLatitudeTwoPointsOppositeSides() throws RuggedException, OrekitException {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 0.1);
         double latitude = -0.5;
 
-        GeodeticPoint gpPlus = ellipsoid.transform(ellipsoid.pointAtLatitude(p, d, latitude),
-                                                   ellipsoid.getBodyFrame(), null);
+        Vector3D pPlus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, +1.0e10, d));
+        GeodeticPoint gpPlus = ellipsoid.transform(pPlus, ellipsoid.getBodyFrame(), null);
         Assert.assertEquals(latitude, gpPlus.getLatitude(), 1.0e-12);
+        Assert.assertEquals(20646364.047, Vector3D.dotProduct(d, pPlus.subtract(p)), 0.001);
 
-        GeodeticPoint gpMinus = ellipsoid.transform(ellipsoid.pointAtLatitude(p, d.negate(), latitude),
-                                                    ellipsoid.getBodyFrame(), null);
+        Vector3D pMinus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, -1.0e10, d));
+        GeodeticPoint gpMinus = ellipsoid.transform(pMinus, ellipsoid.getBodyFrame(), null);
         Assert.assertEquals(latitude, gpMinus.getLatitude(), 1.0e-12);
+        Assert.assertEquals(-31797895.234, Vector3D.dotProduct(d, pMinus.subtract(p)), 0.001);
 
     }
 
@@ -111,7 +149,7 @@ public class ExtendedEllipsoidTest {
         double latitude = -1.4;
 
         try {
-            ellipsoid.pointAtLatitude(p, d, latitude);
+            ellipsoid.pointAtLatitude(p, d, latitude, p);
             Assert.fail("an error should have been triggered");
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
@@ -128,7 +166,7 @@ public class ExtendedEllipsoidTest {
         double latitude = 0.5;
 
         try {
-            ellipsoid.pointAtLatitude(p, d, latitude);
+            ellipsoid.pointAtLatitude(p, d, latitude, p);
             Assert.fail("an error should have been triggered");
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());

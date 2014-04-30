@@ -276,7 +276,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     } else {
                         // full computation of crossing point
                         final Vector3D crossingP = ellipsoid.pointAtLatitude(position, los,
-                                                                             tile.getLatitudeAtIndex(crossingLat));
+                                                                             tile.getLatitudeAtIndex(crossingLat),
+                                                                             ellipsoid.transform(entry));
                         crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
                     }
                     final int crossingLon = tile.getLongitudeIndex(crossingGP.getLongitude());
@@ -346,7 +347,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         switch (tile.getLocation(exitGP.getLatitude(), exitGP.getLongitude())) {
         case SOUTH_WEST :
             return new LimitPoint(ellipsoid,
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude()),
+                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
                                                 position),
                                                 true);
@@ -356,17 +357,17 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                   true);
         case NORTH_WEST:
             return new LimitPoint(ellipsoid,
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude()),
+                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
                                                 position),
                                                 true);
         case NORTH :
             return new LimitPoint(ellipsoid,
-                                  ellipsoid.pointAtLatitude(position, los, tile.getMaximumLatitude()),
+                                  ellipsoid.pointAtLatitude(position, los, tile.getMaximumLatitude(), exitP),
                                   true);
         case NORTH_EAST :
             return new LimitPoint(ellipsoid,
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude()),
+                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
                                                 position),
                                                 true);
@@ -376,13 +377,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                   true);
         case SOUTH_EAST :
             return new LimitPoint(ellipsoid,
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude()),
+                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
                                                 position),
                                                 true);
         case SOUTH :
             return new LimitPoint(ellipsoid,
-                                  ellipsoid.pointAtLatitude(position, los, tile.getMinimumLatitude()),
+                                  ellipsoid.pointAtLatitude(position, los, tile.getMinimumLatitude(), exitP),
                                   true);
         case IN_TILE :
             return new LimitPoint(exitGP, false);

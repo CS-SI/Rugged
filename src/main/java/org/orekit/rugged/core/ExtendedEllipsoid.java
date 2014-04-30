@@ -60,10 +60,13 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param position pixel position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param latitude latitude with respect to ellipsoid
+     * @param closeReference reference point used to select the closest solution
+     * when there are two points at the desired latitude along the line
      * @return point at altitude
      * @exception RuggedException if no such point exists
      */
-    public Vector3D pointAtLatitude(final Vector3D position, final Vector3D los, final double latitude)
+    public Vector3D pointAtLatitude(final Vector3D position, final Vector3D los,
+                                    final double latitude, final Vector3D closeReference)
         throws RuggedException {
 
         // find apex of iso-latitude cone, somewhere along polar axis
@@ -93,15 +96,17 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         final double k1 = (b > 0) ? -(s + b) / a : c / (s - b);
         final double k2 = c / (a * k1);
 
-        // the quadratic equation may find spurious solutions in the wrong cone nappe
+        // the quadratic equation has two solutions
         final boolean  k1IsOK = (delta.getZ() + k1 * los.getZ()) * latitude >= 0;
         final boolean  k2IsOK = (delta.getZ() + k2 * los.getZ()) * latitude >= 0;
         final double selectedK;
         if (k1IsOK) {
             if (k2IsOK) {
                 // both solutions are in the good nappe,
-                // we arbitrarily select the one closest to the initial position
-                selectedK = FastMath.abs(k1) <= FastMath.abs(k2) ? k1 : k2;
+                // select the one closest to the specified reference
+                final double kRef = Vector3D.dotProduct(los, closeReference.subtract(position)) /
+                                    los.getNormSq();
+                selectedK = FastMath.abs(k1 - kRef) <= FastMath.abs(k2 - kRef) ? k1 : k2;
             } else {
                 // only k1 is in the good nappe
                 selectedK = k1;
