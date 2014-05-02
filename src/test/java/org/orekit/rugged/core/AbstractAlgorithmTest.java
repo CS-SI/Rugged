@@ -85,7 +85,8 @@ public abstract class AbstractAlgorithmTest {
         // test direct localization
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
-        GeodeticPoint result   = algorithm.intersection(earth, position, los);
+        GeodeticPoint result   = algorithm.refineIntersection(earth, position, los,
+                                                              algorithm.intersection(earth, position, los));
         checkIntersection(position, los, result);
         Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
@@ -110,7 +111,8 @@ public abstract class AbstractAlgorithmTest {
         // test direct localization
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
-        GeodeticPoint result   = algorithm.intersection(earth, position, los);
+        GeodeticPoint result   = algorithm.refineIntersection(earth, position, los,
+                                                              algorithm.intersection(earth, position, los));
         checkIntersection(position, los, result);
         Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
@@ -144,7 +146,8 @@ public abstract class AbstractAlgorithmTest {
 
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
-        GeodeticPoint result   = algorithm.intersection(earth, position, los);
+        GeodeticPoint result   = algorithm.refineIntersection(earth, position, los,
+                                                              algorithm.intersection(earth, position, los));
         checkIntersection(position, los, result);
         Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
