@@ -501,17 +501,17 @@ public class Rugged {
             final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
             for (int i = 0; i < gp.length; ++i) {
 
-                final Vector3D pInert = scToInert.transformPosition(sensor.getPosition(i));
+                final Vector3D pInert    = scToInert.transformPosition(sensor.getPosition(i));
+                final Vector3D rawLInert = scToInert.transformVector(sensor.getLos(i));
                 final Vector3D lInert;
                 if (aberrationOfLightCorrection) {
                     // apply aberration of light correction
                     // as the spacecraft velocity is small with respect to speed of light,
                     // we use classical velocity addition and not relativistic velocity addition
-                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, scToInert.transformVector(sensor.getLos(i)),
-                                          1.0, spacecraftVelocity).normalize();
+                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, rawLInert, 1.0, spacecraftVelocity).normalize();
                 } else {
                     // don't apply aberration of light correction
-                    lInert = scToInert.transformVector(sensor.getLos(i));
+                    lInert = rawLInert;
                 }
 
                 if (lightTimeCorrection) {
@@ -535,9 +535,10 @@ public class Rugged {
 
                 } else {
                     // compute DEM intersection without light time correction
-                    gp[i] = algorithm.intersection(ellipsoid,
-                                                   inertToBody.transformPosition(pInert),
-                                                   inertToBody.transformVector(lInert));
+                    final Vector3D pBody = inertToBody.transformPosition(pInert);
+                    final Vector3D lBody = inertToBody.transformVector(lInert);
+                    gp[i] = algorithm.refineIntersection(ellipsoid, pBody, lBody,
+                                                         algorithm.intersection(ellipsoid, pBody, lBody));
                 }
 
             }
@@ -645,18 +646,18 @@ public class Rugged {
                 }
                 final Vector3D targetInert = shifted.transformPosition(target);
 
-                Vector3D lInert;
+                final Vector3D rawLInert = targetInert.subtract(meanRefInert).normalize();
+                final Vector3D lInert;
                 if (aberrationOfLightCorrection) {
                     // apply aberration of light correction
                     // as the spacecraft velocity is small with respect to speed of light,
                     // we use classical velocity addition and not relativistic velocity addition
                     final Vector3D spacecraftVelocity =
                             scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
-                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, targetInert.subtract(meanRefInert).normalize(),
-                                          1.0, spacecraftVelocity).normalize();
+                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, rawLInert, -1.0, spacecraftVelocity).normalize();
                 } else {
                     // don't apply aberration of light correction
-                    lInert = targetInert.subtract(meanRefInert).normalize();
+                    lInert = rawLInert;
                 }
 
                 // direction of the target point in spacecraft frame

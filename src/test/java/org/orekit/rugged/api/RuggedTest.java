@@ -411,9 +411,9 @@ public class RuggedTest {
             Vector3D pWithout = earth.transform(gpWithoutFlatBodyCorrection[i]);
             stats.addValue(Vector3D.distance(pWith, pWithout));
         }
-        Assert.assertEquals(0.005, stats.getMin(),  1.0e-3);
-        Assert.assertEquals(6.503, stats.getMax(),  1.0e-3);
-        Assert.assertEquals(2.199, stats.getMean(), 1.0e-3);
+        Assert.assertEquals( 0.005, stats.getMin(),  1.0e-3);
+        Assert.assertEquals(49.157, stats.getMax(),  1.0e-3);
+        Assert.assertEquals( 4.870, stats.getMean(), 1.0e-3);
 
     }
 
@@ -452,17 +452,16 @@ public class RuggedTest {
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         rugged.setLightTimeCorrection(true);
-        rugged.setAberrationOfLightCorrection(false);
+        rugged.setAberrationOfLightCorrection(true);
         rugged.setLineSensor("line", los, lineDatation);
 
-        double referenceLine = 100.00;
+        double referenceLine = dimension / 2;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
 
-        for (int i = 0; i < gp.length; ++i) {
+        for (int i = 1; i < gp.length - 1; ++i) {
             SensorPixel sp = rugged.inverseLocalization("line", gp[i], 0, dimension);
-            System.out.println(i + " " + (sp.getLineNumber() - referenceLine) + " " + (sp.getPixelNumber() - i));
-//            Assert.assertEquals(referenceLine, sp.getLineNumber(),  3.0e-9);
-//            Assert.assertEquals(i,             sp.getPixelNumber(), 8.0e-5);
+            Assert.assertEquals(referenceLine, sp.getLineNumber(),  5.0e-6);
+            Assert.assertEquals(i,             sp.getPixelNumber(), 1.0e-7);
         }
 
     }
