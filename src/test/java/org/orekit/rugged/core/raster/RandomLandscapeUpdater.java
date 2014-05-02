@@ -16,8 +16,6 @@
  */
 package org.orekit.rugged.core.raster;
 
-import java.io.IOException;
-
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -97,21 +95,6 @@ public class RandomLandscapeUpdater implements TileUpdater {
             // reduce scale
             scale *= reductionFactor;
 
-        }
-
-        try {
-            java.io.PrintStream out = new java.io.PrintStream("/home/luc/x.dat");
-            for (int i = 0; i < n; ++i) {
-                for (int j = 0; j < n; ++j) {
-                    out.format(java.util.Locale.US, "%d %d %12.3f%n",
-                               i, j, heightMap[i][j]);
-                }
-                out.format("%n");
-            }
-            out.close();
-        } catch (IOException ioe) {
-            ioe.printStackTrace(System.err);
-            System.exit(1);
         }
 
     }
