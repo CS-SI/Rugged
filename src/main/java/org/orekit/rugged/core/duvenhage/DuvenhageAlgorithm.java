@@ -54,8 +54,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * from entry/exit points in the DEM are considered to be straight lines also
      * in geodetic coordinates. The sagitta resulting from real ellipsoid curvature
      * is therefore <em>not</em> corrected in this case. As this computation is not
-     * costly (a few percents overhead), it is not recommended to set this parameter
-     * to {@code true}. This flag is mainly intended for comparison purposes with other systems.
+     * costly (a few percents overhead), it is highly recommended to set this parameter
+     * to {@code false}. This flag is mainly intended for comparison purposes with other systems.
      */
     public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles,
                               final boolean flatBody) {
@@ -152,14 +152,26 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                             final GeodeticPoint closeGuess)
         throws RuggedException {
         try {
-            final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
-            final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
-            final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                ellipsoid.getBodyFrame(), null);
-            final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
-            return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
-                                          tile.getLatitudeIndex(projected.getLatitude()),
-                                          tile.getLongitudeIndex(projected.getLongitude()));
+            if (flatBody) {
+                // under the (bad) flat-body assumption, the reference point must remain
+                // at DEM entry, even if we already have a much better close guess :-(
+                // this is in order to remain consistent with other systems
+                final Tile tile = cache.getTile(closeGuess.getLatitude(), closeGuess.getLongitude());
+                final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
+                final GeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null);
+                return tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los),
+                                              tile.getLatitudeIndex(closeGuess.getLatitude()),
+                                              tile.getLongitudeIndex(closeGuess.getLongitude()));
+            } else {
+                final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
+                final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                                                    ellipsoid.getBodyFrame(), null);
+                final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
+                return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
+                                              tile.getLatitudeIndex(projected.getLatitude()),
+                                              tile.getLongitudeIndex(projected.getLongitude()));
+            }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
