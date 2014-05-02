@@ -36,4 +36,23 @@ public interface IntersectionAlgorithm {
     GeodeticPoint intersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los)
         throws RuggedException;
 
+    /** Refine intersection of line with Digital Elevation Model.
+     * <p>
+     * This method is used to refine an intersection when a close guess is
+     * already known. The intersection is typically looked for by a direct
+     * {@link Tile#pixelIntersection(GeodeticPoint, Vector3D, int, int) pixel intersection}
+     * in the {@link Tile} which already contains the close guess, or any
+     * similar very fast algorithm.
+     * </p>
+     * @param ellipsoid reference ellipsoid
+     * @param position pixel position in ellipsoid frame
+     * @param los pixel line-of-sight in ellipsoid frame
+     * @param closeGuess guess close to the real intersection
+     * @return point at which the line first enters ground
+     * @exception RuggedException if intersection cannot be found
+     */
+    GeodeticPoint refineIntersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los,
+                                     GeodeticPoint closeGuess)
+        throws RuggedException;
+
 }

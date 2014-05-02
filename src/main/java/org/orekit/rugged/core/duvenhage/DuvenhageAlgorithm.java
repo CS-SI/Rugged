@@ -145,6 +145,26 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         }
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public GeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
+                                            final Vector3D position, final Vector3D los,
+                                            final GeodeticPoint closeGuess)
+        throws RuggedException {
+        try {
+            final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
+            final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+            final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                                                ellipsoid.getBodyFrame(), null);
+            final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
+            return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
+                                          tile.getLatitudeIndex(projected.getLatitude()),
+                                          tile.getLongitudeIndex(projected.getLongitude()));
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
+    }
+
     /** Compute intersection of line with Digital Elevation Model in a sub-tile.
      * @param depth recursion depth
      * @param ellipsoid reference ellipsoid
@@ -176,19 +196,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         if (entryLat == exitLat && entryLon == exitLon) {
             // we have narrowed the search down to a single Digital Elevation Model pixel
-            GeodeticPoint intersection = tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los),
-                                                                exitLat, exitLon);
-            if (intersection != null && !flatBody) {
-                // improve the point, by projecting it back on the 3D line,
-                // fixing the small body curvature remaining at pixel level
-                final Vector3D      delta     = ellipsoid.transform(intersection).subtract(position);
-                final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
-                final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                    ellipsoid.getBodyFrame(), null);
-                intersection = tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
-                                                      exitLat, exitLon);
-            }
-            return intersection;
+            return tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los), exitLat, exitLon);
         }
 
         // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile

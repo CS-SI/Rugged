@@ -28,6 +28,7 @@ import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.core.raster.IntersectionAlgorithm;
 import org.orekit.rugged.core.raster.SimpleTile;
 import org.orekit.rugged.core.raster.SimpleTileFactory;
+import org.orekit.rugged.core.raster.Tile;
 import org.orekit.rugged.core.raster.TilesCache;
 
 /** Intersection computation using a basic algorithm based on exhaustive scan.
@@ -141,6 +142,26 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
         } catch (OrekitException oe) {
             // this should never happen
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public GeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
+                                            final Vector3D position, final Vector3D los,
+                                            final GeodeticPoint closeGuess)
+        throws RuggedException {
+        try {
+            final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
+            final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+            final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                                                ellipsoid.getBodyFrame(), null);
+            final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
+            return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
+                                          tile.getLatitudeIndex(projected.getLatitude()),
+                                          tile.getLongitudeIndex(projected.getLongitude()));
+        } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
     }

@@ -48,4 +48,13 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
         }
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public GeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
+                                            final Vector3D position, final Vector3D los,
+                                            final GeodeticPoint closeGuess)
+        throws RuggedException {
+        return intersection(ellipsoid, position, los);
+    }
+
 }

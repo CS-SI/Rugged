@@ -514,25 +514,31 @@ public class Rugged {
                     lInert = scToInert.transformVector(sensor.getLos(i));
                 }
 
-                final Vector3D pBody;
-                final Vector3D lBody;
                 if (lightTimeCorrection) {
-                    // apply light time correction
-                    final Vector3D sP     = approximate.transformPosition(sensor.getPosition(i));
-                    final Vector3D sL     = approximate.transformVector(sensor.getLos(i));
-                    final Vector3D eP     = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
-                    final double   deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
-                    final Transform shifted = inertToBody.shiftedBy(-deltaT);
-                    pBody = shifted.transformPosition(pInert);
-                    lBody = shifted.transformVector(lInert);
-                } else {
-                    // don't apply light time correction
-                    pBody = inertToBody.transformPosition(pInert);
-                    lBody = inertToBody.transformVector(lInert);
-                }
+                    // compute DEM intersection with light time correction
+                    final Vector3D  sP       = approximate.transformPosition(sensor.getPosition(i));
+                    final Vector3D  sL       = approximate.transformVector(sensor.getLos(i));
+                    final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
+                    final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
+                    final Transform shifted1 = inertToBody.shiftedBy(-deltaT1);
+                    final GeodeticPoint gp1  = algorithm.intersection(ellipsoid,
+                                                                      shifted1.transformPosition(pInert),
+                                                                      shifted1.transformVector(lInert));
 
-                // compute DEM intersection
-                gp[i] = algorithm.intersection(ellipsoid, pBody, lBody);
+                    final Vector3D  eP2      = ellipsoid.transform(gp1);
+                    final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
+                    final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
+                    gp[i] = algorithm.refineIntersection(ellipsoid,
+                                                         shifted2.transformPosition(pInert),
+                                                         shifted2.transformVector(lInert),
+                                                         gp1);
+
+                } else {
+                    // compute DEM intersection without light time correction
+                    gp[i] = algorithm.intersection(ellipsoid,
+                                                   inertToBody.transformPosition(pInert),
+                                                   inertToBody.transformVector(lInert));
+                }
 
             }
 
