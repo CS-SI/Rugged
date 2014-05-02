@@ -48,7 +48,7 @@ public class Sensor {
     /** Mean plane normal. */
     private final Vector3D normal;
 
-    /** Mean plane reference point. */
+    /** Mean reference point. */
     private final Vector3D referencePoint;
 
     /** Simple constructor.
@@ -65,34 +65,47 @@ public class Sensor {
         this.los           = los;
         this.datationModel = datationModel;
 
+        // mean reference point
+        double sumX = 0;
+        double sumY = 0;
+        double sumZ = 0;
+        for (int i = 0; i < los.size(); ++i) {
+            final Vector3D p = positions.get(i);
+            sumX += p.getX();
+            sumY += p.getY();
+            sumZ += p.getZ();
+        }
+        sumX /= los.size();
+        sumY /= los.size();
+        sumZ /= los.size();
+        referencePoint = new Vector3D(sumX, sumY, sumZ);
+
         // we consider the viewing directions as a point cloud
         // and want to find the plane that best fits it
 
         // start by finding the centroid
-        // (which will also be our plane reference point)
         double centroidX = 0;
         double centroidY = 0;
         double centroidZ = 0;
         for (int i = 0; i < los.size(); ++i) {
             final Vector3D p = positions.get(i);
             final Vector3D l = los.get(i);
-            centroidX += p.getX() + l.getX();
-            centroidY += p.getY() + l.getY();
-            centroidZ += p.getZ() + l.getZ();
+            centroidX += (p.getX() - referencePoint.getX()) + l.getX();
+            centroidY += (p.getY() - referencePoint.getY()) + l.getY();
+            centroidZ += (p.getZ() - referencePoint.getZ()) + l.getZ();
         }
         centroidX /= los.size();
         centroidY /= los.size();
         centroidZ /= los.size();
-        referencePoint = new Vector3D(centroidX, centroidY, centroidZ);
 
         // build a centered data matrix
         final RealMatrix matrix = MatrixUtils.createRealMatrix(3, los.size());
         for (int i = 0; i < los.size(); ++i) {
             final Vector3D p = positions.get(i);
             final Vector3D l = los.get(i);
-            matrix.setEntry(0, i, p.getX() + l.getX() - centroidX);
-            matrix.setEntry(1, i, p.getY() + l.getY() - centroidY);
-            matrix.setEntry(2, i, p.getZ() + l.getZ() - centroidZ);
+            matrix.setEntry(0, i, (p.getX() - referencePoint.getX()) + l.getX() - centroidX);
+            matrix.setEntry(1, i, (p.getY() - referencePoint.getY()) + l.getY() - centroidY);
+            matrix.setEntry(2, i, (p.getZ() - referencePoint.getZ()) + l.getZ() - centroidZ);
         }
 
         // compute Singular Value Decomposition
