@@ -114,7 +114,14 @@ public class Sensor {
         // extract the left singular vector corresponding to least singular value
         // (i.e. last vector since Apache Commons Math returns the values
         //  in non-increasing order)
-        normal = new Vector3D(svd.getU().getColumn(2)).normalize();
+        final Vector3D singularVector = new Vector3D(svd.getU().getColumn(2)).normalize();
+
+        // check rotation order
+        if (Vector3D.dotProduct(singularVector, Vector3D.crossProduct(los.get(0), los.get(los.size() - 1))) >= 0) {
+            normal = singularVector;
+        } else {
+            normal = singularVector.negate();
+        }
 
     }
 
@@ -165,16 +172,21 @@ public class Sensor {
     }
 
     /** Get the mean plane normal.
+     * <p>
+     * The normal is oriented such traversing pixels in increasing indices
+     * order corresponds is consistent with trigonometric order (i.e.
+     * counterclockwise).
+     * </p>
      * @return mean plane normal
      */
     public Vector3D getMeanPlaneNormal() {
         return normal;
     }
 
-    /** Get the mean plane reference point.
-     * @return mean plane reference point
+    /** Get the sensor reference point.
+     * @return reference point
      */
-    public Vector3D getMeanPlaneReferencePoint() {
+    public Vector3D getReferencePoint() {
         return referencePoint;
     }
 

@@ -52,8 +52,8 @@ public class SensorTest {
 
         Assert.assertEquals("perfect line", sensor.getName());
         Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
-        Assert.assertEquals(0.0, Vector3D.dotProduct(normal, center.subtract(sensor.getMeanPlaneReferencePoint())), 1.0e-15);
-        Assert.assertEquals(0.0, FastMath.sin(Vector3D.angle(normal, sensor.getMeanPlaneNormal())), 1.0e-15);
+        Assert.assertEquals(0.0, Vector3D.dotProduct(normal, center.subtract(sensor.getReferencePoint())), 1.0e-15);
+        Assert.assertEquals(0.0, Vector3D.angle(normal, sensor.getMeanPlaneNormal()), 1.0e-15);
 
     }
 
@@ -85,8 +85,8 @@ public class SensorTest {
 
         Assert.assertEquals("noisy line", sensor.getName());
         Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
-        Assert.assertEquals(0.0, Vector3D.dotProduct(normal, center.subtract(sensor.getMeanPlaneReferencePoint())), 1.0e-5);
-        Assert.assertEquals(0.0, FastMath.sin(Vector3D.angle(normal, sensor.getMeanPlaneNormal())), 3.0e-7);
+        Assert.assertEquals(0.0, Vector3D.dotProduct(normal, center.subtract(sensor.getReferencePoint())), 1.0e-5);
+        Assert.assertEquals(0.0, Vector3D.angle(normal, sensor.getMeanPlaneNormal()), 3.0e-7);
 
     }
 
