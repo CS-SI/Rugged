@@ -45,6 +45,7 @@ import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.core.BasicScanAlgorithm;
 import org.orekit.rugged.core.ExtendedEllipsoid;
+import org.orekit.rugged.core.FixedAltitudeAlgorithm;
 import org.orekit.rugged.core.IgnoreDEMAlgorithm;
 import org.orekit.rugged.core.Sensor;
 import org.orekit.rugged.core.SpacecraftToObservedBody;
@@ -62,11 +63,17 @@ import org.orekit.utils.PVCoordinatesProvider;
  */
 public class Rugged {
 
-    /** Absolute accuracy to use for inverse localization. */
-    private static final double INVERSE_LOCALIZATION_ACCURACY = 1.0e-8;
+    /** Accuracy to use in the first stage of inverse localization.
+     * <p>
+     * This accuracy is only used to locate the point within one
+     * pixel, so four neighboring corners can be estimated. Hence
+     * there is no point in choosing a too small value here.
+     * </p>
+     */
+    private static final double COARSE_INVERSE_LOCALIZATION_ACCURACY = 0.01;
 
     /** Maximum number of evaluations for inverse localization. */
-    private static final int INVERSE_LOCALIZATION_MAX_EVAL = 1000;
+    private static final int MAX_EVAL = 1000;
 
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
@@ -483,10 +490,24 @@ public class Rugged {
      */
     public GeodeticPoint[] directLocalization(final String sensorName, final double lineNumber)
         throws RuggedException {
-        try {
+        final Sensor sensor = getSensor(sensorName);
+        return directLocalization(sensor, 0, sensor.getNbPixels(), algorithm, lineNumber);
+    }
 
-            // select the sensor
-            final Sensor sensor = getSensor(sensorName);
+    /** Direct localization of a sensor line.
+     * @param sensor line sensor
+     * @param start start pixel to consider in the line sensor
+     * @param end end  pixel to consider in the line sensor (excluded)
+     * @param alg intersection algorithm to use
+     * @param lineNumber number of the line to localize on ground
+     * @return ground position of all pixels of the specified sensor line
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
+     */
+    private GeodeticPoint[] directLocalization(final Sensor sensor, final int start, final int end,
+                                               final IntersectionAlgorithm alg,
+                                               final double lineNumber)
+        throws RuggedException {
+        try {
 
             // compute the approximate transform between spacecraft and observed body
             final AbsoluteDate date        = sensor.getDate(lineNumber);
@@ -498,8 +519,8 @@ public class Rugged {
                     scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
 
             // compute localization of each pixel
-            final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
-            for (int i = 0; i < gp.length; ++i) {
+            final GeodeticPoint[] gp = new GeodeticPoint[end - start];
+            for (int i = start; i < end; ++i) {
 
                 final Vector3D pInert    = scToInert.transformPosition(sensor.getPosition(i));
                 final Vector3D rawLInert = scToInert.transformVector(sensor.getLos(i));
@@ -521,24 +542,24 @@ public class Rugged {
                     final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
                     final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
                     final Transform shifted1 = inertToBody.shiftedBy(-deltaT1);
-                    final GeodeticPoint gp1  = algorithm.intersection(ellipsoid,
-                                                                      shifted1.transformPosition(pInert),
-                                                                      shifted1.transformVector(lInert));
+                    final GeodeticPoint gp1  = alg.intersection(ellipsoid,
+                                                                shifted1.transformPosition(pInert),
+                                                                shifted1.transformVector(lInert));
 
                     final Vector3D  eP2      = ellipsoid.transform(gp1);
                     final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
                     final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
-                    gp[i] = algorithm.refineIntersection(ellipsoid,
-                                                         shifted2.transformPosition(pInert),
-                                                         shifted2.transformVector(lInert),
-                                                         gp1);
+                    gp[i] = alg.refineIntersection(ellipsoid,
+                                                   shifted2.transformPosition(pInert),
+                                                   shifted2.transformVector(lInert),
+                                                   gp1);
 
                 } else {
                     // compute DEM intersection without light time correction
                     final Vector3D pBody = inertToBody.transformPosition(pInert);
                     final Vector3D lBody = inertToBody.transformVector(lInert);
-                    gp[i] = algorithm.refineIntersection(ellipsoid, pBody, lBody,
-                                                         algorithm.intersection(ellipsoid, pBody, lBody));
+                    gp[i] = alg.refineIntersection(ellipsoid, pBody, lBody,
+                                                   alg.intersection(ellipsoid, pBody, lBody));
                 }
 
             }
@@ -564,25 +585,38 @@ public class Rugged {
         throws RuggedException {
         try {
 
-            final Sensor   sensor = getSensor(sensorName);
-            final Vector3D target = ellipsoid.transform(groundPoint);
-            final UnivariateSolver solver = new BracketingNthOrderBrentSolver(0.0, INVERSE_LOCALIZATION_ACCURACY, 5);
+            final Sensor        sensor   = getSensor(sensorName);
+            final Vector3D      target   = ellipsoid.transform(groundPoint);
+            final PVCoordinates targetPV = new PVCoordinates(target, Vector3D.ZERO);
 
-            // find the line at which ground point crosses sensor mean plane
+            final UnivariateSolver coarseSolver =
+                    new BracketingNthOrderBrentSolver(0.0, COARSE_INVERSE_LOCALIZATION_ACCURACY, 5);
+
+            // find approximately the sensor line at which ground point crosses sensor mean plane
             final SensorMeanPlaneCrossing planeCrossing = new SensorMeanPlaneCrossing(sensor, target);
-            final double meanLine = solver.solve(INVERSE_LOCALIZATION_MAX_EVAL, planeCrossing, minLine, maxLine);
-            final Vector3D targetDirection = planeCrossing.targetDirection(meanLine);
+            final double coarseLine = coarseSolver.solve(MAX_EVAL, planeCrossing, minLine, maxLine);
 
-            // find the pixel along the line
-            final double meanPixel = solver.solve(INVERSE_LOCALIZATION_MAX_EVAL,
-                                                  new SensorPixelCrossing(sensor, targetDirection),
-                                                  -1.0, sensor.getNbPixels());
+            // find approximately the pixel along this sensor line
+            final SensorPixelCrossing pixelCrossing =
+                    new SensorPixelCrossing(sensor, planeCrossing.getTargetDirection(coarseLine));
+            final double coarsePixel = coarseSolver.solve(MAX_EVAL, pixelCrossing, -1.0, sensor.getNbPixels());
 
-            // TODO: fix pixel offset with respect to mean sensor plane
-            final double fixedLine  = meanLine;
-            final double fixedPixel = meanPixel;
+            // compute a quadrilateral that should surround the target
+            final double lInf = FastMath.floor(coarseLine);
+            final double lSup = lInf + 1;
+            final int    pInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
+            final int    pSup = pInf + 1;
+            final IntersectionAlgorithm alg = new FixedAltitudeAlgorithm(groundPoint.getAltitude());
+            final GeodeticPoint[] previous  = directLocalization(sensor, pInf, pSup, alg, lInf);
+            final GeodeticPoint[] next      = directLocalization(sensor, pInf, pSup, alg, lSup);
 
-            return new SensorPixel(fixedLine, fixedPixel);
+            final double[] interp = interpolationCoordinates(groundPoint.getLongitude(), groundPoint.getLatitude(),
+                                                             previous[0].getLongitude(), previous[0].getLatitude(),
+                                                             previous[1].getLongitude(), previous[1].getLatitude(),
+                                                             next[0].getLongitude(),     next[0].getLatitude(),
+                                                             next[1].getLongitude(),     next[1].getLatitude());
+
+            return new SensorPixel(lInf + interp[1], pInf + interp[0]);
 
         } catch (NoBracketingException nbe) {
             // there are no solutions in the search interval
@@ -593,6 +627,34 @@ public class Rugged {
             final OrekitException oe = oew.getException();
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+    }
+
+    /** Compute a point bilinear interpolation coordinates.
+     * <p>
+     * This method is used to find interpolation coordinates when the
+     * quadrilateral is <em>not</em> an exact rectangle.
+     * </p>
+     * @param x point abscissa
+     * @param y point ordinate
+     * @param xA lower left abscissa
+     * @param yA lower left ordinate
+     * @param xB lower right abscissa
+     * @param yB lower right ordinate
+     * @param xC upper left abscissa
+     * @param yC upper left ordinate
+     * @param xD upper right abscissa
+     * @param yD upper right ordinate
+     * @return interpolation coordinates corresponding to point {@code x}, {@code y}
+     */
+    private double[] interpolationCoordinates(final double x,  final double y,
+                                              final double xA, final double yA,
+                                              final double xB, final double yB,
+                                              final double xC, final double yC,
+                                              final double xD, final double yD) {
+        // TODO: compute coordinates
+        return new double[] {
+            Double.NaN, Double.NaN
+        };
     }
 
     /** Local class for finding when ground point crosses mean sensor plane. */
@@ -616,52 +678,53 @@ public class Rugged {
         /** {@inheritDoc} */
         @Override
         public double value(final double lineNumber) throws OrekitExceptionWrapper {
+
             // the target crosses the mean plane if it orthogonal to the normal vector
-            return Vector3D.angle(targetDirection(lineNumber), sensor.getMeanPlaneNormal()) - 0.5 * FastMath.PI;
+            return Vector3D.angle(getTargetDirection(lineNumber), sensor.getMeanPlaneNormal()) - 0.5 * FastMath.PI;
+
         }
 
-        /** Compute target point direction in spacecraft frame, at line acquisition time.
-         * @param lineNumber line being acquired
-         * @return target point direction in spacecraft frame
+        /** Get the target direction in spacecraft frame.
+         * @param lineNumber current line number
+         * @return target direction in spacecraft frame
          * @exception OrekitExceptionWrapper if some frame conversion fails
          */
-        public Vector3D targetDirection(final double lineNumber) throws OrekitExceptionWrapper {
+        public Vector3D getTargetDirection(final double lineNumber) throws OrekitExceptionWrapper {
             try {
 
                 // compute the transform between spacecraft and observed body
-                final AbsoluteDate date         = sensor.getDate(lineNumber);
-                final Transform    bodyToInert  = scToBody.getInertialToBody(date).getInverse();
-                final Transform    scToInert    = scToBody.getScToInertial(date);
-                final Vector3D     meanRefInert = scToInert.transformPosition(sensor.getMeanPlaneReferencePoint());
+                final AbsoluteDate date        = sensor.getDate(lineNumber);
+                final Transform    bodyToInert = scToBody.getInertialToBody(date).getInverse();
+                final Transform    scToInert   = scToBody.getScToInertial(date);
+                final Vector3D     refInert    = scToInert.transformPosition(sensor.getReferencePoint());
 
-                final Transform shifted;
+                final Vector3D targetInert;
                 if (lightTimeCorrection) {
                     // apply light time correction
                     final Vector3D iT     = bodyToInert.transformPosition(target);
-                    final double   deltaT = meanRefInert.distance(iT) / Constants.SPEED_OF_LIGHT;
-                    shifted = bodyToInert.shiftedBy(-deltaT);
+                    final double   deltaT = refInert.distance(iT) / Constants.SPEED_OF_LIGHT;
+                    targetInert = bodyToInert.shiftedBy(-deltaT).transformPosition(target);
                 } else {
                     // don't apply light time correction
-                    shifted = bodyToInert;
+                    targetInert = bodyToInert.transformPosition(target);
                 }
-                final Vector3D targetInert = shifted.transformPosition(target);
 
-                final Vector3D rawLInert = targetInert.subtract(meanRefInert).normalize();
-                final Vector3D lInert;
+                final Vector3D lInert = targetInert.subtract(refInert).normalize();
+                final Vector3D rawLInert;
                 if (aberrationOfLightCorrection) {
                     // apply aberration of light correction
                     // as the spacecraft velocity is small with respect to speed of light,
                     // we use classical velocity addition and not relativistic velocity addition
                     final Vector3D spacecraftVelocity =
                             scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
-                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, rawLInert, -1.0, spacecraftVelocity).normalize();
+                    rawLInert = new Vector3D(Constants.SPEED_OF_LIGHT, lInert, -1.0, spacecraftVelocity).normalize();
                 } else {
                     // don't apply aberration of light correction
-                    lInert = rawLInert;
+                    rawLInert = lInert;
                 }
 
                 // direction of the target point in spacecraft frame
-                return scToInert.getInverse().transformVector(lInert);
+                return scToInert.getInverse().transformVector(rawLInert);
 
             } catch (OrekitException oe) {
                 throw new OrekitExceptionWrapper(oe);
