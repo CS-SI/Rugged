@@ -246,4 +246,28 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
 
     }
 
+    /** Convert a line-of-sight from Cartesian to topocentric.
+     * @param primary reference point on the line-of-sight (in body frame and Cartesian coordinates)
+     * @param secondary secondary point on the line-of-sight, only used to define a direction
+     * with respect to the primary point (in body frame and Cartesian coordinates)
+     * @return line-of-sight in topocentric frame (East, North, Zenith) of the point,
+     * scaled to match radians in the horizontal plane and meters along the vertical axis
+     * @exception RuggedException if points cannot be converted to geodetic coordinates
+     */
+    public Vector3D convertLos(final Vector3D primary, final Vector3D secondary)
+        throws RuggedException {
+        try {
+
+            // switch to geodetic coordinates using primary point as reference
+            final GeodeticPoint point = transform(primary, getBodyFrame(), null);
+            final Vector3D      los   = secondary.subtract(primary);
+
+            // convert line of sight
+            return convertLos(point, los);
+
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
+    }
+
 }

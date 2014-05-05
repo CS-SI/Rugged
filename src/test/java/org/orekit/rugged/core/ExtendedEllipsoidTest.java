@@ -226,11 +226,13 @@ public class ExtendedEllipsoidTest {
         Vector3D converted = ellipsoid.convertLos(gp, los);
         Line line = new Line(p, new Vector3D(1.0, p, 1000, los), 1.0e-10);
 
-        for (double delta = 0; delta < 100.0; delta += 0.1) {
+        for (double delta = 0.1; delta < 100.0; delta += 0.1) {
             GeodeticPoint shifted = new GeodeticPoint(gp.getLatitude()  + delta * converted.getY(),
                                                       gp.getLongitude() + delta * converted.getX(),
                                                       gp.getAltitude()  + delta * converted.getZ());
-            Assert.assertEquals(0.0, line.distance(ellipsoid.transform(shifted)), 1.0e-3);
+            Vector3D converted2 = ellipsoid.convertLos(p, ellipsoid.transform(shifted));
+            Assert.assertEquals(0.0, Vector3D.distance(converted, converted2), 3.0e-5 * converted.getNorm());
+            Assert.assertEquals(0.0, line.distance(ellipsoid.transform(shifted)), 8.0e-4);
         }
 
     }

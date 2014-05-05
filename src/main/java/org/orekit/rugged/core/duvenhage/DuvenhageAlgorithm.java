@@ -154,12 +154,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         try {
             if (flatBody) {
                 // under the (bad) flat-body assumption, the reference point must remain
-                // at DEM entry, even if we already have a much better close guess :-(
+                // at DEM entry and exit, even if we already have a much better close guess :-(
                 // this is in order to remain consistent with other systems
                 final Tile tile = cache.getTile(closeGuess.getLatitude(), closeGuess.getLongitude());
+                final Vector3D      exitP  = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
                 final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
                 final GeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null);
-                return tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los),
+                return tile.pixelIntersection(entry, ellipsoid.convertLos(entryP, exitP),
                                               tile.getLatitudeIndex(closeGuess.getLatitude()),
                                               tile.getLongitudeIndex(closeGuess.getLongitude()));
             } else {
