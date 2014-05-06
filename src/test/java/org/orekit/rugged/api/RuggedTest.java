@@ -427,8 +427,15 @@ public class RuggedTest {
     @Test
     public void testInverseLocalization()
         throws RuggedException, OrekitException, URISyntaxException {
+        checkInverseLocalization(2000, false, false, 4.0e-5, 4.0e-5);
+        checkInverseLocalization(2000, false, true,  4.0e-5, 4.0e-5);
+        checkInverseLocalization(2000, true,  false, 4.0e-5, 4.0e-5);
+        checkInverseLocalization(2000, true,  true,  4.0e-5, 4.0e-5);
+    }
 
-        int dimension = 3;
+    private void checkInverseLocalization(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
+                                          double maxLineError, double maxPixelError)
+        throws RuggedException, OrekitException, URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -459,21 +466,24 @@ public class RuggedTest {
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
-        rugged.setLightTimeCorrection(false);
-        rugged.setAberrationOfLightCorrection(true);
+        rugged.setLightTimeCorrection(lightTimeCorrection);
+        rugged.setAberrationOfLightCorrection(aberrationOfLightCorrection);
         rugged.setLineSensor(lineSensor);
 
-        double referenceLine = dimension / 2;
+        double referenceLine = 0.56789 * dimension;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
 
-        for (int i = 1; i < gp.length - 1; ++i) {
-            SensorPixel sp = rugged.inverseLocalization("line", gp[i], 0, dimension);
-            System.out.println(i + " " + (referenceLine - sp.getLineNumber()) + " " + (i - sp.getPixelNumber()));
-//            Assert.assertEquals(referenceLine, sp.getLineNumber(),  5.0e-6);
-//            Assert.assertEquals(i,             sp.getPixelNumber(), 1.0e-7);
+        for (double p = 1; p < gp.length - 1; p += 0.2) {
+            int    i = (int) FastMath.floor(p);
+            double d = p - i;
+            GeodeticPoint g = new GeodeticPoint((1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
+                                                (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
+                                                (1 - d) * gp[i].getAltitude()  + d * gp[i + 1].getAltitude());
+            SensorPixel sp = rugged.inverseLocalization("line", g, 0, dimension);
+            Assert.assertEquals(referenceLine, sp.getLineNumber(),  maxLineError);
+            Assert.assertEquals(p,             sp.getPixelNumber(), maxPixelError);
         }
-
-    }
+     }
 
     private BodyShape createEarth()
        throws OrekitException {

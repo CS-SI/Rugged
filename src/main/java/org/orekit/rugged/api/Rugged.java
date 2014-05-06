@@ -30,6 +30,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
+import org.apache.commons.math3.util.Precision;
 import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.TabulatedProvider;
@@ -539,17 +540,17 @@ public class Rugged {
                     final Vector3D  eP2      = ellipsoid.transform(gp1);
                     final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
                     final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
-                    gp[i] = alg.refineIntersection(ellipsoid,
-                                                   shifted2.transformPosition(pInert),
-                                                   shifted2.transformVector(lInert),
-                                                   gp1);
+                    gp[i - start] = alg.refineIntersection(ellipsoid,
+                                                           shifted2.transformPosition(pInert),
+                                                           shifted2.transformVector(lInert),
+                                                           gp1);
 
                 } else {
                     // compute DEM intersection without light time correction
                     final Vector3D pBody = inertToBody.transformPosition(pInert);
                     final Vector3D lBody = inertToBody.transformVector(lInert);
-                    gp[i] = alg.refineIntersection(ellipsoid, pBody, lBody,
-                                                   alg.intersection(ellipsoid, pBody, lBody));
+                    gp[i - start] = alg.refineIntersection(ellipsoid, pBody, lBody,
+                                                           alg.intersection(ellipsoid, pBody, lBody));
                 }
 
             }
@@ -592,12 +593,10 @@ public class Rugged {
 
             // compute a quadrilateral that should surround the target
             final double lInf = FastMath.floor(coarseLine);
-            final double lSup = lInf + 1;
             final int    pInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
-            final int    pSup = pInf + 1;
             final IntersectionAlgorithm alg = new FixedAltitudeAlgorithm(groundPoint.getAltitude());
-            final GeodeticPoint[] previous  = directLocalization(sensor, pInf, pSup, alg, lInf);
-            final GeodeticPoint[] next      = directLocalization(sensor, pInf, pSup, alg, lSup);
+            final GeodeticPoint[] previous  = directLocalization(sensor, pInf, pInf + 2, alg, lInf);
+            final GeodeticPoint[] next      = directLocalization(sensor, pInf, pInf + 2, alg, lInf + 1);
 
             final double[] interp = interpolationCoordinates(groundPoint.getLongitude(), groundPoint.getLatitude(),
                                                              previous[0].getLongitude(), previous[0].getLatitude(),
@@ -605,7 +604,7 @@ public class Rugged {
                                                              next[0].getLongitude(),     next[0].getLatitude(),
                                                              next[1].getLongitude(),     next[1].getLatitude());
 
-            return new SensorPixel(lInf + interp[1], pInf + interp[0]);
+            return (interp == null) ? null : new SensorPixel(lInf + interp[1], pInf + interp[0]);
 
         } catch (NoBracketingException nbe) {
             // there are no solutions in the search interval
@@ -621,29 +620,103 @@ public class Rugged {
     /** Compute a point bilinear interpolation coordinates.
      * <p>
      * This method is used to find interpolation coordinates when the
-     * quadrilateral is <em>not</em> an exact rectangle.
+     * quadrilateral is <em>not</em> a perfect rectangle.
      * </p>
-     * @param x point abscissa
-     * @param y point ordinate
-     * @param xA lower left abscissa
-     * @param yA lower left ordinate
-     * @param xB lower right abscissa
-     * @param yB lower right ordinate
-     * @param xC upper left abscissa
-     * @param yC upper left ordinate
-     * @param xD upper right abscissa
-     * @param yD upper right ordinate
-     * @return interpolation coordinates corresponding to point {@code x}, {@code y}
+     * @param xuv desired point abscissa, at interpolation coordinates u, v
+     * @param yuv desired point ordinate, at interpolation coordinates u, v
+     * @param x00 abscissa for base quadrilateral point at u = 0, v = 0
+     * @param y00 ordinate for base quadrilateral point at u = 0, v = 0
+     * @param x10 abscissa for base quadrilateral point at u = 1, v = 0
+     * @param y10 ordinate for base quadrilateral point at u = 1, v = 0
+     * @param x01 abscissa for base quadrilateral point at u = 0, v = 1
+     * @param y01 ordinate for base quadrilateral point at u = 0, v = 1
+     * @param x11 abscissa for base quadrilateral point at u = 1, v = 1
+     * @param y11 ordinate for base quadrilateral point at u = 1, v = 1
+     * @return interpolation coordinates {@code u, v} corresponding to point {@code xuv, yuv},
+     * or null if no such points can be found
      */
-    private double[] interpolationCoordinates(final double x,  final double y,
-                                              final double xA, final double yA,
-                                              final double xB, final double yB,
-                                              final double xC, final double yC,
-                                              final double xD, final double yD) {
-        // TODO: compute coordinates
-        return new double[] {
-            Double.NaN, Double.NaN
-        };
+    private double[] interpolationCoordinates(final double xuv, final double yuv,
+                                              final double x00, final double y00,
+                                              final double x10, final double y10,
+                                              final double x01, final double y01,
+                                              final double x11, final double y11) {
+
+        // bilinear interpolation can be written as follows:
+        // P(0,v) = v P(0,1) + (1 - v) P(0,0)
+        // P(1,v) = v P(1,1) + (1 - v) P(1,0)
+        // P(u,v) = u P(1,v) + (1 - u) P(0,v)
+        // which can be solved for u:
+        // u = [P(u,v) - P(0,v)] / [P(1,v) - P(0,v)]
+        // this equation holds for both x and y coordinates of the various P points, so u can be eliminated:
+        // [x(u,v) - x(0,v)] * [y(1,v) - y(0,v)] - [y(u,v) - y(0,v)] * [x(1,v) - x(0,v)] = 0
+        // this is a quadratic equation in v: a v² + bv + c = 0
+        final double a = y11 * x00 - y10 * x00 + y10 * x01 - y11 * x01 + y01 * x11 - y01 * x10 - y00 * x11 + y00 * x10;
+        final double b = y11 * xuv - y10 * xuv + y00 * xuv - y01 * xuv - y11 * x00 + 2 * y10 * x00 - y10 * x01 + y01 * x10 + y00 * x11 - 2 * y00 * x10 + yuv * x01 + yuv * x10 - yuv * x11 - yuv * x00;
+        final double c = y10 * xuv - y00 * xuv - y10 * x00 + y00 * x10 - yuv * x10 + yuv * x00;
+
+        if (FastMath.abs(a) < Precision.EPSILON * (FastMath.abs(b) + FastMath.abs(c))) {
+            if (FastMath.abs(b) < Precision.EPSILON * FastMath.abs(c)) {
+                return null;
+            } else {
+
+                // solve linear equation in v
+                final double v = -c / b;
+
+                // recover uA from vA
+                final double x0v = v * x01 + (1 - v) * x00;
+                final double x1v = v * x11 + (1 - v) * x10;
+                final double dX  = x1v - x0v;
+                final double y0v = v * y01 + (1 - v) * y00;
+                final double y1v = v * y11 + (1 - v) * y10;
+                final double dY  = y1v - y0v;
+                final double u   = (FastMath.abs(dX) >= FastMath.abs(dX)) ? ((xuv - x0v) / dX) : ((yuv - y0v) / dY);
+
+                return new double[] {
+                    u, v
+                };
+
+            }
+        } else {
+            // solve quadratic equation in v
+            final double bb  = b * b;
+            final double fac = 4 * a * c;
+            if (bb < fac) {
+                return null;
+            }
+            final double s  = FastMath.sqrt(bb - fac);
+            final double vA = (b > 0) ? -(s + b) / (2 * a) : (2 * c) / (s - b);
+            final double vB = c / (a * vA);
+
+            // recover uA from vA
+            final double x0vA = vA * x01 + (1 - vA) * x00;
+            final double x1vA = vA * x11 + (1 - vA) * x10;
+            final double dXA  = x1vA - x0vA;
+            final double y0vA = vA * y01 + (1 - vA) * y00;
+            final double y1vA = vA * y11 + (1 - vA) * y10;
+            final double dYA  = y1vA - y0vA;
+            final double uA   = (FastMath.abs(dXA) >= FastMath.abs(dXA)) ? ((xuv - x0vA) / dXA) : ((yuv - y0vA) / dYA);
+
+            // recover uB from vB
+            final double x0vB = vB * x01 + (1 - vB) * x00;
+            final double x1vB = vB * x11 + (1 - vB) * x10;
+            final double dXB  = x1vB - x0vB;
+            final double y0vB = vB * y01 + (1 - vB) * y00;
+            final double y1vB = vB * y11 + (1 - vB) * y10;
+            final double dYB  = y1vB - y0vB;
+            final double uB   = (FastMath.abs(dXB) >= FastMath.abs(dXB)) ? ((xuv - x0vB) / dXB) : ((yuv - y0vB) / dYB);
+
+            if ((uA * uA + vA * vA) <= (uB * uB + vB * vB)) {
+                return new double[] {
+                    uA, vA
+                };
+            } else {
+                return new double[] {
+                    uA, vA
+                };
+            }
+
+        }
+
     }
 
     /** Local class for finding when ground point crosses mean sensor plane. */
