@@ -47,7 +47,6 @@ import org.orekit.rugged.core.BasicScanAlgorithm;
 import org.orekit.rugged.core.ExtendedEllipsoid;
 import org.orekit.rugged.core.FixedAltitudeAlgorithm;
 import org.orekit.rugged.core.IgnoreDEMAlgorithm;
-import org.orekit.rugged.core.Sensor;
 import org.orekit.rugged.core.SpacecraftToObservedBody;
 import org.orekit.rugged.core.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.core.raster.IntersectionAlgorithm;
@@ -82,7 +81,7 @@ public class Rugged {
     private final SpacecraftToObservedBody scToBody;
 
     /** Sensors. */
-    private final Map<String, Sensor> sensors;
+    private final Map<String, LineSensor> sensors;
 
     /** DEM intersection algorithm. */
     private final IntersectionAlgorithm algorithm;
@@ -235,7 +234,7 @@ public class Rugged {
         // intersection algorithm
         this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
 
-        this.sensors = new HashMap<String, Sensor>();
+        this.sensors = new HashMap<String, LineSensor>();
         setLightTimeCorrection(true);
         setAberrationOfLightCorrection(true);
 
@@ -295,19 +294,10 @@ public class Rugged {
     }
 
     /** Set up line sensor model.
-     * @param sensorName name of the line sensor.
-     * @param linesOfSigth lines of sight for each pixels
-     * @param datationModel model to use for dating sensor lines
+     * @param lineSensor line sensor model
      */
-    public void setLineSensor(final String sensorName, final List<PixelLOS> linesOfSigth, final LineDatation datationModel) {
-        final List<Vector3D> positions = new ArrayList<Vector3D>(linesOfSigth.size());
-        final List<Vector3D> los       = new ArrayList<Vector3D>(linesOfSigth.size());
-        for (final PixelLOS plos : linesOfSigth) {
-            positions.add(new Vector3D(plos.getPx(), plos.getPy(), plos.getPz()));
-            los.add(new Vector3D(plos.getDx(), plos.getDy(), plos.getDz()).normalize());
-        }
-        final Sensor sensor = new Sensor(sensorName, datationModel, positions, los);
-        sensors.put(sensor.getName(), sensor);
+    public void setLineSensor(final LineSensor lineSensor) {
+        sensors.put(lineSensor.getName(), lineSensor);
     }
 
     /** Select inertial frame.
@@ -490,7 +480,7 @@ public class Rugged {
      */
     public GeodeticPoint[] directLocalization(final String sensorName, final double lineNumber)
         throws RuggedException {
-        final Sensor sensor = getSensor(sensorName);
+        final LineSensor sensor = getSensor(sensorName);
         return directLocalization(sensor, 0, sensor.getNbPixels(), algorithm, lineNumber);
     }
 
@@ -503,7 +493,7 @@ public class Rugged {
      * @return ground position of all pixels of the specified sensor line
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    private GeodeticPoint[] directLocalization(final Sensor sensor, final int start, final int end,
+    private GeodeticPoint[] directLocalization(final LineSensor sensor, final int start, final int end,
                                                final IntersectionAlgorithm alg,
                                                final double lineNumber)
         throws RuggedException {
@@ -519,10 +509,10 @@ public class Rugged {
                     scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
 
             // compute localization of each pixel
+            final Vector3D pInert    = scToInert.transformPosition(sensor.getPosition());
             final GeodeticPoint[] gp = new GeodeticPoint[end - start];
             for (int i = start; i < end; ++i) {
 
-                final Vector3D pInert    = scToInert.transformPosition(sensor.getPosition(i));
                 final Vector3D rawLInert = scToInert.transformVector(sensor.getLos(i));
                 final Vector3D lInert;
                 if (aberrationOfLightCorrection) {
@@ -537,7 +527,7 @@ public class Rugged {
 
                 if (lightTimeCorrection) {
                     // compute DEM intersection with light time correction
-                    final Vector3D  sP       = approximate.transformPosition(sensor.getPosition(i));
+                    final Vector3D  sP       = approximate.transformPosition(sensor.getPosition());
                     final Vector3D  sL       = approximate.transformVector(sensor.getLos(i));
                     final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
                     final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
@@ -585,9 +575,8 @@ public class Rugged {
         throws RuggedException {
         try {
 
-            final Sensor        sensor   = getSensor(sensorName);
+            final LineSensor        sensor   = getSensor(sensorName);
             final Vector3D      target   = ellipsoid.transform(groundPoint);
-            final PVCoordinates targetPV = new PVCoordinates(target, Vector3D.ZERO);
 
             final UnivariateSolver coarseSolver =
                     new BracketingNthOrderBrentSolver(0.0, COARSE_INVERSE_LOCALIZATION_ACCURACY, 5);
@@ -661,7 +650,7 @@ public class Rugged {
     private class SensorMeanPlaneCrossing implements UnivariateFunction {
 
         /** Line sensor. */
-        private final Sensor sensor;
+        private final LineSensor sensor;
 
         /** Target ground point. */
         private final Vector3D target;
@@ -670,7 +659,7 @@ public class Rugged {
          * @param sensor sensor to consider
          * @param target target ground point
          */
-        public SensorMeanPlaneCrossing(final Sensor sensor, final Vector3D target) {
+        public SensorMeanPlaneCrossing(final LineSensor sensor, final Vector3D target) {
             this.sensor = sensor;
             this.target = target;
         }
@@ -696,7 +685,7 @@ public class Rugged {
                 final AbsoluteDate date        = sensor.getDate(lineNumber);
                 final Transform    bodyToInert = scToBody.getInertialToBody(date).getInverse();
                 final Transform    scToInert   = scToBody.getScToInertial(date);
-                final Vector3D     refInert    = scToInert.transformPosition(sensor.getReferencePoint());
+                final Vector3D     refInert    = scToInert.transformPosition(sensor.getPosition());
 
                 final Vector3D targetInert;
                 if (lightTimeCorrection) {
@@ -737,7 +726,7 @@ public class Rugged {
     private class SensorPixelCrossing implements UnivariateFunction {
 
         /** Line sensor. */
-        private final Sensor sensor;
+        private final LineSensor sensor;
 
         /** Cross direction in spacecraft frame. */
         private final Vector3D cross;
@@ -746,7 +735,7 @@ public class Rugged {
          * @param sensor sensor to consider
          * @param targetDirection target direction in spacecraft frame
          */
-        public SensorPixelCrossing(final Sensor sensor, final Vector3D targetDirection) {
+        public SensorPixelCrossing(final LineSensor sensor, final Vector3D targetDirection) {
             this.sensor = sensor;
             this.cross  = Vector3D.crossProduct(sensor.getMeanPlaneNormal(), targetDirection).normalize();
         }
@@ -779,8 +768,8 @@ public class Rugged {
      * @return selected sensor
      * @exception RuggedException if sensor is not known
      */
-    private Sensor getSensor(final String sensorName) throws RuggedException {
-        final Sensor sensor = sensors.get(sensorName);
+    private LineSensor getSensor(final String sensorName) throws RuggedException {
+        final LineSensor sensor = sensors.get(sensorName);
         if (sensor == null) {
             throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
         }

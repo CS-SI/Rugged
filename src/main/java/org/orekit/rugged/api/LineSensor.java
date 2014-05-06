@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core;
+package org.orekit.rugged.api;
 
 import java.util.List;
 
@@ -22,34 +22,30 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
-import org.orekit.rugged.api.LineDatation;
 import org.orekit.time.AbsoluteDate;
 
-/** Container for sensor data.
+/** Line sensor model.
  * <p>
  * Instances of this class are guaranteed to be immutable.
  * </p>
  * @author Luc Maisonobe
  */
-public class Sensor {
+public class LineSensor {
 
     /** Name of the sensor. */
     private final String name;
 
-    /** Pixels positions. */
-    private final List<Vector3D> positions;
+    /** Datation model. */
+    private final LineDatation datationModel;
+
+    /** Sensor position. */
+    private final Vector3D position;
 
     /** Pixels lines-of-sight. */
     private final List<Vector3D> los;
 
-    /** Datation model. */
-    private final LineDatation datationModel;
-
     /** Mean plane normal. */
     private final Vector3D normal;
-
-    /** Mean reference point. */
-    private final Vector3D referencePoint;
 
     /** Simple constructor.
      * @param name name of the sensor
@@ -57,28 +53,13 @@ public class Sensor {
      * @param los pixels lines-of-sight
      * @param datationModel datation model
      */
-    public Sensor(final String name, final LineDatation datationModel,
-                  final List<Vector3D> positions, final List<Vector3D> los) {
+    public LineSensor(final String name, final LineDatation datationModel,
+                      final Vector3D position, final List<Vector3D> los) {
 
         this.name          = name;
-        this.positions     = positions;
-        this.los           = los;
         this.datationModel = datationModel;
-
-        // mean reference point
-        double sumX = 0;
-        double sumY = 0;
-        double sumZ = 0;
-        for (int i = 0; i < los.size(); ++i) {
-            final Vector3D p = positions.get(i);
-            sumX += p.getX();
-            sumY += p.getY();
-            sumZ += p.getZ();
-        }
-        sumX /= los.size();
-        sumY /= los.size();
-        sumZ /= los.size();
-        referencePoint = new Vector3D(sumX, sumY, sumZ);
+        this.position      = position ;
+        this.los           = los;
 
         // we consider the viewing directions as a point cloud
         // and want to find the plane that best fits it
@@ -88,11 +69,10 @@ public class Sensor {
         double centroidY = 0;
         double centroidZ = 0;
         for (int i = 0; i < los.size(); ++i) {
-            final Vector3D p = positions.get(i);
             final Vector3D l = los.get(i);
-            centroidX += (p.getX() - referencePoint.getX()) + l.getX();
-            centroidY += (p.getY() - referencePoint.getY()) + l.getY();
-            centroidZ += (p.getZ() - referencePoint.getZ()) + l.getZ();
+            centroidX += l.getX();
+            centroidY += l.getY();
+            centroidZ += l.getZ();
         }
         centroidX /= los.size();
         centroidY /= los.size();
@@ -101,11 +81,10 @@ public class Sensor {
         // build a centered data matrix
         final RealMatrix matrix = MatrixUtils.createRealMatrix(3, los.size());
         for (int i = 0; i < los.size(); ++i) {
-            final Vector3D p = positions.get(i);
             final Vector3D l = los.get(i);
-            matrix.setEntry(0, i, (p.getX() - referencePoint.getX()) + l.getX() - centroidX);
-            matrix.setEntry(1, i, (p.getY() - referencePoint.getY()) + l.getY() - centroidY);
-            matrix.setEntry(2, i, (p.getZ() - referencePoint.getZ()) + l.getZ() - centroidZ);
+            matrix.setEntry(0, i, l.getX() - centroidX);
+            matrix.setEntry(1, i, l.getY() - centroidY);
+            matrix.setEntry(2, i, l.getZ() - centroidZ);
         }
 
         // compute Singular Value Decomposition
@@ -136,15 +115,7 @@ public class Sensor {
      * @return number of pixels
      */
     public int getNbPixels() {
-        return positions.size();
-    }
-
-    /** Get pixel position.
-     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
-     * @return pixel position
-     */
-    public Vector3D getPosition(final int i) {
-        return positions.get(i);
+        return los.size();
     }
 
     /** Get the pixel line-of-sight.
@@ -183,11 +154,11 @@ public class Sensor {
         return normal;
     }
 
-    /** Get the sensor reference point.
-     * @return reference point
+    /** Get the sensor position.
+     * @return position
      */
-    public Vector3D getReferencePoint() {
-        return referencePoint;
+    public Vector3D getPosition() {
+        return position;
     }
 
 }

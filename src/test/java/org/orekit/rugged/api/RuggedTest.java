@@ -205,13 +205,15 @@ public class RuggedTest {
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
-        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(Vector3D.PLUS_K, Vector3D.PLUS_I,
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
 
         Propagator propagator = createPropagator(earth, gravityField, orbit);
         propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
@@ -225,7 +227,7 @@ public class RuggedTest {
         rugged.setLightTimeCorrection(true);
         rugged.setAberrationOfLightCorrection(true);
 
-        rugged.setLineSensor("line", los, lineDatation);
+        rugged.setLineSensor(lineSensor);
 
         try {
 
@@ -281,20 +283,22 @@ public class RuggedTest {
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
-        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(Vector3D.PLUS_K, Vector3D.PLUS_I,
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
 
         Rugged rugged = new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
-        rugged.setLineSensor("line", los, lineDatation);
+        rugged.setLineSensor(lineSensor);
 
         rugged.setLightTimeCorrection(true);
         rugged.setAberrationOfLightCorrection(false);
@@ -329,20 +333,22 @@ public class RuggedTest {
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
-        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2), Vector3D.PLUS_K, Vector3D.PLUS_I,
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(Vector3D.PLUS_K, Vector3D.PLUS_I,
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
 
         Rugged rugged = new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
-        rugged.setLineSensor("line", los, lineDatation);
+        rugged.setLineSensor(lineSensor);
 
         rugged.setLightTimeCorrection(false);
         rugged.setAberrationOfLightCorrection(true);
@@ -377,8 +383,8 @@ public class RuggedTest {
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
-        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2),
-                                       new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -386,6 +392,7 @@ public class RuggedTest {
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
 
         TileUpdater updater =
                 new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
@@ -395,14 +402,14 @@ public class RuggedTest {
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                        orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                        orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
-        ruggedFull.setLineSensor("line", los, lineDatation);
+        ruggedFull.setLineSensor(lineSensor);
         GeodeticPoint[] gpWithFlatBodyCorrection = ruggedFull.directLocalization("line", 100);
 
         Rugged ruggedFlat = new Rugged(updater, 8, AlgorithmId.DUVENHAGE_FLAT_BODY,
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                        orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                        orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
-        ruggedFlat.setLineSensor("line", los, lineDatation);
+        ruggedFlat.setLineSensor(lineSensor);
         GeodeticPoint[] gpWithoutFlatBodyCorrection = ruggedFlat.directLocalization("line", 100);
 
         SummaryStatistics stats = new SummaryStatistics();
@@ -433,8 +440,8 @@ public class RuggedTest {
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
-        List<PixelLOS> los = createLOS(new Vector3D(1.5, 0, -0.2),
-                                       new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -442,6 +449,7 @@ public class RuggedTest {
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
 
         TileUpdater updater =
                 new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
@@ -453,7 +461,7 @@ public class RuggedTest {
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         rugged.setLightTimeCorrection(false);
         rugged.setAberrationOfLightCorrection(true);
-        rugged.setLineSensor("line", los, lineDatation);
+        rugged.setLineSensor(lineSensor);
 
         double referenceLine = dimension / 2;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
@@ -533,14 +541,11 @@ public class RuggedTest {
 
     }
 
-    private List<PixelLOS> createLOS(Vector3D offset, Vector3D center, Vector3D normal,
-                                     double halfAperture, int n) {
-        List<PixelLOS> list = new ArrayList<PixelLOS>(n);
+    private List<Vector3D> createLOS(Vector3D center, Vector3D normal, double halfAperture, int n) {
+        List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
-            Vector3D los = new Rotation(normal, alpha).applyTo(center);
-            list.add(new PixelLOS(offset.getX(), offset.getY(), offset.getZ(),
-                                  los.getX(),    los.getY(),    los.getZ()));
+            list.add(new Rotation(normal, alpha).applyTo(center));
         }
         return list;
     }
