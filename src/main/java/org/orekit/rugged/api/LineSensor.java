@@ -49,7 +49,7 @@ public class LineSensor {
 
     /** Simple constructor.
      * @param name name of the sensor
-     * @param positions pixels positions
+     * @param position sensor position
      * @param los pixels lines-of-sight
      * @param datationModel datation model
      */
@@ -58,7 +58,7 @@ public class LineSensor {
 
         this.name          = name;
         this.datationModel = datationModel;
-        this.position      = position ;
+        this.position      = position;
         this.los           = los;
 
         // we consider the viewing directions as a point cloud
