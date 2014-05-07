@@ -297,7 +297,7 @@ public class Rugged {
     /** Set up line sensor model.
      * @param lineSensor line sensor model
      */
-    public void setLineSensor(final LineSensor lineSensor) {
+    public void addLineSensor(final LineSensor lineSensor) {
         sensors.put(lineSensor.getName(), lineSensor);
     }
 
@@ -481,7 +481,7 @@ public class Rugged {
      */
     public GeodeticPoint[] directLocalization(final String sensorName, final double lineNumber)
         throws RuggedException {
-        final LineSensor sensor = getSensor(sensorName);
+        final LineSensor sensor = getLineSensor(sensorName);
         return directLocalization(sensor, 0, sensor.getNbPixels(), algorithm, lineNumber);
     }
 
@@ -576,7 +576,7 @@ public class Rugged {
         throws RuggedException {
         try {
 
-            final LineSensor        sensor   = getSensor(sensorName);
+            final LineSensor        sensor   = getLineSensor(sensorName);
             final Vector3D      target   = ellipsoid.transform(groundPoint);
 
             final UnivariateSolver coarseSolver =
@@ -841,7 +841,7 @@ public class Rugged {
      * @return selected sensor
      * @exception RuggedException if sensor is not known
      */
-    private LineSensor getSensor(final String sensorName) throws RuggedException {
+    private LineSensor getLineSensor(final String sensorName) throws RuggedException {
         final LineSensor sensor = sensors.get(sensorName);
         if (sensor == null) {
             throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);

@@ -227,7 +227,7 @@ public class RuggedTest {
         rugged.setLightTimeCorrection(true);
         rugged.setAberrationOfLightCorrection(true);
 
-        rugged.setLineSensor(lineSensor);
+        rugged.addLineSensor(lineSensor);
 
         try {
 
@@ -298,7 +298,7 @@ public class RuggedTest {
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
-        rugged.setLineSensor(lineSensor);
+        rugged.addLineSensor(lineSensor);
 
         rugged.setLightTimeCorrection(true);
         rugged.setAberrationOfLightCorrection(false);
@@ -348,7 +348,7 @@ public class RuggedTest {
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
-        rugged.setLineSensor(lineSensor);
+        rugged.addLineSensor(lineSensor);
 
         rugged.setLightTimeCorrection(false);
         rugged.setAberrationOfLightCorrection(true);
@@ -402,14 +402,14 @@ public class RuggedTest {
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                        orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                        orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
-        ruggedFull.setLineSensor(lineSensor);
+        ruggedFull.addLineSensor(lineSensor);
         GeodeticPoint[] gpWithFlatBodyCorrection = ruggedFull.directLocalization("line", 100);
 
         Rugged ruggedFlat = new Rugged(updater, 8, AlgorithmId.DUVENHAGE_FLAT_BODY,
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                        orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                        orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
-        ruggedFlat.setLineSensor(lineSensor);
+        ruggedFlat.addLineSensor(lineSensor);
         GeodeticPoint[] gpWithoutFlatBodyCorrection = ruggedFlat.directLocalization("line", 100);
 
         SummaryStatistics stats = new SummaryStatistics();
@@ -468,7 +468,7 @@ public class RuggedTest {
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         rugged.setLightTimeCorrection(lightTimeCorrection);
         rugged.setAberrationOfLightCorrection(aberrationOfLightCorrection);
-        rugged.setLineSensor(lineSensor);
+        rugged.addLineSensor(lineSensor);
 
         double referenceLine = 0.56789 * dimension;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
