@@ -1,0 +1,107 @@
+/* Copyright 2013-2014 CS Systèmes d'Information
+ * Licensed to CS Systèmes d'Information (CS) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * CS licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.orekit.rugged.api;
+
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
+import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
+import org.apache.commons.math3.exception.NoBracketingException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.FastMath;
+import org.orekit.errors.OrekitExceptionWrapper;
+
+/** Class devoted to locate where ground point crosses a sensor line.
+ * <p>
+ * This class is used in the first stage of inverse localization.
+ * </p>
+ * @author Luc Maisonobe
+ */
+class SensorPixelCrossing {
+
+    /** Line sensor. */
+    private final LineSensor sensor;
+
+    /** Cross direction in spacecraft frame. */
+    private final Vector3D cross;
+
+    /** Maximum number of evaluations. */
+    private final int maxEval;
+
+    /** Accuracy to use for finding crossing line number. */
+    private final double accuracy;
+
+    /** Simple constructor.
+     * @param sensor sensor to consider
+     * @param targetDirection target direction in spacecraft frame
+     * @param maxEval maximum number of evaluations
+     * @param accuracy accuracy to use for finding crossing line number
+     */
+    public SensorPixelCrossing(final LineSensor sensor, final Vector3D targetDirection,
+                               final int maxEval, final double accuracy) {
+        this.sensor   = sensor;
+        this.cross    = Vector3D.crossProduct(sensor.getMeanPlaneNormal(), targetDirection).normalize();
+        this.maxEval  = maxEval;
+        this.accuracy = accuracy;
+    }
+
+    /** Locate pixel along sensor line.
+     * @return pixel location ({@code Double.NaN} if the first and last
+     * pixels of the line do not bracket a location)
+     * @exception RuggedException if the maximum number of evaluations is exceeded
+     */
+    public double locatePixel() throws RuggedException {
+        try {
+
+            // set up function evaluating to 0.0 where target matches pixel
+            final UnivariateFunction f = new UnivariateFunction() {
+                /** {@inheritDoc} */
+                @Override
+                public double value(final double x) throws OrekitExceptionWrapper {
+                    return Vector3D.angle(cross, getLOS(x)) - 0.5 * FastMath.PI;
+                }
+            };
+
+            // find the root
+            final UnivariateSolver solver =
+                    new BracketingNthOrderBrentSolver(0.0, accuracy, 5);
+            return solver.solve(maxEval, f, -1.0, sensor.getNbPixels());
+
+        } catch (NoBracketingException nbe) {
+            // there are no solutions in the search interval
+            return Double.NaN;
+        } catch (TooManyEvaluationsException tmee) {
+            throw new RuggedException(tmee);
+        }
+    }
+
+    /** Interpolate sensor pixels at some pixel index.
+     * @param x pixel index
+     * @return interpolated direction for specified index
+     */
+    private Vector3D getLOS(final double x) {
+
+        // find surrounding pixels
+        final int iInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(x)));
+        final int iSup = iInf + 1;
+
+        // interpolate
+        return new Vector3D(iSup - x, sensor.getLos(iInf), x - iInf, sensor.getLos(iSup)).normalize();
+
+    }
+
+}

@@ -431,10 +431,11 @@ public class RuggedTest {
     @Test
     public void testInverseLocalization()
         throws RuggedException, OrekitException, URISyntaxException {
-        checkInverseLocalization(2000, false, false, 4.0e-5, 4.0e-5);
-        checkInverseLocalization(2000, false, true,  4.0e-5, 4.0e-5);
-        checkInverseLocalization(2000, true,  false, 4.0e-5, 4.0e-5);
-        checkInverseLocalization(2000, true,  true,  4.0e-5, 4.0e-5);
+//        checkInverseLocalization(2000, false, false, 4.0e-5, 4.0e-5);
+//        checkInverseLocalization(2000, false, true,  4.0e-5, 4.0e-5);
+//        checkInverseLocalization(2000, true,  false, 4.0e-5, 4.0e-5);
+//        checkInverseLocalization(2000, true,  true,  4.0e-5, 4.0e-5);
+        checkInverseLocalization(200, true,  true,  5.0e-5, 7.0e-5);
     }
 
     private void checkInverseLocalization(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
@@ -450,11 +451,11 @@ public class RuggedTest {
 
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
+        // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
-                                       FastMath.toRadians(1.0), dimension);
+                                       FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -477,16 +478,27 @@ public class RuggedTest {
         double referenceLine = 0.56789 * dimension;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
 
-        for (double p = 1; p < gp.length - 1; p += 0.2) {
+        long t0 = System.currentTimeMillis();
+//        double maxL = 0;
+//        double maxP = 0;
+        for (int k = 0; k < dimension; ++k) {
+        for (double p = 0; p < gp.length - 1; p += 1.0) {
             int    i = (int) FastMath.floor(p);
             double d = p - i;
             GeodeticPoint g = new GeodeticPoint((1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
                                                 (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
                                                 (1 - d) * gp[i].getAltitude()  + d * gp[i + 1].getAltitude());
             SensorPixel sp = rugged.inverseLocalization("line", g, 0, dimension);
+//            System.out.println(p + " " + (referenceLine - sp.getLineNumber()) + " " + (p - sp.getPixelNumber()));
             Assert.assertEquals(referenceLine, sp.getLineNumber(),  maxLineError);
             Assert.assertEquals(p,             sp.getPixelNumber(), maxPixelError);
+//            maxL = FastMath.max(maxL, FastMath.abs(referenceLine - sp.getLineNumber()));
+//            maxP = FastMath.max(maxP, FastMath.abs(p - sp.getPixelNumber()));
         }
+        }
+        long t1 = System.currentTimeMillis();
+        System.out.println("# " + dimension + "x" + dimension + " " + (1.0e-3 * (t1 - t0)));
+//        System.out.println("# maxL = " + maxL + ", maxP = " + maxP);
      }
 
     private BodyShape createEarth()

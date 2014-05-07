@@ -21,23 +21,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
-import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
-import org.apache.commons.math3.exception.NoBracketingException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
-import org.apache.commons.math3.util.Precision;
 import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
@@ -46,7 +39,6 @@ import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.core.BasicScanAlgorithm;
 import org.orekit.rugged.core.ExtendedEllipsoid;
-import org.orekit.rugged.core.FixedAltitudeAlgorithm;
 import org.orekit.rugged.core.IgnoreDEMAlgorithm;
 import org.orekit.rugged.core.SpacecraftToObservedBody;
 import org.orekit.rugged.core.duvenhage.DuvenhageAlgorithm;
@@ -66,14 +58,13 @@ public class Rugged {
     /** Accuracy to use in the first stage of inverse localization.
      * <p>
      * This accuracy is only used to locate the point within one
-     * pixel, so four neighboring corners can be estimated. Hence
-     * there is no point in choosing a too small value here.
+     * pixel, hence there is no point in choosing a too small value here.
      * </p>
      */
-    private static final double COARSE_INVERSE_LOCALIZATION_ACCURACY = 0.01;
+    private static final double COARSE_INVERSE_LOCALIZATION_ACCURACY = 0.1;
 
-    /** Maximum number of evaluations for inverse localization. */
-    private static final int MAX_EVAL = 1000;
+    /** Maximum number of evaluations. */
+    private static final int MAX_EVAL = 50;
 
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
@@ -419,8 +410,10 @@ public class Rugged {
      * @param inertialFrame inertial frame where position and velocity are defined
      * @return selected position/velocity provider
      */
-    private static PVCoordinatesProvider selectPVCoordinatesProvider(final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities,
-                                                                     final int interpolationOrder, final Frame inertialFrame) {
+    private static PVCoordinatesProvider selectPVCoordinatesProvider(final List<Pair<AbsoluteDate,
+                                                                     PVCoordinates>> positionsVelocities,
+                                                                     final int interpolationOrder,
+                                                                     final Frame inertialFrame) {
 
         // set up the ephemeris
         final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
@@ -574,265 +567,48 @@ public class Rugged {
     public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint groundPoint,
                                            final double minLine, final double maxLine)
         throws RuggedException {
-        try {
 
-            final LineSensor        sensor   = getLineSensor(sensorName);
-            final Vector3D      target   = ellipsoid.transform(groundPoint);
+        final LineSensor sensor = getLineSensor(sensorName);
+        final Vector3D   target = ellipsoid.transform(groundPoint);
 
-            final UnivariateSolver coarseSolver =
-                    new BracketingNthOrderBrentSolver(0.0, COARSE_INVERSE_LOCALIZATION_ACCURACY, 5);
-
-            // find approximately the sensor line at which ground point crosses sensor mean plane
-            final SensorMeanPlaneCrossing planeCrossing = new SensorMeanPlaneCrossing(sensor, target);
-            final double coarseLine = coarseSolver.solve(MAX_EVAL, planeCrossing, minLine, maxLine);
-
-            // find approximately the pixel along this sensor line
-            final SensorPixelCrossing pixelCrossing =
-                    new SensorPixelCrossing(sensor, planeCrossing.getTargetDirection(coarseLine));
-            final double coarsePixel = coarseSolver.solve(MAX_EVAL, pixelCrossing, -1.0, sensor.getNbPixels());
-
-            // compute a quadrilateral that should surround the target
-            final double lInf = FastMath.floor(coarseLine);
-            final int    pInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
-            final IntersectionAlgorithm alg = new FixedAltitudeAlgorithm(groundPoint.getAltitude());
-            final GeodeticPoint[] previous  = directLocalization(sensor, pInf, pInf + 2, alg, lInf);
-            final GeodeticPoint[] next      = directLocalization(sensor, pInf, pInf + 2, alg, lInf + 1);
-
-            final double[] interp = interpolationCoordinates(groundPoint.getLongitude(), groundPoint.getLatitude(),
-                                                             previous[0].getLongitude(), previous[0].getLatitude(),
-                                                             previous[1].getLongitude(), previous[1].getLatitude(),
-                                                             next[0].getLongitude(),     next[0].getLatitude(),
-                                                             next[1].getLongitude(),     next[1].getLatitude());
-
-            return (interp == null) ? null : new SensorPixel(lInf + interp[1], pInf + interp[0]);
-
-        } catch (NoBracketingException nbe) {
-            // there are no solutions in the search interval
+        // find approximately the sensor line at which ground point crosses sensor mean plane
+        final SensorMeanPlaneCrossing planeCrossing = new SensorMeanPlaneCrossing(sensor, target, scToBody,
+                                                                                  lightTimeCorrection,
+                                                                                  aberrationOfLightCorrection,
+                                                                                  MAX_EVAL,
+                                                                                  COARSE_INVERSE_LOCALIZATION_ACCURACY);
+        if (!planeCrossing.find(minLine, maxLine)) {
+            // target is out of search interval
             return null;
-        } catch (TooManyEvaluationsException tmee) {
-            throw new RuggedException(tmee);
-        } catch (OrekitExceptionWrapper oew) {
-            final OrekitException oe = oew.getException();
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
-    }
-
-    /** Compute a point bilinear interpolation coordinates.
-     * <p>
-     * This method is used to find interpolation coordinates when the
-     * quadrilateral is <em>not</em> a perfect rectangle.
-     * </p>
-     * @param xuv desired point abscissa, at interpolation coordinates u, v
-     * @param yuv desired point ordinate, at interpolation coordinates u, v
-     * @param x00 abscissa for base quadrilateral point at u = 0, v = 0
-     * @param y00 ordinate for base quadrilateral point at u = 0, v = 0
-     * @param x10 abscissa for base quadrilateral point at u = 1, v = 0
-     * @param y10 ordinate for base quadrilateral point at u = 1, v = 0
-     * @param x01 abscissa for base quadrilateral point at u = 0, v = 1
-     * @param y01 ordinate for base quadrilateral point at u = 0, v = 1
-     * @param x11 abscissa for base quadrilateral point at u = 1, v = 1
-     * @param y11 ordinate for base quadrilateral point at u = 1, v = 1
-     * @return interpolation coordinates {@code u, v} corresponding to point {@code xuv, yuv},
-     * or null if no such points can be found
-     */
-    private double[] interpolationCoordinates(final double xuv, final double yuv,
-                                              final double x00, final double y00,
-                                              final double x10, final double y10,
-                                              final double x01, final double y01,
-                                              final double x11, final double y11) {
-
-        // bilinear interpolation can be written as follows:
-        // P(0,v) = v P(0,1) + (1 - v) P(0,0)
-        // P(1,v) = v P(1,1) + (1 - v) P(1,0)
-        // P(u,v) = u P(1,v) + (1 - u) P(0,v)
-        // which can be solved for u:
-        // u = [P(u,v) - P(0,v)] / [P(1,v) - P(0,v)]
-        // this equation holds for both x and y coordinates of the various P points, so u can be eliminated:
-        // [x(u,v) - x(0,v)] * [y(1,v) - y(0,v)] - [y(u,v) - y(0,v)] * [x(1,v) - x(0,v)] = 0
-        // this is a quadratic equation in v: a v² + bv + c = 0
-        final double a = y11 * x00 - y10 * x00 + y10 * x01 - y11 * x01 + y01 * x11 - y01 * x10 - y00 * x11 + y00 * x10;
-        final double b = y11 * xuv - y10 * xuv + y00 * xuv - y01 * xuv - y11 * x00 + 2 * y10 * x00 - y10 * x01 + y01 * x10 + y00 * x11 - 2 * y00 * x10 + yuv * x01 + yuv * x10 - yuv * x11 - yuv * x00;
-        final double c = y10 * xuv - y00 * xuv - y10 * x00 + y00 * x10 - yuv * x10 + yuv * x00;
-
-        if (FastMath.abs(a) < Precision.EPSILON * (FastMath.abs(b) + FastMath.abs(c))) {
-            if (FastMath.abs(b) < Precision.EPSILON * FastMath.abs(c)) {
-                return null;
-            } else {
-
-                // solve linear equation in v
-                final double v = -c / b;
-
-                // recover uA from vA
-                final double x0v = v * x01 + (1 - v) * x00;
-                final double x1v = v * x11 + (1 - v) * x10;
-                final double dX  = x1v - x0v;
-                final double y0v = v * y01 + (1 - v) * y00;
-                final double y1v = v * y11 + (1 - v) * y10;
-                final double dY  = y1v - y0v;
-                final double u   = (FastMath.abs(dX) >= FastMath.abs(dX)) ? ((xuv - x0v) / dX) : ((yuv - y0v) / dY);
-
-                return new double[] {
-                    u, v
-                };
-
-            }
-        } else {
-            // solve quadratic equation in v
-            final double bb  = b * b;
-            final double fac = 4 * a * c;
-            if (bb < fac) {
-                return null;
-            }
-            final double s  = FastMath.sqrt(bb - fac);
-            final double vA = (b > 0) ? -(s + b) / (2 * a) : (2 * c) / (s - b);
-            final double vB = c / (a * vA);
-
-            // recover uA from vA
-            final double x0vA = vA * x01 + (1 - vA) * x00;
-            final double x1vA = vA * x11 + (1 - vA) * x10;
-            final double dXA  = x1vA - x0vA;
-            final double y0vA = vA * y01 + (1 - vA) * y00;
-            final double y1vA = vA * y11 + (1 - vA) * y10;
-            final double dYA  = y1vA - y0vA;
-            final double uA   = (FastMath.abs(dXA) >= FastMath.abs(dXA)) ? ((xuv - x0vA) / dXA) : ((yuv - y0vA) / dYA);
-
-            // recover uB from vB
-            final double x0vB = vB * x01 + (1 - vB) * x00;
-            final double x1vB = vB * x11 + (1 - vB) * x10;
-            final double dXB  = x1vB - x0vB;
-            final double y0vB = vB * y01 + (1 - vB) * y00;
-            final double y1vB = vB * y11 + (1 - vB) * y10;
-            final double dYB  = y1vB - y0vB;
-            final double uB   = (FastMath.abs(dXB) >= FastMath.abs(dXB)) ? ((xuv - x0vB) / dXB) : ((yuv - y0vB) / dYB);
-
-            if ((uA * uA + vA * vA) <= (uB * uB + vB * vB)) {
-                return new double[] {
-                    uA, vA
-                };
-            } else {
-                return new double[] {
-                    uA, vA
-                };
-            }
-
         }
 
-    }
-
-    /** Local class for finding when ground point crosses mean sensor plane. */
-    private class SensorMeanPlaneCrossing implements UnivariateFunction {
-
-        /** Line sensor. */
-        private final LineSensor sensor;
-
-        /** Target ground point. */
-        private final Vector3D target;
-
-        /** Simple constructor.
-         * @param sensor sensor to consider
-         * @param target target ground point
-         */
-        public SensorMeanPlaneCrossing(final LineSensor sensor, final Vector3D target) {
-            this.sensor = sensor;
-            this.target = target;
+        // find approximately the pixel along this sensor line
+        final SensorPixelCrossing pixelCrossing = new SensorPixelCrossing(sensor, planeCrossing.getTargetDirection(),
+                                                                          MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
+        final double coarsePixel = pixelCrossing.locatePixel();
+        if (Double.isNaN(coarsePixel)) {
+            // target is out of search interval
+            return null;
         }
 
-        /** {@inheritDoc} */
-        @Override
-        public double value(final double lineNumber) throws OrekitExceptionWrapper {
+        // fix line by considering the closest pixel exact position and line-of-sight
+        // (this pixel might point towards a direction slightly above or below the mean sensor plane)
+        final int      closestIndex       = (int) FastMath.rint(coarsePixel);
+        final Vector3D xAxis              = sensor.getLos(closestIndex);
+        final Vector3D zAxis              = sensor.getCross(closestIndex);
+        final Vector3D coarseDirection    = planeCrossing.getTargetDirection();
+        final Vector3D coarseDirectionDot = planeCrossing.getTargetDirectionDot();
+        final double   deltaT             = Vector3D.dotProduct(xAxis.subtract(coarseDirection), zAxis) /
+                                            Vector3D.dotProduct(coarseDirectionDot, zAxis);
+        final double   fixedLine          = sensor.getLine(sensor.getDate(planeCrossing.getLine()).shiftedBy(deltaT));
+        final Vector3D fixedDirection     = new Vector3D(1, coarseDirection, deltaT, coarseDirectionDot).normalize();
 
-            // the target crosses the mean plane if it orthogonal to the normal vector
-            return Vector3D.angle(getTargetDirection(lineNumber), sensor.getMeanPlaneNormal()) - 0.5 * FastMath.PI;
+        // fix pixel
+        final double alpha      = sensor.getAzimuth(fixedDirection, closestIndex);
+        final double pixelWidth = sensor.getWidth(closestIndex);
+        final double fixedPixel = closestIndex + alpha / pixelWidth;
 
-        }
-
-        /** Get the target direction in spacecraft frame.
-         * @param lineNumber current line number
-         * @return target direction in spacecraft frame
-         * @exception OrekitExceptionWrapper if some frame conversion fails
-         */
-        public Vector3D getTargetDirection(final double lineNumber) throws OrekitExceptionWrapper {
-            try {
-
-                // compute the transform between spacecraft and observed body
-                final AbsoluteDate date        = sensor.getDate(lineNumber);
-                final Transform    bodyToInert = scToBody.getInertialToBody(date).getInverse();
-                final Transform    scToInert   = scToBody.getScToInertial(date);
-                final Vector3D     refInert    = scToInert.transformPosition(sensor.getPosition());
-
-                final Vector3D targetInert;
-                if (lightTimeCorrection) {
-                    // apply light time correction
-                    final Vector3D iT     = bodyToInert.transformPosition(target);
-                    final double   deltaT = refInert.distance(iT) / Constants.SPEED_OF_LIGHT;
-                    targetInert = bodyToInert.shiftedBy(-deltaT).transformPosition(target);
-                } else {
-                    // don't apply light time correction
-                    targetInert = bodyToInert.transformPosition(target);
-                }
-
-                final Vector3D lInert = targetInert.subtract(refInert).normalize();
-                final Vector3D rawLInert;
-                if (aberrationOfLightCorrection) {
-                    // apply aberration of light correction
-                    // as the spacecraft velocity is small with respect to speed of light,
-                    // we use classical velocity addition and not relativistic velocity addition
-                    final Vector3D spacecraftVelocity =
-                            scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
-                    rawLInert = new Vector3D(Constants.SPEED_OF_LIGHT, lInert, -1.0, spacecraftVelocity).normalize();
-                } else {
-                    // don't apply aberration of light correction
-                    rawLInert = lInert;
-                }
-
-                // direction of the target point in spacecraft frame
-                return scToInert.getInverse().transformVector(rawLInert);
-
-            } catch (OrekitException oe) {
-                throw new OrekitExceptionWrapper(oe);
-            }
-        }
-
-    }
-
-    /** Local class for finding when ground point crosses pixel along sensor line. */
-    private class SensorPixelCrossing implements UnivariateFunction {
-
-        /** Line sensor. */
-        private final LineSensor sensor;
-
-        /** Cross direction in spacecraft frame. */
-        private final Vector3D cross;
-
-        /** Simple constructor.
-         * @param sensor sensor to consider
-         * @param targetDirection target direction in spacecraft frame
-         */
-        public SensorPixelCrossing(final LineSensor sensor, final Vector3D targetDirection) {
-            this.sensor = sensor;
-            this.cross  = Vector3D.crossProduct(sensor.getMeanPlaneNormal(), targetDirection).normalize();
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public double value(final double x) {
-            return Vector3D.angle(cross, getLOS(x)) - 0.5 * FastMath.PI;
-        }
-
-        /** Interpolate sensor pixels at some pixel index.
-         * @param x pixel index
-         * @return interpolated direction for specified index
-         */
-        public Vector3D getLOS(final double x) {
-
-            // find surrounding pixels
-            final int iInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(x)));
-            final int iSup = iInf + 1;
-
-            // interpolate
-            return new Vector3D(iSup - x, sensor.getLos(iInf), x - iInf, sensor.getLos(iSup)).normalize();
-
-        }
+        return new SensorPixel(fixedLine, fixedPixel);
 
     }
 

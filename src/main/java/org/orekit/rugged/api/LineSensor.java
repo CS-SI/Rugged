@@ -22,6 +22,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
+import org.apache.commons.math3.util.FastMath;
 import org.orekit.time.AbsoluteDate;
 
 /** Line sensor model.
@@ -42,7 +43,16 @@ public class LineSensor {
     private final Vector3D position;
 
     /** Pixels lines-of-sight. */
-    private final List<Vector3D> los;
+    private final Vector3D[] x;
+
+    /** Pixels transversal direction (i.e. towards left pixel). */
+    private final Vector3D[] y;
+
+    /** Pixels cross direction (i.e. above line-of-sight). */
+    private final Vector3D[] z;
+
+    /** Pixels widths. */
+    private final double[] width;
 
     /** Mean plane normal. */
     private final Vector3D normal;
@@ -59,7 +69,12 @@ public class LineSensor {
         this.name          = name;
         this.datationModel = datationModel;
         this.position      = position;
-        this.los           = los;
+
+        // normalize lines-of-sight
+        this.x = new Vector3D[los.size()];
+        for (int i = 0; i < los.size(); ++i) {
+            x[i] = los.get(i).normalize();
+        }
 
         // we consider the viewing directions as a point cloud
         // and want to find the plane that best fits it
@@ -68,20 +83,20 @@ public class LineSensor {
         double centroidX = 0;
         double centroidY = 0;
         double centroidZ = 0;
-        for (int i = 0; i < los.size(); ++i) {
-            final Vector3D l = los.get(i);
+        for (int i = 0; i < x.length; ++i) {
+            final Vector3D l = x[i];
             centroidX += l.getX();
             centroidY += l.getY();
             centroidZ += l.getZ();
         }
-        centroidX /= los.size();
-        centroidY /= los.size();
-        centroidZ /= los.size();
+        centroidX /= x.length;
+        centroidY /= x.length;
+        centroidZ /= x.length;
 
         // build a centered data matrix
         final RealMatrix matrix = MatrixUtils.createRealMatrix(3, los.size());
-        for (int i = 0; i < los.size(); ++i) {
-            final Vector3D l = los.get(i);
+        for (int i = 0; i < x.length; ++i) {
+            final Vector3D l = x[i];
             matrix.setEntry(0, i, l.getX() - centroidX);
             matrix.setEntry(1, i, l.getY() - centroidY);
             matrix.setEntry(2, i, l.getZ() - centroidZ);
@@ -102,6 +117,26 @@ public class LineSensor {
             normal = singularVector.negate();
         }
 
+        // compute transversal directions
+        y = new Vector3D[x.length];
+        z = new Vector3D[x.length];
+        for (int i = 0; i < x.length; ++i) {
+            y[i] = Vector3D.crossProduct(normal, x[i]).normalize();
+            z[i] = Vector3D.crossProduct(x[i], y[i]);
+        }
+
+        // compute pixel widths
+        width = new double[x.length];
+        for (int i = 0; i < x.length; ++i) {
+            if (i < 1) {
+                width[i] =  getAzimuth(los.get(i + 1), i);
+            } else if (i > x.length - 2) {
+                width[i] = -getAzimuth(los.get(i - 1), i);
+            } else {
+                width[i] = 0.5 * (getAzimuth(los.get(i + 1), i) - getAzimuth(los.get(i - 1), i));
+            }
+        }
+
     }
 
     /** Get the name of the sensor.
@@ -115,15 +150,52 @@ public class LineSensor {
      * @return number of pixels
      */
     public int getNbPixels() {
-        return los.size();
+        return x.length;
     }
 
-    /** Get the pixel line-of-sight.
+    /** Get the pixel normalized line-of-sight.
+     * <p>
+     * The {@link #getLos(int) line-of-sight}, {@link #getTransversal(int) transversal}
+     * and {@link #getCross(int) cross} directions form a right-handed frame aligned
+     * with the pixel.
+     * </p>
      * @param i pixel index (must be between 0 and {@link #getNbPixels()}
-     * @return pixel line-of-sight
+     * @return pixel normalized line-of-sight
      */
     public Vector3D getLos(final int i) {
-        return los.get(i);
+        return x[i];
+    }
+
+    /** Get the pixel normalized transversal direction.
+     * <p>
+     * The transversal direction is towards left pixel.
+     * </p>
+     * <p>
+     * The {@link #getLos(int) line-of-sight}, {@link #getTransversal(int) transversal}
+     * and {@link #getCross(int) cross} directions form a right-handed frame aligned
+     * with the pixel.
+     * </p>
+     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
+     * @return pixel normalized transversal direction
+     */
+    public Vector3D getTransversal(final int i) {
+        return y[i];
+    }
+
+    /** Get the pixel normalized cross direction.
+     * <p>
+     * The cross direction is above sensor lines.
+     * </p>
+     * <p>
+     * The {@link #getLos(int) line-of-sight}, {@link #getTransversal(int) transversal}
+     * and {@link #getCross(int) cross} directions form a right-handed frame aligned
+     * with the pixel.
+     * </p>
+     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
+     * @return pixel normalized cross direction
+     */
+    public Vector3D getCross(final int i) {
+        return z[i];
     }
 
     /** Get the date.
@@ -159,6 +231,24 @@ public class LineSensor {
      */
     public Vector3D getPosition() {
         return position;
+    }
+
+    /** Get the relative azimuth of a direction with respect to a pixel.
+     * @param direction direction to check
+     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
+     * @return relative azimuth of direction
+     */
+    public double getAzimuth(final Vector3D direction, final int i) {
+        return FastMath.atan2(Vector3D.dotProduct(direction, y[i]),
+                              Vector3D.dotProduct(direction, x[i]));
+    }
+
+    /** Get the the angular width a pixel.
+     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
+     * @return relative azimuth of direction
+     */
+    public double getWidth(final int i) {
+        return width[i];
     }
 
 }
