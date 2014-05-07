@@ -35,6 +35,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -180,8 +181,11 @@ public class RuggedTest {
 
     }
 
+    // the following test is disabled by default
+    // it is only used to check timings, and also create a large (366M) temporary file
     @Test
-    public void testMayonVolcano()
+    @Ignore
+    public void testMayonVolcanoTiming()
         throws RuggedException, OrekitException, URISyntaxException {
 
         long t0 = System.currentTimeMillis();
