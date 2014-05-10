@@ -60,4 +60,10 @@ public class LinearLineDatation implements LineDatation {
         return referenceLine + rate * date.durationFrom(referenceDate);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public double getRate(final double lineNumber) {
+        return rate;
+    }
+
 }

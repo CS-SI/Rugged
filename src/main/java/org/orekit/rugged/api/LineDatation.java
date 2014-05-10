@@ -36,4 +36,10 @@ public interface LineDatation {
      */
     double getLine(AbsoluteDate date);
 
+    /** Get the rate of lines scanning.
+     * @param lineNumber line number
+     * @return rate of lines scanning (lines / seconds)
+     */
+    double getRate(double lineNumber);
+
 }

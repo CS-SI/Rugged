@@ -214,6 +214,14 @@ public class LineSensor {
         return datationModel.getLine(date);
     }
 
+    /** Get the rate of lines scanning.
+     * @param lineNumber line number
+     * @return rate of lines scanning (lines / seconds)
+     */
+    public double getRate(final double lineNumber) {
+        return datationModel.getRate(lineNumber);
+    }
+
     /** Get the mean plane normal.
      * <p>
      * The normal is oriented such traversing pixels in increasing indices
