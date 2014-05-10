@@ -66,6 +66,8 @@ import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.core.raster.RandomLandscapeUpdater;
+import org.orekit.rugged.core.raster.SimpleTileFactory;
+import org.orekit.rugged.core.raster.Tile;
 import org.orekit.rugged.core.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -182,7 +184,7 @@ public class RuggedTest {
     }
 
     // the following test is disabled by default
-    // it is only used to check timings, and also create a large (366M) temporary file
+    // it is only used to check timings, and also create a large (66M) temporary file
     @Test
     @Ignore
     public void testMayonVolcanoTiming()
@@ -235,7 +237,7 @@ public class RuggedTest {
 
         try {
 
-            int              size   = (lastLine - firstLine) * los.size() * 3 * Integer.SIZE;
+            int              size   = (lastLine - firstLine) * los.size() * 3 * Integer.SIZE / 8;
             RandomAccessFile out    = new RandomAccessFile(tempFolder.newFile(), "rw");
             MappedByteBuffer buffer = out.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
 
@@ -262,7 +264,7 @@ public class RuggedTest {
             System.out.format(Locale.US,
                               "%n%n%5dx%5d:%n" +
                               "  Orekit initialization and DEM creation   : %5.1fs%n" +
-                              "  direct localization and %3dM grid writing: %5.1fs (%.0f px/s)%n",
+                              "  direct localization and %3dM grid writing: %5.1fs (%.1f px/s)%n",
                               lastLine - firstLine, los.size(),
                               1.0e-3 *(t1 - t0), sizeM, 1.0e-3 *(t2 - t1), pixels / (1.0e-3 * (t2 - t1)));
         } catch (IOException ioe) {
@@ -423,19 +425,112 @@ public class RuggedTest {
             stats.addValue(Vector3D.distance(pWith, pWithout));
         }
         Assert.assertEquals( 0.005, stats.getMin(),  1.0e-3);
-        Assert.assertEquals(49.157, stats.getMax(),  1.0e-3);
-        Assert.assertEquals( 4.870, stats.getMean(), 1.0e-3);
+        Assert.assertEquals(39.924, stats.getMax(),  1.0e-3);
+        Assert.assertEquals( 4.823, stats.getMean(), 1.0e-3);
 
+    }
+
+    // the following test is disabled by default
+    // it is only used to check timings, and also create a small (2M) temporary file
+    @Test
+    @Ignore
+    public void testInverseLocalizationTiming()
+            throws RuggedException, OrekitException, URISyntaxException {
+
+        long t0 = System.currentTimeMillis();
+        int dimension = 1000;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                       Vector3D.PLUS_I,
+                                       FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+
+        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+
+        TileUpdater updater =
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
+
+        Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
+                                   orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
+        rugged.setLightTimeCorrection(true);
+        rugged.setAberrationOfLightCorrection(true);
+        rugged.addLineSensor(lineSensor);
+
+        double lat0  = FastMath.toRadians(-22.9);
+        double lon0  = FastMath.toRadians(142.4);
+        double delta = FastMath.toRadians(0.5);
+        Tile tile = new SimpleTileFactory().createTile();
+        updater.updateTile(lat0, lon0, tile);
+
+        try {
+            int              size   = dimension * dimension * 2 * Integer.SIZE / 8;
+            RandomAccessFile out    = new RandomAccessFile(tempFolder.newFile(), "rw");
+            MappedByteBuffer buffer = out.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
+
+            long t1 = System.currentTimeMillis();
+            int goodPixels = 0;
+            int badPixels  = 0;
+            for (int i = 0; i < dimension; ++i) {
+                double latitude  = lat0 + (i * delta) / dimension;
+                for (int j = 0; j < dimension; ++j) {
+                    double longitude = lon0 + (j * delta) / dimension;
+                    GeodeticPoint gp = new GeodeticPoint(latitude, longitude,
+                                                         tile.interpolateElevation(latitude, longitude));
+                    SensorPixel sp = rugged.inverseLocalization("line", gp, 0, dimension);
+                    if (sp == null) {
+                        ++badPixels;
+                        buffer.putInt(-1);
+                        buffer.putInt(-1);
+                    } else {
+                        ++goodPixels;
+                        final int lineCode  = (int) FastMath.rint(FastMath.scalb(sp.getLineNumber(),  16));
+                        final int pixelCode = (int) FastMath.rint(FastMath.scalb(sp.getPixelNumber(), 16));
+                        buffer.putInt(lineCode);
+                        buffer.putInt(pixelCode);
+                    }
+                }
+            }
+
+            long t2 = System.currentTimeMillis();
+            out.close();
+            int sizeM = size / (1024 * 1024);
+            System.out.format(Locale.US,
+                              "%n%n%5dx%5d:%n" +
+                              "  Orekit initialization and DEM creation   : %5.1fs%n" +
+                              "  inverse localization and %3dM grid writing: %5.1fs (%.1f px/s, %.1f%% covered)%n",
+                              dimension, dimension,
+                              1.0e-3 *(t1 - t0), sizeM, 1.0e-3 *(t2 - t1),
+                              (badPixels + goodPixels) / (1.0e-3 * (t2 - t1)),
+                              (100.0 * goodPixels) / (goodPixels + badPixels));
+        } catch (IOException ioe) {
+            Assert.fail(ioe.getLocalizedMessage());
+        }
     }
 
     @Test
     public void testInverseLocalization()
         throws RuggedException, OrekitException, URISyntaxException {
-//        checkInverseLocalization(2000, false, false, 4.0e-5, 4.0e-5);
-//        checkInverseLocalization(2000, false, true,  4.0e-5, 4.0e-5);
-//        checkInverseLocalization(2000, true,  false, 4.0e-5, 4.0e-5);
-//        checkInverseLocalization(2000, true,  true,  4.0e-5, 4.0e-5);
-        checkInverseLocalization(200, true,  true,  5.0e-5, 7.0e-5);
+        checkInverseLocalization(2000, false, false, 5.0e-5, 8.0e-5);
+        checkInverseLocalization(2000, false, true,  5.0e-5, 8.0e-5);
+        checkInverseLocalization(2000, true,  false, 5.0e-5, 8.0e-5);
+        checkInverseLocalization(2000, true,  true,  5.0e-5, 8.0e-5);
     }
 
     private void checkInverseLocalization(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
@@ -475,13 +570,9 @@ public class RuggedTest {
         rugged.setAberrationOfLightCorrection(aberrationOfLightCorrection);
         rugged.addLineSensor(lineSensor);
 
-        double referenceLine = 0.56789 * dimension;
+        double referenceLine = 0.87654 * dimension;
         GeodeticPoint[] gp = rugged.directLocalization("line", referenceLine);
 
-        long t0 = System.currentTimeMillis();
-//        double maxL = 0;
-//        double maxP = 0;
-        for (int k = 0; k < dimension; ++k) {
         for (double p = 0; p < gp.length - 1; p += 1.0) {
             int    i = (int) FastMath.floor(p);
             double d = p - i;
@@ -489,16 +580,9 @@ public class RuggedTest {
                                                 (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
                                                 (1 - d) * gp[i].getAltitude()  + d * gp[i + 1].getAltitude());
             SensorPixel sp = rugged.inverseLocalization("line", g, 0, dimension);
-//            System.out.println(p + " " + (referenceLine - sp.getLineNumber()) + " " + (p - sp.getPixelNumber()));
             Assert.assertEquals(referenceLine, sp.getLineNumber(),  maxLineError);
             Assert.assertEquals(p,             sp.getPixelNumber(), maxPixelError);
-//            maxL = FastMath.max(maxL, FastMath.abs(referenceLine - sp.getLineNumber()));
-//            maxP = FastMath.max(maxP, FastMath.abs(p - sp.getPixelNumber()));
         }
-        }
-        long t1 = System.currentTimeMillis();
-        System.out.println("# " + dimension + "x" + dimension + " " + (1.0e-3 * (t1 - t0)));
-//        System.out.println("# maxL = " + maxL + ", maxP = " + maxP);
      }
 
     private BodyShape createEarth()

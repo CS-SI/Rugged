@@ -79,7 +79,7 @@ class SensorPixelCrossing {
             // find the root
             final UnivariateSolver solver =
                     new BracketingNthOrderBrentSolver(0.0, accuracy, 5);
-            return solver.solve(maxEval, f, -1.0, sensor.getNbPixels());
+            return solver.solve(maxEval, f, 0.0, sensor.getNbPixels() - 1.0);
 
         } catch (NoBracketingException nbe) {
             // there are no solutions in the search interval

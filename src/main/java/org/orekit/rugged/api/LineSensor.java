@@ -48,9 +48,6 @@ public class LineSensor {
     /** Pixels transversal direction (i.e. towards left pixel). */
     private final Vector3D[] y;
 
-    /** Pixels cross direction (i.e. above line-of-sight). */
-    private final Vector3D[] z;
-
     /** Pixels widths. */
     private final double[] width;
 
@@ -117,12 +114,10 @@ public class LineSensor {
             normal = singularVector.negate();
         }
 
-        // compute transversal directions
+        // compute transversal direction
         y = new Vector3D[x.length];
-        z = new Vector3D[x.length];
         for (int i = 0; i < x.length; ++i) {
             y[i] = Vector3D.crossProduct(normal, x[i]).normalize();
-            z[i] = Vector3D.crossProduct(x[i], y[i]);
         }
 
         // compute pixel widths
@@ -164,38 +159,6 @@ public class LineSensor {
      */
     public Vector3D getLos(final int i) {
         return x[i];
-    }
-
-    /** Get the pixel normalized transversal direction.
-     * <p>
-     * The transversal direction is towards left pixel.
-     * </p>
-     * <p>
-     * The {@link #getLos(int) line-of-sight}, {@link #getTransversal(int) transversal}
-     * and {@link #getCross(int) cross} directions form a right-handed frame aligned
-     * with the pixel.
-     * </p>
-     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
-     * @return pixel normalized transversal direction
-     */
-    public Vector3D getTransversal(final int i) {
-        return y[i];
-    }
-
-    /** Get the pixel normalized cross direction.
-     * <p>
-     * The cross direction is above sensor lines.
-     * </p>
-     * <p>
-     * The {@link #getLos(int) line-of-sight}, {@link #getTransversal(int) transversal}
-     * and {@link #getCross(int) cross} directions form a right-handed frame aligned
-     * with the pixel.
-     * </p>
-     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
-     * @return pixel normalized cross direction
-     */
-    public Vector3D getCross(final int i) {
-        return z[i];
     }
 
     /** Get the date.

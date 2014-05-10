@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
@@ -61,7 +63,7 @@ public class Rugged {
      * pixel, hence there is no point in choosing a too small value here.
      * </p>
      */
-    private static final double COARSE_INVERSE_LOCALIZATION_ACCURACY = 0.1;
+    private static final double COARSE_INVERSE_LOCALIZATION_ACCURACY = 0.01;
 
     /** Maximum number of evaluations. */
     private static final int MAX_EVAL = 50;
@@ -507,16 +509,24 @@ public class Rugged {
             final GeodeticPoint[] gp = new GeodeticPoint[end - start];
             for (int i = start; i < end; ++i) {
 
-                final Vector3D rawLInert = scToInert.transformVector(sensor.getLos(i));
+                final Vector3D obsLInert = scToInert.transformVector(sensor.getLos(i));
                 final Vector3D lInert;
                 if (aberrationOfLightCorrection) {
                     // apply aberration of light correction
                     // as the spacecraft velocity is small with respect to speed of light,
                     // we use classical velocity addition and not relativistic velocity addition
-                    lInert = new Vector3D(Constants.SPEED_OF_LIGHT, rawLInert, 1.0, spacecraftVelocity).normalize();
+                    // we look for a positive k such that: c * lInert + vsat = k * obsLInert
+                    // with lInert normalized
+                    final double a = obsLInert.getNormSq();
+                    final double b = -Vector3D.dotProduct(obsLInert, spacecraftVelocity);
+                    final double c = spacecraftVelocity.getNormSq() - Constants.SPEED_OF_LIGHT * Constants.SPEED_OF_LIGHT;
+                    final double s = FastMath.sqrt(b * b - a * c);
+                    final double k = (b > 0) ? -c / (s + b) : (s - b) / a;
+                    lInert = new Vector3D( k   / Constants.SPEED_OF_LIGHT, obsLInert,
+                                          -1.0 / Constants.SPEED_OF_LIGHT, spacecraftVelocity);
                 } else {
                     // don't apply aberration of light correction
-                    lInert = rawLInert;
+                    lInert = obsLInert;
                 }
 
                 if (lightTimeCorrection) {
@@ -572,19 +582,20 @@ public class Rugged {
         final Vector3D   target = ellipsoid.transform(groundPoint);
 
         // find approximately the sensor line at which ground point crosses sensor mean plane
-        final SensorMeanPlaneCrossing planeCrossing = new SensorMeanPlaneCrossing(sensor, target, scToBody,
-                                                                                  lightTimeCorrection,
-                                                                                  aberrationOfLightCorrection,
-                                                                                  MAX_EVAL,
-                                                                                  COARSE_INVERSE_LOCALIZATION_ACCURACY);
+        final SensorMeanPlaneCrossing planeCrossing =
+                new SensorMeanPlaneCrossing(sensor, target, scToBody,
+                                            lightTimeCorrection, aberrationOfLightCorrection,
+                                            MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
         if (!planeCrossing.find(minLine, maxLine)) {
             // target is out of search interval
             return null;
         }
+        final FieldVector3D<DerivativeStructure> coarseDirection = planeCrossing.getTargetDirection();
 
         // find approximately the pixel along this sensor line
-        final SensorPixelCrossing pixelCrossing = new SensorPixelCrossing(sensor, planeCrossing.getTargetDirection(),
-                                                                          MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
+        final SensorPixelCrossing pixelCrossing =
+                new SensorPixelCrossing(sensor, coarseDirection.toVector3D(),
+                                        MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
         final double coarsePixel = pixelCrossing.locatePixel();
         if (Double.isNaN(coarsePixel)) {
             // target is out of search interval
@@ -593,15 +604,13 @@ public class Rugged {
 
         // fix line by considering the closest pixel exact position and line-of-sight
         // (this pixel might point towards a direction slightly above or below the mean sensor plane)
-        final int      closestIndex       = (int) FastMath.rint(coarsePixel);
-        final Vector3D xAxis              = sensor.getLos(closestIndex);
-        final Vector3D zAxis              = sensor.getCross(closestIndex);
-        final Vector3D coarseDirection    = planeCrossing.getTargetDirection();
-        final Vector3D coarseDirectionDot = planeCrossing.getTargetDirectionDot();
-        final double   deltaT             = Vector3D.dotProduct(xAxis.subtract(coarseDirection), zAxis) /
-                                            Vector3D.dotProduct(coarseDirectionDot, zAxis);
-        final double   fixedLine          = sensor.getLine(sensor.getDate(planeCrossing.getLine()).shiftedBy(deltaT));
-        final Vector3D fixedDirection     = new Vector3D(1, coarseDirection, deltaT, coarseDirectionDot).normalize();
+        final int      closestIndex    = (int) FastMath.rint(coarsePixel);
+        final DerivativeStructure beta = FieldVector3D.angle(coarseDirection, sensor.getMeanPlaneNormal());
+        final double   deltaL          = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
+        final double   fixedLine       = planeCrossing.getLine() + deltaL;
+        final Vector3D fixedDirection  = new Vector3D(coarseDirection.getX().taylor(deltaL),
+                                                      coarseDirection.getY().taylor(deltaL),
+                                                      coarseDirection.getZ().taylor(deltaL)).normalize();
 
         // fix pixel
         final double alpha      = sensor.getAzimuth(fixedDirection, closestIndex);
