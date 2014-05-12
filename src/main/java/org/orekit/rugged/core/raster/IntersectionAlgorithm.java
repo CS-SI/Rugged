@@ -55,4 +55,13 @@ public interface IntersectionAlgorithm {
                                      GeodeticPoint closeGuess)
         throws RuggedException;
 
+    /** Get elevation at a given ground point.
+     * @param latitude ground point latitude
+     * @param longitude ground point longitude
+     * @return elevation at specified point
+     * @exception RuggedException if Digital Elevation Model does not cover point
+     */
+    double getElevation(double latitude, double longitude)
+        throws RuggedException;
+
 }

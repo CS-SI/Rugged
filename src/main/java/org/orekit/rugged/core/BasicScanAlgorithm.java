@@ -166,6 +166,14 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
         }
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public double getElevation(final double latitude, final double longitude)
+        throws RuggedException {
+        final Tile tile = cache.getTile(latitude, longitude);
+        return tile.interpolateElevation(latitude, longitude);
+    }
+
     /** Check the overall min and max altitudes.
      * @param tiles tiles to check
      * @return true if the tile changed either min or max altitude

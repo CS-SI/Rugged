@@ -550,20 +550,43 @@ public class Rugged {
     }
 
     /** Inverse localization of a ground point.
+     * <p>
+     * The point is given only by its latitude and longitude, the elevation is
+     * computed from the Digital Elevation Model.
+     * </p>
      * @param sensorName name of the line  sensor
-     * @param groundPoint ground point to localize
+     * @param latitude ground point latitude
+     * @param longitude ground point longitude
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return sensor pixel seeing ground point, or null if ground point cannot
      * be seen between the prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint groundPoint,
+    public SensorPixel inverseLocalization(final String sensorName,
+                                           final double latitude, final double longitude,
+                                           final double minLine,  final double maxLine)
+        throws RuggedException {
+        final GeodeticPoint groundPoint =
+                new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
+        return inverseLocalization(sensorName, groundPoint, minLine, maxLine);
+    }
+
+    /** Inverse localization of a point.
+     * @param sensorName name of the line  sensor
+     * @param point point to localize
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @return sensor pixel seeing point, or null if point cannot be seen between the
+     * prescribed line numbers
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
+     */
+    public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint point,
                                            final double minLine, final double maxLine)
         throws RuggedException {
 
         final LineSensor sensor = getLineSensor(sensorName);
-        final Vector3D   target = ellipsoid.transform(groundPoint);
+        final Vector3D   target = ellipsoid.transform(point);
 
         // find approximately the sensor line at which ground point crosses sensor mean plane
         final SensorMeanPlaneCrossing planeCrossing =

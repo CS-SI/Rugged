@@ -476,8 +476,6 @@ public class RuggedTest {
         double lat0  = FastMath.toRadians(-22.9);
         double lon0  = FastMath.toRadians(142.4);
         double delta = FastMath.toRadians(0.5);
-        Tile tile = new SimpleTileFactory().createTile();
-        updater.updateTile(lat0, lon0, tile);
 
         try {
             int              size   = dimension * dimension * 2 * Integer.SIZE / 8;
@@ -491,9 +489,7 @@ public class RuggedTest {
                 double latitude  = lat0 + (i * delta) / dimension;
                 for (int j = 0; j < dimension; ++j) {
                     double longitude = lon0 + (j * delta) / dimension;
-                    GeodeticPoint gp = new GeodeticPoint(latitude, longitude,
-                                                         tile.interpolateElevation(latitude, longitude));
-                    SensorPixel sp = rugged.inverseLocalization("line", gp, 0, dimension);
+                    SensorPixel sp = rugged.inverseLocalization("line", latitude, longitude, 0, dimension);
                     if (sp == null) {
                         ++badPixels;
                         buffer.putInt(-1);

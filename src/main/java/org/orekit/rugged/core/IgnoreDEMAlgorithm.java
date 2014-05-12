@@ -57,4 +57,15 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
         return intersection(ellipsoid, position, los);
     }
 
+    /** {@inheritDoc}
+     * <p>
+     * As this algorithm ignored the Digital Elevation Model,
+     * this method always returns 0.0.
+     * </p>
+     */
+    @Override
+    public double getElevation(final double latitude, final double longitude) {
+        return 0.0;
+    }
+
 }

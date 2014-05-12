@@ -178,6 +178,14 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         }
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public double getElevation(final double latitude, final double longitude)
+        throws RuggedException {
+        final Tile tile = cache.getTile(latitude, longitude);
+        return tile.interpolateElevation(latitude, longitude);
+    }
+
     /** Compute intersection of line with Digital Elevation Model in a sub-tile.
      * @param depth recursion depth
      * @param ellipsoid reference ellipsoid
