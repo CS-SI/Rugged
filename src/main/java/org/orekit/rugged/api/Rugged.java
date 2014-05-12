@@ -476,26 +476,10 @@ public class Rugged {
      */
     public GeodeticPoint[] directLocalization(final String sensorName, final double lineNumber)
         throws RuggedException {
-        final LineSensor sensor = getLineSensor(sensorName);
-        return directLocalization(sensor, 0, sensor.getNbPixels(), algorithm, lineNumber);
-    }
-
-    /** Direct localization of a sensor line.
-     * @param sensor line sensor
-     * @param start start pixel to consider in the line sensor
-     * @param end end  pixel to consider in the line sensor (excluded)
-     * @param alg intersection algorithm to use
-     * @param lineNumber number of the line to localize on ground
-     * @return ground position of all pixels of the specified sensor line
-     * @exception RuggedException if line cannot be localized, or sensor is unknown
-     */
-    private GeodeticPoint[] directLocalization(final LineSensor sensor, final int start, final int end,
-                                               final IntersectionAlgorithm alg,
-                                               final double lineNumber)
-        throws RuggedException {
         try {
 
             // compute the approximate transform between spacecraft and observed body
+            final LineSensor   sensor      = getLineSensor(sensorName);
             final AbsoluteDate date        = sensor.getDate(lineNumber);
             final Transform    scToInert   = scToBody.getScToInertial(date);
             final Transform    inertToBody = scToBody.getInertialToBody(date);
@@ -506,8 +490,8 @@ public class Rugged {
 
             // compute localization of each pixel
             final Vector3D pInert    = scToInert.transformPosition(sensor.getPosition());
-            final GeodeticPoint[] gp = new GeodeticPoint[end - start];
-            for (int i = start; i < end; ++i) {
+            final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
+            for (int i = 0; i < sensor.getNbPixels(); ++i) {
 
                 final Vector3D obsLInert = scToInert.transformVector(sensor.getLos(i));
                 final Vector3D lInert;
@@ -536,24 +520,24 @@ public class Rugged {
                     final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
                     final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
                     final Transform shifted1 = inertToBody.shiftedBy(-deltaT1);
-                    final GeodeticPoint gp1  = alg.intersection(ellipsoid,
-                                                                shifted1.transformPosition(pInert),
-                                                                shifted1.transformVector(lInert));
+                    final GeodeticPoint gp1  = algorithm.intersection(ellipsoid,
+                                                                      shifted1.transformPosition(pInert),
+                                                                      shifted1.transformVector(lInert));
 
                     final Vector3D  eP2      = ellipsoid.transform(gp1);
                     final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
                     final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
-                    gp[i - start] = alg.refineIntersection(ellipsoid,
-                                                           shifted2.transformPosition(pInert),
-                                                           shifted2.transformVector(lInert),
-                                                           gp1);
+                    gp[i] = algorithm.refineIntersection(ellipsoid,
+                                                         shifted2.transformPosition(pInert),
+                                                         shifted2.transformVector(lInert),
+                                                         gp1);
 
                 } else {
                     // compute DEM intersection without light time correction
                     final Vector3D pBody = inertToBody.transformPosition(pInert);
                     final Vector3D lBody = inertToBody.transformVector(lInert);
-                    gp[i - start] = alg.refineIntersection(ellipsoid, pBody, lBody,
-                                                           alg.intersection(ellipsoid, pBody, lBody));
+                    gp[i] = algorithm.refineIntersection(ellipsoid, pBody, lBody,
+                                                         algorithm.intersection(ellipsoid, pBody, lBody));
                 }
 
             }
