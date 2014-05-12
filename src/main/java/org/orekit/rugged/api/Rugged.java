@@ -77,6 +77,9 @@ public class Rugged {
     /** Sensors. */
     private final Map<String, LineSensor> sensors;
 
+    /** Mean plane crossing finders. */
+    private final Map<String, SensorMeanPlaneCrossing> finders;
+
     /** DEM intersection algorithm. */
     private final IntersectionAlgorithm algorithm;
 
@@ -229,6 +232,8 @@ public class Rugged {
         this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
 
         this.sensors = new HashMap<String, LineSensor>();
+        this.finders = new HashMap<String, SensorMeanPlaneCrossing>();
+
         setLightTimeCorrection(true);
         setAberrationOfLightCorrection(true);
 
@@ -565,7 +570,7 @@ public class Rugged {
      */
     public SensorPixel inverseLocalization(final String sensorName,
                                            final double latitude, final double longitude,
-                                           final double minLine,  final double maxLine)
+                                           final int minLine,  final int maxLine)
         throws RuggedException {
         final GeodeticPoint groundPoint =
                 new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
@@ -582,26 +587,37 @@ public class Rugged {
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
     public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint point,
-                                           final double minLine, final double maxLine)
+                                           final int minLine, final int maxLine)
         throws RuggedException {
 
         final LineSensor sensor = getLineSensor(sensorName);
-        final Vector3D   target = ellipsoid.transform(point);
+        SensorMeanPlaneCrossing planeCrossing = finders.get(sensorName);
+        if (planeCrossing == null ||
+            planeCrossing.getMinLine() != minLine ||
+            planeCrossing.getMaxLine() != maxLine) {
+
+            // create a new finder for the specified sensor and range
+            planeCrossing = new SensorMeanPlaneCrossing(sensor, scToBody, minLine, maxLine,
+                                                        lightTimeCorrection, aberrationOfLightCorrection,
+                                                        MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
+
+            // store the finder, in order to reuse it
+            // (and save some computation done in its constructor)
+            finders.put(sensorName, planeCrossing);
+
+        }
 
         // find approximately the sensor line at which ground point crosses sensor mean plane
-        final SensorMeanPlaneCrossing planeCrossing =
-                new SensorMeanPlaneCrossing(sensor, target, scToBody,
-                                            lightTimeCorrection, aberrationOfLightCorrection,
-                                            MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
-        if (!planeCrossing.find(minLine, maxLine)) {
+        final Vector3D   target = ellipsoid.transform(point);
+        final SensorMeanPlaneCrossing.CrossingResult crossingResult = planeCrossing.find(target);
+        if (crossingResult == null) {
             // target is out of search interval
             return null;
         }
-        final FieldVector3D<DerivativeStructure> coarseDirection = planeCrossing.getTargetDirection();
 
         // find approximately the pixel along this sensor line
         final SensorPixelCrossing pixelCrossing =
-                new SensorPixelCrossing(sensor, coarseDirection.toVector3D(),
+                new SensorPixelCrossing(sensor, crossingResult.getTargetDirection().toVector3D(),
                                         MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
         final double coarsePixel = pixelCrossing.locatePixel();
         if (Double.isNaN(coarsePixel)) {
@@ -612,12 +628,12 @@ public class Rugged {
         // fix line by considering the closest pixel exact position and line-of-sight
         // (this pixel might point towards a direction slightly above or below the mean sensor plane)
         final int      closestIndex    = (int) FastMath.rint(coarsePixel);
-        final DerivativeStructure beta = FieldVector3D.angle(coarseDirection, sensor.getMeanPlaneNormal());
+        final DerivativeStructure beta = FieldVector3D.angle(crossingResult.getTargetDirection(), sensor.getMeanPlaneNormal());
         final double   deltaL          = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
-        final double   fixedLine       = planeCrossing.getLine() + deltaL;
-        final Vector3D fixedDirection  = new Vector3D(coarseDirection.getX().taylor(deltaL),
-                                                      coarseDirection.getY().taylor(deltaL),
-                                                      coarseDirection.getZ().taylor(deltaL)).normalize();
+        final double   fixedLine       = crossingResult.getLine() + deltaL;
+        final Vector3D fixedDirection  = new Vector3D(crossingResult.getTargetDirection().getX().taylor(deltaL),
+                                                      crossingResult.getTargetDirection().getY().taylor(deltaL),
+                                                      crossingResult.getTargetDirection().getZ().taylor(deltaL)).normalize();
 
         // fix pixel
         final double alpha      = sensor.getAzimuth(fixedDirection, closestIndex);

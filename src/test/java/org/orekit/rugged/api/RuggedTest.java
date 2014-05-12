@@ -66,8 +66,6 @@ import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.core.raster.RandomLandscapeUpdater;
-import org.orekit.rugged.core.raster.SimpleTileFactory;
-import org.orekit.rugged.core.raster.Tile;
 import org.orekit.rugged.core.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -433,9 +431,8 @@ public class RuggedTest {
     // the following test is disabled by default
     // it is only used to check timings, and also create a small (2M) temporary file
     @Test
-    @Ignore
     public void testInverseLocalizationTiming()
-            throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         long t0 = System.currentTimeMillis();
         int dimension = 1000;
