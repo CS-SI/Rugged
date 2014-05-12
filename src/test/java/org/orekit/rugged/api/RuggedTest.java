@@ -431,6 +431,7 @@ public class RuggedTest {
     // the following test is disabled by default
     // it is only used to check timings, and also create a small (2M) temporary file
     @Test
+    @Ignore
     public void testInverseLocalizationTiming()
         throws RuggedException, OrekitException, URISyntaxException {
 
