@@ -16,6 +16,9 @@
  */
 package org.orekit.rugged.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -30,8 +33,17 @@ import org.orekit.utils.PVCoordinates;
 /** Class dedicated to when ground point crosses mean sensor plane. */
 class SensorMeanPlaneCrossing {
 
-    /** Converter between spacecraft and body. */
-    private final SpacecraftToObservedBody scToBody;
+    /** Number of points for frames interpolation. */
+    private static final int INTERPOLATION_POINTS = 5;
+
+    /** Line numbers of the middle sample point. */
+    private final int midLine;
+
+    /** Transforms sample from observed body frame to inertial frame. */
+    private final List<Transform> bodyToInertial;
+
+    /** Transforms sample from spacecraft frame to inertial frame. */
+    private final List<Transform> scToInertial;
 
     /** Minimum line number in the search interval. */
     private final int minLine;
@@ -54,15 +66,6 @@ class SensorMeanPlaneCrossing {
     /** Accuracy to use for finding crossing line number. */
     private final double accuracy;
 
-    /** Middle line. */
-    private final double midLine;
-
-    /** Transform from observed body to inertial frame, for middle line. */
-    private final Transform midLineBodyToInert;
-
-    /** Transform from inertial frame to spacecraft frame, for middle line. */
-    private final Transform midLineScToInert;
-
     /** Simple constructor.
      * @param sensor sensor to consider
      * @param scToBody converter between spacecraft and body
@@ -84,7 +87,6 @@ class SensorMeanPlaneCrossing {
         try {
 
             this.sensor                      = sensor;
-            this.scToBody                    = scToBody;
             this.minLine                     = minLine;
             this.maxLine                     = maxLine;
             this.lightTimeCorrection         = lightTimeCorrection;
@@ -94,10 +96,19 @@ class SensorMeanPlaneCrossing {
 
             // compute one the transforms for middle line, as they will be reused
             // as the start point for all searches
-            midLine                  = 0.5 * (minLine + maxLine);
-            final AbsoluteDate  date = sensor.getDate(midLine);
-            midLineBodyToInert       = scToBody.getInertialToBody(date).getInverse();
-            midLineScToInert         = scToBody.getScToInertial(date);
+            bodyToInertial = new ArrayList<Transform>(INTERPOLATION_POINTS);
+            scToInertial   = new ArrayList<Transform>(INTERPOLATION_POINTS);
+            int middle = -1;
+            for (int i = 0; i < INTERPOLATION_POINTS; ++i) {
+                final int line = (i * maxLine + (INTERPOLATION_POINTS - i) * minLine) / INTERPOLATION_POINTS;
+                if (i == INTERPOLATION_POINTS / 2) {
+                    middle = line;
+                }
+                final AbsoluteDate date = sensor.getDate(line);
+                bodyToInertial.add(scToBody.getInertialToBody(date).getInverse());
+                scToInertial.add(scToBody.getScToInertial(date));
+            }
+            midLine = middle;
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
@@ -173,8 +184,8 @@ class SensorMeanPlaneCrossing {
             // We expect two or three evaluations only. Each new evaluation shows up quickly in
             // the performances as it involves frames conversions
             double  crossingLine  = midLine;
-            Transform bodyToInert = midLineBodyToInert;
-            Transform scToInert   = midLineScToInert;
+            Transform bodyToInert = bodyToInertial.get(INTERPOLATION_POINTS / 2);
+            Transform scToInert   = scToInertial.get(INTERPOLATION_POINTS / 2);
             boolean atMin         = false;
             boolean atMax         = false;
             for (int i = 0; i < maxEval; ++i) {
@@ -213,8 +224,8 @@ class SensorMeanPlaneCrossing {
                 }
 
                 final AbsoluteDate date = sensor.getDate(crossingLine);
-                bodyToInert = scToBody.getInertialToBody(date).getInverse();
-                scToInert   = scToBody.getScToInertial(date);
+                bodyToInert = Transform.interpolate(date, false, false, bodyToInertial);
+                scToInert   = Transform.interpolate(date, false, false, scToInertial);
             }
 
             return null;

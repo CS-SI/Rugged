@@ -436,7 +436,7 @@ public class RuggedTest {
         throws RuggedException, OrekitException, URISyntaxException {
 
         long t0 = System.currentTimeMillis();
-        int dimension = 1000;
+        int dimension = 2200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
