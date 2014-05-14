@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.api;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
@@ -33,17 +33,11 @@ import org.orekit.utils.PVCoordinates;
 /** Class dedicated to when ground point crosses mean sensor plane. */
 class SensorMeanPlaneCrossing {
 
-    /** Converter between spacecraft and body. */
-    private final SpacecraftToObservedBody scToBody;
-
-    /** Line numbers of the middle sample point. */
-    private final double midLine;
-
     /** Transforms sample from observed body frame to inertial frame. */
     private final List<Transform> bodyToInertial;
 
-    /** Transform from inertial frame to spacecraft frame, for middle line. */
-    private final Transform midLineScToInert;
+    /** Transforms sample from spacecraft frame to inertial frame. */
+    private final List<Transform> scToInertial;
 
     /** Minimum line number in the search interval. */
     private final int minLine;
@@ -87,7 +81,6 @@ class SensorMeanPlaneCrossing {
         try {
 
             this.sensor                      = sensor;
-            this.scToBody                    = scToBody;
             this.minLine                     = minLine;
             this.maxLine                     = maxLine;
             this.lightTimeCorrection         = lightTimeCorrection;
@@ -95,11 +88,13 @@ class SensorMeanPlaneCrossing {
             this.maxEval                     = maxEval;
             this.accuracy                    = accuracy;
 
-            midLine          = 0.5 * (minLine + maxLine);
-            bodyToInertial   = Arrays.asList(scToBody.getInertialToBody(sensor.getDate(minLine)).getInverse(),
-                                             scToBody.getInertialToBody(sensor.getDate(midLine)).getInverse(),
-                                             scToBody.getInertialToBody(sensor.getDate(maxLine)).getInverse());
-            midLineScToInert = scToBody.getScToInertial(sensor.getDate(midLine));
+            bodyToInertial = new ArrayList<Transform>(maxLine - minLine + 1);
+            scToInertial   = new ArrayList<Transform>(maxLine - minLine + 1);
+            for (int line = minLine; line <= maxLine; ++line) {
+                final AbsoluteDate date = sensor.getDate(line);
+                bodyToInertial.add(scToBody.getInertialToBody(date).getInverse());
+                scToInertial.add(scToBody.getScToInertial(date));
+            }
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
@@ -174,9 +169,10 @@ class SensorMeanPlaneCrossing {
             // as we know the solution is improved in the second stage of inverse localization.
             // We expect two or three evaluations only. Each new evaluation shows up quickly in
             // the performances as it involves frames conversions
-            double  crossingLine  = midLine;
-            Transform bodyToInert = bodyToInertial.get(1);
-            Transform scToInert   = midLineScToInert;
+            final int midIndex    = bodyToInertial.size() / 2;
+            double  crossingLine  = minLine + midIndex;
+            Transform bodyToInert = bodyToInertial.get(midIndex);
+            Transform scToInert   = scToInertial.get(midIndex);
             boolean atMin         = false;
             boolean atMax         = false;
             for (int i = 0; i < maxEval; ++i) {
@@ -214,9 +210,10 @@ class SensorMeanPlaneCrossing {
                     atMax = false;
                 }
 
+                final int inf = FastMath.max(0, FastMath.min(scToInertial.size() - 2, (int) FastMath.floor(crossingLine)));
                 final AbsoluteDate date = sensor.getDate(crossingLine);
-                bodyToInert = Transform.interpolate(date, true, true, bodyToInertial);
-                scToInert   = scToBody.getScToInertial(date);
+                    bodyToInert = Transform.interpolate(date, false, false, bodyToInertial.subList(inf, inf + 2));
+                    scToInert   = Transform.interpolate(date, false, false, scToInertial.subList(inf, inf + 2));
             }
 
             return null;
