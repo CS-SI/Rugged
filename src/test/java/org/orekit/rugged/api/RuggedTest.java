@@ -429,13 +429,14 @@ public class RuggedTest {
     }
 
     // the following test is disabled by default
-    // it is only used to check timings, and also create a small (2M) temporary file
+    // it is only used to check timings, and also create a large (30M) temporary file
     @Test
+    @Ignore
     public void testInverseLocalizationTiming()
         throws RuggedException, OrekitException, URISyntaxException {
 
         long t0 = System.currentTimeMillis();
-        int dimension = 2200;
+        int dimension = 2000;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
