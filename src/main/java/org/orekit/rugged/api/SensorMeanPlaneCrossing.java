@@ -30,7 +30,12 @@ import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.PVCoordinates;
 
-/** Class dedicated to when ground point crosses mean sensor plane. */
+/** Class dedicated to find when ground point crosses mean sensor plane.
+ * <p>
+ * This class is used in the first stage of inverse localization.
+ * </p>
+ * @author Luc Maisonobe
+ */
 class SensorMeanPlaneCrossing {
 
     /** Transforms sample from observed body frame to inertial frame. */
