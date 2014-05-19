@@ -182,7 +182,7 @@ public class RuggedTest {
     }
 
     // the following test is disabled by default
-    // it is only used to check timings, and also create a large (66M) temporary file
+    // it is only used to check timings, and also creates a large (66M) temporary file
     @Test
     @Ignore
     public void testMayonVolcanoTiming()
@@ -429,7 +429,7 @@ public class RuggedTest {
     }
 
     // the following test is disabled by default
-    // it is only used to check timings, and also create a large (30M) temporary file
+    // it is only used to check timings, and also creates a large (30M) temporary file
     @Test
     @Ignore
     public void testInverseLocalizationTiming()
