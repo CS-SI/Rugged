@@ -217,8 +217,8 @@ class SensorMeanPlaneCrossing {
 
                 final int inf = FastMath.max(0, FastMath.min(scToInertial.size() - 2, (int) FastMath.floor(crossingLine)));
                 final AbsoluteDate date = sensor.getDate(crossingLine);
-                    bodyToInert = Transform.interpolate(date, false, false, bodyToInertial.subList(inf, inf + 2));
-                    scToInert   = Transform.interpolate(date, false, false, scToInertial.subList(inf, inf + 2));
+                bodyToInert = Transform.interpolate(date, false, false, bodyToInertial.subList(inf, inf + 2));
+                scToInert   = Transform.interpolate(date, false, false, scToInertial.subList(inf, inf + 2));
             }
 
             return null;
