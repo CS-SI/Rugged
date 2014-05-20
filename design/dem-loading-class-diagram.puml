@@ -25,9 +25,9 @@
   skinparam NoteFontColor         #691616
   skinparam ClassFontSize         11
 
-  package fr.cs.rugged #ECEBD8
+  package fr.cs.rugged #ECEBD8 {
 
-    package api #DDEBD8
+    package api #DDEBD8 {
       interface UpdatableTile {
         +setGeometry(φ₀, λ₀, δφ, δλ, rows, columns)
         +setElevation(i, j, h)
@@ -36,9 +36,9 @@
         +updateTile(φ, λ, UpdatableTile)
       }
       UpdatableTile <-- TileUpdater : updates
-    end package
+    }
 
-    package raster #DDEBD8
+    package raster #DDEBD8 {
      interface Tile
      class SpecializedTile
       interface "TileFactory<T extends Tile>" as TileFactory_T_ {
@@ -53,12 +53,12 @@
      TileUpdater  "1" <--o "1" TilesCache_T_ : triggers
      TileFactory_T_  "1" <--o "1" TilesCache_T_ : triggers
      TileFactory_T_  --> SpecializedTile : creates
-    end package
+    }
 
-  end package
+  }
 
-  package specific.interface #ECEBD8
+  package specific.interface #ECEBD8 {
     TileUpdater <|-- MissionSpecificDEM
-  end package
+  }
 
 @enduml
