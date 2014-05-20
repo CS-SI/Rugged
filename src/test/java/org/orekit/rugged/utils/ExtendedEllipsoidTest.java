@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core;
+package org.orekit.rugged.utils;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -34,7 +34,7 @@ import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
-import org.orekit.rugged.core.ExtendedEllipsoid;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 

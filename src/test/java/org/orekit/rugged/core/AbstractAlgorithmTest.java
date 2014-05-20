@@ -44,6 +44,7 @@ import org.orekit.rugged.core.duvenhage.MinMaxTreeTileFactory;
 import org.orekit.rugged.raster.CliffsElevationUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
 import org.orekit.rugged.raster.IntersectionAlgorithm;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;

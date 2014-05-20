@@ -19,7 +19,7 @@ package org.orekit.rugged.raster;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.core.ExtendedEllipsoid;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 
 /** Interface for Digital Elevation Model intersection algorithm.
  * @author Luc Maisonobe

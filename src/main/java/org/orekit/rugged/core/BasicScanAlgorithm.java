@@ -30,6 +30,7 @@ import org.orekit.rugged.raster.SimpleTile;
 import org.orekit.rugged.raster.SimpleTileFactory;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.TilesCache;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 
 /** Intersection computation using a basic algorithm based on exhaustive scan.
  * <p>
