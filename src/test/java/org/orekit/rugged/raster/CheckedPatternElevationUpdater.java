@@ -14,32 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.raster;
+package org.orekit.rugged.raster;
 
 import org.apache.commons.math3.util.FastMath;
-import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.api.UpdatableTile;
 
-public class CliffsElevationUpdater implements TileUpdater {
+public class CheckedPatternElevationUpdater implements TileUpdater {
 
-    private GeodeticPoint point1;
-    private GeodeticPoint point2;
-    private double        top;
-    private double        bottom;
-    private double        size;
-    private int           n;
+    private double size;
+    private int    n;
+    private double elevation1;
+    private double elevation2;
 
-    public CliffsElevationUpdater(GeodeticPoint point1, GeodeticPoint point2,
-                                  double top, double bottom,
-                                  double size, int n) {
-        this.point1 = point1;
-        this.point2 = point2;
-        this.top    = top;
-        this.bottom = bottom;
-        this.size   = size;
-        this.n      = n;
+    public CheckedPatternElevationUpdater(double size, int n, double elevation1, double elevation2) {
+        this.size       = size;
+        this.n          = n;
+        this.elevation1 = elevation1;
+        this.elevation2 = elevation2;
     }
 
     public void updateTile(double latitude, double longitude, UpdatableTile tile)
@@ -47,22 +40,12 @@ public class CliffsElevationUpdater implements TileUpdater {
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
         double minLongitude = size * FastMath.floor(longitude / size);
-        double x2Mx1        = point2.getLongitude() - point1.getLongitude();
-        double y2My1        = point2.getLatitude()  - point1.getLatitude();
         tile.setGeometry(minLatitude, minLongitude, step, step, n, n);
         for (int i = 0; i < n; ++i) {
-            double pixelLatitude = minLatitude + i * step;
+            int p = (int) FastMath.floor((minLatitude + i * step) / step);
             for (int j = 0; j < n; ++j) {
-                double pixelLongitude = minLongitude + j * step;
-                double xMx1  = pixelLongitude - point1.getLongitude();
-                double yMy1  = pixelLatitude  - point1.getLatitude();
-                if (yMy1 * x2Mx1 > xMx1 * y2My1) {
-                    // left side of the point1 to point2 track
-                    tile.setElevation(i, j, top);
-                } else {
-                    // right side of the point1 to point2 track
-                    tile.setElevation(i, j, bottom);
-                }
+                int q = (int) FastMath.floor((minLongitude + j * step) / step);
+                tile.setElevation(i, j, (((p ^ q) & 0x1) == 0) ? elevation1 : elevation2);
             }
         }
     }

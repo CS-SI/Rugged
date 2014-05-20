@@ -24,7 +24,7 @@ import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.core.AbstractAlgorithmTest;
-import org.orekit.rugged.core.raster.IntersectionAlgorithm;
+import org.orekit.rugged.raster.IntersectionAlgorithm;
 
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 

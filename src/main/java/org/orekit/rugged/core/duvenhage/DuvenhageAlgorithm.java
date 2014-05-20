@@ -24,9 +24,9 @@ import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.core.ExtendedEllipsoid;
-import org.orekit.rugged.core.raster.IntersectionAlgorithm;
-import org.orekit.rugged.core.raster.Tile;
-import org.orekit.rugged.core.raster.TilesCache;
+import org.orekit.rugged.raster.IntersectionAlgorithm;
+import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.raster.TilesCache;
 
 /** Digital Elevation Model intersection using Bernardt Duvenhage's algorithm.
  * <p>

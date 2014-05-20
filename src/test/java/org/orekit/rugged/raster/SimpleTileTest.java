@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.raster;
+package org.orekit.rugged.raster;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
@@ -23,10 +23,10 @@ import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
-import org.orekit.rugged.core.raster.SimpleTile;
-import org.orekit.rugged.core.raster.SimpleTileFactory;
-import org.orekit.rugged.core.raster.Tile;
-import org.orekit.rugged.core.raster.Tile.Location;
+import org.orekit.rugged.raster.SimpleTile;
+import org.orekit.rugged.raster.SimpleTileFactory;
+import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.raster.Tile.Location;
 
 public class SimpleTileTest {
 

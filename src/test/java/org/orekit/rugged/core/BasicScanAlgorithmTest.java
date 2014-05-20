@@ -18,7 +18,7 @@ package org.orekit.rugged.core;
 
 
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.raster.IntersectionAlgorithm;
+import org.orekit.rugged.raster.IntersectionAlgorithm;
 
 public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
 

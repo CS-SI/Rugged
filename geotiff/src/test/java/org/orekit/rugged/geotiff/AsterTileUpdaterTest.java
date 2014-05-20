@@ -32,9 +32,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.core.raster.SimpleTile;
-import org.orekit.rugged.core.raster.SimpleTileFactory;
-import org.orekit.rugged.core.raster.TileFactory;
+import org.orekit.rugged.raster.SimpleTile;
+import org.orekit.rugged.raster.SimpleTileFactory;
+import org.orekit.rugged.raster.TileFactory;
 
 
 public class AsterTileUpdaterTest {

@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.core.duvenhage;
 
-import org.orekit.rugged.core.raster.TileFactory;
+import org.orekit.rugged.raster.TileFactory;
 
 /** Simple implementation of a {@link TileFactory} for {@link MinMaxTreeTile}.
  * @author Luc Maisonobe

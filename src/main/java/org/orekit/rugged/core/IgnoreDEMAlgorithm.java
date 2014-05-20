@@ -20,7 +20,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.core.raster.IntersectionAlgorithm;
+import org.orekit.rugged.raster.IntersectionAlgorithm;
 
 /** Intersection ignoring Digital Elevation Model.
  * <p>

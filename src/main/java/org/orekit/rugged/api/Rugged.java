@@ -44,7 +44,7 @@ import org.orekit.rugged.core.ExtendedEllipsoid;
 import org.orekit.rugged.core.IgnoreDEMAlgorithm;
 import org.orekit.rugged.core.SpacecraftToObservedBody;
 import org.orekit.rugged.core.duvenhage.DuvenhageAlgorithm;
-import org.orekit.rugged.core.raster.IntersectionAlgorithm;
+import org.orekit.rugged.raster.IntersectionAlgorithm;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;

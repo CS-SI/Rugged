@@ -14,25 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.raster;
+package org.orekit.rugged.raster;
 
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.api.UpdatableTile;
+import org.orekit.utils.Constants;
 
-public class CheckedPatternElevationUpdater implements TileUpdater {
+public class VolcanicConeElevationUpdater implements TileUpdater {
 
-    private double size;
-    private int    n;
-    private double elevation1;
-    private double elevation2;
+    private GeodeticPoint summit;
+    private double        slope;
+    private double        base;
+    private double        size;
+    private int           n;
 
-    public CheckedPatternElevationUpdater(double size, int n, double elevation1, double elevation2) {
-        this.size       = size;
-        this.n          = n;
-        this.elevation1 = elevation1;
-        this.elevation2 = elevation2;
+    public VolcanicConeElevationUpdater(GeodeticPoint summit, double slope, double base,
+                                        double size, int n) {
+        this.summit = summit;
+        this.slope  = slope;
+        this.base   = base;
+        this.size   = size;
+        this.n      = n;
     }
 
     public void updateTile(double latitude, double longitude, UpdatableTile tile)
@@ -40,12 +45,18 @@ public class CheckedPatternElevationUpdater implements TileUpdater {
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
         double minLongitude = size * FastMath.floor(longitude / size);
+        double sinSlope     = FastMath.sin(slope);
         tile.setGeometry(minLatitude, minLongitude, step, step, n, n);
         for (int i = 0; i < n; ++i) {
-            int p = (int) FastMath.floor((minLatitude + i * step) / step);
+            double pixelLatitude = minLatitude + i * step;
             for (int j = 0; j < n; ++j) {
-                int q = (int) FastMath.floor((minLongitude + j * step) / step);
-                tile.setElevation(i, j, (((p ^ q) & 0x1) == 0) ? elevation1 : elevation2);
+                double pixelLongitude = minLongitude + j * step;
+                double distance       = Constants.WGS84_EARTH_EQUATORIAL_RADIUS *
+                                        FastMath.hypot(pixelLatitude  - summit.getLatitude(),
+                                                       pixelLongitude - summit.getLongitude());
+                double altitude = FastMath.max(summit.getAltitude() - distance * sinSlope,
+                                               base);
+                tile.setElevation(i, j, altitude);
             }
         }
     }

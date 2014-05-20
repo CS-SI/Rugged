@@ -14,28 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.raster;
+package org.orekit.rugged.raster;
 
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.api.UpdatableTile;
-import org.orekit.utils.Constants;
 
-public class VolcanicConeElevationUpdater implements TileUpdater {
+public class CliffsElevationUpdater implements TileUpdater {
 
-    private GeodeticPoint summit;
-    private double        slope;
-    private double        base;
+    private GeodeticPoint point1;
+    private GeodeticPoint point2;
+    private double        top;
+    private double        bottom;
     private double        size;
     private int           n;
 
-    public VolcanicConeElevationUpdater(GeodeticPoint summit, double slope, double base,
-                                        double size, int n) {
-        this.summit = summit;
-        this.slope  = slope;
-        this.base   = base;
+    public CliffsElevationUpdater(GeodeticPoint point1, GeodeticPoint point2,
+                                  double top, double bottom,
+                                  double size, int n) {
+        this.point1 = point1;
+        this.point2 = point2;
+        this.top    = top;
+        this.bottom = bottom;
         this.size   = size;
         this.n      = n;
     }
@@ -45,18 +47,22 @@ public class VolcanicConeElevationUpdater implements TileUpdater {
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
         double minLongitude = size * FastMath.floor(longitude / size);
-        double sinSlope     = FastMath.sin(slope);
+        double x2Mx1        = point2.getLongitude() - point1.getLongitude();
+        double y2My1        = point2.getLatitude()  - point1.getLatitude();
         tile.setGeometry(minLatitude, minLongitude, step, step, n, n);
         for (int i = 0; i < n; ++i) {
             double pixelLatitude = minLatitude + i * step;
             for (int j = 0; j < n; ++j) {
                 double pixelLongitude = minLongitude + j * step;
-                double distance       = Constants.WGS84_EARTH_EQUATORIAL_RADIUS *
-                                        FastMath.hypot(pixelLatitude  - summit.getLatitude(),
-                                                       pixelLongitude - summit.getLongitude());
-                double altitude = FastMath.max(summit.getAltitude() - distance * sinSlope,
-                                               base);
-                tile.setElevation(i, j, altitude);
+                double xMx1  = pixelLongitude - point1.getLongitude();
+                double yMy1  = pixelLatitude  - point1.getLatitude();
+                if (yMy1 * x2Mx1 > xMx1 * y2My1) {
+                    // left side of the point1 to point2 track
+                    tile.setElevation(i, j, top);
+                } else {
+                    // right side of the point1 to point2 track
+                    tile.setElevation(i, j, bottom);
+                }
             }
         }
     }

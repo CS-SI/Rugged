@@ -20,9 +20,9 @@ import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.function.Max;
 import org.apache.commons.math3.analysis.function.Min;
 import org.apache.commons.math3.util.FastMath;
-import org.orekit.rugged.core.raster.SimpleTile;
+import org.orekit.rugged.raster.SimpleTile;
 
-/** Simple implementation of a {@link org.orekit.rugged.core.raster.Tile}
+/** Simple implementation of a {@link org.orekit.rugged.raster.Tile}
  * with a min/max kd tree.
  * <p>
  * A n level min/max kd-tree contains sub-tiles merging individual pixels

@@ -25,11 +25,11 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.raster.IntersectionAlgorithm;
-import org.orekit.rugged.core.raster.SimpleTile;
-import org.orekit.rugged.core.raster.SimpleTileFactory;
-import org.orekit.rugged.core.raster.Tile;
-import org.orekit.rugged.core.raster.TilesCache;
+import org.orekit.rugged.raster.IntersectionAlgorithm;
+import org.orekit.rugged.raster.SimpleTile;
+import org.orekit.rugged.raster.SimpleTileFactory;
+import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.raster.TilesCache;
 
 /** Intersection computation using a basic algorithm based on exhaustive scan.
  * <p>

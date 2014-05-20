@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.raster;
+package org.orekit.rugged.raster;
 
-import org.orekit.rugged.core.raster.TileFactory;
+import org.orekit.rugged.raster.TileFactory;
 
 /** Simple implementation of a {@link TileFactory} for {@link SimpleTile}.
  * @author Luc Maisonobe
