@@ -35,30 +35,45 @@
       interface TileUpdater {
         +updateTile(φ, λ, UpdatableTile)
       }
-      UpdatableTile <-- TileUpdater : updates
+      TileUpdater --> UpdatableTile : updates
     }
 
     package raster #DDEBD8 {
-     interface Tile
-     class SpecializedTile
       interface "TileFactory<T extends Tile>" as TileFactory_T_ {
         +T createTile()
       }
       class "TilesCache<T extends Tile>" as TilesCache_T_ {
         + T getTile(φ, λ)
       }
-      Tile --|> UpdatableTile
-      Tile <|-- SpecializedTile
-      SpecializedTile "*" <--o "1" TilesCache_T_
-     TileUpdater  "1" <--o "1" TilesCache_T_ : triggers
-     TileFactory_T_  "1" <--o "1" TilesCache_T_ : triggers
-     TileFactory_T_  --> SpecializedTile : creates
+      interface Tile {
+        + double interpolateElevation(φ, λ)
+      }
+      UpdatableTile <|.. Tile
+      Tile <|-- SimpleTile
+      TilesCache_T_ "1" o--> "*" Tile
+      TilesCache_T_  "1" o--> "1" TileUpdater : triggers
+      TilesCache_T_ "1" o--> "1" TileFactory_T_ : triggers
+    }
+
+    package intersection.duvenhage #DDEBD8 {
+      TileFactory_T_ <|-- MinMaxTreeTileFactory
+      SimpleTile     <|-- MinMaxTreeTile
+      MinMaxTreeTileFactory  -left-> MinMaxTreeTile : creates
+      note left
+        tile extended with Duvenhage
+        specific min/max kd-tree
+      end note
     }
 
   }
 
-  package specific.interface #ECEBD8 {
+  package mission.specific #C4D2C5 {
+    class MissionSpecificDEM #D5E0D5/E2EBE2
     TileUpdater <|-- MissionSpecificDEM
+    note top #E2EBE2
+      user provides DEM loading
+      by implementing TileUpdater
+    end note
   }
 
 @enduml
