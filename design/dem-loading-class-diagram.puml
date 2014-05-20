@@ -25,7 +25,7 @@
   skinparam NoteFontColor         #691616
   skinparam ClassFontSize         11
 
-  package fr.cs.rugged #ECEBD8 {
+  package org.orekit.rugged #ECEBD8 {
 
     package api #DDEBD8 {
       interface UpdatableTile {
