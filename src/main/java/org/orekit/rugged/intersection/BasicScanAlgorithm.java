@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core;
+package org.orekit.rugged.intersection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.raster.IntersectionAlgorithm;
 import org.orekit.rugged.raster.SimpleTile;
 import org.orekit.rugged.raster.SimpleTileFactory;
 import org.orekit.rugged.raster.Tile;

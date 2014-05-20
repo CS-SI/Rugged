@@ -1,4 +1,4 @@
-/* Copyright 2002-2014 CS Systèmes d'Information
+/* Copyright 2013-2014 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,16 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core;
+package org.orekit.rugged.intersection.duvenhage;
 
+import org.orekit.rugged.raster.TileFactory;
 
-import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.raster.IntersectionAlgorithm;
+/** Simple implementation of a {@link TileFactory} for {@link MinMaxTreeTile}.
+ * @author Luc Maisonobe
+ */
+public class MinMaxTreeTileFactory implements TileFactory<MinMaxTreeTile> {
 
-public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
-
-    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        return new BasicScanAlgorithm(updater, maxCachedTiles);
+    /** {@inheritDoc} */
+    @Override
+    public MinMaxTreeTile createTile() {
+        return new MinMaxTreeTile();
     }
 
 }

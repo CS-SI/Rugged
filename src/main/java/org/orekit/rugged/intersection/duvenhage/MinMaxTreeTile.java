@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.duvenhage;
+package org.orekit.rugged.intersection.duvenhage;
 
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.function.Max;

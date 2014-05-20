@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.duvenhage;
+package org.orekit.rugged.intersection.duvenhage;
 
 import java.lang.reflect.Field;
 
@@ -22,6 +22,8 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
+import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
 
 public class MinMaxTreeTileTest {
 

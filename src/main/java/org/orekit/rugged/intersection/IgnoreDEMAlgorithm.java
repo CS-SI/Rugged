@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core;
+package org.orekit.rugged.intersection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.raster.IntersectionAlgorithm;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 
 /** Intersection ignoring Digital Elevation Model.

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core.duvenhage;
+package org.orekit.rugged.intersection.duvenhage;
 
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -23,8 +23,9 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.AbstractAlgorithmTest;
-import org.orekit.rugged.raster.IntersectionAlgorithm;
+import org.orekit.rugged.intersection.AbstractAlgorithmTest;
+import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 

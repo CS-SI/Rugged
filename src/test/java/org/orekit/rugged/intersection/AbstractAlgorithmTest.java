@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.core;
+package org.orekit.rugged.intersection;
 
 
 import java.io.File;
@@ -39,11 +39,11 @@ import org.orekit.orbits.CartesianOrbit;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.core.duvenhage.MinMaxTreeTile;
-import org.orekit.rugged.core.duvenhage.MinMaxTreeTileFactory;
+import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
+import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
 import org.orekit.rugged.raster.CliffsElevationUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
-import org.orekit.rugged.raster.IntersectionAlgorithm;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
