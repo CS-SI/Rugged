@@ -19,7 +19,6 @@ package org.orekit.rugged.intersection;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 
 /** Interface for Digital Elevation Model intersection algorithm.
@@ -41,9 +40,9 @@ public interface IntersectionAlgorithm {
      * <p>
      * This method is used to refine an intersection when a close guess is
      * already known. The intersection is typically looked for by a direct
-     * {@link Tile#pixelIntersection(GeodeticPoint, Vector3D, int, int) pixel intersection}
-     * in the {@link Tile} which already contains the close guess, or any
-     * similar very fast algorithm.
+     * {@link org.orekit.rugged.raster.Tile#pixelIntersection(GeodeticPoint,
+     * Vector3D, int, int) pixel intersection} in the tile which already
+     * contains the close guess, or any similar very fast algorithm.
      * </p>
      * @param ellipsoid reference ellipsoid
      * @param position pixel position in ellipsoid frame
