@@ -1,0 +1,103 @@
+' Copyright 2013-2014 CS Systèmes d'Information
+' Licensed to CS Systèmes d'Information (CS) under one or more
+' contributor license agreements.  See the NOTICE file distributed with
+' this work for additional information regarding copyright ownership.
+' CS licenses this file to You under the Apache License, Version 2.0
+' (the "License"); you may not use this file except in compliance with
+' the License.  You may obtain a copy of the License at
+'
+'   http://www.apache.org/licenses/LICENSE-2.0
+'
+' Unless required by applicable law or agreed to in writing, software
+' distributed under the License is distributed on an "AS IS" BASIS,
+' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+' See the License for the specific language governing permissions and
+' limitations under the License.
+
+@startuml
+
+  skinparam svek                  true
+  skinparam ClassBackgroundColor  #F3EFEB/CCC9C5
+  skinparam ClassArrowColor       #691616
+  skinparam ClassBorderColor      #691616
+  skinparam NoteBackgroundColor   #F3EFEB
+  skinparam NoteBorderColor       #691616
+  skinparam NoteFontColor         #691616
+  skinparam ClassFontSize         11
+
+  package orekit #ECEBD8 {
+    class OneAxisEllipsoid
+    class Frame
+    class PVCoordinatesProvider
+    class AttitudeProvider
+  }
+
+  package rugged #ECEBD8 {
+
+    package utils #DDEBD8 {
+
+      class ExtendedEllipsoid
+      class SpacecraftToObservedBody
+
+      OneAxisEllipsoid          <|-- ExtendedEllipsoid
+      Frame                 "2" <--o SpacecraftToObservedBody
+      PVCoordinatesProvider "1" <--o SpacecraftToObservedBody
+      AttitudeProvider      "1" <--o SpacecraftToObservedBody
+
+    }
+
+    package api #DDEBD8 {
+      enum AlgorithmId {
+        +DUVENHAGE
+        +DUVENHAGE_FLAT_BODY
+        +BASIC_SCAN
+        +IGNORE_DEM
+      }
+      enum EllipsoidId {
+        +GRS80
+        +WGS84
+        +IERS96
+        +IERS2003
+      }
+      enum BodyRotatingFrameId {
+        +ITRF
+        +ITRF_EQUINOX
+        +GTOD
+      }
+      enum InertialFrameId {
+        +GCRF
+        +EME2000
+        +MOD
+        +TOD
+        +VEIS1950
+      }
+      class Rugged {
+        +setLightTimeCorrection(boolean)
+        +setAberrationOfLightCorrection(boolean)
+        +addLineSensor(lineSensor)
+      }
+      class LineSensor
+      ExtendedEllipsoid        "1" <--o Rugged
+      SpacecraftToObservedBody "1" <--o Rugged
+      Rugged o--> "*" LineSensor 
+    }
+
+  }
+
+  package mission.specific #C4D2C5 {
+    class UserMain #D5E0D5/E2EBE2
+    AlgorithmId         <-- UserMain : selects
+    EllipsoidId         <-- UserMain : selects
+    BodyRotatingFrameId <-- UserMain : selects
+    InertialFrameId     <-- UserMain : selects
+    LineSensor          <-- UserMain : creates
+    Rugged              <-- UserMain : configures
+    note as N1 #E2EBE2
+      user configures Rugged either by
+      selecting from a few predefined
+      choices or by directly building
+      Orekit objects
+    end note
+  }
+
+@enduml
