@@ -47,22 +47,22 @@
     end note
     stop
   endif
-  :previous ← start;
-  : crossings ← line-of-sight segment crossings of next level sub-tiles;
+  :previous ⇦ start;
+  : crossings ⇦ line-of-sight segment crossings of next level sub-tiles;
   note right
     crossings can be computed either
     using flat body hypothesis
     or taking curvature into account
   end note
   repeat
-    :intersection ← recurse(previous, crossing);
+    :intersection ⇦ recurse(previous, crossing);
     if (found intersection?) then (yes)
       : return intersection;
       stop
     endif
-    :previous ← crossing;
+    :previous ⇦ crossing;
   repeat while (more crossings?)
-  :intersection ← recurse(previous, end);
+  :intersection ⇦ recurse(previous, end);
   : return intersection;
   stop
 
