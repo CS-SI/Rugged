@@ -22,10 +22,10 @@ import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
+import org.orekit.rugged.raster.TileUpdater;
 
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 

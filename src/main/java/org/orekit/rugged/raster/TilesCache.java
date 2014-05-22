@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.raster.Tile.Location;
 
 /** Cache for Digital Elevation Model {@link Tile tiles}.

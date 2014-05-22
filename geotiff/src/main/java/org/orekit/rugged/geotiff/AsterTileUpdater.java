@@ -36,8 +36,8 @@ import org.apache.commons.imaging.formats.tiff.constants.GeoTiffTagConstants;
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.api.UpdatableTile;
+import org.orekit.rugged.raster.TileUpdater;
+import org.orekit.rugged.raster.UpdatableTile;
 
 /** Digital Elevation Model Updater using Aster data.
  * @author Luc Maisonobe

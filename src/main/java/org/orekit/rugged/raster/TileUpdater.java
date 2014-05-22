@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.api;
+package org.orekit.rugged.raster;
+
+import org.orekit.rugged.api.RuggedException;
 
 /** Interface used to update Digital Elevation Model tiles.
  * <p>

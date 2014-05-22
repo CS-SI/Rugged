@@ -22,9 +22,9 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
-import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.TilesCache;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 

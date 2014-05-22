@@ -23,8 +23,6 @@ import org.apache.commons.math3.random.Well19937a;
 import org.apache.commons.math3.util.ArithmeticUtils;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.api.UpdatableTile;
 
 public class RandomLandscapeUpdater implements TileUpdater {
 

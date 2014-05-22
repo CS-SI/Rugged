@@ -19,7 +19,6 @@ package org.orekit.rugged.raster;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.UpdatableTile;
 
 /** Interface representing a raster tile.
  * @author Luc Maisonobe

@@ -18,8 +18,6 @@ package org.orekit.rugged.raster;
 
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.api.UpdatableTile;
 
 public class CheckedPatternElevationUpdater implements TileUpdater {
 

@@ -19,8 +19,6 @@ package org.orekit.rugged.raster;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
-import org.orekit.rugged.api.UpdatableTile;
 import org.orekit.utils.Constants;
 
 public class VolcanicConeElevationUpdater implements TileUpdater {

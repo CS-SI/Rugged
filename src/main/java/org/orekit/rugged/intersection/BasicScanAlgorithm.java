@@ -24,10 +24,10 @@ import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.TileUpdater;
 import org.orekit.rugged.raster.SimpleTile;
 import org.orekit.rugged.raster.SimpleTileFactory;
 import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.TilesCache;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 
