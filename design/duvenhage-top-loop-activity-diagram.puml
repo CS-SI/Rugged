@@ -34,10 +34,10 @@
   : current point ⇦ null;
   : hmax ⇦ tile maximum elevation;
   while (current point is null)
-    : entry ⇦ point at altitude hmax;
-    if (locate entry point) then (in selected tile)
+    : current ⇦ point at altitude hmax;
+    if (locate current point) then (in selected tile)
     else (outside of selected tile)
-      : select tile containing entry point;
+      : select tile containing current point;
       : hmax ⇦ max(hmax, tile maximum elevation);
       : current point ⇦ null;
     endif
@@ -45,16 +45,16 @@
   repeat
     : exit ⇦ line-of-sight exit point from tile;
     : intersection ⇦ Duvenhage(current, exit);
-    if (found intersection?) then (yes)
+    if (intersection found?) then (yes)
       : return intersection;
       stop
     endif
-    if (tile exited at side?) then (no)
+    if (tile exit) then (bottom)
       : searching ⇦ false;
-    else (yes)
+    else (side)
       : forward point ⇦ point slightly after exit point;
       : select tile containing forward point;
-      if (DEM traversed between\ncurrent and forward points) then (yes)
+      if (DEM traversed between\ncurrent and forward points?) then (yes)
         : return current point;
         note right
          extremely rare case!

@@ -29,21 +29,26 @@
   skinparam ActivityFontSize                    11
 
   start
-  if (recursion depth > 30) then (yes)
+  if (recursion depth > 30?) then (yes)
     : search failed;
     stop
   endif
-  if (start and end point on same pixel) then (yes)
-    : return pixel intersection;
+  if (compare start and end point) then (same pixel)
+    : intersection ⇦ pixel intersection, with bilinear model;
+    : return intersection;
+    note left
+      this is the nominal return,
+      at final recursion level
+    end note
     stop
   endif
-  : compute kd-tree deepest level\ncontaining both start and end points;
+  :compute kd-tree deepest\nlevel sub-tile containing\nboth segment endpoints;
   if (compare segment and sub-tile maximum elevation) then (fully above)
     : return null;
-    note right
+    note left
       when the line-of-sight segment is fully above
       Digital Elevation Model, we can safely reject
-      it and proceed to next segment
+      it and proceed immediately to next segment
     end note
     stop
   endif
@@ -56,7 +61,7 @@
   end note
   repeat
     :intersection ⇦ recurse(previous, crossing);
-    if (found intersection?) then (yes)
+    if (intersection found?) then (yes)
       : return intersection;
       stop
     endif
