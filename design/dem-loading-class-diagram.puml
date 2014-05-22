@@ -27,7 +27,7 @@
 
   package org.orekit.rugged #ECEBD8 {
 
-    package api #DDEBD8 {
+    package raster #DDEBD8 {
       interface UpdatableTile {
         +setGeometry(φ₀, λ₀, δφ, δλ, rows, columns)
         +setElevation(i, j, h)
@@ -36,9 +36,7 @@
         +updateTile(φ, λ, UpdatableTile)
       }
       TileUpdater --> UpdatableTile : updates
-    }
 
-    package raster #DDEBD8 {
       interface "TileFactory<T extends Tile>" as TileFactory_T_ {
         +T createTile()
       }

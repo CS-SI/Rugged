@@ -21,6 +21,7 @@
   skinparam NoteBorderColor                     #691616
   skinparam NoteFontColor                       #691616
   skinparam SequenceActorBorderColor            #6A584B
+  skinparam SequenceActorBackgroundColor        #F3EFEB/CCC9C5
   skinparam SequenceParticipantBackgroundColor  #F3EFEB/CCC9C5
   skinparam SequenceParticipantBorderColor      #6A584B
   skinparam SequenceLifeLineBackgroundColor     #CCC9C5/F3EFEB
@@ -31,57 +32,66 @@
 
   hide footbox
 
-  participant "Application" as A
-  participant "Interface" as I
+  actor       "UserMain" as A
   participant "Rugged" as R
-  participant "Orekit" as O
+  participant "SensorMeanPlaneCrossing" as P
+  participant "SensorPixelCrossing" as X
+  participant "SpacecraftToObservedBody" as S
+  participant "ExtendedEllipsoid" as E
+  participant "Transform" as T
   participant "Math" as M
 
   activate A
-  A  -> I : inverseLocalization(φ, λ)
-     activate I
-       I  -> R : inverseLocalization(φ, λ)
-       activate R
-         R  -> R : elevation(φ, λ)
-         activate R
-            R -> I : DEM callback
-            I --> R : DEM raw data cell
-            R --> R : h(φ, λ)
-         deactivate R
-         R -> O : convert(ellipsoid, φ, λ, h)
-         activate O
-           O --> R : P(φ, λ, h) in Earth frame
-         deactivate O
-         R -> R : createSwathOffset(P, interpolator)
-         activate R
-           R --> R : function f(t)
-         deactivate R
-         R -> M : solve f(t₀) = 0
-         activate M
-           M --> R : evaluate f(t)
-           activate R
-             R -> R : apply combined transform provider at date
-             R --> M : f(t)
-           deactivate R
-           M --> R : evaluate f(t)
-           activate R
-             R -> R : apply combined transform provider at date
-             R --> M : f(t)
-           deactivate R
-           M --> R : evaluate f(t)
-           activate R
-             R -> R : apply combined transform provider at date
-             R --> M : f(t)
-           deactivate R
-           M --> R : t₀
-         deactivate M
-         R -> R : apply combined transform provider at date
-          R -> R : apply inverse time stamping model
-          R -> R : locate pixel in line for solved geometry
-          R --> I : pixel coordinates
-       deactivate R
-        I --> A : pixel coordinates
-    deactivate I         
+    A  -> R : inverseLocalization
+    activate R
+      R  -> P : getMeanPlaneFinder
+      activate P
+        P -> S : getTransform(each line)
+        note left
+           transforms are computed
+           only once and reused
+           across successive inverse
+           localization calls
+        end note
+        activate S
+          S -> T : create
+          activate T
+          deactivate T
+        deactivate S
+      deactivate P
+      R -> E : transform(φ, λ, h)
+      activate E
+        E --> R : x, y, z
+      deactivate E
+      R -> P : findCrossing(ground target)
+      activate P
+        P -> T : interpolate
+        activate T
+        deactivate T
+        note left
+           algorithm converges
+           in 2 or 3 iterations
+        end note
+        P -> T : interpolate
+        activate T
+        deactivate T
+        P --> R : target direction at mean plane crossing\n(with time derivative)
+      deactivate P
+      R -> X : create(target direction at crossing time)
+      activate X
+      deactivate X
+      R -> X : locatePixel
+      activate X
+        X -> M : solve f(x) = 0
+        activate M
+          M --> X : x₀
+        deactivate M
+        X --> R : coarse pixel crossing
+      deactivate X
+      R -> R : fix line, considering closest pixel position
+      R -> R : fix pixel
+      R --> A : accurate line/pixel
+    deactivate R
   deactivate A
 
 @enduml

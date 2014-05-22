@@ -1,0 +1,69 @@
+' Copyright 2013-2014 CS Systèmes d'Information
+' Licensed to CS Systèmes d'Information (CS) under one or more
+' contributor license agreements.  See the NOTICE file distributed with
+' this work for additional information regarding copyright ownership.
+' CS licenses this file to You under the Apache License, Version 2.0
+' (the "License"); you may not use this file except in compliance with
+' the License.  You may obtain a copy of the License at
+'
+'   http://www.apache.org/licenses/LICENSE-2.0
+'
+' Unless required by applicable law or agreed to in writing, software
+' distributed under the License is distributed on an "AS IS" BASIS,
+' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+' See the License for the specific language governing permissions and
+' limitations under the License.
+
+@startuml
+
+  skinparam svek                                true
+  skinparam NoteBackgroundColor                 #F3EFEB
+  skinparam NoteBorderColor                     #691616
+  skinparam NoteFontColor                       #691616
+  skinparam ActivityStartColor                  #6A584B
+  skinparam ActivityEndColor                    #6A584B
+  skinparam ActivityBarColor                    #6A584B
+  skinparam ActivityBorderColor                 #691616
+  skinparam ActivityBackgroundColor             #F3EFEB/CCC9C5
+  skinparam ActivityArrowColor                  #691616
+  skinparam ActivityFontSize                    11
+
+  start
+  if (recursion depth > 30) then (yes)
+    : search failed;
+    stop
+  endif
+  if (start and end point on same pixel) then (yes)
+    : return pixel intersection;
+    stop
+  endif
+  : compute kd-tree deepest level\ncontaining both start and end points;
+  if (compare segment and sub-tile maximum elevation) then (fully above)
+    : return null;
+    note right
+      when the line-of-sight segment is fully above
+      Digital Elevation Model, we can safely reject
+      it and proceed to next segment
+    end note
+    stop
+  endif
+  :previous ← start;
+  : crossings ← line-of-sight segment crossings of next level sub-tiles;
+  note right
+    crossings can be computed either
+    using flat body hypothesis
+    or taking curvature into account
+  end note
+  repeat
+    :intersection ← recurse(previous, crossing);
+    if (found intersection?) then (yes)
+      : return intersection;
+      stop
+    endif
+    :previous ← crossing;
+  repeat while (more crossings?)
+  :intersection ← recurse(previous, end);
+  : return intersection;
+  stop
+
+@enduml

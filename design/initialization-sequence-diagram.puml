@@ -21,6 +21,7 @@
   skinparam NoteBorderColor                     #691616
   skinparam NoteFontColor                       #691616
   skinparam SequenceActorBorderColor            #6A584B
+  skinparam SequenceActorBackgroundColor        #F3EFEB/CCC9C5
   skinparam SequenceParticipantBackgroundColor  #F3EFEB/CCC9C5
   skinparam SequenceParticipantBorderColor      #6A584B
   skinparam SequenceLifeLineBackgroundColor     #CCC9C5/F3EFEB
@@ -31,41 +32,53 @@
 
   hide footbox
 
-  participant "Application" as A
-  participant "Interface" as I
+  actor       "UserMain" as A
+  participant "MissionSpecificDEM" as B
   participant "Rugged" as R
+  participant "ExtendedEllipsoid" as E
+  participant "SpacecraftToObservedBody" as S
+  participant "LineSensor" as LS
   participant "Orekit" as O
 
   activate A
-    A -> I : init
-    activate I
-      I -> I : loadModels
-      I -> I : unfoldOpticalPath
-      activate I
-      deactivate I
-      I -> R : setGeneralContext(algorithm, frames, ellipsoid, ephemeris)
-      activate R
-        R -> O : createInterpolator(ephemeris)
-        activate O
-          O --> R : interpolating propagator
-        deactivate O
-        R -> R : createTransformProvider(interpolator)
-        activate R
-         deactivate R
-      deactivate R
-      I -> R : setLineSensor(sensorName, pixels, datationModel)
-      activate R
-      deactivate R
-      I -> R : setLineSensor(sensorName, pixels, datationModel)
-      activate R
-      deactivate R
-      I -> R : setLineSensor(sensorName, pixels, datationModel)
-      activate R
-      deactivate R
-      I -> R : setUpTilesManagement(tileUpdater, maxCachedTiles)
-      activate R
-      deactivate R
-    deactivate I
+    A -> A : loadModels
+    A -> B : create
+    activate B
+    deactivate B
+    A -> A : unfoldOpticalPath
+    activate A
+    deactivate A
+    A -> R : create(DEM, algorithm, frames, ellipsoid, ephemeris)
+    activate R
+      R -> E : create
+      activate E
+      deactivate E
+      R -> O : createProviders(ephemeris)
+      activate O
+        O --> R : position/velocity/atttitude providers
+      deactivate O
+      R -> S : create
+      activate S
+      deactivate S
+    deactivate R
+    A -> LS : create
+    activate LS
+    deactivate LS
+    A -> R : addLineSensor
+    activate R
+    deactivate R
+    A -> LS : create
+    activate LS
+    deactivate LS
+    A -> R : addLineSensor
+    activate R
+    deactivate R
+    A -> LS : create
+    activate LS
+    deactivate LS
+    A -> R : addLineSensor
+    activate R
+    deactivate R
   deactivate A
 
 @enduml

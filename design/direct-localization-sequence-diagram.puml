@@ -21,6 +21,7 @@
   skinparam NoteBorderColor                     #691616
   skinparam NoteFontColor                       #691616
   skinparam SequenceActorBorderColor            #6A584B
+  skinparam SequenceActorBackgroundColor        #F3EFEB/CCC9C5
   skinparam SequenceParticipantBackgroundColor  #F3EFEB/CCC9C5
   skinparam SequenceParticipantBorderColor      #6A584B
   skinparam SequenceLifeLineBackgroundColor     #CCC9C5/F3EFEB
@@ -31,7 +32,7 @@
 
   hide footbox
 
-  participant "UserMain" as A
+  actor       "UserMain" as A
   participant "Rugged" as R
   participant "LineSensor" as LS
   participant "SpacecraftToObservedBody" as S

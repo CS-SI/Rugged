@@ -27,9 +27,21 @@
 
   package orekit #ECEBD8 {
     class OneAxisEllipsoid
-    class Frame
     class PVCoordinatesProvider
+    class Frame
     class AttitudeProvider
+  }
+
+  package mission.specific #C4D2C5 {
+    class UserMain #D5E0D5/E2EBE2
+    note top #E2EBE2
+      user configures Rugged either by
+      selecting from a few predefined
+      choices or by directly building
+      Orekit objects
+    end note
+    class MissionSpecificDEM #D5E0D5/E2EBE2
+    MissionSpecificDEM <-left- UserMain : creates
   }
 
   package rugged #ECEBD8 {
@@ -46,7 +58,16 @@
 
     }
 
+    package raster #DDEBD8 {
+      interface TileUpdater
+    }
+
     package api #DDEBD8 {
+      class Rugged {
+        +setLightTimeCorrection(boolean)
+        +setAberrationOfLightCorrection(boolean)
+        +addLineSensor(lineSensor)
+      }
       enum AlgorithmId {
         +DUVENHAGE
         +DUVENHAGE_FLAT_BODY
@@ -71,33 +92,21 @@
         +TOD
         +VEIS1950
       }
-      class Rugged {
-        +setLightTimeCorrection(boolean)
-        +setAberrationOfLightCorrection(boolean)
-        +addLineSensor(lineSensor)
-      }
       class LineSensor
       ExtendedEllipsoid        "1" <--o Rugged
       SpacecraftToObservedBody "1" <--o Rugged
       Rugged o--> "*" LineSensor 
+      Rugged --> AlgorithmId
+      Rugged --> EllipsoidId
+      Rugged --> BodyRotatingFrameId
+      Rugged --> InertialFrameId
+
+      UserMain    -->  LineSensor  : creates
+      MissionSpecificDEM --|> TileUpdater
+      UserMain    -->  Rugged      : configures
+
     }
 
-  }
-
-  package mission.specific #C4D2C5 {
-    class UserMain #D5E0D5/E2EBE2
-    AlgorithmId         <-- UserMain : selects
-    EllipsoidId         <-- UserMain : selects
-    BodyRotatingFrameId <-- UserMain : selects
-    InertialFrameId     <-- UserMain : selects
-    LineSensor          <-- UserMain : creates
-    Rugged              <-- UserMain : configures
-    note as N1 #E2EBE2
-      user configures Rugged either by
-      selecting from a few predefined
-      choices or by directly building
-      Orekit objects
-    end note
   }
 
 @enduml

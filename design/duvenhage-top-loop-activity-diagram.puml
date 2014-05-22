@@ -1,0 +1,72 @@
+' Copyright 2013-2014 CS Systèmes d'Information
+' Licensed to CS Systèmes d'Information (CS) under one or more
+' contributor license agreements.  See the NOTICE file distributed with
+' this work for additional information regarding copyright ownership.
+' CS licenses this file to You under the Apache License, Version 2.0
+' (the "License"); you may not use this file except in compliance with
+' the License.  You may obtain a copy of the License at
+'
+'   http://www.apache.org/licenses/LICENSE-2.0
+'
+' Unless required by applicable law or agreed to in writing, software
+' distributed under the License is distributed on an "AS IS" BASIS,
+' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+' See the License for the specific language governing permissions and
+' limitations under the License.
+
+@startuml
+
+  skinparam svek                                true
+  skinparam NoteBackgroundColor                 #F3EFEB
+  skinparam NoteBorderColor                     #691616
+  skinparam NoteFontColor                       #691616
+  skinparam ActivityStartColor                  #6A584B
+  skinparam ActivityEndColor                    #6A584B
+  skinparam ActivityBarColor                    #6A584B
+  skinparam ActivityBorderColor                 #691616
+  skinparam ActivityBackgroundColor             #F3EFEB/CCC9C5
+  skinparam ActivityArrowColor                  #691616
+  skinparam ActivityFontSize                    11
+
+  start
+  : gp₀ ← point at altitude 0;
+  : select tile containing gp₀;
+  : current point ← null;
+  : hmax ← tile maximum elevation;
+  while (current point is null)
+    : entry ← point at altitude hmax;
+    if (locate entry point) then (in selected tile)
+    else (outside of selected tile)
+      : select tile containing entry point;
+      : hmax ← max(hmax, tile maximum elevation);
+      : current point ← null;
+    endif
+  endwhile
+  repeat
+    : exit ← line-of-sight exit point from tile;
+    : intersection ← Duvenhage(current, exit);
+    if (found intersection?) then (yes)
+      : return intersection;
+      stop
+    endif
+    if (tile exited at side?) then (no)
+      : searching ← false;
+    else (yes)
+      : forward point ← point slightly after exit point;
+      : select tile containing forward point;
+      if (DEM traversed between\ncurrent and forward points) then (yes)
+        : return current point;
+        note right
+         extremely rare case!
+        end note
+        stop
+      endif
+      : current point ← forward point;
+    endif
+  repeat while (searching ?)
+  :search failed;
+  note left
+    this should never happen
+  end note
+
+@enduml
