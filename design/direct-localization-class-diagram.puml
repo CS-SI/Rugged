@@ -39,7 +39,7 @@
         +intersection(ellipsoid, position, los)
         +refineIntersection(ellipsoid, position, los, closeGuess)
       }
-      Tile <-- IntersectionAlgorithm : compute elevation
+      Tile <-- IntersectionAlgorithm : evaluate DEM
     }
 
     package utils #DDEBD8 {
@@ -51,7 +51,7 @@
         +pointOnGround(position, los)
       }
       class SpacecraftToObservedBody
-      IntersectionAlgorithm --> ExtendedEllipsoid : find DEM tiles boundaries
+      IntersectionAlgorithm --> ExtendedEllipsoid : compute grid points crossings
     }
 
     package api #DDEBD8 {

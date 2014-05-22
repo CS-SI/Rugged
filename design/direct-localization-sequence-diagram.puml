@@ -31,53 +31,61 @@
 
   hide footbox
 
-  participant "Application" as A
-  participant "Interface" as I
+  participant "UserMain" as A
   participant "Rugged" as R
-  participant "Algorithm" as G
-  participant "Orekit" as O
+  participant "LineSensor" as LS
+  participant "SpacecraftToObservedBody" as S
+  participant "ExtendedEllipsoid" as E
+  participant "IntersectionAlgorithm" as G
+  participant "Tile" as T
 
   activate A
-  A  -> I : directLocalization(name, number)
-     activate I
-       I  -> R : directLocalization(name, number)
+     A  -> R : directLocalization(name, number)
+     activate R
+       R -> LS : apply time stamping model
+       R -> S : get transforms at line date
+       R -> R : loop over line pixels pₖ
        activate R
-         R -> R : apply time stamping model
-         R -> R : apply combined transform provider at date
-         R -> R : loop over line pixels pₖ
-         activate R
-           R -> O : intersection(ellipsoid, line-of-sight)
-           R -> R : fix speed of light delay in transforms
-           activate R
-           deactivate R
-           R -> G : intersection(ellipsoid, line-of-sight)
-           activate G
-             G -> O  : conversions
-             G -> R : elevation(φₖ, λₖ)
-             activate R
-               R -> I : DEM callback
-               I --> R : DEM raw data cell
-               R --> G : h(φₖ, λₖ)
-             deactivate R
-             G -> O  : conversions
-             G -> R : elevation(φₖ, λₖ)
-             activate R
-               R --> G : h(φₖ, λₖ)
-             deactivate R
-             G -> O  : conversions
-             G -> R : elevation(φₖ, λₖ)
-             activate R
-               R --> G : h(φₖ, λₖ)
-             deactivate R
-             G -> O  : conversions
-             G --> R : φₖ, λₖ, hₖ
-           deactivate G
-           R --> R : list(φₖ, λₖ, hₖ)
-         deactivate R
-         R --> I : list(φₖ, λₖ, hₖ)
+         R -> R : fix aberration of light
+         R -> E : approximate point on ground
+         R -> R : fix speed of light delay in transforms
+         R -> G : intersection(ellipsoid, line-of-sight)
+         activate G
+           G -> E  : grid points crossings
+           G -> T : elevation(φₖ, λₖ)
+           activate T
+             T -> A : DEM callback
+             A --> T : DEM raw data cell
+             T --> G : h(φₖ, λₖ)
+           deactivate T
+           G -> E  : grid points crossings
+           G -> T : elevation(φₖ, λₖ)
+           activate T
+             T --> G : h(φₖ, λₖ)
+           deactivate T
+           G -> E  : grid points crossings
+           G -> T : elevation(φₖ, λₖ)
+           activate T
+             T --> G : h(φₖ, λₖ)
+           deactivate T
+           G -> T  : pixel intersection(los)
+           activate T
+             T --> G : φₖ, λₖ, hₖ
+           deactivate T
+           G --> R : φₖ, λₖ, hₖ
+         deactivate G
+         R -> R : refine speed of light delay in transforms
+         R -> G : refine intersection(ellipsoid, line-of-sight)
+         activate G
+           G -> T  : refine pixel intersection(los)
+           activate T
+             T --> G : φₖ, λₖ, hₖ
+           deactivate T
+         deactivate G
+         R --> R : array(φₖ, λₖ, hₖ)
        deactivate R
-       I  --> A : list(φₖ, λₖ, hₖ)
-     deactivate I
+       R --> A : array(φₖ, λₖ, hₖ)
+     deactivate R
   deactivate A
 
 @enduml
