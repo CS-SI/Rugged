@@ -149,11 +149,6 @@ public class LineSensor {
     }
 
     /** Get the pixel normalized line-of-sight.
-     * <p>
-     * The {@link #getLos(int) line-of-sight}, {@link #getTransversal(int) transversal}
-     * and {@link #getCross(int) cross} directions form a right-handed frame aligned
-     * with the pixel.
-     * </p>
      * @param i pixel index (must be between 0 and {@link #getNbPixels()}
      * @return pixel normalized line-of-sight
      */
@@ -205,6 +200,12 @@ public class LineSensor {
     }
 
     /** Get the relative azimuth of a direction with respect to a pixel.
+     * <p>
+     * The relative azimuth is computed along the sensor line. As it is
+     * relative to current pixel, it is 0 when the direction is aligned
+     * with pixel i, and the sign is consistent with {@link #getMeanPlaneNormal()
+     * mean plane normal} orientation.
+     * </p>
      * @param direction direction to check
      * @param i pixel index (must be between 0 and {@link #getNbPixels()}
      * @return relative azimuth of direction

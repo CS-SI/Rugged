@@ -250,6 +250,7 @@ public class Rugged {
      * @param lightTimeCorrection if true, the light travel time between ground
      * and spacecraft is compensated for more accurate localization
      * @see #isLightTimeCorrected()
+     * @see #setAberrationOfLightCorrection(boolean)
      */
     public void setLightTimeCorrection(final boolean lightTimeCorrection) {
         this.lightTimeCorrection = lightTimeCorrection;
@@ -278,7 +279,7 @@ public class Rugged {
      * @param aberrationOfLightCorrection if true, the aberration of light
      * is corrected for more accurate localization
      * @see #isAberrationOfLightCorrected()
-     * @see #setLineSensor(String, List, LineDatation)
+     * @see #setLightTimeCorrection(boolean)
      */
     public void setAberrationOfLightCorrection(final boolean aberrationOfLightCorrection) {
         this.aberrationOfLightCorrection = aberrationOfLightCorrection;
