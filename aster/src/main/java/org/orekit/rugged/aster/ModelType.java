@@ -14,52 +14,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.geotiff;
+package org.orekit.rugged.aster;
 
 
-/** Enumerate for linear units.
- * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.3">GeoTIFF specification, section 6.3.1.3</a>
+/** Enumerate for model type.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.1">GeoTIFF specification, section 6.3.1.1</a>
  * @author Luc Maisonobe
  */
-enum LinearUnits {
+enum ModelType {
 
     // CHECKSTYLE: stop JavadocVariable check
-    METER(9001),
-    FOOT(9002),
-    FOOT_US_SURVEY(9003),
-    FOOT_MODIFIED_AMERICAN(9004),
-    FOOT_CLARKE(9005),
-    FOOT_INDIAN(9006),
-    LINK(9007),
-    LINK_BENOIT(9008),
-    LINK_SEARS(9009),
-    CHAIN_BENOIT(9010),
-    CHAIN_SEARS(9011),
-    YARD_SEARS(9012),
-    YARD_INDIAN(9013),
-    FATHOM(9014),
-    MILE_INTERNATIONAL_NAUTICAL(9015);
+    UNDEFINED(0),
+    PROJECTED(1),
+    GEOGRAPHIC(2),
+    GEOCENTRIC(3);
     // CHECKSTYLE: resume JavadocVariable check
 
-    /** Units ID. */
+    /** Type ID. */
     private final int id;
 
     /** Simple constructor.
      * @param id key id
      */
-    private LinearUnits(final int id) {
+    private ModelType(final int id) {
         this.id   = id;
     }
 
-    /** Get the units corresponding to an id.
+    /** Get the type corresponding to an id.
      * @param id type id
-     * @return the units corresponding to the id
-     * @exception IllegalArgumentException if the id does not correspond to known units
+     * @return the type corresponding to the id
+     * @exception IllegalArgumentException if the id does not correspond to a known type
      */
-    public static LinearUnits getUnits(final int id) {
-        for (LinearUnits units : values()) {
-            if (units.id == id) {
-                return units;
+    public static ModelType getType(final int id) {
+        for (ModelType type : values()) {
+            if (type.id == id) {
+                return type;
             }
         }
         throw new IllegalArgumentException();

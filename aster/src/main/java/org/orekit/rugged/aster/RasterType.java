@@ -14,20 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.geotiff;
+package org.orekit.rugged.aster;
 
 
-/** Enumerate for model type.
- * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.1">GeoTIFF specification, section 6.3.1.1</a>
+/** Enumerate for raster types.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.2">GeoTIFF specification, section 6.3.1.2</a>
  * @author Luc Maisonobe
  */
-enum ModelType {
+enum RasterType {
 
     // CHECKSTYLE: stop JavadocVariable check
     UNDEFINED(0),
-    PROJECTED(1),
-    GEOGRAPHIC(2),
-    GEOCENTRIC(3);
+    RASTER_PIXEL_IS_AREA(1),
+    RASTER_PIXEL_IS_POINT(2);
     // CHECKSTYLE: resume JavadocVariable check
 
     /** Type ID. */
@@ -36,7 +35,7 @@ enum ModelType {
     /** Simple constructor.
      * @param id key id
      */
-    private ModelType(final int id) {
+    private RasterType(final int id) {
         this.id   = id;
     }
 
@@ -45,8 +44,8 @@ enum ModelType {
      * @return the type corresponding to the id
      * @exception IllegalArgumentException if the id does not correspond to a known type
      */
-    public static ModelType getType(final int id) {
-        for (ModelType type : values()) {
+    public static RasterType getType(final int id) {
+        for (RasterType type : values()) {
             if (type.id == id) {
                 return type;
             }

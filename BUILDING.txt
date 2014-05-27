@@ -1,0 +1,37 @@
+Rugged can be built from source either using maven 3 or eclipse.
+
+Building with Maven 3:
+ - Maven 3 can be downloaded here:
+       http://maven.apache.org/download.html
+ - If you are behind a proxy (which is a traditional
+   setting in a corporate environment), then you need
+   to configure maven to use it. This is explained
+   in the maven documentation here:
+   http://maven.apache.org/guides/mini/guide-proxies.html
+ - run "mvn package" to automatically download all
+   the required dependencies listed in the pom.xml file
+   and create a file named target/rugged-x.y.jar where
+   x.y is the version number
+
+Building with Eclipse:
+ - Eclipse can be downloaded here:
+       http://www.eclipse.org/downloads/
+ - extract the rugged source jar in your eclipse workspace
+ - create a new java project from existing sources and direct
+   Eclipse to the directory where you unpacked Rugged
+ - set the source folders to rugged/src/main/java,
+   rugged/src/main/resources, rugged/src/test/java,
+   rugged/src/test/resources in
+   the source tab of the Configure Build Path dialog
+ - set the external libraries to JRE system library (provided by Eclipse),
+   Junit 4.x (provided by Eclipse) orekit (available at Orekit website
+   https://www.orekit.org/) and Apache Commons Math (available at
+   Apache Software Foundation commons-math
+   http://commons.apache.org/proper/commons-math/download_math.cgi
+   in the libraries tab of the Configure Build Path dialog
+ - if you want to also build the optional geotiff module, you should
+   add rugged/geotiff/src/main/java, rugged/geotiff/src/main/resources,
+   rugged/geotiff/src/test/java, rugged/geotiff/src/test/resources in
+   the source tab of the Configure Build Path dialog and add the
+   Apache Commons Imaging library to the external libraries
+

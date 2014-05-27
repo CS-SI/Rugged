@@ -14,40 +14,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.geotiff;
+package org.orekit.rugged.aster;
 
 
-/** Enumerate for raster types.
- * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.2">GeoTIFF specification, section 6.3.1.2</a>
+/** Enumerate for linear units.
+ * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.3">GeoTIFF specification, section 6.3.1.3</a>
  * @author Luc Maisonobe
  */
-enum RasterType {
+enum LinearUnits {
 
     // CHECKSTYLE: stop JavadocVariable check
-    UNDEFINED(0),
-    RASTER_PIXEL_IS_AREA(1),
-    RASTER_PIXEL_IS_POINT(2);
+    METER(9001),
+    FOOT(9002),
+    FOOT_US_SURVEY(9003),
+    FOOT_MODIFIED_AMERICAN(9004),
+    FOOT_CLARKE(9005),
+    FOOT_INDIAN(9006),
+    LINK(9007),
+    LINK_BENOIT(9008),
+    LINK_SEARS(9009),
+    CHAIN_BENOIT(9010),
+    CHAIN_SEARS(9011),
+    YARD_SEARS(9012),
+    YARD_INDIAN(9013),
+    FATHOM(9014),
+    MILE_INTERNATIONAL_NAUTICAL(9015);
     // CHECKSTYLE: resume JavadocVariable check
 
-    /** Type ID. */
+    /** Units ID. */
     private final int id;
 
     /** Simple constructor.
      * @param id key id
      */
-    private RasterType(final int id) {
+    private LinearUnits(final int id) {
         this.id   = id;
     }
 
-    /** Get the type corresponding to an id.
+    /** Get the units corresponding to an id.
      * @param id type id
-     * @return the type corresponding to the id
-     * @exception IllegalArgumentException if the id does not correspond to a known type
+     * @return the units corresponding to the id
+     * @exception IllegalArgumentException if the id does not correspond to known units
      */
-    public static RasterType getType(final int id) {
-        for (RasterType type : values()) {
-            if (type.id == id) {
-                return type;
+    public static LinearUnits getUnits(final int id) {
+        for (LinearUnits units : values()) {
+            if (units.id == id) {
+                return units;
             }
         }
         throw new IllegalArgumentException();
