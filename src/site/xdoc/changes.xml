@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Copyright 2002-2014 CS Systèmes d'Information
+  Licensed to CS Systèmes d'Information (CS) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  CS licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<document>
+  <properties>
+    <title>Rugged Changes</title>
+  </properties>
+  <body>
+    <release version="1.0" date="TBD"
+             description="TBD">
+      <action dev="luc" type="update">
+        Swtiched maven configuration to multi-modules.
+      </action>
+      <action dev="luc" type="update">
+        Updated UML diagrams.
+      </action>
+      <action dev="luc" type="update">
+        Moved TileUpdate to raster package.
+      </action>
+      <action dev="luc" type="update">
+        Finalized direct localization diagrams.
+      </action>
+      <action dev="luc" type="update">
+        renamed core package into intersection.
+      </action>
+      <action dev="luc" type="update">
+        Created a utils package.
+      </action>
+      <action dev="luc" type="update">
+        Moved raster package one level up.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed top package name.
+      </action>
+      <action dev="luc" type="update">
+        Updated maven plugins versions.
+      </action>
+      <action dev="luc" type="update">
+        Updated Apache Commons Version as 3.3 has now been released.
+      </action>
+      <action dev="luc" type="update">
+        Updated Orekit version.
+      </action>
+      <action dev="luc" type="update">
+        Improved performance.
+      </action>
+      <action dev="luc" type="update">
+        Disabled timing test for inverse localization.
+      </action>
+      <action dev="luc" type="update">
+        Improved inverse localization speed again!
+      </action>
+      <action dev="luc" type="update">
+        Added inverse localization from latitude and longitude only.
+        When only latitude and longitude are specified, the elevation is
+        automatically computed from the Digital Elevation Model.
+      </action>
+      <action dev="luc" type="update">
+        Simplified direct localization.
+      </action>
+      <action dev="luc" type="update">
+        Improved inverse localization performances.
+      </action>
+      <action dev="luc" type="update">
+        Added rate to the LineDatation interface.
+      </action>
+      <action dev="luc" type="update">
+        Disable timing test by default.
+      </action>
+      <action dev="luc" type="update">
+        Renamed setLineSensor into addLineSensor.
+        The new name explains more clearly that several sensors can be set up at
+        once.
+      </action>
+      <action dev="luc" type="fix">
+        First working version of inverse localization.
+      </action>
+      <action dev="luc" type="update">
+        Streamlined line sensor model.
+        We now use a single position for all pixels (but of course still
+        different line-of-sight vectors), as it doesn't really make sense to
+        consider different positions as pixels are only a few microns away from
+        each other.
+      </action>
+      <action dev="luc" type="update">
+        Ensure sensor mean plane normal has a deterministic orientation.
+      </action>
+      <action dev="luc" type="update">
+        Slightly changed the intersection refinement in flat-body.
+      </action>
+      <action dev="luc" type="update">
+        Added a flat-body implementation of refineIntersection.
+        The former implementation ignored the flat-body flag and in fact
+        corrected the flat-body ...
+      </action>
+      <action dev="luc" type="fix">
+        Fixed mean reference point position.
+      </action>
+      <action dev="luc" type="update">
+        Improved light time correction.
+        The current altitude must be considered when computing light time
+        correction. Previous computation was slightly wrong as it only computed
+        light time from the ellipsoid. This induced problems when computing
+        inverse correction.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed computation of latitude crossings for line of sight.
+        In some cases, the line of sight has two intersections with a given
+        iso-latitude cone, and the selecting the closes one to spacecraft was
+        not always the appropriate choice. An hint from the caller was needed,
+        as a point close to the desired intersection.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed non-bracketing error near start of sensor line.
+      </action>
+      <action dev="luc" type="update">
+        Moved reference date from Rugged top class to LineDatation model.
+      </action>
+      <action dev="luc" type="update">
+        Remove check for context, which is ensured since construction.
+      </action>
+      <action dev="luc" type="update">
+        Improved speed of inverse localization test.
+      </action>
+      <action dev="luc" type="fix">
+        First working version of inverse localization.
+        It works in simple cases (no light time correction and no aberration of
+        light correction), and is still really slow.
+      </action>
+      <action dev="luc" type="add">
+        Started implementation of inverse localization (not working yet).
+      </action>
+      <action dev="luc" type="update">
+        Removed a check that is not needed anymore.
+        The indices are now checked at caller level.
+      </action>
+      <action dev="luc" type="update">
+        Added an option to use Duvenhage algorithm with flat-Earth hypothesis.
+        This option is mainly intended for comparison with existing systems. It
+        should not be used for operational systems and the full Duvenhage
+        algorithm with line-of-sight bending in geodetic coordinates should be
+        used instead.
+      </action>
+      <action dev="luc" type="fix">
+        Avoid array bounds error when interpolating exactly at tile edges.
+      </action>
+      <action dev="luc" type="update">
+        Added automatic mean plane computation for line sensors.
+        This will allow implementing inverse localization.
+      </action>
+      <action dev="luc" type="update">
+        Allow direct use of Orekit inertial frames and ellipsoids.
+      </action>
+      <action dev="luc" type="update">
+        Added optional aberration of light correction.
+      </action>
+      <action dev="luc" type="update">
+        Renamed ligth travel time compensation into light time correction.
+        This better matches physics naming conventions.
+      </action>
+      <action dev="luc" type="update">
+        Moved light travel compensation setting out of construction.
+        This setting is not intended to be used often (in fact it should be used
+        only for validation against other systems), so forcing user to set it in
+        all cases was a bad idea. Now the default configuration is to compensate
+        and if user does not want to compensate, he can inhibate it by calling a
+        separate method after construction.
+      </action>
+      <action dev="luc" type="update">
+        Fixing light travel time or not is now a user setting.
+      </action>
+      <action dev="luc" type="update">
+        Configure tiles updater at construction time.
+      </action>
+      <action dev="luc" type="update">
+        Replaced setGeneralContext with constructors.
+      </action>
+      <action dev="luc" type="update">
+        Replaced Rugged interface with a class.
+      </action>
+      <action dev="luc" type="update">
+        Moved enumerates out of Rugged top level interface.
+      </action>
+      <action dev="luc" type="update">
+        Removed SatellitePV and SatelliteQ classes.
+        We now use directly Orekit PVCoordinates and Apache Commons Math
+        Rotation classes.
+      </action>
+      <action dev="luc" type="update">
+        Remove GroundPoint class.
+        We use directly the Orekit GeodeticPoint now.
+      </action>
+      <action dev="luc" type="add">
+        Added ITRF equinox, for applications that rely on it...
+      </action>
+      <action dev="luc" type="fix">
+        Fixed virtual "wall" appearing at tiles boundaries.
+      </action>
+      <action dev="luc" type="fix">
+        Avoid an infinite loop near tiles boundaries.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed error loading elevation from Aster files.
+      </action>
+      <action dev="luc" type="update">
+        Improved accuracy by taking speed of light into account in transforms.
+      </action>
+      <action dev="luc" type="update">
+        Slight speed-up with a dedicated pointOnGround method.
+      </action>
+      <action dev="luc" type="update">
+        Added writing of grid file to full test.
+      </action>
+      <action dev="luc" type="update">
+        Don't use a numerical propagator within direct localization.
+        As the time between each line is really small (milliseconds), it is
+        better to propagate first and use an ephemeris later.
+      </action>
+      <action dev="luc" type="add">
+        New global test (temporary, much too computing intensive).
+      </action>
+      <action dev="luc" type="add">
+        Added a default linear model for line datation.
+      </action>
+      <action dev="luc" type="update">
+        Avoid line-of-sight splitting before its start.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed a numerical issue at tile exit.
+        The low point at tile minimum elevation was computed with a tiny
+        positive error, meaning the point really was above min elevation (at
+        micrometer level). The line segment between entry and exit stopped just
+        before traversing the Digital Elevation Model, and an error was
+        triggered.
+        The solution was to take some margin when computing the segment
+        endpoints at entry and exit: we now start above max elevation and end
+        below min elevation so the intersection should be really on the line.
+      </action>
+      <action dev="luc" type="update">
+        Greatly improved accuracy of direct localization.
+        There were some small errors (at centimeter level) as result points may
+        be slightly out of line of sight. These errors seemed to be due to the
+        final linear line-of-sight model that is used at pixel level.
+        An iterative correction step is performed to ensure the point is really
+        on the line-of-sight.
+        The residual error is now at nanometer level.
+      </action>
+      <action dev="luc" type="add">
+        Allow tolerance for intersections close to pixel edges.
+      </action>
+      <action dev="luc" type="update">
+        Use the four corners of each pixel to initialize min/max kd-tree.
+      </action>
+      <action dev="luc" type="update">
+        Use point and direction rather than two points for pixel intersection.
+      </action>
+      <action dev="luc" type="update">
+        Added a los conversion between Cartesian and geodetic coordinates.
+        The conversion is of course accurate only in the neighborhood of the
+        reference point, as a straight line in Cartesian is not a straight line
+        in geodetic coordinates. What is converted is the initial direction so
+        the two curves are tangent at the reference point.
+        Near Earth surface, the two curves remain within one millimeter of each
+        other after about 100 m travel.
+      </action>
+      <action dev="luc" type="fix">
+        First working version of Duvenhage algorithm!
+      </action>
+      <action dev="luc" type="fix">
+        Handle degenerate intersection cases.
+        The cases handled include linear cases (when Digital Elevation Model has
+        zero curvature) and constant cases (no curvature and line-of-sight
+        parallel to tile, both in or out-of-tile).
+      </action>
+      <action dev="luc" type="fix">
+        First working version of BasicScanAlgorithm.
+        The case where the line-of-sight enters the Digital Elevation Model in
+        one tile on top and exit it in another tile on bottom is not tested yet.
+      </action>
+      <action dev="luc" type="add">
+        Added tests for BasicScanAlgorithm.
+      </action>
+      <action dev="luc" type="update">
+        Don't exclude endpoints when un-merging tiles.
+      </action>
+      <action dev="luc" type="update">
+        Changed private method arguments order for easier understanding.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed computation of sub-tiles crossings.
+      </action>
+      <action dev="luc" type="update">
+        Added library setup test, with and without Orekit.
+      </action>
+      <action dev="luc" type="add">
+        Prepared framework for more complete flight dynamics tests.
+      </action>
+      <action dev="luc" type="update">
+        Implemented intersection at pixel level.
+      </action>
+      <action dev="luc" type="update">
+        Delegate final pixel intersection to Tile.
+      </action>
+      <action dev="luc" type="fix">
+        Added a basic scan algorithm, for testing and validation purposes.
+      </action>
+      <action dev="luc" type="update">
+        Added line-of-sight splitting at sub-tiles boundaries.
+      </action>
+      <action dev="luc" type="update">
+        Added test for level 0 merging row and tall tile.
+      </action>
+      <action dev="luc" type="update">
+        Added methods getLatitudeAtIndex and getLongitudeAtIndex in Tile.
+      </action>
+      <action dev="luc" type="update">
+        Changed semantics of merge methods so they refer to current level.
+      </action>
+      <action dev="luc" type="update">
+        Renamed package dem into raster.
+      </action>
+      <action dev="luc" type="update">
+        Work In Progress on duvenhage algorithm.
+      </action>
+      <action dev="luc" type="update">
+        Added getMergingRow and getMergingColumn methods.
+        These methods are essential to identify where to split the line-of-sight
+        in the Duvenhage algorithm, when going from one level in the min/max
+        kd-tree to the next level.
+      </action>
+      <action dev="luc" type="update">
+        Added isColumnMerging predicate.
+      </action>
+      <action dev="luc" type="update">
+        Added a tolerance around tile for elevation interpolation.
+        Elevation is going to be interpolated at tiles entry and exit points,
+        which are computed from geodetic conversions. The result points may be
+        very slightly out of tiles, at numerical accuracy level. These points
+        should nevertheless be allowed to be interpolated using the closest
+        pixel data, so a tolerance was needed.
+        The SimpleTile class uses a fixed tolerance, arbitrarily set to 1/8
+        pixel.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed interpolation error.
+      </action>
+      <action dev="luc" type="add">
+        started implementation of the Duvenhage algorithm.
+      </action>
+      <action dev="luc" type="update">
+        Added getLatitudeIndex and getLongitudeIndex in Tile.
+      </action>
+      <action dev="luc" type="fix">
+        Handle properly tiles boundaries.    
+        Tiles are expected to have no inter-tile gap, i.e. the boundary row/columns are repeated in neighboring tiles.
+      </action>
+      <action dev="luc" type="update">
+        Improved identification of point location with respect to tile.
+      </action>
+      <action dev="luc" type="update">
+        Sensor directly uses points and vectors, and no more Line.
+      </action>
+      <action dev="luc" type="update">
+        Intersection algorithms can use the new ExtendedEllipsoid.
+        This allows them to chop off line-of-sight at DEM cells boundaries.
+      </action>
+      <action dev="luc" type="fix">
+        Fixed wrong package in tests.
+      </action>
+      <action dev="luc" type="add">
+        Added ExtendedEllipsoid to chop off line-of-sight according to DEM.
+      </action>
+      <action dev="luc" type="update">
+        Split top level class from DEM intersection algorithm.
+      </action>
+      <action dev="luc" type="update">
+        Line numbers are double.
+      </action>
+      <action dev="luc" type="add">
+        Started implementation of direct localization ...
+      </action>
+      <action dev="luc" type="update">
+        Added a protection against unknown sensors.
+      </action>
+      <action dev="luc" type="add">
+        Added configuration for sensor lines of sight.
+      </action>
+      <action dev="luc" type="update">
+        Use an offset from a reference date for all computation.
+      </action>
+      <action dev="luc" type="update">
+        Added a getMergeLevel method to identify when pixels share min/max.
+        This is a first step towards duvenhage's algorithm.
+      </action>
+      <action dev="luc" type="fix">
+        Working version of min/max kd-tree tile.
+      </action>
+      <action dev="luc" type="add">
+        Started implementation of min/max KD-tree tile.
+        This is work in progress, the min/max computation seems wrong for now.
+      </action>
+      <action dev="luc" type="update">
+        pixels are double.
+      </action>
+      <action dev="luc" type="update">
+        Added protection against empty tiles.
+      </action>
+      <action dev="luc" type="update">
+        Removed AbastractTile.
+        Specialized tiles should directly extend SimpleTile.
+      </action>
+      <action dev="luc" type="add">
+        Added global min/max handling for any tile.
+      </action>
+      <action dev="luc" type="add">
+        Prepared first implementation for Duvenhage algorithm.
+        For now, only the (incomplete) API and classes hierarchy has been set
+        up. The tile is still a simple tile and does not yet creates the min/max
+        kd-tree. The algorithm doesn't do anything.
+      </action>
+      <action dev="luc" type="update">
+        Boilerplate part for Rugged interface implementation.
+      </action>
+      <action dev="luc" type="update">
+        Added API for global context initialization.
+      </action>
+      <action dev="luc" type="update">
+        Added containers for parsed position/velocity and attitude.
+      </action>
+      <action dev="luc" type="update">
+        Added a hook called after tile update completion.
+      </action>
+      <action dev="luc" type="update">
+        Force use of factory to create simple tiles.
+      </action>
+      <action dev="luc" type="update">
+        Extract an AbstractTile from SimpleTile
+      </action>
+      <action dev="luc" type="update">
+        Added a simple container for inverse localization result.
+      </action>
+      <action dev="luc" type="update">
+        Expanded API.
+      </action>
+      <action dev="luc" type="update">
+        Use new specialized exceptions.
+      </action>
+      <action dev="luc" type="update">
+        Added error messages handling, with translation.
+      </action>
+      <action dev="luc" type="update">
+        Added design document and diagrams.
+      </action>
+      <action dev="luc" type="update">
+        Implemented TilesCache.
+      </action>
+      <action dev="luc" type="update">
+        Added factory for tiles.
+        The factory is to be implemented by the DEM intersection algorithm, at
+        very low level (typically tiles based on min/max kd-tree for Duvenhage
+        algorithm).
+        The tile updater on the other hand is the responsibility of the mission
+        specific interface.
+      </action>
+      <action dev="luc" type="update">
+        Added method to check ground point coverage.
+      </action>
+      <action dev="luc" type="update">
+        Reference latitude/longitude must be the minimum.    
+        This ensures simple search for tiles given a ground point.
+      </action>
+    </release>
+  </body>
+</document>

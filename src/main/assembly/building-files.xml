@@ -4,7 +4,6 @@
       <includes>
         <include>BUILDING.txt</include>
         <include>pom.xml</include>
-        <include>build.xml</include>
         <include>checkstyle.xml</include>
         <include>findbugs-exclude-filter.xml</include>
         <include>license-header.txt</include>
