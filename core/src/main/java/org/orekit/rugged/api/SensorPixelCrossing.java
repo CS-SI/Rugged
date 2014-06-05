@@ -33,6 +33,9 @@ import org.orekit.errors.OrekitExceptionWrapper;
  */
 class SensorPixelCrossing {
 
+    /** Margin before and after end pixels, in order to avoid search failures near boundaries. */
+    private final double MARGIN = 5.0;
+
     /** Line sensor. */
     private final LineSensor sensor;
 
@@ -79,7 +82,7 @@ class SensorPixelCrossing {
             // find the root
             final UnivariateSolver solver =
                     new BracketingNthOrderBrentSolver(0.0, accuracy, 5);
-            return solver.solve(maxEval, f, 0.0, sensor.getNbPixels() - 1.0);
+            return solver.solve(maxEval, f, -MARGIN, sensor.getNbPixels() - 1 + MARGIN);
 
         } catch (NoBracketingException nbe) {
             // there are no solutions in the search interval

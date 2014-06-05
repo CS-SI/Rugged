@@ -207,20 +207,22 @@ public class LineSensor {
      * mean plane normal} orientation.
      * </p>
      * @param direction direction to check
-     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
+     * @param i pixel index (will be enforced between 0 and {@link #getNbPixels()})
      * @return relative azimuth of direction
      */
     public double getAzimuth(final Vector3D direction, final int i) {
-        return FastMath.atan2(Vector3D.dotProduct(direction, y[i]),
-                              Vector3D.dotProduct(direction, x[i]));
+        final int fixedI = FastMath.max(0, FastMath.min(x.length - 1, i));
+        return FastMath.atan2(Vector3D.dotProduct(direction, y[fixedI]),
+                              Vector3D.dotProduct(direction, x[fixedI]));
     }
 
     /** Get the the angular width a pixel.
-     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
+     * @param i pixel index (will be enforced between 0 and {@link #getNbPixels()})
      * @return relative azimuth of direction
      */
     public double getWidth(final int i) {
-        return width[i];
+        final int fixedI = FastMath.max(0, FastMath.min(x.length - 1, i));
+        return width[fixedI];
     }
 
 }

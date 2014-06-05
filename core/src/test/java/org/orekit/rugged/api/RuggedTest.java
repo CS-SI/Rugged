@@ -56,6 +56,7 @@ import org.orekit.forces.gravity.potential.GravityFieldFactory;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
+import org.orekit.frames.Transform;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.OrbitType;
@@ -69,6 +70,7 @@ import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
@@ -526,6 +528,166 @@ public class RuggedTest {
         checkInverseLocalization(2000, false, true,  5.0e-5, 8.0e-5);
         checkInverseLocalization(2000, true,  false, 5.0e-5, 8.0e-5);
         checkInverseLocalization(2000, true,  true,  5.0e-5, 8.0e-5);
+    }
+
+    @Test
+    public void testInverseLocNearLineEnd() throws OrekitException, RuggedException, URISyntaxException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        Vector3D offset = Vector3D.ZERO;
+        TimeScale gps = TimeScalesFactory.getGPS();
+        Frame eme2000 = FramesFactory.getEME2000();
+        Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+        ArrayList<Pair<AbsoluteDate, Rotation>> satelliteQList = new ArrayList<Pair<AbsoluteDate, Rotation>>();
+        ArrayList<Pair<AbsoluteDate, PVCoordinates>> satellitePVList = new ArrayList<Pair<AbsoluteDate, PVCoordinates>>();
+
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:58:42.592937", -0.340236d, 0.333952d, -0.844012d, -0.245684d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:06.592937", -0.354773d, 0.329336d, -0.837871d, -0.252281d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:30.592937", -0.369237d, 0.324612d, -0.831445d, -0.258824d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:54.592937", -0.3836d, 0.319792d, -0.824743d, -0.265299d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:00:18.592937", -0.397834d, 0.314883d, -0.817777d, -0.271695d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:00:42.592937", -0.411912d, 0.309895d, -0.810561d, -0.278001d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:06.592937", -0.42581d, 0.304838d, -0.803111d, -0.284206d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:30.592937", -0.439505d, 0.299722d, -0.795442d, -0.290301d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:54.592937", -0.452976d, 0.294556d, -0.787571d, -0.296279d);
+        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:02:18.592937", -0.466207d, 0.28935d, -0.779516d, -0.302131d);
+
+
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:58:42.592937", -726361.466d, -5411878.485d, 4637549.599d, -2068.995d, -4500.601d, -5576.736d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:04.192937", -779538.267d, -5506500.533d, 4515934.894d, -2058.308d, -4369.521d, -5683.906d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:25.792937", -832615.368d, -5598184.195d, 4392036.13d, -2046.169d, -4236.279d, -5788.201d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:47.392937", -885556.748d, -5686883.696d, 4265915.971d, -2032.579d, -4100.944d, -5889.568d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:08.992937", -938326.32d, -5772554.875d, 4137638.207d, -2017.537d, -3963.59d, -5987.957d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:30.592937", -990887.942d, -5855155.21d, 4007267.717d, -2001.046d, -3824.291d, -6083.317d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:52.192937", -1043205.448d, -5934643.836d, 3874870.441d, -1983.107d, -3683.122d, -6175.6d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:13.792937", -1095242.669d, -6010981.571d, 3740513.34d, -1963.723d, -3540.157d, -6264.76d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:35.392937", -1146963.457d, -6084130.93d, 3604264.372d, -1942.899d, -3395.473d, -6350.751d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -1920.64d, -3249.148d, -6433.531d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -1896.952d, -3101.26d, -6513.056d);
+
+        TileUpdater updater = new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l, FastMath.toRadians(1.0), 257);
+        Rugged rugged = new Rugged(updater, 8,
+                                   AlgorithmId.DUVENHAGE, EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   satellitePVList, 8,
+                                   satelliteQList, 8);
+
+        List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
+        lineOfSight.add(new Vector3D(-0.011204, 0.181530, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181518, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181505, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181492, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181480, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181467, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181455, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181442, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181430, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181417, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181405, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181392, 1d).normalize());
+
+        lineOfSight.add(new Vector3D(-0.011204, 0.149762, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149749, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149737, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149724, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149712, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149699, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149686, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149674, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149661, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149649, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149636, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149624, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149611, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149599, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149586, 1d).normalize());
+
+        AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:58:51.593", gps);
+        LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 638.5696040868454);
+        LineSensor lineSensor = new LineSensor("perfect-line", lineDatation, offset, lineOfSight);
+        rugged.addLineSensor(lineSensor);
+
+        GeodeticPoint point1 = new GeodeticPoint(0.7053784581520293, -1.7354535645320581, 691.856741468848);
+        SensorPixel sensorPixel1 = rugged.inverseLocalization(lineSensor.getName(), point1, 1, 131328);
+        Assert.assertEquals(   2.0147269, sensorPixel1.getLineNumber(), 1.0e-6);
+        Assert.assertEquals(   2.0927144, sensorPixel1.getPixelNumber(), 1.0e-6);
+        GeodeticPoint point2 = new GeodeticPoint(0.704463899881073, -1.7303503789334154, 648.9200602492216);
+        SensorPixel sensorPixel2 = rugged.inverseLocalization(lineSensor.getName(), point2, 1, 131328);
+        Assert.assertEquals(   2.0218406, sensorPixel2.getLineNumber(), 1.0e-6);
+        Assert.assertEquals(  29.5300850, sensorPixel2.getPixelNumber(), 1.0e-6);
+        GeodeticPoint point3 = new GeodeticPoint(0.7009593480939814, -1.7314283804521957, 588.3075485689468);
+        SensorPixel sensorPixel3 = rugged.inverseLocalization(lineSensor.getName(), point3, 1, 131328);
+        Assert.assertEquals(2305.2617453, sensorPixel3.getLineNumber(),  1.0e-6);
+        Assert.assertEquals(  28.1838132, sensorPixel3.getPixelNumber(), 1.0e-6);
+        GeodeticPoint point4 = new GeodeticPoint(0.7018731669637096, -1.73651769725183, 611.2759403696498);
+        SensorPixel sensorPixel4 = rugged.inverseLocalization(lineSensor.getName(), point4, 1, 131328);
+        Assert.assertEquals(2305.2550610, sensorPixel4.getLineNumber(), 1.0e-6);
+        Assert.assertEquals(   1.5444731, sensorPixel4.getPixelNumber(), 1.0e-6);
+
+    }
+
+    /**
+     * Add a satellite PV to given satellitePVList List
+     * @param gps GPS TimeScale
+     * @param eme2000 EME200 Frame
+     * @param itrf ITRF Frame
+     * @param satellitePVList list of Satellite Position/Velocity
+     * @param absDate Absolute date
+     * @param px Position x
+     * @param py Position y
+     * @param pz Position z
+     * @param vx Velocity x
+     * @param vy Velocity y
+     * @param vz Velocity z
+     * @throws OrekitException
+     */
+    protected void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
+                                  ArrayList<Pair<AbsoluteDate, PVCoordinates>> satellitePVList,
+                                  String absDate,
+                                  double px, double py, double pz, double vx, double vy, double vz)
+        throws OrekitException {
+        AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
+        Vector3D position = new Vector3D(px, py, pz);
+        Vector3D velocity = new Vector3D(vx, vy, vz);
+        PVCoordinates pvITRF = new PVCoordinates(position, velocity);
+        Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
+        Vector3D pEME2000 = transform.transformPosition(pvITRF.getPosition());
+        Vector3D vEME2000 = transform.transformVector(pvITRF.getVelocity());
+        PVCoordinates pvCoords = new PVCoordinates(pEME2000, vEME2000);
+        Pair<AbsoluteDate, PVCoordinates> pair = new Pair<AbsoluteDate, PVCoordinates>(ephemerisDate, pvCoords);
+        satellitePVList.add(pair);
+    }
+
+    /**
+     * Add a SatelliteQ to the given
+     * @param gps GPS TimeScale
+     * @param satelliteQList  list of SatelliteQ
+     * @param absDate  Absolute date
+     * @param q0
+     * @param q1
+     * @param q2
+     * @param q3
+     */
+    protected void addSatelliteQ(TimeScale gps, ArrayList<Pair<AbsoluteDate, Rotation>> satelliteQList, String absDate, double q0, double q1, double q2,
+            double q3) {
+        AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
+        Rotation rotation = new Rotation(q0, q1, q2, q3, true);
+        Pair<AbsoluteDate, Rotation> pair = new Pair<AbsoluteDate, Rotation>(attitudeDate, rotation);
+        satelliteQList.add(pair);
+    }
+
+    /**
+     * @param point
+     * @param sensorPixel
+     */
+    protected void checkInverseLoc(GeodeticPoint point, SensorPixel sensorPixel) {
+        if (sensorPixel != null) {
+            System.out.println("Point : " + point);
+            System.out.println("Sensor pixel : line " + sensorPixel.getLineNumber() + " number " + sensorPixel.getPixelNumber());
+        } else {
+            System.out.println("Point : " + point);
+            System.out.println("Sensor pixel : Not found !!! :'(");
+        }
     }
 
     private void checkInverseLocalization(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
