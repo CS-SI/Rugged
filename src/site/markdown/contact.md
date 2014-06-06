@@ -20,15 +20,11 @@ Mailing lists
 
 Most discussions should occur on the public mailing lists.
 
-|---------------|------------------------------|------------------------------------------------------------|-------------------------------------------------------|
-|     topic     |         post address         |                      subscribe URL                         |                      archive URL                      |
-|---------------|------------------------------|------------------------------------------------------------|-------------------------------------------------------|
-|  announces    | orekit-announces@orekit.org  |  {{https://www.orekit.org/wws/subscribe/orekit-announces}} |  {{https://www.orekit.org/wws/arc/orekit-announces}}  |
-|---------------|------------------------------|------------------------------------------------------------|-------------------------------------------------------|
-|     users     |   orekit-users@orekit.org    |  {{https://www.orekit.org/wws/subscribe/orekit-users}}     |  {{https://www.orekit.org/wws/arc/orekit-users}}      |
-|---------------|------------------------------|------------------------------------------------------------|-------------------------------------------------------|
-|   developers  | orekit-developers@orekit.org | {{https://www.orekit.org/wws/subscribe/orekit-developers}} |  {{https://www.orekit.org/wws/arc/orekit-developers}} |
-|---------------|------------------------------|------------------------------------------------------------|-------------------------------------------------------|
+|---------------|------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+|     topic     |         post address         |                                            subscribe URL                                                           |                                               archive URL                                            |
+|  announces    | orekit-announces@orekit.org  |   [https://www.orekit.org/wws/subscribe/orekit-announces](https://www.orekit.org/wws/subscribe/orekit-announces)   | [https://www.orekit.org/wws/arc/orekit-announces](https://www.orekit.org/wws/arc/orekit-announces)   |
+|     users     |   orekit-users@orekit.org    |   [https://www.orekit.org/wws/subscribe/orekit-users](https://www.orekit.org/wws/subscribe/orekit-users)           | [https://www.orekit.org/wws/arc/orekit-users](https://www.orekit.org/wws/arc/orekit-users)           |
+|   developers  | orekit-developers@orekit.org |   [https://www.orekit.org/wws/subscribe/orekit-developers](https://www.orekit.org/wws/subscribe/orekit-developers) | [https://www.orekit.org/wws/arc/orekit-developers](https://www.orekit.org/wws/arc/orekit-developers) |
 
 Please register to these mailing lists before attempting to post!
 
@@ -50,7 +46,7 @@ please use the following address:
 
 |:---------------------------------------------------------------------|
 |  CS Systèmes d'Information                                           |
-|  Business Unit Espace et Renseignement                               |
+|  BU E-space & Geoinformation                                         |
 |  parc de la plaine - 5 rue Brindejonc des Moulinais                  |
 |  BP 15872                                                            |
 |  31506 Toulouse CEDEX 5                                              |

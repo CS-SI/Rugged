@@ -351,7 +351,7 @@
           <links>
             <link>http://download.oracle.com/javase/1.6.0/docs/api/</link>
             <link>http://commons.apache.org/math/apidocs/</link>
-            <link>https://www.orekit.org/static/apidocs/index.html</link>
+            <link>https://www.orekit.org/static/apidocs/</link>
           </links>
           <charset>${project.reporting.outputEncoding}</charset>
         </configuration>

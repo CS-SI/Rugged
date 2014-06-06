@@ -17,7 +17,7 @@ Overview
 
   Rugged is an add-on for Orekit handling Digital Elevation Models
   contribution to line of sight computation. It is a free software
-  low-level library written in Java.
+  intermediate-level library written in Java.
 
   It mainly provides direct and inverse localization, i.e. it allows
   to compute accurately which ground point is looked at from a specific
@@ -27,17 +27,42 @@ Overview
 Features
 --------
 
-  * Direct localization
+  * Direct/inverse localization
 
-  * Inverse localization
+  * can support several types of Digital Elevation Models, including user-provided models
+
+  * several intersection models algorithms available
+
+  * can propagate orbit by itself for preliminary mission analysis or data generation
+
+  * can propagate attitude by itself for preliminary mission analysis or data generation
+
+  * *very* fast
+
+  * Both modern and legacy models for Earth rotation
+    * Lieske (1976), Wahr (1980), 
+    * Mathews, Herring, Buffett (2002)
+    * Capitaine (2006)
+
+  * complete set of corrections applied for greater accuracy
+    * δΔψ, δΔε on precession nutation (about 3m correction since 2013, steadily increasing)
+    * ΔUT₁, lod on proper rotation (can theoretically reach up to 400m)
+    * u, v pole wander (polhody), (about 15m correction)
+    * light time correction (about 1.2m)
+    * aberration of light correction (about 20m)
+    * line-of-sight curvature in geodetic coordinates,
+      (0m at nadir, 10m at 30° dive angle, hundreds of meters for skimming los)
+    * refraction not available in early 2014, but expected to be added soon
+
+  * not limited to Earth
+
+  * highly portable (Linux, Windows, MacOSX, ...)
 
   * Localized in several languages
 
     * English
 
     * French
-
-    * Galician
 
 Free software
 -------------
@@ -49,7 +74,7 @@ It is distributed under the [Apache License Version 2.0](./license.html). This
 is a well known business-friendly license. This means anybody can use it to build
 any application, free or not. There are no strings attached to your own code.
 
-Everybody is encouraged to use Orekit as a common low level layer to improve
+Everybody is encouraged to use Rugged as a common intermediate level layer to improve
 interoperability in space systems.
 
 Maintained library
@@ -59,5 +84,5 @@ Rugged has been in development since 2013 inside [CS Systèmes
 d'Information](http://www.c-s.fr/) and is still used and maintained by its dual teams
 of space dynamics and image processing experts.
 
-Rugged is used for image processing of the Sentinel 2 missiong at European Space
+Rugged is used for image processing of the Sentinel 2 mission at European Space
 Agency (ESA).

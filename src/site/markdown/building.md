@@ -86,6 +86,7 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
 	* aster/src/main/resources
 	* core/src/test/resources
 	* aster/src/test/resources
+
     in the source tab of the Configure Build Path dialog
 
   * set the external libraries to JRE system library (provided by Eclipse),

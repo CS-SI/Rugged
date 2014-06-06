@@ -16,7 +16,7 @@
 <project name="Rugged">
   <bannerLeft>
     <name>CS Syst&#232;mes d&#039;Information</name>
-    <src>/images/cs_logiciel_dev_32pixelsgri.png</src>
+    <src>/images/logo_cs_2008_baseline_ang.jpg</src>
     <href>http://www.c-s.fr/</href>
   </bannerLeft>
   <bannerRight>
@@ -45,4 +45,11 @@
       </menu>
     <menu ref="reports"/>
   </body>
+  <poweredBy>
+    <logo name="orekit"
+          href="https://www.orekit.org/"
+          img="/images/orekit-logo.png"
+          alt="orekit"
+          width="100" />
+  </poweredBy>
 </project>
