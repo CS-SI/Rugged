@@ -22,7 +22,14 @@ Overview
   It mainly provides direct and inverse localization, i.e. it allows
   to compute accurately which ground point is looked at from a specific
   pixel in a spacecraft instrument, and conversely which pixel will
-  see a specified ground point.
+  see a specified ground point. This mapping between ground and sensor
+  is computed with a viewing model taking into account ground Digital
+  Elevation Model, Earth rotation will all its tiny irregularities,
+  on-board sensor pixels individual line-of-sights, spacecraft motion and
+  attitude and several physical effects.
+
+  Direct and inverse localization can be used to perform full ortho-rectification
+  of images and correlation between sensors observing the same area.
 
 Features
 --------

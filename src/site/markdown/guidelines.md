@@ -84,8 +84,8 @@ difficult to catch bugs are caused by mutable objects that are changed in some d
 buried code and have an impact on user code that forgot to perform a defensive copy.
 Orbits, dates, vectors, and rotations are all immutable objects.
 
-Style
------
+Style Rules
+-----------
 
 For reading ease and consistency, the existing code style should be
 preserved for all new developments. The rules are common ones, inherited
@@ -142,27 +142,29 @@ root directory.
 : _star_ imports are forbidden, parameters and local variables are final
   wherever possible.
 
-Rules summary
--------------
+Design Rules
+------------
 
-|---|-----------------|----------------------------------------------------------------------------------|
-| 1 |    validation   | seek for a line test coverage of at least 80% (more is better)                   |
-|---|-----------------|----------------------------------------------------------------------------------|
-| 2 |    robustness   | fix _all_ errors and warnings found by findbugs                                  |
-|---|-----------------|----------------------------------------------------------------------------------|
-| 3 |    robustness   | do not make assumptions on the runtime environment of applications using Rugged  |
-|   |                 | (they may be embedded with no console, no possible user interaction, no network, |
-|   |                 | no writable file system, no stoppable main program, have memory constraints,     |
-|   |                 | time constraints, be run in different linguistic contexts ...)                   |
-|---|-----------------|----------------------------------------------------------------------------------|
-| 4 | maintainability | follow Occam's razor principle                                                   |
-|   |                 | or its declination in computer science: KISS (Keep It Simple, Stupid)            |
-|---|-----------------|----------------------------------------------------------------------------------|
-| 5 |    efficiency   | seek efficiency, but do not overstep robustness and maintainability              |
-|---|-----------------|----------------------------------------------------------------------------------|
-| 6 |    robustness   | use immutable objects as much as possible                                        |
-|   | maintainability |                                                                                  |
-|   |    efficiency   |                                                                                  |
-|---|-----------------|----------------------------------------------------------------------------------|
-| 7 |      style      | fix _all_ errors and warnings found by checkstyle                                |
-|---|-----------------|----------------------------------------------------------------------------------|
+*coverage* (validation)
+: seek for a line test coverage of at least 80% (more is better)
+
+*findbugs* (robustness)
+: fix _all_ errors and warnings found by findbugs
+
+*no runtime assumptions* (robustness)
+:  do not make assumptions on the runtime environment of applications using Rugged
+   (they may be embedded with no console, no possible user interaction, no network,
+   no writable file system, no stoppable main program, have memory constraints,
+   time constraints, be run in different linguistic contexts ...)
+
+*simplicity* (maintainability)
+:  follow Occam's razor principle or its declination in computer science: KISS (Keep It Simple, Stupid)
+
+*balanced design* (efficiency)
+:  seek efficiency, but do not overstep robustness and maintainability
+
+*immutable objects* (robustness, maintainability)
+: use immutable objects as much as possible
+
+*checkstyle* (style)
+: fix _all_ errors and warnings found by checkstyle
