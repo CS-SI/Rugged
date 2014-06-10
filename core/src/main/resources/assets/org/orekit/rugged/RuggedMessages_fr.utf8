@@ -7,6 +7,9 @@ OUT_OF_TILE_INDICES = aucune donnée aux indices [{0}, {1}], la tuile ne couvre 
 # no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
 OUT_OF_TILE_ANGLES = aucune donnée à la latitude {0} et à la longitude {1}, la tuile ne couvre que les latitudes de {2} à {3} et les longitudes de {4} à {5}
 
+# date {0} is out of time span [{1}, {2}]
+OUT_OF_TIME_RANGE = la date {0} est hors de la plage temporelle [{1}, {2}]
+
 # general context has not been initialized
 UNINITIALIZED_CONTEXT = le contexte général n''a pas été initialisé
 

@@ -186,6 +186,82 @@ public class RuggedTest {
 
     }
 
+    @Test
+    public void testOutOfTimeRange()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        AbsoluteDate t0 = new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC());
+
+        @SuppressWarnings("unchecked")
+        List<Pair<AbsoluteDate, PVCoordinates>> pv = Arrays.asList(
+            createPV(t0, 0.000, -1545168.478, -7001985.361,       0.000, -1095.152224, 231.344922, -7372.851944),
+            createPV(t0, 1.000, -1546262.794, -7001750.226,   -7372.851, -1093.478904, 238.925123, -7372.847995),
+            createPV(t0, 2.000, -1547355.435, -7001507.511,  -14745.693, -1091.804408, 246.505033, -7372.836044),
+            createPV(t0, 3.000, -1548446.402, -7001257.216,  -22118.520, -1090.128736, 254.084644, -7372.816090),
+            createPV(t0, 4.000, -1549535.693, -7000999.342,  -29491.323, -1088.451892, 261.663949, -7372.788133),
+            createPV(t0, 5.000, -1550623.306, -7000733.888,  -36864.094, -1086.773876, 269.242938, -7372.752175),
+            createPV(t0, 6.000, -1551709.240, -7000460.856,  -44236.825, -1085.094690, 276.821604, -7372.708214),
+            createPV(t0, 7.000, -1552793.495, -7000180.245,  -51609.507, -1083.414336, 284.399938, -7372.656251),
+            createPV(t0, 8.000, -1553876.068, -6999892.056,  -58982.134, -1081.732817, 291.977932, -7372.596287),
+            createPV(t0, 9.000, -1554956.960, -6999596.289,  -66354.697, -1080.050134, 299.555578, -7372.528320),
+            createPV(t0,10.000, -1556036.168, -6999292.945,  -73727.188, -1078.366288, 307.132868, -7372.452352));
+
+        @SuppressWarnings("unchecked")
+        List<Pair<AbsoluteDate, Rotation>> q = Arrays.asList(
+            createQ(t0, 4.000, 0.517572246112, -0.399109487434,  0.581929667081,  0.483930211565),
+            createQ(t0, 5.000, 0.517876365096, -0.398856552030,  0.581658654071,  0.484139165451),
+            createQ(t0, 6.000, 0.518180341637, -0.398603508416,  0.581387482627,  0.484347986126),
+            createQ(t0, 7.000, 0.518484175647, -0.398350356669,  0.581116152834,  0.484556673529),
+            createQ(t0, 8.000, 0.518787867035, -0.398097096866,  0.580844664773,  0.484765227599));
+
+        TileUpdater updater =
+                new VolcanicConeElevationUpdater(new GeodeticPoint(FastMath.toRadians(13.25667), FastMath.toRadians(123.685), 2463.0),
+                                                 FastMath.toRadians(30.0), 16.0,
+                                                 FastMath.toRadians(1.0), 1201);
+
+        Assert.assertNotNull(new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                        t0.shiftedBy(4), t0.shiftedBy(6), pv, 2, q, 2));
+        try {
+            new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   t0.shiftedBy(-1), t0.shiftedBy(6), pv, 2, q, 2);
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assert.assertEquals(t0.shiftedBy(-1), re.getParts()[0]);
+        }
+
+        try {
+            new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   t0.shiftedBy(2), t0.shiftedBy(6), pv, 2, q, 2);
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assert.assertEquals(t0.shiftedBy(2), re.getParts()[0]);
+        }
+
+        try {
+            new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   t0.shiftedBy(4), t0.shiftedBy(9), pv, 2, q, 2);
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assert.assertEquals(t0.shiftedBy(9), re.getParts()[0]);
+        }
+
+        try {
+            new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   t0.shiftedBy(4), t0.shiftedBy(12), pv, 2, q, 2);
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assert.assertEquals(t0.shiftedBy(12), re.getParts()[0]);
+        }
+
+    }
+
     // the following test is disabled by default
     // it is only used to check timings, and also creates a large (66M) temporary file
     @Test

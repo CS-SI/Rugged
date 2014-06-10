@@ -30,6 +30,7 @@ import org.orekit.frames.Transform;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.ImmutableTimeStampedCache;
@@ -70,8 +71,27 @@ public class SpacecraftToObservedBody {
                                     final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
 
-        this.inertialFrame        = inertialFrame;
-        this.bodyFrame            = bodyFrame;
+        // safety checks
+        final AbsoluteDate minPVDate = positionsVelocities.get(0).getFirst();
+        final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getFirst();
+        if (minDate.compareTo(minPVDate) < 0) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
+        }
+        if (maxDate.compareTo(maxPVDate) > 0) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
+        }
+
+        final AbsoluteDate minQDate  = quaternions.get(0).getFirst();
+        final AbsoluteDate maxQDate  = quaternions.get(quaternions.size() - 1).getFirst();
+        if (minDate.compareTo(minQDate) < 0) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minQDate, maxQDate);
+        }
+        if (maxDate.compareTo(maxQDate) > 0) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minQDate, maxQDate);
+        }
+
+        this.inertialFrame = inertialFrame;
+        this.bodyFrame     = bodyFrame;
 
         // set up the orbit provider
         final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
