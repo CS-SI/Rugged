@@ -144,6 +144,7 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   pv.get(0).getFirst(), pv.get(pv.size() - 1).getFirst(),
                                    pv, 8, q, 8);
 
         Assert.assertTrue(rugged.isLightTimeCorrected());
@@ -173,7 +174,8 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   propagator);
+                                   orbit.getDate().shiftedBy(-10.0), orbit.getDate().shiftedBy(+10.0),
+                                   1.0, 8, propagator);
 
         Assert.assertTrue(rugged.isLightTimeCorrected());
         rugged.setLightTimeCorrection(false);
@@ -230,7 +232,8 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   ephemeris);
+                                   lineDatation.getDate(firstLine), lineDatation.getDate(lastLine),
+                                   1.0 / lineDatation.getRate(0.0), 8, ephemeris);
         rugged.setLightTimeCorrection(true);
         rugged.setAberrationOfLightCorrection(true);
 
@@ -302,6 +305,7 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   lineDatation.getDate(firstLine), lineDatation.getDate(lastLine),
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
@@ -352,6 +356,7 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   lineDatation.getDate(firstLine), lineDatation.getDate(lastLine),
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
 
@@ -407,6 +412,7 @@ public class RuggedTest {
 
         Rugged ruggedFull = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                       lineDatation.getDate(firstLine), lineDatation.getDate(lastLine),
                                        orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                        orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         ruggedFull.addLineSensor(lineSensor);
@@ -414,6 +420,7 @@ public class RuggedTest {
 
         Rugged ruggedFlat = new Rugged(updater, 8, AlgorithmId.DUVENHAGE_FLAT_BODY,
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                       lineDatation.getDate(firstLine), lineDatation.getDate(lastLine),
                                        orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                        orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         ruggedFlat.addLineSensor(lineSensor);
@@ -468,6 +475,7 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   lineDatation.getDate(firstLine), lineDatation.getDate(lastLine),
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         rugged.setLightTimeCorrection(true);
@@ -569,6 +577,7 @@ public class RuggedTest {
         TileUpdater updater = new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l, FastMath.toRadians(1.0), 257);
         Rugged rugged = new Rugged(updater, 8,
                                    AlgorithmId.DUVENHAGE, EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   satellitePVList.get(0).getFirst(), satellitePVList.get(satellitePVList.size() - 1).getFirst(),
                                    satellitePVList, 8,
                                    satelliteQList, 8);
 
@@ -721,6 +730,7 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   lineDatation.getDate(firstLine), lineDatation.getDate(lastLine),
                                    orbitToPV(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 8,
                                    orbitToQ(orbit, earth, lineDatation, firstLine, lastLine, 0.25), 2);
         rugged.setLightTimeCorrection(lightTimeCorrection);

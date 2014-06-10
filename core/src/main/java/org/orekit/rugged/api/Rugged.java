@@ -27,18 +27,16 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
-import org.orekit.attitudes.Attitude;
-import org.orekit.attitudes.AttitudeProvider;
-import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
+import org.orekit.errors.PropagationException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
-import org.orekit.orbits.CartesianOrbit;
-import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
+import org.orekit.propagation.SpacecraftState;
+import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.intersection.BasicScanAlgorithm;
 import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
@@ -49,9 +47,7 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
-import org.orekit.utils.ImmutableTimeStampedCache;
 import org.orekit.utils.PVCoordinates;
-import org.orekit.utils.PVCoordinatesProvider;
 
 /** Main class of Rugged library API.
  * @author Luc Maisonobe
@@ -105,21 +101,25 @@ public class Rugged {
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
      * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param minDate start of search time span
+     * @param maxDate end of search time span
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
      * @param aInterpolationOrder order to use for attitude interpolation
-     * @exception RuggedException if data needed for some frame cannot be loaded
+     * @exception RuggedException if data needed for some frame cannot be loaded or if position
+     * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
                   final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID),
+             selectInertialFrame(inertialFrameID), minDate, maxDate,
              positionsVelocities, pvInterpolationOrder, quaternions, aInterpolationOrder);
     }
 
@@ -137,21 +137,40 @@ public class Rugged {
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid reference ellipsoid
      * @param inertialFrame inertial frame
+     * @param minDate start of search time span
+     * @param maxDate end of search time span
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
      * @param aInterpolationOrder order to use for attitude interpolation
-     * @exception RuggedException if data needed for some frame cannot be loaded
+     * @exception RuggedException if data needed for some frame cannot be loaded or if position
+     * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
                   final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
                   final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
         throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID,
-             extend(ellipsoid), inertialFrame,
-             selectPVCoordinatesProvider(positionsVelocities, pvInterpolationOrder, inertialFrame),
-             selectAttitudeProvider(quaternions, aInterpolationOrder, inertialFrame));
+
+        // space reference
+        this.ellipsoid     = extend(ellipsoid);
+
+        // orbit/attitude to body converter
+        this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
+                                                     minDate, maxDate,
+                                                     positionsVelocities, pvInterpolationOrder,
+                                                     quaternions, aInterpolationOrder);
+
+        // intersection algorithm
+        this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+
+        this.sensors = new HashMap<String, LineSensor>();
+        this.finders = new HashMap<String, SensorMeanPlaneCrossing>();
+
+        setLightTimeCorrection(true);
+        setAberrationOfLightCorrection(true);
+
     }
 
     /** Build a configured instance.
@@ -169,17 +188,23 @@ public class Rugged {
      * @param ellipsoidID identifier of reference ellipsoid
      * @param inertialFrameID identifier of inertial frame
      * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param minDate start of search time span
+     * @param maxDate end of search time span
+     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
+     * @param interpolationOrder order to use for inertial/Earth/spacraft transforms interpolations
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final Propagator propagator)
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                  final double interpolationStep, final int interpolationOrder, final Propagator propagator)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID), propagator);
+             selectInertialFrame(inertialFrameID), minDate, maxDate,
+             interpolationStep, interpolationOrder, propagator);
     }
 
     /** Build a configured instance.
@@ -196,48 +221,68 @@ public class Rugged {
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid f reference ellipsoid
      * @param inertialFrame inertial frame
+     * @param minDate start of search time span
+     * @param maxDate end of search time span
+     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
+     * @param interpolationOrder order to use for inertial/Earth/spacraft transforms interpolations
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid,
-                  final Frame inertialFrame, final Propagator propagator)
+                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                  final double interpolationStep, final int interpolationOrder, final Propagator propagator)
         throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID,
-             extend(ellipsoid), inertialFrame,
-             propagator, propagator.getAttitudeProvider());
-    }
+        try {
 
-    /** Low level private constructor.
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoid f reference ellipsoid
-     * @param inertialFrame inertial frame
-     * @param pvProvider orbit propagator/interpolator
-     * @param aProvider attitude propagator/interpolator
-     * @exception RuggedException if data needed for some frame cannot be loaded
-     */
-    private Rugged(final TileUpdater updater, final int maxCachedTiles, final AlgorithmId algorithmID,
-                   final ExtendedEllipsoid ellipsoid, final Frame inertialFrame,
-                   final PVCoordinatesProvider pvProvider, final AttitudeProvider aProvider)
-        throws RuggedException {
+            // space reference
+            this.ellipsoid = extend(ellipsoid);
 
-        // space reference
-        this.ellipsoid     = ellipsoid;
+            // extract position/attitude samples from propagator
+            final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities = new ArrayList<Pair<AbsoluteDate,PVCoordinates>>();
+            final List<Pair<AbsoluteDate, Rotation>> quaternions = new ArrayList<Pair<AbsoluteDate,Rotation>>();
+            propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
 
-        // orbit/attitude to body converter
-        this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(), pvProvider, aProvider);
+                /** {@inheritDoc} */
+                @Override
+                public void init(final SpacecraftState s0, final AbsoluteDate t) {
+                }
 
-        // intersection algorithm
-        this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+                /** {@inheritDoc} */
+                @Override
+                public void handleStep(final SpacecraftState currentState, final boolean isLast)
+                    throws PropagationException {
+                    try {
+                        final AbsoluteDate  date = currentState.getDate();
+                        final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
+                        final Rotation      q    = currentState.getAttitude().getRotation();
+                        positionsVelocities.add(new Pair<AbsoluteDate, PVCoordinates>(date, pv));
+                        quaternions.add(new Pair<AbsoluteDate, Rotation>(date, q));
+                    } catch (OrekitException oe) {
+                        throw new PropagationException(oe);
+                    }
+                }
 
-        this.sensors = new HashMap<String, LineSensor>();
-        this.finders = new HashMap<String, SensorMeanPlaneCrossing>();
+            });
+            propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
 
-        setLightTimeCorrection(true);
-        setAberrationOfLightCorrection(true);
+            // orbit/attitude to body converter
+            this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
+                                                         minDate, maxDate,
+                                                         positionsVelocities, interpolationOrder,
+                                                         quaternions, interpolationOrder);
 
+            // intersection algorithm
+            this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+
+            this.sensors = new HashMap<String, LineSensor>();
+            this.finders = new HashMap<String, SensorMeanPlaneCrossing>();
+
+            setLightTimeCorrection(true);
+            setAberrationOfLightCorrection(true);
+        } catch (PropagationException pe) {
+            throw new RuggedException(pe, pe.getSpecifier(), pe.getParts());
+        }
     }
 
     /** Set flag for light time correction.
@@ -393,60 +438,6 @@ public class Rugged {
         return new ExtendedEllipsoid(ellipsoid.getEquatorialRadius(),
                                      ellipsoid.getFlattening(),
                                      ellipsoid.getBodyFrame());
-    }
-
-    /** Select attitude provider.
-     * @param quaternions satellite quaternions
-     * @param interpolationOrder order to use for interpolation
-     * @param inertialFrame inertial frame where position and velocity are defined
-     * @return selected attitude provider
-     */
-    private static AttitudeProvider selectAttitudeProvider(final List<Pair<AbsoluteDate, Rotation>> quaternions,
-                                                           final int interpolationOrder, final Frame inertialFrame) {
-
-        // set up the attitude provider
-        final List<Attitude> attitudes = new ArrayList<Attitude>(quaternions.size());
-        for (final Pair<AbsoluteDate, Rotation> q : quaternions) {
-            attitudes.add(new Attitude(q.getFirst(), inertialFrame, q.getSecond(), Vector3D.ZERO));
-        }
-        return new TabulatedProvider(attitudes, interpolationOrder, false);
-
-    }
-
-    /** Select position/velocity provider.
-     * @param positionsVelocities satellite position and velocity
-     * @param interpolationOrder order to use for interpolation
-     * @param inertialFrame inertial frame where position and velocity are defined
-     * @return selected position/velocity provider
-     */
-    private static PVCoordinatesProvider selectPVCoordinatesProvider(final List<Pair<AbsoluteDate,
-                                                                     PVCoordinates>> positionsVelocities,
-                                                                     final int interpolationOrder,
-                                                                     final Frame inertialFrame) {
-
-        // set up the ephemeris
-        final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
-        for (final Pair<AbsoluteDate, PVCoordinates> pv : positionsVelocities) {
-            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), inertialFrame,
-                                                            pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
-            orbits.add(orbit);
-        }
-
-        final ImmutableTimeStampedCache<Orbit> cache =
-                new ImmutableTimeStampedCache<Orbit>(interpolationOrder, orbits);
-        return new PVCoordinatesProvider() {
-
-            /** {@inhritDoc} */
-            @Override
-            public PVCoordinates getPVCoordinates(final AbsoluteDate date, final Frame f)
-                throws OrekitException {
-                final List<Orbit> sample = cache.getNeighbors(date);
-                final Orbit interpolated = sample.get(0).interpolate(date, sample);
-                return interpolated.getPVCoordinates(date, f);
-            }
-
-        };
-
     }
 
     /** Select DEM intersection algorithm.

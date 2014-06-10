@@ -16,14 +16,24 @@
  */
 package org.orekit.rugged.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.Pair;
 import org.orekit.attitudes.Attitude;
-import org.orekit.attitudes.AttitudeProvider;
+import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
+import org.orekit.orbits.CartesianOrbit;
+import org.orekit.orbits.Orbit;
+import org.orekit.rugged.api.RuggedException;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.utils.Constants;
+import org.orekit.utils.ImmutableTimeStampedCache;
 import org.orekit.utils.PVCoordinates;
-import org.orekit.utils.PVCoordinatesProvider;
 
 /** Provider for observation transforms.
  * @author Luc Maisonobe
@@ -31,30 +41,54 @@ import org.orekit.utils.PVCoordinatesProvider;
 public class SpacecraftToObservedBody {
 
     /** Inertial frame. */
-    private Frame inertialFrame;
+    private final Frame inertialFrame;
 
     /** Observed body frame. */
-    private Frame bodyFrame;
+    private final Frame bodyFrame;
 
-    /** Orbit propagator/interpolator. */
-    private PVCoordinatesProvider pvProvider;
+    /** Satellite orbits. */
+    private final ImmutableTimeStampedCache<Orbit> orbits;
 
-    /** Attitude propagator/interpolator. */
-    private AttitudeProvider aProvider;
+    /** Satellite quaternions. */
+    private final TabulatedProvider attitudes;
 
     /** Simple constructor.
      * @param inertialFrame inertial frame
      * @param bodyFrame observed body frame
-     * @param pvProvider orbit propagator/interpolator
-     * @param aProvider attitude propagator/interpolator
+     * @param minDate start of search time span
+     * @param maxDate end of search time span
+     * @param positionsVelocities satellite position and velocity
+     * @param pvInterpolationOrder order to use for position/velocity interpolation
+     * @param quaternions satellite quaternions
+     * @param aInterpolationOrder order to use for attitude interpolation
+     * @exception RuggedException if position or attitude samples do not fully cover the
+     * [{@code minDate}, {@code maxDate}] search time span
      */
     public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
-                                    final PVCoordinatesProvider pvProvider,
-                                    final AttitudeProvider aProvider) {
-        this.inertialFrame = inertialFrame;
-        this.bodyFrame     = bodyFrame;
-        this.pvProvider    = pvProvider;
-        this.aProvider     = aProvider;
+                                    final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                                    final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
+                                    final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
+        throws RuggedException {
+
+        this.inertialFrame        = inertialFrame;
+        this.bodyFrame            = bodyFrame;
+
+        // set up the orbit provider
+        final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
+        for (final Pair<AbsoluteDate, PVCoordinates> pv : positionsVelocities) {
+            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), inertialFrame,
+                                                            pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
+            orbits.add(orbit);
+        }
+        this.orbits = new ImmutableTimeStampedCache<Orbit>(pvInterpolationOrder, orbits);
+
+        // set up the attitude provider
+        final List<Attitude> attitudes = new ArrayList<Attitude>(quaternions.size());
+        for (final Pair<AbsoluteDate, Rotation> q : quaternions) {
+            attitudes.add(new Attitude(q.getFirst(), inertialFrame, q.getSecond(), Vector3D.ZERO));
+        }
+        this.attitudes = new TabulatedProvider(attitudes, aInterpolationOrder, false);
+
     }
 
     /** Get transform from spacecraft to inertial frame.
@@ -65,9 +99,13 @@ public class SpacecraftToObservedBody {
     public Transform getScToInertial(final AbsoluteDate date)
         throws OrekitException {
 
-        // propagate/interpolate orbit and attitude
-        final PVCoordinates pv  = pvProvider.getPVCoordinates(date, inertialFrame);
-        final Attitude attitude = aProvider.getAttitude(pvProvider, date, inertialFrame);
+        //interpolate orbit and attitude
+        final List<Orbit>   sample = orbits.getNeighbors(date);
+        final Orbit         orbit  = sample.get(0).interpolate(date, sample);
+        final PVCoordinates pv     = orbit.getPVCoordinates(date, inertialFrame);
+
+        //interpolate attitude
+        final Attitude attitude = attitudes.getAttitude(orbit, date, inertialFrame);
 
         // compute transform from spacecraft frame to inertial frame
         return new Transform(date,
