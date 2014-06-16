@@ -78,7 +78,45 @@ public class AsterTileUpdaterTest {
         try {
             String warningResource = "org/orekit/rugged/geotiff/ASTER-files-warning.txt";
             URL url = AsterTileUpdaterTest.class.getClassLoader().getResource(warningResource);
-            warningFile = new File(url.toURI().getPath());
+            File compiledWarningFile = new File(url.toURI().getPath());
+
+            // the resource found above is in the "compiled" area of the build system,
+            // however, we want to notify users they may put ASTER files in the "source" area
+            // so we need to roll back the folders and find the sources.
+            // under eclipse, the compiled area is typically in a "bin" folder below project
+            // under maven, the compiled area of a multi-module component is in [component-name]/target/test-classes
+            // so we need to perform the following transform on the compiled path:
+            // replace /some/deep/path/to/project/[**]/org/orekit/rugged/geotiff/ASTER-files-warning.txt
+            // with    /some/deep/path/to/project/[aster/src/test/resources]/org/orekit/rugged/geotiff/ASTER-files-warning.txt
+            File walking = compiledWarningFile;
+            List<String> subs = new ArrayList<String>();
+            for (int i = 0; i < 6; ++i) {
+                subs.add(0, walking.getName());
+                walking = walking.getParentFile();
+            }
+            subs.set(0, "resources");
+            subs.add(0, "test");
+            subs.add(0, "src");
+            subs.add(0, "aster");
+
+            while (walking.exists()) {
+                File sourceWarningFile = walking;
+                for (String sub : subs) {
+                    if (sourceWarningFile.exists()) {
+                        sourceWarningFile = new File(sourceWarningFile, sub);
+                    }
+                }
+                if (sourceWarningFile.exists()) {
+                    warningFile = sourceWarningFile;
+                    return;
+                } else {
+                    walking = walking.getParentFile();
+                }
+            }
+
+            // we didn't find the source file, use the "compiled" one
+            warningFile = compiledWarningFile;
+
         } catch (URISyntaxException urise) {
             Assert.fail(urise.getLocalizedMessage());
         }
