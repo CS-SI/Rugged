@@ -16,25 +16,17 @@
  */
 package org.orekit.rugged.utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.util.Pair;
-import org.orekit.attitudes.Attitude;
-import org.orekit.attitudes.TabulatedProvider;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
-import org.orekit.orbits.CartesianOrbit;
-import org.orekit.orbits.Orbit;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
-import org.orekit.utils.Constants;
 import org.orekit.utils.ImmutableTimeStampedCache;
-import org.orekit.utils.PVCoordinates;
+import org.orekit.utils.TimeStampedAngularCoordinates;
+import org.orekit.utils.TimeStampedPVCoordinates;
 
 /** Provider for observation transforms.
  * @author Luc Maisonobe
@@ -48,10 +40,10 @@ public class SpacecraftToObservedBody {
     private final Frame bodyFrame;
 
     /** Satellite orbits. */
-    private final ImmutableTimeStampedCache<Orbit> orbits;
+    private final ImmutableTimeStampedCache<TimeStampedPVCoordinates> positionsVelocities;
 
     /** Satellite quaternions. */
-    private final TabulatedProvider attitudes;
+    private final ImmutableTimeStampedCache<TimeStampedAngularCoordinates> quaternions;
 
     /** Simple constructor.
      * @param inertialFrame inertial frame
@@ -67,13 +59,13 @@ public class SpacecraftToObservedBody {
      */
     public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
                                     final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                    final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
-                                    final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
+                                    final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationOrder,
+                                    final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationOrder)
         throws RuggedException {
 
         // safety checks
-        final AbsoluteDate minPVDate = positionsVelocities.get(0).getFirst();
-        final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getFirst();
+        final AbsoluteDate minPVDate = positionsVelocities.get(0).getDate();
+        final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getDate();
         if (minDate.compareTo(minPVDate) < 0) {
             throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
         }
@@ -81,8 +73,8 @@ public class SpacecraftToObservedBody {
             throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
         }
 
-        final AbsoluteDate minQDate  = quaternions.get(0).getFirst();
-        final AbsoluteDate maxQDate  = quaternions.get(quaternions.size() - 1).getFirst();
+        final AbsoluteDate minQDate  = quaternions.get(0).getDate();
+        final AbsoluteDate maxQDate  = quaternions.get(quaternions.size() - 1).getDate();
         if (minDate.compareTo(minQDate) < 0) {
             throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minQDate, maxQDate);
         }
@@ -93,21 +85,11 @@ public class SpacecraftToObservedBody {
         this.inertialFrame = inertialFrame;
         this.bodyFrame     = bodyFrame;
 
-        // set up the orbit provider
-        final List<Orbit> orbits = new ArrayList<Orbit>(positionsVelocities.size());
-        for (final Pair<AbsoluteDate, PVCoordinates> pv : positionsVelocities) {
-            final CartesianOrbit orbit = new CartesianOrbit(pv.getSecond(), inertialFrame,
-                                                            pv.getFirst(), Constants.EIGEN5C_EARTH_MU);
-            orbits.add(orbit);
-        }
-        this.orbits = new ImmutableTimeStampedCache<Orbit>(pvInterpolationOrder, orbits);
+        // set up the cache for position-velocities
+        this.positionsVelocities = new ImmutableTimeStampedCache<TimeStampedPVCoordinates>(pvInterpolationOrder, positionsVelocities);
 
-        // set up the attitude provider
-        final List<Attitude> attitudes = new ArrayList<Attitude>(quaternions.size());
-        for (final Pair<AbsoluteDate, Rotation> q : quaternions) {
-            attitudes.add(new Attitude(q.getFirst(), inertialFrame, q.getSecond(), Vector3D.ZERO));
-        }
-        this.attitudes = new TabulatedProvider(attitudes, aInterpolationOrder, false);
+        // set up the cache for attitudes
+        this.quaternions = new ImmutableTimeStampedCache<TimeStampedAngularCoordinates>(aInterpolationOrder, quaternions);
 
     }
 
@@ -119,17 +101,17 @@ public class SpacecraftToObservedBody {
     public Transform getScToInertial(final AbsoluteDate date)
         throws OrekitException {
 
-        //interpolate orbit and attitude
-        final List<Orbit>   sample = orbits.getNeighbors(date);
-        final Orbit         orbit  = sample.get(0).interpolate(date, sample);
-        final PVCoordinates pv     = orbit.getPVCoordinates(date, inertialFrame);
+        // interpolate position-velocity
+        final List<TimeStampedPVCoordinates> sample = positionsVelocities.getNeighbors(date);
+        final TimeStampedPVCoordinates pv = TimeStampedPVCoordinates.interpolate(date, true, sample);
 
-        //interpolate attitude
-        final Attitude attitude = attitudes.getAttitude(orbit, date, inertialFrame);
+        // interpolate attitude
+        final List<TimeStampedAngularCoordinates> sampleAC = quaternions.getNeighbors(date);
+        final TimeStampedAngularCoordinates quaternion = TimeStampedAngularCoordinates.interpolate(date, false, sampleAC);
 
         // compute transform from spacecraft frame to inertial frame
         return new Transform(date,
-                             new Transform(date, attitude.getOrientation().revert()),
+                             new Transform(date, quaternion.revert()),
                              new Transform(date, pv));
 
     }

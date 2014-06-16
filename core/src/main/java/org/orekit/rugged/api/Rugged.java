@@ -26,7 +26,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
@@ -48,6 +47,8 @@ import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 import org.orekit.utils.PVCoordinates;
+import org.orekit.utils.TimeStampedAngularCoordinates;
+import org.orekit.utils.TimeStampedPVCoordinates;
 
 /** Main class of Rugged library API.
  * @author Luc Maisonobe
@@ -114,8 +115,8 @@ public class Rugged {
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
                   final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
-                  final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
+                  final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationOrder,
+                  final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
@@ -149,8 +150,8 @@ public class Rugged {
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
                   final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                  final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities, final int pvInterpolationOrder,
-                  final List<Pair<AbsoluteDate, Rotation>> quaternions, final int aInterpolationOrder)
+                  final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationOrder,
+                  final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationOrder)
         throws RuggedException {
 
         // space reference
@@ -239,8 +240,10 @@ public class Rugged {
             this.ellipsoid = extend(ellipsoid);
 
             // extract position/attitude samples from propagator
-            final List<Pair<AbsoluteDate, PVCoordinates>> positionsVelocities = new ArrayList<Pair<AbsoluteDate,PVCoordinates>>();
-            final List<Pair<AbsoluteDate, Rotation>> quaternions = new ArrayList<Pair<AbsoluteDate,Rotation>>();
+            final List<TimeStampedPVCoordinates> positionsVelocities =
+                    new ArrayList<TimeStampedPVCoordinates>();
+            final List<TimeStampedAngularCoordinates> quaternions =
+                    new ArrayList<TimeStampedAngularCoordinates>();
             propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
 
                 /** {@inheritDoc} */
@@ -256,8 +259,8 @@ public class Rugged {
                         final AbsoluteDate  date = currentState.getDate();
                         final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
                         final Rotation      q    = currentState.getAttitude().getRotation();
-                        positionsVelocities.add(new Pair<AbsoluteDate, PVCoordinates>(date, pv));
-                        quaternions.add(new Pair<AbsoluteDate, Rotation>(date, q));
+                        positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity()));
+                        quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO));
                     } catch (OrekitException oe) {
                         throw new PropagationException(oe);
                     }

@@ -33,7 +33,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.Pair;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -75,6 +74,8 @@ import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 import org.orekit.utils.PVCoordinates;
+import org.orekit.utils.TimeStampedAngularCoordinates;
+import org.orekit.utils.TimeStampedPVCoordinates;
 
 public class RuggedTest {
 
@@ -89,8 +90,7 @@ public class RuggedTest {
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         AbsoluteDate t0 = new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC());
 
-        @SuppressWarnings("unchecked")
-        List<Pair<AbsoluteDate, PVCoordinates>> pv = Arrays.asList(
+        List<TimeStampedPVCoordinates> pv = Arrays.asList(
             createPV(t0, 0.000, -1545168.478, -7001985.361,       0.000, -1095.152224, 231.344922, -7372.851944),
             createPV(t0, 1.000, -1546262.794, -7001750.226,   -7372.851, -1093.478904, 238.925123, -7372.847995),
             createPV(t0, 2.000, -1547355.435, -7001507.511,  -14745.693, -1091.804408, 246.505033, -7372.836044),
@@ -113,8 +113,7 @@ public class RuggedTest {
             createPV(t0,19.000, -1565673.105, -6996221.923, -140075.049, -1063.159684, 375.311060, -7371.408591),
             createPV(t0,20.000, -1566735.417, -6995842.825, -147446.380, -1061.464319, 382.884328, -7371.252616));
 
-        @SuppressWarnings("unchecked")
-        List<Pair<AbsoluteDate, Rotation>> q = Arrays.asList(
+        List<TimeStampedAngularCoordinates> q = Arrays.asList(
             createQ(t0, 0.000, 0.516354347549, -0.400120145429,  0.583012133139,  0.483093065155),
             createQ(t0, 1.000, 0.516659035405, -0.399867643627,  0.582741754688,  0.483302551263),
             createQ(t0, 2.000, 0.516963581177, -0.399615033309,  0.582471217473,  0.483511904409),
@@ -144,7 +143,7 @@ public class RuggedTest {
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   pv.get(0).getFirst(), pv.get(pv.size() - 1).getFirst(),
+                                   pv.get(0).getDate(), pv.get(pv.size() - 1).getDate(),
                                    pv, 8, q, 8);
 
         Assert.assertTrue(rugged.isLightTimeCorrected());
@@ -194,8 +193,7 @@ public class RuggedTest {
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         AbsoluteDate t0 = new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC());
 
-        @SuppressWarnings("unchecked")
-        List<Pair<AbsoluteDate, PVCoordinates>> pv = Arrays.asList(
+        List<TimeStampedPVCoordinates> pv = Arrays.asList(
             createPV(t0, 0.000, -1545168.478, -7001985.361,       0.000, -1095.152224, 231.344922, -7372.851944),
             createPV(t0, 1.000, -1546262.794, -7001750.226,   -7372.851, -1093.478904, 238.925123, -7372.847995),
             createPV(t0, 2.000, -1547355.435, -7001507.511,  -14745.693, -1091.804408, 246.505033, -7372.836044),
@@ -208,8 +206,7 @@ public class RuggedTest {
             createPV(t0, 9.000, -1554956.960, -6999596.289,  -66354.697, -1080.050134, 299.555578, -7372.528320),
             createPV(t0,10.000, -1556036.168, -6999292.945,  -73727.188, -1078.366288, 307.132868, -7372.452352));
 
-        @SuppressWarnings("unchecked")
-        List<Pair<AbsoluteDate, Rotation>> q = Arrays.asList(
+        List<TimeStampedAngularCoordinates> q = Arrays.asList(
             createQ(t0, 4.000, 0.517572246112, -0.399109487434,  0.581929667081,  0.483930211565),
             createQ(t0, 5.000, 0.517876365096, -0.398856552030,  0.581658654071,  0.484139165451),
             createQ(t0, 6.000, 0.518180341637, -0.398603508416,  0.581387482627,  0.484347986126),
@@ -623,8 +620,8 @@ public class RuggedTest {
         TimeScale gps = TimeScalesFactory.getGPS();
         Frame eme2000 = FramesFactory.getEME2000();
         Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-        ArrayList<Pair<AbsoluteDate, Rotation>> satelliteQList = new ArrayList<Pair<AbsoluteDate, Rotation>>();
-        ArrayList<Pair<AbsoluteDate, PVCoordinates>> satellitePVList = new ArrayList<Pair<AbsoluteDate, PVCoordinates>>();
+        ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
+        ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
 
         addSatelliteQ(gps, satelliteQList, "2009-12-11T16:58:42.592937", -0.340236d, 0.333952d, -0.844012d, -0.245684d);
         addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:06.592937", -0.354773d, 0.329336d, -0.837871d, -0.252281d);
@@ -653,7 +650,7 @@ public class RuggedTest {
         TileUpdater updater = new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l, FastMath.toRadians(1.0), 257);
         Rugged rugged = new Rugged(updater, 8,
                                    AlgorithmId.DUVENHAGE, EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   satellitePVList.get(0).getFirst(), satellitePVList.get(satellitePVList.size() - 1).getFirst(),
+                                   satellitePVList.get(0).getDate(), satellitePVList.get(satellitePVList.size() - 1).getDate(),
                                    satellitePVList, 8,
                                    satelliteQList, 8);
 
@@ -727,7 +724,7 @@ public class RuggedTest {
      * @throws OrekitException
      */
     protected void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
-                                  ArrayList<Pair<AbsoluteDate, PVCoordinates>> satellitePVList,
+                                  ArrayList<TimeStampedPVCoordinates> satellitePVList,
                                   String absDate,
                                   double px, double py, double pz, double vx, double vy, double vz)
         throws OrekitException {
@@ -738,9 +735,7 @@ public class RuggedTest {
         Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
         Vector3D pEME2000 = transform.transformPosition(pvITRF.getPosition());
         Vector3D vEME2000 = transform.transformVector(pvITRF.getVelocity());
-        PVCoordinates pvCoords = new PVCoordinates(pEME2000, vEME2000);
-        Pair<AbsoluteDate, PVCoordinates> pair = new Pair<AbsoluteDate, PVCoordinates>(ephemerisDate, pvCoords);
-        satellitePVList.add(pair);
+        satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000));
     }
 
     /**
@@ -753,11 +748,11 @@ public class RuggedTest {
      * @param q2
      * @param q3
      */
-    protected void addSatelliteQ(TimeScale gps, ArrayList<Pair<AbsoluteDate, Rotation>> satelliteQList, String absDate, double q0, double q1, double q2,
+    protected void addSatelliteQ(TimeScale gps, ArrayList<TimeStampedAngularCoordinates> satelliteQList, String absDate, double q0, double q1, double q2,
             double q3) {
         AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
         Rotation rotation = new Rotation(q0, q1, q2, q3, true);
-        Pair<AbsoluteDate, Rotation> pair = new Pair<AbsoluteDate, Rotation>(attitudeDate, rotation);
+        TimeStampedAngularCoordinates pair = new TimeStampedAngularCoordinates(attitudeDate, rotation, Vector3D.ZERO);
         satelliteQList.add(pair);
     }
 
@@ -903,53 +898,57 @@ public class RuggedTest {
         return list;
     }
 
-    private Pair<AbsoluteDate, PVCoordinates> createPV(AbsoluteDate t0, double dt,
-                                                       double px, double py, double pz,
-                                                       double vx, double vy, double vz) {
-        return new Pair<AbsoluteDate, PVCoordinates>(t0.shiftedBy(dt),
-                                                     new PVCoordinates(new Vector3D(px, py, pz),
-                                                                       new Vector3D(vx, vy, vz)));
+    private TimeStampedPVCoordinates createPV(AbsoluteDate t0, double dt,
+                                              double px, double py, double pz,
+                                              double vx, double vy, double vz) {
+        return new TimeStampedPVCoordinates(t0.shiftedBy(dt),
+                                            new Vector3D(px, py, pz),
+                                            new Vector3D(vx, vy, vz));
     }
 
-    private Pair<AbsoluteDate, Rotation> createQ(AbsoluteDate t0, double dt,
+    private TimeStampedAngularCoordinates createQ(AbsoluteDate t0, double dt,
                                                        double q0, double q1, double q2, double q3) {
-        return new Pair<AbsoluteDate, Rotation>(t0.shiftedBy(dt), new Rotation(q0, q1, q2, q3, true));
+        return new TimeStampedAngularCoordinates(t0.shiftedBy(dt),
+                                                 new Rotation(q0, q1, q2, q3, true),
+                                                 Vector3D.ZERO);
     }
 
-    private List<Pair<AbsoluteDate, PVCoordinates>> orbitToPV(Orbit orbit, BodyShape earth,
-                                                              LineDatation lineDatation, int firstLine, int lastLine,
-                                                              double step)
+    private List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
+                                                     LineDatation lineDatation, int firstLine, int lastLine,
+                                                     double step)
         throws PropagationException {
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
         propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
-        final List<Pair<AbsoluteDate, PVCoordinates>> list = new ArrayList<Pair<AbsoluteDate, PVCoordinates>>();
+        final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
             public void init(SpacecraftState s0, AbsoluteDate t) {
             }   
             public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new Pair<AbsoluteDate, PVCoordinates>(currentState.getDate(),
-                                                               currentState.getPVCoordinates()));
+                list.add(new TimeStampedPVCoordinates(currentState.getDate(),
+                                                      currentState.getPVCoordinates().getPosition(),
+                                                      currentState.getPVCoordinates().getVelocity()));
             }
         });
         propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
         return list;
     }
 
-    private List<Pair<AbsoluteDate, Rotation>> orbitToQ(Orbit orbit, BodyShape earth,
-                                                        LineDatation lineDatation, int firstLine, int lastLine,
-                                                        double step)
+    private List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
+                                                         LineDatation lineDatation, int firstLine, int lastLine,
+                                                         double step)
         throws PropagationException {
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
         propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
-        final List<Pair<AbsoluteDate, Rotation>> list = new ArrayList<Pair<AbsoluteDate, Rotation>>();
+        final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
             public void init(SpacecraftState s0, AbsoluteDate t) {
             }   
             public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new Pair<AbsoluteDate, Rotation>(currentState.getDate(),
-                                                          currentState.getAttitude().getRotation()));
+                list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
+                                                           currentState.getAttitude().getRotation(),
+                                                           Vector3D.ZERO));
             }
         });
         propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
