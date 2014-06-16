@@ -66,6 +66,9 @@ public class Rugged {
     /** Maximum number of evaluations. */
     private static final int MAX_EVAL = 50;
 
+    /** Time step for frames transforms interpolations. */
+    private static final double FRAMES_TRANSFORMS_INTERPOLATION_STEP = 0.01;
+
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
 
@@ -161,7 +164,8 @@ public class Rugged {
         this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
                                                      minDate, maxDate,
                                                      positionsVelocities, pvInterpolationOrder,
-                                                     quaternions, aInterpolationOrder);
+                                                     quaternions, aInterpolationOrder,
+                                                     FRAMES_TRANSFORMS_INTERPOLATION_STEP);
 
         // intersection algorithm
         this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
@@ -273,7 +277,8 @@ public class Rugged {
             this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
                                                          minDate, maxDate,
                                                          positionsVelocities, interpolationOrder,
-                                                         quaternions, interpolationOrder);
+                                                         quaternions, interpolationOrder,
+                                                         FRAMES_TRANSFORMS_INTERPOLATION_STEP);
 
             // intersection algorithm
             this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
