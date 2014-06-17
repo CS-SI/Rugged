@@ -134,7 +134,7 @@ public class SpacecraftToObservedBody {
      */
     public Transform getScToInertial(final AbsoluteDate date)
         throws OrekitException {
-        return intepolate(date, scToInertial);
+        return interpolate(date, scToInertial);
     }
 
     /** Get transform from inertial frame to observed body frame.
@@ -144,7 +144,7 @@ public class SpacecraftToObservedBody {
      */
     public Transform getInertialToBody(final AbsoluteDate date)
         throws OrekitException {
-        return intepolate(date, inertialToBody);
+        return interpolate(date, inertialToBody);
     }
 
     /** Get transform from observed body frame to inertial frame.
@@ -154,20 +154,21 @@ public class SpacecraftToObservedBody {
      */
     public Transform getBodyToInertial(final AbsoluteDate date)
         throws OrekitException {
-        return intepolate(date, bodyToInertial);
+        return interpolate(date, bodyToInertial);
     }
 
     /** Interpolate transform.
      * @param date date of the transform
      * @param list transforms list to interpolate from
-     * @return interpolated
+     * @return interpolated transform
      * @exception OrekitException if frames cannot be computed at date
      */
-    private Transform intepolate(final AbsoluteDate date, final List<Transform> list)
+    private Transform interpolate(final AbsoluteDate date, final List<Transform> list)
         throws OrekitException {
-        final double s = date.durationFrom(list.get(0).getDate()) / tStep;
-        final int inf  = FastMath.max(0, FastMath.min(list.size() - 2, (int) FastMath.floor(s)));
-        return Transform.interpolate(date, false, false, list.subList(inf, inf + 2));
+        final double    s     = date.durationFrom(list.get(0).getDate()) / tStep;
+        final int       index = FastMath.max(0, FastMath.min(list.size() - 1, (int) FastMath.rint(s)));
+        final Transform close = list.get(index);
+        return close.shiftedBy(date.durationFrom(close.getDate()));
     }
 
 }

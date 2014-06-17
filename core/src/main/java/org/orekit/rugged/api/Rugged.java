@@ -67,7 +67,7 @@ public class Rugged {
     private static final int MAX_EVAL = 50;
 
     /** Time step for frames transforms interpolations. */
-    private static final double FRAMES_TRANSFORMS_INTERPOLATION_STEP = 0.01;
+    private static final double FRAMES_TRANSFORMS_INTERPOLATION_STEP = 0.001;
 
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;

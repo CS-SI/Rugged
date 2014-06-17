@@ -525,8 +525,8 @@ public class RuggedTest {
         throws RuggedException, OrekitException, URISyntaxException {
 
         long t0       = System.currentTimeMillis();
-        int dimension = 1000;
-        int nbSensors = 5;
+        int dimension = 2000;
+        int nbSensors = 3;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -586,6 +586,9 @@ public class RuggedTest {
             for (final LineSensor lineSensor : sensors) {
                 for (int i = 0; i < dimension; ++i) {
                     double latitude  = lat0 + (i * delta) / dimension;
+                    if (i %100 == 0) {
+                        System.out.println(lineSensor.getName() + " " + i);
+                    }
                     for (int j = 0; j < dimension; ++j) {
                         double longitude = lon0 + (j * delta) / dimension;
                         SensorPixel sp = rugged.inverseLocalization(lineSensor.getName(), latitude, longitude, 0, dimension);
