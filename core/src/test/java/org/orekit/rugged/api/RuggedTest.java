@@ -576,7 +576,7 @@ public class RuggedTest {
         double delta = FastMath.toRadians(0.5);
 
         try {
-            int              size   = nbSensors * dimension * dimension * 2 * Integer.SIZE / 8;
+            long             size   = nbSensors * dimension * dimension * 2l * Integer.SIZE / 8l;
             RandomAccessFile out    = new RandomAccessFile(tempFolder.newFile(), "rw");
             MappedByteBuffer buffer = out.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
 
@@ -609,13 +609,13 @@ public class RuggedTest {
 
             long t2 = System.currentTimeMillis();
             out.close();
-            int sizeM = size / (1024 * 1024);
+            int sizeM = (int) (size / (1024l * 1024l));
             System.out.format(Locale.US,
                               "%n%n%5dx%5d, %d sensors:%n" +
                               "  Orekit initialization and DEM creation   : %5.1fs%n" +
                               "  inverse localization and %3dM grid writing: %5.1fs (%.1f px/s, %.1f%% covered)%n",
                               dimension, dimension, nbSensors,
-                              1.0e-3 *(t1 - t0), sizeM, 1.0e-3 *(t2 - t1),
+                              1.0e-3 * (t1 - t0), sizeM, 1.0e-3 * (t2 - t1),
                               (badPixels + goodPixels) / (1.0e-3 * (t2 - t1)),
                               (100.0 * goodPixels) / (goodPixels + badPixels));
         } catch (IOException ioe) {
