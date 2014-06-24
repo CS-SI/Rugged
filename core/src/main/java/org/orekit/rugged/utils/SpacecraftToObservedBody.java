@@ -36,6 +36,12 @@ import org.orekit.utils.TimeStampedPVCoordinates;
  */
 public class SpacecraftToObservedBody {
 
+    /** Start of search time span. */
+    private final AbsoluteDate minDate;
+
+    /** End of search time span. */
+    private final AbsoluteDate maxDate;
+
     /** Step to use for inertial frame to body frame transforms cache computations. */
     private final double tStep;
 
@@ -68,6 +74,10 @@ public class SpacecraftToObservedBody {
                                     final double tStep)
         throws RuggedException {
         try {
+
+            this.minDate = minDate;
+            this.maxDate = maxDate;
+
             // safety checks
             final AbsoluteDate minPVDate = positionsVelocities.get(0).getDate();
             final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getDate();
@@ -130,30 +140,30 @@ public class SpacecraftToObservedBody {
     /** Get transform from spacecraft to inertial frame.
      * @param date date of the transform
      * @return transform from spacecraft to inertial frame
-     * @exception OrekitException if spacecraft position or attitude cannot be computed at date
+     * @exception RuggedException if spacecraft position or attitude cannot be computed at date
      */
     public Transform getScToInertial(final AbsoluteDate date)
-        throws OrekitException {
+        throws RuggedException {
         return interpolate(date, scToInertial);
     }
 
     /** Get transform from inertial frame to observed body frame.
      * @param date date of the transform
      * @return transform from inertial frame to observed body frame
-     * @exception OrekitException if frames cannot be computed at date
+     * @exception RuggedException if frames cannot be computed at date
      */
     public Transform getInertialToBody(final AbsoluteDate date)
-        throws OrekitException {
+        throws RuggedException {
         return interpolate(date, inertialToBody);
     }
 
     /** Get transform from observed body frame to inertial frame.
      * @param date date of the transform
      * @return transform from observed body frame to inertial frame
-     * @exception OrekitException if frames cannot be computed at date
+     * @exception RuggedException if frames cannot be computed at date
      */
     public Transform getBodyToInertial(final AbsoluteDate date)
-        throws OrekitException {
+        throws RuggedException {
         return interpolate(date, bodyToInertial);
     }
 
@@ -161,14 +171,24 @@ public class SpacecraftToObservedBody {
      * @param date date of the transform
      * @param list transforms list to interpolate from
      * @return interpolated transform
-     * @exception OrekitException if frames cannot be computed at date
+     * @exception RuggedException if frames cannot be computed at date
      */
     private Transform interpolate(final AbsoluteDate date, final List<Transform> list)
-        throws OrekitException {
+        throws RuggedException {
+
+        // check date range
+        if (date.compareTo(minDate) < 0) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate);
+        }
+        if (date.compareTo(maxDate) > 0) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate);
+        }
+
         final double    s     = date.durationFrom(list.get(0).getDate()) / tStep;
         final int       index = FastMath.max(0, FastMath.min(list.size() - 1, (int) FastMath.rint(s)));
         final Transform close = list.get(index);
         return close.shiftedBy(date.durationFrom(close.getDate()));
+
     }
 
 }

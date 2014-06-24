@@ -20,7 +20,6 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -86,25 +85,21 @@ class SensorMeanPlaneCrossing {
                                    final boolean aberrationOfLightCorrection,
                                    final int maxEval, final double accuracy)
         throws RuggedException {
-        try {
 
-            this.sensor                      = sensor;
-            this.minLine                     = minLine;
-            this.maxLine                     = maxLine;
-            this.lightTimeCorrection         = lightTimeCorrection;
-            this.aberrationOfLightCorrection = aberrationOfLightCorrection;
-            this.maxEval                     = maxEval;
-            this.accuracy                    = accuracy;
-            this.scToBody                    = scToBody;
+        this.sensor                      = sensor;
+        this.minLine                     = minLine;
+        this.maxLine                     = maxLine;
+        this.lightTimeCorrection         = lightTimeCorrection;
+        this.aberrationOfLightCorrection = aberrationOfLightCorrection;
+        this.maxEval                     = maxEval;
+        this.accuracy                    = accuracy;
+        this.scToBody                    = scToBody;
 
-            this.midLine               = 0.5 * (minLine + maxLine);
-            final AbsoluteDate midDate = sensor.getDate(midLine);
-            this.midBodyToInert        = scToBody.getBodyToInertial(midDate);
-            this.midScToInert          = scToBody.getScToInertial(midDate);
+        this.midLine               = 0.5 * (minLine + maxLine);
+        final AbsoluteDate midDate = sensor.getDate(midLine);
+        this.midBodyToInert        = scToBody.getBodyToInertial(midDate);
+        this.midScToInert          = scToBody.getScToInertial(midDate);
 
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
     }
 
     /** Get the minimum line number in the search interval.
@@ -166,65 +161,61 @@ class SensorMeanPlaneCrossing {
      */
     public CrossingResult find(final Vector3D target)
         throws RuggedException {
-        try {
 
-            final PVCoordinates targetPV = new PVCoordinates(target, Vector3D.ZERO);
+        final PVCoordinates targetPV = new PVCoordinates(target, Vector3D.ZERO);
 
-            // we don't use an Apache Commons Math solver here because we are more
-            // interested in reducing the number of evaluations than being accurate,
-            // as we know the solution is improved in the second stage of inverse localization.
-            // We expect two or three evaluations only. Each new evaluation shows up quickly in
-            // the performances as it involves frames conversions
-            double  crossingLine  = midLine;
-            Transform bodyToInert = midBodyToInert;
-            Transform scToInert   = midScToInert;
-            boolean atMin         = false;
-            boolean atMax         = false;
-            for (int i = 0; i < maxEval; ++i) {
+        // we don't use an Apache Commons Math solver here because we are more
+        // interested in reducing the number of evaluations than being accurate,
+        // as we know the solution is improved in the second stage of inverse localization.
+        // We expect two or three evaluations only. Each new evaluation shows up quickly in
+        // the performances as it involves frames conversions
+        double  crossingLine  = midLine;
+        Transform bodyToInert = midBodyToInert;
+        Transform scToInert   = midScToInert;
+        boolean atMin         = false;
+        boolean atMax         = false;
+        for (int i = 0; i < maxEval; ++i) {
 
-                final FieldVector3D<DerivativeStructure> targetDirection =
-                        evaluateLine(crossingLine, targetPV, bodyToInert, scToInert);
-                final DerivativeStructure beta = FieldVector3D.angle(targetDirection, sensor.getMeanPlaneNormal());
+            final FieldVector3D<DerivativeStructure> targetDirection =
+                    evaluateLine(crossingLine, targetPV, bodyToInert, scToInert);
+            final DerivativeStructure beta = FieldVector3D.angle(targetDirection, sensor.getMeanPlaneNormal());
 
-                final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
-                if (FastMath.abs(deltaL) <= accuracy) {
-                    // return immediately, without doing any additional evaluation!
-                    return new CrossingResult(crossingLine, targetDirection);
+            final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
+            if (FastMath.abs(deltaL) <= accuracy) {
+                // return immediately, without doing any additional evaluation!
+                return new CrossingResult(crossingLine, targetDirection);
+            }
+            crossingLine += deltaL;
+
+            if (crossingLine < minLine) {
+                if (atMin) {
+                    // we were already trying at minLine and we need to go below that
+                    // give up as the solution is out of search interval
+                    return null;
                 }
-                crossingLine += deltaL;
-
-                if (crossingLine < minLine) {
-                    if (atMin) {
-                        // we were already trying at minLine and we need to go below that
-                        // give up as the solution is out of search interval
-                        return null;
-                    }
-                    atMin        = true;
-                    crossingLine = minLine;
-                } else if (crossingLine > maxLine) {
-                    if (atMax) {
-                        // we were already trying at maxLine and we need to go above that
-                        // give up as the solution is out of search interval
-                        return null;
-                    }
-                    atMax        = true;
-                    crossingLine = maxLine;
-                } else {
-                    // the next evaluation will be a regular point
-                    atMin = false;
-                    atMax = false;
+                atMin        = true;
+                crossingLine = minLine;
+            } else if (crossingLine > maxLine) {
+                if (atMax) {
+                    // we were already trying at maxLine and we need to go above that
+                    // give up as the solution is out of search interval
+                    return null;
                 }
-
-                final AbsoluteDate date = sensor.getDate(crossingLine);
-                bodyToInert = scToBody.getBodyToInertial(date);
-                scToInert   = scToBody.getScToInertial(date);
+                atMax        = true;
+                crossingLine = maxLine;
+            } else {
+                // the next evaluation will be a regular point
+                atMin = false;
+                atMax = false;
             }
 
-            return null;
-
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            final AbsoluteDate date = sensor.getDate(crossingLine);
+            bodyToInert = scToBody.getBodyToInertial(date);
+            scToInert   = scToBody.getScToInertial(date);
         }
+
+        return null;
+
     }
 
     /** Evaluate geometry for a given line number.
