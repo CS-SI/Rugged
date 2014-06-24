@@ -645,6 +645,36 @@ public class Rugged {
 
     }
 
+    /** Get transform from spacecraft to inertial frame.
+     * @param date date of the transform
+     * @return transform from spacecraft to inertial frame
+     * @exception RuggedException if spacecraft position or attitude cannot be computed at date
+     */
+    public Transform getScToInertial(final AbsoluteDate date)
+        throws RuggedException {
+        return scToBody.getScToInertial(date);
+    }
+
+    /** Get transform from inertial frame to observed body frame.
+     * @param date date of the transform
+     * @return transform from inertial frame to observed body frame
+     * @exception RuggedException if frames cannot be computed at date
+     */
+    public Transform getInertialToBody(final AbsoluteDate date)
+        throws RuggedException {
+        return scToBody.getInertialToBody(date);
+    }
+
+    /** Get transform from observed body frame to inertial frame.
+     * @param date date of the transform
+     * @return transform from observed body frame to inertial frame
+     * @exception RuggedException if frames cannot be computed at date
+     */
+    public Transform getBodyToInertial(final AbsoluteDate date)
+        throws RuggedException {
+        return scToBody.getBodyToInertial(date);
+    }
+
     /** Get a sensor.
      * @param sensorName sensor name
      * @return selected sensor
