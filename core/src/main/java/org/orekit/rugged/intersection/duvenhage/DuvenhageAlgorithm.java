@@ -103,14 +103,22 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 // find where line-of-sight exit tile
                 final LimitPoint exit = findExit(tile, ellipsoid, position, los);
 
-                final GeodeticPoint intersection =
-                        recurseIntersection(0, ellipsoid, position, los, tile,
-                                            current,
-                                            tile.getLatitudeIndex(current.getLatitude()),
-                                            tile.getLongitudeIndex(current.getLongitude()),
-                                            exit.getPoint(),
-                                            tile.getLatitudeIndex(exit.getPoint().getLatitude()),
-                                            tile.getLongitudeIndex(exit.getPoint().getLongitude()));
+                // compute intersection with Digital Elevation Model
+                final int entryLat = FastMath.max(0,
+                                                  FastMath.min(tile.getLatitudeRows() - 1,
+                                                               tile.getLatitudeIndex(current.getLatitude())));
+                final int entryLon = FastMath.max(0,
+                                                  FastMath.min(tile.getLongitudeColumns() - 1,
+                                                               tile.getLongitudeIndex(current.getLongitude())));
+                final int exitLat  = FastMath.max(0,
+                                                  FastMath.min(tile.getLatitudeRows() - 1,
+                                                               tile.getLatitudeIndex(exit.getPoint().getLatitude())));
+                final int exitLon  = FastMath.max(0,
+                                                  FastMath.min(tile.getLongitudeColumns() - 1,
+                                                               tile.getLongitudeIndex(exit.getPoint().getLongitude())));
+                final GeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
+                                                                       current, entryLat, entryLon,
+                                                                       exit.getPoint(), exitLat, exitLon);
 
                 if (intersection != null) {
                     // we have found the intersection
