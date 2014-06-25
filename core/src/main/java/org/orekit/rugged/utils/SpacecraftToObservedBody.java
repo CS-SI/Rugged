@@ -26,6 +26,8 @@ import org.orekit.frames.Transform;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.utils.AngularDerivativesFilter;
+import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.ImmutableTimeStampedCache;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedCache;
@@ -114,11 +116,11 @@ public class SpacecraftToObservedBody {
 
                 // interpolate position-velocity
                 final TimeStampedPVCoordinates pv =
-                        TimeStampedPVCoordinates.interpolate(date, true, pvCache.getNeighbors(date));
+                        TimeStampedPVCoordinates.interpolate(date, CartesianDerivativesFilter.USE_PV, pvCache.getNeighbors(date));
 
                 // interpolate attitude
                 final TimeStampedAngularCoordinates quaternion =
-                        TimeStampedAngularCoordinates.interpolate(date, false, aCache.getNeighbors(date));
+                        TimeStampedAngularCoordinates.interpolate(date, AngularDerivativesFilter.USE_R, aCache.getNeighbors(date));
 
                 // store transform from spacecraft frame to inertial frame
                 scToInertial.add(new Transform(date,
