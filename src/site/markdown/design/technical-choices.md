@@ -25,12 +25,18 @@ to the older equinox-based paradigm (Mean Of Date and True Of Date), apply only 
 wander corrections and ignore the other Earth Orientation Parameters corrections. The expected
 difference with such libraries is due to the missing corrections (δΔε and δΔψ for equinox-based
 paradigm) to the IAU-1980 precession (Lieske) and nutation (Wahr) models used in the legacy MOD
-and TOD frames. The error is a combination of an offset, a global drift and several periodic terms.
-This error was small in the 80's but is much higher now as it has reached the 3 meters level since
-mid-2013. The error is steadily increasing, as the old precession and nutation models are not accurate
-enough for current needs and are drifting with respect to real Earth motion.
+and TOD frames. The error is plotted below, showing the coordinates of three points along the three
+canonical X, Y and Z axes, roughly at Earth radius. The plot shows a clear regular signal with
+several harmonics, which correspond to the nutation components that were not in this older model.
+This error was small in the 80's but is much higher now (as of 2014, it is of the order of magnitude
+of 3 meters). The error is steadily increasing.
 
-![precession/nutation error](../images/precession-nutation-error.png)
+![precession/nutation error](../images/ignoring-EOP-1996.png)
+
+As Rugged delegates computation to Orekit, the full set of corrections (DUT1, pole wander, lod, δΔε/δΔψ
+or δx/δy) are automatically loaded and applied. The final accuracy obtained when all EOP are considered
+is at sub-millimeter level in position, and the expected difference with libraries ignoring  δΔε and δΔψ
+is at a few meters level, Rugged being the more accurate one.
 
 These legacy models are very old and not recommended anymore by IERS since 2003. IERS also currently
 still provides the correction for these models, but there is no guarantee they will do so indefinitely,
@@ -38,18 +44,22 @@ as they are now providing corrections with respect to newer and more accurate mo
 are based on a non-rotating origin paradigm and on different precession and nutation models (IAU-2000/2006),
 which are much more accurate. The corresponding corrections (δx/δy, not to be confused with the xp/yp
 pole wander) are smaller because the precession and nutation models are better than the former ones.
+The much better accuracy of these new models can be seen doing the same kind of plot as before, i.e.
+ignoring temporarily the IERS corrections. The plot below shows the result.
 
-As Rugged delegates computation to Orekit, the full set of corrections (DUT1, pole wander, lod, δΔε/δΔψ
-or δx/δy) are automatically loaded and applied. The final accuracy obtained when all EOP are considered
-is at sub-millimeter level in position, and the expected difference with libraries ignoring  δΔε and δΔψ
-is at a few meters level, Rugged being the more accurate one.
+![precession/nutation error](../images/ignoring-EOP-2010.png)
 
-Rugged is not limited to the legacy MOD and TOD frames and can use the newer IERS recommended frames as well.
-From a user perspective, this is completely unnoticeable as user simply selects an Earth frame as an existing
-predefined object by name, and doesn't have to care about the transforms and corrections. In fact at Rugged
-level there is not even a notion of precession, nutation or EOP corrections. The only interfaces used are the
-inertial and Earth frames and the date. From these three elements, Orekit computes all geometrical transform,
-including both the theoretical motion models and the IERS corrections, thus greatly leveraging the computation.
+The remaining error is very small, of the order of magnitude of 2 or 3 centimeters. Rugged is not limited to
+the legacy MOD and TOD frames and can use the newer IERS recommended frames as well. From a user perspective,
+this is completely unnoticeable as user simply selects an Earth frame as an existing predefined object by
+name, and doesn't have to care about the transforms and corrections. In fact at Rugged level there is not
+even a notion of precession, nutation or EOP corrections. The only interfaces used are the inertial and Earth
+frames and the date. From these three elements, Orekit computes all geometrical transform, including both the
+theoretical motion models and the IERS corrections, thus greatly leveraging the computation.
+
+One consequence of using newer precession and nutation models is that even as shown in the plot above, even
+when the EOP corrections are not available yet (typically for near real-time analysis of images), it
+is still possible to compute very accurately the geometry of the image.
 
 As a summary, Rugged may give results slightly more accurate than other geometric correction
 libraries, and is compatible with both the legacy frames and the newer frames.
