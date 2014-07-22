@@ -17,6 +17,7 @@
 package org.orekit.rugged.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -352,6 +353,13 @@ public class Rugged {
      */
     public void addLineSensor(final LineSensor lineSensor) {
         sensors.put(lineSensor.getName(), lineSensor);
+    }
+
+    /** Get the line sensors.
+     * @return line sensors
+     */
+    public Collection<LineSensor> getLineSensors() {
+        return sensors.values();
     }
 
     /** Select inertial frame.
