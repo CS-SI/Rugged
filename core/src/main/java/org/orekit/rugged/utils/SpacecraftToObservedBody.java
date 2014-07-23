@@ -139,6 +139,20 @@ public class SpacecraftToObservedBody {
         }
     }
 
+    /** Get the start of search time span.
+     * @return start of search time span
+     */
+    public AbsoluteDate getMinDate() {
+        return minDate;
+    }
+
+    /** Get the end of search time span.
+     * @return end of search time span
+     */
+    public AbsoluteDate getMaxDate() {
+        return maxDate;
+    }
+
     /** Get transform from spacecraft to inertial frame.
      * @param date date of the transform
      * @return transform from spacecraft to inertial frame
