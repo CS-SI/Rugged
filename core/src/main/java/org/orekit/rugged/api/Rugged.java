@@ -108,6 +108,7 @@ public class Rugged {
      * @param bodyRotatingFrameID identifier of body rotating frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
@@ -118,13 +119,13 @@ public class Rugged {
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
                   final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationOrder,
                   final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationOrder)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID), minDate, maxDate,
+             selectInertialFrame(inertialFrameID), minDate, maxDate, overshootTolerance,
              positionsVelocities, pvInterpolationOrder, quaternions, aInterpolationOrder);
     }
 
@@ -144,6 +145,7 @@ public class Rugged {
      * @param inertialFrame inertial frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
@@ -153,7 +155,7 @@ public class Rugged {
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
                   final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationOrder,
                   final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationOrder)
         throws RuggedException {
@@ -163,7 +165,7 @@ public class Rugged {
 
         // orbit/attitude to body converter
         this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
-                                                     minDate, maxDate,
+                                                     minDate, maxDate, overshootTolerance,
                                                      positionsVelocities, pvInterpolationOrder,
                                                      quaternions, aInterpolationOrder,
                                                      FRAMES_TRANSFORMS_INTERPOLATION_STEP);
@@ -196,6 +198,7 @@ public class Rugged {
      * @param bodyRotatingFrameID identifier of body rotating frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
      * @param interpolationOrder order to use for inertial/Earth/spacraft transforms interpolations
      * @param propagator global propagator
@@ -204,12 +207,12 @@ public class Rugged {
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
                   final double interpolationStep, final int interpolationOrder, final Propagator propagator)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID), minDate, maxDate,
+             selectInertialFrame(inertialFrameID), minDate, maxDate, overshootTolerance,
              interpolationStep, interpolationOrder, propagator);
     }
 
@@ -229,6 +232,7 @@ public class Rugged {
      * @param inertialFrame inertial frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
      * @param interpolationOrder order to use for inertial/Earth/spacraft transforms interpolations
      * @param propagator global propagator
@@ -236,7 +240,7 @@ public class Rugged {
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
                   final double interpolationStep, final int interpolationOrder, final Propagator propagator)
         throws RuggedException {
         try {
@@ -276,7 +280,7 @@ public class Rugged {
 
             // orbit/attitude to body converter
             this.scToBody = new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
-                                                         minDate, maxDate,
+                                                         minDate, maxDate, overshootTolerance,
                                                          positionsVelocities, interpolationOrder,
                                                          quaternions, interpolationOrder,
                                                          FRAMES_TRANSFORMS_INTERPOLATION_STEP);

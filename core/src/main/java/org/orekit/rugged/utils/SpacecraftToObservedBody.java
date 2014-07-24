@@ -61,16 +61,19 @@ public class SpacecraftToObservedBody {
      * @param bodyFrame observed body frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
+     * slightly the position, velocity and quaternions ephemerides
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationOrder order to use for position/velocity interpolation
      * @param quaternions satellite quaternions
      * @param aInterpolationOrder order to use for attitude interpolation
      * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @exception RuggedException if position or attitude samples do not fully cover the
-     * [{@code minDate}, {@code maxDate}] search time span
+     * @exception RuggedException if [{@code minDate}, {@code maxDate}] search time span overshoots
+     * position or attitude samples by more than {@code overshootTolerance}
+     * ,
      */
     public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
-                                    final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                                    final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
                                     final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationOrder,
                                     final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationOrder,
                                     final double tStep)
@@ -83,19 +86,19 @@ public class SpacecraftToObservedBody {
             // safety checks
             final AbsoluteDate minPVDate = positionsVelocities.get(0).getDate();
             final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getDate();
-            if (minDate.compareTo(minPVDate) < 0) {
+            if (minPVDate.durationFrom(minDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
             }
-            if (maxDate.compareTo(maxPVDate) > 0) {
+            if (maxDate.durationFrom(maxDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
             }
 
             final AbsoluteDate minQDate  = quaternions.get(0).getDate();
             final AbsoluteDate maxQDate  = quaternions.get(quaternions.size() - 1).getDate();
-            if (minDate.compareTo(minQDate) < 0) {
+            if (minQDate.durationFrom(minDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minQDate, maxQDate);
             }
-            if (maxDate.compareTo(maxQDate) > 0) {
+            if (maxDate.durationFrom(maxQDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minQDate, maxQDate);
             }
 
@@ -114,13 +117,35 @@ public class SpacecraftToObservedBody {
             this.scToInertial   = new ArrayList<Transform>(n);
             for (AbsoluteDate date = minDate; bodyToInertial.size() < n; date = date.shiftedBy(tStep)) {
 
-                // interpolate position-velocity
-                final TimeStampedPVCoordinates pv =
-                        TimeStampedPVCoordinates.interpolate(date, CartesianDerivativesFilter.USE_PV, pvCache.getNeighbors(date));
+                // interpolate position-velocity, allowing slight extrapolation near the boundaries
+                final AbsoluteDate pvInterpolationDate;
+                if (date.compareTo(pvCache.getEarliest().getDate()) < 0) {
+                    pvInterpolationDate = pvCache.getEarliest().getDate();
+                } else if (date.compareTo(pvCache.getLatest().getDate()) > 0) {
+                    pvInterpolationDate = pvCache.getLatest().getDate();
+                } else {
+                    pvInterpolationDate = date;
+                }
+                final TimeStampedPVCoordinates interpolatedPV =
+                        TimeStampedPVCoordinates.interpolate(pvInterpolationDate,
+                                                             CartesianDerivativesFilter.USE_PV,
+                                                             pvCache.getNeighbors(pvInterpolationDate));
+                final TimeStampedPVCoordinates pv = interpolatedPV.shiftedBy(date.durationFrom(pvInterpolationDate));
 
-                // interpolate attitude
-                final TimeStampedAngularCoordinates quaternion =
-                        TimeStampedAngularCoordinates.interpolate(date, AngularDerivativesFilter.USE_R, aCache.getNeighbors(date));
+                // interpolate attitude, allowing slight extrapolation near the boundaries
+                final AbsoluteDate aInterpolationDate;
+                if (date.compareTo(aCache.getEarliest().getDate()) < 0) {
+                    aInterpolationDate = aCache.getEarliest().getDate();
+                } else if (date.compareTo(aCache.getLatest().getDate()) > 0) {
+                    aInterpolationDate = aCache.getLatest().getDate();
+                } else {
+                    aInterpolationDate = date;
+                }
+                final TimeStampedAngularCoordinates interpolatedQuaternion =
+                        TimeStampedAngularCoordinates.interpolate(aInterpolationDate,
+                                                                  AngularDerivativesFilter.USE_R,
+                                                                  aCache.getNeighbors(aInterpolationDate));
+                final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 
                 // store transform from spacecraft frame to inertial frame
                 scToInertial.add(new Transform(date,
