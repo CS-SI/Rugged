@@ -366,6 +366,20 @@ public class Rugged {
         return sensors.values();
     }
 
+    /** Get the start of search time span.
+     * @return start of search time span
+     */
+    public AbsoluteDate getMinDate() {
+        return scToBody.getMinDate();
+    }
+
+    /** Get the end of search time span.
+     * @return end of search time span
+     */
+    public AbsoluteDate getMaxDate() {
+        return scToBody.getMaxDate();
+    }
+
     /** Select inertial frame.
      * @param inertialFrameId inertial frame identifier
      * @return inertial frame
@@ -692,7 +706,7 @@ public class Rugged {
      * @return selected sensor
      * @exception RuggedException if sensor is not known
      */
-    private LineSensor getLineSensor(final String sensorName) throws RuggedException {
+    public LineSensor getLineSensor(final String sensorName) throws RuggedException {
         final LineSensor sensor = sensors.get(sensorName);
         if (sensor == null) {
             throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
