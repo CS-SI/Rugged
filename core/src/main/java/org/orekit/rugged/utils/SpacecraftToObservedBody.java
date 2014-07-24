@@ -44,6 +44,9 @@ public class SpacecraftToObservedBody {
     /** End of search time span. */
     private final AbsoluteDate maxDate;
 
+    /** Tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting. */
+    private final double overshootTolerance;
+
     /** Step to use for inertial frame to body frame transforms cache computations. */
     private final double tStep;
 
@@ -80,8 +83,9 @@ public class SpacecraftToObservedBody {
         throws RuggedException {
         try {
 
-            this.minDate = minDate;
-            this.maxDate = maxDate;
+            this.minDate            = minDate;
+            this.maxDate            = maxDate;
+            this.overshootTolerance = overshootTolerance;
 
             // safety checks
             final AbsoluteDate minPVDate = positionsVelocities.get(0).getDate();
@@ -218,10 +222,10 @@ public class SpacecraftToObservedBody {
         throws RuggedException {
 
         // check date range
-        if (date.compareTo(minDate) < 0) {
+        if (minDate.durationFrom(date) > overshootTolerance) {
             throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate);
         }
-        if (date.compareTo(maxDate) > 0) {
+        if (date.durationFrom(maxDate) > overshootTolerance) {
             throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate);
         }
 
