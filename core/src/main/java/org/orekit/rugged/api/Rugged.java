@@ -604,6 +604,52 @@ public class Rugged {
         return inverseLocalization(sensorName, groundPoint, minLine, maxLine);
     }
 
+    /** Find the date at which sensor sees a ground point.
+     * <p>
+     * This method is a partial {@link #inverseLocalization(String,
+     * GeodeticPoint, int, int) inverse localization} focusing only on date.
+     * </p>
+     * @param sensorName name of the line  sensor
+     * @param point point to localize
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @return date at which ground point is seen by line sensor
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
+     * @see #inverseLocalization(String, GeodeticPoint, int, int)
+     */
+    public AbsoluteDate dateLocalization(final String sensorName, final GeodeticPoint point,
+                                         final int minLine, final int maxLine)
+        throws RuggedException {
+
+        final LineSensor sensor = getLineSensor(sensorName);
+        SensorMeanPlaneCrossing planeCrossing = finders.get(sensorName);
+        if (planeCrossing == null ||
+            planeCrossing.getMinLine() != minLine ||
+            planeCrossing.getMaxLine() != maxLine) {
+
+            // create a new finder for the specified sensor and range
+            planeCrossing = new SensorMeanPlaneCrossing(sensor, scToBody, minLine, maxLine,
+                                                        lightTimeCorrection, aberrationOfLightCorrection,
+                                                        MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
+
+            // store the finder, in order to reuse it
+            // (and save some computation done in its constructor)
+            finders.put(sensorName, planeCrossing);
+
+        }
+
+        // find approximately the sensor line at which ground point crosses sensor mean plane
+        final Vector3D   target = ellipsoid.transform(point);
+        final SensorMeanPlaneCrossing.CrossingResult crossingResult = planeCrossing.find(target);
+        if (crossingResult == null) {
+            // target is out of search interval
+            return null;
+        } else {
+            return sensor.getDate(crossingResult.getLine());
+        }
+
+    }
+
     /** Inverse localization of a point.
      * @param sensorName name of the line  sensor
      * @param point point to localize
@@ -612,6 +658,7 @@ public class Rugged {
      * @return sensor pixel seeing point, or null if point cannot be seen between the
      * prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
+     * @see #dateLocalization(String, GeodeticPoint, int, int)
      */
     public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint point,
                                            final int minLine, final int maxLine)
