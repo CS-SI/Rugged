@@ -67,9 +67,11 @@ public class SpacecraftToObservedBody {
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * slightly the position, velocity and quaternions ephemerides
      * @param positionsVelocities satellite position and velocity
-     * @param pvInterpolationOrder order to use for position/velocity interpolation
+     * @param pvInterpolationNumber number of points to use for position/velocity interpolation
+     * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param quaternions satellite quaternions
-     * @param aInterpolationOrder order to use for attitude interpolation
+     * @param aInterpolationNumber number of points to use for attitude interpolation
+     * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @exception RuggedException if [{@code minDate}, {@code maxDate}] search time span overshoots
      * position or attitude samples by more than {@code overshootTolerance}
@@ -77,8 +79,10 @@ public class SpacecraftToObservedBody {
      */
     public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
                                     final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
-                                    final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationOrder,
-                                    final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationOrder,
+                                    final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
+                                    final CartesianDerivativesFilter pvFilter,
+                                    final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
+                                    final AngularDerivativesFilter aFilter,
                                     final double tStep)
         throws RuggedException {
         try {
@@ -108,11 +112,11 @@ public class SpacecraftToObservedBody {
 
             // set up the cache for position-velocities
             final TimeStampedCache<TimeStampedPVCoordinates> pvCache =
-                    new ImmutableTimeStampedCache<TimeStampedPVCoordinates>(pvInterpolationOrder, positionsVelocities);
+                    new ImmutableTimeStampedCache<TimeStampedPVCoordinates>(pvInterpolationNumber, positionsVelocities);
 
             // set up the cache for attitudes
             final TimeStampedCache<TimeStampedAngularCoordinates> aCache =
-                    new ImmutableTimeStampedCache<TimeStampedAngularCoordinates>(aInterpolationOrder, quaternions);
+                    new ImmutableTimeStampedCache<TimeStampedAngularCoordinates>(aInterpolationNumber, quaternions);
 
             final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
             this.tStep          = tStep;
@@ -131,8 +135,7 @@ public class SpacecraftToObservedBody {
                     pvInterpolationDate = date;
                 }
                 final TimeStampedPVCoordinates interpolatedPV =
-                        TimeStampedPVCoordinates.interpolate(pvInterpolationDate,
-                                                             CartesianDerivativesFilter.USE_PV,
+                        TimeStampedPVCoordinates.interpolate(pvInterpolationDate, pvFilter,
                                                              pvCache.getNeighbors(pvInterpolationDate));
                 final TimeStampedPVCoordinates pv = interpolatedPV.shiftedBy(date.durationFrom(pvInterpolationDate));
 
@@ -146,8 +149,7 @@ public class SpacecraftToObservedBody {
                     aInterpolationDate = date;
                 }
                 final TimeStampedAngularCoordinates interpolatedQuaternion =
-                        TimeStampedAngularCoordinates.interpolate(aInterpolationDate,
-                                                                  AngularDerivativesFilter.USE_R,
+                        TimeStampedAngularCoordinates.interpolate(aInterpolationDate, aFilter,
                                                                   aCache.getNeighbors(aInterpolationDate));
                 final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 

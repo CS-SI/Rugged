@@ -71,6 +71,8 @@ import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
+import org.orekit.utils.AngularDerivativesFilter;
+import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 import org.orekit.utils.PVCoordinates;
@@ -144,7 +146,7 @@ public class RuggedTest {
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    pv.get(0).getDate(), pv.get(pv.size() - 1).getDate(), 5.0,
-                                   pv, 8, q, 8);
+                                   pv, 8, CartesianDerivativesFilter.USE_PV, q, 8, AngularDerivativesFilter.USE_R);
 
         Assert.assertTrue(rugged.isLightTimeCorrected());
         rugged.setLightTimeCorrection(false);
@@ -174,7 +176,7 @@ public class RuggedTest {
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    orbit.getDate().shiftedBy(-10.0), orbit.getDate().shiftedBy(+10.0), 5.0,
-                                   1.0, 8, propagator);
+                                   1.0, 8, CartesianDerivativesFilter.USE_PV, AngularDerivativesFilter.USE_R, propagator);
 
         Assert.assertTrue(rugged.isLightTimeCorrected());
         rugged.setLightTimeCorrection(false);
@@ -220,11 +222,13 @@ public class RuggedTest {
 
         Assert.assertNotNull(new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                         EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                        t0.shiftedBy(4), t0.shiftedBy(6), 5.0, pv, 2, q, 2));
+                                        t0.shiftedBy(4), t0.shiftedBy(6), 5.0,
+                                        pv, 2,CartesianDerivativesFilter.USE_PV, q, 2, AngularDerivativesFilter.USE_R));
         try {
             new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   t0.shiftedBy(-1), t0.shiftedBy(6), 0.0001, pv, 2, q, 2);
+                                   t0.shiftedBy(-1), t0.shiftedBy(6), 0.0001,
+                                   pv, 2, CartesianDerivativesFilter.USE_PV, q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
             Assert.assertEquals(t0.shiftedBy(-1), re.getParts()[0]);
@@ -233,7 +237,8 @@ public class RuggedTest {
         try {
             new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   t0.shiftedBy(2), t0.shiftedBy(6), 0.0001, pv, 2, q, 2);
+                                   t0.shiftedBy(2), t0.shiftedBy(6), 0.0001,
+                                   pv, 2, CartesianDerivativesFilter.USE_PV, q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
             Assert.assertEquals(t0.shiftedBy(2), re.getParts()[0]);
@@ -242,7 +247,8 @@ public class RuggedTest {
         try {
             new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   t0.shiftedBy(4), t0.shiftedBy(9), 0.0001, pv, 2, q, 2);
+                                   t0.shiftedBy(4), t0.shiftedBy(9), 0.0001,
+                                   pv, 2, CartesianDerivativesFilter.USE_PV, q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
             Assert.assertEquals(t0.shiftedBy(9), re.getParts()[0]);
@@ -251,7 +257,8 @@ public class RuggedTest {
         try {
             new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                   t0.shiftedBy(4), t0.shiftedBy(12), 0.0001, pv, 2, q, 2);
+                                   t0.shiftedBy(4), t0.shiftedBy(12), 0.0001,
+                                   pv, 2, CartesianDerivativesFilter.USE_PV, q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
             Assert.assertEquals(t0.shiftedBy(12), re.getParts()[0]);
@@ -306,7 +313,9 @@ public class RuggedTest {
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    lineDatation.getDate(firstLine), lineDatation.getDate(lastLine), 5.0,
-                                   1.0 / lineDatation.getRate(0.0), 8, ephemeris);
+                                   1.0 / lineDatation.getRate(0.0), 8,
+                                   CartesianDerivativesFilter.USE_PV, AngularDerivativesFilter.USE_R,
+                                   ephemeris);
         rugged.setLightTimeCorrection(true);
         rugged.setAberrationOfLightCorrection(true);
 
@@ -382,7 +391,9 @@ public class RuggedTest {
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    minDate, maxDate, 5.0,
                                    orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
-                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2);
+                                   CartesianDerivativesFilter.USE_PV,
+                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                   AngularDerivativesFilter.USE_R);
 
         rugged.addLineSensor(lineSensor);
 
@@ -435,7 +446,9 @@ public class RuggedTest {
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    minDate, maxDate, 5.0,
                                    orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
-                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2);
+                                   CartesianDerivativesFilter.USE_PV,
+                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                   AngularDerivativesFilter.USE_R);
 
         rugged.addLineSensor(lineSensor);
 
@@ -493,7 +506,9 @@ public class RuggedTest {
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                        minDate, maxDate, 5.0,
                                        orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
-                                       orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2);
+                                       CartesianDerivativesFilter.USE_PV,
+                                       orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                       AngularDerivativesFilter.USE_R);
         ruggedFull.addLineSensor(lineSensor);
         GeodeticPoint[] gpWithFlatBodyCorrection = ruggedFull.directLocalization("line", 100);
 
@@ -501,7 +516,9 @@ public class RuggedTest {
                                        EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                        minDate, maxDate, 5.0,
                                        orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
-                                       orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2);
+                                       CartesianDerivativesFilter.USE_PV,
+                                       orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                       AngularDerivativesFilter.USE_R);
         ruggedFlat.addLineSensor(lineSensor);
         GeodeticPoint[] gpWithoutFlatBodyCorrection = ruggedFlat.directLocalization("line", 100);
 
@@ -564,7 +581,9 @@ public class RuggedTest {
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    minDate, maxDate, 5.0,
                                    orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
-                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2);
+                                   CartesianDerivativesFilter.USE_PV,
+                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                   AngularDerivativesFilter.USE_R);
         rugged.setLightTimeCorrection(true);
         rugged.setAberrationOfLightCorrection(true);
         for (LineSensor lineSensor : sensors) {
@@ -672,8 +691,8 @@ public class RuggedTest {
         Rugged rugged = new Rugged(updater, 8,
                                    AlgorithmId.DUVENHAGE, EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    satellitePVList.get(0).getDate(), satellitePVList.get(satellitePVList.size() - 1).getDate(), 5.0,
-                                   satellitePVList, 8,
-                                   satelliteQList, 8);
+                                   satellitePVList, 8, CartesianDerivativesFilter.USE_PV,
+                                   satelliteQList, 8, AngularDerivativesFilter.USE_R);
 
         List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
         lineOfSight.add(new Vector3D(-0.011204, 0.181530, 1d).normalize());
@@ -826,7 +845,9 @@ public class RuggedTest {
                                    EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    minDate, maxDate, 5.0,
                                    orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
-                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2);
+                                   CartesianDerivativesFilter.USE_PV, 
+                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                   AngularDerivativesFilter.USE_R);
         rugged.setLightTimeCorrection(lightTimeCorrection);
         rugged.setAberrationOfLightCorrection(aberrationOfLightCorrection);
         rugged.addLineSensor(lineSensor);
