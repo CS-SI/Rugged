@@ -22,8 +22,11 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="add">
+        Time step for internal transform caching is now user-configurable.
+      </action>
       <action dev="luc" type="update">
-        Swtiched maven configuration to multi-modules.
+        Switched maven configuration to multi-modules.
       </action>
       <action dev="luc" type="update">
         Updated UML diagrams.

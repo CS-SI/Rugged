@@ -69,9 +69,6 @@ public class Rugged {
     /** Maximum number of evaluations. */
     private static final int MAX_EVAL = 50;
 
-    /** Time step for frames transforms interpolations. */
-    private static final double FRAMES_TRANSFORMS_INTERPOLATION_STEP = 0.001;
-
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
 
@@ -117,6 +114,7 @@ public class Rugged {
      * @param quaternions satellite quaternions
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @exception RuggedException if data needed for some frame cannot be loaded or if position
      * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
@@ -127,13 +125,13 @@ public class Rugged {
                   final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                   final CartesianDerivativesFilter pvFilter,
                   final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                  final AngularDerivativesFilter aFilter)
+                  final AngularDerivativesFilter aFilter, final double tStep)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
              selectInertialFrame(inertialFrameID), minDate, maxDate, overshootTolerance,
              positionsVelocities, pvInterpolationNumber, pvFilter,
-             quaternions, aInterpolationNumber, aFilter);
+             quaternions, aInterpolationNumber, aFilter, tStep);
     }
 
     /** Build a configured instance.
@@ -159,6 +157,7 @@ public class Rugged {
      * @param quaternions satellite quaternions
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @exception RuggedException if data needed for some frame cannot be loaded or if position
      * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
@@ -168,7 +167,7 @@ public class Rugged {
                   final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                   final CartesianDerivativesFilter pvFilter,
                   final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                  final AngularDerivativesFilter aFilter)
+                  final AngularDerivativesFilter aFilter, final double tStep)
         throws RuggedException {
 
         // space reference
@@ -179,7 +178,7 @@ public class Rugged {
                                                      minDate, maxDate, overshootTolerance,
                                                      positionsVelocities, pvInterpolationNumber, pvFilter,
                                                      quaternions, aInterpolationNumber, aFilter,
-                                                     FRAMES_TRANSFORMS_INTERPOLATION_STEP);
+                                                     tStep);
 
         // intersection algorithm
         this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
@@ -214,6 +213,7 @@ public class Rugged {
      * @param interpolationNumber number of points to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
@@ -223,12 +223,12 @@ public class Rugged {
                   final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
                   final double interpolationStep, final int interpolationNumber,
                   final CartesianDerivativesFilter pvFilter, final AngularDerivativesFilter aFilter,
-                  final Propagator propagator)
+                  final double tStep, final Propagator propagator)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
              selectInertialFrame(inertialFrameID), minDate, maxDate, overshootTolerance,
-             interpolationStep, interpolationNumber, pvFilter, aFilter, propagator);
+             interpolationStep, interpolationNumber, pvFilter, aFilter, tStep, propagator);
     }
 
     /** Build a configured instance.
@@ -252,6 +252,7 @@ public class Rugged {
      * @param interpolationNumber number of points of to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
@@ -260,7 +261,7 @@ public class Rugged {
                   final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
                   final double interpolationStep, final int interpolationNumber,
                   final CartesianDerivativesFilter pvFilter, final AngularDerivativesFilter aFilter,
-                  final Propagator propagator)
+                  final double tStep, final Propagator propagator)
         throws RuggedException {
         try {
 
@@ -302,7 +303,7 @@ public class Rugged {
                                                          minDate, maxDate, overshootTolerance,
                                                          positionsVelocities, interpolationNumber, pvFilter,
                                                          quaternions, interpolationNumber, aFilter,
-                                                         FRAMES_TRANSFORMS_INTERPOLATION_STEP);
+                                                         tStep);
 
             // intersection algorithm
             this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
