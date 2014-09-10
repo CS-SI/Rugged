@@ -798,7 +798,11 @@ public class Rugged {
         }
     }
 
-    /** Inverse localization of a ground point.
+    /** Find the date at which sensor sees a ground point.
+     * <p>
+     * This method is a partial {@link #inverseLocalization(String,
+     * GeodeticPoint, int, int) inverse localization} focusing only on date.
+     * </p>
      * <p>
      * The point is given only by its latitude and longitude, the elevation is
      * computed from the Digital Elevation Model.
@@ -808,17 +812,17 @@ public class Rugged {
      * @param longitude ground point longitude
      * @param minLine minimum line number
      * @param maxLine maximum line number
-     * @return sensor pixel seeing ground point, or null if ground point cannot
-     * be seen between the prescribed line numbers
+     * @return date at which ground point is seen by line sensor
      * @exception RuggedException if line cannot be localized, or sensor is unknown
+     * @see #inverseLocalization(String, double, double, int, int)
      */
-    public SensorPixel inverseLocalization(final String sensorName,
-                                           final double latitude, final double longitude,
-                                           final int minLine,  final int maxLine)
+    public AbsoluteDate dateLocalization(final String sensorName,
+                                         final double latitude, final double longitude,
+                                         final int minLine, final int maxLine)
         throws RuggedException {
         final GeodeticPoint groundPoint =
                 new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
-        return inverseLocalization(sensorName, groundPoint, minLine, maxLine);
+        return dateLocalization(sensorName, groundPoint, minLine, maxLine);
     }
 
     /** Find the date at which sensor sees a ground point.
@@ -865,6 +869,29 @@ public class Rugged {
             return sensor.getDate(crossingResult.getLine());
         }
 
+    }
+
+    /** Inverse localization of a ground point.
+     * <p>
+     * The point is given only by its latitude and longitude, the elevation is
+     * computed from the Digital Elevation Model.
+     * </p>
+     * @param sensorName name of the line  sensor
+     * @param latitude ground point latitude
+     * @param longitude ground point longitude
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @return sensor pixel seeing ground point, or null if ground point cannot
+     * be seen between the prescribed line numbers
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
+     */
+    public SensorPixel inverseLocalization(final String sensorName,
+                                           final double latitude, final double longitude,
+                                           final int minLine,  final int maxLine)
+        throws RuggedException {
+        final GeodeticPoint groundPoint =
+                new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
+        return inverseLocalization(sensorName, groundPoint, minLine, maxLine);
     }
 
     /** Inverse localization of a point.
