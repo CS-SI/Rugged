@@ -17,9 +17,13 @@
 package org.orekit.rugged.api;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.StreamCorruptedException;
 import java.net.URISyntaxException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -531,6 +535,212 @@ public class RuggedTest {
         Assert.assertEquals( 0.005, stats.getMin(),  1.0e-3);
         Assert.assertEquals(39.924, stats.getMax(),  1.0e-3);
         Assert.assertEquals( 4.823, stats.getMean(), 1.0e-3);
+
+    }
+
+    @Test
+    public void testInterpolatorDump()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 200;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                       Vector3D.PLUS_I,
+                                       FastMath.toRadians(1.0), dimension);
+
+        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine);
+
+        TileUpdater updater =
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0x84186d1344722b8fl,
+                                           FastMath.toRadians(1.0), 257);
+
+        Rugged ruggedOriginal = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                       EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                       minDate, maxDate, 5.0,
+                                       orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
+                                       CartesianDerivativesFilter.USE_PV,
+                                       orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                       AngularDerivativesFilter.USE_R, 0.001);
+        ruggedOriginal.addLineSensor(lineSensor);
+        GeodeticPoint[] gpOriginal = ruggedOriginal.directLocalization("line", 100);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ruggedOriginal.dumpInterpolator(bos);
+        Assert.assertTrue(bos.size() > 100000);
+        Assert.assertTrue(bos.size() < 200000);
+
+        Rugged ruggedRecovered = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                            EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                            new ByteArrayInputStream(bos.toByteArray()));
+        ruggedRecovered.addLineSensor(lineSensor);
+        GeodeticPoint[] gpRecovered = ruggedRecovered.directLocalization("line", 100);
+
+        for (int i = 0; i < gpOriginal.length; ++i) {
+            Vector3D pOriginal  = earth.transform(gpOriginal[i]);
+            Vector3D pRecovered = earth.transform(gpRecovered[i]);
+            Assert.assertEquals(0.0, Vector3D.distance(pOriginal, pRecovered), 1.0e-15);
+        }
+
+    }
+
+    @Test
+    public void testInterpolatorDumpWrongFrame()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 200;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                       Vector3D.PLUS_I,
+                                       FastMath.toRadians(1.0), dimension);
+
+        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine);
+
+        Rugged ruggedOriginal = new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
+                                       EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                       minDate, maxDate, 5.0,
+                                       orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
+                                       CartesianDerivativesFilter.USE_PV,
+                                       orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                       AngularDerivativesFilter.USE_R, 0.001);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ruggedOriginal.dumpInterpolator(bos);
+        Assert.assertTrue(bos.size() > 100000);
+        Assert.assertTrue(bos.size() < 200000);
+
+        for (InertialFrameId iId : Arrays.asList(InertialFrameId.GCRF,
+                                                 InertialFrameId.MOD,
+                                                 InertialFrameId.TOD,
+                                                 InertialFrameId.VEIS1950)) {
+            try {
+                new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
+                           EllipsoidId.WGS84, iId, BodyRotatingFrameId.ITRF,
+                           new ByteArrayInputStream(bos.toByteArray()));
+                Assert.fail("an exception should have been thrown");
+            } catch (RuggedException re) {
+                Assert.assertEquals(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
+                                    re.getSpecifier());
+            }
+        }
+
+        for (BodyRotatingFrameId bId : Arrays.asList(BodyRotatingFrameId.GTOD,
+                                                     BodyRotatingFrameId.ITRF_EQUINOX)) {
+            try {
+                new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
+                           EllipsoidId.WGS84, InertialFrameId.EME2000, bId,
+                           new ByteArrayInputStream(bos.toByteArray()));
+                Assert.fail("an exception should have been thrown");
+            } catch (RuggedException re) {
+                Assert.assertEquals(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
+                                    re.getSpecifier());
+            }
+        }
+    }
+
+    @Test
+    public void testInterpolatorNotADump()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+
+        // the following array is a real serialization file corresponding to the following
+        // made-up empty class that does not exist in Rugged:
+        //        public class NonExistentClass implements java.io.Serializable {
+        //            private static final long serialVersionUID = -1;
+        //        }
+        byte[] nonExistentClass = new byte[] {
+            -84, -19,   0,   5, 115, 114,
+              0,  16,  78, 111, 110,  69,
+            120, 105, 115, 116, 101, 110,
+            116,  67, 108,  97, 115, 115,
+             -1,  -1,  -1,  -1,  -1,  -1,
+             -1,  -1,   2,   0,   0, 120,
+            112
+        };
+
+        // the following array is a real serialization file of object Integer.valueOf(1)
+        byte[] integerOne = new byte[] {
+          -84, -19,   0,   5, 115, 114,
+            0,  17, 106,  97, 118,  97,
+           46, 108,  97, 110, 103,  46,
+           73, 110, 116, 101, 103, 101,
+          114,  18, -30, -96, -92,  -9,
+         -127,-121,  56,   2,   0,   1,
+           73,   0,   5, 118,  97, 108,
+          117, 101, 120, 114,   0,  16,
+          106,  97, 118,  97,  46, 108,
+           97, 110, 103,  46,  78, 117,
+          109,  98, 101, 114,-122, -84,
+         -107,  29,  11,-108, -32,-117,
+            2,   0,   0, 120, 112,   0,
+            0,   0,   1
+        };
+
+        // the following array is a truncation of the previous one
+        byte[] truncatedDump = new byte[] {
+          -84, -19,   0,   5, 115, 114,
+            0,  17, 106,  97, 118,  97
+        };
+
+        byte[] notSerialization = new byte[] {
+            1, 2, 3, 4, 5, 6
+        };
+
+        for (byte[] array : Arrays.asList(nonExistentClass, integerOne, truncatedDump, notSerialization)) {
+            try {
+                new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
+                           EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                           new ByteArrayInputStream(array));
+                Assert.fail("an exception should have been thrown");
+            } catch (RuggedException re) {
+                Assert.assertEquals(RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA,
+                                    re.getSpecifier());
+                if (array == nonExistentClass) {
+                    Assert.assertEquals(ClassNotFoundException.class, re.getCause().getClass());
+                } else if (array == integerOne) {
+                    Assert.assertEquals(ClassCastException.class, re.getCause().getClass());
+                } else if (array == truncatedDump) {
+                    Assert.assertEquals(EOFException.class, re.getCause().getClass());
+                } else if (array == notSerialization) {
+                    Assert.assertEquals(StreamCorruptedException.class, re.getCause().getClass());
+                }
+            }
+        }
 
     }
 

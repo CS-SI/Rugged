@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,16 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 /** Provider for observation transforms.
  * @author Luc Maisonobe
  */
-public class SpacecraftToObservedBody {
+public class SpacecraftToObservedBody implements Serializable {
+
+    /** Serializable UID. */
+    private static final long serialVersionUID = 20140909L;
+
+    /** Name of the inertial frame. */
+    private final String inertialFrameName;
+
+    /** Name of the body frame. */
+    private final String bodyFrameName;
 
     /** Start of search time span. */
     private final AbsoluteDate minDate;
@@ -87,6 +97,8 @@ public class SpacecraftToObservedBody {
         throws RuggedException {
         try {
 
+            this.inertialFrameName  = inertialFrame.getName();
+            this.bodyFrameName      = bodyFrame.getName();
             this.minDate            = minDate;
             this.maxDate            = maxDate;
             this.overshootTolerance = overshootTolerance;
@@ -168,6 +180,20 @@ public class SpacecraftToObservedBody {
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+    }
+
+    /** Get the name of the inertial frame.
+     * @return inertial frame name
+     */
+    public String getInertialFrameName() {
+        return inertialFrameName;
+    }
+
+    /** Get the name of the body frame.
+     * @return body frame name
+     */
+    public String getBodyFrameName() {
+        return bodyFrameName;
     }
 
     /** Get the start of search time span.

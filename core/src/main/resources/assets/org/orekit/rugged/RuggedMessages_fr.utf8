@@ -30,3 +30,9 @@ LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = la ligne de visée ne franchit jamais l''
 
 # line-of-sight enters the Digital Elevation Model behind spacecraft!
 DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = la ligne de visée entre dans le Modèle Numérique de Terrain derrière le satellite !
+
+# frame {0} does not match frame {1} from interpolator dump
+FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = le repère {0} ne correspond pas au repère {1} de la sauvegarde d''interpolateur
+
+# data is not an interpolator dump
+NOT_INTERPOLATOR_DUMP_DATA = les données ne correspondent pas à une sauvegarde d''interpolateur

@@ -23,6 +23,10 @@
     <release version="1.0" date="TBD"
              description="TBD">
       <action dev="luc" type="add">
+        Added a way to reuse transform interpolator from one run to another
+        by dumping its state into a file, thus avoiding costly initialization.
+      </action>
+      <action dev="luc" type="add">
         Time step for internal transform caching is now user-configurable.
       </action>
       <action dev="luc" type="update">
