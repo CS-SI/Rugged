@@ -148,7 +148,7 @@ public class RuggedTest {
                                                  FastMath.toRadians(1.0), 1201);
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
-                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   EllipsoidId.GRS80, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    pv.get(0).getDate(), pv.get(pv.size() - 1).getDate(), 5.0,
                                    pv, 8, CartesianDerivativesFilter.USE_PV, q, 8, AngularDerivativesFilter.USE_R, 0.001);
 
@@ -178,7 +178,7 @@ public class RuggedTest {
                                                  FastMath.toRadians(1.0), 1201);
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
-                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   EllipsoidId.IERS96, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    orbit.getDate().shiftedBy(-10.0), orbit.getDate().shiftedBy(+10.0), 5.0,
                                    1.0, 8, CartesianDerivativesFilter.USE_PV, AngularDerivativesFilter.USE_R, 0.001, propagator);
 
@@ -392,7 +392,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         Rugged rugged = new Rugged(null, -1, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID,
-                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   EllipsoidId.IERS2003, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
                                    minDate, maxDate, 5.0,
                                    orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
                                    CartesianDerivativesFilter.USE_PV,
@@ -535,6 +535,68 @@ public class RuggedTest {
         Assert.assertEquals( 0.005, stats.getMin(),  1.0e-3);
         Assert.assertEquals(39.924, stats.getMax(),  1.0e-3);
         Assert.assertEquals( 4.823, stats.getMean(), 1.0e-3);
+
+    }
+
+    @Test
+    public void testBasicScan()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 200;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                       Vector3D.PLUS_I,
+                                       FastMath.toRadians(1.0), dimension);
+
+        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine);
+
+        TileUpdater updater =
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xe12ef744f224cf43l,
+                                           FastMath.toRadians(1.0), 257);
+
+        Rugged ruggedDuvenhage = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                            EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                            minDate, maxDate, 5.0,
+                                            orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
+                                            CartesianDerivativesFilter.USE_PV,
+                                            orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                            AngularDerivativesFilter.USE_R, 0.001);
+        ruggedDuvenhage.addLineSensor(lineSensor);
+        GeodeticPoint[] gpDuvenhage = ruggedDuvenhage.directLocalization("line", 100);
+
+        Rugged ruggedBasicScan = new Rugged(updater, 8, AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY,
+                                            EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                            minDate, maxDate, 5.0,
+                                            orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
+                                            CartesianDerivativesFilter.USE_PV,
+                                            orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                            AngularDerivativesFilter.USE_R, 0.001);
+        ruggedBasicScan.addLineSensor(lineSensor);
+        GeodeticPoint[] gpBasicScan = ruggedBasicScan.directLocalization("line", 100);
+
+
+        for (int i = 0; i < gpDuvenhage.length; ++i) {
+            Vector3D pDuvenhage = earth.transform(gpDuvenhage[i]);
+            Vector3D pBasicScan = earth.transform(gpBasicScan[i]);
+            Assert.assertEquals(0.0, Vector3D.distance(pDuvenhage, pBasicScan), 4.0e-5);
+        }
 
     }
 
