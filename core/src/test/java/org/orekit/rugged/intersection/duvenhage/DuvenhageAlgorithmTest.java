@@ -18,10 +18,12 @@ package org.orekit.rugged.intersection.duvenhage;
 
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
@@ -53,6 +55,20 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
         GeodeticPoint intersection = algorithm.refineIntersection(earth, position, los,
                                                                   algorithm.intersection(earth, position, los));
         checkIntersection(position, los, intersection);
+    }
+
+    @Test
+    public void testWrongPositionMissesGround() throws RuggedException, OrekitException {
+        setUpMayonVolcanoContext();
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        Vector3D position = new Vector3D(7.551889113912788E9, -3.173692685491814E10, 1.5727517321541348E9);
+        Vector3D los = new Vector3D(0.010401349221417867, -0.17836068905951286, 0.9839101973923178);
+        try {
+            algorithm.intersection(earth, position, los);
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND, re.getSpecifier());
+        }
     }
 
 }

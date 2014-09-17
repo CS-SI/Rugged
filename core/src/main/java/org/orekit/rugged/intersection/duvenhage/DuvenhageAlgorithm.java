@@ -72,6 +72,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
             // compute intersection with ellipsoid
             final GeodeticPoint gp0 = ellipsoid.pointOnGround(position, los);
+            if (gp0 == null) {
+                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND);
+            }
 
             // locate the entry tile along the line-of-sight
             MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
