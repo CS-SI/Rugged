@@ -115,6 +115,42 @@ public class SimpleTileTest {
         checkOutOfBound( 50, 200, tile);
     }
 
+    @Test
+    public void testIndexShift() throws RuggedException {
+
+        SimpleTile tile = new SimpleTileFactory().createTile();
+        tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
+        tile.setElevation(50, 100, 1000.0);
+        tile.tileUpdateCompleted();
+
+        // indices correspond to pixels centers
+        double latCenterColumn50 = tile.getLatitudeAtIndex(50);
+        double latCenterColumn51 = tile.getLatitudeAtIndex(51);
+        double lonCenterRow23    = tile.getLongitudeAtIndex(23);
+        double lonCenterRow24    = tile.getLongitudeAtIndex(24);
+
+        // getLatitudeIndex shift indices 1/2 pixel, so that
+        // the specified latitude is always between index and index+1
+        // so despite latWestColumn51 is very close to column 51 center,
+        // getLatitudeIndex should return 50
+        double latWestColumn51   = 0.001 * latCenterColumn50 + 0.999 * latCenterColumn51;
+        int retrievedLatIndex = tile.getLatitudeIndex(latWestColumn51);
+        Assert.assertEquals(50, retrievedLatIndex);
+        Assert.assertTrue(tile.getLatitudeAtIndex(retrievedLatIndex) < latWestColumn51);
+        Assert.assertTrue(latWestColumn51 < tile.getLatitudeAtIndex(retrievedLatIndex + 1));
+
+        // getLongitudeIndex shift indices 1/2 pixel, so that
+        // the specified longitude is always between index and index+1
+        // so despite lonSouthRow24 is very close to row 24 center,
+        // getLongitudeIndex should return 23
+        double lonSouthRow24     = 0.001 * lonCenterRow23    + 0.999 * lonCenterRow24;
+        int retrievedLonIndex = tile.getLongitudeIndex(lonSouthRow24);
+        Assert.assertEquals(23, retrievedLonIndex);
+        Assert.assertTrue(tile.getLongitudeAtIndex(retrievedLonIndex) < lonSouthRow24);
+        Assert.assertTrue(lonSouthRow24 < tile.getLongitudeAtIndex(retrievedLonIndex + 1));
+
+    }
+
     private void checkOutOfBound(int i, int j, Tile tile) {
         try {
             tile.setElevation(i, j, 1000.0);

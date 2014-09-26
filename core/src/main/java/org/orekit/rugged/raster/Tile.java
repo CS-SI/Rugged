@@ -128,13 +128,21 @@ public interface Tile extends UpdatableTile {
     int getLongitudeColumns();
 
     /** Get the latitude index of a point.
+     * <p>
+     * This method shift indices 1/2 pixel, so that
+     * the specified latitude is always between index and index+1.
+     * </p>
      * @param latitude geodetic latitude
-     * @return latirute index (it may lie outside of the tile!)
+     * @return latitude index (it may lie outside of the tile!)
      */
     int getLatitudeIndex(double latitude);
 
     /** Get the longitude index of a point.
-     * @param longitude geodetic latitude
+     * <p>
+     * This method shift indices 1/2 pixel, so that
+     * the specified longitude is always between index and index+1.
+     * </p>
+     * @param longitude geodetic longitude
      * @return longitude index (it may lie outside of the tile!)
      */
     int getLongitudeIndex(double longitude);
