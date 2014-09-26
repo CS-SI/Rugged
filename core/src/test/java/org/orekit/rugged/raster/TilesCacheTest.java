@@ -77,7 +77,7 @@ public class TilesCacheTest {
         cache.getTile(FastMath.toRadians(20.5), FastMath.toRadians(30.5));
         Assert.assertEquals(14, factory.getCount());
 
-        // evict all the tiles, goind to a completely different zone
+        // evict all the tiles, going to a completely different zone
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < 3; ++j) {
                 cache.getTile(FastMath.toRadians(40.5 + i), FastMath.toRadians(90.5 + j));
