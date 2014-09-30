@@ -798,6 +798,80 @@ public class Rugged {
         }
     }
 
+    /** Direct localization of a single line-of-sight.
+     * @param date date of the localization
+     * @param pixel position in spacecraft frame
+     * @param los normalized line-of-sight in spacecraft frame
+     * @return ground position of all pixels of the specified sensor line
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
+     */
+    public GeodeticPoint directLocalization(final AbsoluteDate date, final Vector3D position, final Vector3D los)
+        throws RuggedException {
+        try {
+
+            // compute the approximate transform between spacecraft and observed body
+            final Transform    scToInert   = scToBody.getScToInertial(date);
+            final Transform    inertToBody = scToBody.getInertialToBody(date);
+            final Transform    approximate = new Transform(date, scToInert, inertToBody);
+
+            final Vector3D spacecraftVelocity =
+                    scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
+
+            // compute localization of specified pixel
+            final Vector3D pInert    = scToInert.transformPosition(position);
+
+            final Vector3D obsLInert = scToInert.transformVector(los);
+            final Vector3D lInert;
+            if (aberrationOfLightCorrection) {
+                // apply aberration of light correction
+                // as the spacecraft velocity is small with respect to speed of light,
+                // we use classical velocity addition and not relativistic velocity addition
+                // we look for a positive k such that: c * lInert + vsat = k * obsLInert
+                // with lInert normalized
+                final double a = obsLInert.getNormSq();
+                final double b = -Vector3D.dotProduct(obsLInert, spacecraftVelocity);
+                final double c = spacecraftVelocity.getNormSq() - Constants.SPEED_OF_LIGHT * Constants.SPEED_OF_LIGHT;
+                final double s = FastMath.sqrt(b * b - a * c);
+                final double k = (b > 0) ? -c / (s + b) : (s - b) / a;
+                lInert = new Vector3D( k   / Constants.SPEED_OF_LIGHT, obsLInert,
+                                       -1.0 / Constants.SPEED_OF_LIGHT, spacecraftVelocity);
+            } else {
+                // don't apply aberration of light correction
+                lInert = obsLInert;
+            }
+
+            if (lightTimeCorrection) {
+                // compute DEM intersection with light time correction
+                final Vector3D  sP       = approximate.transformPosition(position);
+                final Vector3D  sL       = approximate.transformVector(los);
+                final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL));
+                final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
+                final Transform shifted1 = inertToBody.shiftedBy(-deltaT1);
+                final GeodeticPoint gp1  = algorithm.intersection(ellipsoid,
+                                                                  shifted1.transformPosition(pInert),
+                                                                  shifted1.transformVector(lInert));
+
+                final Vector3D  eP2      = ellipsoid.transform(gp1);
+                final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
+                final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
+                return algorithm.refineIntersection(ellipsoid,
+                                                    shifted2.transformPosition(pInert),
+                                                    shifted2.transformVector(lInert),
+                                                    gp1);
+
+            } else {
+                // compute DEM intersection without light time correction
+                final Vector3D pBody = inertToBody.transformPosition(pInert);
+                final Vector3D lBody = inertToBody.transformVector(lInert);
+                return algorithm.refineIntersection(ellipsoid, pBody, lBody,
+                                                    algorithm.intersection(ellipsoid, pBody, lBody));
+            }
+
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
+    }
+
     /** Find the date at which sensor sees a ground point.
      * <p>
      * This method is a partial {@link #inverseLocalization(String,

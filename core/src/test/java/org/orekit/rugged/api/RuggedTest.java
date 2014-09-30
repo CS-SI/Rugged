@@ -555,6 +555,59 @@ public class RuggedTest {
     }
 
     @Test
+    public void testLocalizationsinglePoint()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 200;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                       Vector3D.PLUS_I,
+                                       FastMath.toRadians(1.0), dimension);
+
+        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine);
+
+        TileUpdater updater =
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
+
+        Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   minDate, maxDate, 5.0,
+                                   orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
+                                   CartesianDerivativesFilter.USE_PV,
+                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                   AngularDerivativesFilter.USE_R, 0.001);
+        rugged.addLineSensor(lineSensor);
+        GeodeticPoint[] gpLine = rugged.directLocalization("line", 100);
+
+        for (int i = 0; i < gpLine.length; ++i) {
+            GeodeticPoint gpPixel =
+                    rugged.directLocalization(lineSensor.getDate(100), lineSensor.getPosition(), lineSensor.getLos(i));
+            Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
+            Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
+            Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
+        }
+
+    }
+
+    @Test
     public void testBasicScan()
         throws RuggedException, OrekitException, URISyntaxException {
 
