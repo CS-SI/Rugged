@@ -19,6 +19,9 @@ EMPTY_TILE = la tuile est vide : {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = capteur {0} inconnu
 
+# line-of-sight does not reach ground
+LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = la ligne de visée n''atteint pas le sol
+
 # line-of-sight never crosses latitude {0}
 LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE = la ligne de visée ne franchit jamais la latitude {0}
 

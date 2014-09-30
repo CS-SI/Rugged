@@ -30,7 +30,7 @@ import org.orekit.rugged.raster.SimpleTile;
  * Level n-1, which is the deepest one, is computed from the raw pixels by
  * merging adjacent pixels pairs columns (i.e. pixels at indices (i, 2j)
  * and (i, 2j+1) are merged together by computing and storing the minimum
- * and maxium in a sub-tile. Level n-1 therefore has the same number of rows
+ * and maximum in a sub-tile. Level n-1 therefore has the same number of rows
  * but half the number of columns of the raw tile, and its sub-tiles are
  * 1 pixel high and 2 pixels wide. Level n-2 is computed from level n-1 by
  * merging sub-tiles rows. Level n-2 therefore has half the number of rows

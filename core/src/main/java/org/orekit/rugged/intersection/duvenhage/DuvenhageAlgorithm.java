@@ -18,6 +18,7 @@ package org.orekit.rugged.intersection.duvenhage;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.MathUtils;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
@@ -72,6 +73,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
             // compute intersection with ellipsoid
             final GeodeticPoint gp0 = ellipsoid.pointOnGround(position, los);
+            if (gp0 == null) {
+                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND);
+            }
 
             // locate the entry tile along the line-of-sight
             MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
@@ -381,7 +385,11 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         final Vector3D exitP = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation() - STEP);
         final GeodeticPoint exitGP = ellipsoid.transform(exitP, ellipsoid.getBodyFrame(), null);
 
-        switch (tile.getLocation(exitGP.getLatitude(), exitGP.getLongitude())) {
+        // fix longitude discontinuity
+        final double meanTileLongitude = tile.getLongitudeAtIndex(tile.getLongitudeColumns() / 2);
+        final double fixedLongitude    = MathUtils.normalizeAngle(exitGP.getLongitude(), meanTileLongitude);
+
+        switch (tile.getLocation(exitGP.getLatitude(), fixedLongitude)) {
         case SOUTH_WEST :
             return new LimitPoint(ellipsoid,
                                   selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude(), exitP),

@@ -21,6 +21,12 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 
 /** Interface representing a raster tile.
+ * <p>
+ * The elevations are considered to be at the <em>center</em> of each pixels.
+ * The minimum latitude and longitude hence correspond to the <em>center</em>
+ * of the most South-West pixel, and the maximum latitude and longitude
+ * correspond to the <em>center</em> of the most North-East pixel.
+ * </p>
  * @author Luc Maisonobe
  */
 public interface Tile extends UpdatableTile {
@@ -65,33 +71,39 @@ public interface Tile extends UpdatableTile {
 
     /** Get minimum latitude.
      * @return minimum latitude
+     * (latitude of the center of the pixels of South row)
      */
     double getMinimumLatitude();
 
     /** Get the latitude at some index.
      * @param latitudeIndex latitude index
      * @return latitude at the specified index
+     * (latitude of the center of the pixels of specified row)
      */
     double getLatitudeAtIndex(int latitudeIndex);
 
     /** Get maximum latitude.
      * @return maximum latitude
+     * (latitude of the center of the pixels of North row)
      */
     double getMaximumLatitude();
 
     /** Get minimum longitude.
      * @return minimum longitude
+     * (longitude of the center of the pixels of West column)
      */
     double getMinimumLongitude();
 
     /** Get the longitude at some index.
      * @param longitudeIndex longitude index
      * @return longitude at the specified index
+     * (longitude of the center of the pixels of specified column)
      */
     double getLongitudeAtIndex(int longitudeIndex);
 
     /** Get maximum longitude.
      * @return maximum longitude
+     * (longitude of the center of the pixels of East column)
      */
     double getMaximumLongitude();
 
@@ -116,13 +128,21 @@ public interface Tile extends UpdatableTile {
     int getLongitudeColumns();
 
     /** Get the latitude index of a point.
+     * <p>
+     * This method shift indices 1/2 pixel, so that
+     * the specified latitude is always between index and index+1.
+     * </p>
      * @param latitude geodetic latitude
-     * @return latirute index (it may lie outside of the tile!)
+     * @return latitude index (it may lie outside of the tile!)
      */
     int getLatitudeIndex(double latitude);
 
     /** Get the longitude index of a point.
-     * @param longitude geodetic latitude
+     * <p>
+     * This method shift indices 1/2 pixel, so that
+     * the specified longitude is always between index and index+1.
+     * </p>
+     * @param longitude geodetic longitude
      * @return longitude index (it may lie outside of the tile!)
      */
     int getLongitudeIndex(double longitude);
