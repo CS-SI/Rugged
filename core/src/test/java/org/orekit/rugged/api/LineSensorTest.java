@@ -85,7 +85,7 @@ public class LineSensorTest {
         Assert.assertEquals("noisy line", sensor.getName());
         Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
         Assert.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-5);
-        Assert.assertEquals(0.0, Vector3D.angle(normal, sensor.getMeanPlaneNormal()), 3.0e-7);
+        Assert.assertEquals(0.0, Vector3D.angle(normal, sensor.getMeanPlaneNormal()), 8.0e-7);
 
     }
 

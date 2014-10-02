@@ -1145,6 +1145,130 @@ public class RuggedTest {
 
     }
 
+    @Test
+    public void testInverseLoc() throws OrekitException, RuggedException, URISyntaxException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        Vector3D offset = Vector3D.ZERO;
+        TimeScale gps = TimeScalesFactory.getGPS();
+        Frame eme2000 = FramesFactory.getEME2000();
+        Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+        ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
+        ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
+
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:27", -0.327993d, -0.715194d, -0.56313d, 0.252592d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:29", -0.328628d, -0.71494d, -0.562769d, 0.25329d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:31", -0.329263d, -0.714685d, -0.562407d, 0.253988d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:33", -0.329898d, -0.714429d, -0.562044d, 0.254685d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:35", -0.330532d, -0.714173d, -0.561681d, 0.255383d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:37", -0.331166d, -0.713915d, -0.561318d, 0.256079d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:39", -0.3318d, -0.713657d, -0.560954d, 0.256776d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:41", -0.332434d, -0.713397d, -0.560589d, 0.257472d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:43", -0.333067d, -0.713137d, -0.560224d, 0.258168d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:45", -0.333699d, -0.712876d, -0.559859d, 0.258864d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:18:17", -0.36244d, -0.699935d, -0.542511d, 0.290533d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:27", -0.401688d, -0.678574d, -0.516285d, 0.334116d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:29", -0.402278d, -0.678218d, -0.515866d, 0.334776d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:31", -0.402868d, -0.677861d, -0.515447d, 0.335435d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:33", -0.403457d, -0.677503d, -0.515028d, 0.336093d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:35", -0.404046d, -0.677144d, -0.514608d, 0.336752d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:37", -0.404634d, -0.676785d, -0.514187d, 0.337409d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:39", -0.405222d, -0.676424d, -0.513767d, 0.338067d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:41", -0.40581d, -0.676063d, -0.513345d, 0.338724d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:43", -0.406397d, -0.675701d, -0.512924d, 0.339381d);
+        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:45", -0.406983d, -0.675338d, -0.512502d, 0.340038d);
+
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:27.857531", -379110.393d, -5386317.278d, 4708158.61d, -1802.078d, -4690.847d,
+                -5512.223d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:36.857531", -398874.476d, -5428039.968d, 4658344.906d, -1801.326d, -4636.91d,
+                -5557.915d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:45.857531", -418657.992d, -5469262.453d, 4608122.145d, -1800.345d, -4582.57d,
+                -5603.119d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:54.857531", -438458.554d, -5509981.109d, 4557494.737d, -1799.136d, -4527.831d,
+                -5647.831d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:03.857531", -458273.771d, -5550192.355d, 4506467.128d, -1797.697d, -4472.698d,
+                -5692.046d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:12.857531", -478101.244d, -5589892.661d, 4455043.798d, -1796.029d, -4417.176d,
+                -5735.762d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:21.857531", -497938.57d, -5629078.543d, 4403229.263d, -1794.131d, -4361.271d,
+                -5778.975d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:30.857531", -517783.34d, -5667746.565d, 4351028.073d, -1792.003d, -4304.987d,
+                -5821.679d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:39.857531", -537633.139d, -5705893.34d, 4298444.812d, -1789.644d, -4248.329d,
+                -5863.873d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:48.857531", -557485.549d, -5743515.53d, 4245484.097d, -1787.055d, -4191.304d,
+                -5905.552d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:57.857531", -577338.146d, -5780609.846d, 4192150.579d, -1784.234d, -4133.916d,
+                -5946.712d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:06.857531", -597188.502d, -5817173.047d, 4138448.941d, -1781.183d, -4076.171d,
+                -5987.35d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:15.857531", -617034.185d, -5853201.943d, 4084383.899d, -1777.899d, -4018.073d,
+                -6027.462d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:24.857531", -636872.759d, -5888693.393d, 4029960.2d, -1774.385d, -3959.629d,
+                -6067.045d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:33.857531", -656701.786d, -5923644.307d, 3975182.623d, -1770.638d, -3900.844d,
+                -6106.095d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:42.857531", -676518.822d, -5958051.645d, 3920055.979d, -1766.659d, -3841.723d,
+                -6144.609d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:51.857531", -696321.424d, -5991912.417d, 3864585.108d, -1762.449d, -3782.271d,
+                -6182.583d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:00.857531", -716107.143d, -6025223.686d, 3808774.881d, -1758.006d, -3722.495d,
+                -6220.015d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:09.857531", -735873.528d, -6057982.563d, 3752630.2d, -1753.332d, -3662.399d,
+                -6256.9d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:18.857531", -755618.129d, -6090186.214d, 3696155.993d, -1748.425d, -3601.99d,
+                -6293.236d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:27.857531", -775338.49d, -6121831.854d, 3639357.221d, -1743.286d, -3541.272d,
+                -6329.019d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:36.857531", -795032.157d, -6152916.751d, 3582238.87d, -1737.915d, -3480.252d,
+                -6364.246d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:45.857531", -814696.672d, -6183438.226d, 3524805.957d, -1732.313d, -3418.935d,
+                -6398.915d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:54.857531", -834329.579d, -6213393.652d, 3467063.525d, -1726.478d, -3357.327d,
+                -6433.022d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:03.857531", -853928.418d, -6242780.453d, 3409016.644d, -1720.412d, -3295.433d,
+                -6466.563d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:12.857531", -873490.732d, -6271596.108d, 3350670.411d, -1714.114d, -3233.259d,
+                -6499.537d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:21.857531", -893014.061d, -6299838.148d, 3292029.951d, -1707.585d, -3170.811d,
+                -6531.941d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:30.857531", -912495.948d, -6327504.159d, 3233100.411d, -1700.825d, -3108.095d,
+                -6563.77d);
+        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:39.857531", -931933.933d, -6354591.778d, 3173886.968d, -1693.833d, -3045.116d,
+                -6595.024d);
+
+        TileUpdater updater = null;
+        Rugged rugged = new Rugged(updater, 8, AlgorithmId.IGNORE_DEM_USE_ELLIPSOID, EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                satellitePVList.get(0).getDate(), satellitePVList.get(satellitePVList.size() - 1).getDate(), 10.0, satellitePVList, 6,
+                CartesianDerivativesFilter.USE_P, satelliteQList, 8, AngularDerivativesFilter.USE_R, 0.1);
+
+        List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
+        lineOfSight.add(new Vector3D(0.0046536264d, -0.1851800945d, 1d).normalize());
+        lineOfSight.add(new Vector3D(0.0000001251d, -0.0002815246d, 1d).normalize());
+        lineOfSight.add(new Vector3D(0.0046694108d, 0.1853863933d, 1d).normalize());
+
+        AbsoluteDate absDate = new AbsoluteDate("2013-07-07T17:16:36.857", gps);
+        LinearLineDatation lineDatation = new LinearLineDatation(absDate, 0.03125d, 19.95565693384045);
+        LineSensor lineSensor = new LineSensor("QUICK_LOOK", lineDatation, offset, lineOfSight);
+        rugged.addLineSensor(lineSensor);
+
+        GeodeticPoint[] temp = rugged.directLocalization("QUICK_LOOK", -250);
+        GeodeticPoint first = temp[0];
+        double minLon = first.getLongitude();
+        double minLat = first.getLatitude();
+        temp = rugged.directLocalization("QUICK_LOOK", 350);
+        GeodeticPoint last = temp[temp.length - 1];
+        double maxLon = last.getLongitude();
+        double maxLat = last.getLatitude();
+
+        GeodeticPoint gp = new GeodeticPoint((minLat + maxLat) / 2d, (minLon + maxLon) / 2d, 0d);
+        SensorPixel sensorPixel = rugged.inverseLocalization("QUICK_LOOK", gp, -250, 350);
+
+        Assert.assertNotNull(sensorPixel);
+
+    }
+
     /**
      * Add a satellite PV to given satellitePVList List
      * @param gps GPS TimeScale

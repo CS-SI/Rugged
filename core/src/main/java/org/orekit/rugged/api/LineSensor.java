@@ -74,29 +74,20 @@ public class LineSensor {
         }
 
         // we consider the viewing directions as a point cloud
-        // and want to find the plane that best fits it
-
-        // start by finding the centroid
-        double centroidX = 0;
-        double centroidY = 0;
-        double centroidZ = 0;
-        for (int i = 0; i < x.length; ++i) {
-            final Vector3D l = x[i];
-            centroidX += l.getX();
-            centroidY += l.getY();
-            centroidZ += l.getZ();
-        }
-        centroidX /= x.length;
-        centroidY /= x.length;
-        centroidZ /= x.length;
+        // and want to find the plane containing origin that best fits it
 
         // build a centered data matrix
-        final RealMatrix matrix = MatrixUtils.createRealMatrix(3, los.size());
+        // (for each viewing direction, we add both the direction and its
+        //  opposite, thus ensuring the plane will contain origin)
+        final RealMatrix matrix = MatrixUtils.createRealMatrix(3, 2 * los.size());
         for (int i = 0; i < x.length; ++i) {
             final Vector3D l = x[i];
-            matrix.setEntry(0, i, l.getX() - centroidX);
-            matrix.setEntry(1, i, l.getY() - centroidY);
-            matrix.setEntry(2, i, l.getZ() - centroidZ);
+            matrix.setEntry(0, 2 * i,      l.getX());
+            matrix.setEntry(1, 2 * i,      l.getY());
+            matrix.setEntry(2, 2 * i,      l.getZ());
+            matrix.setEntry(0, 2 * i + 1, -l.getX());
+            matrix.setEntry(1, 2 * i + 1, -l.getY());
+            matrix.setEntry(2, 2 * i + 1, -l.getZ());
         }
 
         // compute Singular Value Decomposition
