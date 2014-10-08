@@ -800,7 +800,7 @@ public class Rugged {
 
     /** Direct localization of a single line-of-sight.
      * @param date date of the localization
-     * @param pixel position in spacecraft frame
+     * @param position pixel position in spacecraft frame
      * @param los normalized line-of-sight in spacecraft frame
      * @return ground position of all pixels of the specified sensor line
      * @exception RuggedException if line cannot be localized, or sensor is unknown
