@@ -2,7 +2,7 @@
 NO_DEM_DATA_FOR_POINT = nessun dato di Modello Digitale di Suolo per il punto {0}, {1} (i dati dovrebbero trovarsi ne file {2})
 
 # error parsing file {0}: {1}
-ERROR_PARSING_FILE = errore durante l'analisi del file {0} : {1}
+ERROR_PARSING_FILE = errore durante l''analisi del file {0} : {1}
 
 # missing pixel scale GeoTIFF tag in file {0}
 MISSING_PIXEL_SCALE = meta-dato « pixel scale » GeoTIFF mancante nel file {0}
