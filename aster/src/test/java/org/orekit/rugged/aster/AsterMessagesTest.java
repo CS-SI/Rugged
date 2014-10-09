@@ -34,7 +34,7 @@ public class AsterMessagesTest {
 
     @Test
     public void testAllKeysPresentInPropertiesFiles() {
-        for (final String language : new String[] { "en", "fr" } ) {
+        for (final String language : new String[] { "de", "en", "fr", "it" } ) {
             ResourceBundle bundle =
                 ResourceBundle.getBundle("assets/org/orekit/rugged/AsterMessages",
                                          new Locale(language), new AsterMessages.UTF8Control());
@@ -54,7 +54,7 @@ public class AsterMessagesTest {
 
     @Test
     public void testAllPropertiesCorrespondToKeys() {
-        for (final String language : new String[] { "en", "fr" } ) {
+        for (final String language : new String[] { "de", "en", "fr", "it" } ) {
             ResourceBundle bundle =
                 ResourceBundle.getBundle("assets/org/orekit/rugged/AsterMessages",
                                          new Locale(language), new AsterMessages.UTF8Control());
@@ -89,7 +89,7 @@ public class AsterMessagesTest {
 
     @Test
     public void testVariablePartsConsistency() {
-        for (final String language : new String[] { "en", "fr" } ) {
+        for (final String language : new String[] { "de", "en", "fr", "it" } ) {
             Locale locale = new Locale(language);
             for (AsterMessages message : AsterMessages.values()) {
                 MessageFormat source     = new MessageFormat(message.getSourceString());
