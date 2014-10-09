@@ -22,6 +22,12 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="add" due-to="Marina Ludwig">
+        Added German translation of error messages.
+      </action>
+      <action dev="luc" type="add" due-to="Francesco Coccoluto">
+        Added Italian translation of error messages.
+      </action>
       <action dev="luc" type="fix">
         Added detection of wrong position/line-of-sight that misses the ground.
       </action>

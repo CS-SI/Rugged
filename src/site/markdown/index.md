@@ -71,6 +71,10 @@ Features
 
     * French
 
+    * German
+
+    * Italian
+
 Free software
 -------------
 
@@ -87,7 +91,7 @@ interoperability in space systems.
 Maintained library
 ------------------
 
-Rugged has been in development since 2013 inside [CS Systèmes
+Rugged has been in development since 2014 inside [CS Systèmes
 d'Information](http://www.c-s.fr/) and is still used and maintained by its dual teams
 of space dynamics and image processing experts.
 
