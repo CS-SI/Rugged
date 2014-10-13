@@ -1,0 +1,41 @@
+# internal error, contact maintenance at {0}
+INTERNAL_ERROR = erro interno, contacte co soporte técnico no {0}
+
+# no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
+OUT_OF_TILE_INDICES = non hai datos nos índices [{0}, {1}], a faceta só cubre dende [0, 0] a [{2}, {3}] (inclusive)
+
+# no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
+OUT_OF_TILE_ANGLES = non hai datos para a latitude {0} e a lonxitude {1}, a faceta só cubre as latitudes de {2} a {3} e as lonxitudes de {4} a {5}
+
+# date {0} is out of time span [{1}, {2}]
+OUT_OF_TIME_RANGE = a data {0} está fora do intervalo temporal [{1}, {2}]
+
+# general context has not been initialized
+UNINITIALIZED_CONTEXT = o contexto xeral non foi inicializado
+
+# tile is empty: {0} ⨉ {1}
+EMPTY_TILE = a faceta está baleira: {0} ⨉ {1}
+
+# unknown sensor {0}
+UNKNOWN_SENSOR = sensor {0} descoñecido
+
+# line-of-sight does not reach ground
+LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = a liña de visión non chega ao chan
+
+# line-of-sight never crosses latitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE = a liña de visión xamais atravesa a latitude {0}
+
+# line-of-sight never crosses longitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = a liña de visión xamais atravesa a longitude {0}
+
+# line never crosses altitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = a liña de visión xamais atravesa a altitude {0}
+
+# line-of-sight enters the Digital Elevation Model behind spacecraft!
+DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = ¡ a liña de visión entra no Modelo Dixital do Terren por detrás do satélite !
+
+# frame {0} does not match frame {1} from interpolator dump
+FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = o sistema de referencia {0} non corresponde co sistema de referencia {1} do baleirado de datos do interpolador
+
+# data is not an interpolator dump
+NOT_INTERPOLATOR_DUMP_DATA = os datos non están no baleirado de datos do interpolador

@@ -71,9 +71,13 @@ Features
 
     * French
 
+    * Galician
+
     * German
 
     * Italian
+
+    * Spanish
 
 Free software
 -------------
