@@ -237,6 +237,25 @@ public class ExtendedEllipsoidTest {
 
     }
 
+    @Test
+    public void testPointAtLatitudeError() throws RuggedException, OrekitException {
+
+        Vector3D p = new Vector3D(-3052690.88784496, 6481300.309857268, 25258.7478104745);
+
+        Vector3D d = new Vector3D(0.3063261631703422, -0.951393802931811, -0.0318451487715828);
+        double latitude = 1.3959699281945737E-14;
+        Vector3D c = new Vector3D(-2809972.5765414005, 5727461.020250551, 26.163518446261833);
+
+        try {
+            ellipsoid.pointAtLatitude(p, d, latitude, c);
+            Assert.fail("an error should have been triggered");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
+            Assert.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
+        }
+
+    }
+
     @Before
     public void setUp() {
         try {

@@ -257,8 +257,18 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (longitude >= FastMath.min(entry.getLongitude(), exit.getLongitude()) &&
                     longitude <= FastMath.max(entry.getLongitude(), exit.getLongitude())) {
 
-                    final GeodeticPoint crossingGP;
-                    if (flatBody) {
+                    GeodeticPoint crossingGP = null;
+                    if (!flatBody) {
+                        try {
+                            // full computation of crossing point
+                            final Vector3D crossingP = ellipsoid.pointAtLongitude(position, los, longitude);
+                            crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                        } catch  (RuggedException re) {
+                            // in some very rare cases of numerical noise, we miss the crossing point
+                            crossingGP = null;
+                        }
+                    }
+                    if (crossingGP == null) {
                         // linear approximation of crossing point
                         final double d  = exit.getLongitude() - entry.getLongitude();
                         final double cN = (exit.getLongitude() - longitude) / d;
@@ -266,10 +276,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         crossingGP = new GeodeticPoint(cN * entry.getLatitude() + cX * exit.getLatitude(),
                                                        longitude,
                                                        cN * entry.getAltitude() + cX * exit.getAltitude());
-                    } else {
-                        // full computation of crossing point
-                        final Vector3D crossingP = ellipsoid.pointAtLongitude(position, los, longitude);
-                        crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
                     }
                     final int crossingLat = tile.getLatitudeIndex(crossingGP.getLatitude());
 
@@ -305,8 +311,20 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (latitude >= FastMath.min(entry.getLatitude(), exit.getLatitude()) &&
                     latitude <= FastMath.max(entry.getLatitude(), exit.getLatitude())) {
 
-                    final GeodeticPoint crossingGP;
-                    if (flatBody) {
+                    GeodeticPoint crossingGP = null;
+                    if (!flatBody) {
+                        // full computation of crossing point
+                        try {
+                            final Vector3D crossingP = ellipsoid.pointAtLatitude(position, los,
+                                                                                 tile.getLatitudeAtIndex(crossingLat),
+                                                                                 ellipsoid.transform(entry));
+                            crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                        } catch  (RuggedException re) {
+                            // in some very rare cases of numerical noise, we miss the crossing point
+                            crossingGP = null;
+                        }
+                    }
+                    if (crossingGP == null) {
                         // linear approximation of crossing point
                         final double d  = exit.getLatitude() - entry.getLatitude();
                         final double cN = (exit.getLatitude() - latitude) / d;
@@ -314,12 +332,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         crossingGP = new GeodeticPoint(latitude,
                                                        cN * entry.getLongitude() + cX * exit.getLongitude(),
                                                        cN * entry.getAltitude()  + cX * exit.getAltitude());
-                    } else {
-                        // full computation of crossing point
-                        final Vector3D crossingP = ellipsoid.pointAtLatitude(position, los,
-                                                                             tile.getLatitudeAtIndex(crossingLat),
-                                                                             ellipsoid.transform(entry));
-                        crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
                     }
                     final int crossingLon = tile.getLongitudeIndex(crossingGP.getLongitude());
 

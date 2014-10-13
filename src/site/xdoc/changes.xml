@@ -22,6 +22,10 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="fix" >
+        Added a protection agains some extremely rare numerical problems
+        in Duvenhage algorithm.
+      </action>
       <action dev="luc" type="add" due-to="Silvia Ríos Bergantiños and Beatriz Salazar">
         Added Spanish and Galician translations of error messages.
       </action>
