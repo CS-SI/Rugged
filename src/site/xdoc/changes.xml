@@ -23,6 +23,10 @@
     <release version="1.0" date="TBD"
              description="TBD">
       <action dev="luc" type="fix" >
+        Force geodetic points to remain in the same longitude range as the tile of the
+        Digital Elevation Model they belong to.
+      </action>
+      <action dev="luc" type="fix" >
         Added a protection agains some extremely rare numerical problems
         in Duvenhage algorithm.
       </action>
@@ -225,7 +229,7 @@
       </action>
       <action dev="luc" type="update">
         Remove GroundPoint class.
-        We use directly the Orekit GeodeticPoint now.
+        We use directly the Orekit NormalizedGeodeticPoint now.
       </action>
       <action dev="luc" type="add">
         Added ITRF equinox, for applications that rely on it...

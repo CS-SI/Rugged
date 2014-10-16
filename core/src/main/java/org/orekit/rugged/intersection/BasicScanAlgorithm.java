@@ -30,6 +30,7 @@ import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.TilesCache;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Intersection computation using a basic algorithm based on exhaustive scan.
  * <p>
@@ -62,30 +63,37 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                      final Vector3D position, final Vector3D los)
+    public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
+                                                final Vector3D position, final Vector3D los)
         throws RuggedException {
         try {
 
             // find the tiles between the entry and exit point in the Digital Elevation Model
-            GeodeticPoint entryPoint = null;
-            GeodeticPoint exitPoint  = null;
+            NormalizedGeodeticPoint entryPoint = null;
+            NormalizedGeodeticPoint exitPoint  = null;
             double minLatitude  = Double.NaN;
             double maxLatitude  = Double.NaN;
             double minLongitude = Double.NaN;
             double maxLongitude = Double.NaN;
             final List<SimpleTile> scannedTiles = new ArrayList<SimpleTile>();
+            double centralLongitude = Double.NaN;
             for (boolean changedMinMax = true; changedMinMax; changedMinMax = checkMinMax(scannedTiles)) {
 
                 scannedTiles.clear();
                 // compute entry and exit points
                 entryPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMax) ? 0.0 : hMax),
-                                                 ellipsoid.getBodyFrame(), null);
+                                                 ellipsoid.getBodyFrame(), null,
+                                                 Double.isNaN(centralLongitude) ? 0.0 : centralLongitude);
                 final SimpleTile entryTile = cache.getTile(entryPoint.getLatitude(), entryPoint.getLongitude());
+                if (Double.isNaN(centralLongitude)) {
+                    centralLongitude = entryTile.getMinimumLongitude();
+                    entryPoint = new NormalizedGeodeticPoint(entryPoint.getLatitude(), entryPoint.getLongitude(),
+                                                             entryPoint.getAltitude(), centralLongitude);
+                }
                 addIfNotPresent(scannedTiles, entryTile);
 
                 exitPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMin) ? 0.0 : hMin),
-                                                ellipsoid.getBodyFrame(), null);
+                                                ellipsoid.getBodyFrame(), null, centralLongitude);
                 final SimpleTile exitTile = cache.getTile(exitPoint.getLatitude(), exitPoint.getLongitude());
                 addIfNotPresent(scannedTiles, exitTile);
 
@@ -111,12 +119,12 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
             }
 
             // scan the tiles
-            GeodeticPoint intersectionGP = null;
+            NormalizedGeodeticPoint intersectionGP = null;
             double intersectionDot = Double.POSITIVE_INFINITY;
             for (final SimpleTile tile : scannedTiles) {
                 for (int i = latitudeIndex(tile, minLatitude); i <= latitudeIndex(tile, maxLatitude); ++i) {
                     for (int j = longitudeIndex(tile, minLongitude); j <= longitudeIndex(tile, maxLongitude); ++j) {
-                        final GeodeticPoint gp = tile.pixelIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
+                        final NormalizedGeodeticPoint gp = tile.pixelIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
                         if (gp != null) {
 
                             // improve the point, by projecting it back on the 3D line, fixing the small body curvature at pixel level
@@ -124,7 +132,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
                             final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
                             final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
                                                                                 ellipsoid.getBodyFrame(), null);
-                            final GeodeticPoint gpImproved = tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los), i, j);
+                            final NormalizedGeodeticPoint gpImproved = tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los), i, j);
 
                             if (gpImproved != null) {
                                 final Vector3D point = ellipsoid.transform(gpImproved);
@@ -150,9 +158,9 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
-                                            final Vector3D position, final Vector3D los,
-                                            final GeodeticPoint closeGuess)
+    public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
+                                                      final Vector3D position, final Vector3D los,
+                                                      final NormalizedGeodeticPoint closeGuess)
         throws RuggedException {
         try {
             final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);

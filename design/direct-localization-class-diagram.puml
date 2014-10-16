@@ -30,7 +30,7 @@
     package raster #DDEBD8 {
       interface Tile {
         +interpolateElevation(φ, λ)
-        +pixelIntersection(geodeticPoint, los, φ index, λ index)
+        +pixelIntersection(NormalizedGeodeticPoint, los, φ index, λ index)
       }
     }
 

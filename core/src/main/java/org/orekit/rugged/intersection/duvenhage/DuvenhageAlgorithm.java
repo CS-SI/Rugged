@@ -18,7 +18,6 @@ package org.orekit.rugged.intersection.duvenhage;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.MathUtils;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
@@ -28,6 +27,7 @@ import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.TilesCache;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Digital Elevation Model intersection using Bernardt Duvenhage's algorithm.
  * <p>
@@ -66,21 +66,18 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                      final Vector3D position, final Vector3D los)
+    public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
+                                                final Vector3D position, final Vector3D los)
         throws RuggedException {
         try {
 
             // compute intersection with ellipsoid
-            final GeodeticPoint gp0 = ellipsoid.pointOnGround(position, los);
-            if (gp0 == null) {
-                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND);
-            }
+            final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
 
             // locate the entry tile along the line-of-sight
             MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
 
-            GeodeticPoint current = null;
+            NormalizedGeodeticPoint current = null;
             double hMax = tile.getMaxElevation();
             while (current == null) {
 
@@ -90,7 +87,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     // the entry point is behind spacecraft!
                     throw new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT);
                 }
-                current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null);
+                current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
 
                 if (tile.getLocation(current.getLatitude(), current.getLongitude()) != Tile.Location.IN_TILE) {
                     // the entry point is in another tile
@@ -120,7 +117,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final int exitLon  = FastMath.max(0,
                                                   FastMath.min(tile.getLongitudeColumns() - 1,
                                                                tile.getLongitudeIndex(exit.getPoint().getLongitude())));
-                final GeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
+                final NormalizedGeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
                                                                        current, entryLat, entryLon,
                                                                        exit.getPoint(), exitLat, exitLon);
 
@@ -132,7 +129,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                     // select next tile after current point
                     final Vector3D forward = new Vector3D(1.0, ellipsoid.transform(exit.getPoint()), STEP, los);
-                    current = ellipsoid.transform(forward, ellipsoid.getBodyFrame(), null);
+                    current = ellipsoid.transform(forward, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
                     tile = cache.getTile(current.getLatitude(), current.getLongitude());
 
                     if (tile.interpolateElevation(current.getLatitude(), current.getLongitude()) >= current.getAltitude()) {
@@ -159,9 +156,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
-                                            final Vector3D position, final Vector3D los,
-                                            final GeodeticPoint closeGuess)
+    public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
+                                                      final Vector3D position, final Vector3D los,
+                                                      final NormalizedGeodeticPoint closeGuess)
         throws RuggedException {
         try {
             if (flatBody) {
@@ -171,7 +168,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final Tile tile = cache.getTile(closeGuess.getLatitude(), closeGuess.getLongitude());
                 final Vector3D      exitP  = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
                 final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
-                final GeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null);
+                final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
+                                                                           tile.getMinimumLongitude());
                 return tile.pixelIntersection(entry, ellipsoid.convertLos(entryP, exitP),
                                               tile.getLatitudeIndex(closeGuess.getLatitude()),
                                               tile.getLongitudeIndex(closeGuess.getLongitude()));
@@ -215,11 +213,11 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @exception RuggedException if intersection cannot be found
      * @exception OrekitException if points cannot be converted to geodetic coordinates
      */
-    private GeodeticPoint recurseIntersection(final int depth, final ExtendedEllipsoid ellipsoid,
-                                              final Vector3D position, final Vector3D los,
-                                              final MinMaxTreeTile tile,
-                                              final GeodeticPoint entry, final int entryLat, final int entryLon,
-                                              final GeodeticPoint exit, final int exitLat, final int exitLon)
+    private NormalizedGeodeticPoint recurseIntersection(final int depth, final ExtendedEllipsoid ellipsoid,
+                                                        final Vector3D position, final Vector3D los,
+                                                        final MinMaxTreeTile tile,
+                                                        final NormalizedGeodeticPoint entry, final int entryLat, final int entryLon,
+                                                        final NormalizedGeodeticPoint exit, final int exitLat, final int exitLon)
         throws RuggedException, OrekitException {
 
         if (depth > 30) {
@@ -240,7 +238,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             return null;
         }
 
-        GeodeticPoint previousGP  = entry;
+        NormalizedGeodeticPoint previousGP  = entry;
         int           previousLat = entryLat;
         int           previousLon = entryLon;
 
@@ -257,12 +255,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (longitude >= FastMath.min(entry.getLongitude(), exit.getLongitude()) &&
                     longitude <= FastMath.max(entry.getLongitude(), exit.getLongitude())) {
 
-                    GeodeticPoint crossingGP = null;
+                    NormalizedGeodeticPoint crossingGP = null;
                     if (!flatBody) {
                         try {
                             // full computation of crossing point
                             final Vector3D crossingP = ellipsoid.pointAtLongitude(position, los, longitude);
-                            crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                            crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null,
+                                                             tile.getMinimumLongitude());
                         } catch  (RuggedException re) {
                             // in some very rare cases of numerical noise, we miss the crossing point
                             crossingGP = null;
@@ -273,9 +272,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         final double d  = exit.getLongitude() - entry.getLongitude();
                         final double cN = (exit.getLongitude() - longitude) / d;
                         final double cX = (longitude - entry.getLongitude()) / d;
-                        crossingGP = new GeodeticPoint(cN * entry.getLatitude() + cX * exit.getLatitude(),
-                                                       longitude,
-                                                       cN * entry.getAltitude() + cX * exit.getAltitude());
+                        crossingGP = new NormalizedGeodeticPoint(cN * entry.getLatitude() + cX * exit.getLatitude(),
+                                                                 longitude,
+                                                                 cN * entry.getAltitude() + cX * exit.getAltitude(),
+                                                                 tile.getMinimumLongitude());
                     }
                     final int crossingLat = tile.getLatitudeIndex(crossingGP.getLatitude());
 
@@ -285,9 +285,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                     if (inRange(crossingLonBefore, entryLon, exitLon)) {
                         // look for intersection
-                        final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
-                                                                               previousGP, previousLat, previousLon,
-                                                                               crossingGP, crossingLat, crossingLonBefore);
+                        final NormalizedGeodeticPoint intersection =
+                                recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                                                    previousGP, previousLat, previousLon,
+                                                    crossingGP, crossingLat, crossingLonBefore);
                         if (intersection != null) {
                             return intersection;
                         }
@@ -311,14 +312,15 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (latitude >= FastMath.min(entry.getLatitude(), exit.getLatitude()) &&
                     latitude <= FastMath.max(entry.getLatitude(), exit.getLatitude())) {
 
-                    GeodeticPoint crossingGP = null;
+                    NormalizedGeodeticPoint crossingGP = null;
                     if (!flatBody) {
                         // full computation of crossing point
                         try {
                             final Vector3D crossingP = ellipsoid.pointAtLatitude(position, los,
                                                                                  tile.getLatitudeAtIndex(crossingLat),
                                                                                  ellipsoid.transform(entry));
-                            crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null);
+                            crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null,
+                                                             tile.getMinimumLongitude());
                         } catch  (RuggedException re) {
                             // in some very rare cases of numerical noise, we miss the crossing point
                             crossingGP = null;
@@ -329,9 +331,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         final double d  = exit.getLatitude() - entry.getLatitude();
                         final double cN = (exit.getLatitude() - latitude) / d;
                         final double cX = (latitude - entry.getLatitude()) / d;
-                        crossingGP = new GeodeticPoint(latitude,
-                                                       cN * entry.getLongitude() + cX * exit.getLongitude(),
-                                                       cN * entry.getAltitude()  + cX * exit.getAltitude());
+                        crossingGP = new NormalizedGeodeticPoint(latitude,
+                                                                 cN * entry.getLongitude() + cX * exit.getLongitude(),
+                                                                 cN * entry.getAltitude()  + cX * exit.getAltitude(),
+                                                                 tile.getMinimumLongitude());
                     }
                     final int crossingLon = tile.getLongitudeIndex(crossingGP.getLongitude());
 
@@ -341,7 +344,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                     if (inRange(crossingLatBefore, entryLat, exitLat)) {
                         // look for intersection
-                        final GeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                        final NormalizedGeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
                                                                                previousGP, previousLat, previousLon,
                                                                                crossingGP, crossingLatBefore, crossingLon);
                         if (intersection != null) {
@@ -395,51 +398,48 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         // look for an exit at bottom
         final Vector3D exitP = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation() - STEP);
-        final GeodeticPoint exitGP = ellipsoid.transform(exitP, ellipsoid.getBodyFrame(), null);
+        final NormalizedGeodeticPoint exitGP = ellipsoid.transform(exitP, ellipsoid.getBodyFrame(), null,
+                                                                   tile.getMinimumLongitude());
 
-        // fix longitude discontinuity
-        final double meanTileLongitude = tile.getLongitudeAtIndex(tile.getLongitudeColumns() / 2);
-        final double fixedLongitude    = MathUtils.normalizeAngle(exitGP.getLongitude(), meanTileLongitude);
-
-        switch (tile.getLocation(exitGP.getLatitude(), fixedLongitude)) {
+        switch (tile.getLocation(exitGP.getLatitude(), exitGP.getLongitude())) {
         case SOUTH_WEST :
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
                                                 position),
-                                                true);
+                                  true);
         case WEST :
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
                                   true);
         case NORTH_WEST:
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
                                                 position),
-                                                true);
+                                  true);
         case NORTH :
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   ellipsoid.pointAtLatitude(position, los, tile.getMaximumLatitude(), exitP),
                                   true);
         case NORTH_EAST :
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
                                                 position),
-                                                true);
+                                  true);
         case EAST :
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
                                   true);
         case SOUTH_EAST :
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude(), exitP),
                                                 ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
                                                 position),
-                                                true);
+                                  true);
         case SOUTH :
-            return new LimitPoint(ellipsoid,
+            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   ellipsoid.pointAtLatitude(position, los, tile.getMinimumLatitude(), exitP),
                                   true);
         case IN_TILE :
@@ -467,21 +467,24 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     private static class LimitPoint {
 
         /** Coordinates. */
-        private final GeodeticPoint point;
+        private final NormalizedGeodeticPoint point;
 
         /** Limit status. */
         private final boolean side;
 
         /** Simple constructor.
-         * @param cartesian point cartesian
          * @param ellipsoid reference ellipsoid
+         * @param centralLongitude reference longitude lc such that the point longitude will
+         * be normalized between lc-π and lc+π
+         * @param cartesian Cartesian point
          * @param side if true, the point is on a side limit, otherwise
          * it is on a top/bottom limit
          * @exception OrekitException if geodetic coordinates cannot be computed
          */
-        public LimitPoint(final ExtendedEllipsoid ellipsoid, final Vector3D cartesian, final boolean side)
+        public LimitPoint(final ExtendedEllipsoid ellipsoid, final double centralLongitude,
+                          final Vector3D cartesian, final boolean side)
             throws OrekitException {
-            this(ellipsoid.transform(cartesian, ellipsoid.getBodyFrame(), null), side);
+            this(ellipsoid.transform(cartesian, ellipsoid.getBodyFrame(), null, centralLongitude), side);
         }
 
         /** Simple constructor.
@@ -489,7 +492,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
          * @param side if true, the point is on a side limit, otherwise
          * it is on a top/bottom limit
          */
-        public LimitPoint(final GeodeticPoint point, final boolean side) {
+        public LimitPoint(final NormalizedGeodeticPoint point, final boolean side) {
             this.point = point;
             this.side  = side;
         }
@@ -497,7 +500,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         /** Get the point coordinates.
          * @return point coordinates
          */
-        public GeodeticPoint getPoint() {
+        public NormalizedGeodeticPoint getPoint() {
             return point;
         }
 

@@ -20,6 +20,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface for Digital Elevation Model intersection algorithm.
  * @author Luc Maisonobe
@@ -33,7 +34,7 @@ public interface IntersectionAlgorithm {
      * @return point at which the line first enters ground
      * @exception RuggedException if intersection cannot be found
      */
-    GeodeticPoint intersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los)
+    NormalizedGeodeticPoint intersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los)
         throws RuggedException;
 
     /** Refine intersection of line with Digital Elevation Model.
@@ -51,8 +52,8 @@ public interface IntersectionAlgorithm {
      * @return point at which the line first enters ground
      * @exception RuggedException if intersection cannot be found
      */
-    GeodeticPoint refineIntersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los,
-                                     GeodeticPoint closeGuess)
+    NormalizedGeodeticPoint refineIntersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los,
+                                               NormalizedGeodeticPoint closeGuess)
         throws RuggedException;
 
     /** Get elevation at a given ground point.

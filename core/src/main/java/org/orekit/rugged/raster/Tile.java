@@ -19,6 +19,7 @@ package org.orekit.rugged.raster;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface representing a raster tile.
  * <p>
@@ -193,8 +194,8 @@ public interface Tile extends UpdatableTile {
      * if it lies within the pixel, null otherwise
      * @exception RuggedException if intersection point cannot be computed
      */
-    GeodeticPoint pixelIntersection(GeodeticPoint p, Vector3D los,
-                                    int latitudeIndex, int longitudeIndex)
+    NormalizedGeodeticPoint pixelIntersection(GeodeticPoint p, Vector3D los,
+                                              int latitudeIndex, int longitudeIndex)
         throws RuggedException;
 
     /** Check if a tile covers a ground point.

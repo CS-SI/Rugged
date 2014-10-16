@@ -22,6 +22,7 @@ import org.apache.commons.math3.util.Precision;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 
 /** Simple implementation of a {@link Tile}.
@@ -245,8 +246,8 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint pixelIntersection(final GeodeticPoint p, final Vector3D los,
-                                           final int latitudeIndex, final int longitudeIndex)
+    public NormalizedGeodeticPoint pixelIntersection(final GeodeticPoint p, final Vector3D los,
+                                                     final int latitudeIndex, final int longitudeIndex)
         throws RuggedException {
 
         // ensure neighboring pixels to not fall out of tile
@@ -312,8 +313,8 @@ public class SimpleTile implements Tile {
 
         }
 
-        final GeodeticPoint p1 = interpolate(t1, p, dxA, dyA, los);
-        final GeodeticPoint p2 = interpolate(t2, p, dxA, dyA, los);
+        final NormalizedGeodeticPoint p1 = interpolate(t1, p, dxA, dyA, los, x00);
+        final NormalizedGeodeticPoint p2 = interpolate(t2, p, dxA, dyA, los, x00);
 
         // select the first point along line-of-sight
         if (p1 == null) {
@@ -332,11 +333,13 @@ public class SimpleTile implements Tile {
      * @param dxP relative coordinate of the start point with respect to current pixel
      * @param dyP relative coordinate of the start point with respect to current pixel
      * @param los direction of the line-of-sight, in geodetic space
+     * @param centralLongitude reference longitude lc such that the point longitude will
+     * be normalized between lc-π and lc+π
      * @return interpolated point along the line
      */
-    private GeodeticPoint interpolate(final double t, final GeodeticPoint p,
-                                      final double dxP, final double dyP,
-                                      final Vector3D los) {
+    private NormalizedGeodeticPoint interpolate(final double t, final GeodeticPoint p,
+                                                final double dxP, final double dyP,
+                                                final Vector3D los, final double centralLongitude) {
 
         if (Double.isInfinite(t)) {
             return null;
@@ -345,9 +348,10 @@ public class SimpleTile implements Tile {
         final double dx = dxP + t * los.getX() / longitudeStep;
         final double dy = dyP + t * los.getY() / latitudeStep;
         if (dx >= -TOLERANCE && dx <= 1 + TOLERANCE && dy >= -TOLERANCE && dy <= 1 + TOLERANCE) {
-            return new GeodeticPoint(p.getLatitude()  + t * los.getY(),
-                                     p.getLongitude() + t * los.getX(),
-                                     p.getAltitude()  + t * los.getZ());
+            return new NormalizedGeodeticPoint(p.getLatitude()  + t * los.getY(),
+                                               p.getLongitude() + t * los.getX(),
+                                               p.getAltitude()  + t * los.getZ(),
+                                               centralLongitude);
         } else {
             return null;
         }

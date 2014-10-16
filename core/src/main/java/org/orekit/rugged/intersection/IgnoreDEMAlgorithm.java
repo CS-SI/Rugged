@@ -17,10 +17,9 @@
 package org.orekit.rugged.intersection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.bodies.GeodeticPoint;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Intersection ignoring Digital Elevation Model.
  * <p>
@@ -37,22 +36,17 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                      final Vector3D position, final Vector3D los)
+    public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
+                                                final Vector3D position, final Vector3D los)
         throws RuggedException {
-        try {
-            return ellipsoid.pointOnGround(position, los);
-        } catch (OrekitException oe) {
-            // this should never happen
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
+        return ellipsoid.pointOnGround(position, los, 0.0);
     }
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
-                                            final Vector3D position, final Vector3D los,
-                                            final GeodeticPoint closeGuess)
+    public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
+                                                      final Vector3D position, final Vector3D los,
+                                                      final NormalizedGeodeticPoint closeGuess)
         throws RuggedException {
         return intersection(ellipsoid, position, los);
     }

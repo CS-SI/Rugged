@@ -25,6 +25,7 @@ import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
+import org.orekit.time.AbsoluteDate;
 
 /** Transform provider from Spacecraft frame to observed body frame.
  * @author Luc Maisonobe
@@ -154,13 +155,26 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     /** Get point on ground along a pixel line of sight.
      * @param position pixel position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
+     * @param centralLongitude reference longitude lc such that the point longitude will
+     * be normalized between lc-π and lc+π
      * @return point on ground
-     * @exception OrekitException if no such point exists (typically line-of-sight missing body)
+     * @exception RuggedException if no such point exists (typically line-of-sight missing body)
      */
-    public GeodeticPoint pointOnGround(final Vector3D position, final Vector3D los)
-        throws OrekitException {
-        return getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),
-                                    position, getBodyFrame(), null);
+    public NormalizedGeodeticPoint pointOnGround(final Vector3D position, final Vector3D los,
+                                                 final double centralLongitude)
+        throws RuggedException {
+        try {
+            final GeodeticPoint gp =
+                    getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),
+                                         position, getBodyFrame(), null);
+            if (gp == null) {
+                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND);
+            }
+            return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
+                                               centralLongitude);
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
     }
 
     /** Get point at some altitude along a pixel line of sight.
@@ -268,6 +282,23 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+    }
+
+    /** Transform a cartesian point to a surface-relative point.
+     * @param point cartesian point
+     * @param frame frame in which cartesian point is expressed
+     * @param date date of the computation (used for frames conversions)
+     * @param centralLongitude reference longitude lc such that the point longitude will
+     * be normalized between lc-π and lc+π
+     * @return point at the same location but as a surface-relative point
+     * @exception OrekitException if point cannot be converted to body frame
+     */
+    public NormalizedGeodeticPoint transform(final Vector3D point, final Frame frame, final AbsoluteDate date,
+                                             final double centralLongitude)
+        throws OrekitException {
+        final GeodeticPoint gp = transform(point, frame, date);
+        return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
+                                           centralLongitude);
     }
 
 }

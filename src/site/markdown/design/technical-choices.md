@@ -186,7 +186,7 @@ Arrival on ellipsoid
 --------------------
 
 Once a pixel line-of-sight is known in Earth frame, computing its intersection with a reference ellipsoid is straightforward using an
-instance of OneAxisEllipsoid. The Orekit library computes this intersection as a GeodeticPoint instance on the ellipsoid surface.
+instance of OneAxisEllipsoid. The Orekit library computes this intersection as a NormalizedGeodeticPoint instance on the ellipsoid surface.
 
 The line-of-sight is a straight line in the Cartesian 3D space, and once converted to geodetic coordinates (latitude, longitude,
 altitude), it is not a straight line anymore. Assuming line-of-sight remains a straight line in this space and can be defined by
