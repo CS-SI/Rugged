@@ -39,6 +39,7 @@ import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -275,6 +276,7 @@ public class RuggedTest {
 
     // the following test is disabled by default
     // it is only used to check timings, and also creates a large (66M) temporary file
+    @Ignore
     @Test
     public void testMayonVolcanoTiming()
         throws RuggedException, OrekitException, URISyntaxException {
@@ -922,6 +924,7 @@ public class RuggedTest {
 
     // the following test is disabled by default
     // it is only used to check timings, and also creates a large (38M) temporary file
+    @Ignore
     @Test
     public void testInverseLocalizationTiming()
         throws RuggedException, OrekitException, URISyntaxException {
