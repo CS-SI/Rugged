@@ -29,6 +29,18 @@ import org.orekit.rugged.api.RuggedException;
 public interface TileUpdater {
 
     /** Set the tile global geometry.
+     * <p>
+     * As elevations are interpolated within Digital Elevation Model
+     * pixels using four pixels at indices (i, j), (i+1, j), (i, j+1)
+     * (i+1, j+1), the last row and last column of each tile is considered
+     * to be <em>not</em> covered by this tile (as checked using {@link
+     * Tile#getLocation(double, double)}) and should therefore be
+     * in the next tile (Eastwards or Northwards), which should have
+     * on row/column of <em>overlap</em>. This implies that this method
+     * must ensure that the latitude and longitude specified here do
+     * not lie in the last row/column of the returned tile, otherwise
+     * an error will be triggered by caller.
+     * <p>
      * @param latitude latitude that must be covered by the tile
      * @param longitude longitude that must be covered by the tile
      * @param tile to update

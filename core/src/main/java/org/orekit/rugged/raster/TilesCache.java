@@ -23,7 +23,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.raster.Tile.Location;
 
 /** Cache for Digital Elevation Model {@link Tile tiles}.
@@ -73,7 +75,14 @@ public class TilesCache<T extends Tile> {
      */
     public T getTile(final double latitude, final double longitude)
         throws RuggedException {
-        return getStrip(latitude, longitude).getTile(latitude, longitude);
+        final T tile = getStrip(latitude, longitude).getTile(latitude, longitude);
+        if (tile.getLocation(latitude, longitude) != Tile.Location.IN_TILE) {
+            // this should happen only if user set up an inconsistent TileUpdater
+            throw new RuggedException(RuggedMessages.WRONG_TILE,
+                                      FastMath.toDegrees(latitude),
+                                      FastMath.toDegrees(longitude));
+        }
+        return tile;
     }
 
     /** Create a tile covering a ground point.

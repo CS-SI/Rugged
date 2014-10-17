@@ -7,6 +7,9 @@ OUT_OF_TILE_INDICES = aucune donnée aux indices [{0}, {1}], la tuile ne couvre 
 # no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
 OUT_OF_TILE_ANGLES = aucune donnée à la latitude {0} et à la longitude {1}, la tuile ne couvre que les latitudes de {2} à {3} et les longitudes de {4} à {5}
 
+# the tile retrieved for latitude {0} and longitude {1} does not cover the point neighborhood (probably wrong overlap handling in TileUpdater)
+WRONG_TILE = la tuile fournie pourla latitude {0} et à la longitude {1} ne couvre pas le voisinage de ce point (il s''agit probablement d''un problème de gestion des recouvrements dans le TileUpdater)
+
 # date {0} is out of time span [{1}, {2}]
 OUT_OF_TIME_RANGE = la date {0} est hors de la plage temporelle [{1}, {2}]
 

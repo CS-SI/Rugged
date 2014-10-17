@@ -104,7 +104,7 @@ public class TilesCacheTest {
         Assert.assertEquals(10.0,     regularTile.getMinElevation(),     1.0e-10);
         Assert.assertEquals(20.0,     regularTile.getMaxElevation(),     1.0e-10);
 
-        SimpleTile tileAtEnd = cache.getTile(0.250, 0.625);
+        SimpleTile tileAtEnd = cache.getTile(0.234375, 0.609375);
         Assert.assertEquals(1, factory.getCount());
         Assert.assertEquals(0.125,    tileAtEnd.getMinimumLatitude(),  1.0e-10);
         Assert.assertEquals(0.5,      tileAtEnd.getMinimumLongitude(), 1.0e-10);

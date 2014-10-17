@@ -18,6 +18,7 @@ package org.orekit.rugged.intersection.duvenhage;
 
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
@@ -26,8 +27,8 @@ import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
-import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.raster.TileUpdater;
+import org.orekit.rugged.raster.UpdatableTile;
 
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 
@@ -68,6 +69,37 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
             Assert.fail("an exception should have been thrown");
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND, re.getSpecifier());
+        }
+    }
+
+    @Test
+    public void testInconsistentTileUpdater() throws RuggedException, OrekitException {
+        final int n = 1201;
+        final double size = FastMath.toRadians(1.0);
+        updater = new TileUpdater() {
+            public void updateTile(double latitude, double longitude, UpdatableTile tile)
+                throws RuggedException {
+                double step = size / (n - 1);
+                // this geometry is incorrect:
+                // the specified latitude/longitude belong to rows/columns [1, n-1]
+                // and not [0, n-2].
+                tile.setGeometry(size * FastMath.floor(latitude / size) - 0.5 * step,
+                                 size * FastMath.floor(longitude / size) - 0.5 * step,
+                                 step, step, n, n);
+                for (int i = 0; i < n; ++i) {
+                    for (int j = 0; j < n; ++j) {
+                        tile.setElevation(i, j, ((i + j) % 2 == 0) ? -7.0 : 224);
+                    }
+                }
+            }
+        };
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        try {
+            algorithm.intersection(earth,
+                                   new Vector3D(-3010311.9672771087, 5307094.8081077365, 1852867.7919871407),
+                                   new Vector3D(0.3953329359154183, -0.8654901360032332, -0.30763402650162286));
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.WRONG_TILE, re.getSpecifier());
         }
     }
 

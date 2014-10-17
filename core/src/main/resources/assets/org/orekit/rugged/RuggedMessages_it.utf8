@@ -7,6 +7,9 @@ OUT_OF_TILE_INDICES = nessun dato agli indici [{0}, {1}], il quadrante non copre
 # no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
 OUT_OF_TILE_ANGLES = nessun dato alla latitudine {0} e alla longitudine {1}, il quadrante non copre che le latitudini da {2} a {3} et les longitudes de {4} à {5}
 
+# the tile retrieved for latitude {0} and longitude {1} does not cover the point neighborhood (probably wrong overlap handling in TileUpdater)
+WRONG_TILE = <MISSING TRANSLATION>
+
 # date {0} is out of time span [{1}, {2}]
 OUT_OF_TIME_RANGE = la data {0} è fuori dell''intervallo temporale [{1}, {2}]
 
