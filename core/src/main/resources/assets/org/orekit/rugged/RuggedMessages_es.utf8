@@ -7,8 +7,8 @@ OUT_OF_TILE_INDICES = no hay datos en los índices [{0}, {1}], la faceta sólo c
 # no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
 OUT_OF_TILE_ANGLES = no hay datos para la latitud {0} y la longitud {1}, la faceta sólo cubre las latitudes de {2} a {3} y las longitudes de {4} a {5}
 
-# the tile retrieved for latitude {0} and longitude {1} does not cover the point neighborhood (probably wrong overlap handling in TileUpdater)
-WRONG_TILE = <MISSING TRANSLATION>
+# the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
+TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = <MISSING TRANSLATION>
 
 # date {0} is out of time span [{1}, {2}]
 OUT_OF_TIME_RANGE = la fecha {0} está fuera del intervalo temporal [{1}, {2}]

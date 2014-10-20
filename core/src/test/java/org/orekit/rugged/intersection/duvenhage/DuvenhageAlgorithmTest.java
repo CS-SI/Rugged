@@ -99,7 +99,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
                                    new Vector3D(-3010311.9672771087, 5307094.8081077365, 1852867.7919871407),
                                    new Vector3D(0.3953329359154183, -0.8654901360032332, -0.30763402650162286));
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.WRONG_TILE, re.getSpecifier());
+            Assert.assertEquals(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED, re.getSpecifier());
         }
     }
 

@@ -76,9 +76,9 @@ public class TilesCache<T extends Tile> {
     public T getTile(final double latitude, final double longitude)
         throws RuggedException {
         final T tile = getStrip(latitude, longitude).getTile(latitude, longitude);
-        if (tile.getLocation(latitude, longitude) != Tile.Location.IN_TILE) {
+        if (tile.getLocation(latitude, longitude) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
             // this should happen only if user set up an inconsistent TileUpdater
-            throw new RuggedException(RuggedMessages.WRONG_TILE,
+            throw new RuggedException(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED,
                                       FastMath.toDegrees(latitude),
                                       FastMath.toDegrees(longitude));
         }
@@ -281,7 +281,7 @@ public class TilesCache<T extends Tile> {
 
                 if (insertionPoint < tiles.size()) {
                     final T tile = tiles.get(insertionPoint).getTile();
-                    if (tile.getLocation(latitude, longitude) == Location.IN_TILE) {
+                    if (tile.getLocation(latitude, longitude) == Location.HAS_INTERPOLATION_NEIGHBORS) {
                         // we have found an existing tile
                         return tile;
                     }

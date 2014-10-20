@@ -24,23 +24,58 @@ import org.orekit.rugged.api.RuggedException;
  * the image processing mission-specific layer, thus allowing
  * the Rugged library to access the Digital Elevation Model data.
  * </p>
- * @author Luc Maisonobe
+ *  * @author Luc Maisonobe
  */
 public interface TileUpdater {
 
-    /** Set the tile global geometry.
+    /** Update the tile according to the Digital Elevation Model.
      * <p>
-     * As elevations are interpolated within Digital Elevation Model
-     * pixels using four pixels at indices (i, j), (i+1, j), (i, j+1)
-     * (i+1, j+1), the last row and last column of each tile is considered
-     * to be <em>not</em> covered by this tile (as checked using {@link
-     * Tile#getLocation(double, double)}) and should therefore be
-     * in the next tile (Eastwards or Northwards), which should have
-     * on row/column of <em>overlap</em>. This implies that this method
-     * must ensure that the latitude and longitude specified here do
-     * not lie in the last row/column of the returned tile, otherwise
-     * an error will be triggered by caller.
+     * This method is the hook used by the Rugged library to delegate
+     * Digital Elevation Model loading to user-provided mission-specific
+     * code. When this method is called, the specified {@link UpdatableTile
+     * tile} is empty and must be updated by calling {@link
+     * UpdatableTile#setGeometry(double, double, double, double, int, int)
+     * tile.setGeometry} once at the start of the method to set up the tile
+     * geometry, and then calling {@link UpdatableTile#setElevation(int, int,
+     * double) tile.setElevation} once for each pixel in the tile to set the
+     * pixel elevation.
+     * </p>
      * <p>
+     * The implementation must fulfill the requirements:
+     * </p>
+     * <ul>
+     *   <li>
+     *     The tiles must overlap each other by one pixel (i.e. pixels
+     *     that belong to the northernmost row of one tile must also belong
+     *     to the sourthernmost row of another tile and pixels that
+     *     belong to the easternmost column of one tile must also belong
+     *     to the westernmost column of another tile).
+     *   </li>
+     *   <li>
+     *     As elevations are interpolated within Digital Elevation Model
+     *     pixels using four pixels at indices (i, j), (i+1, j), (i, j+1)
+     *     (i+1, j+1). A point in the northernmost row (resp. easternmost
+     *     column) miss neighboring points at row j+1 (resp. neighboring
+     *     points at column i+1) and therefore cannot be interpolated.
+     *     The method should therefore select the northernmost tile if the
+     *     specified latitude is in the overlapping row between two tiles,
+     *     and it should select the easternmost tile if the specified longitude
+     *     is in the overlapping column between two tiles. Failing to do so will
+     *     trigger an error at caller level mentioning the missing required
+     *     neighbors.
+     *   </li>
+     *   <li>
+     *     the elevation at grid point as set when calling {@link
+     *     UpdatableTile#setElevation(int, int, double) tile.setElevation(i, j,
+     *     elevation)} must be the elevation corresponding to the latitude
+     *     {@code minLatitude + i * latitudeStep} and longitude {@code
+     *     minLongitude + j * longitudeStep}, where {@code minLatitude},
+     *     {@code latitudeStep}, {@code minLongitude} and {@code longitudeStep}
+     *     correspond to the parameter of the {@link UpdatableTile#setGeometry(double,
+     *     double, double, double, int, int) tile.setGeometry(minLatitude, minLongitude,
+           latitudeStep, longitudeStep, latitudeRows, longitudeColumns)} call.
+     *   </li>
+     * </ul>
      * @param latitude latitude that must be covered by the tile
      * @param longitude longitude that must be covered by the tile
      * @param tile to update

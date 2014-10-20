@@ -89,7 +89,7 @@ public class SimpleTileTest {
         Assert.assertEquals(Location.WEST,       tile.getLocation( 6.0,  1.0));
         Assert.assertEquals(Location.NORTH_WEST, tile.getLocation(12.0,  1.0));
         Assert.assertEquals(Location.SOUTH,      tile.getLocation( 0.0, 22.0));
-        Assert.assertEquals(Location.IN_TILE,    tile.getLocation( 6.0, 22.0));
+        Assert.assertEquals(Location.HAS_INTERPOLATION_NEIGHBORS,    tile.getLocation( 6.0, 22.0));
         Assert.assertEquals(Location.NORTH,      tile.getLocation(12.0, 22.0));
         Assert.assertEquals(Location.SOUTH_EAST, tile.getLocation( 0.0, 43.0));
         Assert.assertEquals(Location.EAST,       tile.getLocation( 6.0, 43.0));
@@ -134,7 +134,7 @@ public class SimpleTileTest {
         // so despite latWestColumn51 is very close to column 51 center,
         // getLatitudeIndex should return 50
         double latWestColumn51   = 0.001 * latCenterColumn50 + 0.999 * latCenterColumn51;
-        int retrievedLatIndex = tile.getLatitudeIndex(latWestColumn51);
+        int retrievedLatIndex = tile.getFloorLatitudeIndex(latWestColumn51);
         Assert.assertEquals(50, retrievedLatIndex);
         Assert.assertTrue(tile.getLatitudeAtIndex(retrievedLatIndex) < latWestColumn51);
         Assert.assertTrue(latWestColumn51 < tile.getLatitudeAtIndex(retrievedLatIndex + 1));
@@ -144,7 +144,7 @@ public class SimpleTileTest {
         // so despite lonSouthRow24 is very close to row 24 center,
         // getLongitudeIndex should return 23
         double lonSouthRow24     = 0.001 * lonCenterRow23    + 0.999 * lonCenterRow24;
-        int retrievedLonIndex = tile.getLongitudeIndex(lonSouthRow24);
+        int retrievedLonIndex = tile.getFloorLongitudeIndex(lonSouthRow24);
         Assert.assertEquals(23, retrievedLonIndex);
         Assert.assertTrue(tile.getLongitudeAtIndex(retrievedLonIndex) < lonSouthRow24);
         Assert.assertTrue(lonSouthRow24 < tile.getLongitudeAtIndex(retrievedLonIndex + 1));

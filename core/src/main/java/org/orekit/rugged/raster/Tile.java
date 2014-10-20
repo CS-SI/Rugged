@@ -32,35 +32,83 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  */
 public interface Tile extends UpdatableTile {
 
-    /** Enumerate for point location with respect to tile. */
+    /** Enumerate for point location with respect to the interpolation grid of a tile.
+     * <p>
+     * Elevations in a tile are interpolated using the four neighboring points
+     * in a grid: (i, j), (i+1, j), (i, j+1), (i+1), (j+1). This implies that a point
+     * can be interpolated only if the elevation for these four points is available
+     * in the tile. A consequence is that a point in the northernmost row (resp.
+     * easternmost column) miss neighboring points at row j+1 (resp. neighboring points
+     * at column i+1) and therefore cannot be interpolated.
+     * </p>
+     * <p>
+     * This enumerate represent the position of a point taking this off-by-one property
+     * into account, the value {@link #HAS_INTERPOLATION_NEIGHBORS} correspond to points that
+     * do have the necessary four neightbors, whereas the other values correspond to points
+     * that are either completely outside of the tile or within the tile but in either the
+     * northernmost row or easternmost column.
+     * </p>
+     */
     enum Location {
 
-        /** Location for points out of tile, past the South-West corner. */
+        /** Location for points out of tile interpolation grid, in the South-West corner direction. */
         SOUTH_WEST,
 
-        /** Location for points out of tile, past the West edge. */
+        /** Location for points out of tile interpolation grid, in the West edge direction. */
         WEST,
 
-        /** Location for points out of tile, past the North-West corner. */
+        /** Location for points out of tile interpolation grid, in the North-West corner direction.
+         * <p>
+         * The point may still be in the tile, but in the northernmost row thus missing required
+         * interpolation points.
+         * </p>
+         */
         NORTH_WEST,
 
-        /** Location for points out of tile, past the North edge. */
+        /** Location for points out of tile interpolation grid, in the North edge direction.
+         * <p>
+         * The point may still be in the tile, but in the northernmost row thus missing required
+         * interpolation points.
+         * </p>
+         */
         NORTH,
 
-        /** Location for points out of tile, past the North-East corner. */
+        /** Location for points out of tile interpolation grid, in the North-East corner direction.
+         * <p>
+         * The point may still be in the tile, but either in the northernmost row or in the
+         * easternmost column thus missing required interpolation points.
+         * </p>
+         */
         NORTH_EAST,
 
-        /** Location for points out of tile, past the East edge. */
+        /** Location for points out of tile interpolation grid, in the East edge direction.
+         * <p>
+         * The point may still be in the tile, but in the easternmost column thus missing required
+         * interpolation points.
+         * </p>
+         */
         EAST,
 
-        /** Location for points out of tile, past the South-East corner. */
+        /** Location for points out of tile interpolation grid, in the South-East corner direction.
+         * <p>
+         * The point may still be in the tile, but in the easternmost column thus missing required
+         * interpolation points.
+         * </p>
+         */
         SOUTH_EAST,
 
-        /** Location for points out of tile, past the South edge. */
+        /** Location for points out of tile interpolation grid, in the South edge direction. */
         SOUTH,
 
-        /** Location for points within tile. */
-        IN_TILE
+        /** Location for points that do have interpolation neighbors.
+         * <p>
+         * The value corresponds to points that can be interpolated using their four
+         * neighboring points in the grid at indices (i, j), (i+1, j), (i, j+1), (i+1),
+         * (j+1). This implies that these points are neither in the northernmost latitude
+         * row nor in the easternmost longitude column.
+         * </p>
+         */
+        HAS_INTERPOLATION_NEIGHBORS
 
     }
 
@@ -70,8 +118,8 @@ public interface Tile extends UpdatableTile {
      */
     void tileUpdateCompleted() throws RuggedException;
 
-    /** Get minimum latitude.
-     * @return minimum latitude
+    /** Get minimum latitude of grid interpolation points.
+     * @return minimum latitude of grid interpolation points
      * (latitude of the center of the pixels of South row)
      */
     double getMinimumLatitude();
@@ -84,6 +132,14 @@ public interface Tile extends UpdatableTile {
     double getLatitudeAtIndex(int latitudeIndex);
 
     /** Get maximum latitude.
+     * <p>
+     * Beware that as a point at maximum latitude is the northernmost
+     * one of the grid, it doesn't have a northwards neighbor and
+     * therefore calling {@link #getLocation(double, double) getLocation}
+     * on such a latitude will return either {@link Location#NORTH_WEST},
+     * {@link Location#NORTH} or {@link Location#NORTH_EAST}, but can
+     * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
+     * </p>
      * @return maximum latitude
      * (latitude of the center of the pixels of North row)
      */
@@ -103,6 +159,14 @@ public interface Tile extends UpdatableTile {
     double getLongitudeAtIndex(int longitudeIndex);
 
     /** Get maximum longitude.
+     * <p>
+     * Beware that as a point at maximum longitude is the easternmost
+     * one of the grid, it doesn't have an eastwards neighbor and
+     * therefore calling {@link #getLocation(double, double) getLocation}
+     * on such a longitude will return either {@link Location#SOUTH_EAST},
+     * {@link Location#EAST} or {@link Location#NORTH_EAST}, but can
+     * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
+     * </p>
      * @return maximum longitude
      * (longitude of the center of the pixels of East column)
      */
@@ -128,25 +192,23 @@ public interface Tile extends UpdatableTile {
      */
     int getLongitudeColumns();
 
-    /** Get the latitude index of a point.
+    /** Get the floor latitude index of a point.
      * <p>
-     * This method shift indices 1/2 pixel, so that
-     * the specified latitude is always between index and index+1.
+     * The specified latitude is always between index and index+1.
      * </p>
      * @param latitude geodetic latitude
-     * @return latitude index (it may lie outside of the tile!)
+     * @return floor latitude index (it may lie outside of the tile!)
      */
-    int getLatitudeIndex(double latitude);
+    int getFloorLatitudeIndex(double latitude);
 
-    /** Get the longitude index of a point.
+    /** Get the floor longitude index of a point.
      * <p>
-     * This method shift indices 1/2 pixel, so that
-     * the specified longitude is always between index and index+1.
+     * The specified longitude is always between index and index+1.
      * </p>
      * @param longitude geodetic longitude
-     * @return longitude index (it may lie outside of the tile!)
+     * @return floor longitude index (it may lie outside of the tile!)
      */
-    int getLongitudeIndex(double longitude);
+    int getFloorLongitudeIndex(double longitude);
 
     /** Get the minimum elevation in the tile.
      * @return minimum elevation in the tile

@@ -89,7 +89,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 }
                 current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
 
-                if (tile.getLocation(current.getLatitude(), current.getLongitude()) != Tile.Location.IN_TILE) {
+                if (tile.getLocation(current.getLatitude(), current.getLongitude()) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
                     // the entry point is in another tile
                     tile    = cache.getTile(current.getLatitude(), current.getLongitude());
                     hMax    = FastMath.max(hMax, tile.getMaxElevation());
@@ -107,16 +107,16 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 // compute intersection with Digital Elevation Model
                 final int entryLat = FastMath.max(0,
                                                   FastMath.min(tile.getLatitudeRows() - 1,
-                                                               tile.getLatitudeIndex(current.getLatitude())));
+                                                               tile.getFloorLatitudeIndex(current.getLatitude())));
                 final int entryLon = FastMath.max(0,
                                                   FastMath.min(tile.getLongitudeColumns() - 1,
-                                                               tile.getLongitudeIndex(current.getLongitude())));
+                                                               tile.getFloorLongitudeIndex(current.getLongitude())));
                 final int exitLat  = FastMath.max(0,
                                                   FastMath.min(tile.getLatitudeRows() - 1,
-                                                               tile.getLatitudeIndex(exit.getPoint().getLatitude())));
+                                                               tile.getFloorLatitudeIndex(exit.getPoint().getLatitude())));
                 final int exitLon  = FastMath.max(0,
                                                   FastMath.min(tile.getLongitudeColumns() - 1,
-                                                               tile.getLongitudeIndex(exit.getPoint().getLongitude())));
+                                                               tile.getFloorLongitudeIndex(exit.getPoint().getLongitude())));
                 final NormalizedGeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
                                                                        current, entryLat, entryLon,
                                                                        exit.getPoint(), exitLat, exitLon);
@@ -171,8 +171,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
                                                                            tile.getMinimumLongitude());
                 return tile.pixelIntersection(entry, ellipsoid.convertLos(entryP, exitP),
-                                              tile.getLatitudeIndex(closeGuess.getLatitude()),
-                                              tile.getLongitudeIndex(closeGuess.getLongitude()));
+                                              tile.getFloorLatitudeIndex(closeGuess.getLatitude()),
+                                              tile.getFloorLongitudeIndex(closeGuess.getLongitude()));
             } else {
                 final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
                 final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
@@ -180,8 +180,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                                     ellipsoid.getBodyFrame(), null);
                 final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
                 return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
-                                              tile.getLatitudeIndex(projected.getLatitude()),
-                                              tile.getLongitudeIndex(projected.getLongitude()));
+                                              tile.getFloorLatitudeIndex(projected.getLatitude()),
+                                              tile.getFloorLongitudeIndex(projected.getLongitude()));
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
@@ -277,7 +277,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                                  cN * entry.getAltitude() + cX * exit.getAltitude(),
                                                                  tile.getMinimumLongitude());
                     }
-                    final int crossingLat = tile.getLatitudeIndex(crossingGP.getLatitude());
+                    final int crossingLat = tile.getFloorLatitudeIndex(crossingGP.getLatitude());
 
                     // adjust indices as the crossing point is by definition between the sub-tiles
                     final int crossingLonBefore = crossingLon - (entryLon <= exitLon ? 1 : 0);
@@ -336,7 +336,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                                  cN * entry.getAltitude()  + cX * exit.getAltitude(),
                                                                  tile.getMinimumLongitude());
                     }
-                    final int crossingLon = tile.getLongitudeIndex(crossingGP.getLongitude());
+                    final int crossingLon = tile.getFloorLongitudeIndex(crossingGP.getLongitude());
 
                     // adjust indices as the crossing point is by definition between the sub-tiles
                     final int crossingLatBefore = crossingLat - (entryLat <= exitLat ? 1 : 0);
@@ -442,7 +442,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
                                   ellipsoid.pointAtLatitude(position, los, tile.getMinimumLatitude(), exitP),
                                   true);
-        case IN_TILE :
+        case HAS_INTERPOLATION_NEIGHBORS :
             return new LimitPoint(exitGP, false);
 
         default :

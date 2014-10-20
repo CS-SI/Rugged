@@ -360,13 +360,13 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public int getLatitudeIndex(final double latitude) {
+    public int getFloorLatitudeIndex(final double latitude) {
         return (int) FastMath.floor(getDoubleLatitudeIndex(latitude));
     }
 
     /** {@inheritDoc} */
     @Override
-    public int getLongitudeIndex(final double longitude) {
+    public int getFloorLongitudeIndex(final double longitude) {
         return (int) FastMath.floor(getDoubleLontitudeIndex(longitude));
     }
 
@@ -389,8 +389,8 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public Location getLocation(final double latitude, final double longitude) {
-        final int latitudeIndex  = getLatitudeIndex(latitude);
-        final int longitudeIndex = getLongitudeIndex(longitude);
+        final int latitudeIndex  = getFloorLatitudeIndex(latitude);
+        final int longitudeIndex = getFloorLongitudeIndex(longitude);
         if (longitudeIndex < 0) {
             if (latitudeIndex < 0) {
                 return Location.SOUTH_WEST;
@@ -403,7 +403,7 @@ public class SimpleTile implements Tile {
             if (latitudeIndex < 0) {
                 return Location.SOUTH;
             } else if (latitudeIndex <= (latitudeRows - 2)) {
-                return Location.IN_TILE;
+                return Location.HAS_INTERPOLATION_NEIGHBORS;
             } else {
                 return Location.NORTH;
             }

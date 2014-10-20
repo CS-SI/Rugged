@@ -169,8 +169,8 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
                                                                 ellipsoid.getBodyFrame(), null);
             final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
             return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
-                                          tile.getLatitudeIndex(projected.getLatitude()),
-                                          tile.getLongitudeIndex(projected.getLongitude()));
+                                          tile.getFloorLatitudeIndex(projected.getLatitude()),
+                                          tile.getFloorLongitudeIndex(projected.getLongitude()));
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
@@ -236,7 +236,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
      * @return index of latitude, truncated at tiles limits
      */
     private int latitudeIndex(final SimpleTile tile, final double latitude) {
-        final int rawIndex = tile.getLatitudeIndex(latitude);
+        final int rawIndex = tile.getFloorLatitudeIndex(latitude);
         return FastMath.min(FastMath.max(0, rawIndex), tile.getLatitudeRows());
     }
 
@@ -246,7 +246,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
      * @return index of longitude, truncated at tiles limits
      */
     private int longitudeIndex(final SimpleTile tile, final double longitude) {
-        final int rawIndex = tile.getLongitudeIndex(longitude);
+        final int rawIndex = tile.getFloorLongitudeIndex(longitude);
         return FastMath.min(FastMath.max(0, rawIndex), tile.getLongitudeColumns());
     }
 
