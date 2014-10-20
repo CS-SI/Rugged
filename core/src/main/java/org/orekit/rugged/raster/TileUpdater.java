@@ -65,7 +65,7 @@ public interface TileUpdater {
      *     neighbors.
      *   </li>
      *   <li>
-     *     the elevation at grid point as set when calling {@link
+     *     The elevation at grid point as set when calling {@link
      *     UpdatableTile#setElevation(int, int, double) tile.setElevation(i, j,
      *     elevation)} must be the elevation corresponding to the latitude
      *     {@code minLatitude + i * latitudeStep} and longitude {@code
