@@ -53,23 +53,23 @@ public interface TileUpdater {
      *   </li>
      *   <li>
      *     As elevations are interpolated within Digital Elevation Model
-     *     pixels using four pixels at indices (i, j), (i+1, j), (i, j+1)
-     *     (i+1, j+1). A point in the northernmost row (resp. easternmost
-     *     column) miss neighboring points at row j+1 (resp. neighboring
-     *     points at column i+1) and therefore cannot be interpolated.
-     *     The method should therefore select the northernmost tile if the
-     *     specified latitude is in the overlapping row between two tiles,
-     *     and it should select the easternmost tile if the specified longitude
-     *     is in the overlapping column between two tiles. Failing to do so will
-     *     trigger an error at caller level mentioning the missing required
-     *     neighbors.
+     *     pixels using four pixels at indices (kLat, kLon), (kLat+1, kLon),
+     *     (kLat, kLon+1), (kLat+1, kLon+1). A point in the northernmost row
+     *     (resp. easternmost column) miss neighboring points at row kLat+1
+     *     (resp. neighboring points at column kLon+1) and therefore cannot
+     *     be interpolated. The method should therefore select the northernmost
+     *     tile if the specified latitude is in the overlapping row between two
+     *     tiles, and it should select the easternmost tile if the specified
+     *     longitude is in the overlapping column between two tiles. Failing
+     *     to do so will trigger an error at caller level mentioning the missing
+     *     required neighbors.
      *   </li>
      *   <li>
      *     The elevation at grid point as set when calling {@link
-     *     UpdatableTile#setElevation(int, int, double) tile.setElevation(i, j,
+     *     UpdatableTile#setElevation(int, int, double) tile.setElevation(kLat, kLon,
      *     elevation)} must be the elevation corresponding to the latitude
-     *     {@code minLatitude + i * latitudeStep} and longitude {@code
-     *     minLongitude + j * longitudeStep}, where {@code minLatitude},
+     *     {@code minLatitude + kLat * latitudeStep} and longitude {@code
+     *     minLongitude + kLon * longitudeStep}, where {@code minLatitude},
      *     {@code latitudeStep}, {@code minLongitude} and {@code longitudeStep}
      *     correspond to the parameter of the {@link UpdatableTile#setGeometry(double,
      *     double, double, double, int, int) tile.setGeometry(minLatitude, minLongitude,

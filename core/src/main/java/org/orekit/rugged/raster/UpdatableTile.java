@@ -38,6 +38,16 @@ public interface UpdatableTile {
         throws RuggedException;
 
     /** Set the elevation for one raster element.
+     * <p>
+     * BEWARE! The order of the indices follows geodetic conventions, i.e.
+     * the latitude is given first and longitude afterwards, so the first
+     * index specifies a <em>row</em> index with zero at South and max value
+     * at North, and the second index specifies a <em>column</em> index
+     * with zero at West and max value at East. This is <em>not</em> the
+     * same as some raster conventions (as our row index increases from South
+     * to North) and this is also not the same as Cartesian coordinates as
+     * our ordinate index appears before our abscissa index).
+     * </p>
      * @param latitudeIndex index of latitude (row index)
      * @param longitudeIndex index of longitude (column index)
      * @param elevation elevation (m)
