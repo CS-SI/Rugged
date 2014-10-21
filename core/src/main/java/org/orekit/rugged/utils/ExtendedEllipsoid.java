@@ -63,7 +63,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param latitude latitude with respect to ellipsoid
      * @param closeReference reference point used to select the closest solution
      * when there are two points at the desired latitude along the line
-     * @return point at altitude
+     * @return point at latitude
      * @exception RuggedException if no such point exists
      */
     public Vector3D pointAtLatitude(final Vector3D position, final Vector3D los,
@@ -133,7 +133,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param position pixel position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param longitude longitude with respect to ellipsoid
-     * @return point at altitude
+     * @return point at longitude
      * @exception RuggedException if no such point exists
      */
     public Vector3D pointAtLongitude(final Vector3D position, final Vector3D los, final double longitude)
