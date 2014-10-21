@@ -397,50 +397,50 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         throws RuggedException, OrekitException {
 
         // look for an exit at bottom
-        final Vector3D exitP = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation() - STEP);
-        final NormalizedGeodeticPoint exitGP = ellipsoid.transform(exitP, ellipsoid.getBodyFrame(), null,
-                                                                   tile.getMinimumLongitude());
+        final double                  reference = tile.getMinimumLongitude();
+        final Vector3D                exitP     = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation() - STEP);
+        final NormalizedGeodeticPoint exitGP    = ellipsoid.transform(exitP, ellipsoid.getBodyFrame(), null, reference);
 
         switch (tile.getLocation(exitGP.getLatitude(), exitGP.getLongitude())) {
         case SOUTH_WEST :
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude(), exitP),
-                                                ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
+            return new LimitPoint(ellipsoid, reference,
+                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMinimumLatitude(),  exitP),
+                                                longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
                                                 position),
                                   true);
         case WEST :
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
+            return new LimitPoint(ellipsoid, reference,
+                                  longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
                                   true);
         case NORTH_WEST:
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude(), exitP),
-                                                ellipsoid.pointAtLongitude(position, los, tile.getMinimumLongitude()),
+            return new LimitPoint(ellipsoid, reference,
+                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMaximumLatitude(),  exitP),
+                                                longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
                                                 position),
                                   true);
         case NORTH :
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  ellipsoid.pointAtLatitude(position, los, tile.getMaximumLatitude(), exitP),
+            return new LimitPoint(ellipsoid, reference,
+                                  latitudeCrossing(ellipsoid, position, los, tile.getMaximumLatitude(), exitP),
                                   true);
         case NORTH_EAST :
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMaximumLatitude(), exitP),
-                                                ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
+            return new LimitPoint(ellipsoid, reference,
+                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMaximumLatitude(),  exitP),
+                                                longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
                                                 position),
                                   true);
         case EAST :
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
+            return new LimitPoint(ellipsoid, reference,
+                                  longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
                                   true);
         case SOUTH_EAST :
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  selectClosest(ellipsoid.pointAtLatitude(position,  los, tile.getMinimumLatitude(), exitP),
-                                                ellipsoid.pointAtLongitude(position, los, tile.getMaximumLongitude()),
+            return new LimitPoint(ellipsoid, reference,
+                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMinimumLatitude(),  exitP),
+                                                longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
                                                 position),
                                   true);
         case SOUTH :
-            return new LimitPoint(ellipsoid, tile.getMinimumLongitude(),
-                                  ellipsoid.pointAtLatitude(position, los, tile.getMinimumLatitude(), exitP),
+            return new LimitPoint(ellipsoid, reference,
+                                  latitudeCrossing(ellipsoid, position, los, tile.getMinimumLatitude(), exitP),
                                   true);
         case HAS_INTERPOLATION_NEIGHBORS :
             return new LimitPoint(exitGP, false);
@@ -463,6 +463,44 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         return Vector3D.distance(p1, position) <= Vector3D.distance(p2, position) ? p1 : p2;
     }
 
+    /** Get point at some latitude along a pixel line of sight.
+     * @param ellipsoid reference ellipsoid
+     * @param position pixel position (in body frame)
+     * @param los pixel line-of-sight, not necessarily normalized (in body frame)
+     * @param latitude latitude with respect to ellipsoid
+     * @param closeReference reference point used to select the closest solution
+     * when there are two points at the desired latitude along the line
+     * @return point at altitude, or closeReference if no such point can be found
+     */
+    private Vector3D latitudeCrossing(final ExtendedEllipsoid ellipsoid,
+                                      final Vector3D position, final Vector3D los,
+                                      final double latitude, final Vector3D closeReference) {
+        try {
+            return ellipsoid.pointAtLatitude(position, los, latitude, closeReference);
+        } catch (RuggedException re) {
+            return closeReference;
+        }
+    }
+
+    /** Get point at some latitude along a pixel line of sight.
+     * @param ellipsoid reference ellipsoid
+     * @param position pixel position (in body frame)
+     * @param los pixel line-of-sight, not necessarily normalized (in body frame)
+     * @param longitude longitude with respect to ellipsoid
+     * @param closeReference reference point used to select the closest solution
+     * when there are two points at the desired latitude along the line
+     * @return point at altitude, or closeReference if no such point can be found
+     */
+    private Vector3D longitudeCrossing(final ExtendedEllipsoid ellipsoid,
+                                       final Vector3D position, final Vector3D los,
+                                       final double longitude, final Vector3D closeReference) {
+        try {
+            return ellipsoid.pointAtLongitude(position, los, longitude);
+        } catch (RuggedException re) {
+            return closeReference;
+        }
+    }
+
     /** Point at tile boundary. */
     private static class LimitPoint {
 
@@ -474,17 +512,17 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         /** Simple constructor.
          * @param ellipsoid reference ellipsoid
-         * @param centralLongitude reference longitude lc such that the point longitude will
+         * @param referenceLongitude reference longitude lc such that the point longitude will
          * be normalized between lc-π and lc+π
          * @param cartesian Cartesian point
          * @param side if true, the point is on a side limit, otherwise
          * it is on a top/bottom limit
          * @exception OrekitException if geodetic coordinates cannot be computed
          */
-        public LimitPoint(final ExtendedEllipsoid ellipsoid, final double centralLongitude,
+        public LimitPoint(final ExtendedEllipsoid ellipsoid, final double referenceLongitude,
                           final Vector3D cartesian, final boolean side)
             throws OrekitException {
-            this(ellipsoid.transform(cartesian, ellipsoid.getBodyFrame(), null, centralLongitude), side);
+            this(ellipsoid.transform(cartesian, ellipsoid.getBodyFrame(), null, referenceLongitude), side);
         }
 
         /** Simple constructor.
