@@ -184,9 +184,6 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
                                      1.0e-6);
 
         // line of sight in the North row
-//        Assert.assertEquals(southTile.getMaximumLatitude() + 0.0625 * southTile.getLatitudeStep(),
-//                            findExit(algorithm, southTile, 128.0625, 32.0).getLatitude(),
-//                            1.0e-6);
         Assert.assertEquals(southTile.getMaximumLatitude() + 0.0625 * southTile.getLatitudeStep(),
                             findExit(algorithm, southTile,
                                      new Vector3D(6251729.731998736, 984354.4963428857, -789526.5774750853),
@@ -194,24 +191,6 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
                                      1.0e-6);
 
     }
-
-//    private NormalizedGeodeticPoint findExit(IntersectionAlgorithm algorithm, Tile tile,
-//                                             double exitLat, double exitLon)
-//        throws RuggedException, OrekitException {
-//
-//        double latX = tile.getMinimumLatitude() + exitLat * tile.getLatitudeStep();
-//        double lonX = tile.getMinimumLongitude() + exitLon * tile.getLongitudeStep();
-//        GeodeticPoint exitGP = new GeodeticPoint(latX, lonX, tile.getMinElevation() - 0.01);
-//        Vector3D exit = earth.transform(exitGP);
-//        final Vector3D zenith      = exitGP.getZenith();
-//        final Vector3D los = Vector3D.crossProduct(Vector3D.PLUS_K, zenith).normalize();
-//        NormalizedGeodeticPoint gp = findExit(algorithm, tile, new Vector3D(1, exit, -500, los), los);
-//        System.out.println(gp.getLatitude() - exitGP.getLatitude());
-//        System.out.println(gp.getLongitude() - exitGP.getLongitude());
-//        System.out.println(gp.getAltitude() - exitGP.getAltitude());
-//        return gp;
-//
-//    }
 
     private NormalizedGeodeticPoint findExit(IntersectionAlgorithm algorithm, Tile tile, Vector3D position, Vector3D los)
         throws RuggedException, OrekitException {
