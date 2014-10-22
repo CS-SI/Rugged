@@ -17,6 +17,10 @@
 package org.orekit.rugged.intersection.duvenhage;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
@@ -27,8 +31,12 @@ import org.orekit.rugged.api.RuggedException;
 import org.orekit.rugged.api.RuggedMessages;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import org.orekit.rugged.raster.CheckedPatternElevationUpdater;
+import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 
@@ -101,6 +109,143 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED, re.getSpecifier());
         }
+    }
+
+    @Test
+    public void testPureEastWestLOS() throws RuggedException, OrekitException {
+        updater = new CheckedPatternElevationUpdater(FastMath.toRadians(1.0),1201, 41.0, 1563.0);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        NormalizedGeodeticPoint gp =
+            algorithm.intersection(earth,
+                                   new Vector3D(-3041185.154503948, 6486750.132281409, -32335.022880173332),
+                                   new Vector3D(0.5660218606298548 , -0.8233939240951769, 0.040517885584811814));
+        Assert.assertEquals(1164.339, gp.getAltitude(), 1.0e-3);
+    }
+
+    @Test
+    public void testParallelLOS() throws RuggedException, OrekitException {
+        double size       = 0.125;
+        int    n          = 129;
+        double elevation1 = 0.0;
+        double elevation2 = 100.0;
+        updater = new CheckedPatternElevationUpdater(size, n, elevation1, elevation2);
+        MinMaxTreeTile northTile = new MinMaxTreeTileFactory().createTile();
+        updater.updateTile((3 * size) / 2, (3 * size) / 2, northTile);
+        MinMaxTreeTile southTile = new MinMaxTreeTileFactory().createTile();
+        updater.updateTile((-3 * size) / 2, (3 * size) / 2, southTile);
+        IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+
+        // line of sight in the South West corner
+        Assert.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
+                            findExit(algorithm, northTile,
+                                     new Vector3D( 6278799.86896170100,   788574.17965500170,   796074.70414069280),
+                                     new Vector3D( 0.09416282233912959,  0.01183204230132312, -0.99548649697728680)).getLongitude(),
+                                     1.0e-6);
+
+        // line of sight in the West column
+        Assert.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
+                            findExit(algorithm, northTile,
+                                     new Vector3D(6278799.868961701, 788574.17965500171, 796074.7041406928),
+                                     new Vector3D(0.09231669916268806, 0.011600067441452849, -0.9956621241621375)).getLongitude(),
+                                     1.0e-6);
+
+        // line of sight in the North-West corner
+        Assert.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
+                            findExit(algorithm, northTile,
+                                     new Vector3D( 6133039.79342824500,   770267.71434489540,  1568158.38266382620),
+                                     new Vector3D(-0.52028845147300570, -0.06537691642830394, -0.85148446025875800)).getLongitude(),
+                                     1.0e-6);
+        // line of sight in the North-East corner
+        Assert.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
+                            findExit(algorithm, northTile,
+                                     new Vector3D( 5988968.17708294100,  1529624.01701343130,  1568158.38266382620),
+                                     new Vector3D(-0.93877408645552440, -0.23970837882807683, -0.24747344851359457)).getLongitude(),
+                                     1.0e-6);
+
+        // line of sight in the East column
+        Assert.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
+                            findExit(algorithm, northTile,
+                                     new Vector3D( 6106093.15406747100,  1559538.54861392200,   979886.66862965740),
+                                     new Vector3D(-0.18115090486319424, -0.04625542007869719,  0.98236693031707310)).getLongitude(),
+                                     1.0e-6);
+
+        // line of sight in the South-East corner
+        Assert.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
+                            findExit(algorithm, northTile,
+                                     new Vector3D( 6131304.19368509600,  1565977.62301751650,   796074.70414069280),
+                                     new Vector3D( 0.09195297594530785,  0.02347944953986664, -0.99548649697728530)).getLongitude(),
+                                     1.0e-6);
+
+        // line of sight in the South row
+        Assert.assertEquals(northTile.getMinimumLatitude() - 0.0625 * northTile.getLatitudeStep(),
+                            findExit(algorithm, northTile,
+                                     new Vector3D(6251729.731998736, 984354.4963428857, 789526.5774750853),
+                                     new Vector3D(-0.15561499277355603, 0.9878177838164719, 0.0)).getLatitude(),
+                                     1.0e-6);
+
+        // line of sight in the North row
+//        Assert.assertEquals(southTile.getMaximumLatitude() + 0.0625 * southTile.getLatitudeStep(),
+//                            findExit(algorithm, southTile, 128.0625, 32.0).getLatitude(),
+//                            1.0e-6);
+        Assert.assertEquals(southTile.getMaximumLatitude() + 0.0625 * southTile.getLatitudeStep(),
+                            findExit(algorithm, southTile,
+                                     new Vector3D(6251729.731998736, 984354.4963428857, -789526.5774750853),
+                                     new Vector3D(-0.15561499277355603, 0.9878177838164719, 0.0)).getLatitude(),
+                                     1.0e-6);
+
+    }
+
+//    private NormalizedGeodeticPoint findExit(IntersectionAlgorithm algorithm, Tile tile,
+//                                             double exitLat, double exitLon)
+//        throws RuggedException, OrekitException {
+//
+//        double latX = tile.getMinimumLatitude() + exitLat * tile.getLatitudeStep();
+//        double lonX = tile.getMinimumLongitude() + exitLon * tile.getLongitudeStep();
+//        GeodeticPoint exitGP = new GeodeticPoint(latX, lonX, tile.getMinElevation() - 0.01);
+//        Vector3D exit = earth.transform(exitGP);
+//        final Vector3D zenith      = exitGP.getZenith();
+//        final Vector3D los = Vector3D.crossProduct(Vector3D.PLUS_K, zenith).normalize();
+//        NormalizedGeodeticPoint gp = findExit(algorithm, tile, new Vector3D(1, exit, -500, los), los);
+//        System.out.println(gp.getLatitude() - exitGP.getLatitude());
+//        System.out.println(gp.getLongitude() - exitGP.getLongitude());
+//        System.out.println(gp.getAltitude() - exitGP.getAltitude());
+//        return gp;
+//
+//    }
+
+    private NormalizedGeodeticPoint findExit(IntersectionAlgorithm algorithm, Tile tile, Vector3D position, Vector3D los)
+        throws RuggedException, OrekitException {
+
+        try {
+            Method findExit = DuvenhageAlgorithm.class.getDeclaredMethod("findExit",
+                                                                         Tile.class,
+                                                                         ExtendedEllipsoid.class,
+                                                                         Vector3D.class, Vector3D.class);
+            findExit.setAccessible(true);
+            Object limitPoint = findExit.invoke(algorithm, tile, earth, position, los);
+            Class<?> limitPointCls = DuvenhageAlgorithm.class.getDeclaredClasses()[0];
+            Field pointField = limitPointCls.getDeclaredField("point");
+            pointField.setAccessible(true);
+            return (NormalizedGeodeticPoint) pointField.get(limitPoint);
+
+        } catch (NoSuchMethodException nsme) {
+            Assert.fail(nsme.getLocalizedMessage());
+        } catch (SecurityException se) {
+            Assert.fail(se.getLocalizedMessage());
+        } catch (IllegalAccessException iae) {
+            Assert.fail(iae.getLocalizedMessage());
+        } catch (IllegalArgumentException iae) {
+            Assert.fail(iae.getLocalizedMessage());
+        } catch (NoSuchFieldException nsfe) {
+            Assert.fail(nsfe.getLocalizedMessage());
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof RuggedException) {
+                throw (RuggedException) e.getCause();
+            } else {
+                throw (OrekitException) e.getCause();
+            }
+        }
+        return null;
     }
 
 }
