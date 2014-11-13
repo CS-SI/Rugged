@@ -45,12 +45,6 @@ public class LineSensor {
     /** Pixels lines-of-sight. */
     private final Vector3D[] x;
 
-    /** Pixels transversal direction (i.e. towards left pixel). */
-    private final Vector3D[] y;
-
-    /** Pixels widths. */
-    private final double[] width;
-
     /** Mean plane normal. */
     private final Vector3D normal;
 
@@ -103,24 +97,6 @@ public class LineSensor {
             normal = singularVector;
         } else {
             normal = singularVector.negate();
-        }
-
-        // compute transversal direction
-        y = new Vector3D[x.length];
-        for (int i = 0; i < x.length; ++i) {
-            y[i] = Vector3D.crossProduct(normal, x[i]).normalize();
-        }
-
-        // compute pixel widths
-        width = new double[x.length];
-        for (int i = 0; i < x.length; ++i) {
-            if (i < 1) {
-                width[i] =  getAzimuth(los.get(i + 1), i);
-            } else if (i > x.length - 2) {
-                width[i] = -getAzimuth(los.get(i - 1), i);
-            } else {
-                width[i] = 0.5 * (getAzimuth(los.get(i + 1), i) - getAzimuth(los.get(i - 1), i));
-            }
         }
 
     }
@@ -188,32 +164,6 @@ public class LineSensor {
      */
     public Vector3D getPosition() {
         return position;
-    }
-
-    /** Get the relative azimuth of a direction with respect to a pixel.
-     * <p>
-     * The relative azimuth is computed along the sensor line. As it is
-     * relative to current pixel, it is 0 when the direction is aligned
-     * with pixel i, and the sign is consistent with {@link #getMeanPlaneNormal()
-     * mean plane normal} orientation.
-     * </p>
-     * @param direction direction to check
-     * @param i pixel index (will be enforced between 0 and {@link #getNbPixels()})
-     * @return relative azimuth of direction
-     */
-    public double getAzimuth(final Vector3D direction, final int i) {
-        final int fixedI = FastMath.max(0, FastMath.min(x.length - 1, i));
-        return FastMath.atan2(Vector3D.dotProduct(direction, y[fixedI]),
-                              Vector3D.dotProduct(direction, x[fixedI]));
-    }
-
-    /** Get the the angular width a pixel.
-     * @param i pixel index (will be enforced between 0 and {@link #getNbPixels()})
-     * @return relative azimuth of direction
-     */
-    public double getWidth(final int i) {
-        final int fixedI = FastMath.max(0, FastMath.min(x.length - 1, i));
-        return width[fixedI];
     }
 
 }
