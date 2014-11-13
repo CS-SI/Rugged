@@ -221,8 +221,8 @@ class SensorMeanPlaneCrossing {
     /** Evaluate geometry for a given line number.
      * @param lineNumber current line number
      * @param targetPV target ground point
-     * @param bodyToInert transform from observed body to inertial frame, for middle line
-     * @param scToInert transform from inertial frame to spacecraft frame, for middle line
+     * @param bodyToInert transform from observed body to inertial frame, for current line
+     * @param scToInert transform from inertial frame to spacecraft frame, for current line
      * @return target direction in spacecraft frame, with its first derivative
      * with respect to line number
      */
@@ -274,14 +274,13 @@ class SensorMeanPlaneCrossing {
         }
         final Vector3D dir    = inertToSc.transformVector(obsLInert);
         final Vector3D dirDot = new Vector3D(+1.0, inertToSc.transformVector(obsLInertDot),
-                                             -1.0, Vector3D.crossProduct(inertToSc.getRotationRate(),
-                                                                         dir));
+                                             -1.0, Vector3D.crossProduct(inertToSc.getRotationRate(), dir));
 
         // combine vector value and derivative
         final double rate = sensor.getRate(lineNumber);
         return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(1, 1, dir.getX(), dirDot.getX() / rate),
-                new DerivativeStructure(1, 1, dir.getY(), dirDot.getY() / rate),
-                new DerivativeStructure(1, 1, dir.getZ(), dirDot.getZ() / rate));
+                                                      new DerivativeStructure(1, 1, dir.getY(), dirDot.getY() / rate),
+                                                      new DerivativeStructure(1, 1, dir.getZ(), dirDot.getZ() / rate));
 
     }
 

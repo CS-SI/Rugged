@@ -303,7 +303,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(Vector3D.PLUS_K, Vector3D.PLUS_I,
+        List<Vector3D> los = createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
@@ -384,7 +384,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(Vector3D.PLUS_K, Vector3D.PLUS_I,
+        List<Vector3D> los = createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
@@ -451,7 +451,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(Vector3D.PLUS_K, Vector3D.PLUS_I,
+        List<Vector3D> los = createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
                                        FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
@@ -506,7 +506,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -571,7 +571,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -624,7 +624,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -679,7 +679,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -741,7 +741,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -803,7 +803,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -850,7 +850,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(1.0), dimension);
 
@@ -1001,7 +1001,7 @@ public class RuggedTest {
             // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
             // los: swath in the (YZ) plane, looking roughly at 50° roll (sensor-dependent), 2.6" per pixel
             Vector3D position = new Vector3D(1.5, 0, -0.2);
-            List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I,
+            List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                         FastMath.toRadians(50.0 - 0.001 * i)).applyTo(Vector3D.PLUS_K),
                                            Vector3D.PLUS_I,
                                            FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
@@ -1188,11 +1188,11 @@ public class RuggedTest {
         GeodeticPoint point2 = new GeodeticPoint(0.704463899881073, -1.7303503789334154, 648.9200602492216);
         SensorPixel sensorPixel2 = rugged.inverseLocalization(lineSensor.getName(), point2, 1, 131328);
         Assert.assertEquals(   2.02184, sensorPixel2.getLineNumber(), 1.0e-5);
-        Assert.assertEquals(  29.53008, sensorPixel2.getPixelNumber(), 1.0e-5);
+        Assert.assertEquals(  27.53008, sensorPixel2.getPixelNumber(), 1.0e-5);
         GeodeticPoint point3 = new GeodeticPoint(0.7009593480939814, -1.7314283804521957, 588.3075485689468);
         SensorPixel sensorPixel3 = rugged.inverseLocalization(lineSensor.getName(), point3, 1, 131328);
         Assert.assertEquals(2305.26174, sensorPixel3.getLineNumber(),  1.0e-5);
-        Assert.assertEquals(  28.18381, sensorPixel3.getPixelNumber(), 1.0e-5);
+        Assert.assertEquals(  27.18381, sensorPixel3.getPixelNumber(), 1.0e-5);
         GeodeticPoint point4 = new GeodeticPoint(0.7018731669637096, -1.73651769725183, 611.2759403696498);
         SensorPixel sensorPixel4 = rugged.inverseLocalization(lineSensor.getName(), point4, 1, 131328);
         Assert.assertEquals(2305.25506, sensorPixel4.getLineNumber(), 1.0e-5);
@@ -1324,21 +1324,58 @@ public class RuggedTest {
 
     }
 
-    /**
-     * Add a satellite PV to given satellitePVList List
-     * @param gps GPS TimeScale
-     * @param eme2000 EME200 Frame
-     * @param itrf ITRF Frame
-     * @param satellitePVList list of Satellite Position/Velocity
-     * @param absDate Absolute date
-     * @param px Position x
-     * @param py Position y
-     * @param pz Position z
-     * @param vx Velocity x
-     * @param vy Velocity y
-     * @param vz Velocity z
-     * @throws OrekitException
-     */
+    @Test
+    public void testInverseLocCurvedLine()
+        throws RuggedException, URISyntaxException, OrekitException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = createEarth();
+        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+        int dimension = 200;
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, looking at nadir, 2.6" per pixel, 3" sagitta
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        List<Vector3D> los = createLOSCurvedLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                 FastMath.toRadians(dimension * 2.6 / 3600.0),
+                                                 FastMath.toRadians(3.0 / 3600.0),
+                                                 dimension);
+
+        // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("curved", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine).shiftedBy(-1.0);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
+
+        TileUpdater updater =
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
+
+        Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
+                                   EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
+                                   minDate, maxDate, 5.0,
+                                   orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 8,
+                                   CartesianDerivativesFilter.USE_PV, 
+                                   orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25), 2,
+                                   AngularDerivativesFilter.USE_R, 0.001);
+        rugged.addLineSensor(lineSensor);
+
+        int lineNumber = 97;
+        GeodeticPoint[] gp = rugged.directLocalization("curved", lineNumber);
+        for (int i = 0; i < gp.length; ++i) {
+            SensorPixel pixel = rugged.inverseLocalization("curved", gp[i], firstLine, lastLine);
+            Assert.assertEquals(lineNumber, pixel.getLineNumber(),  1.5e-7);
+            Assert.assertEquals(i,          pixel.getPixelNumber(), 3.1e-7);
+        }
+
+    }
+
     protected void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
                                   ArrayList<TimeStampedPVCoordinates> satellitePVList,
                                   String absDate,
@@ -1354,36 +1391,12 @@ public class RuggedTest {
         satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000));
     }
 
-    /**
-     * Add a SatelliteQ to the given
-     * @param gps GPS TimeScale
-     * @param satelliteQList  list of SatelliteQ
-     * @param absDate  Absolute date
-     * @param q0
-     * @param q1
-     * @param q2
-     * @param q3
-     */
     protected void addSatelliteQ(TimeScale gps, ArrayList<TimeStampedAngularCoordinates> satelliteQList, String absDate, double q0, double q1, double q2,
             double q3) {
         AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
         Rotation rotation = new Rotation(q0, q1, q2, q3, true);
         TimeStampedAngularCoordinates pair = new TimeStampedAngularCoordinates(attitudeDate, rotation, Vector3D.ZERO);
         satelliteQList.add(pair);
-    }
-
-    /**
-     * @param point
-     * @param sensorPixel
-     */
-    protected void checkInverseLoc(GeodeticPoint point, SensorPixel sensorPixel) {
-        if (sensorPixel != null) {
-            System.out.println("Point : " + point);
-            System.out.println("Sensor pixel : line " + sensorPixel.getLineNumber() + " number " + sensorPixel.getPixelNumber());
-        } else {
-            System.out.println("Point : " + point);
-            System.out.println("Sensor pixel : Not found !!! :'(");
-        }
     }
 
     private void checkInverseLocalization(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
@@ -1401,11 +1414,11 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
 
-        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
+        // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
         int firstLine = 0;
         int lastLine  = dimension;
@@ -1414,7 +1427,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
                                            FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new Rugged(updater, 8, AlgorithmId.DUVENHAGE,
@@ -1487,7 +1500,7 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<Vector3D> los = createLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+        List<Vector3D> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
                                        Vector3D.PLUS_I,
                                        FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
 
@@ -1611,11 +1624,24 @@ public class RuggedTest {
 
     }
 
-    private List<Vector3D> createLOS(Vector3D center, Vector3D normal, double halfAperture, int n) {
+    private List<Vector3D> createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
             list.add(new Rotation(normal, alpha).applyTo(center));
+        }
+        return list;
+    }
+
+    private List<Vector3D> createLOSCurvedLine(Vector3D center, Vector3D normal,
+                                               double halfAperture, double sagitta, int n) {
+        Vector3D u = Vector3D.crossProduct(center, normal);
+        List<Vector3D> list = new ArrayList<Vector3D>(n);
+        for (int i = 0; i < n; ++i) {
+            double x = (2.0 * i + 1.0 - n) / (n - 1);
+            double alpha = x * halfAperture;
+            double beta  = x * x * sagitta;
+            list.add(new Rotation(normal, alpha).applyTo(new Rotation(u, beta).applyTo(center)));
         }
         return list;
     }

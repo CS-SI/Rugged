@@ -1012,8 +1012,12 @@ public class Rugged {
 
         // fix line by considering the closest pixel exact position and line-of-sight
         // (this pixel might point towards a direction slightly above or below the mean sensor plane)
-        final int      closestIndex    = (int) FastMath.rint(coarsePixel);
-        final DerivativeStructure beta = FieldVector3D.angle(crossingResult.getTargetDirection(), sensor.getMeanPlaneNormal());
+        final int      lowIndex        = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
+        final Vector3D lowLOS          = sensor.getLos(lowIndex);
+        final Vector3D highLOS         = sensor.getLos(lowIndex + 1);
+        final Vector3D localZ          = Vector3D.crossProduct(lowLOS, highLOS);
+        final Vector3D localY          = Vector3D.crossProduct(localZ, lowLOS);
+        final DerivativeStructure beta = FieldVector3D.angle(crossingResult.getTargetDirection(), localZ);
         final double   deltaL          = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
         final double   fixedLine       = crossingResult.getLine() + deltaL;
         final Vector3D fixedDirection  = new Vector3D(crossingResult.getTargetDirection().getX().taylor(deltaL),
@@ -1021,9 +1025,11 @@ public class Rugged {
                                                       crossingResult.getTargetDirection().getZ().taylor(deltaL)).normalize();
 
         // fix pixel
-        final double alpha      = sensor.getAzimuth(fixedDirection, closestIndex);
-        final double pixelWidth = sensor.getWidth(closestIndex);
-        final double fixedPixel = closestIndex + alpha / pixelWidth;
+        final double pixelWidth = FastMath.atan2(Vector3D.dotProduct(highLOS,        localY),
+                                                 Vector3D.dotProduct(highLOS,        lowLOS));
+        final double alpha      = FastMath.atan2(Vector3D.dotProduct(fixedDirection, localY),
+                                                 Vector3D.dotProduct(fixedDirection, lowLOS));
+        final double fixedPixel = lowIndex + alpha / pixelWidth;
 
         return new SensorPixel(fixedLine, fixedPixel);
 
