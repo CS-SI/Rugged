@@ -50,14 +50,16 @@ class SensorPixelCrossing {
 
     /** Simple constructor.
      * @param sensor sensor to consider
+     * @param meanNormal mean plane normal of the line sensor
      * @param targetDirection target direction in spacecraft frame
      * @param maxEval maximum number of evaluations
      * @param accuracy accuracy to use for finding crossing line number
      */
-    public SensorPixelCrossing(final LineSensor sensor, final Vector3D targetDirection,
+    public SensorPixelCrossing(final LineSensor sensor, final Vector3D meanNormal,
+                               final Vector3D targetDirection,
                                final int maxEval, final double accuracy) {
         this.sensor   = sensor;
-        this.cross    = Vector3D.crossProduct(sensor.getMeanPlaneNormal(), targetDirection).normalize();
+        this.cross    = Vector3D.crossProduct(meanNormal, targetDirection).normalize();
         this.maxEval  = maxEval;
         this.accuracy = accuracy;
     }

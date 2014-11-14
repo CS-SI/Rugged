@@ -1002,7 +1002,8 @@ public class Rugged {
 
         // find approximately the pixel along this sensor line
         final SensorPixelCrossing pixelCrossing =
-                new SensorPixelCrossing(sensor, crossingResult.getTargetDirection().toVector3D(),
+                new SensorPixelCrossing(sensor, planeCrossing.getMeanPlaneNormal(),
+                                        crossingResult.getTargetDirection().toVector3D(),
                                         MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
         final double coarsePixel = pixelCrossing.locatePixel();
         if (Double.isNaN(coarsePixel)) {

@@ -19,6 +19,9 @@ package org.orekit.rugged.api;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -61,6 +64,9 @@ class SensorMeanPlaneCrossing {
     /** Line sensor. */
     private final LineSensor sensor;
 
+    /** Sensor mean plane normal. */
+    private final Vector3D meanPlaneNormal;
+
     /** Maximum number of evaluations. */
     private final int maxEval;
 
@@ -100,6 +106,51 @@ class SensorMeanPlaneCrossing {
         this.midBodyToInert        = scToBody.getBodyToInertial(midDate);
         this.midScToInert          = scToBody.getScToInertial(midDate);
 
+        this.meanPlaneNormal = computeMeanPlaneNormal();
+
+    }
+
+    /** Compute the plane containing origin that best fits viewing directions point cloud.
+     * <p>
+     * The normal is oriented such traversing pixels in increasing indices
+     * order corresponds is consistent with trigonometric order (i.e.
+     * counterclockwise).
+     * </p>
+     * @return normal of the mean plane
+     */
+    private Vector3D computeMeanPlaneNormal() {
+
+        // build a centered data matrix
+        // (for each viewing direction, we add both the direction and its
+        //  opposite, thus ensuring the plane will contain origin)
+        final RealMatrix matrix = MatrixUtils.createRealMatrix(3, 2 * sensor.getNbPixels());
+        for (int i = 0; i < sensor.getNbPixels(); ++i) {
+            final Vector3D l = sensor.getLos(i);
+            matrix.setEntry(0, 2 * i,      l.getX());
+            matrix.setEntry(1, 2 * i,      l.getY());
+            matrix.setEntry(2, 2 * i,      l.getZ());
+            matrix.setEntry(0, 2 * i + 1, -l.getX());
+            matrix.setEntry(1, 2 * i + 1, -l.getY());
+            matrix.setEntry(2, 2 * i + 1, -l.getZ());
+        }
+
+        // compute Singular Value Decomposition
+        final SingularValueDecomposition svd = new SingularValueDecomposition(matrix);
+
+        // extract the left singular vector corresponding to least singular value
+        // (i.e. last vector since Apache Commons Math returns the values
+        //  in non-increasing order)
+        final Vector3D singularVector = new Vector3D(svd.getU().getColumn(2)).normalize();
+
+        // check rotation order
+        final Vector3D first = sensor.getLos(0);
+        final Vector3D last  = sensor.getLos(sensor.getNbPixels() - 1);
+        if (Vector3D.dotProduct(singularVector, Vector3D.crossProduct(first, last)) >= 0) {
+            return singularVector;
+        } else {
+            return singularVector.negate();
+        }
+
     }
 
     /** Get the minimum line number in the search interval.
@@ -114,6 +165,18 @@ class SensorMeanPlaneCrossing {
      */
     public int getMaxLine() {
         return maxLine;
+    }
+
+    /** Get the mean plane normal.
+     * <p>
+     * The normal is oriented such traversing pixels in increasing indices
+     * order corresponds is consistent with trigonometric order (i.e.
+     * counterclockwise).
+     * </p>
+     * @return mean plane normal
+     */
+    public Vector3D getMeanPlaneNormal() {
+        return meanPlaneNormal;
     }
 
     /** Container for mean plane crossing result. */
@@ -178,7 +241,7 @@ class SensorMeanPlaneCrossing {
 
             final FieldVector3D<DerivativeStructure> targetDirection =
                     evaluateLine(crossingLine, targetPV, bodyToInert, scToInert);
-            final DerivativeStructure beta = FieldVector3D.angle(targetDirection, sensor.getMeanPlaneNormal());
+            final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
 
             final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
             if (FastMath.abs(deltaL) <= accuracy) {
