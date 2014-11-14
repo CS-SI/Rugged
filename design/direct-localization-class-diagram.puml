@@ -61,7 +61,7 @@
       class LineSensor
       IntersectionAlgorithm "1" <--o Rugged : delegate DEM intersection
       ExtendedEllipsoid <-- Rugged : convert geodetic points
-      Rugged --> LineSensor : getLOS(pixel)
+      Rugged --> LineSensor : getLOS(date, pixel)
       Rugged --> LineSensor : getDate(line)
       SpacecraftToObservedBody <-- Rugged : convert positions/directions
     }

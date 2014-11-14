@@ -24,6 +24,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.errors.OrekitExceptionWrapper;
+import org.orekit.time.AbsoluteDate;
 
 /** Class devoted to locate where ground point crosses a sensor line.
  * <p>
@@ -65,11 +66,12 @@ class SensorPixelCrossing {
     }
 
     /** Locate pixel along sensor line.
+     * @param date current date
      * @return pixel location ({@code Double.NaN} if the first and last
      * pixels of the line do not bracket a location)
      * @exception RuggedException if the maximum number of evaluations is exceeded
      */
-    public double locatePixel() throws RuggedException {
+    public double locatePixel(final AbsoluteDate date) throws RuggedException {
         try {
 
             // set up function evaluating to 0.0 where target matches pixel
@@ -77,7 +79,7 @@ class SensorPixelCrossing {
                 /** {@inheritDoc} */
                 @Override
                 public double value(final double x) throws OrekitExceptionWrapper {
-                    return Vector3D.angle(cross, getLOS(x)) - 0.5 * FastMath.PI;
+                    return Vector3D.angle(cross, getLOS(date, x)) - 0.5 * FastMath.PI;
                 }
             };
 
@@ -95,17 +97,19 @@ class SensorPixelCrossing {
     }
 
     /** Interpolate sensor pixels at some pixel index.
+     * @param date current date
      * @param x pixel index
      * @return interpolated direction for specified index
      */
-    private Vector3D getLOS(final double x) {
+    private Vector3D getLOS(final AbsoluteDate date, final double x) {
 
         // find surrounding pixels
         final int iInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(x)));
         final int iSup = iInf + 1;
 
         // interpolate
-        return new Vector3D(iSup - x, sensor.getLos(iInf), x - iInf, sensor.getLos(iSup)).normalize();
+        return new Vector3D(iSup - x, sensor.getLos(date, iInf),
+                            x - iInf, sensor.getLos(date, iSup)).normalize();
 
     }
 

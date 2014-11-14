@@ -66,10 +66,10 @@ public class SensorMeanPlaneCrossingTest {
         final Vector3D       cross     = Vector3D.crossProduct(normal, fovCenter);
 
         // build lists of pixels regularly spread on a perfect plane
-        final List<Vector3D> los       = new ArrayList<Vector3D>();
+        final List<TimeDependentLOS> los       = new ArrayList<TimeDependentLOS>();
         for (int i = -1000; i <= 1000; ++i) {
             final double alpha = i * 0.17 / 1000;
-            los.add(new Vector3D(FastMath.cos(alpha), fovCenter, FastMath.sin(alpha), cross));
+            los.add(new FixedLOS(new Vector3D(FastMath.cos(alpha), fovCenter, FastMath.sin(alpha), cross)));
         }
 
         final LineSensor sensor = new LineSensor("perfect line",
@@ -96,7 +96,7 @@ public class SensorMeanPlaneCrossingTest {
         final Vector3D        cross     = Vector3D.crossProduct(normal, fovCenter);
 
         // build lists of pixels regularly spread on a perfect plane
-        final List<Vector3D> los       = new ArrayList<Vector3D>();
+        final List<TimeDependentLOS> los       = new ArrayList<TimeDependentLOS>();
         for (int i = -1000; i <= 1000; ++i) {
             final double alpha = i * 0.17 / 10 + 1.0e-5 * random.nextDouble();
             final double delta = 1.0e-5 * random.nextDouble();
@@ -104,7 +104,7 @@ public class SensorMeanPlaneCrossingTest {
             final double sA = FastMath.sin(alpha);
             final double cD = FastMath.cos(delta);
             final double sD = FastMath.sin(delta);
-            los.add(new Vector3D(cA * cD, fovCenter, sA * cD, cross, sD, normal));
+            los.add(new FixedLOS(new Vector3D(cA * cD, fovCenter, sA * cD, cross, sD, normal)));
         }
 
         final LineSensor sensor = new LineSensor("noisy line",

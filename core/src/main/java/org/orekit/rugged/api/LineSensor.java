@@ -39,7 +39,7 @@ public class LineSensor {
     private final Vector3D position;
 
     /** Pixels lines-of-sight. */
-    private final Vector3D[] x;
+    private final List<TimeDependentLOS> los;
 
     /** Simple constructor.
      * @param name name of the sensor
@@ -48,17 +48,12 @@ public class LineSensor {
      * @param datationModel datation model
      */
     public LineSensor(final String name, final LineDatation datationModel,
-                      final Vector3D position, final List<Vector3D> los) {
+                      final Vector3D position, final List<TimeDependentLOS> los) {
 
         this.name          = name;
         this.datationModel = datationModel;
         this.position      = position;
-
-        // normalize lines-of-sight
-        this.x = new Vector3D[los.size()];
-        for (int i = 0; i < los.size(); ++i) {
-            x[i] = los.get(i).normalize();
-        }
+        this.los           = los;
 
     }
 
@@ -73,15 +68,16 @@ public class LineSensor {
      * @return number of pixels
      */
     public int getNbPixels() {
-        return x.length;
+        return los.size();
     }
 
-    /** Get the pixel normalized line-of-sight.
+    /** Get the pixel normalized line-of-sight at some date.
+     * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()}
      * @return pixel normalized line-of-sight
      */
-    public Vector3D getLos(final int i) {
-        return x[i];
+    public Vector3D getLos(final AbsoluteDate date, final int i) {
+        return los.get(i).getLOS(date).normalize();
     }
 
     /** Get the date.

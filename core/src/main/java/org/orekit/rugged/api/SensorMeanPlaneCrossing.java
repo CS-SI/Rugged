@@ -101,16 +101,17 @@ class SensorMeanPlaneCrossing {
         this.accuracy                    = accuracy;
         this.scToBody                    = scToBody;
 
-        this.midLine               = 0.5 * (minLine + maxLine);
-        final AbsoluteDate midDate = sensor.getDate(midLine);
-        this.midBodyToInert        = scToBody.getBodyToInertial(midDate);
-        this.midScToInert          = scToBody.getScToInertial(midDate);
+        this.midLine                     = 0.5 * (minLine + maxLine);
+        final AbsoluteDate midDate       = sensor.getDate(midLine);
+        this.midBodyToInert              = scToBody.getBodyToInertial(midDate);
+        this.midScToInert                = scToBody.getScToInertial(midDate);
 
-        this.meanPlaneNormal = computeMeanPlaneNormal();
+        this.meanPlaneNormal             = computeMeanPlaneNormal(midDate);
 
     }
 
     /** Compute the plane containing origin that best fits viewing directions point cloud.
+     * @param midDate middle date
      * <p>
      * The normal is oriented such traversing pixels in increasing indices
      * order corresponds is consistent with trigonometric order (i.e.
@@ -118,14 +119,14 @@ class SensorMeanPlaneCrossing {
      * </p>
      * @return normal of the mean plane
      */
-    private Vector3D computeMeanPlaneNormal() {
+    private Vector3D computeMeanPlaneNormal(final AbsoluteDate midDate) {
 
         // build a centered data matrix
         // (for each viewing direction, we add both the direction and its
         //  opposite, thus ensuring the plane will contain origin)
         final RealMatrix matrix = MatrixUtils.createRealMatrix(3, 2 * sensor.getNbPixels());
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
-            final Vector3D l = sensor.getLos(i);
+            final Vector3D l = sensor.getLos(midDate, i);
             matrix.setEntry(0, 2 * i,      l.getX());
             matrix.setEntry(1, 2 * i,      l.getY());
             matrix.setEntry(2, 2 * i,      l.getZ());
@@ -143,8 +144,8 @@ class SensorMeanPlaneCrossing {
         final Vector3D singularVector = new Vector3D(svd.getU().getColumn(2)).normalize();
 
         // check rotation order
-        final Vector3D first = sensor.getLos(0);
-        final Vector3D last  = sensor.getLos(sensor.getNbPixels() - 1);
+        final Vector3D first = sensor.getLos(midDate, 0);
+        final Vector3D last  = sensor.getLos(midDate, sensor.getNbPixels() - 1);
         if (Vector3D.dotProduct(singularVector, Vector3D.crossProduct(first, last)) >= 0) {
             return singularVector;
         } else {
@@ -182,6 +183,9 @@ class SensorMeanPlaneCrossing {
     /** Container for mean plane crossing result. */
     public static class CrossingResult {
 
+        /** Crossing date. */
+        private final AbsoluteDate crossingDate;
+
         /** Crossing line. */
         private final double crossingLine;
 
@@ -189,13 +193,22 @@ class SensorMeanPlaneCrossing {
         private final FieldVector3D<DerivativeStructure> targetDirection;
 
         /** Simple constructor.
+         * @param crossingDate crossing date
          * @param crossingLine crossing line
          * @param targetDirection target direction in spacecraft frame
          */
-        private CrossingResult(final double crossingLine,
+        private CrossingResult(final AbsoluteDate crossingDate, final double crossingLine,
                                final FieldVector3D<DerivativeStructure> targetDirection) {
+            this.crossingDate    = crossingDate;
             this.crossingLine    = crossingLine;
             this.targetDirection = targetDirection;
+        }
+
+        /** Get the crossing date.
+         * @return crossing date
+         */
+        public AbsoluteDate getDate() {
+            return crossingDate;
         }
 
         /** Get the crossing line.
@@ -246,7 +259,7 @@ class SensorMeanPlaneCrossing {
             final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
             if (FastMath.abs(deltaL) <= accuracy) {
                 // return immediately, without doing any additional evaluation!
-                return new CrossingResult(crossingLine, targetDirection);
+                return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetDirection);
             }
             crossingLine += deltaL;
 
