@@ -28,7 +28,7 @@ first time, you will add the following code snippet:
 
     File home       = new File(System.getProperty("user.home"));
     File orekitData = new File(home, "orekit-data");
-    DataProvidersManager.addProvider(new DirectoryCrawler(orekitData));
+    DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
 This is sufficient to start working.
 
