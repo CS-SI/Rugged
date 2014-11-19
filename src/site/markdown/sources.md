@@ -34,8 +34,8 @@ source code control system. Rugged Git master repository is available online.
     tab in Rugged forge
  * you can clone it anonymously with the command:
 
-    git clone http://www.orekit.org/git/rugged
+    git clone https://www.orekit.org/git/rugged-main.git
 
  ** if you are a committer, you can clone it using your ssh credentials with the command:
 
-    git clone ssh://git@www.orekit.org/rugged.git
+    git clone ssh://git@www.orekit.org/rugged-main.git
