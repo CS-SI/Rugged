@@ -55,8 +55,8 @@ The following table sorts out the various topics between the various layers.
 
 |          Topic                   |           Layer         |                                                      Comment
 |----------------------------------|-------------------------|-----------------------------------------------------------------------------
-|  Sensor to ground mapping        |           Rugged        |                          Direct localization is the base feature provided
-|  Ground to sensor mapping        |           Rugged        |                       Inverse localization is another base feature provided
+|  Sensor to ground mapping        |           Rugged        |                          Direct location is the base feature provided
+|  Ground to sensor mapping        |           Rugged        |                       Inverse location is another base feature provided
 |     Individual pixels            |           Rugged        |The API supports any number of pixels, defined by their individual line of sight provided by caller
 |        Optical path              |         Interface       |The folded optical path inside the spacecraft is taken into account by computing an overall transform combining all inside reflections, so each pixel position and line of sight can be computed later on by a single translation and rotation with respect to spacecraft center of mass
 |    Line time-stamping            |     Interface/Rugged    |The caller must provide a simple time-stamping model (typically linear) that will be applied

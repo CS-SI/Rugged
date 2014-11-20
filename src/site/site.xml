@@ -43,7 +43,7 @@
       <item name="Preliminary design"      href="/design/preliminary-design.html"      />
     </menu>
     <menu name="Tutorials">
-      <item name="Direct localization"     href="/tutorials/direct-localization.html"  />
+      <item name="Direct location"     href="/tutorials/direct-location.html"  />
     </menu>
     <menu name="Development">
       <item name="Contributing"            href="/contributing.html"                   />

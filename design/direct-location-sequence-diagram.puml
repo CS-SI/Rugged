@@ -34,64 +34,59 @@
 
   actor       "UserMain" as A
   participant "Rugged" as R
-  participant "SensorMeanPlaneCrossing" as P
-  participant "SensorPixelCrossing" as X
+  participant "LineSensor" as LS
   participant "SpacecraftToObservedBody" as S
   participant "ExtendedEllipsoid" as E
-  participant "Transform" as T
-  participant "Math" as M
+  participant "IntersectionAlgorithm" as G
+  participant "Tile" as T
 
   activate A
-    A  -> R : inverseLocalization
-    activate R
-      R  -> P : getMeanPlaneFinder
-      activate P
-        P -> S : getTransform(each line)
-        note left
-           transforms are computed
-           only once and reused
-           across successive inverse
-           localization calls
-        end note
-        activate S
-          S -> T : create
-          activate T
-          deactivate T
-        deactivate S
-      deactivate P
-      R -> E : transform(φ, λ, h)
-      activate E
-        E --> R : x, y, z
-      deactivate E
-      R -> P : findCrossing(ground target)
-      activate P
-        P -> T : interpolate
-        activate T
-        deactivate T
-        note left
-           algorithm converges
-           in 2 or 3 iterations
-        end note
-        P -> T : interpolate
-        activate T
-        deactivate T
-        P --> R : target direction at mean plane crossing\n(with time derivative)
-      deactivate P
-      R -> X : create(target direction at crossing time)
-      activate X
-      deactivate X
-      R -> X : locatePixel
-      activate X
-        X -> M : solve f(x) = 0
-        activate M
-          M --> X : x₀
-        deactivate M
-        X --> R : coarse pixel crossing
-      deactivate X
-      R -> R : fix line, considering closest pixel position
-      R -> R : fix pixel
-      R --> A : accurate line/pixel
-    deactivate R
+     A  -> R : directLocation(name, number)
+     activate R
+       R -> LS : apply time stamping model
+       R -> S : get transforms at line date
+       R -> R : loop over line pixels pₖ
+       activate R
+         R -> R : fix aberration of light
+         R -> E : approximate point on ground
+         R -> R : fix speed of light delay in transforms
+         R -> G : intersection(ellipsoid, line-of-sight)
+         activate G
+           G -> E  : grid points crossings
+           G -> T : elevation(φₖ, λₖ)
+           activate T
+             T -> A : DEM callback
+             A --> T : DEM raw data cell
+             T --> G : h(φₖ, λₖ)
+           deactivate T
+           G -> E  : grid points crossings
+           G -> T : elevation(φₖ, λₖ)
+           activate T
+             T --> G : h(φₖ, λₖ)
+           deactivate T
+           G -> E  : grid points crossings
+           G -> T : elevation(φₖ, λₖ)
+           activate T
+             T --> G : h(φₖ, λₖ)
+           deactivate T
+           G -> T  : pixel intersection(los)
+           activate T
+             T --> G : φₖ, λₖ, hₖ
+           deactivate T
+           G --> R : φₖ, λₖ, hₖ
+         deactivate G
+         R -> R : refine speed of light delay in transforms
+         R -> G : refine intersection(ellipsoid, line-of-sight)
+         activate G
+           G -> T  : refine pixel intersection(los)
+           activate T
+             T --> G : φₖ, λₖ, hₖ
+           deactivate T
+         deactivate G
+         R --> R : array(φₖ, λₖ, hₖ)
+       deactivate R
+       R --> A : array(φₖ, λₖ, hₖ)
+     deactivate R
   deactivate A
 
 @enduml

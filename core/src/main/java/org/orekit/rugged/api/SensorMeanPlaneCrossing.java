@@ -31,7 +31,7 @@ import org.orekit.utils.PVCoordinates;
 
 /** Class dedicated to find when ground point crosses mean sensor plane.
  * <p>
- * This class is used in the first stage of inverse localization.
+ * This class is used in the first stage of inverse location.
  * </p>
  * @author Luc Maisonobe
  */
@@ -242,7 +242,7 @@ class SensorMeanPlaneCrossing {
 
         // we don't use an Apache Commons Math solver here because we are more
         // interested in reducing the number of evaluations than being accurate,
-        // as we know the solution is improved in the second stage of inverse localization.
+        // as we know the solution is improved in the second stage of inverse location.
         // We expect two or three evaluations only. Each new evaluation shows up quickly in
         // the performances as it involves frames conversions
         double  crossingLine  = midLine;

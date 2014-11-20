@@ -12,7 +12,7 @@
   limitations under the License.
 -->
 
-# Rugged initialization and direct localization
+# Rugged initialization and direct location
 
 This tutorial explains how to initialize Rugged and use it to geolocate a satellite image.
 Let's imagine the sensor is a single line imager with 2000 pixels and 20° field of view,
@@ -206,7 +206,7 @@ The next 3 arguments defines the ellipsoid and the reference frames: `EllipsoidI
 On the third line, we find the time interval of the acquisition: acquisitionStartDate, acquisitionStopDate,
 timeTolerance (margin allowed for extrapolation, in seconds). This is an important information as Rugged
 will pre-compute a lot of stuff at initialization in order to optimize further calls to the direct and
-inverse localization functions. 
+inverse location functions. 
 
 On the fourth line, the arguments are the list of time-stamped positions and velocities as well as options
 for interpolation: number of points to use and type of filter for derivatives. We find the same arguments
@@ -219,7 +219,7 @@ The sensor models are added after initialization. We can add as many as we want.
 
 
 
-## Direct localization
+## Direct location
 
 Finally everything is set to do some real work. Let's try to locate a point on Earth 
 
@@ -228,7 +228,7 @@ Upper left point (first line, first pixel):
     Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
     AbsoluteDate firstLineDate = lineSensor.getDate(1);
     Vector3D los = lineSensor.getLos(firstLineDate, 0);
-    GeodeticPoint upLeftPoint = rugged.directLocalization(firstLineDate, position, los);
+    GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
 
 
 The results are ....

@@ -65,13 +65,13 @@ import org.orekit.utils.TimeStampedPVCoordinates;
  */
 public class Rugged {
 
-    /** Accuracy to use in the first stage of inverse localization.
+    /** Accuracy to use in the first stage of inverse location.
      * <p>
      * This accuracy is only used to locate the point within one
      * pixel, hence there is no point in choosing a too small value here.
      * </p>
      */
-    private static final double COARSE_INVERSE_LOCALIZATION_ACCURACY = 0.01;
+    private static final double COARSE_INVERSE_LOCATION_ACCURACY = 0.01;
 
     /** Maximum number of evaluations. */
     private static final int MAX_EVAL = 50;
@@ -519,12 +519,12 @@ public class Rugged {
     /** Set flag for light time correction.
      * <p>
      * This methods set the flag for compensating or not light time between
-     * ground and spacecraft. Compensating this delay improves localization
+     * ground and spacecraft. Compensating this delay improves location
      * accuracy and is enabled by default. Not compensating it is mainly useful
      * for validation purposes against system that do not compensate it.
      * </p>
      * @param lightTimeCorrection if true, the light travel time between ground
-     * and spacecraft is compensated for more accurate localization
+     * and spacecraft is compensated for more accurate location
      * @see #isLightTimeCorrected()
      * @see #setAberrationOfLightCorrection(boolean)
      */
@@ -534,7 +534,7 @@ public class Rugged {
 
     /** Get flag for light time correction.
      * @return true if the light time between ground and spacecraft is
-     * compensated for more accurate localization
+     * compensated for more accurate location
      * @see #setLightTimeCorrection(boolean)
      */
     public boolean isLightTimeCorrected() {
@@ -546,14 +546,14 @@ public class Rugged {
      * This methods set the flag for compensating or not aberration of light,
      * which is velocity composition between light and spacecraft when the
      * light from ground points reaches the sensor.
-     * Compensating this velocity composition improves localization
+     * Compensating this velocity composition improves location
      * accuracy and is enabled by default. Not compensating it is useful
      * in two cases: for validation purposes against system that do not
      * compensate it or when the pixels line of sight already include the
      * correction.
      * </p>
      * @param aberrationOfLightCorrection if true, the aberration of light
-     * is corrected for more accurate localization
+     * is corrected for more accurate location
      * @see #isAberrationOfLightCorrected()
      * @see #setLightTimeCorrection(boolean)
      */
@@ -563,7 +563,7 @@ public class Rugged {
 
     /** Get flag for aberration of light correction.
      * @return true if the aberration of light time is corrected
-     * for more accurate localization
+     * for more accurate location
      * @see #setAberrationOfLightCorrection(boolean)
      */
     public boolean isAberrationOfLightCorrected() {
@@ -718,13 +718,13 @@ public class Rugged {
 
     }
 
-    /** Direct localization of a sensor line.
+    /** Direct location of a sensor line.
      * @param sensorName name of the line sensor
      * @param lineNumber number of the line to localize on ground
      * @return ground position of all pixels of the specified sensor line
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    public GeodeticPoint[] directLocalization(final String sensorName, final double lineNumber)
+    public GeodeticPoint[] directLocation(final String sensorName, final double lineNumber)
         throws RuggedException {
 
         // compute the approximate transform between spacecraft and observed body
@@ -737,7 +737,7 @@ public class Rugged {
         final Vector3D spacecraftVelocity =
                 scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
 
-        // compute localization of each pixel
+        // compute location of each pixel
         final Vector3D pInert    = scToInert.transformPosition(sensor.getPosition());
         final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
@@ -795,14 +795,14 @@ public class Rugged {
 
     }
 
-    /** Direct localization of a single line-of-sight.
-     * @param date date of the localization
+    /** Direct location of a single line-of-sight.
+     * @param date date of the location
      * @param position pixel position in spacecraft frame
      * @param los normalized line-of-sight in spacecraft frame
      * @return ground position of all pixels of the specified sensor line
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    public GeodeticPoint directLocalization(final AbsoluteDate date, final Vector3D position, final Vector3D los)
+    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los)
         throws RuggedException {
 
         // compute the approximate transform between spacecraft and observed body
@@ -813,7 +813,7 @@ public class Rugged {
         final Vector3D spacecraftVelocity =
                 scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
 
-        // compute localization of specified pixel
+        // compute location of specified pixel
         final Vector3D pInert    = scToInert.transformPosition(position);
 
         final Vector3D obsLInert = scToInert.transformVector(los);
@@ -867,8 +867,8 @@ public class Rugged {
 
     /** Find the date at which sensor sees a ground point.
      * <p>
-     * This method is a partial {@link #inverseLocalization(String,
-     * GeodeticPoint, int, int) inverse localization} focusing only on date.
+     * This method is a partial {@link #inverseLocation(String,
+     * GeodeticPoint, int, int) inverse location} focusing only on date.
      * </p>
      * <p>
      * The point is given only by its latitude and longitude, the elevation is
@@ -881,21 +881,21 @@ public class Rugged {
      * @param maxLine maximum line number
      * @return date at which ground point is seen by line sensor
      * @exception RuggedException if line cannot be localized, or sensor is unknown
-     * @see #inverseLocalization(String, double, double, int, int)
+     * @see #inverseLocation(String, double, double, int, int)
      */
-    public AbsoluteDate dateLocalization(final String sensorName,
-                                         final double latitude, final double longitude,
-                                         final int minLine, final int maxLine)
+    public AbsoluteDate dateLocation(final String sensorName,
+                                     final double latitude, final double longitude,
+                                     final int minLine, final int maxLine)
         throws RuggedException {
         final GeodeticPoint groundPoint =
                 new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
-        return dateLocalization(sensorName, groundPoint, minLine, maxLine);
+        return dateLocation(sensorName, groundPoint, minLine, maxLine);
     }
 
     /** Find the date at which sensor sees a ground point.
      * <p>
-     * This method is a partial {@link #inverseLocalization(String,
-     * GeodeticPoint, int, int) inverse localization} focusing only on date.
+     * This method is a partial {@link #inverseLocation(String,
+     * GeodeticPoint, int, int) inverse location} focusing only on date.
      * </p>
      * @param sensorName name of the line  sensor
      * @param point point to localize
@@ -903,10 +903,10 @@ public class Rugged {
      * @param maxLine maximum line number
      * @return date at which ground point is seen by line sensor
      * @exception RuggedException if line cannot be localized, or sensor is unknown
-     * @see #inverseLocalization(String, GeodeticPoint, int, int)
+     * @see #inverseLocation(String, GeodeticPoint, int, int)
      */
-    public AbsoluteDate dateLocalization(final String sensorName, final GeodeticPoint point,
-                                         final int minLine, final int maxLine)
+    public AbsoluteDate dateLocation(final String sensorName, final GeodeticPoint point,
+                                     final int minLine, final int maxLine)
         throws RuggedException {
 
         final LineSensor sensor = getLineSensor(sensorName);
@@ -918,7 +918,7 @@ public class Rugged {
             // create a new finder for the specified sensor and range
             planeCrossing = new SensorMeanPlaneCrossing(sensor, scToBody, minLine, maxLine,
                                                         lightTimeCorrection, aberrationOfLightCorrection,
-                                                        MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
+                                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
 
             // store the finder, in order to reuse it
             // (and save some computation done in its constructor)
@@ -938,7 +938,7 @@ public class Rugged {
 
     }
 
-    /** Inverse localization of a ground point.
+    /** Inverse location of a ground point.
      * <p>
      * The point is given only by its latitude and longitude, the elevation is
      * computed from the Digital Elevation Model.
@@ -952,16 +952,16 @@ public class Rugged {
      * be seen between the prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    public SensorPixel inverseLocalization(final String sensorName,
-                                           final double latitude, final double longitude,
-                                           final int minLine,  final int maxLine)
+    public SensorPixel inverseLocation(final String sensorName,
+                                       final double latitude, final double longitude,
+                                       final int minLine,  final int maxLine)
         throws RuggedException {
         final GeodeticPoint groundPoint =
                 new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
-        return inverseLocalization(sensorName, groundPoint, minLine, maxLine);
+        return inverseLocation(sensorName, groundPoint, minLine, maxLine);
     }
 
-    /** Inverse localization of a point.
+    /** Inverse location of a point.
      * @param sensorName name of the line  sensor
      * @param point point to localize
      * @param minLine minimum line number
@@ -969,10 +969,10 @@ public class Rugged {
      * @return sensor pixel seeing point, or null if point cannot be seen between the
      * prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
-     * @see #dateLocalization(String, GeodeticPoint, int, int)
+     * @see #dateLocation(String, GeodeticPoint, int, int)
      */
-    public SensorPixel inverseLocalization(final String sensorName, final GeodeticPoint point,
-                                           final int minLine, final int maxLine)
+    public SensorPixel inverseLocation(final String sensorName, final GeodeticPoint point,
+                                       final int minLine, final int maxLine)
         throws RuggedException {
 
         final LineSensor sensor = getLineSensor(sensorName);
@@ -984,7 +984,7 @@ public class Rugged {
             // create a new finder for the specified sensor and range
             planeCrossing = new SensorMeanPlaneCrossing(sensor, scToBody, minLine, maxLine,
                                                         lightTimeCorrection, aberrationOfLightCorrection,
-                                                        MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
+                                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
 
             // store the finder, in order to reuse it
             // (and save some computation done in its constructor)
@@ -1004,7 +1004,7 @@ public class Rugged {
         final SensorPixelCrossing pixelCrossing =
                 new SensorPixelCrossing(sensor, planeCrossing.getMeanPlaneNormal(),
                                         crossingResult.getTargetDirection().toVector3D(),
-                                        MAX_EVAL, COARSE_INVERSE_LOCALIZATION_ACCURACY);
+                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
         final double coarsePixel = pixelCrossing.locatePixel(crossingResult.getDate());
         if (Double.isNaN(coarsePixel)) {
             // target is out of search interval

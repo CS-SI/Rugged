@@ -19,7 +19,7 @@ Overview
   contribution to line of sight computation. It is a free software
   intermediate-level library written in Java.
 
-  It mainly provides direct and inverse localization, i.e. it allows
+  It mainly provides direct and inverse location, i.e. it allows
   to compute accurately which ground point is looked at from a specific
   pixel in a spacecraft instrument, and conversely which pixel will
   see a specified ground point. This mapping between ground and sensor
@@ -28,13 +28,13 @@ Overview
   on-board sensor pixels individual line-of-sights, spacecraft motion and
   attitude and several physical effects.
 
-  Direct and inverse localization can be used to perform full ortho-rectification
+  Direct and inverse location can be used to perform full ortho-rectification
   of images and correlation between sensors observing the same area.
 
 Features
 --------
 
-  * Direct/inverse localization
+  * Direct/inverse location
 
   * can support several types of Digital Elevation Models, including user-provided models
 

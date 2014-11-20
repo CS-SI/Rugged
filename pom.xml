@@ -19,24 +19,24 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
-    <rugged.maven-compiler-plugin.version>3.1</rugged.maven-compiler-plugin.version>
-    <rugged.maven-jar-plugin.version>2.4</rugged.maven-jar-plugin.version>
-    <rugged.maven-assembly-plugin.version>2.4</rugged.maven-assembly-plugin.version>
-    <rugged.maven-bundle-plugin.version>2.4.0</rugged.maven-bundle-plugin.version>
-    <rugged.maven-resources-plugin.version>2.6</rugged.maven-resources-plugin.version>
-    <rugged.maven-clean-plugin.version>2.5</rugged.maven-clean-plugin.version>
-    <rugged.jacoco-maven-plugin.version>0.7.1.201405082137</rugged.jacoco-maven-plugin.version>
+    <rugged.maven-compiler-plugin.version>3.2</rugged.maven-compiler-plugin.version>
+    <rugged.maven-jar-plugin.version>2.5</rugged.maven-jar-plugin.version>
+    <rugged.maven-assembly-plugin.version>2.5.1</rugged.maven-assembly-plugin.version>
+    <rugged.maven-bundle-plugin.version>2.5.3</rugged.maven-bundle-plugin.version>
+    <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
+    <rugged.maven-clean-plugin.version>2.6.1</rugged.maven-clean-plugin.version>
+    <rugged.jacoco-maven-plugin.version>0.7.2.201409121644</rugged.jacoco-maven-plugin.version>
     <rugged.maven-plantuml-plugin.version>7940</rugged.maven-plantuml-plugin.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
-    <rugged.maven-site-plugin.version>3.3</rugged.maven-site-plugin.version>
-    <rugged.findbugs-maven-plugin.version>2.5.3</rugged.findbugs-maven-plugin.version>
-    <rugged.maven-surefire-plugin.version>2.17</rugged.maven-surefire-plugin.version>
-    <rugged.maven-surefire-report-plugin.version>2.17</rugged.maven-surefire-report-plugin.version>
-    <rugged.maven-checkstyle-plugin.version>2.12.1</rugged.maven-checkstyle-plugin.version>
-    <rugged.maven-changes-plugin.version>2.10</rugged.maven-changes-plugin.version>
-    <rugged.maven-jxr-plugin.version>2.4</rugged.maven-jxr-plugin.version>
-    <rugged.maven-javadoc-plugin.version>2.9.1</rugged.maven-javadoc-plugin.version>
-    <rugged.maven-source-plugin.version>2.2.1</rugged.maven-source-plugin.version>
+    <rugged.maven-site-plugin.version>3.4</rugged.maven-site-plugin.version>
+    <rugged.findbugs-maven-plugin.version>3.0.0</rugged.findbugs-maven-plugin.version>
+    <rugged.maven-surefire-plugin.version>2.18</rugged.maven-surefire-plugin.version>
+    <rugged.maven-surefire-report-plugin.version>2.18</rugged.maven-surefire-report-plugin.version>
+    <rugged.maven-checkstyle-plugin.version>2.13</rugged.maven-checkstyle-plugin.version>
+    <rugged.maven-changes-plugin.version>2.11</rugged.maven-changes-plugin.version>
+    <rugged.maven-jxr-plugin.version>2.5</rugged.maven-jxr-plugin.version>
+    <rugged.maven-javadoc-plugin.version>2.10.1</rugged.maven-javadoc-plugin.version>
+    <rugged.maven-source-plugin.version>2.4</rugged.maven-source-plugin.version>
 
     <rugged.maven-project-info-reports-plugin.version>2.7</rugged.maven-project-info-reports-plugin.version>
   </properties>

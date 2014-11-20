@@ -28,7 +28,7 @@ import org.orekit.time.AbsoluteDate;
 
 /** Class devoted to locate where ground point crosses a sensor line.
  * <p>
- * This class is used in the first stage of inverse localization.
+ * This class is used in the first stage of inverse location.
  * </p>
  * @author Luc Maisonobe
  */

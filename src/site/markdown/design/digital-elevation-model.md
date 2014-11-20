@@ -47,7 +47,7 @@ DEM loading
 
 As the min/max KD-tree structure is specific to the Duvenhage algorithm, and as the algorithm is hidden behind
 a generic interface, the tree remains an implementation detail the user should not see. The min/max KD-tree structure is
-therefore built directly at Rugged level, only when the Duvenhage algorithm has been selected to perform localization computation.
+therefore built directly at Rugged level, only when the Duvenhage algorithm has been selected to perform location computation.
 
 On the other hand, Rugged is not expected to parsed DEM files, so the algorithm relies on the raw data being passed by the upper
 layer. In order to pass these data, a specific callback function is implemented in the mission specific interface layer and

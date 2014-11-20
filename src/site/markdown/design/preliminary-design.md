@@ -19,7 +19,7 @@ The top level design describes the various libraries and their interactions. The
 corresponding to the Apache Commons Math library is not shown here for clarity.
 
 The following sequence and class diagrams show the three most important functions: initialization
-of the libraries, direct localization and inverse localization.
+of the libraries, direct location and inverse location.
 
 ### Initialization
 
@@ -41,9 +41,9 @@ two different sensors are expected to be accurately combined.
 
 ![initialization sequence diagram](../images/design/initialization-sequence-diagram.png)
 
-### Direct localization
+### Direct location
 
-Direct localization is called a large number of times by the application, once for each sensor line.
+Direct location is called a large number of times by the application, once for each sensor line.
 The application only provides image processing related data to the configured Rugged instance, i.e. the
 line number, and it expects the geodetic coordinates of the ground points corresponding to each pixels
 in the sensor line. The Rugged instance will delegate conversions between frames to an internal
@@ -51,7 +51,7 @@ SpacecraftToObservedBody converter, the conversions between Cartesian coordinate
 to an internal ExtendedEllipsoid object, and the computation of the intersection with the Digital Elevation
 Model to the algorithm that was selected by user at configuration time.
 
-![direct localization class diagram](../images/design/direct-localization-class-diagram.png)
+![direct location class diagram](../images/design/direct-location-class-diagram.png)
 
 The pixels independent computation (orbit and attitude interpolation, Earth frame to inertial frame transforms,
 transforms composition) are performed only once per date inside the caching combined transform provider set up
@@ -63,7 +63,7 @@ and followed by the Digital Elevation Model intersection. The callback to the mi
 retrieve DEM raw data is called from the inner loop but is expected to be triggered only infrequently thanks to a
 caching feature done at Rugged library level.
 
-![direct localization sequence diagram](../images/design/direct-localization-sequence-diagram.png)
+![direct location sequence diagram](../images/design/direct-location-sequence-diagram.png)
 
 The following figure describes the algorithm used for tile selection and how the underlying intersection algorithm
 (Duvenhage in this example) is called for one tile:
@@ -75,16 +75,16 @@ describes how it is implemented in the Rugged library.
 
 ![duvenhage inner recursion activity diagram](../images/design/duvenhage-inner-recursion-activity-diagram.png)
 
-### Inverse localization
+### Inverse location
 
-Inverse localization is called a large number of times by the application, typically on a regular grid in some
+Inverse location is called a large number of times by the application, typically on a regular grid in some
 geographic reference like UTM. The application only provides image processing related data, i.e. the geodetic
 coordinates of the ground points and expects the coordinates of the corresponding pixel (both line number of
 pixel number). The pixels independent computation (orbit and attitude interpolation, Earth frame to inertial
 frame transforms, transforms composition) are performed only once per line and cached across successive calls to
-inverse localization, thus greatly improving performances.
+inverse location, thus greatly improving performances.
 
-![inverse localization sequence diagram](../images/design/inverse-localization-sequence-diagram.png)
+![inverse location sequence diagram](../images/design/inverse-location-sequence-diagram.png)
 
 The computation is performed in several steps. The line to which the points belong is first searched using a dedicated
 solver taking advantage of the first time derivatives automatically included in Orekit transforms. It can therefore set

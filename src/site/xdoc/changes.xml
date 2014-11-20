@@ -59,7 +59,7 @@
         Moved TileUpdate to raster package.
       </action>
       <action dev="luc" type="update">
-        Finalized direct localization diagrams.
+        Finalized direct location diagrams.
       </action>
       <action dev="luc" type="update">
         renamed core package into intersection.
@@ -86,21 +86,21 @@
         Improved performance.
       </action>
       <action dev="luc" type="update">
-        Disabled timing test for inverse localization.
+        Disabled timing test for inverse location.
       </action>
       <action dev="luc" type="update">
-        Improved inverse localization speed again!
+        Improved inverse location speed again!
       </action>
       <action dev="luc" type="update">
-        Added inverse localization from latitude and longitude only.
+        Added inverse location from latitude and longitude only.
         When only latitude and longitude are specified, the elevation is
         automatically computed from the Digital Elevation Model.
       </action>
       <action dev="luc" type="update">
-        Simplified direct localization.
+        Simplified direct location.
       </action>
       <action dev="luc" type="update">
-        Improved inverse localization performances.
+        Improved inverse location performances.
       </action>
       <action dev="luc" type="update">
         Added rate to the LineDatation interface.
@@ -114,7 +114,7 @@
         once.
       </action>
       <action dev="luc" type="fix">
-        First working version of inverse localization.
+        First working version of inverse location.
       </action>
       <action dev="luc" type="update">
         Streamlined line sensor model.
@@ -161,15 +161,15 @@
         Remove check for context, which is ensured since construction.
       </action>
       <action dev="luc" type="update">
-        Improved speed of inverse localization test.
+        Improved speed of inverse location test.
       </action>
       <action dev="luc" type="fix">
-        First working version of inverse localization.
+        First working version of inverse location.
         It works in simple cases (no light time correction and no aberration of
         light correction), and is still really slow.
       </action>
       <action dev="luc" type="add">
-        Started implementation of inverse localization (not working yet).
+        Started implementation of inverse location (not working yet).
       </action>
       <action dev="luc" type="update">
         Removed a check that is not needed anymore.
@@ -187,7 +187,7 @@
       </action>
       <action dev="luc" type="update">
         Added automatic mean plane computation for line sensors.
-        This will allow implementing inverse localization.
+        This will allow implementing inverse location.
       </action>
       <action dev="luc" type="update">
         Allow direct use of Orekit inertial frames and ellipsoids.
@@ -253,7 +253,7 @@
         Added writing of grid file to full test.
       </action>
       <action dev="luc" type="update">
-        Don't use a numerical propagator within direct localization.
+        Don't use a numerical propagator within direct location.
         As the time between each line is really small (milliseconds), it is
         better to propagate first and use an ephemeris later.
       </action>
@@ -278,7 +278,7 @@
         below min elevation so the intersection should be really on the line.
       </action>
       <action dev="luc" type="update">
-        Greatly improved accuracy of direct localization.
+        Greatly improved accuracy of direct location.
         There were some small errors (at centimeter level) as result points may
         be slightly out of line of sight. These errors seemed to be due to the
         final linear line-of-sight model that is used at pixel level.
@@ -418,7 +418,7 @@
         Line numbers are double.
       </action>
       <action dev="luc" type="add">
-        Started implementation of direct localization ...
+        Started implementation of direct location ...
       </action>
       <action dev="luc" type="update">
         Added a protection against unknown sensors.
@@ -478,7 +478,7 @@
         Extract an AbstractTile from SimpleTile
       </action>
       <action dev="luc" type="update">
-        Added a simple container for inverse localization result.
+        Added a simple container for inverse location result.
       </action>
       <action dev="luc" type="update">
         Expanded API.
