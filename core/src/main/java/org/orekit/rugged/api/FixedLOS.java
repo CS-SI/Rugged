@@ -26,7 +26,7 @@ import org.orekit.time.AbsoluteDate;
 public class FixedLOS implements TimeDependentLOS {
 
     /** Fixed direction for los. */
-    final Vector3D los;
+    private final Vector3D los;
 
     /** Simple constructor.
      * @param los fixed direction for the line of sight
@@ -35,8 +35,8 @@ public class FixedLOS implements TimeDependentLOS {
         this.los = los;
     }
 
-    /** {@inheritDoc}} */
-    public Vector3D getLOS(AbsoluteDate date) {
+    /** {@inheritDoc} */
+    public Vector3D getLOS(final AbsoluteDate date) {
         return los;
     }
 

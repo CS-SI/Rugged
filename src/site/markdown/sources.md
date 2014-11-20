@@ -30,12 +30,13 @@ Development version
 The development of the Rugged project is done using the [Git](http://git-scm.com/)
 source code control system. Rugged Git master repository is available online.
 
- * you can browse it using the [Repository](https://www.orekit.org/forge/projects/rugged/repository)
-    tab in Rugged forge
- * you can clone it anonymously with the command:
+You can browse it using the [Repository](https://www.orekit.org/forge/projects/rugged/repository)
+tab in Rugged forge
 
-    git clone http://www.orekit.org/git/rugged
+You can clone it anonymously with the command:
 
- ** if you are a committer, you can clone it using your ssh credentials with the command:
+     git clone https://www.orekit.org/git/rugged-main.git
 
-    git clone ssh://git@www.orekit.org/rugged.git
+If you are a committer, you can clone it using your ssh credentials with the command:
+
+     git clone ssh://git@www.orekit.org/rugged-main.git

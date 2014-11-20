@@ -83,10 +83,38 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:http://www.orekit.org/git/rugged</connection>
-    <developerConnection>scm:git:ssh://git@www.orekit.org/rugged.git</developerConnection>
+    <connection>scm:git:https://www.orekit.org/git/rugged-main.git</connection>
+    <developerConnection>scm:git:ssh://git@www.orekit.org/rugged-main.git</developerConnection>
     <url>https://www.orekit.org/forge/projects/rugged/repository</url>
   </scm>
+
+  <issueManagement>
+      <system>Redmine</system>
+      <url>https://www.orekit.org/forge/projects/rugged/issues</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>Shared Orekit/Rugged announces mailing list</name>
+      <subscribe>https://www.orekit.org/wws/subscribe/orekit-announces</subscribe>
+      <unsubscribe>https://www.orekit.org/wws/signoff/orekit-announces</unsubscribe>
+      <archive>https://www.orekit.org/wws/arc/orekit-announces</archive>
+    </mailingList>
+    <mailingList>
+      <name>Rugged users mailing list</name>
+      <subscribe>https://www.orekit.org/wws/subscribe/rugged-users</subscribe>
+      <unsubscribe>https://www.orekit.org/wws/signoff/rugged-users</unsubscribe>
+      <post>rugged-users@orekit.org</post>
+      <archive>https://www.orekit.org/wws/arc/rugged-users</archive>
+    </mailingList>
+    <mailingList>
+      <name>Rugged developers mailing list</name>
+      <subscribe>https://www.orekit.org/wws/subscribe/rugged-developers</subscribe>
+      <unsubscribe>https://www.orekit.org/wws/signoff/rugged-developers</unsubscribe>
+      <post>rugged-developers@orekit.org</post>
+      <archive>https://www.orekit.org/wws/arc/rugged-developers</archive>
+    </mailingList>
+  </mailingLists>
 
   <modules>
     <module>core</module>

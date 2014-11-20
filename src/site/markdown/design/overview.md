@@ -53,21 +53,21 @@ Functional Breakdown
 
 The following table sorts out the various topics between the various layers.
 
-:--------------------------------:|:-----------------------:|:---------------------------------------------------------------------------------------------------|
-           Topic                  |           Layer         |                                                      Comment
- Sensor to ground mapping         |           Rugged        |                          Direct localization is the base feature provided
- Ground to sensor mapping         |           Rugged        |                       Inverse localization is another base feature provided
-     Individual pixels            |           Rugged        |The API supports any number of pixels, defined by their individual line of sight provided by caller
-        Optical path              |         Interface       |The folded optical path inside the spacecraft is taken into account by computing an overall transform combining all inside reflections, so each pixel position and line of sight can be computed later on by a single translation and rotation with respect to spacecraft center of mass
-    Line time-stamping            |     Interface/Rugged    |The caller must provide a simple time-stamping model (typically linear) that will be applied
-Orbit and attitude interpolation  |          Orekit         |Both simple interpolation from timestamped position samples and full orbit propagation are available, thanks to Orekit streamlined propagator architecture
-CCSDS Orbit/Attitude file parsing |          Orekit         |This is supported as long as standard CCSDS Orbit Data Message (CCSDS 502.0-B-2) and CCSDS Attitude Data Messages (CCSDS 504.0-B-1) are used
-Custom Orbit/Attitude file parsing|        Interface        |Custom files can be loaded by mission specific readers, and the list or orbit/attitude states can be provided to Orekit which is able to handle interpolation from these sample data
-       Frames transforms          |          Orekit         |Full support to all classical reference inertial and Earth frames is already provided by Orekit (including the legacy EME2000, MOD, TOD, but also the more modern GCRF, ICRF, TIRF or exotic frames like TEME or Veis1950, as well as several versions of ITRF)
-      IERS data correction        |          Orekit         |All frame transforms support the full set of IERS Earth Orientation Parameters corrections, including of course the large DUT1 time correction, but also the smaller corrections to older IAU-76/80 or newer IAU-2000/2006 precession nutation models as well as the polar wander. The frames level accuracy is at sub-millimeter level
-     Grid-post elevation model    |          Rugged         |Only raster elevation models are supported
-Triangulated Irregular Network elevation model | Not supported |If vector elevation models are needed, they must be converted to raster form in order to be used
-         Geoid computation        |     Not in version 1    |The first version only supports Digital Elevation Models computed with respect to a reference ellipsoid. If needed, this feature could be added after version 1, either at Rugged or Orekit level, using Orekit gravity fields
-  Time-dependent deformations     |     Interface/Rugged    |The caller must supply a simple line-of-sight model (typically polynomial) that will be applied
-           Calibration            |Image processing or interface|The calibration phase remains at the mission-specific caller level (pixels geometry, clock synchronization …), the caller is required to provide the already calibrated line of sights
-         DEM file parsing         |         Interface       |The elevation models are dedicated to the mission and there are several formats (DTED, GeoTIFF, raw data …).Rugged only deals with raw elevation on small latitude/longitude cells
+|          Topic                   |           Layer         |                                                      Comment
+|----------------------------------|-------------------------|-----------------------------------------------------------------------------
+|  Sensor to ground mapping        |           Rugged        |                          Direct localization is the base feature provided
+|  Ground to sensor mapping        |           Rugged        |                       Inverse localization is another base feature provided
+|     Individual pixels            |           Rugged        |The API supports any number of pixels, defined by their individual line of sight provided by caller
+|        Optical path              |         Interface       |The folded optical path inside the spacecraft is taken into account by computing an overall transform combining all inside reflections, so each pixel position and line of sight can be computed later on by a single translation and rotation with respect to spacecraft center of mass
+|    Line time-stamping            |     Interface/Rugged    |The caller must provide a simple time-stamping model (typically linear) that will be applied
+|Orbit and attitude interpolation  |          Orekit         |Both simple interpolation from timestamped position samples and full orbit propagation are available, thanks to Orekit streamlined propagator architecture
+|CCSDS Orbit/Attitude file parsing |          Orekit         |This is supported as long as standard CCSDS Orbit Data Message (CCSDS 502.0-B-2) and CCSDS Attitude Data Messages (CCSDS 504.0-B-1) are used
+|Custom Orbit/Attitude file parsing|        Interface        |Custom files can be loaded by mission specific readers, and the list or orbit/attitude states can be provided to Orekit which is able to handle interpolation from these sample data
+|       Frames transforms          |          Orekit         |Full support to all classical reference inertial and Earth frames is already provided by Orekit (including the legacy EME2000, MOD, TOD, but also the more modern GCRF, ICRF, TIRF or exotic frames like TEME or Veis1950, as well as several versions of ITRF)
+|      IERS data correction        |          Orekit         |All frame transforms support the full set of IERS Earth Orientation Parameters corrections, including of course the large DUT1 time correction, but also the smaller corrections to older IAU-76/80 or newer IAU-2000/2006 precession nutation models as well as the polar wander. The frames level accuracy is at sub-millimeter level
+|     Grid-post elevation model    |          Rugged         |Only raster elevation models are supported
+|Triangulated Irregular Network elevation model | Not supported |If vector elevation models are needed, they must be converted to raster form in order to be used
+|         Geoid computation        |     Not in version 1    |The first version only supports Digital Elevation Models computed with respect to a reference ellipsoid. If needed, this feature could be added after version 1, either at Rugged or Orekit level, using Orekit gravity fields
+|  Time-dependent deformations     |     Interface/Rugged    |The caller must supply a simple line-of-sight model (typically polynomial) that will be applied
+|           Calibration            |Image processing or interface|The calibration phase remains at the mission-specific caller level (pixels geometry, clock synchronization …), the caller is required to provide the already calibrated line of sights
+|         DEM file parsing         |         Interface       |The elevation models are dedicated to the mission and there are several formats (DTED, GeoTIFF, raw data …).Rugged only deals with raw elevation on small latitude/longitude cells
