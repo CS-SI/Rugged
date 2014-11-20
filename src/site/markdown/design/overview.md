@@ -30,7 +30,7 @@ interpolation ...). The Rugged library itself provides the algorithms
 dealing with line-of-sight intersection with Digital Elevation Models
 in a mission-independent way. Rugged does not parse the DEM models itself,
 nor does it performs image processing. Mission-dependent parts (including
-Digital Elevation Model parsing or instrument viewing model creation remain
+Digital Elevation Model parsing or instrument viewing model creation) remain
 under the responsibility of Rugged caller, typically using a mission-specific
 library used by several image processing applications.
 

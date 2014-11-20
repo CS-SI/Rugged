@@ -30,7 +30,7 @@ Three different algorithms are predefined in Rugged:
 
  * a recursive algorithm based on Bernardt Duvenhage's 2009 paper
    [Using An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations](http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf)
- * an alternate version od Duvenhage algorithm using flat-body hypothesis,
+ * an alternate version of the Duvenhage algorithm using flat-body hypothesis,
  * a basic scan algorithm sequentially checking all pixels in the rectangular array defined by Digital Elevation Model entry and exit points,
  * a no-operation algorithm that ignores the Digital Elevation Model and uses only the ellipsoid.
 
