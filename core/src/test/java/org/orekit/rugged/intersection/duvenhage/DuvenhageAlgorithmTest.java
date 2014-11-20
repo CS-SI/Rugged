@@ -202,7 +202,12 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
                                                                          Vector3D.class, Vector3D.class);
             findExit.setAccessible(true);
             Object limitPoint = findExit.invoke(algorithm, tile, earth, position, los);
-            Class<?> limitPointCls = DuvenhageAlgorithm.class.getDeclaredClasses()[0];
+            Class<?> limitPointCls = null;
+            for (Class<?> c : DuvenhageAlgorithm.class.getDeclaredClasses()) {
+                if (c.getName().endsWith("LimitPoint")) {
+                    limitPointCls = c;
+                }
+            }
             Field pointField = limitPointCls.getDeclaredField("point");
             pointField.setAccessible(true);
             return (NormalizedGeodeticPoint) pointField.get(limitPoint);
