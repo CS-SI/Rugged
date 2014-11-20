@@ -157,7 +157,7 @@ public class AsterTileUpdater implements TileUpdater {
                                           1, 1, 0);
             }
 
-            AngulerUnits angulerUnits = AngulerUnits.DEGREE;
+            AngularUnits angulerUnits = AngularUnits.DEGREE;
             for (int i = 0; i < numberOfKeys; ++i) {
                 final GeoKey geoKey   = GeoKey.getKey(geoKeyDirectory[4 * i + 4]);
                 final int location    = geoKeyDirectory[4 * i + 5];
@@ -199,7 +199,7 @@ public class AsterTileUpdater implements TileUpdater {
                     break;
                 }
                 case GEOG_ANGULAR_UNITS: {
-                    angulerUnits = AngulerUnits.getUnits(getShort(geoKey, location, count, valueOffset, fileName));
+                    angulerUnits = AngularUnits.getUnits(getShort(geoKey, location, count, valueOffset, fileName));
                     break;
                 }
                 default:

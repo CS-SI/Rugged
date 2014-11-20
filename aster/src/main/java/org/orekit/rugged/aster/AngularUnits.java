@@ -22,7 +22,7 @@ import org.apache.commons.math3.util.FastMath;
  * @see <a href="http://www.remotesensing.org/geotiff/spec/geotiff6.html#6.3.1.4">GeoTIFF specification, section 6.3.1.4</a>
  * @author Luc Maisonobe
  */
-enum AngulerUnits {
+enum AngularUnits {
 
     // CHECKSTYLE: stop JavadocVariable check
     RADIAN(9101) {
@@ -97,7 +97,7 @@ enum AngulerUnits {
     /** Simple constructor.
      * @param id key id
      */
-    private AngulerUnits(final int id) {
+    private AngularUnits(final int id) {
         this.id = id;
     }
 
@@ -112,8 +112,8 @@ enum AngulerUnits {
      * @return the units corresponding to the id
      * @exception IllegalArgumentException if the id does not correspond to known units
      */
-    public static AngulerUnits getUnits(final int id) {
-        for (AngulerUnits units : values()) {
+    public static AngularUnits getUnits(final int id) {
+        for (AngularUnits units : values()) {
             if (units.id == id) {
                 return units;
             }
