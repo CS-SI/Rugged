@@ -14,7 +14,7 @@
 
 DEM intersection
 ------------
-The page [technical choices](./technical-choices.html) explains how Rugged goes from an on-board pixel
+The page [technical choices](./technical-choices.html) explain how Rugged goes from an on-board pixel
 line-of-sight to a ground-based line-of-sight arrival in the vicinity of the ellipsoid entry point. At
 this step, we have a 3D line defined near the surface and want to compute where it exactly traverses the
 Digital Elevation Model surface. There is no support for this computation at Orekit library level,
