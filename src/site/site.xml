@@ -41,6 +41,9 @@
       <item name="Digital Elevation Model" href="/design/digital-elevation-model.html" />
       <item name="Preliminary design"      href="/design/preliminary-design.html"      />
     </menu>
+    <menu name="Tutorials">
+      <item name="Direct localization"     href="/tutorials/direct-localization.html"  />
+    </menu>
     <menu name="Development">
       <item name="Contributing"            href="/contributing.html"                   />
       <item name="Guidelines"              href="/guidelines.html"                     />
