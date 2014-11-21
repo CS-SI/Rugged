@@ -26,7 +26,7 @@ a nadir view), some algorithms are more suitable than others. This computation i
 programming unit possible in the Rugged library and an interface is defined with several different
 implementations among which user can select.
 
-Three different algorithms are predefined in Rugged:
+Four different algorithms are predefined in Rugged:
 
  * a recursive algorithm based on Bernardt Duvenhage's 2009 paper
    [Using An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations](http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf)
