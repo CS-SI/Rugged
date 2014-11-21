@@ -158,7 +158,8 @@ public class SensorMeanPlaneCrossingTest {
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 list.add(new TimeStampedPVCoordinates(currentState.getDate(),
                                                       currentState.getPVCoordinates().getPosition(),
-                                                      currentState.getPVCoordinates().getVelocity()));
+                                                      currentState.getPVCoordinates().getVelocity(),
+                                                      Vector3D.ZERO));
             }
         });
         propagator.propagate(maxDate);
@@ -179,7 +180,7 @@ public class SensorMeanPlaneCrossingTest {
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
                                                            currentState.getAttitude().getRotation(),
-                                                           Vector3D.ZERO));
+                                                           Vector3D.ZERO, Vector3D.ZERO));
             }
         });
         propagator.propagate(maxDate);

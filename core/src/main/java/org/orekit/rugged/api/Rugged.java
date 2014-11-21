@@ -437,8 +437,8 @@ public class Rugged {
                         final AbsoluteDate  date = currentState.getDate();
                         final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
                         final Rotation      q    = currentState.getAttitude().getRotation();
-                        positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity()));
-                        quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO));
+                        positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
+                        quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
                     } catch (OrekitException oe) {
                         throw new PropagationException(oe);
                     }

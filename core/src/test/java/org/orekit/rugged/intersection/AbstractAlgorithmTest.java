@@ -212,7 +212,8 @@ public abstract class AbstractAlgorithmTest {
                                                                                  true),
                                                                     new Vector3D(-7.048568391860185e-05,
                                                                                  -1.043582650222194e-03,
-                                                                                  1.700400341147713e-05)));
+                                                                                  1.700400341147713e-05),
+                                                                    Vector3D.ZERO));
 
     }
 
@@ -265,7 +266,8 @@ public abstract class AbstractAlgorithmTest {
                                                                                  true),
                                                                     new Vector3D(-4.289600857433520e-05,
                                                                                  -1.039151496480297e-03,
-                                                                                  5.811423736843181e-05)));
+                                                                                  5.811423736843181e-05),
+                                                                    Vector3D.ZERO));
 
     }
 
