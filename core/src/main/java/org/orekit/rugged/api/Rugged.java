@@ -110,15 +110,15 @@ public class Rugged {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoidID identifier of reference ellipsoid
-     * @param inertialFrameID identifier of inertial frame
-     * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param inertialFrameID identifier of inertial frame used for spacecraft positions/velocities/quaternions
+     * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
      * @param minDate start of search time span
      * @param maxDate end of search time span
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param positionsVelocities satellite position and velocity
+     * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param quaternions satellite quaternions
+     * @param quaternions satellite quaternions with respect to inertial frame
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @param tStep step to use for inertial frame to body frame transforms cache computations
@@ -154,14 +154,14 @@ public class Rugged {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid reference ellipsoid
-     * @param inertialFrame inertial frame
+     * @param inertialFrame inertial frame used for spacecraft positions/velocities/quaternions
      * @param minDate start of search time span
      * @param maxDate end of search time span
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param positionsVelocities satellite position and velocity
+     * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param quaternions satellite quaternions
+     * @param quaternions satellite quaternions with respect to inertial frame
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @param tStep step to use for inertial frame to body frame transforms cache computations
@@ -197,8 +197,8 @@ public class Rugged {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoidID identifier of reference ellipsoid
-     * @param inertialFrameID identifier of inertial frame
-     * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param inertialFrameID identifier of inertial frame for spacecraft positions/velocities/quaternions
+     * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
      * @param minDate start of search time span
      * @param maxDate end of search time span
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
@@ -237,7 +237,7 @@ public class Rugged {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid f reference ellipsoid
-     * @param inertialFrame inertial frame
+     * @param inertialFrame inertial frame for spacecraft positions/velocities/quaternions
      * @param minDate start of search time span
      * @param maxDate end of search time span
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
@@ -276,8 +276,8 @@ public class Rugged {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoidID identifier of reference ellipsoid
-     * @param inertialFrameID identifier of inertial frame
-     * @param bodyRotatingFrameID identifier of body rotating frame
+     * @param inertialFrameID identifier of inertial frame for spacecraft positions/velocities/quaternions
+     * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
      * @param dumpStream stream from where to read previous instance dumped interpolator
      * (caller opened it and remains responsible for closing it)
      * @exception RuggedException if dump file cannot be loaded
@@ -307,7 +307,7 @@ public class Rugged {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid reference ellipsoid
-     * @param inertialFrame inertial frame
+     * @param inertialFrame inertial frame for spacecraft positions/velocities/quaternions
      * @param dumpStream stream from where to read previous instance dumped interpolator
      * (caller opened it and remains responsible for closing it)
      * @exception RuggedException if dump file cannot be loaded
