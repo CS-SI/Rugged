@@ -23,10 +23,10 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface representing a raster tile.
  * <p>
- * The elevations are considered to be at the <em>center</em> of each pixels.
+ * The elevations are considered to be at the <em>center</em> of each cells.
  * The minimum latitude and longitude hence correspond to the <em>center</em>
- * of the most South-West pixel, and the maximum latitude and longitude
- * correspond to the <em>center</em> of the most North-East pixel.
+ * of the most South-West cell, and the maximum latitude and longitude
+ * correspond to the <em>center</em> of the most North-East cell.
  * </p>
  * @author Luc Maisonobe
  */
@@ -120,14 +120,14 @@ public interface Tile extends UpdatableTile {
 
     /** Get minimum latitude of grid interpolation points.
      * @return minimum latitude of grid interpolation points
-     * (latitude of the center of the pixels of South row)
+     * (latitude of the center of the cells of South row)
      */
     double getMinimumLatitude();
 
     /** Get the latitude at some index.
      * @param latitudeIndex latitude index
      * @return latitude at the specified index
-     * (latitude of the center of the pixels of specified row)
+     * (latitude of the center of the cells of specified row)
      */
     double getLatitudeAtIndex(int latitudeIndex);
 
@@ -141,20 +141,20 @@ public interface Tile extends UpdatableTile {
      * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
      * </p>
      * @return maximum latitude
-     * (latitude of the center of the pixels of North row)
+     * (latitude of the center of the cells of North row)
      */
     double getMaximumLatitude();
 
     /** Get minimum longitude.
      * @return minimum longitude
-     * (longitude of the center of the pixels of West column)
+     * (longitude of the center of the cells of West column)
      */
     double getMinimumLongitude();
 
     /** Get the longitude at some index.
      * @param longitudeIndex longitude index
      * @return longitude at the specified index
-     * (longitude of the center of the pixels of specified column)
+     * (longitude of the center of the cells of specified column)
      */
     double getLongitudeAtIndex(int longitudeIndex);
 
@@ -168,7 +168,7 @@ public interface Tile extends UpdatableTile {
      * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
      * </p>
      * @return maximum longitude
-     * (longitude of the center of the pixels of East column)
+     * (longitude of the center of the cells of East column)
      */
     double getMaximumLongitude();
 
@@ -232,10 +232,10 @@ public interface Tile extends UpdatableTile {
     /** Interpolate elevation.
      * <p>
      * In order to cope with numerical accuracy issues when computing
-     * points at tile boundary, a slight tolerance (typically 1/8 pixel)
+     * points at tile boundary, a slight tolerance (typically 1/8 cell)
      * around the tile is allowed. Elevation can therefore be interpolated
      * (really extrapolated in this case) even for points slightly overshooting
-     * tile boundaries, using the closest tile pixel. Attempting to interpolate
+     * tile boundaries, using the closest tile cell. Attempting to interpolate
      * too far from the tile will trigger an exception.
      * </p>
      * @param latitude ground point latitude
@@ -246,17 +246,17 @@ public interface Tile extends UpdatableTile {
     double interpolateElevation(double latitude, double longitude)
         throws RuggedException;
 
-    /** Find the intersection of a line-of-sight and a Digital Elevation Model pixel.
+    /** Find the intersection of a line-of-sight and a Digital Elevation Model cell.
      * @param p point on the line
      * @param los line-of-sight, in the topocentric frame (East, North, Zenith) of the point,
      * scaled to match radians in the horizontal plane and meters along the vertical axis
-     * @param latitudeIndex latitude index of the Digital Elevation Model pixel
-     * @param longitudeIndex longitude index of the Digital Elevation Model pixel
+     * @param latitudeIndex latitude index of the Digital Elevation Model cell
+     * @param longitudeIndex longitude index of the Digital Elevation Model cell
      * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
-     * if it lies within the pixel, null otherwise
+     * if it lies within the cell, null otherwise
      * @exception RuggedException if intersection point cannot be computed
      */
-    NormalizedGeodeticPoint pixelIntersection(GeodeticPoint p, Vector3D los,
+    NormalizedGeodeticPoint cellIntersection(GeodeticPoint p, Vector3D los,
                                               int latitudeIndex, int longitudeIndex)
         throws RuggedException;
 

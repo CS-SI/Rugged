@@ -62,7 +62,7 @@ public abstract class AbstractAlgorithmTest {
         setUpMayonVolcanoContext();
 
         // test point approximately 1.6km North-North-West and 800 meters below volcano summit
-        // note that this test point is EXACTLY at a pixel corner, and even at corners of
+        // note that this test point is EXACTLY at a cell corner, and even at corners of
         // middle level (12 and above) sub-tiles
         final double latitude  = FastMath.toRadians(13.27);
         final double longitude = FastMath.toRadians(123.68);
@@ -227,7 +227,7 @@ public abstract class AbstractAlgorithmTest {
                                                 FastMath.toRadians(-9.4369),
                                                 120.0);
 
-        // pixels are about 10m x 10m here and a tile covers 1km x 1km
+        // cells are about 10m x 10m here and a tile covers 1km x 1km
         updater = new CliffsElevationUpdater(north, south,
                                              120.0, 0.0,
                                              FastMath.toRadians(0.015), 101);

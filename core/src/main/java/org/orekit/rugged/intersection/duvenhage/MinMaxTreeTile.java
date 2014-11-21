@@ -25,17 +25,17 @@ import org.orekit.rugged.raster.SimpleTile;
 /** Simple implementation of a {@link org.orekit.rugged.raster.Tile}
  * with a min/max kd tree.
  * <p>
- * A n level min/max kd-tree contains sub-tiles merging individual pixels
+ * A n level min/max kd-tree contains sub-tiles merging individual cells
  * together from coarse-grained (at level 0) to fine-grained (at level n-1).
- * Level n-1, which is the deepest one, is computed from the raw pixels by
- * merging adjacent pixels pairs columns (i.e. pixels at indices (i, 2j)
+ * Level n-1, which is the deepest one, is computed from the raw cells by
+ * merging adjacent cells pairs columns (i.e. cells at indices (i, 2j)
  * and (i, 2j+1) are merged together by computing and storing the minimum
  * and maximum in a sub-tile. Level n-1 therefore has the same number of rows
  * but half the number of columns of the raw tile, and its sub-tiles are
- * 1 pixel high and 2 pixels wide. Level n-2 is computed from level n-1 by
+ * 1 cell high and 2 cells wide. Level n-2 is computed from level n-1 by
  * merging sub-tiles rows. Level n-2 therefore has half the number of rows
  * and half the number of columns of the raw tile, and its sub-tiles are
- * 2 pixels high and 2 pixels wide. Level n-3 is again computed by merging
+ * 2 cells high and 2 cells wide. Level n-3 is again computed by merging
  * columns, level n-4 merging rows and so on. As depth decreases, the number
  * of sub-tiles decreases and their size increase. Level 0 is reached when
  * there is only either one row or one column of large sub-tiles.
@@ -129,8 +129,8 @@ public class MinMaxTreeTile extends SimpleTile {
     }
 
     /** Get the minimum elevation at some level tree.
-     * @param i row index of the pixel
-     * @param j column index of the pixel
+     * @param i row index of the cell
+     * @param j column index of the cell
      * @param level tree level
      * @return minimum elevation
      * @see #getLevels()
@@ -152,8 +152,8 @@ public class MinMaxTreeTile extends SimpleTile {
     }
 
     /** Get the maximum elevation at some level tree.
-     * @param i row index of the pixel
-     * @param j column index of the pixel
+     * @param i row index of the cell
+     * @param j column index of the cell
      * @param level tree level
      * @return maximum elevation
      * @see #getLevels()
@@ -174,12 +174,12 @@ public class MinMaxTreeTile extends SimpleTile {
 
     }
 
-    /** Get the deepest level at which two pixels are merged in the same min/max sub-tile.
-     * @param i1 row index of first pixel
-     * @param j1 column index of first pixel
-     * @param i2 row index of second pixel
-     * @param j2 column index of second pixel
-     * @return deepest level at which two pixels are merged in the same min/max sub-tile,
+    /** Get the deepest level at which two cells are merged in the same min/max sub-tile.
+     * @param i1 row index of first cell
+     * @param j1 column index of first cell
+     * @param i2 row index of second cell
+     * @param j2 column index of second cell
+     * @return deepest level at which two cells are merged in the same min/max sub-tile,
      * or -1 if they are never merged in the same sub-tile
      * @see #getLevels()
      * @see #getMinElevation(int, int, int)
@@ -362,7 +362,7 @@ public class MinMaxTreeTile extends SimpleTile {
 
     /** Preprocess recursive application of a function.
      * <p>
-     * At start, the min/max should be computed for each pixel using the four corners values.
+     * At start, the min/max should be computed for each cell using the four corners values.
      * </p>
      * @param preprocessed preprocessed array to fill up
      * @param elevations raw elevations te preprocess

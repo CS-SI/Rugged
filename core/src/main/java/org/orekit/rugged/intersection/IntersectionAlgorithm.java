@@ -40,8 +40,8 @@ public interface IntersectionAlgorithm {
      * <p>
      * This method is used to refine an intersection when a close guess is
      * already known. The intersection is typically looked for by a direct
-     * {@link org.orekit.rugged.raster.Tile#pixelIntersection(GeodeticPoint,
-     * Vector3D, int, int) pixel intersection} in the tile which already
+     * {@link org.orekit.rugged.raster.Tile#cellIntersection(GeodeticPoint,
+     * Vector3D, int, int) cell intersection} in the tile which already
      * contains the close guess, or any similar very fast algorithm.
      * </p>
      * @param ellipsoid reference ellipsoid

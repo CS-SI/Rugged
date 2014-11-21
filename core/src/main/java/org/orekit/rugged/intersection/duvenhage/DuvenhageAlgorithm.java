@@ -170,7 +170,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
                 final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
                                                                            tile.getMinimumLongitude());
-                return tile.pixelIntersection(entry, ellipsoid.convertLos(entryP, exitP),
+                return tile.cellIntersection(entry, ellipsoid.convertLos(entryP, exitP),
                                               tile.getFloorLatitudeIndex(closeGuess.getLatitude()),
                                               tile.getFloorLongitudeIndex(closeGuess.getLongitude()));
             } else {
@@ -179,7 +179,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
                                                                     ellipsoid.getBodyFrame(), null);
                 final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
-                return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
+                return tile.cellIntersection(projected, ellipsoid.convertLos(projected, los),
                                               tile.getFloorLatitudeIndex(projected.getLatitude()),
                                               tile.getFloorLongitudeIndex(projected.getLongitude()));
             }
@@ -226,8 +226,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         }
 
         if (entryLat == exitLat && entryLon == exitLon) {
-            // we have narrowed the search down to a single Digital Elevation Model pixel
-            return tile.pixelIntersection(entry, ellipsoid.convertLos(entry, los), exitLat, exitLon);
+            // we have narrowed the search down to a single Digital Elevation Model cell
+            return tile.cellIntersection(entry, ellipsoid.convertLos(entry, los), exitLat, exitLon);
         }
 
         // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile

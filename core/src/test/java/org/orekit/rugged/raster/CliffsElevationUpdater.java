@@ -49,11 +49,11 @@ public class CliffsElevationUpdater implements TileUpdater {
         double y2My1        = point2.getLatitude()  - point1.getLatitude();
         tile.setGeometry(minLatitude, minLongitude, step, step, n, n);
         for (int i = 0; i < n; ++i) {
-            double pixelLatitude = minLatitude + i * step;
+            double cellLatitude = minLatitude + i * step;
             for (int j = 0; j < n; ++j) {
-                double pixelLongitude = minLongitude + j * step;
-                double xMx1  = pixelLongitude - point1.getLongitude();
-                double yMy1  = pixelLatitude  - point1.getLatitude();
+                double cellLongitude = minLongitude + j * step;
+                double xMx1  = cellLongitude - point1.getLongitude();
+                double yMy1  = cellLatitude  - point1.getLatitude();
                 if (yMy1 * x2Mx1 > xMx1 * y2My1) {
                     // left side of the point1 to point2 track
                     tile.setElevation(i, j, top);

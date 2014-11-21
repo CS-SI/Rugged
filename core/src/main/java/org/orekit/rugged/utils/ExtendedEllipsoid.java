@@ -58,7 +58,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point at some latitude along a pixel line of sight.
-     * @param position pixel position (in body frame)
+     * @param position cell position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param latitude latitude with respect to ellipsoid
      * @param closeReference reference point used to select the closest solution
@@ -130,7 +130,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point at some longitude along a pixel line of sight.
-     * @param position pixel position (in body frame)
+     * @param position cell position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param longitude longitude with respect to ellipsoid
      * @return point at longitude
@@ -153,7 +153,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point on ground along a pixel line of sight.
-     * @param position pixel position (in body frame)
+     * @param position cell position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param centralLongitude reference longitude lc such that the point longitude will
      * be normalized between lc-π and lc+π
@@ -178,7 +178,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point at some altitude along a pixel line of sight.
-     * @param position pixel position (in body frame)
+     * @param position cell position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param altitude altitude with respect to ellipsoid
      * @return point at altitude

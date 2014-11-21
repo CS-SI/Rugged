@@ -124,15 +124,15 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
             for (final SimpleTile tile : scannedTiles) {
                 for (int i = latitudeIndex(tile, minLatitude); i <= latitudeIndex(tile, maxLatitude); ++i) {
                     for (int j = longitudeIndex(tile, minLongitude); j <= longitudeIndex(tile, maxLongitude); ++j) {
-                        final NormalizedGeodeticPoint gp = tile.pixelIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
+                        final NormalizedGeodeticPoint gp = tile.cellIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
                         if (gp != null) {
 
-                            // improve the point, by projecting it back on the 3D line, fixing the small body curvature at pixel level
+                            // improve the point, by projecting it back on the 3D line, fixing the small body curvature at cell level
                             final Vector3D      delta     = ellipsoid.transform(gp).subtract(position);
                             final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
                             final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
                                                                                 ellipsoid.getBodyFrame(), null);
-                            final NormalizedGeodeticPoint gpImproved = tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los), i, j);
+                            final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(projected, ellipsoid.convertLos(projected, los), i, j);
 
                             if (gpImproved != null) {
                                 final Vector3D point = ellipsoid.transform(gpImproved);
@@ -168,7 +168,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
             final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
                                                                 ellipsoid.getBodyFrame(), null);
             final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
-            return tile.pixelIntersection(projected, ellipsoid.convertLos(projected, los),
+            return tile.cellIntersection(projected, ellipsoid.convertLos(projected, los),
                                           tile.getFloorLatitudeIndex(projected.getLatitude()),
                                           tile.getFloorLongitudeIndex(projected.getLongitude()));
         } catch (OrekitException oe) {

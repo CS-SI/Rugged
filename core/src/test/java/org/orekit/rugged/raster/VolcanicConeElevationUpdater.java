@@ -46,12 +46,12 @@ public class VolcanicConeElevationUpdater implements TileUpdater {
         double sinSlope     = FastMath.sin(slope);
         tile.setGeometry(minLatitude, minLongitude, step, step, n, n);
         for (int i = 0; i < n; ++i) {
-            double pixelLatitude = minLatitude + i * step;
+            double cellLatitude = minLatitude + i * step;
             for (int j = 0; j < n; ++j) {
-                double pixelLongitude = minLongitude + j * step;
+                double cellLongitude = minLongitude + j * step;
                 double distance       = Constants.WGS84_EARTH_EQUATORIAL_RADIUS *
-                                        FastMath.hypot(pixelLatitude  - summit.getLatitude(),
-                                                       pixelLongitude - summit.getLongitude());
+                                        FastMath.hypot(cellLatitude  - summit.getLatitude(),
+                                                       cellLongitude - summit.getLongitude());
                 double altitude = FastMath.max(summit.getAltitude() - distance * sinSlope,
                                                base);
                 tile.setElevation(i, j, altitude);

@@ -37,23 +37,23 @@ public interface TileUpdater {
      * UpdatableTile#setGeometry(double, double, double, double, int, int)
      * tile.setGeometry} once at the start of the method to set up the tile
      * geometry, and then calling {@link UpdatableTile#setElevation(int, int,
-     * double) tile.setElevation} once for each pixel in the tile to set the
-     * pixel elevation.
+     * double) tile.setElevation} once for each cell in the tile to set the
+     * cell elevation.
      * </p>
      * <p>
      * The implementation must fulfill the requirements:
      * </p>
      * <ul>
      *   <li>
-     *     The tiles must overlap each other by one pixel (i.e. pixels
+     *     The tiles must overlap each other by one cell (i.e. cells
      *     that belong to the northernmost row of one tile must also belong
-     *     to the sourthernmost row of another tile and pixels that
+     *     to the sourthernmost row of another tile and cells that
      *     belong to the easternmost column of one tile must also belong
      *     to the westernmost column of another tile).
      *   </li>
      *   <li>
      *     As elevations are interpolated within Digital Elevation Model
-     *     pixels using four pixels at indices (kLat, kLon), (kLat+1, kLon),
+     *     cells using four cells at indices (kLat, kLon), (kLat+1, kLon),
      *     (kLat, kLon+1), (kLat+1, kLon+1). A point in the northernmost row
      *     (resp. easternmost column) miss neighboring points at row kLat+1
      *     (resp. neighboring points at column kLon+1) and therefore cannot
@@ -65,7 +65,7 @@ public interface TileUpdater {
      *     required neighbors.
      *   </li>
      *   <li>
-     *     The elevation at grid point as set when calling {@link
+     *     The elevation at cells as set when calling {@link
      *     UpdatableTile#setElevation(int, int, double) tile.setElevation(kLat, kLon,
      *     elevation)} must be the elevation corresponding to the latitude
      *     {@code minLatitude + kLat * latitudeStep} and longitude {@code

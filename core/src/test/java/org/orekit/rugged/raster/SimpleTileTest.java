@@ -123,13 +123,13 @@ public class SimpleTileTest {
         tile.setElevation(50, 100, 1000.0);
         tile.tileUpdateCompleted();
 
-        // indices correspond to pixels centers
+        // indices correspond to cells centers
         double latCenterColumn50 = tile.getLatitudeAtIndex(50);
         double latCenterColumn51 = tile.getLatitudeAtIndex(51);
         double lonCenterRow23    = tile.getLongitudeAtIndex(23);
         double lonCenterRow24    = tile.getLongitudeAtIndex(24);
 
-        // getLatitudeIndex shift indices 1/2 pixel, so that
+        // getLatitudeIndex shift indices 1/2 cell, so that
         // the specified latitude is always between index and index+1
         // so despite latWestColumn51 is very close to column 51 center,
         // getLatitudeIndex should return 50
@@ -139,7 +139,7 @@ public class SimpleTileTest {
         Assert.assertTrue(tile.getLatitudeAtIndex(retrievedLatIndex) < latWestColumn51);
         Assert.assertTrue(latWestColumn51 < tile.getLatitudeAtIndex(retrievedLatIndex + 1));
 
-        // getLongitudeIndex shift indices 1/2 pixel, so that
+        // getLongitudeIndex shift indices 1/2 cell, so that
         // the specified longitude is always between index and index+1
         // so despite lonSouthRow24 is very close to row 24 center,
         // getLongitudeIndex should return 23
@@ -186,7 +186,7 @@ public class SimpleTileTest {
         tile.setElevation(1, 0, 162.0);
         tile.setElevation(1, 1,  95.0);
         tile.tileUpdateCompleted();
-        // the following points are 1/16 pixel out of tile
+        // the following points are 1/16 cell out of tile
         Assert.assertEquals(151.875, tile.interpolateElevation(-0.0625,  0.5),    1.0e-10);
         Assert.assertEquals(127.125, tile.interpolateElevation( 1.0625,  0.5),    1.0e-10);
         Assert.assertEquals(124.875, tile.interpolateElevation( 0.5,    -0.0625), 1.0e-10);
@@ -202,7 +202,7 @@ public class SimpleTileTest {
         tile.setElevation(1, 0, 162.0);
         tile.setElevation(1, 1,  95.0);
         tile.tileUpdateCompleted();
-        // the following points are 3/16 pixel out of tile
+        // the following points are 3/16 cell out of tile
         checkOutOfBound(-0.1875,  0.5,    tile);
         checkOutOfBound( 1.1875,  0.5,    tile);
         checkOutOfBound( 0.5,    -0.1875, tile);
@@ -210,7 +210,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testPixelIntersection() throws RuggedException {
+    public void testCellIntersection() throws RuggedException {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(20, 14,  91.0);
@@ -224,10 +224,10 @@ public class SimpleTileTest {
         GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
                                               tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
                                               10.0);
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 20, 14);
+        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 20, 14);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 20, 14);
+        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 20, 14);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -238,7 +238,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testPixelIntersection2Solutions() throws RuggedException {
+    public void testCellIntersection2Solutions() throws RuggedException {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(20, 14,  91.0);
@@ -255,10 +255,10 @@ public class SimpleTileTest {
 
         // the line from gpA to gpB should traverse the DEM twice within the tile
         // we use the points in the two different orders to retrieve both solutions
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 20, 14);
+        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 20, 14);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 20, 14);
+        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 20, 14);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -269,7 +269,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testPixelIntersectionNoSolutions() throws RuggedException {
+    public void testCellIntersectionNoSolutions() throws RuggedException {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(20, 14,  91.0);
@@ -284,12 +284,12 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
                                               190.0);
 
-        Assert.assertNull(tile.pixelIntersection(gpA, los(gpA, gpB), 20, 14));
+        Assert.assertNull(tile.cellIntersection(gpA, los(gpA, gpB), 20, 14));
 
     }
 
     @Test
-    public void testPixelIntersectionLinearOnly() throws RuggedException {
+    public void testCellIntersectionLinearOnly() throws RuggedException {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -304,10 +304,10 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               20.0);
 
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0);
+        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 0, 0);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 0, 0);
+        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 0, 0);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -318,7 +318,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testPixelIntersectionLinearIntersectionOutside() throws RuggedException {
+    public void testCellIntersectionLinearIntersectionOutside() throws RuggedException {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -333,12 +333,12 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               55.0);
 
-       Assert.assertNull(tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0));
+       Assert.assertNull(tile.cellIntersection(gpA, los(gpA, gpB), 0, 0));
 
     }
 
     @Test
-    public void testPixelIntersectionLinearNoIntersection() throws RuggedException {
+    public void testCellIntersectionLinearNoIntersection() throws RuggedException {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -353,12 +353,12 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               50.0);
 
-        Assert.assertNull(tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0));
+        Assert.assertNull(tile.cellIntersection(gpA, los(gpA, gpB), 0, 0));
 
     }
 
     @Test
-    public void testPixelIntersectionConstant0() throws RuggedException {
+    public void testCellIntersectionConstant0() throws RuggedException {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -373,10 +373,10 @@ public class SimpleTileTest {
                                               tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
                                               37.5);
 
-        GeodeticPoint gpIAB = tile.pixelIntersection(gpA, los(gpA, gpB), 0, 0);
+        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 0, 0);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.pixelIntersection(gpB, los(gpB, gpA), 0, 0);
+        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 0, 0);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 

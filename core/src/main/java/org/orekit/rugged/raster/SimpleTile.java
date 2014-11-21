@@ -31,7 +31,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  */
 public class SimpleTile implements Tile {
 
-    /** Tolerance used to interpolate points slightly out of tile (in pixels). */
+    /** Tolerance used to interpolate points slightly out of tile (in cells). */
     private static final double TOLERANCE = 1.0 / 8.0;
 
     /** Minimum latitude. */
@@ -204,7 +204,7 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc}
      * <p>
-     * This classes uses an arbitrary 1/8 pixel tolerance for interpolating
+     * This classes uses an arbitrary 1/8 cell tolerance for interpolating
      * slightly out of tile points.
      * </p>
      */
@@ -246,15 +246,15 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public NormalizedGeodeticPoint pixelIntersection(final GeodeticPoint p, final Vector3D los,
-                                                     final int latitudeIndex, final int longitudeIndex)
+    public NormalizedGeodeticPoint cellIntersection(final GeodeticPoint p, final Vector3D los,
+                                                    final int latitudeIndex, final int longitudeIndex)
         throws RuggedException {
 
-        // ensure neighboring pixels to not fall out of tile
+        // ensure neighboring cells to not fall out of tile
         final int iLat  = FastMath.max(0, FastMath.min(latitudeRows     - 2, latitudeIndex));
         final int jLong = FastMath.max(0, FastMath.min(longitudeColumns - 2, longitudeIndex));
 
-        // Digital Elevation Mode coordinates at pixel vertices
+        // Digital Elevation Mode coordinates at cell vertices
         final double x00 = getLongitudeAtIndex(jLong);
         final double y00 = getLatitudeAtIndex(iLat);
         final double z00 = getElevationAtIndices(iLat,     jLong);
@@ -330,8 +330,8 @@ public class SimpleTile implements Tile {
     /** Interpolate point along a line.
      * @param t abscissa along the line
      * @param p start point
-     * @param dxP relative coordinate of the start point with respect to current pixel
-     * @param dyP relative coordinate of the start point with respect to current pixel
+     * @param dxP relative coordinate of the start point with respect to current cell
+     * @param dyP relative coordinate of the start point with respect to current cell
      * @param los direction of the line-of-sight, in geodetic space
      * @param centralLongitude reference longitude lc such that the point longitude will
      * be normalized between lc-π and lc+π
