@@ -136,12 +136,12 @@ public class SensorMeanPlaneCrossingTest {
         AbsoluteDate minDate = sensor.getDate(0);
         AbsoluteDate maxDate = sensor.getDate(2000);
         return new SpacecraftToObservedBody(orbit.getFrame(), earth.getBodyFrame(),
-                                            minDate, maxDate, 5.0,
-                                            orbitToPV(orbit, earth, minDate, maxDate, 0.25),
-                                            2, CartesianDerivativesFilter.USE_P,
-                                            orbitToQ(orbit, earth, minDate, maxDate, 0.25),
-                                            2, AngularDerivativesFilter.USE_R,
-                                            0.01);
+                                            minDate, maxDate, 0.01,
+                                            5.0,
+                                            orbitToPV(orbit, earth, minDate, maxDate, 0.25), 2,
+                                            CartesianDerivativesFilter.USE_P,
+                                            orbitToQ(orbit, earth, minDate, maxDate, 0.25), 2,
+                                            AngularDerivativesFilter.USE_R);
     }
 
     private List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,

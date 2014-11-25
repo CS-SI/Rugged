@@ -114,6 +114,7 @@ public class Rugged {
      * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
@@ -121,24 +122,25 @@ public class Rugged {
      * @param quaternions satellite quaternions with respect to inertial frame
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @exception RuggedException if data needed for some frame cannot be loaded or if position
      * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
+                  final double overshootTolerance,
                   final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                   final CartesianDerivativesFilter pvFilter,
                   final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                  final AngularDerivativesFilter aFilter, final double tStep)
+                  final AngularDerivativesFilter aFilter)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID), minDate, maxDate, overshootTolerance,
+             selectInertialFrame(inertialFrameID),
+             minDate, maxDate, tStep, overshootTolerance,
              positionsVelocities, pvInterpolationNumber, pvFilter,
-             quaternions, aInterpolationNumber, aFilter, tStep);
+             quaternions, aInterpolationNumber, aFilter);
     }
 
     /** Build a configured instance.
@@ -157,6 +159,7 @@ public class Rugged {
      * @param inertialFrame inertial frame used for spacecraft positions/velocities/quaternions
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
@@ -164,24 +167,23 @@ public class Rugged {
      * @param quaternions satellite quaternions with respect to inertial frame
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @exception RuggedException if data needed for some frame cannot be loaded or if position
      * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
+                  final double overshootTolerance,
                   final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                   final CartesianDerivativesFilter pvFilter,
                   final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                  final AngularDerivativesFilter aFilter, final double tStep)
+                  final AngularDerivativesFilter aFilter)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID, ellipsoid,
              createInterpolator(inertialFrame, ellipsoid.getBodyFrame(),
-                                minDate, maxDate, overshootTolerance,
+                                minDate, maxDate, tStep, overshootTolerance,
                                 positionsVelocities, pvInterpolationNumber, pvFilter,
-                                quaternions, aInterpolationNumber, aFilter,
-                                tStep));
+                                quaternions, aInterpolationNumber, aFilter));
     }
 
     /** Build a configured instance.
@@ -201,27 +203,29 @@ public class Rugged {
      * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
      * @param interpolationNumber number of points to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
                   final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
+                  final double overshootTolerance,
                   final double interpolationStep, final int interpolationNumber,
                   final CartesianDerivativesFilter pvFilter, final AngularDerivativesFilter aFilter,
-                  final double tStep, final Propagator propagator)
+                  final Propagator propagator)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID,
              selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID), minDate, maxDate, overshootTolerance,
-             interpolationStep, interpolationNumber, pvFilter, aFilter, tStep, propagator);
+             selectInertialFrame(inertialFrameID),
+             minDate, maxDate, tStep, overshootTolerance,
+             interpolationStep, interpolationNumber, pvFilter, aFilter, propagator);
     }
 
     /** Build a configured instance.
@@ -240,27 +244,27 @@ public class Rugged {
      * @param inertialFrame inertial frame for spacecraft positions/velocities/quaternions
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
      * @param interpolationNumber number of points of to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param propagator global propagator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     public Rugged(final TileUpdater updater, final int maxCachedTiles,
                   final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
+                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
+                  final double overshootTolerance,
                   final double interpolationStep, final int interpolationNumber,
                   final CartesianDerivativesFilter pvFilter, final AngularDerivativesFilter aFilter,
-                  final double tStep, final Propagator propagator)
+                  final Propagator propagator)
         throws RuggedException {
         this(updater, maxCachedTiles, algorithmID, ellipsoid,
              createInterpolator(inertialFrame, ellipsoid.getBodyFrame(),
-                                minDate, maxDate, overshootTolerance,
-                                interpolationStep, interpolationNumber,
-                                pvFilter, aFilter, tStep, propagator));
+                                minDate, maxDate, tStep, overshootTolerance,
+                                interpolationStep, interpolationNumber, pvFilter, aFilter, propagator));
     }
 
     /** Build a configured instance, reusing the interpolator dumped from a previous instance.
@@ -363,6 +367,7 @@ public class Rugged {
      * @param bodyFrame observed body frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param positionsVelocities satellite position and velocity
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
@@ -370,26 +375,25 @@ public class Rugged {
      * @param quaternions satellite quaternions
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @return transforms interpolator
      * @exception RuggedException if data needed for some frame cannot be loaded or if position
      * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
     private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
                                                                final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                                               final double overshootTolerance,
+                                                               final double tStep, final double overshootTolerance,
                                                                final List<TimeStampedPVCoordinates> positionsVelocities,
                                                                final int pvInterpolationNumber,
                                                                final CartesianDerivativesFilter pvFilter,
                                                                final List<TimeStampedAngularCoordinates> quaternions,
                                                                final int aInterpolationNumber,
-                                                               final AngularDerivativesFilter aFilter, final double tStep)
+                                                               final AngularDerivativesFilter aFilter)
         throws RuggedException {
         return new SpacecraftToObservedBody(inertialFrame, bodyFrame,
-                                            minDate, maxDate, overshootTolerance,
-                                            positionsVelocities, pvInterpolationNumber, pvFilter,
-                                            quaternions, aInterpolationNumber, aFilter,
-                                            tStep);
+                                            minDate, maxDate, tStep,
+                                            overshootTolerance, positionsVelocities, pvInterpolationNumber,
+                                            pvFilter, quaternions, aInterpolationNumber,
+                                            aFilter);
     }
 
     /** Create a transform interpolator from a propagator.
@@ -397,23 +401,23 @@ public class Rugged {
      * @param bodyFrame observed body frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
      * @param interpolationNumber number of points of to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param propagator global propagator
      * @return transforms interpolator
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
                                                                final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                                               final double overshootTolerance,
+                                                               final double tStep, final double overshootTolerance,
                                                                final double interpolationStep, final int interpolationNumber,
                                                                final CartesianDerivativesFilter pvFilter,
                                                                final AngularDerivativesFilter aFilter,
-                                                               final double tStep, final Propagator propagator)
+                                                               final Propagator propagator)
         throws RuggedException {
         try {
 
@@ -449,10 +453,10 @@ public class Rugged {
 
             // orbit/attitude to body converter
             return createInterpolator(inertialFrame, bodyFrame,
-                                      minDate, maxDate, overshootTolerance,
-                                      positionsVelocities, interpolationNumber, pvFilter,
-                                      quaternions, interpolationNumber, aFilter,
-                                      tStep);
+                                      minDate, maxDate, tStep,
+                                      overshootTolerance, positionsVelocities, interpolationNumber,
+                                      pvFilter, quaternions, interpolationNumber,
+                                      aFilter);
 
         } catch (PropagationException pe) {
             throw new RuggedException(pe, pe.getSpecifier(), pe.getParts());

@@ -54,11 +54,11 @@ public class SpacecraftToObservedBody implements Serializable {
     /** End of search time span. */
     private final AbsoluteDate maxDate;
 
-    /** Tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting. */
-    private final double overshootTolerance;
-
     /** Step to use for inertial frame to body frame transforms cache computations. */
     private final double tStep;
+
+    /** Tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting. */
+    private final double overshootTolerance;
 
     /** Transforms sample from observed body frame to inertial frame. */
     private final List<Transform> bodyToInertial;
@@ -74,6 +74,7 @@ public class SpacecraftToObservedBody implements Serializable {
      * @param bodyFrame observed body frame
      * @param minDate start of search time span
      * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * slightly the position, velocity and quaternions ephemerides
      * @param positionsVelocities satellite position and velocity
@@ -82,18 +83,17 @@ public class SpacecraftToObservedBody implements Serializable {
      * @param quaternions satellite quaternions
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @exception RuggedException if [{@code minDate}, {@code maxDate}] search time span overshoots
      * position or attitude samples by more than {@code overshootTolerance}
      * ,
      */
     public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
-                                    final AbsoluteDate minDate, final AbsoluteDate maxDate, final double overshootTolerance,
+                                    final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
+                                    final double overshootTolerance,
                                     final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                                     final CartesianDerivativesFilter pvFilter,
                                     final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                                    final AngularDerivativesFilter aFilter,
-                                    final double tStep)
+                                    final AngularDerivativesFilter aFilter)
         throws RuggedException {
         try {
 
