@@ -508,8 +508,8 @@ public class Rugged {
      * @param dumpStream stream where to dump the interpolator
      * (caller opened it and remains responsible for closing it)
      * @exception RuggedException if interpolator cannot be written to file
-     * @see #Rugged(TileUpdater, int, AlgorithmId, OneAxisEllipsoid, Frame, File)
-     * @see #Rugged(TileUpdater, int, AlgorithmId, EllipsoidId, InertialFrameId, BodyRotatingFrameId, File)
+     * @see #Rugged(TileUpdater, int, AlgorithmId, OneAxisEllipsoid, Frame, InputStream)
+     * @see #Rugged(TileUpdater, int, AlgorithmId, EllipsoidId, InertialFrameId, BodyRotatingFrameId, InputStream)
      */
     public void dumpInterpolator(final OutputStream dumpStream) throws RuggedException {
         try {
