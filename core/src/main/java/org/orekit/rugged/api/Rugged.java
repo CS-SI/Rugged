@@ -722,6 +722,22 @@ public class Rugged {
 
     }
 
+    /** Check if a date is in the supported range.
+     * <p>
+     * The supporte range is given by the {@code minDate} and
+     * {@code maxDate} construction parameters, with an {@code
+     * overshootTolerance} margin accepted (i.e. a date slightly
+     * before {@code minDate} or slightly after {@code maxDate}
+     * will be considered in range if the overshoot does not exceed
+     * the tolerance set at construction).
+     * </p>
+     * @param date date to check
+     * @return true if date is in the supported range
+     */
+    public boolean isInRange(final AbsoluteDate date) {
+        return scToBody.isInRange(date);
+    }
+
     /** Direct location of a sensor line.
      * @param sensorName name of the line sensor
      * @param lineNumber number of the line to localize on ground

@@ -250,10 +250,7 @@ public class SpacecraftToObservedBody implements Serializable {
         throws RuggedException {
 
         // check date range
-        if (minDate.durationFrom(date) > overshootTolerance) {
-            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate);
-        }
-        if (date.durationFrom(maxDate) > overshootTolerance) {
+        if (!isInRange(date)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate);
         }
 
@@ -262,6 +259,15 @@ public class SpacecraftToObservedBody implements Serializable {
         final Transform close = list.get(index);
         return close.shiftedBy(date.durationFrom(close.getDate()));
 
+    }
+
+    /** Check if a date is in the supported range.
+     * @param date date to check
+     * @return true if date is in the supported range
+     */
+    public boolean isInRange(final AbsoluteDate date) {
+        return (minDate.durationFrom(date) <= overshootTolerance) &&
+               (date.durationFrom(maxDate) <= overshootTolerance);
     }
 
 }
