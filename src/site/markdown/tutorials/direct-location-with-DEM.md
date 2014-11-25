@@ -124,7 +124,7 @@ In a similar way as in the first tutorial [direct location](./direct-location.ht
     int lineStep = (maxLine - minLine) / nbLineStep;
     int pxStep = (maxPx - minPx) / nbPxStep;
 
-    ArrayList<GeodeticPoint> pointList = new ArrayList<GeodeticPoint>();
+    List<GeodeticPoint> pointList = new ArrayList<GeodeticPoint>();
     for (int i = 0; i < nbLineStep; i++) {
         int currentLine = minLine + i * lineStep;
         for (int j = 0; j < nbPxStep; j++) {
@@ -143,7 +143,7 @@ In a similar way as in the first tutorial [direct location](./direct-location.ht
             }
             // Store the GeodeticPoint to write longitude and altitude later
             pointList.add(point);
-            }
+
         }
         for (GeodeticPoint point : pointList) {
             if (point != null) {
