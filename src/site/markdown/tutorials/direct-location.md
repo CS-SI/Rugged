@@ -21,8 +21,9 @@ list of positions, velocities and attitude quaternions recorded during the acqui
 passing all this information to Rugged, we will be able to precisely locate each point of
 the image on the Earth. Well, not exactly precise, as this first tutorial does not use a
 Digital Elevation Model, but considers the Earth as an ellipsoid. The DEM will be added in
-a second tutorial. The objective here is limited to explain how to initialize everything
-Rugged needs to know about the sensor and the acquisition.   
+a second tutorial [Direct location with DEM](./direct-location-with-DEM.html). The objective
+here is limited to explain how to initialize everything Rugged needs to know about the sensor
+and the acquisition.   
 
 
 ## Sensor's definition
@@ -30,7 +31,6 @@ Rugged needs to know about the sensor and the acquisition.
 
 Let's start by defining the imager. The sensor model is described by its viewing geometry
 (i.e. the line of sight of each physical pixel) and by its datation model.
-
 
 ### Line of sight
 
@@ -58,8 +58,8 @@ The viewing direction of pixel i with respect to the instrument is defined by th
 The instrument is oriented 10° off nadir around the X-axis, we need to rotate the viewing
 direction to obtain the line of sight in the satellite frame
 
-    Rotation rotation = new Rotation(axis, FastMath.toRadians(10));
-    viewDir = rotation.applyTo(viewDir);
+    Rotation rotation = new Rotation(Vector3D.PLUS_I, FastMath.toRadians(10));
+    Vector3D los = rotation.applyTo(viewDir);
 
 The viewing direction is the line of sight of one pixel. In the case of a single line sensor,
 Rugged expects to receive an array of LOS. The LOS can be time dependent (useful when applying
@@ -69,7 +69,6 @@ instantiated from the viewing direction vector.
 
     List<TimeDependentLOS> lineOfSight = new ArrayList<TimeDependentLOS>();
     lineOfSight.add(new FixedLOS(los));
-
 
 ### Datation model
 
@@ -115,13 +114,12 @@ auxiliary telemetry.
 
 Note that for simulation purpose, we could also use Orekit to simulate the orbit. It offers very
 convenient functions to propagate sun-synchronous orbits with yaw steering compensation (typical
-orbits for Earth Observation satellites).  
- 
+orbits for Earth Observation satellites).
 
 ### Reference frames
 
 
-Rugged expects the positions, velocities and quaternions to be expressed in an inertial frame.
+Rugged expects the positions (unit: m), velocities (unit: m/s) and quaternions to be expressed in an inertial frame.
 All standard inertial and terrestrial frames are implemented in Orekit, so we just need to specify
 which frames we are using and convert if necessary. 
 
@@ -131,16 +129,16 @@ bulletins and other physical data are provided within the orekit-data folder. Th
 to configure Orekit to use this data. More information is given
 [here](https://www.orekit.org/forge/projects/orekit/wiki/Configuration).
 
-In our application, we simply need to know the name of the frames we are working with. Position and
+In our application, we simply need to know the name of the frames we are working with. Positions and
 velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
 inertial frame.  
 
     import org.orekit.frames.Frame;
     import org.orekit.frames.FramesFactory;
+    import org.orekit.utils.IERSConventions;
     Frame eme2000 = FramesFactory.getEME2000();
     boolean simpleEOP = true; // we don't want to compute tiny tidal effects at millimeter level
     Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, simpleEOP);
-
 
 ### Satellite attitude
 
@@ -148,32 +146,37 @@ inertial frame.
 The attitude quaternions are grouped in a list of TimeStampedAngularCoordinates objects: 
 
     import org.orekit.utils.TimeStampedAngularCoordinates;
-    List<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();`
+    List<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
 
-Each attitude sample (quaternion, time) is added to the list  
+Each attitude sample (quaternion, time) is added to the list, 
 
     AbsoluteDate attitudeDate = new AbsoluteDate(gpsDateAsString, TimeScalesFactory.getGPS());
-    Rotation rotation = new Rotation(q0, q1, q2, q3, true); //q0 is the scalar term
+    Rotation rotation = new Rotation(q0, q1, q2, q3, true); // q0 is the scalar term
     Vector3D rotationRate = Vector3D.ZERO;
-    TimeStampedAngularCoordinates pair = new TimeStampedAngularCoordinates(attitudeDate, rotation, rotationRate); 
-    satelliteQList.add(pair);`
+    Vector3D rotationAcceleration = Vector3D.ZERO;
+    TimeStampedAngularCoordinates pair = new TimeStampedAngularCoordinates(attitudeDate, rotation, rotationRate, rotationAcceleration); 
+    satelliteQList.add(pair);
+
+where, for instance, gpsDateAsString is set to "2009-12-11T10:49:55.899994"
 
 ### Position and velocities
 
 
-Similarly the position and velocities will be set in a list of `TimeStampedPVCoordinates`. Before being
+Similarly the positions and velocities will be set in a list of `TimeStampedPVCoordinates`. Before being
 added to the list, they must be transformed to EME2000: 
 
+    import org.orekit.utils.TimeStampedPVCoordinates;
+    import org.orekit.utils.PVCoordinates;
+    import org.orekit.frames.Transform;
     List<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
     AbsoluteDate ephemerisDate = new AbsoluteDate(gpsDateAsString, TimeScalesFactory.getGPS());
-    Vector3D position = new Vector3D(px, py, pz);
-    Vector3D velocity = new Vector3D(vx, vy, vz);
+    Vector3D position = new Vector3D(px, py, pz); // in ITRF, unit: m 
+    Vector3D velocity = new Vector3D(vx, vy, vz); // in ITRF, unit: m/s
     PVCoordinates pvITRF = new PVCoordinates(position, velocity);
     Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
-    PVCoordinates pvEME2000 = transform.transformPVCoordinates(pITRF); 
-    satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000));
+    PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF); 
+    satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pvEME2000.getPosition(), pvEME2000.getVelocity(), Vector3D.ZERO)));
 
- 
 ## Rugged initialization
 
 
@@ -190,13 +193,13 @@ Finally we can initialize Rugged. It looks like this:
     import org.orekit.utils.IERSConventions;
     Rugged rugged = new Rugged (demTileUpdater, nbTiles,  demAlgoId, 
                                 EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                acquisitionStartDate, acquisitionStopDate, timeTolerance,
+                                acquisitionStartDate, acquisitionStopDate, tStep, timeTolerance,
                                 satellitePVList, nbPVPoints, CartesianDerivativesFilter.USE_P,
-                                satelliteQList, nbQPoints, AngularDerivativesFilter.USE_R, 0.1);
+                                satelliteQList, nbQPoints, AngularDerivativesFilter.USE_R);
 
 Argh, that sounds complicated. It is not so difficult since we have already defined most of what is
 needed. Let's describe the arguments line by line:
- 
+
 The first 3 are related to the DEM. Since we are ignoring the DEM, they can be set respectively to
 `null`, `0` and `AlgorithmId.IGNORE_DEM_USE_ELLIPSOID`.
 
@@ -204,7 +207,8 @@ The next 3 arguments defines the ellipsoid and the reference frames: `EllipsoidI
 `InertialFrameId.EME2000`, `BodyRotatingFrameId.ITRF`
 
 On the third line, we find the time interval of the acquisition: acquisitionStartDate, acquisitionStopDate,
-timeTolerance (margin allowed for extrapolation, in seconds). This is an important information as Rugged
+tStep (step at which the pre-computed frames transforms cache will be filled), timeTolerance (margin
+allowed for extrapolation, in seconds). This is an important information as Rugged
 will pre-compute a lot of stuff at initialization in order to optimize further calls to the direct and
 inverse location functions. 
 
@@ -217,25 +221,18 @@ The sensor models are added after initialization. We can add as many as we want.
 
     rugged.addLineSensor(lineSensor);
 
-
-
 ## Direct location
 
 Finally everything is set to do some real work. Let's try to locate a point on Earth 
 
 Upper left point (first line, first pixel): 
 
+    import org.orekit.bodies.GeodeticPoint;
     Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
     AbsoluteDate firstLineDate = lineSensor.getDate(1);
     Vector3D los = lineSensor.getLos(firstLineDate, 0);
     GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
 
-
-The results are ....
-
-
-
-
 ## Source code 
 
-The source code is available in ....
+The source code is available in DirectLocation.java
