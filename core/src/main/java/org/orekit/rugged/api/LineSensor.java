@@ -73,7 +73,7 @@ public class LineSensor {
 
     /** Get the pixel normalized line-of-sight at some date.
      * @param date current date
-     * @param i pixel index (must be between 0 and {@link #getNbPixels()}
+     * @param i pixel index (must be between 0 and {@link #getNbPixels() - 1}
      * @return pixel normalized line-of-sight
      */
     public Vector3D getLos(final AbsoluteDate date, final int i) {
