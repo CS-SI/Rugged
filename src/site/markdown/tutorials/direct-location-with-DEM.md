@@ -114,8 +114,6 @@ Initialize Rugged with these parameters :
                                satellitePVList, 6, CartesianDerivativesFilter.USE_P, 
                                satelliteQList, 8, AngularDerivativesFilter.USE_R);
 
-  
-
 ## Computing a direct location grid
 
 In a similar way as in the first tutorial [direct location](./direct-location.html), we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk. 
@@ -124,8 +122,9 @@ In a similar way as in the first tutorial [direct location](./direct-location.ht
     int lineStep = (maxLine - minLine) / nbLineStep;
     int pxStep = (maxPx - minPx) / nbPxStep;
 
-    List<GeodeticPoint> pointList = new ArrayList<GeodeticPoint>();
-    for (int i = 0; i < nbLineStep; i++) {
+     for (int i = 0; i < nbLineStep; i++) {
+
+        List<GeodeticPoint> pointList = new ArrayList<GeodeticPoint>(nbPxStep);
         int currentLine = minLine + i * lineStep;
         for (int j = 0; j < nbPxStep; j++) {
             int currentPx = minPx + j * pxStep;
@@ -133,17 +132,14 @@ In a similar way as in the first tutorial [direct location](./direct-location.ht
             Vector3D position = lineSensor.getPosition();
             AbsoluteDate currentLineDate = lineSensor.getDate(currentLine);
             Vector3D los = lineSensor.getLos(absDate, currentPx);
-            GeodeticPoint point = rugged.directLocation(currentLineDate, position, los);
-
-            // Write latitude
+            pointList.add(rugged.directLocation(currentLineDate, position, los));
+        }
+        for (GeodeticPoint point : pointList) {
             if (point != null) {
                 dos.writeFloat((float) FastMath.toDegrees(point.getLatitude()));
             } else {
                 dos.writeFloat((float) base);
             }
-            // Store the GeodeticPoint to write longitude and altitude later
-            pointList.add(point);
-
         }
         for (GeodeticPoint point : pointList) {
             if (point != null) {
@@ -159,7 +155,7 @@ In a similar way as in the first tutorial [direct location](./direct-location.ht
                 dos.writeFloat((float) base);
             }
         }
-
+    }
 
 ## Source code
 The source code is available in DirectLocationGrid.java

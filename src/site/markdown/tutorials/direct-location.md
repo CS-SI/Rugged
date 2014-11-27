@@ -21,9 +21,8 @@ list of positions, velocities and attitude quaternions recorded during the acqui
 passing all this information to Rugged, we will be able to precisely locate each point of
 the image on the Earth. Well, not exactly precise, as this first tutorial does not use a
 Digital Elevation Model, but considers the Earth as an ellipsoid. The DEM will be added in
-a second tutorial [Direct location with DEM](./direct-location-with-DEM.html). The objective
-here is limited to explain how to initialize everything Rugged needs to know about the sensor
-and the acquisition.   
+a second tutorial [Direct location with DEM](./direct-location-with-DEM.html). The objective here is limited to explain how to initialize everything
+Rugged needs to know about the sensor and the acquisition.   
 
 
 ## Sensor's definition
@@ -199,22 +198,22 @@ Finally we can initialize Rugged. It looks like this:
 
 Argh, that sounds complicated. It is not so difficult since we have already defined most of what is
 needed. Let's describe the arguments line by line:
-
+ 
 The first 3 are related to the DEM. Since we are ignoring the DEM, they can be set respectively to
 `null`, `0` and `AlgorithmId.IGNORE_DEM_USE_ELLIPSOID`.
 
-The next 3 arguments defines the ellipsoid and the reference frames: `EllipsoidId.WGS84`,
+The next 3 arguments define the ellipsoid and the reference frames: `EllipsoidId.WGS84`,
 `InertialFrameId.EME2000`, `BodyRotatingFrameId.ITRF`
 
 On the third line, we find the time interval of the acquisition: acquisitionStartDate, acquisitionStopDate,
 tStep (step at which the pre-computed frames transforms cache will be filled), timeTolerance (margin
-allowed for extrapolation, in seconds). This is an important information as Rugged
+allowed for extrapolation during inverse location, in seconds. A few lines must be taken into account like: timeTolerance = 5/lineSensor.getRate(0)). This is an important information as Rugged
 will pre-compute a lot of stuff at initialization in order to optimize further calls to the direct and
 inverse location functions. 
 
 On the fourth line, the arguments are the list of time-stamped positions and velocities as well as options
-for interpolation: number of points to use and type of filter for derivatives. We find the same arguments
-on the last line for the attitude quaternions. 
+for interpolation: number of points to use and type of filter for derivatives. The interpolation polynomials for nbPVPoints without any derivatives (case of CartesianDerivativesFilter.USE_P: only positions are used, without velocities) have a degree nbPVPoints - 1. In case of computation with velocities included (case of CartesianDerivativesFilter.USE_PV), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the positions/velocities data are of good quality and spaced by a few seconds, one may choose only a few points but interpolate with both positions and velocities; in other cases, one may choose more points but interpolate only with positions.
+We find the same arguments on the last line for the attitude quaternions. 
 
 
 The sensor models are added after initialization. We can add as many as we want. 
