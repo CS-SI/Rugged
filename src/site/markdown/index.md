@@ -15,9 +15,11 @@
 Overview
 ========
 
-  Rugged is an add-on for Orekit handling Digital Elevation Models
+  Rugged is an add-on for Orekit handling Digital Elevation Models (DEM)
   contribution to line of sight computation. It is a free software
   intermediate-level library written in Java.
+
+  ![Earth_FlatVsRugged.gif](./images/Earth_FlatVsRugged.gif)
 
   It mainly provides direct and inverse location, i.e. it allows
   to compute accurately which ground point is looked at from a specific
@@ -27,6 +29,9 @@ Overview
   Elevation Model, Earth rotation will all its tiny irregularities,
   on-board sensor pixels individual line-of-sights, spacecraft motion and
   attitude and several physical effects.
+
+![RuggedExplained.png](./images/RuggedExplained.png)
+ *Effects of taking into account the DEM in the computation of latitude, longitude and altitude*
 
   Direct and inverse location can be used to perform full ortho-rectification
   of images and correlation between sensors observing the same area.

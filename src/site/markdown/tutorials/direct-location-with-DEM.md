@@ -16,6 +16,9 @@
 
 The aim of this tutorial is to compute a direct location grid by intersection of the line of sight with a DEM (Digital Elevation Model), using Duvenhage's algorithm. This algorithm is the most performant one in Rugged. 
 
+The following figure shows the effects of taking into account the DEM in the computation of latitude, longitude and altitude:
+
+![RuggedExplained.png](../images/RuggedExplained.png)
 
 ## Feeding Rugged with DEM tiles
 
@@ -88,15 +91,16 @@ Here's the source code of the class `VolcanicConeElevationUpdater` :
 * In Rugged terminology, the minimum latitude and longitude correspond to the centre of the farthest Southwest cell of the DEM. Be careful if using GDAL to pass the correct information as there is half a pixel shift with respect to the lower left corner coordinates in gdalinfo.
 
 The following diagram illustrates proper DEM tiling with one line/column overlaps between neighbouring tiles :
-![DEM tiles overlap](../images/DEM-tiles-overlap.png)
+
+![DEM-tiles-overlap.png](../images/DEM-tiles-overlap.png)
 
 This diagram tries to represent the meaning of the different parameters in the definition of a tile :
 
-![tile description](../images/tile-description.png)
+![tile-description.png](../images/tile-description.png)
 
 ## Initializing Rugged with a DEM
 
-The initialization step differs slightly from the first tutorial [[DirectLocation|Direct location]], as we need to pass the information about our TileUpdater.  
+The initialization step differs slightly from the first tutorial [Direct location](direct-location.html), as we need to pass the information about our TileUpdater.  
 
 Instantiate an object derived from TileUpdater :
 
@@ -116,7 +120,7 @@ Initialize Rugged with these parameters :
 
 ## Computing a direct location grid
 
-In a similar way as in the first tutorial [direct location](./direct-location.html), we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk. 
+In a similar way as in the first tutorial [[DirectLocation|Direct location]], we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk. 
 
     DataOutputStream dos = new DataOutputStream(new FileOutputStream("demDirectLoc.c1"));
     int lineStep = (maxLine - minLine) / nbLineStep;

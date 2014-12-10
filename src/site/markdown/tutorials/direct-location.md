@@ -21,7 +21,7 @@ list of positions, velocities and attitude quaternions recorded during the acqui
 passing all this information to Rugged, we will be able to precisely locate each point of
 the image on the Earth. Well, not exactly precise, as this first tutorial does not use a
 Digital Elevation Model, but considers the Earth as an ellipsoid. The DEM will be added in
-a second tutorial [Direct location with DEM](./direct-location-with-DEM.html). The objective here is limited to explain how to initialize everything
+a second tutorial [Direct location with DEM](direct-location-with-DEM.html). The objective here is limited to explain how to initialize everything
 Rugged needs to know about the sensor and the acquisition.   
 
 
@@ -215,6 +215,20 @@ On the fourth line, the arguments are the list of time-stamped positions and vel
 for interpolation: number of points to use and type of filter for derivatives. The interpolation polynomials for nbPVPoints without any derivatives (case of CartesianDerivativesFilter.USE_P: only positions are used, without velocities) have a degree nbPVPoints - 1. In case of computation with velocities included (case of CartesianDerivativesFilter.USE_PV), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the positions/velocities data are of good quality and spaced by a few seconds, one may choose only a few points but interpolate with both positions and velocities; in other cases, one may choose more points but interpolate only with positions.
 We find the same arguments on the last line for the attitude quaternions. 
 
+Rugged takes into account by default some corrections for more accurate locations: 
+
+* light time correction (compensates or not light time between ground and spacecraft). 
+* aberration of light correction (compensates or not aberration of light, which is velocity composition between light and spacecraft when the light from ground points reaches the sensor).
+
+Not compensating the delay or the velocity composition are mainly useful for validation purposes against system that do not compensate it. When the pixels line of sight already includes the aberration of light correction, one must obviously deactivate the correction.
+In order not to take into account those corrections, one must finalize Rugged initialization by setting the related flags to false:
+
+    rugged.setLightTimeCorrection(false);
+
+or
+
+    rugged.setAberrationOfLightCorrection(false);
+
 
 The sensor models are added after initialization. We can add as many as we want. 
 
@@ -223,12 +237,11 @@ The sensor models are added after initialization. We can add as many as we want.
 ## Direct location
 
 Finally everything is set to do some real work. Let's try to locate a point on Earth 
-
-Upper left point (first line, first pixel): 
+for upper left point (first line, first pixel): 
 
     import org.orekit.bodies.GeodeticPoint;
     Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
-    AbsoluteDate firstLineDate = lineSensor.getDate(1);
+    AbsoluteDate firstLineDate = lineSensor.getDate(0);
     Vector3D los = lineSensor.getLos(firstLineDate, 0);
     GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
 
