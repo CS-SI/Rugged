@@ -6,15 +6,7 @@
     <format>zip</format>
   </formats>
   <componentDescriptors>
-    <componentDescriptor>src/main/assembly/misc-files.xml</componentDescriptor>
-    <componentDescriptor>src/main/assembly/jar-files.xml</componentDescriptor>
+    <componentDescriptor>src/assembly/misc-files.xml</componentDescriptor>
+    <componentDescriptor>src/assembly/jar-files.xml</componentDescriptor>
   </componentDescriptors>
-  <moduleSets>
-    <moduleSet>
-      <includes>
-        <include>org.orekit:rugged-aster</include>
-        <include>org.orekit:rugged-core</include>
-      </includes>
-    </moduleSet>
-  </moduleSets>
 </assembly>

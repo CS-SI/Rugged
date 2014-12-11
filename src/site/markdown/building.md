@@ -38,12 +38,13 @@ installation procedure.
 As with all maven enabled projects, building Rugged is straightforward, simply
 run:
 
-    mvn assembly:single
+    mvn package
 
 The preceding command will perform all dependencies retrieval, compilation,
-tests and packaging for you. At the end, it will create several files named
-{module}/target/rugged-{module}-x.y.jar where {module} is the module name (aster,
-core, ...) and x.y is the version number.
+tests and packaging for you. At the end, it will create several files in
+the target directory, including one file named rugged-x.y.jar where x.y is
+the version number. This is the jar file you can use in your project using
+Rugged.
 
 If you need to configure a proxy server for dependencies retrieval, see
 the [Guide to using proxies](http://maven.apache.org/guides/mini/guide-proxies.html)
@@ -78,14 +79,10 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
      directory where you unpacked Rugged
 
   * set the source folders to
-    * core/src/main/java
-	* aster/src/main/java
-	* core/src/test/java
-	* aster/src/test/java
-	* core/src/main/resources
-	* aster/src/main/resources
-	* core/src/test/resources
-	* aster/src/test/resources
+    * src/main/java
+	* src/test/java
+	* src/main/resources
+	* src/test/resources
 
     in the source tab of the Configure Build Path dialog
 

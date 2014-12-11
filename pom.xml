@@ -3,10 +3,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.orekit</groupId>
-  <artifactId>rugged-parent</artifactId>
+  <artifactId>rugged</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>Rugged Parent</name>
+  <packaging>bundle</packaging>
+  <name>Rugged</name>
 
   <inceptionYear>2014</inceptionYear>
   <description>
@@ -21,7 +21,7 @@
     <maven.compiler.target>1.6</maven.compiler.target>
     <rugged.maven-compiler-plugin.version>3.2</rugged.maven-compiler-plugin.version>
     <rugged.maven-jar-plugin.version>2.5</rugged.maven-jar-plugin.version>
-    <rugged.maven-assembly-plugin.version>2.5.1</rugged.maven-assembly-plugin.version>
+    <rugged.maven-assembly-plugin.version>2.5.2</rugged.maven-assembly-plugin.version>
     <rugged.maven-bundle-plugin.version>2.5.3</rugged.maven-bundle-plugin.version>
     <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
     <rugged.maven-clean-plugin.version>2.6.1</rugged.maven-clean-plugin.version>
@@ -115,11 +115,6 @@
     </mailingList>
   </mailingLists>
 
-  <modules>
-    <module>core</module>
-    <module>aster</module>
-  </modules>
-
   <distributionManagement>
     <site>
       <id>rugged.website</id>
@@ -128,8 +123,32 @@
     </site>
   </distributionManagement>
 
+  <dependencies>
+    <dependency>
+        <groupId>org.orekit</groupId>
+        <artifactId>orekit</artifactId>
+        <version>7.0-SNAPSHOT</version>
+        <type>jar</type>
+        <optional>false</optional>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-math3</artifactId>
+        <version>3.3</version>
+        <type>jar</type>
+        <optional>false</optional>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <type>jar</type>
+      <scope>test</scope>
+      <optional>false</optional>
+    </dependency>
+  </dependencies>
+
   <build>
-    <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -155,8 +174,8 @@
           <version>${rugged.maven-assembly-plugin.version}</version>
           <configuration>
             <descriptors>
-              <descriptor>src/main/assembly/source-assembly.xml</descriptor>
-              <descriptor>src/main/assembly/binary-assembly.xml</descriptor>
+              <descriptor>src/assembly/source-assembly.xml</descriptor>
+              <descriptor>src/assembly/binary-assembly.xml</descriptor>
             </descriptors>
           </configuration>
           <executions>
@@ -184,9 +203,6 @@
           <artifactId>maven-site-plugin</artifactId>
           <version>${rugged.maven-site-plugin.version}</version>
         </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
      <plugin>
        <groupId>com.github.jeluard</groupId>
        <artifactId>maven-plantuml-plugin</artifactId>
@@ -220,6 +236,27 @@
          </dependency>
        </dependencies>
      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${rugged.maven-bundle-plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>org.orekit.rugged.api.*;version=${project.version};-noimport:=true</Export-Package>
+            <Bundle-DocURL>${project.url}</Bundle-DocURL>
+          </instructions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>bundle-manifest</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -242,7 +279,7 @@
         <configuration>
           <threshold>Normal</threshold>
           <effort>Default</effort>
-          <excludeFilterFile>${project.parent.basedir}/findbugs-exclude-filter.xml</excludeFilterFile>
+          <excludeFilterFile>${basedir}/findbugs-exclude-filter.xml</excludeFilterFile>
        </configuration>
       </plugin>
       <plugin>
@@ -263,9 +300,9 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${rugged.maven-checkstyle-plugin.version}</version>
         <configuration>
-          <configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
+          <configLocation>${basedir}/checkstyle.xml</configLocation>
           <enableRulesSummary>false</enableRulesSummary>
-          <headerLocation>${project.parent.basedir}/license-header.txt</headerLocation>
+          <headerLocation>${basedir}/license-header.txt</headerLocation>
         </configuration>
         <reportSets>
           <reportSet>

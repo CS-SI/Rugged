@@ -3,7 +3,4 @@ bin
 .project
 .settings
 target
-core/target
-aster/target
-aster/src/test/resources/org/orekit/rugged/geotiff/ASTGTM2_*.zip
 
