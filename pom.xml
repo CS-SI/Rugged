@@ -25,7 +25,6 @@
     <rugged.maven-bundle-plugin.version>2.5.3</rugged.maven-bundle-plugin.version>
     <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
     <rugged.maven-clean-plugin.version>2.6.1</rugged.maven-clean-plugin.version>
-    <rugged.jacoco-maven-plugin.version>0.7.2.201409121644</rugged.jacoco-maven-plugin.version>
     <rugged.maven-plantuml-plugin.version>7940</rugged.maven-plantuml-plugin.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
     <rugged.maven-site-plugin.version>3.4</rugged.maven-site-plugin.version>
@@ -181,73 +180,6 @@
           <version>${rugged.maven-clean-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${rugged.jacoco-maven-plugin.version}</version>
-          <executions>
-            <execution>
-              <id>prepare-agent</id>
-              <phase>process-test-classes</phase>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>report</id>
-              <phase>site</phase>
-              <goals>
-                <goal>report</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>check</id>
-              <goals>
-                <goal>check</goal>
-              </goals>
-              <configuration>
-                <rules>
-                  <rule>
-                    <element>BUNDLE</element>
-                    <limits>
-                      <limit>
-                        <counter>CLASS</counter>
-                        <value>COVEREDRATIO</value>
-                        <minimum>1.00</minimum>
-                      </limit>
-                      <limit>
-                        <counter>INSTRUCTION</counter>
-                        <value>COVEREDRATIO</value>
-                        <minimum>0.90</minimum>
-                      </limit>
-                      <limit>
-                        <counter>METHOD</counter>
-                        <value>COVEREDRATIO</value>
-                        <minimum>0.95</minimum>
-                      </limit>
-                      <limit>
-                        <counter>BRANCH</counter>
-                        <value>COVEREDRATIO</value>
-                        <minimum>0.85</minimum>
-                      </limit>
-                      <limit>
-                        <counter>COMPLEXITY</counter>
-                        <value>COVEREDRATIO</value>
-                        <minimum>0.85</minimum>
-                      </limit>
-                      <limit>
-                        <counter>LINE</counter>
-                        <value>COVEREDRATIO</value>
-                        <minimum>0.90</minimum>
-                      </limit>
-                    </limits>
-                  </rule>
-                </rules>
-                <haltOnFailure>false</haltOnFailure>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
           <version>${rugged.maven-site-plugin.version}</version>
@@ -302,11 +234,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>${rugged.maven-project-info-reports-plugin.version}</version>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${rugged.jacoco-maven-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
