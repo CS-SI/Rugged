@@ -55,4 +55,20 @@ public class NormalizedGeodeticPoint extends GeodeticPoint {
         return normalizedLongitude;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object object) {
+        // we override the method just to make it clear that we INTENTIONALLY
+        // consider normalized point are just similar to regular points
+        return super.equals(object);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        // we override the method just to make it clear that we INTENTIONALLY
+        // consider normalized point are just similar to regular points
+        return super.hashCode();
+    }
+
 }

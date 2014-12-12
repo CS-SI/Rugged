@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.raster;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -341,7 +342,10 @@ public class TilesCache<T extends Tile> {
     }
 
     /** Comparator for sorting with respect to latitude. */
-    private static class LatitudeComparator implements Comparator<LatitudeProvider> {
+    private static class LatitudeComparator implements Comparator<LatitudeProvider>, Serializable {
+
+        /** Serializable UID. */
+        private static final long serialVersionUID = 20141212L;
 
         /** {@inheritDoc} */
         @Override
@@ -352,7 +356,10 @@ public class TilesCache<T extends Tile> {
     }
 
     /** Comparator for sorting with respect to longitude. */
-    private static class LongitudeComparator implements Comparator<LongitudeProvider> {
+    private static class LongitudeComparator implements Comparator<LongitudeProvider>, Serializable {
+
+        /** Serializable UID. */
+        private static final long serialVersionUID = 20141212L;
 
         /** {@inheritDoc} */
         @Override
