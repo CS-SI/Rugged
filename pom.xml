@@ -311,9 +311,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
         <version>${rugged.maven-surefire-report-plugin.version}</version>
-        <configuration>
-          <aggregate>true</aggregate>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -324,15 +321,6 @@
           <enableRulesSummary>false</enableRulesSummary>
           <headerLocation>${basedir}/license-header.txt</headerLocation>
         </configuration>
-        <reportSets>
-          <reportSet>
-            <id>aggregate</id>
-            <inherited>false</inherited>
-            <reports>
-              <report>checkstyle</report>
-            </reports>
-          </reportSet>
-        </reportSets>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -356,15 +344,6 @@
         <configuration>
           <linkJavadoc>false</linkJavadoc>
         </configuration>
-        <reportSets>
-          <reportSet>
-            <id>aggregate</id>
-            <inherited>false</inherited>
-            <reports>
-              <report>aggregate</report>
-            </reports>
-          </reportSet>
-        </reportSets>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -379,15 +358,6 @@
           </links>
           <charset>${project.reporting.outputEncoding}</charset>
         </configuration>
-        <reportSets>
-          <reportSet>
-            <id>aggregate</id>
-            <inherited>false</inherited>
-            <reports>
-              <report>aggregate</report>
-            </reports>
-          </reportSet>
-        </reportSets>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
