@@ -82,6 +82,8 @@ Features
 
     * Italian
 
+    * Romanian
+
     * Spanish
 
 Free software

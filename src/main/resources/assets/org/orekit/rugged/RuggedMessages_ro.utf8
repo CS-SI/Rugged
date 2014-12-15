@@ -1,0 +1,44 @@
+# internal error, contact maintenance at {0}
+INTERNAL_ERROR = eroare internă, contactați echipa de întrținere la {0}
+
+# no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
+OUT_OF_TILE_INDICES = date inexistente pentru indicii [{0}, {1}], regiunea oferă acoperire doar pentru intervalul de la [0, 0] la [{2}, {3}] (inclusiv)
+
+# no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
+OUT_OF_TILE_ANGLES = nu există date pentru latitudinea {0} și longitudinea {1}, regiunea oferă acoperire doar pentru latitudini de la {2} la {3} și longitudini de la {4} la {5}
+
+# the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
+TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = regiunea selectată pentru latitudinea {0} și longitudinea {1} nu conține vecinătatea necesară a punctului
+
+# date {0} is out of time span [{1}, {2}]
+OUT_OF_TIME_RANGE = data {0} este în afara intervalului [{1}, {2}]
+
+# general context has not been initialized (missing call to {0})
+UNINITIALIZED_CONTEXT = contextul general nu a fost inițializat (lipsește apelul către {0})
+
+# tile is empty: {0} ⨉ {1}
+EMPTY_TILE = regiunea este vidă: {0} ⨉ {1}
+
+# unknown sensor {0}
+UNKNOWN_SENSOR = senzor necunoscut {0}
+
+# line-of-sight does not reach ground
+LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = linia de vizare nu ajunge la sol
+
+# line-of-sight never crosses latitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE = linia de vizare nu intersectează latitudinea {0}
+
+# line-of-sight never crosses longitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = linia de vizare nu intersectează longitudinea {0}
+
+# line never crosses altitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = linia de vizare nu intersectează altitudinea {0}
+
+# line-of-sight enters the Digital Elevation Model behind spacecraft!
+DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = linia de vizare intră în Modelul Digital de Elevație în spatele navei spațiale!
+
+# frame {0} does not match frame {1} from interpolator dump
+FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = sistemul de coordonate {0} nu se potrivește cu sistemul de coordonate {1} din copia de siguranță a interpolatorului
+
+# data is not an interpolator dump
+NOT_INTERPOLATOR_DUMP_DATA = datele nu reprezintă o copie de siguranță a interpolatorului

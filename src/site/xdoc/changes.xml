@@ -22,6 +22,9 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="add" due-to="Lucian Barbulescu">
+        Added Romanian translation of error messages.
+      </action>
       <action dev="luc" type="update" >
         Use builder pattern and fluent interface to create the top level Rugged instance.
       </action>
