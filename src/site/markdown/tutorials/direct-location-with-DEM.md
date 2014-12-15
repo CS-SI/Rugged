@@ -112,15 +112,20 @@ Instantiate an object derived from TileUpdater :
  
 Initialize Rugged with these parameters :
 
-    Rugged rugged = new Rugged(updater, nbTiles, algoId, 
-                               EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF, 
-                               startDate, stopDate, 0.1, 10.0, 
-                               satellitePVList, 6, CartesianDerivativesFilter.USE_P, 
-                               satelliteQList, 8, AngularDerivativesFilter.USE_R);
+    Rugged rugged = new RuggedBuilder().
+                    setDigitalElevationModel(updater, nbTiles).
+                    setAlgorithm(algoId). 
+                    setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                    setTimeSpan(startDate, stopDate, 0.1, 10.0). 
+                    setTrajectory(InertialFrameId.EME2000,
+                                  satellitePVList, 6, CartesianDerivativesFilter.USE_P, 
+                                  satelliteQList, 8, AngularDerivativesFilter.USE_R).
+                    addLineSensor(lineSensor).
+                    build();
 
 ## Computing a direct location grid
 
-In a similar way as in the first tutorial [[DirectLocation|Direct location]], we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk. 
+In a similar way as in the first tutorial [DirectLocation](./direct-location.html), we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk. 
 
     DataOutputStream dos = new DataOutputStream(new FileOutputStream("demDirectLoc.c1"));
     int lineStep = (maxLine - minLine) / nbLineStep;

@@ -22,6 +22,9 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="update" >
+        Use builder pattern and fluent interface to create the top level Rugged instance.
+      </action>
       <action dev="luc" type="fix" >
         Force geodetic points to remain in the same longitude range as the tile of the
         Digital Elevation Model they belong to.

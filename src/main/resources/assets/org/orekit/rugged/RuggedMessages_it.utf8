@@ -13,8 +13,8 @@ TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = <MISSING TRANSLATION>
 # date {0} is out of time span [{1}, {2}]
 OUT_OF_TIME_RANGE = la data {0} è fuori dell''intervallo temporale [{1}, {2}]
 
-# general context has not been initialized
-UNINITIALIZED_CONTEXT = il contesto generale non è stato inizializzato
+# general context has not been initialized (missing call to {0})
+UNINITIALIZED_CONTEXT = <MISSING TRANSLATION>
 
 # tile is empty: {0} ⨉ {1}
 EMPTY_TILE = il quadrante è vuoto : {0} ⨉ {1}

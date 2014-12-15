@@ -16,51 +16,26 @@
  */
 package org.orekit.rugged.api;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
-import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.PropagationException;
-import org.orekit.frames.Frame;
-import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
-import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
-import org.orekit.rugged.intersection.BasicScanAlgorithm;
-import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
-import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
-import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
-import org.orekit.utils.AngularDerivativesFilter;
-import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.Constants;
-import org.orekit.utils.IERSConventions;
 import org.orekit.utils.PVCoordinates;
-import org.orekit.utils.TimeStampedAngularCoordinates;
-import org.orekit.utils.TimeStampedPVCoordinates;
 
 /** Main class of Rugged library API.
+ * @see RuggedBuilder
  * @author Luc Maisonobe
  */
 public class Rugged {
@@ -106,479 +81,53 @@ public class Rugged {
      * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
      * can be made after construction if these phenomena should not be corrected.
      * </p>
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoidID identifier of reference ellipsoid
-     * @param inertialFrameID identifier of inertial frame used for spacecraft positions/velocities/quaternions
-     * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
-     * @param minDate start of search time span
-     * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
-     * @param pvInterpolationNumber number of points to use for position/velocity interpolation
-     * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param quaternions satellite quaternions with respect to inertial frame
-     * @param aInterpolationNumber number of points to use for attitude interpolation
-     * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @exception RuggedException if data needed for some frame cannot be loaded or if position
-     * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
-     */
-    public Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
-                  final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
-                  final double overshootTolerance,
-                  final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
-                  final CartesianDerivativesFilter pvFilter,
-                  final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                  final AngularDerivativesFilter aFilter)
-        throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID,
-             selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID),
-             minDate, maxDate, tStep, overshootTolerance,
-             positionsVelocities, pvInterpolationNumber, pvFilter,
-             quaternions, aInterpolationNumber, aFilter);
-    }
-
-    /** Build a configured instance.
-     * <p>
-     * By default, the instance performs both light time correction (which refers
-     * to ground point motion with respect to inertial frame) and aberration of
-     * light correction (which refers to spacecraft proper velocity). Explicit calls
-     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
-     * can be made after construction if these phenomena should not be corrected.
-     * </p>
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoid reference ellipsoid
-     * @param inertialFrame inertial frame used for spacecraft positions/velocities/quaternions
-     * @param minDate start of search time span
-     * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
-     * @param pvInterpolationNumber number of points to use for position/velocity interpolation
-     * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param quaternions satellite quaternions with respect to inertial frame
-     * @param aInterpolationNumber number of points to use for attitude interpolation
-     * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @exception RuggedException if data needed for some frame cannot be loaded or if position
-     * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
-     */
-    public Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
-                  final double overshootTolerance,
-                  final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
-                  final CartesianDerivativesFilter pvFilter,
-                  final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                  final AngularDerivativesFilter aFilter)
-        throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID, ellipsoid,
-             createInterpolator(inertialFrame, ellipsoid.getBodyFrame(),
-                                minDate, maxDate, tStep, overshootTolerance,
-                                positionsVelocities, pvInterpolationNumber, pvFilter,
-                                quaternions, aInterpolationNumber, aFilter));
-    }
-
-    /** Build a configured instance.
-     * <p>
-     * By default, the instance performs both light time correction (which refers
-     * to ground point motion with respect to inertial frame) and aberration of
-     * light correction (which refers to spacecraft proper velocity). Explicit calls
-     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
-     * can be made after construction if these phenomena should not be corrected.
-     * </p>
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoidID identifier of reference ellipsoid
-     * @param inertialFrameID identifier of inertial frame for spacecraft positions/velocities/quaternions
-     * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
-     * @param minDate start of search time span
-     * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
-     * @param interpolationNumber number of points to use for inertial/Earth/spacraft transforms interpolations
-     * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param propagator global propagator
-     * @exception RuggedException if data needed for some frame cannot be loaded
-     */
-    public Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
-                  final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
-                  final double overshootTolerance,
-                  final double interpolationStep, final int interpolationNumber,
-                  final CartesianDerivativesFilter pvFilter, final AngularDerivativesFilter aFilter,
-                  final Propagator propagator)
-        throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID,
-             selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID),
-             minDate, maxDate, tStep, overshootTolerance,
-             interpolationStep, interpolationNumber, pvFilter, aFilter, propagator);
-    }
-
-    /** Build a configured instance.
-     * <p>
-     * By default, the instance performs both light time correction (which refers
-     * to ground point motion with respect to inertial frame) and aberration of
-     * light correction (which refers to spacecraft proper velocity). Explicit calls
-     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
-     * can be made after construction if these phenomena should not be corrected.
-     * </p>
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
+     * @param algorithm algorithm to use for Digital Elevation Model intersection
      * @param ellipsoid f reference ellipsoid
-     * @param inertialFrame inertial frame for spacecraft positions/velocities/quaternions
-     * @param minDate start of search time span
-     * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
-     * @param interpolationNumber number of points of to use for inertial/Earth/spacraft transforms interpolations
-     * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param propagator global propagator
-     * @exception RuggedException if data needed for some frame cannot be loaded
-     */
-    public Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
-                  final double overshootTolerance,
-                  final double interpolationStep, final int interpolationNumber,
-                  final CartesianDerivativesFilter pvFilter, final AngularDerivativesFilter aFilter,
-                  final Propagator propagator)
-        throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID, ellipsoid,
-             createInterpolator(inertialFrame, ellipsoid.getBodyFrame(),
-                                minDate, maxDate, tStep, overshootTolerance,
-                                interpolationStep, interpolationNumber, pvFilter, aFilter, propagator));
-    }
-
-    /** Build a configured instance, reusing the interpolator dumped from a previous instance.
-     * <p>
-     * By default, the instance performs both light time correction (which refers
-     * to ground point motion with respect to inertial frame) and aberration of
-     * light correction (which refers to spacecraft proper velocity). Explicit calls
-     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
-     * can be made after construction if these phenomena should not be corrected.
-     * </p>
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoidID identifier of reference ellipsoid
-     * @param inertialFrameID identifier of inertial frame for spacecraft positions/velocities/quaternions
-     * @param bodyRotatingFrameID identifier of body rotating frame for observed ground points
-     * @param dumpStream stream from where to read previous instance dumped interpolator
-     * (caller opened it and remains responsible for closing it)
-     * @exception RuggedException if dump file cannot be loaded
-     * or if frames do not match the ones referenced in the dump file
-     * @see #dumpInterpolator(OutputStream)
-     */
-    public Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final EllipsoidId ellipsoidID,
-                  final InertialFrameId inertialFrameID, final BodyRotatingFrameId bodyRotatingFrameID,
-                  final InputStream dumpStream)
-        throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID,
-             selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)),
-             selectInertialFrame(inertialFrameID), dumpStream);
-    }
-
-    /** Build a configured instance, reusing the interpolator dumped from a previous instance.
-     * <p>
-     * By default, the instance performs both light time correction (which refers
-     * to ground point motion with respect to inertial frame) and aberration of
-     * light correction (which refers to spacecraft proper velocity). Explicit calls
-     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
-     * can be made after construction if these phenomena should not be corrected.
-     * </p>
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoid reference ellipsoid
-     * @param inertialFrame inertial frame for spacecraft positions/velocities/quaternions
-     * @param dumpStream stream from where to read previous instance dumped interpolator
-     * (caller opened it and remains responsible for closing it)
-     * @exception RuggedException if dump file cannot be loaded
-     * or if frames do not match the ones referenced in the dump file
-     * @see #dumpInterpolator(OutputStream)
-     */
-    public Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid, final Frame inertialFrame,
-                  final InputStream dumpStream)
-        throws RuggedException {
-        this(updater, maxCachedTiles, algorithmID, ellipsoid,
-             createInterpolator(inertialFrame, ellipsoid.getBodyFrame(), dumpStream));
-    }
-
-    /** Build a configured instance.
-     * <p>
-     * By default, the instance performs both light time correction (which refers
-     * to ground point motion with respect to inertial frame) and aberration of
-     * light correction (which refers to spacecraft proper velocity). Explicit calls
-     * to {@link #setLightTimeCorrection(boolean) setLightTimeCorrection}
-     * and {@link #setAberrationOfLightCorrection(boolean) setAberrationOfLightCorrection}
-     * can be made after construction if these phenomena should not be corrected.
-     * </p>
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
-     * @param ellipsoid f reference ellipsoid
+     * @param lightTimeCorrection if true, the light travel time between ground
+     * @param aberrationOfLightCorrection if true, the aberration of light
+     * is corrected for more accurate location
+     * and spacecraft is compensated for more accurate location
      * @param scToBody transforms interpolator
+     * @param sensors sensors
      */
-    private Rugged(final TileUpdater updater, final int maxCachedTiles,
-                  final AlgorithmId algorithmID, final OneAxisEllipsoid ellipsoid,
-                  final SpacecraftToObservedBody scToBody) {
+    Rugged(final IntersectionAlgorithm algorithm, final ExtendedEllipsoid ellipsoid,
+           final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
+           final SpacecraftToObservedBody scToBody, final Collection<LineSensor> sensors) {
 
         // space reference
-        this.ellipsoid = extend(ellipsoid);
+        this.ellipsoid = ellipsoid;
 
         // orbit/attitude to body converter
         this.scToBody = scToBody;
 
         // intersection algorithm
-        this.algorithm = selectAlgorithm(algorithmID, updater, maxCachedTiles);
+        this.algorithm = algorithm;
 
         this.sensors = new HashMap<String, LineSensor>();
+        for (final LineSensor s : sensors) {
+            this.sensors.put(s.getName(), s);
+        }
         this.finders = new HashMap<String, SensorMeanPlaneCrossing>();
 
-        setLightTimeCorrection(true);
-        setAberrationOfLightCorrection(true);
+        this.lightTimeCorrection         = lightTimeCorrection;
+        this.aberrationOfLightCorrection = aberrationOfLightCorrection;
 
-    }
-
-    /** Create a transform interpolator from positions and quaternions lists.
-     * @param inertialFrame inertial frame
-     * @param bodyFrame observed body frame
-     * @param minDate start of search time span
-     * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param positionsVelocities satellite position and velocity
-     * @param pvInterpolationNumber number of points to use for position/velocity interpolation
-     * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param quaternions satellite quaternions
-     * @param aInterpolationNumber number of points to use for attitude interpolation
-     * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @return transforms interpolator
-     * @exception RuggedException if data needed for some frame cannot be loaded or if position
-     * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
-     */
-    private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
-                                                               final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                                               final double tStep, final double overshootTolerance,
-                                                               final List<TimeStampedPVCoordinates> positionsVelocities,
-                                                               final int pvInterpolationNumber,
-                                                               final CartesianDerivativesFilter pvFilter,
-                                                               final List<TimeStampedAngularCoordinates> quaternions,
-                                                               final int aInterpolationNumber,
-                                                               final AngularDerivativesFilter aFilter)
-        throws RuggedException {
-        return new SpacecraftToObservedBody(inertialFrame, bodyFrame,
-                                            minDate, maxDate, tStep,
-                                            overshootTolerance, positionsVelocities, pvInterpolationNumber,
-                                            pvFilter, quaternions, aInterpolationNumber,
-                                            aFilter);
-    }
-
-    /** Create a transform interpolator from a propagator.
-     * @param inertialFrame inertial frame
-     * @param bodyFrame observed body frame
-     * @param minDate start of search time span
-     * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
-     * @param interpolationNumber number of points of to use for inertial/Earth/spacraft transforms interpolations
-     * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
-     * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @param propagator global propagator
-     * @return transforms interpolator
-     * @exception RuggedException if data needed for some frame cannot be loaded
-     */
-    private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
-                                                               final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                                               final double tStep, final double overshootTolerance,
-                                                               final double interpolationStep, final int interpolationNumber,
-                                                               final CartesianDerivativesFilter pvFilter,
-                                                               final AngularDerivativesFilter aFilter,
-                                                               final Propagator propagator)
-        throws RuggedException {
-        try {
-
-            // extract position/attitude samples from propagator
-            final List<TimeStampedPVCoordinates> positionsVelocities =
-                    new ArrayList<TimeStampedPVCoordinates>();
-            final List<TimeStampedAngularCoordinates> quaternions =
-                    new ArrayList<TimeStampedAngularCoordinates>();
-            propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
-
-                /** {@inheritDoc} */
-                @Override
-                public void init(final SpacecraftState s0, final AbsoluteDate t) {
-                }
-
-                /** {@inheritDoc} */
-                @Override
-                public void handleStep(final SpacecraftState currentState, final boolean isLast)
-                    throws PropagationException {
-                    try {
-                        final AbsoluteDate  date = currentState.getDate();
-                        final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
-                        final Rotation      q    = currentState.getAttitude().getRotation();
-                        positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
-                        quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
-                    } catch (OrekitException oe) {
-                        throw new PropagationException(oe);
-                    }
-                }
-
-            });
-            propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
-
-            // orbit/attitude to body converter
-            return createInterpolator(inertialFrame, bodyFrame,
-                                      minDate, maxDate, tStep,
-                                      overshootTolerance, positionsVelocities, interpolationNumber,
-                                      pvFilter, quaternions, interpolationNumber,
-                                      aFilter);
-
-        } catch (PropagationException pe) {
-            throw new RuggedException(pe, pe.getSpecifier(), pe.getParts());
-        }
-    }
-
-    /** Create a transform interpolator from positions and quaternions lists.
-     * @param inertialFrame inertial frame
-     * @param bodyFrame observed body frame
-     * @param dumpStream stream from where to read previous instance dumped interpolator
-     * (caller opened it and remains responsible for closing it)
-     * @return recovered interpolator from dump
-     * @exception RuggedException if dump file cannot be loaded or if
-     * frames do not match the ones referenced in the dump file
-     */
-    private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
-                                                               final InputStream dumpStream)
-        throws RuggedException {
-        try {
-            final ObjectInputStream ois = new ObjectInputStream(dumpStream);
-            final SpacecraftToObservedBody scToBody = (SpacecraftToObservedBody) ois.readObject();
-            if (!inertialFrame.getName().equals(scToBody.getInertialFrameName())) {
-                throw new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
-                                          inertialFrame.getName(), scToBody.getInertialFrameName());
-            }
-            if (!bodyFrame.getName().equals(scToBody.getBodyFrameName())) {
-                throw new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
-                                          bodyFrame.getName(), scToBody.getBodyFrameName());
-            }
-            return scToBody;
-        } catch (ClassNotFoundException cnfe) {
-            throw new RuggedException(cnfe, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA);
-        } catch (ClassCastException cce) {
-            throw new RuggedException(cce, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA);
-        } catch (IOException ioe) {
-            throw new RuggedException(ioe, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA);
-        }
-    }
-
-    /** Dump frames transform interpolator.
-     * <p>
-     * This method allows to reuse the interpolator built in one instance, to build
-     * another instance by calling {@link #Rugged(TileUpdater, int, AlgorithmId, OneAxisEllipsoid, Frame, InputStream)}
-     * or {@link #Rugged(TileUpdater, int, AlgorithmId, EllipsoidId, InertialFrameId, BodyRotatingFrameId, InputStream)}.
-     * This reduces Rugged initialization time as setting up the interpolator can be long, it is
-     * mainly intended to be used when several runs are done (for example in an image processing chain)
-     * with the same configuration.
-     * </p>
-     * @param dumpStream stream where to dump the interpolator
-     * (caller opened it and remains responsible for closing it)
-     * @exception RuggedException if interpolator cannot be written to file
-     * @see #Rugged(TileUpdater, int, AlgorithmId, OneAxisEllipsoid, Frame, InputStream)
-     * @see #Rugged(TileUpdater, int, AlgorithmId, EllipsoidId, InertialFrameId, BodyRotatingFrameId, InputStream)
-     */
-    public void dumpInterpolator(final OutputStream dumpStream) throws RuggedException {
-        try {
-            final ObjectOutputStream oos = new ObjectOutputStream(dumpStream);
-            oos.writeObject(scToBody);
-        } catch (IOException ioe) {
-            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getMessage());
-        }
-    }
-
-    /** Set flag for light time correction.
-     * <p>
-     * This methods set the flag for compensating or not light time between
-     * ground and spacecraft. Compensating this delay improves location
-     * accuracy and is enabled by default. Not compensating it is mainly useful
-     * for validation purposes against system that do not compensate it.
-     * </p>
-     * @param lightTimeCorrection if true, the light travel time between ground
-     * and spacecraft is compensated for more accurate location
-     * @see #isLightTimeCorrected()
-     * @see #setAberrationOfLightCorrection(boolean)
-     */
-    public void setLightTimeCorrection(final boolean lightTimeCorrection) {
-        this.lightTimeCorrection = lightTimeCorrection;
     }
 
     /** Get flag for light time correction.
      * @return true if the light time between ground and spacecraft is
      * compensated for more accurate location
-     * @see #setLightTimeCorrection(boolean)
      */
     public boolean isLightTimeCorrected() {
         return lightTimeCorrection;
     }
 
-    /** Set flag for aberration of light correction.
-     * <p>
-     * This methods set the flag for compensating or not aberration of light,
-     * which is velocity composition between light and spacecraft when the
-     * light from ground points reaches the sensor.
-     * Compensating this velocity composition improves location
-     * accuracy and is enabled by default. Not compensating it is useful
-     * in two cases: for validation purposes against system that do not
-     * compensate it or when the pixels line of sight already include the
-     * correction.
-     * </p>
-     * @param aberrationOfLightCorrection if true, the aberration of light
-     * is corrected for more accurate location
-     * @see #isAberrationOfLightCorrected()
-     * @see #setLightTimeCorrection(boolean)
-     */
-    public void setAberrationOfLightCorrection(final boolean aberrationOfLightCorrection) {
-        this.aberrationOfLightCorrection = aberrationOfLightCorrection;
-    }
-
     /** Get flag for aberration of light correction.
      * @return true if the aberration of light time is corrected
      * for more accurate location
-     * @see #setAberrationOfLightCorrection(boolean)
      */
     public boolean isAberrationOfLightCorrected() {
         return aberrationOfLightCorrection;
-    }
-
-    /** Set up line sensor model.
-     * @param lineSensor line sensor model
-     */
-    public void addLineSensor(final LineSensor lineSensor) {
-        sensors.put(lineSensor.getName(), lineSensor);
     }
 
     /** Get the line sensors.
@@ -600,126 +149,6 @@ public class Rugged {
      */
     public AbsoluteDate getMaxDate() {
         return scToBody.getMaxDate();
-    }
-
-    /** Select inertial frame.
-     * @param inertialFrameId inertial frame identifier
-     * @return inertial frame
-     * @exception RuggedException if data needed for some frame cannot be loaded
-     */
-    private static Frame selectInertialFrame(final InertialFrameId inertialFrameId)
-        throws RuggedException {
-
-        try {
-            // set up the inertial frame
-            switch (inertialFrameId) {
-            case GCRF :
-                return FramesFactory.getGCRF();
-            case EME2000 :
-                return FramesFactory.getEME2000();
-            case MOD :
-                return FramesFactory.getMOD(IERSConventions.IERS_1996);
-            case TOD :
-                return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
-            case VEIS1950 :
-                return FramesFactory.getVeis1950();
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
-            }
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
-        }
-
-    }
-
-    /** Select body rotating frame.
-     * @param bodyRotatingFrame body rotating frame identifier
-     * @return body rotating frame
-     * @exception RuggedException if data needed for some frame cannot be loaded
-     */
-    private static Frame selectBodyRotatingFrame(final BodyRotatingFrameId bodyRotatingFrame)
-        throws RuggedException {
-
-        try {
-            // set up the rotating frame
-            switch (bodyRotatingFrame) {
-            case ITRF :
-                return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-            case ITRF_EQUINOX :
-                return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
-            case GTOD :
-                return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
-            }
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
-        }
-
-    }
-
-    /** Select ellipsoid.
-     * @param ellipsoidID reference ellipsoid identifier
-     * @param bodyFrame body rotating frame
-     * @return selected ellipsoid
-     */
-    private static OneAxisEllipsoid selectEllipsoid(final EllipsoidId ellipsoidID, final Frame bodyFrame) {
-
-        // set up the ellipsoid
-        switch (ellipsoidID) {
-        case GRS80 :
-            return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
-        case WGS84 :
-            return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                        Constants.WGS84_EARTH_FLATTENING,
-                                        bodyFrame);
-        case IERS96 :
-            return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
-        case IERS2003 :
-            return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
-        }
-
-    }
-
-    /** Convert a {@link OneAxisEllipsoid} into a {@link ExtendedEllipsoid}.
-     * @param ellipsoid ellpsoid to extend
-     * @return extended ellipsoid
-     */
-    private static ExtendedEllipsoid extend(final OneAxisEllipsoid ellipsoid) {
-        return new ExtendedEllipsoid(ellipsoid.getEquatorialRadius(),
-                                     ellipsoid.getFlattening(),
-                                     ellipsoid.getBodyFrame());
-    }
-
-    /** Select DEM intersection algorithm.
-     * @param algorithmID intersection algorithm identifier
-     * @param updater updater used to load Digital Elevation Model tiles
-     * @param maxCachedTiles maximum number of tiles stored in the cache
-     * @return selected algorithm
-     */
-    private IntersectionAlgorithm selectAlgorithm(final AlgorithmId algorithmID,
-                                                  final TileUpdater updater, final int maxCachedTiles) {
-
-        // set up the algorithm
-        switch (algorithmID) {
-        case DUVENHAGE :
-            return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
-        case DUVENHAGE_FLAT_BODY :
-            return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
-        case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-            return new BasicScanAlgorithm(updater, maxCachedTiles);
-        case IGNORE_DEM_USE_ELLIPSOID :
-            return new IgnoreDEMAlgorithm();
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
-        }
-
     }
 
     /** Check if a date is in the supported range.

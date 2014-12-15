@@ -21,8 +21,9 @@ list of positions, velocities and attitude quaternions recorded during the acqui
 passing all this information to Rugged, we will be able to precisely locate each point of
 the image on the Earth. Well, not exactly precise, as this first tutorial does not use a
 Digital Elevation Model, but considers the Earth as an ellipsoid. The DEM will be added in
-a second tutorial [Direct location with DEM](direct-location-with-DEM.html). The objective here is limited to explain how to initialize everything
-Rugged needs to know about the sensor and the acquisition.   
+a second tutorial: [Direct location with a DEM](direct-location-with-DEM.html). The objective
+here is limited to explain how to initialize everything Rugged needs to know about the sensor
+and the acquisition.   
 
 
 ## Sensor's definition
@@ -190,49 +191,100 @@ Finally we can initialize Rugged. It looks like this:
     import org.orekit.utils.AngularDerivativesFilter;
     import org.orekit.utils.CartesianDerivativesFilter;
     import org.orekit.utils.IERSConventions;
-    Rugged rugged = new Rugged (demTileUpdater, nbTiles,  demAlgoId, 
-                                EllipsoidId.WGS84, InertialFrameId.EME2000, BodyRotatingFrameId.ITRF,
-                                acquisitionStartDate, acquisitionStopDate, tStep, timeTolerance,
-                                satellitePVList, nbPVPoints, CartesianDerivativesFilter.USE_P,
-                                satelliteQList, nbQPoints, AngularDerivativesFilter.USE_R);
+    Rugged rugged = new RuggedBuilder().
+                    setAlgorithm(demAlgoId). 
+                    setDigitalElevationModel(demTileUpdater, nbTiles).
+                    setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                    setTimeSpan(acquisitionStartDate, acquisitionStopDate, tStep, timeTolerance). 
+                    setTrajectory(InertialFrameId.EME2000,
+                                  satellitePVList, nbPVPoints, CartesianDerivativesFilter.USE_P,
+                                  satelliteQList,  nbQPoints,  AngularDerivativesFilter.USE_R).
+                    addLineSensor(lineSensor).
+                    build();
 
 Argh, that sounds complicated. It is not so difficult since we have already defined most of what is
-needed. Let's describe the arguments line by line:
- 
-The first 3 are related to the DEM. Since we are ignoring the DEM, they can be set respectively to
-`null`, `0` and `AlgorithmId.IGNORE_DEM_USE_ELLIPSOID`.
+needed. Let's describe the Rugged instance building process line by line:
 
-The next 3 arguments define the ellipsoid and the reference frames: `EllipsoidId.WGS84`,
-`InertialFrameId.EME2000`, `BodyRotatingFrameId.ITRF`
+As the Rugged top level object that will be used for all user interaction is quite involved and can be
+built in several different ways, a [builder pattern](https://en.wikipedia.org/wiki/Builder_pattern)
+approach has been adopted. The builder itself is configured by calling dedicated setters for each
+concept (Digital Elevation Model, intersection algorithm, trajectory, ...).
+As all these concepts can be chained together, the setters themselves implement the
+[fluent interface](https://en.wikipedia.org/wiki/Fluent_interface) pattern, which implies each setter
+returns the builder instance, and therefore another setter can be called directly.
 
-On the third line, we find the time interval of the acquisition: acquisitionStartDate, acquisitionStopDate,
+The first setter specifies the intersection algorithm to use. As this tutorial is intended to be very
+simple for a beginning, we choose to use directly the ellipsoid and not a real Digital Elevation Model,
+so we can use `AlgorithmId.IGNORE_DEM_USE_ELLIPSOID` as the single parameter of this setter.
+
+The second setter specifies the Digital Elevation Model. In fact, as we decided to ignore the Digital
+Elevation Model in this tutorial, we could have omitted this call and it would have worked correctly.
+We preferred to let it in so users do not forget to set the Digital Elevation Model for intersection
+algorithms that really use them. As the model will be ignored, we can put the parameters for this
+setter to `null` and `0`. Of course if another algorithm had been chosen,  null parameters would clearly
+not work, this is explained in another tutorial: [Direct location with a DEM](direct-location-with-DEM.html).
+
+The third setter defines the shape and orientation of the ellipsoid. We use simple predefined enumerates:
+`EllipsoidId.WGS84`, `InertialFrameId.EME2000`, but could also use a custom ellipsoid if needed.
+
+The fourth setter is used to define the global time span of the search algorithms (direct and inverse
+location). Four parameters are used for this: acquisitionStartDate, acquisitionStopDate,
 tStep (step at which the pre-computed frames transforms cache will be filled), timeTolerance (margin
-allowed for extrapolation during inverse location, in seconds. A few lines must be taken into account like: timeTolerance = 5/lineSensor.getRate(0)). This is an important information as Rugged
-will pre-compute a lot of stuff at initialization in order to optimize further calls to the direct and
-inverse location functions. 
+allowed for extrapolation during inverse location, in seconds. The tStep parameter is a key parameter
+to achieve good performances as frames transforms will be precomputed throughout the time span using
+this time step. These computation are costly because they involve Earth precession/nutation models to
+be evaluated. So the transformed are precomputed and cached instead of being recomputed for each pixel.
+However, if direct and inverse location are expected to be performed over a reduced time span (say a few
+tens of seconds), precomputing the transforms over half an orbit at one millisecond rate would be a
+waste of computing power. Typical values are therefore to restrict the time span as much as possible
+to properly cover the expected direct and inverse location calls, and to use a step between one millisecond
+and one second, depending on the required accuracy. The exact value to use is mission-dependent. The
+final timeTolerance parameter is simply a margin used before and after the final precomputed transforms to
+allow a slight extrapolation if during a search the interval is slightly overshoot. A typical value is
+to allow a few images lines so for example a 5 lines tolerance would imply computing the tolerance as:
+timeTolerance = 5 / lineSensor.getRate(0)).
+`BodyRotatingFrameId.ITRF`
 
-On the fourth line, the arguments are the list of time-stamped positions and velocities as well as options
-for interpolation: number of points to use and type of filter for derivatives. The interpolation polynomials for nbPVPoints without any derivatives (case of CartesianDerivativesFilter.USE_P: only positions are used, without velocities) have a degree nbPVPoints - 1. In case of computation with velocities included (case of CartesianDerivativesFilter.USE_PV), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the positions/velocities data are of good quality and spaced by a few seconds, one may choose only a few points but interpolate with both positions and velocities; in other cases, one may choose more points but interpolate only with positions.
-We find the same arguments on the last line for the attitude quaternions. 
+The fifth setter defines the spacecraft evolution. The arguments are the list of time-stamped positions and
+velocities as well as the inertial frame with respect to which they are defined and options for interpolation:
+number of points to use and type of filter for derivatives. The interpolation polynomials for nbPVPoints
+without any derivatives (case of CartesianDerivativesFilter.USE_P: only positions are used, without velocities)
+have a degree nbPVPoints - 1. In case of computation with velocities included (case of
+CartesianDerivativesFilter.USE_PV), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the
+positions/velocities data are of good quality and separated by a few seconds, one may choose only a few points
+but interpolate with both positions and velocities; in other cases, one may choose more points but interpolate
+only with positions. We find similar arguments for the attitude quaternions. 
+
+The sixth setter used registers a line sensor. As can be deduced from its prefix (`add` instead of `set`), it
+can be called several time to register several sensors that will all be available in the built Rugged instance.
+We have called the method only once here, so we will use only one sensor.
+
+After the last setter has been called, we call the `build()` method which really build the Rugged instance
+(and not a RuggedBuilder instance has the setter did).
 
 Rugged takes into account by default some corrections for more accurate locations: 
 
 * light time correction (compensates or not light time between ground and spacecraft). 
 * aberration of light correction (compensates or not aberration of light, which is velocity composition between light and spacecraft when the light from ground points reaches the sensor).
 
-Not compensating the delay or the velocity composition are mainly useful for validation purposes against system that do not compensate it. When the pixels line of sight already includes the aberration of light correction, one must obviously deactivate the correction.
-In order not to take into account those corrections, one must finalize Rugged initialization by setting the related flags to false:
+Not compensating the delay or the velocity composition are mainly useful for validation purposes against system
+that do not compensate it. When the pixels line of sight already includes the aberration of light correction,
+one must obviously deactivate the correction.
 
-    rugged.setLightTimeCorrection(false);
+If those corrections should be ignored, some other setters must be inserted before the call to `build()`:
 
-or
+    setXxxx().
+    setLightTimeCorrection(false).
+    setAberrationOfLightCorrection(false).
+    build();
 
-    rugged.setAberrationOfLightCorrection(false);
-
-
-The sensor models are added after initialization. We can add as many as we want. 
-
-    rugged.addLineSensor(lineSensor);
+The various setters can be called in any order. The only important thing is that once a Rugged instance
+has been created by calling the `build()` method, it is independent from the builder so later calls
+to setters will not change the build instance. In fact, it is possible to create a builder, then
+call its `build()` method to create a first Rugged instance, and then to modify the builder configuration
+by calling again some of the setters and building a second Rugged instance from the new configuration.
+This allows to perform comparisons between two different configurations in the same program and without
+having to recreate everything.
 
 ## Direct location
 

@@ -13,8 +13,8 @@ TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = <MISSING TRANSLATION>
 # date {0} is out of time span [{1}, {2}]
 OUT_OF_TIME_RANGE = Angabe {0} ist außerhalb der Zeitspanne [{1}, {2}]
 
-# general context has not been initialized
-UNINITIALIZED_CONTEXT = der allgemeine Zusammenhang kann nicht initialisiert (gestartet/geladen) werden
+# general context has not been initialized (missing call to {0})
+UNINITIALIZED_CONTEXT = <MISSING TRANSLATION>
 
 # tile is empty: {0} * {1}
 EMPTY_TILE = die Ziegel ist leer: {0} * {1}

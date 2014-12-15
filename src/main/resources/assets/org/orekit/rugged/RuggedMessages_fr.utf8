@@ -13,8 +13,8 @@ TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = la tuile sélectionnée pour la latit
 # date {0} is out of time span [{1}, {2}]
 OUT_OF_TIME_RANGE = la date {0} est hors de la plage temporelle [{1}, {2}]
 
-# general context has not been initialized
-UNINITIALIZED_CONTEXT = le contexte général n''a pas été initialisé
+# general context has not been initialized (missing call to {0})
+UNINITIALIZED_CONTEXT = le contexte général n''a pas été initialisé (appel manquant à {0})
 
 # tile is empty: {0} ⨉ {1}
 EMPTY_TILE = la tuile est vide : {0} ⨉ {1}

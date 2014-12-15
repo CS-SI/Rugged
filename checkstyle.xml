@@ -97,4 +97,9 @@
     	<property name="onCommentFormat" value="CHECKSTYLE\: resume FallThrough check"/>
     	<property name="checkFormat" value="FallThrough"/>
   	</module>
+    <module name="SuppressionCommentFilter">
+      <property name="offCommentFormat" value="CHECKSTYLE\: stop HiddenField check"/>
+      <property name="onCommentFormat" value="CHECKSTYLE\: resume HiddenField check"/>
+      <property name="checkFormat" value="HiddenField"/>
+    </module>
 </module>
