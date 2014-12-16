@@ -373,7 +373,7 @@ public class RuggedBuilderTest {
                 setDigitalElevationModel(updater, 8).
                 setAlgorithm(AlgorithmId.DUVENHAGE).
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                setTrajectory(new ByteArrayInputStream(bos.toByteArray())).
+                setTrajectoryAndTimeSpan(new ByteArrayInputStream(bos.toByteArray())).
                 addLineSensor(lineSensor);
         GeodeticPoint[] gpRecovered = recovered.build().directLocation("line", 100);
 
@@ -485,7 +485,7 @@ public class RuggedBuilderTest {
                 new RuggedBuilder().
                 setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                 setEllipsoid(EllipsoidId.WGS84, bId).
-                setTrajectory(new ByteArrayInputStream(bos.toByteArray())).build();
+                setTrajectoryAndTimeSpan(new ByteArrayInputStream(bos.toByteArray())).build();
                 Assert.fail("an exception should have been thrown");
             } catch (RuggedException re) {
                 Assert.assertEquals(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
@@ -546,7 +546,7 @@ public class RuggedBuilderTest {
 
         for (byte[] array : Arrays.asList(nonExistentClass, integerOne, truncatedDump, notSerialization)) {
             try {
-                new RuggedBuilder().setTrajectory(new ByteArrayInputStream(array));
+                new RuggedBuilder().setTrajectoryAndTimeSpan(new ByteArrayInputStream(array));
                 Assert.fail("an exception should have been thrown");
             } catch (RuggedException re) {
                 Assert.assertEquals(RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA,

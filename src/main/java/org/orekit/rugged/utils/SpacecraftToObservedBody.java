@@ -210,6 +210,20 @@ public class SpacecraftToObservedBody implements Serializable {
         return maxDate;
     }
 
+    /** Get the step to use for inertial frame to body frame transforms cache computations.
+     * @return step to use for inertial frame to body frame transforms cache computations
+     */
+    public double getTStep() {
+        return tStep;
+    }
+
+    /** Get the tolerance in seconds allowed for {@link #getMinDate()} and {@link #getMaxDate()} overshooting.
+     * @return tolerance in seconds allowed for {@link #getMinDate()} and {@link #getMaxDate()} overshooting
+     */
+    public double getOvershootTolerance() {
+        return overshootTolerance;
+    }
+
     /** Get transform from spacecraft to inertial frame.
      * @param date date of the transform
      * @return transform from spacecraft to inertial frame

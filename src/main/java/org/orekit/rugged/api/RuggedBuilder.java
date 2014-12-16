@@ -96,16 +96,16 @@ public class RuggedBuilder {
     private int maxCachedTiles;
 
     /** Start of search time span. */
-    private AbsoluteDate startDate;
+    private AbsoluteDate minDate;
 
     /** End of search time span. */
-    private AbsoluteDate endDate;
+    private AbsoluteDate maxDate;
 
     /** Step to use for inertial frame to body frame transforms cache computations. */
-    private double step;
+    private double tStep;
 
     /** OvershootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting. */
-    private double tolerance;
+    private double overshootTolerance;
 
     /** Inertial frame for position/velocity/attitude. */
     private Frame inertial;
@@ -166,7 +166,7 @@ public class RuggedBuilder {
      * @param ellipsoidID reference ellipsoid
      * @param bodyRotatingFrameID body rotating frame identifier
      * @exception RuggedException if data needed for some frame cannot be loaded
-     * or if trajectory has been {@link #setTrajectory(InputStream) recovered}
+     * or if trajectory has been {@link #setTrajectoryAndTimeSpan(InputStream) recovered}
      * from an earlier run and frames mismatch
      * @return the builder instance
      * @see #setEllipsoid(OneAxisEllipsoid)
@@ -181,7 +181,7 @@ public class RuggedBuilder {
      * @return the builder instance
      * @see #setEllipsoid(EllipsoidId, BodyRotatingFrameId)
      * @exception RuggedException if trajectory has been
-     * {@link #setTrajectory(InputStream) recovered} from an earlier run and frames
+     * {@link #setTrajectoryAndTimeSpan(InputStream) recovered} from an earlier run and frames
      * mismatch
      */
     // CHECKSTYLE: stop HiddenField check
@@ -234,22 +234,39 @@ public class RuggedBuilder {
     }
 
     /** Set the time span to be covered for direct and inverse location calls.
+     * <p>
+     * This method set only the time span and not the trajectory, therefore it
+     * <em>must</em> be used together with either
+     * {@link #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)},
+     * {@link #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)},
+     * or {@link #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)}
+     * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
+     * </p>
      * @param minDate start of search time span
      * @param maxDate end of search time span
      * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @return the builder instance
+     * @see #setTrajectoryAndTimeSpan(InputStream)
      */
+    // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setTimeSpan(final AbsoluteDate minDate, final AbsoluteDate maxDate,
                                      final double tStep, final double overshootTolerance) {
-        this.startDate = minDate;
-        this.endDate   = maxDate;
-        this.step      = tStep;
-        this.tolerance = overshootTolerance;
+        // CHECKSTYLE: resume HiddenField check
+        this.minDate            = minDate;
+        this.maxDate            = maxDate;
+        this.tStep              = tStep;
+        this.overshootTolerance = overshootTolerance;
+        this.scToBody           = null;
         return this;
     }
 
     /** Set the spacecraft trajectory.
+     * <p>
+     * This method set only the trajectory and not the time span, therefore it
+     * <em>must</em> be used together with the {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}
+     * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
+     * </p>
      * @param inertialFrame inertial frame used for spacecraft positions/velocities/quaternions
      * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
@@ -261,7 +278,7 @@ public class RuggedBuilder {
      * @exception RuggedException if data needed for inertial frame cannot be loaded
      * @see #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
-     * @see #setTrajectory(InputStream)
+     * @see #setTrajectoryAndTimeSpan(InputStream)
      */
     public RuggedBuilder setTrajectory(final InertialFrameId inertialFrame,
                                        final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
@@ -275,6 +292,11 @@ public class RuggedBuilder {
     }
 
     /** Set the spacecraft trajectory.
+     * <p>
+     * This method set only the trajectory and not the time span, therefore it
+     * <em>must</em> be used together with the {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}
+     * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
+     * </p>
      * @param inertialFrame inertial frame used for spacecraft positions/velocities/quaternions
      * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
@@ -285,7 +307,7 @@ public class RuggedBuilder {
      * @return the builder instance
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
-     * @see #setTrajectory(InputStream)
+     * @see #setTrajectoryAndTimeSpan(InputStream)
      */
     public RuggedBuilder setTrajectory(final Frame inertialFrame,
                                        final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
@@ -307,6 +329,11 @@ public class RuggedBuilder {
     }
 
     /** Set the spacecraft trajectory.
+     * <p>
+     * This method set only the trajectory and not the time span, therefore it
+     * <em>must</em> be used together with the {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}
+     * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
+     * </p>
      * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
      * @param interpolationNumber number of points to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
@@ -315,7 +342,7 @@ public class RuggedBuilder {
      * @return the builder instance
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
-     * @see #setTrajectory(InputStream)
+     * @see #setTrajectoryAndTimeSpan(InputStream)
      */
     public RuggedBuilder setTrajectory(final double interpolationStep, final int interpolationNumber,
                                        final CartesianDerivativesFilter pvFilter, final AngularDerivativesFilter aFilter,
@@ -334,7 +361,15 @@ public class RuggedBuilder {
         return this;
     }
 
-    /** Set the spacecraft trajectory.
+    /** Set both the spacecraft trajectory and the time span.
+     * <p>
+     * This method set both the trajectory and the time span in a tightly coupled
+     * way, therefore it should <em>not</em> be mixed with the individual methods
+     * {@link #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)},
+     * {@link #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)},
+     * {@link #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)},
+     * or {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}.
+     * </p>
      * @param dumpStream stream from where to read previous instance dumped interpolator
      * (caller opened it and remains responsible for closing it)
      * @return the builder instance
@@ -345,20 +380,24 @@ public class RuggedBuilder {
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #dumpInterpolator(OutputStream)
      */
-    public RuggedBuilder setTrajectory(final InputStream dumpStream)
+    public RuggedBuilder setTrajectoryAndTimeSpan(final InputStream dumpStream)
         throws RuggedException {
         try {
-            this.inertial        = null;
-            this.pvSample        = null;
-            this.pvNeighborsSize = -1;
-            this.pvDerivatives   = null;
-            this.aSample         = null;
-            this.aNeighborsSize  = -1;
-            this.aDerivatives    = null;
-            this.pvaPropagator   = null;
-            this.iStep           = Double.NaN;
-            this.iN              = -1;
-            this.scToBody        = (SpacecraftToObservedBody) new ObjectInputStream(dumpStream).readObject();
+            this.inertial           = null;
+            this.pvSample           = null;
+            this.pvNeighborsSize    = -1;
+            this.pvDerivatives      = null;
+            this.aSample            = null;
+            this.aNeighborsSize     = -1;
+            this.aDerivatives       = null;
+            this.pvaPropagator      = null;
+            this.iStep              = Double.NaN;
+            this.iN                 = -1;
+            this.scToBody           = (SpacecraftToObservedBody) new ObjectInputStream(dumpStream).readObject();
+            this.minDate            = scToBody.getMinDate();
+            this.maxDate            = scToBody.getMaxDate();
+            this.tStep              = scToBody.getTStep();
+            this.overshootTolerance = scToBody.getOvershootTolerance();
             checkFramesConsistency();
             return this;
         } catch (ClassNotFoundException cnfe) {
@@ -373,7 +412,7 @@ public class RuggedBuilder {
     /** Dump frames transform interpolator.
      * <p>
      * This method allows to reuse the interpolator built in one instance, to build
-     * another instance by calling {@link #setTrajectory(InputStream)}.
+     * another instance by calling {@link #setTrajectoryAndTimeSpan(InputStream)}.
      * This reduces the builder initialization time as setting up the interpolator can be long, it is
      * mainly intended to be used when several runs are done (for example in an image processing chain)
      * with the same configuration.
@@ -389,7 +428,7 @@ public class RuggedBuilder {
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
-     * @see #setTrajectory(InputStream)
+     * @see #setTrajectoryAndTimeSpan(InputStream)
      */
     public void dumpInterpolator(final OutputStream dumpStream) throws RuggedException {
         try {
@@ -426,12 +465,12 @@ public class RuggedBuilder {
         if (scToBody == null) {
             if (pvSample != null) {
                 scToBody = createInterpolator(inertial, ellipsoid.getBodyFrame(),
-                                              startDate, endDate, step, tolerance,
+                                              minDate, maxDate, tStep, overshootTolerance,
                                               pvSample, pvNeighborsSize, pvDerivatives,
                                               aSample, aNeighborsSize, aDerivatives);
             } else if (pvaPropagator != null) {
                 scToBody = createInterpolator(inertial, ellipsoid.getBodyFrame(),
-                                              startDate, endDate, step, tolerance,
+                                              minDate, maxDate, tStep, overshootTolerance,
                                               iStep, iN, pvDerivatives, aDerivatives, pvaPropagator);
             } else {
                 throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setTrajectory()");
@@ -468,8 +507,8 @@ public class RuggedBuilder {
                                                                final AngularDerivativesFilter aFilter)
         throws RuggedException {
         return new SpacecraftToObservedBody(inertialFrame, bodyFrame,
-                                            minDate, maxDate, tStep,
-                                            overshootTolerance, positionsVelocities, pvInterpolationNumber,
+                                            minDate, maxDate, tStep, overshootTolerance,
+                                            positionsVelocities, pvInterpolationNumber,
                                             pvFilter, quaternions, aInterpolationNumber,
                                             aFilter);
     }
@@ -531,8 +570,8 @@ public class RuggedBuilder {
 
             // orbit/attitude to body converter
             return createInterpolator(inertialFrame, bodyFrame,
-                                      minDate, maxDate, tStep,
-                                      overshootTolerance, positionsVelocities, interpolationNumber,
+                                      minDate, maxDate, tStep, overshootTolerance,
+                                      positionsVelocities, interpolationNumber,
                                       pvFilter, quaternions, interpolationNumber,
                                       aFilter);
 
@@ -593,6 +632,14 @@ public class RuggedBuilder {
      */
     public RuggedBuilder addLineSensor(final LineSensor lineSensor) {
         sensors.add(lineSensor);
+        return this;
+    }
+
+    /** Remove all line sensors.
+     * @return the builder instance
+     */
+    public RuggedBuilder clearLineSensors() {
+        sensors.clear();
         return this;
     }
 
