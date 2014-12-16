@@ -22,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.math3.exception.util.LocalizedFormats;
@@ -170,6 +171,7 @@ public class RuggedBuilder {
      * from an earlier run and frames mismatch
      * @return the builder instance
      * @see #setEllipsoid(OneAxisEllipsoid)
+     * @see #getEllipsoid()
      */
     public RuggedBuilder setEllipsoid(final EllipsoidId ellipsoidID, final BodyRotatingFrameId bodyRotatingFrameID)
         throws RuggedException {
@@ -179,10 +181,10 @@ public class RuggedBuilder {
     /** Set the reference ellipsoid.
      * @param ellipsoid reference ellipsoid
      * @return the builder instance
-     * @see #setEllipsoid(EllipsoidId, BodyRotatingFrameId)
      * @exception RuggedException if trajectory has been
-     * {@link #setTrajectoryAndTimeSpan(InputStream) recovered} from an earlier run and frames
-     * mismatch
+     * {@link #setTrajectoryAndTimeSpan(InputStream) recovered} from an earlier run and frames mismatch
+     * @see #setEllipsoid(EllipsoidId, BodyRotatingFrameId)
+     * @see #getEllipsoid()
      */
     // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setEllipsoid(final OneAxisEllipsoid ellipsoid)
@@ -195,6 +197,15 @@ public class RuggedBuilder {
         return this;
     }
 
+    /** Get the ellipsoid.
+     * @return the ellipsoid
+     * @see #setEllipsoid(EllipsoidId, BodyRotatingFrameId)
+     * @see #setEllipsoid(OneAxisEllipsoid)
+     */
+    public ExtendedEllipsoid getEllipsoid() {
+        return ellipsoid;
+    }
+
     /** Set the algorithm to use for Digital Elevation Model intersection.
      * <p>
      * Note that when the specified algorithm is {@link AlgorithmId#IGNORE_DEM_USE_ELLIPSOID},
@@ -205,12 +216,21 @@ public class RuggedBuilder {
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @return the builder instance
      * @see #setDigitalElevationModel(TileUpdater, int)
+     * @see #getAlgorithm()
      */
     // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setAlgorithm(final AlgorithmId algorithmID) {
         // CHECKSTYLE: resume HiddenField check
         this.algorithmID = algorithmID;
         return this;
+    }
+
+    /** Get the algorithm to use for Digital Elevation Model intersection.
+     * @return algorithm to use for Digital Elevation Model intersection
+     * @see #setAlgorithm(AlgorithmId)
+     */
+    public AlgorithmId getAlgorithm() {
+        return algorithmID;
     }
 
     /** Set the user-provided {@link TileUpdater tile updater}.
@@ -224,6 +244,8 @@ public class RuggedBuilder {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @return the builder instance
      * @see #setAlgorithm(AlgorithmId)
+     * @see #getTileUpdater()
+     * @see #getMaxCachedTiles()
      */
     // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setDigitalElevationModel(final TileUpdater tileUpdater, final int maxCachedTiles) {
@@ -231,6 +253,24 @@ public class RuggedBuilder {
         this.tileUpdater    = tileUpdater;
         this.maxCachedTiles = maxCachedTiles;
         return this;
+    }
+
+    /** Get the updater used to load Digital Elevation Model tiles.
+     * @return updater used to load Digital Elevation Model tiles
+     * @see #setDigitalElevationModel(TileUpdater, int)
+     * @see #getMaxCachedTiles()
+     */
+    public TileUpdater getTileUpdater() {
+        return tileUpdater;
+    }
+
+    /** Get the maximum number of tiles stored in the cache.
+     * @return maximum number of tiles stored in the cache
+     * @see #setDigitalElevationModel(TileUpdater, int)
+     * @see #getTileUpdater()
+     */
+    public int getMaxCachedTiles() {
+        return maxCachedTiles;
     }
 
     /** Set the time span to be covered for direct and inverse location calls.
@@ -248,6 +288,10 @@ public class RuggedBuilder {
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
      * @return the builder instance
      * @see #setTrajectoryAndTimeSpan(InputStream)
+     * @see #getMinDate()
+     * @see #getMaxDate()
+     * @see #getTStep()
+     * @see #getOvershootTolerance()
      */
     // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setTimeSpan(final AbsoluteDate minDate, final AbsoluteDate maxDate,
@@ -259,6 +303,38 @@ public class RuggedBuilder {
         this.overshootTolerance = overshootTolerance;
         this.scToBody           = null;
         return this;
+    }
+
+    /** Get the start of search time span.
+     * @return start of search time span
+     * @see #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)
+     */
+    public AbsoluteDate getMinDate() {
+        return minDate;
+    }
+
+    /** Get the end of search time span.
+     * @return end of search time span
+     * @see #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)
+     */
+    public AbsoluteDate getMaxDate() {
+        return maxDate;
+    }
+
+    /** Get the step to use for inertial frame to body frame transforms cache computations.
+     * @return step to use for inertial frame to body frame transforms cache computations
+     * @see #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)
+     */
+    public double getTStep() {
+        return tStep;
+    }
+
+    /** Get the tolerance in seconds allowed for {@link #getMinDate()} and {@link #getMaxDate()} overshooting.
+     * @return tolerance in seconds allowed for {@link #getMinDate()} and {@link #getMaxDate()} overshooting
+     * @see #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)
+     */
+    public double getOvershootTolerance() {
+        return overshootTolerance;
     }
 
     /** Set the spacecraft trajectory.
@@ -279,6 +355,13 @@ public class RuggedBuilder {
      * @see #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #setTrajectoryAndTimeSpan(InputStream)
+     * @see #getInertialFrame()
+     * @see #getpositionsVelocities()
+     * @see #getPVInterpolationNumber()
+     * @see #getPVInterpolationNumber()
+     * @see #getQuaternions()
+     * @see #getAInterpolationNumber()
+     * @see #getAFilter()
      */
     public RuggedBuilder setTrajectory(final InertialFrameId inertialFrame,
                                        final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
@@ -308,6 +391,12 @@ public class RuggedBuilder {
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #setTrajectoryAndTimeSpan(InputStream)
+     * @see #getpositionsVelocities()
+     * @see #getPVInterpolationNumber()
+     * @see #getPVInterpolationNumber()
+     * @see #getQuaternions()
+     * @see #getAInterpolationNumber()
+     * @see #getAFilter()
      */
     public RuggedBuilder setTrajectory(final Frame inertialFrame,
                                        final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
@@ -359,6 +448,55 @@ public class RuggedBuilder {
         this.iN              = interpolationNumber;
         this.scToBody        = null;
         return this;
+    }
+
+    /** Get the inertial frame.
+     * @return inertial frame
+     */
+    public Frame getInertialFrame() {
+        return inertial;
+    }
+
+    /** Get the satellite position and velocity (m and m/s in inertial frame).
+     * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
+     */
+    public List<TimeStampedPVCoordinates> getpositionsVelocities() {
+        return pvSample;
+    }
+
+    /** Get the number of points to use for position/velocity interpolation.
+     * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
+     */
+    public int getPVInterpolationNumber() {
+        return pvNeighborsSize;
+    }
+
+    /** Get the Filter for derivatives from the sample to use in position/velocity interpolation.
+     * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
+     */
+    public CartesianDerivativesFilter getPVFilter() {
+        return pvDerivatives;
+    }
+
+    /** Get the Satellite quaternions with respect to inertial frame.
+     * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
+     */
+    public List<TimeStampedAngularCoordinates> getQuaternions() {
+        return aSample;
+    }
+
+    /** Get the Number of points to use for attitude interpolation.
+     * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
+     */
+    public int getAInterpolationNumber() {
+        return aNeighborsSize;
+    }
+
+    /** Get the Filter for derivatives from the sample to use in attitude interpolation.
+     * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
+     */
+    public AngularDerivativesFilter getAFilter() {
+        return aDerivatives;
     }
 
     /** Set both the spacecraft trajectory and the time span.
@@ -593,12 +731,21 @@ public class RuggedBuilder {
      * and spacecraft is compensated for more accurate location
      * @return the builder instance
      * @see #setAberrationOfLightCorrection(boolean)
+     * @see #getLightTimeCorrection()
      */
     // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setLightTimeCorrection(final boolean lightTimeCorrection) {
         // CHECKSTYLE: resume HiddenField check
         this.lightTimeCorrection = lightTimeCorrection;
         return this;
+    }
+
+    /** Get the light time correction flag.
+     * @return light time correction flag
+     * @see #setLightTimeCorrection(boolean)
+     */
+    public boolean getLightTimeCorrection() {
+        return lightTimeCorrection;
     }
 
     /** Set flag for aberration of light correction.
@@ -618,12 +765,21 @@ public class RuggedBuilder {
      * is corrected for more accurate location
      * @return the builder instance
      * @see #setLightTimeCorrection(boolean)
+     * @see #getAberrationOfLightCorrection()
      */
     // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setAberrationOfLightCorrection(final boolean aberrationOfLightCorrection) {
         // CHECKSTYLE: resume HiddenField check
         this.aberrationOfLightCorrection = aberrationOfLightCorrection;
         return this;
+    }
+
+    /** Get the aberration of light correction flag.
+     * @return aberration of light correction flag
+     * @see #setAberrationOfLightCorrection(boolean)
+     */
+    public boolean getAberrationOfLightCorrection() {
+        return aberrationOfLightCorrection;
     }
 
     /** Set up line sensor model.
@@ -641,6 +797,13 @@ public class RuggedBuilder {
     public RuggedBuilder clearLineSensors() {
         sensors.clear();
         return this;
+    }
+
+    /** Get all line sensors.
+     * @return all line sensors (in an unmodifiable list)
+     */
+    public List<LineSensor> getLineSensors() {
+        return Collections.unmodifiableList(sensors);
     }
 
     /** Select inertial frame.

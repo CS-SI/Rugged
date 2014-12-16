@@ -22,6 +22,9 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="add" >
+        Added getters to the RuggedBuilder.
+      </action>
       <action dev="luc" type="fix" >
         Force reset of builder interpolator when time span is changed.
       </action>
