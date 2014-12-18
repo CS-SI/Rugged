@@ -8,13 +8,13 @@ OUT_OF_TILE_INDICES = non hai datos nos índices [{0}, {1}], a faceta só cubre 
 OUT_OF_TILE_ANGLES = non hai datos para a latitude {0} e a lonxitude {1}, a faceta só cubre as latitudes de {2} a {3} e as lonxitudes de {4} a {5}
 
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
-TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = <MISSING TRANSLATION>
+TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = a faceta seleccionada para a latitude {0} e lonxitude {1} non cumpre o requisito de veciñanza
 
 # date {0} is out of time span [{1}, {2}]
 OUT_OF_TIME_RANGE = a data {0} está fora do intervalo temporal [{1}, {2}]
 
 # general context has not been initialized (missing call to {0})
-UNINITIALIZED_CONTEXT = <MISSING TRANSLATION>
+UNINITIALIZED_CONTEXT = o contexto xeral non foi inicializado (falta face-la chamada a {0})
 
 # tile is empty: {0} ⨉ {1}
 EMPTY_TILE = a faceta está baleira: {0} ⨉ {1}
