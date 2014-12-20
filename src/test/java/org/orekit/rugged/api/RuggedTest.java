@@ -71,7 +71,7 @@ import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.los.FixedLOS;
+import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
@@ -733,39 +733,40 @@ public class RuggedTest {
                               satellitePVList, 8, CartesianDerivativesFilter.USE_PV,
                               satelliteQList, 8, AngularDerivativesFilter.USE_R);
 
-        List<TimeDependentLOS> lineOfSight = new ArrayList<TimeDependentLOS>();
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181530, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181518, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181505, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181492, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181480, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181467, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181455, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181442, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181430, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181417, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181405, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.181392, 1d).normalize()));
+        List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
+        lineOfSight.add(new Vector3D(-0.011204, 0.181530, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181518, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181505, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181492, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181480, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181467, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181455, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181442, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181430, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181417, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181405, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.181392, 1d).normalize());
 
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149762, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149749, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149737, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149724, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149712, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149699, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149686, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149674, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149661, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149649, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149636, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149624, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149611, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149599, 1d).normalize()));
-        lineOfSight.add(new FixedLOS(new Vector3D(-0.011204, 0.149586, 1d).normalize()));
+        lineOfSight.add(new Vector3D(-0.011204, 0.149762, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149749, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149737, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149724, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149712, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149699, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149686, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149674, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149661, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149649, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149636, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149624, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149611, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149599, 1d).normalize());
+        lineOfSight.add(new Vector3D(-0.011204, 0.149586, 1d).normalize());
 
         AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:58:51.593", gps);
         LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 638.5696040868454);
-        LineSensor lineSensor = new LineSensor("perfect-line", lineDatation, offset, lineOfSight);
+        LineSensor lineSensor = new LineSensor("perfect-line", lineDatation, offset,
+                                               new LOSBuilder(lineOfSight).build());
         builder.addLineSensor(lineSensor);
 
         Rugged rugged = builder.build();
@@ -881,14 +882,15 @@ public class RuggedTest {
         addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:39.857531", -931933.933d, -6354591.778d, 3173886.968d, -1693.833d, -3045.116d,
                 -6595.024d);
 
-        List<TimeDependentLOS> lineOfSight = new ArrayList<TimeDependentLOS>();
-        lineOfSight.add(new FixedLOS(new Vector3D(0.0046536264d, -0.1851800945d, 1d)));
-        lineOfSight.add(new FixedLOS(new Vector3D(0.0000001251d, -0.0002815246d, 1d)));
-        lineOfSight.add(new FixedLOS(new Vector3D(0.0046694108d, 0.1853863933d, 1d)));
+        List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
+        lineOfSight.add(new Vector3D(0.0046536264d, -0.1851800945d, 1d));
+        lineOfSight.add(new Vector3D(0.0000001251d, -0.0002815246d, 1d));
+        lineOfSight.add(new Vector3D(0.0046694108d, 0.1853863933d, 1d));
 
         AbsoluteDate absDate = new AbsoluteDate("2013-07-07T17:16:36.857", gps);
         LinearLineDatation lineDatation = new LinearLineDatation(absDate, 0.03125d, 19.95565693384045);
-        LineSensor lineSensor = new LineSensor("QUICK_LOOK", lineDatation, offset, lineOfSight);
+        LineSensor lineSensor = new LineSensor("QUICK_LOOK", lineDatation, offset,
+                                               new LOSBuilder(lineOfSight).build());
         Rugged rugged = new RuggedBuilder().
                 setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
@@ -1232,25 +1234,25 @@ public class RuggedTest {
     }
 
     private List<TimeDependentLOS> createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
-        List<TimeDependentLOS> list = new ArrayList<TimeDependentLOS>(n);
+        List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
-            list.add(new FixedLOS(new Rotation(normal, alpha).applyTo(center)));
+            list.add(new Rotation(normal, alpha).applyTo(center));
         }
-        return list;
+        return new LOSBuilder(list).build();
     }
 
     private List<TimeDependentLOS> createLOSCurvedLine(Vector3D center, Vector3D normal,
                                                        double halfAperture, double sagitta, int n) {
         Vector3D u = Vector3D.crossProduct(center, normal);
-        List<TimeDependentLOS> list = new ArrayList<TimeDependentLOS>(n);
+        List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double x = (2.0 * i + 1.0 - n) / (n - 1);
             double alpha = x * halfAperture;
             double beta  = x * x * sagitta;
-            list.add(new FixedLOS(new Rotation(normal, alpha).applyTo(new Rotation(u, beta).applyTo(center))));
+            list.add(new Rotation(normal, alpha).applyTo(new Rotation(u, beta).applyTo(center)));
         }
-        return list;
+        return new LOSBuilder(list).build();
     }
 
     private List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,

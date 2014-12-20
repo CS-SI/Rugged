@@ -68,6 +68,6 @@ The following table sorts out the various topics between the various layers.
 |     Grid-post elevation model    |          Rugged         |Only raster elevation models are supported
 |Triangulated Irregular Network elevation model | Not supported |If vector elevation models are needed, they must be converted to raster form in order to be used
 |         Geoid computation        |     Not in version 1    |The first version only supports Digital Elevation Models computed with respect to a reference ellipsoid. If needed, this feature could be added after version 1, either at Rugged or Orekit level, using Orekit gravity fields
-|  Time-dependent deformations     |     Interface/Rugged    |The caller must supply a simple line-of-sight model (typically polynomial) that will be applied
+|  Time-dependent deformations     |     Interface/Rugged    |Simple line-of-sight models (typically polynomial) can be used
 |           Calibration            |Image processing or interface|The calibration phase remains at the mission-specific caller level (pixels geometry, clock synchronization …), the caller is required to provide the already calibrated line of sights
 |         DEM file parsing         |         Interface       |The elevation models are dedicated to the mission and there are several formats (DTED, GeoTIFF, raw data …).Rugged only deals with raw elevation on small latitude/longitude cells

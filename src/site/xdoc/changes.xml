@@ -23,6 +23,9 @@
     <release version="1.0" date="TBD"
              description="TBD">
       <action dev="luc" type="add" >
+        Added a builder for line-of-sight lists.
+      </action>
+      <action dev="luc" type="update" >
         Reorganized packages.
       </action>
       <action dev="luc" type="add" >

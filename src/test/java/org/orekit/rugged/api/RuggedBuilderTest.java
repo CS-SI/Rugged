@@ -69,7 +69,7 @@ import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
-import org.orekit.rugged.los.FixedLOS;
+import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
@@ -663,12 +663,12 @@ public class RuggedBuilderTest {
     }
 
     private List<TimeDependentLOS> createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
-        List<TimeDependentLOS> list = new ArrayList<TimeDependentLOS>(n);
+        List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
-            list.add(new FixedLOS(new Rotation(normal, alpha).applyTo(center)));
+            list.add(new Rotation(normal, alpha).applyTo(center));
         }
-        return list;
+        return new LOSBuilder(list).build();
     }
 
     private TimeStampedPVCoordinates createPV(AbsoluteDate t0, double dt,

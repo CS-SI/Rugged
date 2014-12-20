@@ -24,7 +24,7 @@ import org.orekit.time.AbsoluteDate;
  * @see LineSensor
  * @author Luc Maisonobe
  */
-public class FixedLOS implements TimeDependentLOS {
+class FixedLOS implements TimeDependentLOS {
 
     /** Fixed direction for los. */
     private final Vector3D los;

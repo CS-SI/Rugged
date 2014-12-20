@@ -128,17 +128,20 @@ Optical path
 ### Inside spacecraft
 
 At spacecraft level, the optical path is folded due to the various reflections and positions of the sensors with respect
-to the spacecraft center of mass. This path is considered fixed in spacecraft frame, i.e. no time-dependent or thermal
-deformation effects are considered. Following this assumption, the path can be virtually unfolded using the laws of optical
+to the spacecraft center of mass. Following this assumption, the path can be virtually unfolded using the laws of optical
 geometry and replaced by a straight line in spacecraft vicinity, with virtual pixels locations and lines of sights defined
 by simple vectors with respect to the center of mass. As both position and orientation are considered, this implies that
 the pixels are not considered exactly co-located with the spacecraft center of mass, the offset is typically of meter order
 of magnitude. If for example we consider a 3m long spacecraft with an instrument is on the front (+X), the offset would be
 about 1.5m if center of mass were at spacecraft mid-length.
 
-This path unfolding is done once at geometry loading by the interface layer above the Rugged library, so all further computation
-are done with simple straight lines. Of course, if the spacecraft definition file does not include position informations, only
-the various reflections are taken into account and the location of the sensor is co-located with spacecraft center of mass.
+This path unfolding is done once at geometry loading by the interface layer above the Rugged library, using the services
+provided by Rugged line-of-sight builder, so all further computation are done with simple straight lines. Of course, if
+the spacecraft definition file does not include position informations, only the various reflections are taken into account
+and the location of the sensor is co-located with spacecraft center of mass.
+
+The various transformed applied when building the lines-of-sight may be time-dependent to take into account slow variations
+like thermo-elastic effects. Their parameters can also be estimated in calibration phases.
 
 ### Free space travel
 

@@ -48,8 +48,7 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
-import org.orekit.rugged.los.FixedLOS;
-import org.orekit.rugged.los.TimeDependentLOS;
+import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
@@ -64,21 +63,21 @@ public class SensorMeanPlaneCrossingTest {
     @Test
     public void testPerfectLine() throws RuggedException, OrekitException {
 
-        final Vector3D       position  = new Vector3D(1.5, Vector3D.PLUS_I);
-        final Vector3D       normal    = Vector3D.PLUS_I;
-        final Vector3D       fovCenter = Vector3D.PLUS_K;
-        final Vector3D       cross     = Vector3D.crossProduct(normal, fovCenter);
+        final Vector3D position  = new Vector3D(1.5, Vector3D.PLUS_I);
+        final Vector3D normal    = Vector3D.PLUS_I;
+        final Vector3D fovCenter = Vector3D.PLUS_K;
+        final Vector3D cross     = Vector3D.crossProduct(normal, fovCenter);
 
         // build lists of pixels regularly spread on a perfect plane
-        final List<TimeDependentLOS> los       = new ArrayList<TimeDependentLOS>();
+        final List<Vector3D> los       = new ArrayList<Vector3D>();
         for (int i = -1000; i <= 1000; ++i) {
             final double alpha = i * 0.17 / 1000;
-            los.add(new FixedLOS(new Vector3D(FastMath.cos(alpha), fovCenter, FastMath.sin(alpha), cross)));
+            los.add(new Vector3D(FastMath.cos(alpha), fovCenter, FastMath.sin(alpha), cross));
         }
 
         final LineSensor sensor = new LineSensor("perfect line",
-                                         new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
-                                         position, los);
+                                                 new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
+                                                 position, new LOSBuilder(los).build());
 
         Assert.assertEquals("perfect line", sensor.getName());
         Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
@@ -100,7 +99,7 @@ public class SensorMeanPlaneCrossingTest {
         final Vector3D        cross     = Vector3D.crossProduct(normal, fovCenter);
 
         // build lists of pixels regularly spread on a perfect plane
-        final List<TimeDependentLOS> los       = new ArrayList<TimeDependentLOS>();
+        final List<Vector3D> los       = new ArrayList<Vector3D>();
         for (int i = -1000; i <= 1000; ++i) {
             final double alpha = i * 0.17 / 10 + 1.0e-5 * random.nextDouble();
             final double delta = 1.0e-5 * random.nextDouble();
@@ -108,12 +107,12 @@ public class SensorMeanPlaneCrossingTest {
             final double sA = FastMath.sin(alpha);
             final double cD = FastMath.cos(delta);
             final double sD = FastMath.sin(delta);
-            los.add(new FixedLOS(new Vector3D(cA * cD, fovCenter, sA * cD, cross, sD, normal)));
+            los.add(new Vector3D(cA * cD, fovCenter, sA * cD, cross, sD, normal));
         }
 
         final LineSensor sensor = new LineSensor("noisy line",
                                                  new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
-                                                 position, los);
+                                                 position, new LOSBuilder(los).build());
 
         Assert.assertEquals("noisy line", sensor.getName());
         Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
