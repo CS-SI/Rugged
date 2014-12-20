@@ -14,30 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.api;
+package org.orekit.rugged.los;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.time.AbsoluteDate;
 
-/** Line-of-sight which does not depends on time.
+/** Interface representing a line-of-sight which depends on time.
  * @see LineSensor
  * @author Luc Maisonobe
  */
-public class FixedLOS implements TimeDependentLOS {
+public interface TimeDependentLOS {
 
-    /** Fixed direction for los. */
-    private final Vector3D los;
-
-    /** Simple constructor.
-     * @param los fixed direction for the line of sight
+    /** Get the line of sight for a given date.
+    * @param date date
+     * @return line of sight
      */
-    public FixedLOS(final Vector3D los) {
-        this.los = los;
-    }
-
-    /** {@inheritDoc} */
-    public Vector3D getLOS(final AbsoluteDate date) {
-        return los;
-    }
+    Vector3D getLOS(AbsoluteDate date);
 
 }

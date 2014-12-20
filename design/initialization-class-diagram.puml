@@ -92,19 +92,22 @@
         +TOD
         +VEIS1950
       }
-      class LineSensor
-      ExtendedEllipsoid        "1" <--o Rugged
+       ExtendedEllipsoid        "1" <--o Rugged
       SpacecraftToObservedBody "1" <--o Rugged
-      Rugged o--> "*" LineSensor 
       Rugged --> AlgorithmId
       Rugged --> EllipsoidId
       Rugged --> BodyRotatingFrameId
       Rugged --> InertialFrameId
 
-      UserMain    -->  LineSensor  : creates
       MissionSpecificDEM --|> TileUpdater
       UserMain    -->  Rugged      : configures
 
+    }
+
+    package linesensor #DDEBD8 {
+      class LineSensor
+      Rugged   o--> "*" LineSensor 
+      UserMain  -->  LineSensor  : creates
     }
 
   }

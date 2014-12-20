@@ -41,7 +41,7 @@ Here's the source code of the class `VolcanicConeElevationUpdater` :
 
     import org.apache.commons.math3.util.FastMath;
     import org.orekit.bodies.GeodeticPoint;
-    import org.orekit.rugged.api.RuggedException;
+    import org.orekit.rugged.errors.RuggedException;
     import org.orekit.utils.Constants;
     
     public class VolcanicConeElevationUpdater implements TileUpdater {

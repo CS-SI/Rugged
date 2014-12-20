@@ -21,7 +21,7 @@ import org.apache.commons.math3.random.Well19937a;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
-import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.raster.SimpleTile;
 import org.orekit.rugged.raster.TilesCache;
 

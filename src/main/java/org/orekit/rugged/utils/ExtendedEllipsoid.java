@@ -23,8 +23,8 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
-import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.RuggedMessages;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
 
 /** Transform provider from Spacecraft frame to observed body frame.

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.api;
+package org.orekit.rugged.linesensor;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
@@ -24,6 +24,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.errors.OrekitExceptionWrapper;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.time.AbsoluteDate;
 
 /** Class devoted to locate where ground point crosses a sensor line.
@@ -32,7 +33,7 @@ import org.orekit.time.AbsoluteDate;
  * </p>
  * @author Luc Maisonobe
  */
-class SensorPixelCrossing {
+public class SensorPixelCrossing {
 
     /** Margin before and after end pixels, in order to avoid search failures near boundaries. */
     private static final double MARGIN = 5.0;

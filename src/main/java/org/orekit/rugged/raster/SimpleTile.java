@@ -20,8 +20,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.api.RuggedException;
-import org.orekit.rugged.api.RuggedMessages;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 

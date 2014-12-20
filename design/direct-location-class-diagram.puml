@@ -58,19 +58,22 @@
       class Rugged {
         +directLocation(sensorName, line)
       }
-      class LineSensor
       IntersectionAlgorithm "1" <--o Rugged : delegate DEM intersection
       ExtendedEllipsoid <-- Rugged : convert geodetic points
+      SpacecraftToObservedBody <-- Rugged : convert positions/directions
+    }
+
+    package linesensor #DDEBD8 {
+      class LineSensor
       Rugged --> LineSensor : getLOS(date, pixel)
       Rugged --> LineSensor : getDate(line)
-      SpacecraftToObservedBody <-- Rugged : convert positions/directions
     }
 
   }
 
   package mission.specific #C4D2C5 {
     class UserMain #D5E0D5/E2EBE2
-    Rugged              <-- UserMain
+    UserMain -->  Rugged 
   }
 
 @enduml

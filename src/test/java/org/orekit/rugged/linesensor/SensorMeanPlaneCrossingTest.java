@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.api;
+package org.orekit.rugged.linesensor;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -44,8 +44,12 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
-import org.orekit.rugged.api.LinearLineDatation;
-import org.orekit.rugged.api.LineSensor;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.LinearLineDatation;
+import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
+import org.orekit.rugged.los.FixedLOS;
+import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;

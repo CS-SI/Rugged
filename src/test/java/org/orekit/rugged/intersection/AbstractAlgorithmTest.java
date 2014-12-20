@@ -37,7 +37,7 @@ import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.propagation.SpacecraftState;
-import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
 import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;

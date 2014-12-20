@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.api;
+package org.orekit.rugged.linesensor;
 
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
@@ -24,6 +24,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.frames.Transform;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
@@ -35,7 +36,7 @@ import org.orekit.utils.PVCoordinates;
  * </p>
  * @author Luc Maisonobe
  */
-class SensorMeanPlaneCrossing {
+public class SensorMeanPlaneCrossing {
 
     /** Converter between spacecraft and body. */
     private final SpacecraftToObservedBody scToBody;

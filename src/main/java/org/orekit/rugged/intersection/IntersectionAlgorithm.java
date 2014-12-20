@@ -17,7 +17,7 @@
 package org.orekit.rugged.intersection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 

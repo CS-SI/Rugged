@@ -23,7 +23,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
-import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.raster.SimpleTile;
 import org.orekit.rugged.raster.SimpleTileFactory;
 import org.orekit.rugged.raster.Tile;

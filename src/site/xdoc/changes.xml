@@ -23,6 +23,9 @@
     <release version="1.0" date="TBD"
              description="TBD">
       <action dev="luc" type="add" >
+        Reorganized packages.
+      </action>
+      <action dev="luc" type="add" >
         Added getters to the RuggedBuilder.
       </action>
       <action dev="luc" type="fix" >

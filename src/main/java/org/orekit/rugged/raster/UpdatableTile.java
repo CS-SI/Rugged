@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.raster;
 
-import org.orekit.rugged.api.RuggedException;
+import org.orekit.rugged.errors.RuggedException;
 
 /** Interface representing one tile of a raster Digital Elevation Model.
  * @author Luc Maisonobe

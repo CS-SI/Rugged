@@ -25,7 +25,7 @@ The initialisation of Rugged is similar as in the [Direct location](direct-locat
 Once Rugged initialised, one can compute the line number and the pixel number of a point defined by its Geodetic coordinates:
 
     import org.orekit.bodies.GeodeticPoint;
-    import org.orekit.rugged.api.SensorPixel;
+    import org.orekit.rugged.linesensor.SensorPixel;
     GeodeticPoint gp = new GeodeticPoint(latitude, longitude, altitude);
     SensorPixel sensorPixel = rugged.inverseLocation(sensorName, gp, minLine, maxLine);
 where minLine (maxLine, respectively) is the minimum line number for the search interval (maximum line number, respectively). 

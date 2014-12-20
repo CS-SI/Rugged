@@ -46,8 +46,8 @@ For this we need the following packages
     import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
     import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
     import org.apache.commons.math3.util.FastMath;
-    import org.orekit.rugged.api.TimeDependentLOS;
-    import org.orekit.rugged.api.FixedLOS;
+    import org.orekit.rugged.los.TimeDependentLOS;
+    import org.orekit.rugged.los.FixedLOS;
 
 
 The viewing direction of pixel i with respect to the instrument is defined by the vector:
@@ -81,7 +81,7 @@ We use Orekit for handling time and dates, and Rugged for defining the datation 
 
     import org.orekit.time.AbsoluteDate;
     import org.orekit.time.TimeScalesFactory;
-    import org.orekit.rugged.api.LinearLineDatation;
+    import org.orekit.rugged.linesensor.LinearLineDatation;
     AbsoluteDate absDate = new AbsoluteDate("2009-12-11T10:49:55.899994", TimeScalesFactory.getGPS());
     LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20); 
 
@@ -96,7 +96,7 @@ need to worry about conversion.
 
 With the LOS and the datation now defined , we can initialize a line sensor object in Rugged:
 
-    import org.orekit.rugged.api.LineSensor;
+    import org.orekit.rugged.linesensor.LineSensor;
     LineSensor lineSensor = new LineSensor("mySensor", lineDatation, Vector3D.ZERO, lineOfSight);
 
 The first parameter is the nickname of the sensor. It is necessary because we can define multiple
@@ -187,7 +187,7 @@ Finally we can initialize Rugged. It looks like this:
     import org.orekit.rugged.api.EllipsoidId;
     import org.orekit.rugged.api.InertialFrameId;
     import org.orekit.rugged.api.Rugged;
-    import org.orekit.rugged.api.RuggedException;
+    import org.orekit.rugged.errors.RuggedException;
     import org.orekit.utils.AngularDerivativesFilter;
     import org.orekit.utils.CartesianDerivativesFilter;
     import org.orekit.utils.IERSConventions;

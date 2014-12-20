@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.api;
+package org.orekit.rugged.linesensor;
 
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
 
 /** Line sensor model.
