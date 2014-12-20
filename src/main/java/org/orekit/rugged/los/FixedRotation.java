@@ -16,20 +16,30 @@
  */
 package org.orekit.rugged.los;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.time.AbsoluteDate;
 
-/** Interface representing a line-of-sight which depends on time.
- * @see LineSensor
+/** {@link LOSTransform LOS transform} based on a fixed rotation.
  * @author Luc Maisonobe
+ * @see LOSBuilder
  */
-public interface TimeDependentLOS {
+public class FixedRotation implements LOSTransform {
 
-    /** Get the line of sight for a given date.
-     * @param date date
-     * @return line of sight
+    /** Underlying rotation. */
+    final Rotation rotation;
+
+    /** Simple constructor.
+     * @param rotation rotation to apply
      */
-    Vector3D getLOS(AbsoluteDate date);
+    public FixedRotation(final Rotation rotation) {
+        this.rotation = rotation;
+    }
 
+    /** {@inheritDoc} */
+    @Override
+    public Vector3D transformLOS(int i, Vector3D los, AbsoluteDate date) {
+        return rotation.applyTo(los);
+    }
+    
 }

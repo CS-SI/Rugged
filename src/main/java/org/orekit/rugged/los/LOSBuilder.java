@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.time.AbsoluteDate;
 
 /** Builder for lines-of-sight list.
  * <p>
@@ -37,22 +38,75 @@ public class LOSBuilder {
     /** Raw fixed ine-of-sights. */
     public final List<Vector3D> rawLOS;
 
+    /** Transforms to be applied. */
+    private final List<LOSTransform> transforms;
+
     /** Create builder.
      * @param rawLOS raw fixed lines-of-sight
      */
     public LOSBuilder(final List<Vector3D> rawLOS) {
         this.rawLOS = rawLOS;
+        this.transforms = new ArrayList<LOSTransform>();
+    }
+
+    /** Add a transform to be applied after the already registered transforms.
+     * @param transform transform to be applied to the lines-of-sight
+     */
+    public void addTransform(final LOSTransform transform) {
+        transforms.add(transform);
+        
     }
 
     /** Build a list of transformed lines-of-sight.
      * @return list of transformed lines of sight
      */
     public List<TimeDependentLOS> build() {
-        final List<TimeDependentLOS> los = new ArrayList<TimeDependentLOS>(rawLOS.size());
-        for (final Vector3D raw : rawLOS) {
-            los.add(new FixedLOS(raw));
+
+        // copy the current transforms set, to ensure immutability
+        // of the built list, in case addTransform is called again after build
+        final List<LOSTransform> copy = new ArrayList<LOSTransform>(transforms);
+        final List<TimeDependentLOS> transformed = new ArrayList<TimeDependentLOS>(rawLOS.size());
+        for (int i = 0; i < rawLOS.size(); ++i) {
+            transformed.add(new TransformsSequenceLOS(i, rawLOS.get(i), copy));
         }
-        return los;
+
+        return transformed;
+
+    }
+
+    /** Implement time-dependent LOS by applying all registered transforms. */
+    private static class TransformsSequenceLOS implements TimeDependentLOS {
+
+        /** LOS index. */
+        private final int index;
+
+        /** Raw direction. */
+        private final Vector3D raw;
+
+        /** Transforms to be applied. */
+        private final List<LOSTransform> transforms;
+
+        /** Simple constructor.
+         * @param index los index
+         * @param raw raw direction
+         * @param transforms transforms to apply
+         */
+        public TransformsSequenceLOS(final int index, final Vector3D raw, final List<LOSTransform> transforms) {
+            this.index      = index;
+            this.raw        = raw;
+            this.transforms = transforms;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public Vector3D getLOS(final AbsoluteDate date) {
+            Vector3D los = raw;
+            for (final LOSTransform transform : transforms) {
+                los = transform.transformLOS(index, los, date);
+            }
+            return los.normalize();
+        }
+        
     }
 
 }

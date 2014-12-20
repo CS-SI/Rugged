@@ -17,19 +17,18 @@
 package org.orekit.rugged.los;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.time.AbsoluteDate;
 
-/** Interface representing a line-of-sight which depends on time.
- * @see LineSensor
+/** Interface for lines-of-sight tranforms.
  * @author Luc Maisonobe
+ * @see LOSBuilder
  */
-public interface TimeDependentLOS {
-
-    /** Get the line of sight for a given date.
-     * @param date date
-     * @return line of sight
+interface LOSTransform {
+    /** Transform a line-of-sight.
+     * @param i los pixel index
+     * @param los line-of-sight to transform
+     * @param date current date
+     * @return transformed line-of-sight
      */
-    Vector3D getLOS(AbsoluteDate date);
-
+    Vector3D transformLOS(int i, Vector3D los, AbsoluteDate date);
 }
