@@ -118,7 +118,7 @@ public class LOSBuilder {
         private final Vector3D[]  los;
 
         /** Simple constructor.
-         * @param raw raw direction
+         * @param raw raw directions
          * @param transforms transforms to apply (must be time-independent!)
          */
         public FixedLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
@@ -158,7 +158,7 @@ public class LOSBuilder {
         private final LOSTransform[] transforms;
 
         /** Simple constructor.
-         * @param raw raw direction
+         * @param raw raw directions
          * @param transforms transforms to apply
          */
         public TransformsSequenceLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
