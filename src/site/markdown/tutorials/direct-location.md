@@ -46,29 +46,31 @@ For this we need the following packages
     import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
     import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
     import org.apache.commons.math3.util.FastMath;
+    import org.orekit.rugged.los.LOSBuilder;
+    import org.orekit.rugged.los.FixedRotation;
     import org.orekit.rugged.los.TimeDependentLOS;
-    import org.orekit.rugged.los.FixedLOS;
+ 
 
+The raw viewing direction of pixel i with respect to the instrument is defined by the vector:
 
-The viewing direction of pixel i with respect to the instrument is defined by the vector:
-
-    Vector3D viewDir = new Vector3D(0d, i*FastMath.toRadians(20)/2000d, 1d).normalize(); //20° field of view, 2000 pixels
+    List<Vector3D> rawDirs = new ArrayList<Vector3D>();
+    for (int i = 0; i < 2000; i++) {
+        //20° field of view, 2000 pixels
+        rawDirs.add(new Vector3D(0d, i*FastMath.toRadians(20)/2000d, 1d));
+    }
 
 
 The instrument is oriented 10° off nadir around the X-axis, we need to rotate the viewing
 direction to obtain the line of sight in the satellite frame
 
-    Rotation rotation = new Rotation(Vector3D.PLUS_I, FastMath.toRadians(10));
-    Vector3D los = rotation.applyTo(viewDir);
+    LOSBuilder losBuilder = new LOSBuilder(rawDirs);
+    losBuilder.addTransform(new FixedRotation(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(10))));
 
-The viewing direction is the line of sight of one pixel. In the case of a single line sensor,
-Rugged expects to receive an array of LOS. The LOS can be time dependent (useful when applying
-time-dependent corrections to the viewing angles). Here we will suppose that the viewing
-directions are constant with time. In consequence we can use the object `FixedLOS` which is
-instantiated from the viewing direction vector.  
+Here we have considered that the viewing directions are constant with time, it is also possible to
+have time-dependent lines-of-sight by using other transforms. It is also possible to append several
+transforms between the raw directions and the final lines-of-sight.
 
-    List<TimeDependentLOS> lineOfSight = new ArrayList<TimeDependentLOS>();
-    lineOfSight.add(new FixedLOS(los));
+    TimeDependentLOS lineOfSight = losBuilder.build();
 
 ### Datation model
 
