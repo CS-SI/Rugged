@@ -461,6 +461,7 @@ public class RuggedBuilder {
     }
 
     /** Get the satellite position and velocity (m and m/s in inertial frame).
+     * @return satellite position and velocity (m and m/s in inertial frame)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      */
     public List<TimeStampedPVCoordinates> getpositionsVelocities() {
@@ -468,34 +469,39 @@ public class RuggedBuilder {
     }
 
     /** Get the number of points to use for position/velocity interpolation.
+     * @return number of points to use for position/velocity interpolation
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      */
     public int getPVInterpolationNumber() {
         return pvNeighborsSize;
     }
 
-    /** Get the Filter for derivatives from the sample to use in position/velocity interpolation.
+    /** Get the filter for derivatives from the sample to use in position/velocity interpolation.
+     * @return filter for derivatives from the sample to use in position/velocity interpolation
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      */
     public CartesianDerivativesFilter getPVFilter() {
         return pvDerivatives;
     }
 
-    /** Get the Satellite quaternions with respect to inertial frame.
+    /** Get the satellite quaternions with respect to inertial frame.
+     * @return satellite quaternions with respect to inertial frame
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      */
     public List<TimeStampedAngularCoordinates> getQuaternions() {
         return aSample;
     }
 
-    /** Get the Number of points to use for attitude interpolation.
+    /** Get the number of points to use for attitude interpolation.
+     * @return number of points to use for attitude interpolation
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      */
     public int getAInterpolationNumber() {
         return aNeighborsSize;
     }
 
-    /** Get the Filter for derivatives from the sample to use in attitude interpolation.
+    /** Get the filter for derivatives from the sample to use in attitude interpolation.
+     * @return filter for derivatives from the sample to use in attitude interpolation
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      */
     public AngularDerivativesFilter getAFilter() {
