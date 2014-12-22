@@ -21,9 +21,6 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
 
 /** Line sensor model.
- * <p>
- * Instances of this class are guaranteed to be immutable.
- * </p>
  * @author Luc Maisonobe
  */
 public class LineSensor {
