@@ -57,7 +57,7 @@ public class LOSBuilder {
      * @param transform transform to be applied to the lines-of-sight
      */
     public void addTransform(final TimeIndependentLOSTransform transform) {
-        transforms.add(new TransformConverter(transform));
+        transforms.add(new TransformAdapter(transform));
     }
 
     /** Add a transform to be applied after the already registered transforms.
@@ -83,8 +83,8 @@ public class LOSBuilder {
 
     }
 
-    /** Converter from time-independent transform to time-dependent transform. */
-    private static class TransformConverter implements LOSTransform {
+    /** Adapter from time-independent transform to time-dependent transform. */
+    private static class TransformAdapter implements LOSTransform {
 
         /** Underlying transform. */
         private final TimeIndependentLOSTransform transform;
@@ -92,7 +92,7 @@ public class LOSBuilder {
         /** Simple constructor.
          * @param transform underlying time-independent transform
          */
-        public TransformConverter(final TimeIndependentLOSTransform transform) {
+        public TransformAdapter(final TimeIndependentLOSTransform transform) {
             this.transform = transform;
         }
 
@@ -129,7 +129,7 @@ public class LOSBuilder {
             for (int i = 0; i < raw.size(); ++i) {
                 Vector3D v = raw.get(i);
                 for (final LOSTransform transform : transforms) {
-                    v = ((TransformConverter) transform).getTransform().transformLOS(i, v);
+                    v = ((TransformAdapter) transform).getTransform().transformLOS(i, v);
                 }
                 los[i] = v.normalize();
             }
