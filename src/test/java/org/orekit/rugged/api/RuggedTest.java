@@ -94,6 +94,7 @@ public class RuggedTest {
 
     // the following test is disabled by default
     // it is only used to check timings, and also creates a large (66M) temporary file
+    @Ignore
     @Test
     public void testMayonVolcanoTiming()
         throws RuggedException, OrekitException, URISyntaxException {
@@ -559,6 +560,7 @@ public class RuggedTest {
 
     // the following test is disabled by default
     // it is only used to check timings, and also creates a large (38M) temporary file
+    @Ignore
     @Test
     public void testInverseLocationTiming()
         throws RuggedException, OrekitException, URISyntaxException {
