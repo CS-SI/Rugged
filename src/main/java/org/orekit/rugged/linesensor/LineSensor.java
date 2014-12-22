@@ -16,8 +16,6 @@
  */
 package org.orekit.rugged.linesensor;
 
-import java.util.List;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
@@ -40,7 +38,7 @@ public class LineSensor {
     private final Vector3D position;
 
     /** Pixels lines-of-sight. */
-    private final List<TimeDependentLOS> los;
+    private final TimeDependentLOS los;
 
     /** Simple constructor.
      * @param name name of the sensor
@@ -49,7 +47,7 @@ public class LineSensor {
      * @param datationModel datation model
      */
     public LineSensor(final String name, final LineDatation datationModel,
-                      final Vector3D position, final List<TimeDependentLOS> los) {
+                      final Vector3D position, final TimeDependentLOS los) {
 
         this.name          = name;
         this.datationModel = datationModel;
@@ -69,7 +67,7 @@ public class LineSensor {
      * @return number of pixels
      */
     public int getNbPixels() {
-        return los.size();
+        return los.getNbPixels();
     }
 
     /** Get the pixel normalized line-of-sight at some date.
@@ -78,7 +76,7 @@ public class LineSensor {
      * @return pixel normalized line-of-sight
      */
     public Vector3D getLos(final AbsoluteDate date, final int i) {
-        return los.get(i).getLOS(date).normalize();
+        return los.getLOS(i, date);
     }
 
     /** Get the date.

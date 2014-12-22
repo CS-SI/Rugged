@@ -25,10 +25,16 @@ import org.orekit.time.AbsoluteDate;
  */
 public interface TimeDependentLOS {
 
+    /** Get the number of pixels.
+     * @return number of pixels
+     */
+    int getNbPixels();
+
     /** Get the line of sight for a given date.
+     * @param index los pixel index
      * @param date date
      * @return line of sight
      */
-    Vector3D getLOS(AbsoluteDate date);
+    Vector3D getLOS(int index, AbsoluteDate date);
 
 }

@@ -41,12 +41,23 @@ public class LOSBuilder {
     /** Transforms to be applied. */
     private final List<LOSTransform> transforms;
 
+    /** Flag for time-independent only transforms. */
+    private boolean timeIndependent;
+
     /** Create builder.
      * @param rawLOS raw fixed lines-of-sight
      */
     public LOSBuilder(final List<Vector3D> rawLOS) {
-        this.rawLOS = rawLOS;
-        this.transforms = new ArrayList<LOSTransform>();
+        this.rawLOS          = rawLOS;
+        this.transforms      = new ArrayList<LOSTransform>();
+        this.timeIndependent = true;
+    }
+
+    /** Add a transform to be applied after the already registered transforms.
+     * @param transform transform to be applied to the lines-of-sight
+     */
+    public void addTransform(final TimeIndependentLOSTransform transform) {
+        transforms.add(new TransformConverter(transform));
     }
 
     /** Add a transform to be applied after the already registered transforms.
@@ -54,57 +65,135 @@ public class LOSBuilder {
      */
     public void addTransform(final LOSTransform transform) {
         transforms.add(transform);
+        timeIndependent = false;
     }
 
     /** Build a list of transformed lines-of-sight.
      * @return list of transformed lines of sight
      */
-    public List<TimeDependentLOS> build() {
+    public TimeDependentLOS build() {
 
-        // copy the current transforms set, to ensure immutability
-        // of the built list, in case addTransform is called again after build
-        final List<LOSTransform> copy = new ArrayList<LOSTransform>(transforms);
-        final List<TimeDependentLOS> transformed = new ArrayList<TimeDependentLOS>(rawLOS.size());
-        for (int i = 0; i < rawLOS.size(); ++i) {
-            transformed.add(new TransformsSequenceLOS(i, rawLOS.get(i), copy));
+        if (timeIndependent) {
+            // fast implementation for time-independent lines-of-sight
+            return new FixedLOS(rawLOS, transforms);
+        } else {
+            // regular implementation, for time-dependent lines-of-sight
+            return new TransformsSequenceLOS(rawLOS, transforms);
         }
-
-        return transformed;
 
     }
 
-    /** Implement time-dependent LOS by applying all registered transforms. */
-    private static class TransformsSequenceLOS implements TimeDependentLOS {
+    /** Converter from time-independent transform to time-dependent transform. */
+    private static class TransformConverter implements LOSTransform {
 
-        /** LOS index. */
-        private final int index;
-
-        /** Raw direction. */
-        private final Vector3D raw;
-
-        /** Transforms to be applied. */
-        private final List<LOSTransform> transforms;
+        /** Underlying transform. */
+        private final TimeIndependentLOSTransform transform;
 
         /** Simple constructor.
-         * @param index los index
-         * @param raw raw direction
-         * @param transforms transforms to apply
+         * @param transform underlying time-independent transform
          */
-        public TransformsSequenceLOS(final int index, final Vector3D raw, final List<LOSTransform> transforms) {
-            this.index      = index;
-            this.raw        = raw;
-            this.transforms = transforms;
+        public TransformConverter(final TimeIndependentLOSTransform transform) {
+            this.transform = transform;
+        }
+
+        /** Get the underlying transform.
+         * @return underlying time-independent transform
+         */
+        public TimeIndependentLOSTransform getTransform() {
+            return transform;
         }
 
         /** {@inheritDoc} */
         @Override
-        public Vector3D getLOS(final AbsoluteDate date) {
-            Vector3D los = raw;
+        public Vector3D transformLOS(final int i, final Vector3D los, final AbsoluteDate date) {
+            return transform.transformLOS(i, los);
+        }
+
+    }
+
+    /** Implement time-independent LOS by applying all registered transforms at construction. */
+    private static class FixedLOS implements TimeDependentLOS {
+
+        /** Fixed direction for los. */
+        private final Vector3D[]  los;
+
+        /** Simple constructor.
+         * @param raw raw direction
+         * @param transforms transforms to apply (must be time-independent!)
+         */
+        public FixedLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
+
+            los = new Vector3D[raw.size()];
+
+            // apply transforms only once
+            for (int i = 0; i < raw.size(); ++i) {
+                Vector3D v = raw.get(i);
+                for (final LOSTransform transform : transforms) {
+                    v = ((TransformConverter) transform).getTransform().transformLOS(i, v);
+                }
+                los[i] = v.normalize();
+            }
+
+        }
+
+        /** {@inheritDoc} */
+        public int getNbPixels() {
+            return los.length;
+        }
+
+        /** {@inheritDoc} */
+        public Vector3D getLOS(final int index, final AbsoluteDate date) {
+            return los[index];
+        }
+
+    }
+
+    /** Implement time-dependent LOS by applying all registered transforms at runtime. */
+    private static class TransformsSequenceLOS implements TimeDependentLOS {
+
+        /** Raw direction. */
+        private final Vector3D[] raw;
+
+        /** Transforms to be applied. */
+        private final LOSTransform[] transforms;
+
+        /** Simple constructor.
+         * @param raw raw direction
+         * @param transforms transforms to apply
+         */
+        public TransformsSequenceLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
+
+            // copy the lists, to ensure immutability of the built object,
+            // in case addTransform is called again after build
+            // or the raw LOS list is changed by caller
+
+            this.raw = new Vector3D[raw.size()];
+            for (int i = 0; i < raw.size(); ++i) {
+                this.raw[i] = raw.get(i);
+            }
+
+            this.transforms = new LOSTransform[transforms.size()];
+            for (int i = 0; i < transforms.size(); ++i) {
+                this.transforms[i] = transforms.get(i);
+            }
+
+        }
+
+        /** {@inheritDoc} */
+        public int getNbPixels() {
+            return raw.length;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public Vector3D getLOS(final int index, final AbsoluteDate date) {
+            Vector3D los = raw[index];
             for (final LOSTransform transform : transforms) {
                 los = transform.transformLOS(index, los, date);
             }
             return los.normalize();
         }
+
     }
 
 }

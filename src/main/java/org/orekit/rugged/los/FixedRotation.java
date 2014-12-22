@@ -18,13 +18,12 @@ package org.orekit.rugged.los;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.time.AbsoluteDate;
 
-/** {@link LOSTransform LOS transform} based on a fixed rotation.
+/** {@link TimeIndependentLOSTransform LOS transform} based on a fixed rotation.
  * @author Luc Maisonobe
  * @see LOSBuilder
  */
-public class FixedRotation implements LOSTransform {
+public class FixedRotation implements TimeIndependentLOSTransform {
 
     /** Underlying rotation. */
     private final Rotation rotation;
@@ -38,7 +37,7 @@ public class FixedRotation implements LOSTransform {
 
     /** {@inheritDoc} */
     @Override
-    public Vector3D transformLOS(final int i, final Vector3D los, final AbsoluteDate date) {
+    public Vector3D transformLOS(final int i, final Vector3D los) {
         return rotation.applyTo(los);
     }
 

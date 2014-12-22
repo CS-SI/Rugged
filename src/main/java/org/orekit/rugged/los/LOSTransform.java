@@ -24,6 +24,7 @@ import org.orekit.time.AbsoluteDate;
  * @see LOSBuilder
  */
 interface LOSTransform {
+
     /** Transform a line-of-sight.
      * @param i los pixel index
      * @param los line-of-sight to transform
@@ -31,4 +32,5 @@ interface LOSTransform {
      * @return transformed line-of-sight
      */
     Vector3D transformLOS(int i, Vector3D los, AbsoluteDate date);
+
 }

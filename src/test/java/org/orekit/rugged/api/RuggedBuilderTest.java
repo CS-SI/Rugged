@@ -341,9 +341,9 @@ public class RuggedBuilderTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<TimeDependentLOS> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                       FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                          Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -409,9 +409,9 @@ public class RuggedBuilderTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<TimeDependentLOS> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                       FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                          Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -458,9 +458,9 @@ public class RuggedBuilderTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        List<TimeDependentLOS> los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                       FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                          Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -662,7 +662,7 @@ public class RuggedBuilderTest {
 
     }
 
-    private List<TimeDependentLOS> createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
+    private TimeDependentLOS createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);

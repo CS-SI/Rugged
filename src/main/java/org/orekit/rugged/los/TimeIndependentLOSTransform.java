@@ -17,27 +17,18 @@
 package org.orekit.rugged.los;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.time.AbsoluteDate;
 
-/** Line-of-sight which does not depends on time.
- * @see LineSensor
+/** Interface for lines-of-sight tranforms that do not depend on time.
  * @author Luc Maisonobe
+ * @see LOSBuilder
  */
-class FixedLOS implements TimeDependentLOS {
+interface TimeIndependentLOSTransform {
 
-    /** Fixed direction for los. */
-    private final Vector3D los;
-
-    /** Simple constructor.
-     * @param los fixed direction for the line of sight
+    /** Transform a line-of-sight.
+     * @param i los pixel index
+     * @param los line-of-sight to transform
+     * @return transformed line-of-sight
      */
-    public FixedLOS(final Vector3D los) {
-        this.los = los;
-    }
-
-    /** {@inheritDoc} */
-    public Vector3D getLOS(final AbsoluteDate date) {
-        return los;
-    }
+    Vector3D transformLOS(int i, Vector3D los);
 
 }
