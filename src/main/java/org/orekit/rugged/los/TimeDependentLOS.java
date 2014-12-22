@@ -17,7 +17,6 @@
 package org.orekit.rugged.los;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.time.AbsoluteDate;
 
 /** Interface representing a line-of-sight which depends on time.

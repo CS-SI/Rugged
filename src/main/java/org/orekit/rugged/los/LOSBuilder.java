@@ -36,7 +36,7 @@ import org.orekit.time.AbsoluteDate;
 public class LOSBuilder {
 
     /** Raw fixed ine-of-sights. */
-    public final List<Vector3D> rawLOS;
+    private final List<Vector3D> rawLOS;
 
     /** Transforms to be applied. */
     private final List<LOSTransform> transforms;
@@ -54,7 +54,6 @@ public class LOSBuilder {
      */
     public void addTransform(final LOSTransform transform) {
         transforms.add(transform);
-        
     }
 
     /** Build a list of transformed lines-of-sight.
@@ -106,7 +105,6 @@ public class LOSBuilder {
             }
             return los.normalize();
         }
-        
     }
 
 }

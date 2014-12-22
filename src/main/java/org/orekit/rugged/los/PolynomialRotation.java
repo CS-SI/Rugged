@@ -28,13 +28,13 @@ import org.orekit.time.AbsoluteDate;
 public class PolynomialRotation implements LOSTransform {
 
     /** Rotation axis. */
-    final Vector3D axis;
+    private final Vector3D axis;
 
     /** Rotation angle polynomial. */
-    final PolynomialFunction angle;
+    private final PolynomialFunction angle;
 
     /** Reference date for polynomial evaluation. */
-    final AbsoluteDate referenceDate;
+    private final AbsoluteDate referenceDate;
 
     /** Simple constructor.
      * @param axis rotation axis
@@ -52,8 +52,8 @@ public class PolynomialRotation implements LOSTransform {
 
     /** {@inheritDoc} */
     @Override
-    public Vector3D transformLOS(int i, Vector3D los, AbsoluteDate date) {
+    public Vector3D transformLOS(final int i, final Vector3D los, final AbsoluteDate date) {
         return new Rotation(axis, angle.value(date.durationFrom(referenceDate))).applyTo(los);
     }
-    
+
 }

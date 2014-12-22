@@ -27,7 +27,7 @@ import org.orekit.time.AbsoluteDate;
 public class FixedRotation implements LOSTransform {
 
     /** Underlying rotation. */
-    final Rotation rotation;
+    private final Rotation rotation;
 
     /** Simple constructor.
      * @param rotation rotation to apply
@@ -38,8 +38,8 @@ public class FixedRotation implements LOSTransform {
 
     /** {@inheritDoc} */
     @Override
-    public Vector3D transformLOS(int i, Vector3D los, AbsoluteDate date) {
+    public Vector3D transformLOS(final int i, final Vector3D los, final AbsoluteDate date) {
         return rotation.applyTo(los);
     }
-    
+
 }
