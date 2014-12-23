@@ -19,6 +19,8 @@ package org.orekit.rugged.los;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
 
@@ -115,7 +117,7 @@ public class LOSBuilder {
     private static class FixedLOS implements TimeDependentLOS {
 
         /** Fixed direction for los. */
-        private final Vector3D[]  los;
+        private final Vector3D[] los;
 
         /** Simple constructor.
          * @param raw raw directions
@@ -144,6 +146,15 @@ public class LOSBuilder {
         /** {@inheritDoc} */
         public Vector3D getLOS(final int index, final AbsoluteDate date) {
             return los[index];
+        }
+
+        /** {@inheritDoc} */
+        public FieldVector3D<DerivativeStructure> getLOS(final int index, final AbsoluteDate date,
+                                                         final double[] parameters) {
+            // fixed LOS do not depend on any parameters
+            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, los[index].getX()),
+                                                          new DerivativeStructure(parameters.length, 1, los[index].getY()),
+                                                          new DerivativeStructure(parameters.length, 1, los[index].getZ()));
         }
 
     }
@@ -192,6 +203,16 @@ public class LOSBuilder {
                 los = transform.transformLOS(index, los, date);
             }
             return los.normalize();
+        }
+
+        /** {@inheritDoc} */
+        public FieldVector3D<DerivativeStructure> getLOS(final int index, final AbsoluteDate date,
+                                                         final double[] parameters) {
+            // non-adjustable LOS do not depend on any parameters
+            final Vector3D los = getLOS(index, date);
+            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, los.getX()),
+                                                          new DerivativeStructure(parameters.length, 1, los.getY()),
+                                                          new DerivativeStructure(parameters.length, 1, los.getZ()));
         }
 
     }

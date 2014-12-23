@@ -16,6 +16,8 @@
  */
 package org.orekit.rugged.los;
 
+import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
 
@@ -36,5 +38,19 @@ public interface TimeDependentLOS {
      * @return line of sight
      */
     Vector3D getLOS(int index, AbsoluteDate date);
+
+    /** Get the line of sight and its partial derivatives for a given date.
+     * <p>
+     * This method is used for LOS calibration purposes. It allows to compute
+     * the Jacobian matrix of the LOS with respect to the parameters, which
+     * are typically polynomials coefficients representing rotation angles.
+     * These polynomials can be used for example to model thermo-elestic effects.
+     * </p>
+     * @param index los pixel index
+     * @param date date
+     * @param parameters current estimate of the adjusted parameters
+     * @return line of sight, and its first partial derivatives with respect to the parameters
+     */
+    FieldVector3D<DerivativeStructure> getLOS(int index, AbsoluteDate date, double[] parameters);
 
 }
