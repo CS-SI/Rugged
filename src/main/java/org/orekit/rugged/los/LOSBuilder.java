@@ -68,8 +68,8 @@ public class LOSBuilder {
         timeIndependent = false;
     }
 
-    /** Build a list of transformed lines-of-sight.
-     * @return list of transformed lines of sight
+    /** Build a lines-of-sight provider.
+     * @return lines-of-sight provider
      */
     public TimeDependentLOS build() {
 
