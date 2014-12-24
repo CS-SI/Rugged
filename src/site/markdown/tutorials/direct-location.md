@@ -215,21 +215,21 @@ As all these concepts can be chained together, the setters themselves implement 
 [fluent interface](https://en.wikipedia.org/wiki/Fluent_interface) pattern, which implies each setter
 returns the builder instance, and therefore another setter can be called directly.
 
-The first setter specifies the intersection algorithm to use. As this tutorial is intended to be very
+The *setAlgorithm* setter specifies the intersection algorithm to use. As this tutorial is intended to be very
 simple for a beginning, we choose to use directly the ellipsoid and not a real Digital Elevation Model,
 so we can use `AlgorithmId.IGNORE_DEM_USE_ELLIPSOID` as the single parameter of this setter.
 
-The second setter specifies the Digital Elevation Model. In fact, as we decided to ignore the Digital
+The *setDigitalElevationModel* setter specifies the Digital Elevation Model. In fact, as we decided to ignore the Digital
 Elevation Model in this tutorial, we could have omitted this call and it would have worked correctly.
 We preferred to let it in so users do not forget to set the Digital Elevation Model for intersection
 algorithms that really use them. As the model will be ignored, we can put the parameters for this
 setter to `null` and `0`. Of course if another algorithm had been chosen,  null parameters would clearly
-not work, this is explained in another tutorial: [Direct location with a DEM](direct-location-with-DEM.html).
+not work, this is explained in another tutorial: [[DirectLocationWithDEM|Direct location with a DEM]].
 
-The third setter defines the shape and orientation of the ellipsoid. We use simple predefined enumerates:
+The *setEllipsoid* setter defines the shape and orientation of the ellipsoid. We use simple predefined enumerates:
 `EllipsoidId.WGS84`, `InertialFrameId.EME2000`, but could also use a custom ellipsoid if needed.
 
-The fourth setter is used to define the global time span of the search algorithms (direct and inverse
+The *setTimeSpan* setter is used to define the global time span of the search algorithms (direct and inverse
 location). Four parameters are used for this: acquisitionStartDate, acquisitionStopDate,
 tStep (step at which the pre-computed frames transforms cache will be filled), timeTolerance (margin
 allowed for extrapolation during inverse location, in seconds. The tStep parameter is a key parameter
@@ -247,7 +247,7 @@ to allow a few images lines so for example a 5 lines tolerance would imply compu
 timeTolerance = 5 / lineSensor.getRate(0)).
 `BodyRotatingFrameId.ITRF`
 
-The fifth setter defines the spacecraft evolution. The arguments are the list of time-stamped positions and
+The *setTrajectory* setter defines the spacecraft evolution. The arguments are the list of time-stamped positions and
 velocities as well as the inertial frame with respect to which they are defined and options for interpolation:
 number of points to use and type of filter for derivatives. The interpolation polynomials for nbPVPoints
 without any derivatives (case of CartesianDerivativesFilter.USE_P: only positions are used, without velocities)
@@ -257,7 +257,7 @@ positions/velocities data are of good quality and separated by a few seconds, on
 but interpolate with both positions and velocities; in other cases, one may choose more points but interpolate
 only with positions. We find similar arguments for the attitude quaternions. 
 
-The sixth setter used registers a line sensor. As can be deduced from its prefix (`add` instead of `set`), it
+The last setter used, *addLineSensor*, registers a line sensor. As can be deduced from its prefix (`add` instead of `set`), it
 can be called several time to register several sensors that will all be available in the built Rugged instance.
 We have called the method only once here, so we will use only one sensor.
 
@@ -286,7 +286,21 @@ to setters will not change the build instance. In fact, it is possible to create
 call its `build()` method to create a first Rugged instance, and then to modify the builder configuration
 by calling again some of the setters and building a second Rugged instance from the new configuration.
 This allows to perform comparisons between two different configurations in the same program and without
-having to recreate everything.
+having to recreate everything. For instance, one can procede in three steps like this:
+
+    RuggedBuilder ruggedBuilder = new RuggedBuilder().
+                                  setAlgorithm(xxxx). 
+                                  [ ... some setters ...]
+                                  setTrajectory(xxxx);
+
+Then add the desired sensor(s):
+
+    ruggedBuilder.addLineSensor(lineSensor);
+
+And create the Rugged instance:
+
+    Rugged rugged = ruggedBuilder.build();
+   
 
 ## Direct location
 
