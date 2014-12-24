@@ -22,9 +22,15 @@ import java.util.List;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.api.Rugged;
 import org.orekit.time.AbsoluteDate;
 
 /** Builder for lines-of-sight list.
+ * <p>
+ * This class implements the <em>builder pattern</em> to create {@link TimeDependentLOS} instances.
+ * It does so by using a <em>fluent API</em> in order to clarify reading and allow
+ * later extensions with new configuration parameters.
+ * </p>
  * <p>
  * This builder aims at creating lines-of-sight directions which are
  * the result of several transforms applied to an initial list of raw
@@ -33,6 +39,8 @@ import org.orekit.time.AbsoluteDate;
  * to a spacecraft.
  * </p>
  * @see TimeDependentLOS
+ * @see <a href="https://en.wikipedia.org/wiki/Builder_pattern">Builder pattern (wikipedia)</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Fluent_interface">Fluent interface (wikipedia)</a>
  * @author Luc Maisonobe
  */
 public class LOSBuilder {
@@ -57,17 +65,21 @@ public class LOSBuilder {
 
     /** Add a transform to be applied after the already registered transforms.
      * @param transform transform to be applied to the lines-of-sight
+     * @return the builder instance
      */
-    public void addTransform(final TimeIndependentLOSTransform transform) {
+    public LOSBuilder addTransform(final TimeIndependentLOSTransform transform) {
         transforms.add(new TransformAdapter(transform));
+        return this;
     }
 
     /** Add a transform to be applied after the already registered transforms.
      * @param transform transform to be applied to the lines-of-sight
+     * @return the builder instance
      */
-    public void addTransform(final LOSTransform transform) {
+    public LOSBuilder addTransform(final LOSTransform transform) {
         transforms.add(transform);
         timeIndependent = false;
+        return this;
     }
 
     /** Build a lines-of-sight provider.
