@@ -39,9 +39,9 @@ public class LineSensor {
 
     /** Simple constructor.
      * @param name name of the sensor
+     * @param datationModel datation model
      * @param position sensor position
      * @param los pixels lines-of-sight
-     * @param datationModel datation model
      */
     public LineSensor(final String name, final LineDatation datationModel,
                       final Vector3D position, final TimeDependentLOS los) {
