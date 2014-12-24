@@ -42,3 +42,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = o sistema de referencia {0} non corresp
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = os datos non están no baleirado de datos do interpolador
+
+# number of estimated parameters mismatch, expected {0} got {1}
+ESTIMATED_PARAMETERS_NUMBER_MISMATCH = <MISSING TRANSLATION>

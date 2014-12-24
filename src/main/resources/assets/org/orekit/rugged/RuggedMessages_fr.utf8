@@ -42,3 +42,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = le repère {0} ne correspond pas au rep
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = les données ne correspondent pas à une sauvegarde d''interpolateur
+
+# number of estimated parameters mismatch, expected {0} got {1}
+ESTIMATED_PARAMETERS_NUMBER_MISMATCH = incohérence du nombre de paramètres estimés, {0} attendus, {1} renseignés

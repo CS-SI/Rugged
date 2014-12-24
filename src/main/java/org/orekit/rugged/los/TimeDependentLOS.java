@@ -19,13 +19,14 @@ package org.orekit.rugged.los;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.utils.ParametricModel;
 import org.orekit.time.AbsoluteDate;
 
 /** Interface representing a line-of-sight which depends on time.
  * @see LineSensor
  * @author Luc Maisonobe
  */
-public interface TimeDependentLOS {
+public interface TimeDependentLOS extends ParametricModel {
 
     /** Get the number of pixels.
      * @return number of pixels
@@ -44,7 +45,15 @@ public interface TimeDependentLOS {
      * This method is used for LOS calibration purposes. It allows to compute
      * the Jacobian matrix of the LOS with respect to the parameters, which
      * are typically polynomials coefficients representing rotation angles.
-     * These polynomials can be used for example to model thermo-elestic effects.
+     * These polynomials can be used for example to model thermo-elastic effects.
+     * </p>
+     * <p>
+     * Note that in order for the partial derivatives to be properly set up, the
+     * {@link #setEstimatedParameters(double[], int, int) setEstimatedParameters}
+     * <em>must</em> have been called at least once before this method and its
+     * {@code start} parameter will be used to ensure the partial derivatives are
+     * ordered in the same way in the returned vector as they were in the set
+     * parameters.
      * </p>
      * @param index los pixel index
      * @param date date

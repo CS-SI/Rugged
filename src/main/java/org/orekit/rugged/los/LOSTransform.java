@@ -16,14 +16,17 @@
  */
 package org.orekit.rugged.los;
 
+import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.utils.ParametricModel;
 import org.orekit.time.AbsoluteDate;
 
 /** Interface for lines-of-sight tranforms.
  * @author Luc Maisonobe
  * @see LOSBuilder
  */
-interface LOSTransform {
+interface LOSTransform extends ParametricModel {
 
     /** Transform a line-of-sight.
      * @param i los pixel index
@@ -32,5 +35,19 @@ interface LOSTransform {
      * @return transformed line-of-sight
      */
     Vector3D transformLOS(int i, Vector3D los, AbsoluteDate date);
+
+    /** Transform a line-of-sight and its partial derivatives.
+     * <p>
+     * This method is used for LOS calibration purposes. It allows to compute
+     * the Jacobian matrix of the LOS with respect to the parameters, which
+     * are typically polynomials coefficients representing rotation angles.
+     * These polynomials can be used for example to model thermo-elastic effects.
+     * </p>
+     * @param index los pixel index
+     * @param date date
+     * @param los line-of-sight to transform
+     * @return line of sight, and its first partial derivatives with respect to the parameters
+     */
+    FieldVector3D<DerivativeStructure> transformLOS(int index, FieldVector3D<DerivativeStructure> los, AbsoluteDate date);
 
 }

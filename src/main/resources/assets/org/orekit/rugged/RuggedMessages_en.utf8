@@ -42,3 +42,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = frame {0} does not match frame {1} from
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = data is not an interpolator dump
+
+# number of estimated parameters mismatch, expected {0} got {1}
+ESTIMATED_PARAMETERS_NUMBER_MISMATCH = number of estimated parameters mismatch, expected {0} got {1}

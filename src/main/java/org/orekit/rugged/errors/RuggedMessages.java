@@ -64,7 +64,8 @@ public enum RuggedMessages implements Localizable {
     LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE("line-of-sight never crosses altitude {0}"),
     DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT("line-of-sight enters the Digital Elevation Model behind spacecraft!"),
     FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP("frame {0} does not match frame {1} from interpolator dump"),
-    NOT_INTERPOLATOR_DUMP_DATA("data is not an interpolator dump");
+    NOT_INTERPOLATOR_DUMP_DATA("data is not an interpolator dump"),
+    ESTIMATED_PARAMETERS_NUMBER_MISMATCH("number of estimated parameters mismatch, expected {0} got {1}");
 
     // CHECKSTYLE: resume JavadocVariable check
 

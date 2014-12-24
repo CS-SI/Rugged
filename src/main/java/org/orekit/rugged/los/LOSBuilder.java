@@ -17,12 +17,15 @@
 package org.orekit.rugged.los;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.api.Rugged;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
+import org.orekit.rugged.utils.ParametricModel;
 import org.orekit.time.AbsoluteDate;
 
 /** Builder for lines-of-sight list.
@@ -110,11 +113,24 @@ public class LOSBuilder {
             this.transform = transform;
         }
 
-        /** Get the underlying transform.
-         * @return underlying time-independent transform
-         */
-        public TimeIndependentLOSTransform getTransform() {
-            return transform;
+        /** {@inheritDoc} */
+        @Override
+        public int getNbEstimatedParameters() {
+            return transform.getNbEstimatedParameters();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void getEstimatedParameters(final double[] parameters, final int start, final int length)
+            throws RuggedException {
+            transform.getEstimatedParameters(parameters, start, length);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
+            throws RuggedException {
+            transform.setEstimatedParameters(parameters, start, length);
         }
 
         /** {@inheritDoc} */
@@ -123,62 +139,26 @@ public class LOSBuilder {
             return transform.transformLOS(i, los);
         }
 
-    }
-
-    /** Implement time-independent LOS by applying all registered transforms at construction. */
-    private static class FixedLOS implements TimeDependentLOS {
-
-        /** Fixed direction for los. */
-        private final Vector3D[] los;
-
-        /** Simple constructor.
-         * @param raw raw directions
-         * @param transforms transforms to apply (must be time-independent!)
-         */
-        public FixedLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
-
-            los = new Vector3D[raw.size()];
-
-            // apply transforms only once
-            for (int i = 0; i < raw.size(); ++i) {
-                Vector3D v = raw.get(i);
-                for (final LOSTransform transform : transforms) {
-                    v = ((TransformAdapter) transform).getTransform().transformLOS(i, v);
-                }
-                los[i] = v.normalize();
-            }
-
-        }
-
         /** {@inheritDoc} */
-        public int getNbPixels() {
-            return los.length;
-        }
-
-        /** {@inheritDoc} */
-        public Vector3D getLOS(final int index, final AbsoluteDate date) {
-            return los[index];
-        }
-
-        /** {@inheritDoc} */
-        public FieldVector3D<DerivativeStructure> getLOS(final int index, final AbsoluteDate date,
-                                                         final double[] parameters) {
-            // fixed LOS do not depend on any parameters
-            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, los[index].getX()),
-                                                          new DerivativeStructure(parameters.length, 1, los[index].getY()),
-                                                          new DerivativeStructure(parameters.length, 1, los[index].getZ()));
+        @Override
+        public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
+                                                               final AbsoluteDate date) {
+            return transform.transformLOS(i, los);
         }
 
     }
 
-    /** Implement time-dependent LOS by applying all registered transforms at runtime. */
-    private static class TransformsSequenceLOS implements TimeDependentLOS {
+    /** Implement time-independent LOS by recomputing directions by applying all transforms each time. */
+    private static class TransformsSequenceLOS implements ParametricModel, TimeDependentLOS {
 
         /** Raw direction. */
         private final Vector3D[] raw;
 
         /** Transforms to be applied. */
         private final LOSTransform[] transforms;
+
+        /** Total number of estimated parameters. */
+        private final int total;
 
         /** Simple constructor.
          * @param raw raw directions
@@ -189,17 +169,74 @@ public class LOSBuilder {
             // copy the lists, to ensure immutability of the built object,
             // in case addTransform is called again after build
             // or the raw LOS list is changed by caller
-
             this.raw = new Vector3D[raw.size()];
             for (int i = 0; i < raw.size(); ++i) {
                 this.raw[i] = raw.get(i);
             }
 
             this.transforms = new LOSTransform[transforms.size()];
+            int n = 0;
             for (int i = 0; i < transforms.size(); ++i) {
-                this.transforms[i] = transforms.get(i);
+                final LOSTransform transform = transforms.get(i);
+                this.transforms[i] = transform;
+                n += transform.getNbEstimatedParameters();
+            }
+            this.total = n;
+
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public int getNbEstimatedParameters() {
+            return total;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void getEstimatedParameters(final double[] parameters, final int start, final int length)
+            throws RuggedException {
+
+            // global check
+            checkSlice(length);
+
+            // retrieve parameters for all transforms
+            int offset = 0;
+            for (final ParametricModel model : transforms) {
+                final int n = model.getNbEstimatedParameters();
+                model.getEstimatedParameters(parameters, offset, n);
+                offset += n;
             }
 
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
+            throws RuggedException {
+
+            // global check
+            checkSlice(length);
+
+            // set parameters for all transforms
+            int offset = 0;
+            for (final ParametricModel model : transforms) {
+                final int n = model.getNbEstimatedParameters();
+                model.setEstimatedParameters(parameters, offset, n);
+                offset += n;
+            }
+
+        }
+
+        /** Check the number of parameters of an array slice.
+         * @param length number of elements in the array slice to consider
+         * @exception RuggedException if the size of the slice does not match
+         * the {@link #getNbEstimatedParameters() number of estimated parameters}
+         */
+        private void checkSlice(final int length) throws RuggedException {
+            if (getNbEstimatedParameters() != length) {
+                throw new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH,
+                                          getNbEstimatedParameters(), length);
+            }
         }
 
         /** {@inheritDoc} */
@@ -218,6 +255,7 @@ public class LOSBuilder {
         }
 
         /** {@inheritDoc} */
+        @Override
         public FieldVector3D<DerivativeStructure> getLOS(final int index, final AbsoluteDate date,
                                                          final double[] parameters) {
             // non-adjustable LOS do not depend on any parameters
@@ -225,6 +263,46 @@ public class LOSBuilder {
             return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, los.getX()),
                                                           new DerivativeStructure(parameters.length, 1, los.getY()),
                                                           new DerivativeStructure(parameters.length, 1, los.getZ()));
+        }
+
+    }
+
+    /** Implement time-independent LOS by computing directions only when parameters are changed. */
+    private static class FixedLOS extends TransformsSequenceLOS {
+
+        /** transformed direction for los. */
+        private final Vector3D[] transformed;
+
+        /** Simple constructor.
+         * @param raw raw directions
+         * @param transforms transforms to apply (must be time-independent!)
+         */
+        public FixedLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
+            super(raw, transforms);
+            transformed = new Vector3D[raw.size()];
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
+            throws RuggedException {
+
+            // update the transforms
+            super.setEstimatedParameters(parameters, start, length);
+
+            // unset the directions, to ensure they get recomputed if needed
+            Arrays.fill(transformed, null);
+
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public Vector3D getLOS(final int index, final AbsoluteDate date) {
+            if (transformed[index] == null) {
+                // recompute the transformed los direction only if needed
+                transformed[index] = super.getLOS(index, date);
+            }
+            return transformed[index];
         }
 
     }

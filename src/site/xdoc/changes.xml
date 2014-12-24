@@ -23,6 +23,10 @@
     <release version="1.0" date="TBD"
              description="TBD">
       <action dev="luc" type="add" >
+        Added partial derivatives for line-of-sights with respect to transforms parameters.
+        This is the first step towards los calibration.
+      </action>
+      <action dev="luc" type="add" >
         Added sequences of transforms for lines-of-sight.
       </action>
       <action dev="luc" type="add" >
