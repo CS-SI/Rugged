@@ -57,7 +57,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 
 /** Builder for {@link Rugged} instances.
  * <p>
- * This class implements the <em>builder pattern</em> to create{@link Rugged} instances.
+ * This class implements the <em>builder pattern</em> to create {@link Rugged} instances.
  * It does so by using a <em>fluent API</em> in order to clarify reading and allow
  * later extensions with new configuration parameters.
  * </p>
