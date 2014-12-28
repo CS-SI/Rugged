@@ -22,6 +22,9 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="update">
+        Updated Apache Commons Version as 3.4 has now been released.
+      </action>
       <action dev="luc" type="add" >
         Added partial derivatives for line-of-sights with respect to transforms parameters.
         This is the first step towards los calibration.
