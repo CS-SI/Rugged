@@ -49,7 +49,7 @@ For this we need the following packages
     import org.orekit.rugged.los.LOSBuilder;
     import org.orekit.rugged.los.FixedRotation;
     import org.orekit.rugged.los.TimeDependentLOS;
-    org.orekit.rugged.utils.ParameterType;
+    import org.orekit.rugged.utils.ParameterType;
  
 
 The raw viewing direction of pixel i with respect to the instrument is defined by the vector:
