@@ -254,7 +254,7 @@ public class Rugged {
      * @param date date of the location
      * @param position pixel position in spacecraft frame
      * @param los normalized line-of-sight in spacecraft frame
-     * @return ground position of all pixels of the specified sensor line
+     * @return ground position of intersection point between specified los and ground
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
     public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los)
