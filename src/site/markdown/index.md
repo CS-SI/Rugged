@@ -82,6 +82,8 @@ Features
 
     * Italian
 
+    * Norwegian
+
     * Romanian
 
     * Spanish

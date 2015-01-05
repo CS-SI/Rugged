@@ -35,7 +35,7 @@ public class RuggedMessagesTest {
 
     @Test
     public void testAllKeysPresentInPropertiesFiles() {
-        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "ro" } ) {
+        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "no", "ro" } ) {
             ResourceBundle bundle =
                 ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
                                          new Locale(language), new RuggedMessages.UTF8Control());
@@ -55,7 +55,7 @@ public class RuggedMessagesTest {
 
     @Test
     public void testAllPropertiesCorrespondToKeys() {
-        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "ro" } ) {
+        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "no", "ro" } ) {
             ResourceBundle bundle =
                 ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
                                          new Locale(language), new RuggedMessages.UTF8Control());
@@ -90,7 +90,7 @@ public class RuggedMessagesTest {
 
     @Test
     public void testVariablePartsConsistency() {
-        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "ro" } ) {
+        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "no", "ro" } ) {
             Locale locale = new Locale(language);
             for (RuggedMessages message : RuggedMessages.values()) {
                 MessageFormat source     = new MessageFormat(message.getSourceString());
