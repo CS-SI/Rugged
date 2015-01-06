@@ -65,7 +65,7 @@ The instrument is oriented 10° off nadir around the X-axis, we need to rotate t
 direction to obtain the line of sight in the satellite frame
 
     LOSBuilder losBuilder = new LOSBuilder(rawDirs);
-    losBuilder.addTransform(new FixedRotation(ParameterType.FIXED, new Rotation(Vector3D.PLUS_I, FastMath.toRadians(10))));
+    losBuilder.addTransform(new FixedRotation(ParameterType.FIXED, Vector3D.PLUS_I, FastMath.toRadians(10)));
 
 Here we have considered that the viewing directions are constant with time, it is also possible to
 have time-dependent lines-of-sight by using other transforms. It is also possible to append several
