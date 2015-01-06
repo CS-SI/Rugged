@@ -15,9 +15,9 @@
 Overview
 ========
 
-  Rugged is an add-on for Orekit handling Digital Elevation Models (DEM)
-  contribution to line of sight computation. It is a free software
-  intermediate-level library written in Java.
+  Rugged is  a sensor-to-terrain mapping tool which takes into account Digital Elevation Models (DEM)
+  in its line of sight computation. It is a free software
+  intermediate-level library written in Java and implemented as an add-on for Orekit.
 
   ![Earth_FlatVsRugged.gif](./images/Earth_FlatVsRugged.gif)
 
