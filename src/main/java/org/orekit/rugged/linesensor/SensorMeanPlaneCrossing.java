@@ -114,7 +114,7 @@ public class SensorMeanPlaneCrossing {
     /** Compute the plane containing origin that best fits viewing directions point cloud.
      * @param midDate middle date
      * <p>
-     * The normal is oriented such traversing pixels in increasing indices
+     * The normal is oriented such that traversing pixels in increasing indices
      * order corresponds is consistent with trigonometric order (i.e.
      * counterclockwise).
      * </p>
