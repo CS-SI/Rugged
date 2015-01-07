@@ -115,8 +115,7 @@ public class SensorMeanPlaneCrossing {
      * @param midDate middle date
      * <p>
      * The normal is oriented such that traversing pixels in increasing indices
-     * order corresponds is consistent with trigonometric order (i.e.
-     * counterclockwise).
+     * order corresponds to trigonometric order (i.e. counterclockwise).
      * </p>
      * @return normal of the mean plane
      */
