@@ -17,7 +17,6 @@
 package org.orekit.rugged.linesensor;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
 
@@ -43,7 +42,7 @@ public class LineSensor {
      * @param datationModel datation model
      * @param position sensor position in spacecraft frame
      * @param los pixels lines-of-sight in spacecraft frame
-     * @see LOSBuilder
+     * @see org.orekit.rugged.los.LOSBuilder
      */
     public LineSensor(final String name, final LineDatation datationModel,
                       final Vector3D position, final TimeDependentLOS los) {
