@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2014 CS Systèmes d'Information
+<!--- Copyright 2013-2015 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -39,6 +39,8 @@ The class `VolcanicConeElevationUpdater` implements the interface `TileUpdater` 
 
 Here's the source code of the class `VolcanicConeElevationUpdater` :
 
+    import org.orekit.rugged.raster.TileUpdater;
+    import org.orekit.rugged.raster.UpdatableTile;
     import org.apache.commons.math3.util.FastMath;
     import org.orekit.bodies.GeodeticPoint;
     import org.orekit.rugged.errors.RuggedException;

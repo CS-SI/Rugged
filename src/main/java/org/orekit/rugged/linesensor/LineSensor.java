@@ -1,4 +1,4 @@
-/* Copyright 2013-2014 CS Systèmes d'Information
+/* Copyright 2013-2015 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,7 +17,6 @@
 package org.orekit.rugged.linesensor;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
 
@@ -43,7 +42,7 @@ public class LineSensor {
      * @param datationModel datation model
      * @param position sensor position in spacecraft frame
      * @param los pixels lines-of-sight in spacecraft frame
-     * @see LOSBuilder
+     * @see org.orekit.rugged.los.LOSBuilder
      */
     public LineSensor(final String name, final LineDatation datationModel,
                       final Vector3D position, final TimeDependentLOS los) {
