@@ -147,6 +147,7 @@ public abstract class AbstractAlgorithmTest {
 
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
+        System.out.println(los.normalize());
         GeodeticPoint result   = algorithm.refineIntersection(earth, position, los,
                                                               algorithm.intersection(earth, position, los));
         checkIntersection(position, los, result);

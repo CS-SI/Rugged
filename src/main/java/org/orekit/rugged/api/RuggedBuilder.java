@@ -39,6 +39,7 @@ import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.BasicScanAlgorithm;
+import org.orekit.rugged.intersection.ConstantElevationAlgorithm;
 import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
@@ -95,6 +96,10 @@ public class RuggedBuilder {
 
     /** Updater used to load Digital Elevation Model tiles. */
     private TileUpdater tileUpdater;
+
+    /** Constant elevation over ellipsoid.
+     * used only with {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID. */
+    private double constantElevation;
 
     /** Maximum number of tiles stored in the cache. */
     private int maxCachedTiles;
@@ -162,6 +167,7 @@ public class RuggedBuilder {
      */
     public RuggedBuilder() {
         sensors                     = new ArrayList<LineSensor>();
+        constantElevation           = Double.NaN;
         lightTimeCorrection         = true;
         aberrationOfLightCorrection = true;
     }
@@ -211,10 +217,21 @@ public class RuggedBuilder {
 
     /** Set the algorithm to use for Digital Elevation Model intersection.
      * <p>
-     * Note that when the specified algorithm is {@link AlgorithmId#IGNORE_DEM_USE_ELLIPSOID},
-     * then calling {@link #setDigitalElevationModel(TileUpdater, int)} is irrelevant and can either
-     * be completely avoided, or the method can be called with an updater set to {@code null}.
-     * For all other algorithms, the updater must be properly configured.
+     * Note that some algorithms require specific other methods to be called too:
+     * <ul>
+     *   <li>{@link AlgorithmId#DUVENHAGE DUVENHAGE},
+     *   {@link AlgorithmId#DUVENHAGE_FLAT_BODY DUVENHAGE_FLAT_BODY}
+     *   and {@link AlgorithmId#BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY
+     *   BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY} all
+     *   require {@link #setDigitalElevationModel(TileUpdater, int) setDigitalElevationModel}
+     *   to be called,</li>
+     *   <li>{@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
+     *   CONSTANT_ELEVATION_OVER_ELLIPSOID} requires
+     *   {@link #setConstantElevation(double) setConstantElevation} to be called,</li>
+     *   <li>{@link AlgorithmId#IGNORE_DEM_USE_ELLIPSOID
+     *   IGNORE_DEM_USE_ELLIPSOID} does not require
+     *   any methods tobe called.</li>
+     * </ul>
      * </p>
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @return the builder instance
@@ -239,9 +256,12 @@ public class RuggedBuilder {
     /** Set the user-provided {@link TileUpdater tile updater}.
      * <p>
      * Note that when the algorithm specified in {@link #setAlgorithm(AlgorithmId)}
-     * is {@link AlgorithmId#IGNORE_DEM_USE_ELLIPSOID},then this method becomes irrelevant
-     * and can either be not called at all, or it can be called with an updater set to
-     * {@code null}. For all other algorithms, the updater must be properly configured.
+     * is either {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
+     * CONSTANT_ELEVATION_OVER_ELLIPSOID} or {@link
+     * AlgorithmId#IGNORE_DEM_USE_ELLIPSOID IGNORE_DEM_USE_ELLIPSOID},
+     * then this method becomes irrelevant and can either be not called at all,
+     * or it can be called with an updater set to {@code null}. For all other
+     * algorithms, the updater must be properly configured.
      * </p>
      * @param tileUpdater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
@@ -265,6 +285,33 @@ public class RuggedBuilder {
      */
     public TileUpdater getTileUpdater() {
         return tileUpdater;
+    }
+
+    /** Set the user-provided constant elevation model.
+     * <p>
+     * Note that this method is relevant <em>only</em> if the algorithm specified
+     * in {@link #setAlgorithm(AlgorithmId)} is {@link
+     * AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID CONSTANT_ELEVATION_OVER_ELLIPSOID}.
+     * If it is called for this algorithm, the elevation set here will be ignored.
+     * </p>
+     * @param constantElevation constant elevation to use
+     * @return the builder instance
+     * @see #setAlgorithm(AlgorithmId)
+     * @see #getConstantElevation()
+     */
+    // CHECKSTYLE: stop HiddenField check
+    public RuggedBuilder setConstantElevation(final double constantElevation) {
+        // CHECKSTYLE: resume HiddenField check
+        this.constantElevation = constantElevation;
+        return this;
+    }
+
+    /** Get the constant elevation over ellipsoid to use with {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID}.
+     * @return updater used to load Digital Elevation Model tiles
+     * @see #setConstantElevation(double)
+     */
+    public double getConstantElevation() {
+        return constantElevation;
     }
 
     /** Get the maximum number of tiles stored in the cache.
@@ -903,10 +950,12 @@ public class RuggedBuilder {
      * @param algorithmID intersection algorithm identifier
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
+     * @param constantElevation constant elevation over ellipsoid
      * @return selected algorithm
      */
     private static IntersectionAlgorithm createAlgorithm(final AlgorithmId algorithmID,
-                                                         final TileUpdater updater, final int maxCachedTiles) {
+                                                         final TileUpdater updater, final int maxCachedTiles,
+                                                         final double constantElevation) {
 
         // set up the algorithm
         switch (algorithmID) {
@@ -916,6 +965,8 @@ public class RuggedBuilder {
             return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
         case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
             return new BasicScanAlgorithm(updater, maxCachedTiles);
+        case CONSTANT_ELEVATION_OVER_ELLIPSOID :
+            return new ConstantElevationAlgorithm(constantElevation);
         case IGNORE_DEM_USE_ELLIPSOID :
             return new IgnoreDEMAlgorithm();
         default :
@@ -934,11 +985,17 @@ public class RuggedBuilder {
         if (algorithmID == null) {
             throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setAlgorithmID()");
         }
-        if (algorithmID != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID && (tileUpdater == null)) {
-            throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setDigitalElevationModel()");
+        if (algorithmID == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
+            if (Double.isNaN(constantElevation)) {
+                throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setConstantElevation()");
+            }
+        } else if (algorithmID != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID) {
+            if (tileUpdater == null) {
+                throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setDigitalElevationModel()");
+            }
         }
         createInterpolatorIfNeeded();
-        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles), ellipsoid,
+        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation), ellipsoid,
                           lightTimeCorrection, aberrationOfLightCorrection, scToBody, sensors);
     }
 

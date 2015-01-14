@@ -57,9 +57,24 @@ public enum AlgorithmId {
      */
     BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY,
 
+    /** Algorithm that simply uses a constant elevation over ellipsoid.
+     * <p>
+     * Intersections are computed only with respect to the reference ellipsoid
+     * and a user-specified elevation. If the user-specified elevation is 0.0,
+     * then this algorithm is equivalent to {@link #IGNORE_DEM_USE_ELLIPSOID},
+     * only slower.
+     * </p>
+     */
+    CONSTANT_ELEVATION_OVER_ELLIPSOID,
+
     /** Dummy algorithm that simply ignores the Digital Elevation Model.
      * <p>
      * Intersections are computed only with respect to the reference ellipsoid.
+     * </p>
+     * <p>
+     * This algorithm is equivalent to {@link #CONSTANT_ELEVATION_OVER_ELLIPSOID}
+     * when the elevation is set to 0.0, but this one is much faster in this
+     * specific case.
      * </p>
      */
     IGNORE_DEM_USE_ELLIPSOID

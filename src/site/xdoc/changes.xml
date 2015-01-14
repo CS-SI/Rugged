@@ -22,6 +22,12 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="add" >
+        Added a CONSTANT_ELEVATION_OVER_ELLIPSOID algorithm, similar in spirit
+        to the IGNORE_DEM_USE_ELLIPSOID, but with a user-specified elevation
+        instead of always using 0.0 elevation.
+        Implements feature #187.
+      </action>
       <action dev="luc" type="add" due-to="Espen Bjørntvedt">
         Added Norwegian translation of error messages.
       </action>

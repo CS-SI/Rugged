@@ -26,12 +26,13 @@ a nadir view), some algorithms are more suitable than others. This computation i
 programming unit possible in the Rugged library and an interface is defined with several different
 implementations among which user can select.
 
-Four different algorithms are predefined in Rugged:
+Five different algorithms are predefined in Rugged:
 
  * a recursive algorithm based on Bernardt Duvenhage's 2009 paper
    [Using An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations](http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf)
  * an alternate version of the Duvenhage algorithm using flat-body hypothesis,
  * a basic scan algorithm sequentially checking all pixels in the rectangular array defined by Digital Elevation Model entry and exit points,
+ * an algorithm that ignores the Digital Elevation Model and uses a constant elevation over the ellipsoid.
  * a no-operation algorithm that ignores the Digital Elevation Model and uses only the ellipsoid.
 
 It is expected that other algorithms like line-stepping (perhaps using Bresenham line algorithm) will be added afterwards.
