@@ -21,6 +21,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.FieldRotation;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.utils.ParameterType;
@@ -30,6 +32,9 @@ import org.orekit.rugged.utils.ParameterType;
  * @see LOSBuilder
  */
 public class FixedRotation implements TimeIndependentLOSTransform {
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Parameters type. */
     private final ParameterType type;
@@ -98,8 +103,8 @@ public class FixedRotation implements TimeIndependentLOSTransform {
      */
     private void checkSlice(final int length) throws RuggedException {
         if (getNbEstimatedParameters() != length) {
-            throw new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH,
-                                      getNbEstimatedParameters(), length);
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH, getNbEstimatedParameters(),
+                                      length));
         }
     }
 

@@ -19,6 +19,8 @@ package org.orekit.rugged.raster;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
@@ -33,6 +35,9 @@ public class SimpleTile implements Tile {
 
     /** Tolerance used to interpolate points slightly out of tile (in cells). */
     private static final double TOLERANCE = 1.0 / 8.0;
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Minimum latitude. */
     private double minLatitude;
@@ -85,7 +90,7 @@ public class SimpleTile implements Tile {
         this.maxElevation     = Double.NEGATIVE_INFINITY;
 
         if (newLatitudeRows < 1 || newLongitudeColumns < 1) {
-            throw new RuggedException(RuggedMessages.EMPTY_TILE, newLatitudeRows, newLongitudeColumns);
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.EMPTY_TILE, newLatitudeRows, newLongitudeColumns));
         }
         this.elevations = new double[newLatitudeRows * newLongitudeColumns];
 
@@ -187,9 +192,9 @@ public class SimpleTile implements Tile {
                              final double elevation) throws RuggedException {
         if (latitudeIndex  < 0 || latitudeIndex  > (latitudeRows - 1) ||
             longitudeIndex < 0 || longitudeIndex > (longitudeColumns - 1)) {
-            throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
-                                      latitudeIndex, longitudeIndex,
-                                      latitudeRows - 1, longitudeColumns - 1);
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES, latitudeIndex,
+                                                      longitudeIndex, latitudeRows - 1,
+                                                      longitudeColumns - 1));
         }
         minElevation = FastMath.min(minElevation, elevation);
         maxElevation = FastMath.max(maxElevation, elevation);
@@ -216,13 +221,12 @@ public class SimpleTile implements Tile {
         final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
         if (doubleLatitudeIndex  < -TOLERANCE || doubleLatitudeIndex  >= (latitudeRows - 1 + TOLERANCE) ||
             doubleLongitudeIndex < -TOLERANCE || doubleLongitudeIndex >= (longitudeColumns - 1 + TOLERANCE)) {
-            throw new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES,
-                                      FastMath.toDegrees(latitude),
-                                      FastMath.toDegrees(longitude),
-                                      FastMath.toDegrees(getMinimumLatitude()),
-                                      FastMath.toDegrees(getMaximumLatitude()),
-                                      FastMath.toDegrees(getMinimumLongitude()),
-                                      FastMath.toDegrees(getMaximumLongitude()));
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES, FastMath.toDegrees(latitude),
+                                                      FastMath.toDegrees(longitude),
+                                                      FastMath.toDegrees(getMinimumLatitude()),
+                                                      FastMath.toDegrees(getMaximumLatitude()),
+                                                      FastMath.toDegrees(getMinimumLongitude()),
+                                                      FastMath.toDegrees(getMaximumLongitude())));
         }
 
         final int latitudeIndex  = FastMath.max(0,

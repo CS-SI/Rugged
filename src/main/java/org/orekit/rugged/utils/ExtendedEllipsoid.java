@@ -19,6 +19,8 @@ package org.orekit.rugged.utils;
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
@@ -37,6 +39,9 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
 
     /** Convergence threshold for {@link #pointAtAltitude(Vector3D, Vector3D, double)}. */
     private static final double ALTITUDE_CONVERGENCE = 1.0e-3;
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Equatorial radius power 2. */
     private final double a2;
@@ -90,8 +95,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         final double   bb    = b * b;
         final double   ac    = a * c;
         if (bb < ac) {
-            throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE,
-                                      FastMath.toDegrees(latitude));
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, FastMath.toDegrees(latitude)));
         }
         final double s  = FastMath.sqrt(bb - ac);
         final double k1 = (b > 0) ? -(s + b) / a : c / (s - b);
@@ -119,8 +123,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
             } else {
                 // both solutions are in the wrong nappe,
                 // there are no solutions
-                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE,
-                                          FastMath.toDegrees(latitude));
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, FastMath.toDegrees(latitude)));
             }
         }
 
@@ -143,8 +146,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         final Vector3D normal = new Vector3D(-FastMath.sin(longitude), FastMath.cos(longitude), 0);
         final double d = Vector3D.dotProduct(los, normal);
         if (FastMath.abs(d) < 1.0e-12) {
-            throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE,
-                                      FastMath.toDegrees(longitude));
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE, FastMath.toDegrees(longitude)));
         }
 
         // compute point
@@ -168,12 +170,12 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
                     getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),
                                          position, getBodyFrame(), null);
             if (gp == null) {
-                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND);
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND));
             }
             return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
                                                centralLongitude);
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 
@@ -199,7 +201,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
             final double r        = getEquatorialRadius() + altitude;
             final double delta2   = r * r - close0.getNormSq();
             if (delta2 < 0) {
-                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, altitude);
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, altitude));
             }
             final double deltaK   = FastMath.sqrt(delta2 / los2);
             final double k1       = k0 + deltaK;
@@ -223,11 +225,11 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
             }
 
             // this should never happen
-            throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, altitude);
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, altitude));
 
         } catch (OrekitException oe) {
             // this should never happen
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 
@@ -280,7 +282,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
             return convertLos(point, los);
 
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 

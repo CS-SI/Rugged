@@ -24,15 +24,15 @@ image processing applications.
 
 The Java platform provides the runtime environment, the Apache Commons
 Math library provides the mathematical algorithms (3D geometry, root
-solvers ...), the Orekit library provides the space flight dynamics
-computation (frames transforms, orbits and attitude propagation and
-interpolation ...). The Rugged library itself provides the algorithms
-dealing with line-of-sight intersection with Digital Elevation Models
-in a mission-independent way. Rugged does not parse the DEM models itself,
-nor does it performs image processing. Mission-dependent parts (including
-Digital Elevation Model parsing or instrument viewing model creation) remain
-under the responsibility of Rugged caller, typically using a mission-specific
-library used by several image processing applications.
+solvers ...), the Apache Log4j 2 library provides logging, the Orekit
+library provides the space flight dynamics computation (frames transforms,
+orbits and attitude propagation and interpolation ...). The Rugged library
+itself provides the algorithms dealing with line-of-sight intersection with
+Digital Elevation Models in a mission-independent way. Rugged does not parse
+the DEM models itself, nor does it performs image processing. Mission-dependent
+parts (including Digital Elevation Model parsing or instrument viewing model
+creation) remain under the responsibility of Rugged caller, typically using
+a mission-specific library used by several image processing applications.
 
 This architecture allows both the image processing application and the mission
 specific interface to be as independent as possible from space flight dynamics and

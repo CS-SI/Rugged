@@ -38,7 +38,7 @@ import org.apache.commons.math3.exception.util.Localizable;
 public class RuggedException extends Exception {
 
     /** Serializable UID. */
-    private static final long serialVersionUID = 20140309L;
+    private static final long serialVersionUID = 20150129L;
 
     /** Exception context (may be null). */
     private final ExceptionContext context;
@@ -60,36 +60,13 @@ public class RuggedException extends Exception {
         this.parts     = (parts == null) ? new Object[0] : parts.clone();
     }
 
-    /** Copy constructor.
-     * @param exception exception to copy from
-     */
-    public RuggedException(final RuggedException exception) {
-        super(exception);
-        this.context   = exception.context;
-        this.specifier = exception.specifier;
-        this.parts     = exception.parts.clone();
-    }
-
-    /** Simple constructor.
-     * Build an exception from a cause and with a specified message
-     * @param message descriptive message
-     * @param cause underlying cause
-     */
-    public RuggedException(final Localizable message, final Throwable cause) {
-        super(cause);
-        this.context   = null;
-        this.specifier = message;
-        this.parts     = new Object[0];
-    }
-
     /** Simple constructor.
      * Build an exception from a cause and with a translated and formatted message
      * @param cause underlying cause
      * @param specifier format specifier (to be translated)
      * @param parts parts to insert in the format (no translation)
      */
-    public RuggedException(final Throwable cause, final Localizable specifier,
-                           final Object ... parts) {
+    public RuggedException(final Throwable cause, final Localizable specifier, final Object ... parts) {
         super(cause);
         this.context   = null;
         this.specifier = specifier;

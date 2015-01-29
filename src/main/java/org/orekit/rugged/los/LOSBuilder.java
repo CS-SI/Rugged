@@ -23,6 +23,8 @@ import java.util.List;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.utils.ParametricModel;
@@ -47,6 +49,9 @@ import org.orekit.time.AbsoluteDate;
  * @author Luc Maisonobe
  */
 public class LOSBuilder {
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Raw fixed ine-of-sights. */
     private final List<Vector3D> rawLOS;
@@ -234,8 +239,8 @@ public class LOSBuilder {
          */
         private void checkSlice(final int length) throws RuggedException {
             if (getNbEstimatedParameters() != length) {
-                throw new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH,
-                                          getNbEstimatedParameters(), length);
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH, getNbEstimatedParameters(),
+                                                          length));
             }
         }
 

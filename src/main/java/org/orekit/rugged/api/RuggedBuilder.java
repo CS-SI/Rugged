@@ -28,6 +28,8 @@ import java.util.List;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.errors.PropagationException;
@@ -87,6 +89,9 @@ import org.orekit.utils.TimeStampedPVCoordinates;
  * @author Luc Maisonobe
  */
 public class RuggedBuilder {
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Reference ellipsoid. */
     private ExtendedEllipsoid ellipsoid;
@@ -595,11 +600,11 @@ public class RuggedBuilder {
             checkFramesConsistency();
             return this;
         } catch (ClassNotFoundException cnfe) {
-            throw new RuggedException(cnfe, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA);
+            throw LOGGER.throwing(new RuggedException(cnfe, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA));
         } catch (ClassCastException cce) {
-            throw new RuggedException(cce, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA);
+            throw LOGGER.throwing(new RuggedException(cce, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA));
         } catch (IOException ioe) {
-            throw new RuggedException(ioe, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA);
+            throw LOGGER.throwing(new RuggedException(ioe, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA));
         }
     }
 
@@ -629,7 +634,7 @@ public class RuggedBuilder {
             createInterpolatorIfNeeded();
             new ObjectOutputStream(dumpStream).writeObject(scToBody);
         } catch (IOException ioe) {
-            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getMessage());
+            throw LOGGER.throwing(new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getMessage()));
         }
     }
 
@@ -640,8 +645,8 @@ public class RuggedBuilder {
     private void checkFramesConsistency() throws RuggedException {
         if (ellipsoid != null && scToBody != null &&
             !ellipsoid.getBodyFrame().getName().equals(scToBody.getBodyFrameName())) {
-            throw new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
-                                      ellipsoid.getBodyFrame().getName(), scToBody.getBodyFrameName());
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP, ellipsoid.getBodyFrame().getName(),
+                                      scToBody.getBodyFrameName()));
         }
     }
 
@@ -653,7 +658,7 @@ public class RuggedBuilder {
     private void createInterpolatorIfNeeded() throws RuggedException {
 
         if (ellipsoid == null) {
-            throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setEllipsoid()");
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setEllipsoid()"));
         }
 
         if (scToBody == null) {
@@ -667,7 +672,7 @@ public class RuggedBuilder {
                                               minDate, maxDate, tStep, overshootTolerance,
                                               iStep, iN, pvDerivatives, aDerivatives, pvaPropagator);
             } else {
-                throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setTrajectory()");
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setTrajectory()"));
             }
         }
 
@@ -770,7 +775,7 @@ public class RuggedBuilder {
                                       aFilter);
 
         } catch (PropagationException pe) {
-            throw new RuggedException(pe, pe.getSpecifier(), pe.getParts());
+            throw LOGGER.throwing(new RuggedException(pe, pe.getSpecifier(), pe.getParts()));
         }
     }
 
@@ -888,7 +893,7 @@ public class RuggedBuilder {
                 throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone()));
         }
 
     }
@@ -915,7 +920,7 @@ public class RuggedBuilder {
                 throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone()));
         }
 
     }
@@ -983,15 +988,15 @@ public class RuggedBuilder {
      */
     public Rugged build() throws RuggedException {
         if (algorithmID == null) {
-            throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setAlgorithmID()");
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setAlgorithmID()"));
         }
         if (algorithmID == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
             if (Double.isNaN(constantElevation)) {
-                throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setConstantElevation()");
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setConstantElevation()"));
             }
         } else if (algorithmID != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID) {
             if (tileUpdater == null) {
-                throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setDigitalElevationModel()");
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setDigitalElevationModel()"));
             }
         }
         createInterpolatorIfNeeded();

@@ -24,6 +24,8 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.RuggedException;
@@ -56,6 +58,9 @@ public class Rugged {
 
     /** Maximum number of evaluations. */
     private static final int MAX_EVAL = 50;
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
@@ -534,7 +539,7 @@ public class Rugged {
     public LineSensor getLineSensor(final String sensorName) throws RuggedException {
         final LineSensor sensor = sensors.get(sensorName);
         if (sensor == null) {
-            throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName));
         }
         return sensor;
     }

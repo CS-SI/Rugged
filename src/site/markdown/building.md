@@ -90,6 +90,8 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
     Junit 4.x (provided by Eclipse), Apache Commons Math (available at
     Apache Software Foundation Commons Math
     [downloads page](http://commons.apache.org/proper/commons-math/download_math.cgi),
+    Apache Log4J (available at Apache Software Foundation Logging
+    [downlowd page](http://logging.apache.org/log4j/2.x/download.html),
     and Orekit (available at Orekit
     [downloads page](https://www.orekit.org/forge/projects/orekit/files)
     in the libraries tab of the Configure Build Path dialog

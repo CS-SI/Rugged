@@ -17,6 +17,8 @@
 package org.orekit.rugged.intersection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
@@ -30,6 +32,9 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  * @author Luc Maisonobe
  */
 public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Constant elevation over ellipsoid. */
     private final double constantElevation;
@@ -51,7 +56,7 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
             final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
             return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(), 0.0);
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 
@@ -67,7 +72,7 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
             return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
                                                closeGuess.getLongitude());
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 

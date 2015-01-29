@@ -25,6 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.raster.Tile.Location;
@@ -37,6 +40,9 @@ import org.orekit.rugged.raster.Tile.Location;
  * @author Luc Maisonobe
  */
 public class TilesCache<T extends Tile> {
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Factory for empty tiles. */
     private final TileFactory<T> factory;
@@ -79,9 +85,8 @@ public class TilesCache<T extends Tile> {
         final T tile = getStrip(latitude, longitude).getTile(latitude, longitude);
         if (tile.getLocation(latitude, longitude) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
             // this should happen only if user set up an inconsistent TileUpdater
-            throw new RuggedException(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED,
-                                      FastMath.toDegrees(latitude),
-                                      FastMath.toDegrees(longitude));
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED, FastMath.toDegrees(latitude),
+                                                      FastMath.toDegrees(longitude)));
         }
         return tile;
     }
@@ -97,7 +102,13 @@ public class TilesCache<T extends Tile> {
 
         // create the tile and retrieve its data
         final T tile = factory.createTile();
+        LOGGER.printf(Level.DEBUG, "Creating tile containing point at φ = %8.3f, λ = %8.3f",
+                      FastMath.toDegrees(latitude), FastMath.toDegrees(longitude));
         updater.updateTile(latitude, longitude, tile);
+        LOGGER.printf(Level.DEBUG,
+                      "Tile created, covering φ ∈ [%8.3f ; %8.3f] and λ ∈ [%8.3f ; %8.3f]",
+                      FastMath.toDegrees(tile.getMinimumLatitude()), FastMath.toDegrees(tile.getMaximumLatitude()),
+                      FastMath.toDegrees(tile.getMinimumLongitude()), FastMath.toDegrees(tile.getMaximumLongitude()));
         tile.tileUpdateCompleted();
 
         return tile;

@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
@@ -41,6 +43,9 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  * @author Luc Maisonobe
  */
 public class BasicScanAlgorithm implements IntersectionAlgorithm {
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Cache for DEM tiles. */
     private final TilesCache<SimpleTile> cache;
@@ -152,7 +157,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
         } catch (OrekitException oe) {
             // this should never happen
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 
@@ -172,7 +177,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
                                           tile.getFloorLatitudeIndex(projected.getLatitude()),
                                           tile.getFloorLongitudeIndex(projected.getLongitude()));
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 

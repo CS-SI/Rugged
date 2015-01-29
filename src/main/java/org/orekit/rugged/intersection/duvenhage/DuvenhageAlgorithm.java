@@ -18,6 +18,8 @@ package org.orekit.rugged.intersection.duvenhage;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
@@ -41,6 +43,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
     /** Step size when skipping from one tile to a neighbor one, in meters. */
     private static final double STEP = 0.01;
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Cache for DEM tiles. */
     private final TilesCache<MinMaxTreeTile> cache;
@@ -85,7 +90,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final Vector3D entryP = ellipsoid.pointAtAltitude(position, los, hMax + STEP);
                 if (Vector3D.dotProduct(entryP.subtract(position), los) < 0) {
                     // the entry point is behind spacecraft!
-                    throw new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT);
+                    throw LOGGER.throwing(new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT));
                 }
                 current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
 
@@ -150,7 +155,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
 
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 
@@ -184,7 +189,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                               tile.getFloorLongitudeIndex(projected.getLongitude()));
             }
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 

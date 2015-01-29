@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
@@ -41,6 +43,9 @@ public class SpacecraftToObservedBody implements Serializable {
 
     /** Serializable UID. */
     private static final long serialVersionUID = 20140909L;
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Name of the inertial frame. */
     private final String inertialFrameName;
@@ -107,19 +112,19 @@ public class SpacecraftToObservedBody implements Serializable {
             final AbsoluteDate minPVDate = positionsVelocities.get(0).getDate();
             final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getDate();
             if (minPVDate.durationFrom(minDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate));
             }
             if (maxDate.durationFrom(maxDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate));
             }
 
             final AbsoluteDate minQDate  = quaternions.get(0).getDate();
             final AbsoluteDate maxQDate  = quaternions.get(quaternions.size() - 1).getDate();
             if (minQDate.durationFrom(minDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minQDate, maxQDate);
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minQDate, maxQDate));
             }
             if (maxDate.durationFrom(maxQDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minQDate, maxQDate);
+                throw LOGGER.throwing(new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minQDate, maxQDate));
             }
 
             // set up the cache for position-velocities
@@ -178,7 +183,7 @@ public class SpacecraftToObservedBody implements Serializable {
             }
 
         } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+            throw LOGGER.throwing(new RuggedException(oe, oe.getSpecifier(), oe.getParts()));
         }
     }
 
@@ -265,7 +270,7 @@ public class SpacecraftToObservedBody implements Serializable {
 
         // check date range
         if (!isInRange(date)) {
-            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate);
+            throw LOGGER.throwing(new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, date, minDate, maxDate));
         }
 
         final double    s     = date.durationFrom(list.get(0).getDate()) / tStep;

@@ -23,6 +23,8 @@ import org.apache.commons.math3.exception.NoBracketingException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.time.AbsoluteDate;
@@ -37,6 +39,9 @@ public class SensorPixelCrossing {
 
     /** Margin before and after end pixels, in order to avoid search failures near boundaries. */
     private static final double MARGIN = 5.0;
+
+    /** Logger. */
+    private static final Logger LOGGER =  LogManager.getLogger();
 
     /** Line sensor. */
     private final LineSensor sensor;
@@ -93,7 +98,7 @@ public class SensorPixelCrossing {
             // there are no solutions in the search interval
             return Double.NaN;
         } catch (TooManyEvaluationsException tmee) {
-            throw new RuggedException(tmee);
+            throw LOGGER.throwing(new RuggedException(tmee));
         }
     }
 
