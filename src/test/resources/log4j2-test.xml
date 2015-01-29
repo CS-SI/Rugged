@@ -16,7 +16,10 @@
     </Root>
 
     <!-- switch level to "debug" if you want to see the tiles created during tests -->
-    <Logger name="org.orekit.rugged.raster.TilesCache" level="off"/>
+    <Logger name="org.orekit.rugged.raster.TilesCache" level="off">
+      <!-- here, we want ONLY debug events, not more specific error events -->
+      <ThresholdFilter level="error" onMatch="DENY" onMisMatch="NEUTRAL"/>
+    </Logger>
 
   </Loggers>
 </Configuration>
