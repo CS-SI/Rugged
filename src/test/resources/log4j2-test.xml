@@ -2,20 +2,21 @@
 <Configuration status="error" name="test-logging-configuration">
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{1} - %msg%n" />
+    </Console>
+    <Console name="ANSI-Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%style{%d{HH:mm:ss.SSS}}{Blue} [%t] %-5level %style{%logger{1}}{Green} - %style{%msg}{Bright}%n" />
     </Console>
   </Appenders>
   <Loggers>
 
     <!-- switch level to "error" if you want to see the exceptions thrown during tests -->
     <Root level="off">
-     <AppenderRef ref="Console" />
+      <AppenderRef ref="Console" /> <!-- you can also use ANSI-Console if your console supports ANSI colors -->
     </Root>
 
     <!-- switch level to "debug" if you want to see the tiles created during tests -->
-    <Logger name="org.orekit.rugged.raster.TilesCache" level="off">
-      <AppenderRef ref="Console" />
-    </Logger>
+    <Logger name="org.orekit.rugged.raster.TilesCache" level="off"/>
 
   </Loggers>
 </Configuration>
