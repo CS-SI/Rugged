@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file is used in case no previous user-defined configuration has been set; it simply sets logging off. -->
+<Configuration status="error">
+  <Loggers>
+    <Root level="off"/>
+  </Loggers>
+</Configuration>
