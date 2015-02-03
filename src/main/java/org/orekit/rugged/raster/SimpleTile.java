@@ -241,11 +241,7 @@ public class SimpleTile implements Tile {
         final double e01  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
         final double e11  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
 
-        DumpManager.dump("DEM cell: latMin = %22.15e latStep = %22.15e lonMin = %22.15e lonStep = %22.15e latIndex = %d lonIndex = %d e00 = %22.15e e10 = %22.15e e01 = %22.15e e11 = %22.15e%n",
-                         getMinimumLatitude(), getLatitudeStep(),
-                         getMinimumLongitude(), getLongitudeStep(),
-                         latitudeIndex, longitudeIndex,
-                         e00, e10, e01, e11);
+        DumpManager.dumpTileCell(this, latitudeIndex, longitudeIndex, e00, e10, e01, e11);
 
         return (e00 * (1.0 - dLon) + dLon * e10) * (1.0 - dLat) +
                (e01 * (1.0 - dLon) + dLon * e11) * dLat;

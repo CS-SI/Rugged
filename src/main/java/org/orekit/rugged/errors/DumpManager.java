@@ -19,7 +19,8 @@ package org.orekit.rugged.errors;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Locale;
+
+import org.orekit.rugged.raster.Tile;
 
 /**
  * Class managing debug dumps.
@@ -35,7 +36,7 @@ import java.util.Locale;
 public class DumpManager {
 
     /** Dump file (default initial value is null, i.e. nothing is dumped). */
-    private static final ThreadLocal<PrintWriter> DUMP = new ThreadLocal<PrintWriter>();
+    private static final ThreadLocal<Dump> DUMP = new ThreadLocal<Dump>();
 
     /** Private constructor for utility class.
      */
@@ -53,7 +54,7 @@ public class DumpManager {
             throw new RuggedException(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE);
         } else {
             try {
-                DUMP.set(new PrintWriter(file));
+                DUMP.set(new Dump(new PrintWriter(file)));
             } catch (IOException ioe) {
                 throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR,
                                           file.getAbsolutePath(), ioe.getLocalizedMessage());
@@ -66,7 +67,7 @@ public class DumpManager {
      */
     public static void deactivate() throws RuggedException {
         if (isActive()) {
-            DUMP.get().close();
+            DUMP.get().deactivate();
             DUMP.set(null);
         } else {
             throw new RuggedException(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE);
@@ -81,12 +82,19 @@ public class DumpManager {
     }
 
     /** Dump some context data.
-     * @param msgPattern message pattern
-     * @param args message arguments
+     * @param tile tile to which the cell belongs
+     * @param latitudeIndex latitude index of the South neighbors of the cell
+     * @param longitudeIndex longitude index of the West neighbors of the cell
+     * @param e00 elevation of the South-West neighbor of the cell
+     * @param e10 elevation of the South-East neighbor of the cell
+     * @param e01 elevation of the North-West neighbor of the cell
+     * @param e11 elevation of the North-East neighbor of the cell
      */
-    public static void dump(final String msgPattern, final Object... args) {
+    public static void dumpTileCell(final Tile tile,
+                                    final int latitudeIndex, final int longitudeIndex,
+                                    final double e00, final double e10, final double e01, final double e11) {
         if (isActive()) {
-            DUMP.get().format(Locale.US, msgPattern, args);
+            DUMP.get().dumpTileCell(tile, latitudeIndex, longitudeIndex, e00, e10, e01, e11);
         }
     }
 
