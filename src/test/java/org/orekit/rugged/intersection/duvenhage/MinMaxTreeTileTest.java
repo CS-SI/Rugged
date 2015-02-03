@@ -18,6 +18,8 @@ package org.orekit.rugged.intersection.duvenhage;
 
 import java.lang.reflect.Field;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
@@ -123,6 +125,39 @@ public class MinMaxTreeTileTest {
 
                             Assert.assertEquals(min, tile.getMinElevation(row, column, level), 1.0e-10 * min);
                             Assert.assertEquals(max, tile.getMaxElevation(row, column, level), 1.0e-10 * max);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testAncestor() throws RuggedException {
+        RandomGenerator random = new Well1024a(0xca9883209c6e740cl);
+        for (int nbRows = 1; nbRows < 25; nbRows++) {
+            for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
+
+                MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
+                tile.setGeometry(1.0, 2.0, 0.1, 0.2, nbRows, nbColumns);
+                for (int i = 0; i < nbRows; ++i) {
+                    for (int j = 0; j < nbColumns; ++j) {
+                        tile.setElevation(i, j, 1000.0 * random.nextDouble());
+                    }
+                }
+                tile.tileUpdateCompleted();
+
+                for (int i = 0; i < tile.getLatitudeRows(); ++i) {
+                    for (int j = 0; j < tile.getLongitudeColumns(); ++j) {
+                        for (int l = 0; l < tile.getLevels(); ++l) {
+                            int[] minAncestor = tile.findAncestor(i, j, l, true);
+                            Assert.assertEquals(tile.getMinElevation(i, j, l),
+                                                tile.getElevationAtIndices(minAncestor[0], minAncestor[1]),
+                                                1.0e-10);
+                            int[] maxAncestor = tile.findAncestor(i, j, l, false);
+                            Assert.assertEquals(tile.getMaxElevation(i, j, l),
+                                                tile.getElevationAtIndices(maxAncestor[0], maxAncestor[1]),
+                                                1.0e-10);
                         }
                     }
                 }

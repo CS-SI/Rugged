@@ -20,6 +20,7 @@ import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.function.Max;
 import org.apache.commons.math3.analysis.function.Min;
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.raster.SimpleTile;
 
 /** Simple implementation of a {@link org.orekit.rugged.raster.Tile}
@@ -147,6 +148,13 @@ public class MinMaxTreeTile extends SimpleTile {
         final int levelJ   = j >> colShift;
         final int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
+        if (DumpManager.isActive()) {
+            // the following call is performed only for its side-effect
+            // of dumping the ancestor elevation, during the final
+            // call to getElevationAtIndices
+            findAncestor(i, j, level, true);
+        }
+
         return minTree[start[level] + levelI * levelC + levelJ];
 
     }
@@ -170,7 +178,109 @@ public class MinMaxTreeTile extends SimpleTile {
         final int levelJ   = j >> colShift;
         final int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
+        if (DumpManager.isActive()) {
+            // the following call is performed only for its side-effect
+            // of dumping the ancestor elevation, during the final
+            // call to getElevationAtIndices
+            findAncestor(i, j, level, false);
+        }
+
         return maxTree[start[level] + levelI * levelC + levelJ];
+
+    }
+
+    /** Find a min or max ancestor cell.
+     * <p>
+     * The min/max ancestor is the cell that reaches the min (resp. max)
+     * elevation for the sub-tile containing cell (i, j) at specified level.
+     * </p>
+     * @param i row index of the cell
+     * @param j column index of the cell
+     * @param level tree level of the sub-tile considered
+     * @param isMin if true, the min ancestor cell is desired, otherwise the max ancestor
+     * cell is desired
+     * @return row/column indices of the min/max ancestor cell
+     */
+    public int[] findAncestor(final int i, final int j, final int level, final boolean isMin) {
+
+        final int k  = start.length - level;
+        int rowShift = k / 2;
+        int colShift = (k + 1) / 2;
+        int levelI   = i >> rowShift;
+        int levelJ   = j >> colShift;
+        int levelR   = 1 + ((getLatitudeRows()     - 1) >> rowShift);
+        int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
+
+        // track the cell ancestors from merged tree at specified level up to tree at level 1
+        for (int l = level; l + 1 < start.length; ++l) {
+
+            if (isColumnMerging(l + 1)) {
+
+                --colShift;
+                levelC = 1 + ((getLongitudeColumns() - 1) >> colShift);
+                levelJ = levelJ << 1;
+
+                if (levelJ + 1 < levelC) {
+                    // the cell results from a regular merging of two columns
+                    if (isMin) {
+                        if (minTree[start[l] + levelI * levelC + levelJ] <=
+                            minTree[start[l] + levelI * levelC + levelJ + 1]) {
+                            levelJ++;
+                        }
+                    } else {
+                        if (maxTree[start[l] + levelI * levelC + levelJ] >=
+                            maxTree[start[l] + levelI * levelC + levelJ + 1]) {
+                            levelJ++;
+                        }
+                    }
+                }
+
+            } else {
+
+                --rowShift;
+                levelR = 1 + ((getLatitudeRows() - 1) >> rowShift);
+                levelI = levelI << 1;
+
+                if (levelI + 1 < levelR) {
+                    // the cell results from a regular merging of two rows
+                    if (isMin) {
+                        if (minTree[start[l] + levelI       * levelC + levelJ] <=
+                            minTree[start[l] + (levelI + 1) * levelC + levelJ]) {
+                            levelI++;
+                        }
+                    } else {
+                        if (maxTree[start[l] + levelI       * levelC + levelJ] >=
+                            maxTree[start[l] + (levelI + 1) * levelC + levelJ]) {
+                            levelI++;
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+        // we are now at first merge level, which always results from a column merge of raw data
+        levelJ = levelJ << 1;
+        levelC = getLongitudeColumns();
+        if (levelJ + 1 < levelC) {
+            // the cell results from a regular merging of two columns
+            if (isMin) {
+                if (getElevationAtIndices(levelI, levelJ) <=
+                    getElevationAtIndices(levelI, levelJ + 1)) {
+                    levelJ++;
+                }
+            } else {
+                if (getElevationAtIndices(levelI, levelJ) >=
+                    getElevationAtIndices(levelI, levelJ + 1)) {
+                    levelJ++;
+                }
+            }
+        }
+
+        return new int[] {
+            levelI, levelJ
+        };
 
     }
 
