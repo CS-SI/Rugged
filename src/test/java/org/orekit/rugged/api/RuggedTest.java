@@ -29,7 +29,6 @@ import java.util.Locale;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
@@ -38,33 +37,17 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.orekit.attitudes.AttitudeProvider;
-import org.orekit.attitudes.NadirPointing;
-import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
-import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.PropagationException;
-import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
-import org.orekit.forces.gravity.ThirdBodyAttraction;
-import org.orekit.forces.gravity.potential.GravityFieldFactory;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
-import org.orekit.frames.Transform;
-import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
-import org.orekit.orbits.OrbitType;
-import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
-import org.orekit.propagation.analytical.KeplerianPropagator;
-import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
+import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineDatation;
@@ -83,7 +66,6 @@ import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
-import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
@@ -104,9 +86,9 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        BodyShape  earth                                  = createEarth();
-        NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
-        Orbit      orbit                                  = createOrbit(gravityField.getMu());
+        BodyShape  earth                                  = TestUtils.createEarth();
+        NormalizedSphericalHarmonicsProvider gravityField = TestUtils.createGravityField();
+        Orbit      orbit                                  = TestUtils.createOrbit(gravityField.getMu());
 
         // Mayon Volcano location according to Wikipedia: 13°15′24″N 123°41′6″E
         GeodeticPoint summit =
@@ -121,8 +103,8 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                    FastMath.toRadians(10.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                              FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -130,7 +112,7 @@ public class RuggedTest {
         int lastLine  = dimension;
         LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
 
-        Propagator propagator = createPropagator(earth, gravityField, orbit);
+        Propagator propagator = TestUtils.createPropagator(earth, gravityField, orbit);
         propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
         propagator.setEphemerisMode();
         propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
@@ -193,8 +175,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:21:15.000", TimeScalesFactory.getUTC());
 
@@ -202,8 +184,8 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                    FastMath.toRadians(10.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                              FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -218,9 +200,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.IERS2003, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor);
 
@@ -271,8 +253,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:46:35.000", TimeScalesFactory.getUTC());
 
@@ -280,8 +262,8 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                    FastMath.toRadians(10.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                              FastMath.toRadians(10.0), dimension);
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -297,9 +279,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor).
                 setLightTimeCorrection(false).
@@ -329,8 +311,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -338,9 +320,9 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                           FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -359,9 +341,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor);
         GeodeticPoint[] gpWithFlatBodyCorrection =
@@ -390,8 +372,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -399,9 +381,9 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                           FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -421,9 +403,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor).build();
         GeodeticPoint[] gpLine = rugged.directLocation("line", 100);
@@ -447,8 +429,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -456,9 +438,9 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                           FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -478,9 +460,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 setAberrationOfLightCorrection(false).
                 setLightTimeCorrection(false).
@@ -507,8 +489,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -516,9 +498,9 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                           FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -537,9 +519,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor);
         GeodeticPoint[] gpDuvenhage =
@@ -571,8 +553,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -582,9 +564,9 @@ public class RuggedTest {
             // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
             // los: swath in the (YZ) plane, looking roughly at 50° roll (sensor-dependent), 2.6" per pixel
             Vector3D position = new Vector3D(1.5, 0, -0.2);
-            TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                     FastMath.toRadians(50.0 - 0.001 * i)).applyTo(Vector3D.PLUS_K),
-                                                        Vector3D.PLUS_I, FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+            TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                               FastMath.toRadians(50.0 - 0.001 * i)).applyTo(Vector3D.PLUS_K),
+                                                                  Vector3D.PLUS_I, FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
 
             // linear datation model: at reference time we get roughly middle line, and the rate is one line every 1.5ms
             LineDatation lineDatation = new LinearLineDatation(crossing, i + dimension / 2, 1.0 / 1.5e-3);
@@ -606,9 +588,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R);
         builder.setLightTimeCorrection(true);
         builder.setAberrationOfLightCorrection(true);
@@ -699,29 +681,29 @@ public class RuggedTest {
         ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
         ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
 
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:58:42.592937", -0.340236d, 0.333952d, -0.844012d, -0.245684d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:06.592937", -0.354773d, 0.329336d, -0.837871d, -0.252281d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:30.592937", -0.369237d, 0.324612d, -0.831445d, -0.258824d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:54.592937", -0.3836d, 0.319792d, -0.824743d, -0.265299d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:00:18.592937", -0.397834d, 0.314883d, -0.817777d, -0.271695d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:00:42.592937", -0.411912d, 0.309895d, -0.810561d, -0.278001d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:06.592937", -0.42581d, 0.304838d, -0.803111d, -0.284206d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:30.592937", -0.439505d, 0.299722d, -0.795442d, -0.290301d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:54.592937", -0.452976d, 0.294556d, -0.787571d, -0.296279d);
-        addSatelliteQ(gps, satelliteQList, "2009-12-11T17:02:18.592937", -0.466207d, 0.28935d, -0.779516d, -0.302131d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T16:58:42.592937", -0.340236d, 0.333952d, -0.844012d, -0.245684d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:06.592937", -0.354773d, 0.329336d, -0.837871d, -0.252281d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:30.592937", -0.369237d, 0.324612d, -0.831445d, -0.258824d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:54.592937", -0.3836d, 0.319792d, -0.824743d, -0.265299d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T17:00:18.592937", -0.397834d, 0.314883d, -0.817777d, -0.271695d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T17:00:42.592937", -0.411912d, 0.309895d, -0.810561d, -0.278001d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:06.592937", -0.42581d, 0.304838d, -0.803111d, -0.284206d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:30.592937", -0.439505d, 0.299722d, -0.795442d, -0.290301d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:54.592937", -0.452976d, 0.294556d, -0.787571d, -0.296279d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T17:02:18.592937", -0.466207d, 0.28935d, -0.779516d, -0.302131d);
 
 
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:58:42.592937", -726361.466d, -5411878.485d, 4637549.599d, -2068.995d, -4500.601d, -5576.736d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:04.192937", -779538.267d, -5506500.533d, 4515934.894d, -2058.308d, -4369.521d, -5683.906d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:25.792937", -832615.368d, -5598184.195d, 4392036.13d, -2046.169d, -4236.279d, -5788.201d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:47.392937", -885556.748d, -5686883.696d, 4265915.971d, -2032.579d, -4100.944d, -5889.568d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:08.992937", -938326.32d, -5772554.875d, 4137638.207d, -2017.537d, -3963.59d, -5987.957d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:30.592937", -990887.942d, -5855155.21d, 4007267.717d, -2001.046d, -3824.291d, -6083.317d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:52.192937", -1043205.448d, -5934643.836d, 3874870.441d, -1983.107d, -3683.122d, -6175.6d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:13.792937", -1095242.669d, -6010981.571d, 3740513.34d, -1963.723d, -3540.157d, -6264.76d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:35.392937", -1146963.457d, -6084130.93d, 3604264.372d, -1942.899d, -3395.473d, -6350.751d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -1920.64d, -3249.148d, -6433.531d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -1896.952d, -3101.26d, -6513.056d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:58:42.592937", -726361.466d, -5411878.485d, 4637549.599d, -2068.995d, -4500.601d, -5576.736d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:04.192937", -779538.267d, -5506500.533d, 4515934.894d, -2058.308d, -4369.521d, -5683.906d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:25.792937", -832615.368d, -5598184.195d, 4392036.13d, -2046.169d, -4236.279d, -5788.201d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:47.392937", -885556.748d, -5686883.696d, 4265915.971d, -2032.579d, -4100.944d, -5889.568d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:08.992937", -938326.32d, -5772554.875d, 4137638.207d, -2017.537d, -3963.59d, -5987.957d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:30.592937", -990887.942d, -5855155.21d, 4007267.717d, -2001.046d, -3824.291d, -6083.317d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:00:52.192937", -1043205.448d, -5934643.836d, 3874870.441d, -1983.107d, -3683.122d, -6175.6d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:13.792937", -1095242.669d, -6010981.571d, 3740513.34d, -1963.723d, -3540.157d, -6264.76d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:35.392937", -1146963.457d, -6084130.93d, 3604264.372d, -1942.899d, -3395.473d, -6350.751d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -1920.64d, -3249.148d, -6433.531d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -1896.952d, -3101.26d, -6513.056d);
 
         TileUpdater updater = new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l, FastMath.toRadians(1.0), 257);
         RuggedBuilder builder = new RuggedBuilder().
@@ -801,86 +783,57 @@ public class RuggedTest {
         ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
         ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
 
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:27", -0.327993d, -0.715194d, -0.56313d, 0.252592d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:29", -0.328628d, -0.71494d, -0.562769d, 0.25329d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:31", -0.329263d, -0.714685d, -0.562407d, 0.253988d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:33", -0.329898d, -0.714429d, -0.562044d, 0.254685d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:35", -0.330532d, -0.714173d, -0.561681d, 0.255383d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:37", -0.331166d, -0.713915d, -0.561318d, 0.256079d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:39", -0.3318d, -0.713657d, -0.560954d, 0.256776d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:41", -0.332434d, -0.713397d, -0.560589d, 0.257472d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:43", -0.333067d, -0.713137d, -0.560224d, 0.258168d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:45", -0.333699d, -0.712876d, -0.559859d, 0.258864d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:18:17", -0.36244d, -0.699935d, -0.542511d, 0.290533d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:27", -0.401688d, -0.678574d, -0.516285d, 0.334116d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:29", -0.402278d, -0.678218d, -0.515866d, 0.334776d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:31", -0.402868d, -0.677861d, -0.515447d, 0.335435d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:33", -0.403457d, -0.677503d, -0.515028d, 0.336093d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:35", -0.404046d, -0.677144d, -0.514608d, 0.336752d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:37", -0.404634d, -0.676785d, -0.514187d, 0.337409d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:39", -0.405222d, -0.676424d, -0.513767d, 0.338067d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:41", -0.40581d, -0.676063d, -0.513345d, 0.338724d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:43", -0.406397d, -0.675701d, -0.512924d, 0.339381d);
-        addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:45", -0.406983d, -0.675338d, -0.512502d, 0.340038d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:27", -0.327993d, -0.715194d, -0.56313d, 0.252592d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:29", -0.328628d, -0.71494d, -0.562769d, 0.25329d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:31", -0.329263d, -0.714685d, -0.562407d, 0.253988d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:33", -0.329898d, -0.714429d, -0.562044d, 0.254685d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:35", -0.330532d, -0.714173d, -0.561681d, 0.255383d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:37", -0.331166d, -0.713915d, -0.561318d, 0.256079d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:39", -0.3318d, -0.713657d, -0.560954d, 0.256776d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:41", -0.332434d, -0.713397d, -0.560589d, 0.257472d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:43", -0.333067d, -0.713137d, -0.560224d, 0.258168d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:45", -0.333699d, -0.712876d, -0.559859d, 0.258864d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:18:17", -0.36244d, -0.699935d, -0.542511d, 0.290533d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:27", -0.401688d, -0.678574d, -0.516285d, 0.334116d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:29", -0.402278d, -0.678218d, -0.515866d, 0.334776d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:31", -0.402868d, -0.677861d, -0.515447d, 0.335435d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:33", -0.403457d, -0.677503d, -0.515028d, 0.336093d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:35", -0.404046d, -0.677144d, -0.514608d, 0.336752d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:37", -0.404634d, -0.676785d, -0.514187d, 0.337409d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:39", -0.405222d, -0.676424d, -0.513767d, 0.338067d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:41", -0.40581d, -0.676063d, -0.513345d, 0.338724d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:43", -0.406397d, -0.675701d, -0.512924d, 0.339381d);
+        TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:20:45", -0.406983d, -0.675338d, -0.512502d, 0.340038d);
 
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:27.857531", -379110.393d, -5386317.278d, 4708158.61d, -1802.078d, -4690.847d,
-                -5512.223d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:36.857531", -398874.476d, -5428039.968d, 4658344.906d, -1801.326d, -4636.91d,
-                -5557.915d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:45.857531", -418657.992d, -5469262.453d, 4608122.145d, -1800.345d, -4582.57d,
-                -5603.119d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:54.857531", -438458.554d, -5509981.109d, 4557494.737d, -1799.136d, -4527.831d,
-                -5647.831d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:03.857531", -458273.771d, -5550192.355d, 4506467.128d, -1797.697d, -4472.698d,
-                -5692.046d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:12.857531", -478101.244d, -5589892.661d, 4455043.798d, -1796.029d, -4417.176d,
-                -5735.762d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:21.857531", -497938.57d, -5629078.543d, 4403229.263d, -1794.131d, -4361.271d,
-                -5778.975d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:30.857531", -517783.34d, -5667746.565d, 4351028.073d, -1792.003d, -4304.987d,
-                -5821.679d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:39.857531", -537633.139d, -5705893.34d, 4298444.812d, -1789.644d, -4248.329d,
-                -5863.873d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:48.857531", -557485.549d, -5743515.53d, 4245484.097d, -1787.055d, -4191.304d,
-                -5905.552d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:57.857531", -577338.146d, -5780609.846d, 4192150.579d, -1784.234d, -4133.916d,
-                -5946.712d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:06.857531", -597188.502d, -5817173.047d, 4138448.941d, -1781.183d, -4076.171d,
-                -5987.35d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:15.857531", -617034.185d, -5853201.943d, 4084383.899d, -1777.899d, -4018.073d,
-                -6027.462d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:24.857531", -636872.759d, -5888693.393d, 4029960.2d, -1774.385d, -3959.629d,
-                -6067.045d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:33.857531", -656701.786d, -5923644.307d, 3975182.623d, -1770.638d, -3900.844d,
-                -6106.095d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:42.857531", -676518.822d, -5958051.645d, 3920055.979d, -1766.659d, -3841.723d,
-                -6144.609d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:51.857531", -696321.424d, -5991912.417d, 3864585.108d, -1762.449d, -3782.271d,
-                -6182.583d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:00.857531", -716107.143d, -6025223.686d, 3808774.881d, -1758.006d, -3722.495d,
-                -6220.015d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:09.857531", -735873.528d, -6057982.563d, 3752630.2d, -1753.332d, -3662.399d,
-                -6256.9d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:18.857531", -755618.129d, -6090186.214d, 3696155.993d, -1748.425d, -3601.99d,
-                -6293.236d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:27.857531", -775338.49d, -6121831.854d, 3639357.221d, -1743.286d, -3541.272d,
-                -6329.019d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:36.857531", -795032.157d, -6152916.751d, 3582238.87d, -1737.915d, -3480.252d,
-                -6364.246d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:45.857531", -814696.672d, -6183438.226d, 3524805.957d, -1732.313d, -3418.935d,
-                -6398.915d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:54.857531", -834329.579d, -6213393.652d, 3467063.525d, -1726.478d, -3357.327d,
-                -6433.022d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:03.857531", -853928.418d, -6242780.453d, 3409016.644d, -1720.412d, -3295.433d,
-                -6466.563d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:12.857531", -873490.732d, -6271596.108d, 3350670.411d, -1714.114d, -3233.259d,
-                -6499.537d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:21.857531", -893014.061d, -6299838.148d, 3292029.951d, -1707.585d, -3170.811d,
-                -6531.941d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:30.857531", -912495.948d, -6327504.159d, 3233100.411d, -1700.825d, -3108.095d,
-                -6563.77d);
-        addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:39.857531", -931933.933d, -6354591.778d, 3173886.968d, -1693.833d, -3045.116d,
-                -6595.024d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:27.857531", -379110.393d, -5386317.278d, 4708158.61d, -1802.078d, -4690.847d,  -5512.223d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:36.857531", -398874.476d, -5428039.968d, 4658344.906d, -1801.326d, -4636.91d,  -5557.915d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:45.857531", -418657.992d, -5469262.453d, 4608122.145d, -1800.345d, -4582.57d,  -5603.119d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:16:54.857531", -438458.554d, -5509981.109d, 4557494.737d, -1799.136d, -4527.831d, -5647.831d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:03.857531", -458273.771d, -5550192.355d, 4506467.128d, -1797.697d, -4472.698d, -5692.046d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:12.857531", -478101.244d, -5589892.661d, 4455043.798d, -1796.029d, -4417.176d, -5735.762d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:21.857531", -497938.57d, -5629078.543d, 4403229.263d, -1794.131d, -4361.271d,  -5778.975d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:30.857531", -517783.34d, -5667746.565d, 4351028.073d, -1792.003d, -4304.987d,  -5821.679d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:39.857531", -537633.139d, -5705893.34d, 4298444.812d, -1789.644d, -4248.329d,  -5863.873d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:48.857531", -557485.549d, -5743515.53d, 4245484.097d, -1787.055d, -4191.304d,  -5905.552d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:17:57.857531", -577338.146d, -5780609.846d, 4192150.579d, -1784.234d, -4133.916d, -5946.712d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:06.857531", -597188.502d, -5817173.047d, 4138448.941d, -1781.183d, -4076.171d, -5987.35d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:15.857531", -617034.185d, -5853201.943d, 4084383.899d, -1777.899d, -4018.073d, -6027.462d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:24.857531", -636872.759d, -5888693.393d, 4029960.2d, -1774.385d, -3959.629d,   -6067.045d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:33.857531", -656701.786d, -5923644.307d, 3975182.623d, -1770.638d, -3900.844d, -6106.095d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:42.857531", -676518.822d, -5958051.645d, 3920055.979d, -1766.659d, -3841.723d, -6144.609d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:18:51.857531", -696321.424d, -5991912.417d, 3864585.108d, -1762.449d, -3782.271d, -6182.583d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:00.857531", -716107.143d, -6025223.686d, 3808774.881d, -1758.006d, -3722.495d, -6220.015d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:09.857531", -735873.528d, -6057982.563d, 3752630.2d, -1753.332d, -3662.399d,   -6256.9d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:18.857531", -755618.129d, -6090186.214d, 3696155.993d, -1748.425d, -3601.99d,  -6293.236d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:27.857531", -775338.49d, -6121831.854d, 3639357.221d, -1743.286d, -3541.272d,  -6329.019d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:36.857531", -795032.157d, -6152916.751d, 3582238.87d, -1737.915d, -3480.252d,  -6364.246d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:45.857531", -814696.672d, -6183438.226d, 3524805.957d, -1732.313d, -3418.935d, -6398.915d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:19:54.857531", -834329.579d, -6213393.652d, 3467063.525d, -1726.478d, -3357.327d, -6433.022d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:03.857531", -853928.418d, -6242780.453d, 3409016.644d, -1720.412d, -3295.433d, -6466.563d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:12.857531", -873490.732d, -6271596.108d, 3350670.411d, -1714.114d, -3233.259d, -6499.537d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:21.857531", -893014.061d, -6299838.148d, 3292029.951d, -1707.585d, -3170.811d, -6531.941d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:30.857531", -912495.948d, -6327504.159d, 3233100.411d, -1700.825d, -3108.095d, -6563.77d);
+        TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:39.857531", -931933.933d, -6354591.778d, 3173886.968d, -1693.833d, -3045.116d, -6595.024d);
 
         List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
         lineOfSight.add(new Vector3D(0.0046536264d, -0.1851800945d, 1d));
@@ -924,8 +877,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
         int dimension = 200;
@@ -934,10 +887,10 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at nadir, 2.6" per pixel, 3" sagitta
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSCurvedLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                   FastMath.toRadians(dimension * 2.6 / 3600.0),
-                                                   FastMath.toRadians(3.0 / 3600.0),
-                                                   dimension);
+        TimeDependentLOS los = TestUtils.createLOSCurvedLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                             FastMath.toRadians(dimension * 2.6 / 3600.0),
+                                                             FastMath.toRadians(3.0 / 3600.0),
+                                                             dimension);
 
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -957,9 +910,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor).
                 build();
@@ -974,38 +927,14 @@ public class RuggedTest {
 
     }
 
-    protected void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
-                                  ArrayList<TimeStampedPVCoordinates> satellitePVList,
-                                  String absDate,
-                                  double px, double py, double pz, double vx, double vy, double vz)
-        throws OrekitException {
-        AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
-        Vector3D position = new Vector3D(px, py, pz);
-        Vector3D velocity = new Vector3D(vx, vy, vz);
-        PVCoordinates pvITRF = new PVCoordinates(position, velocity);
-        Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
-        Vector3D pEME2000 = transform.transformPosition(pvITRF.getPosition());
-        Vector3D vEME2000 = transform.transformVector(pvITRF.getVelocity());
-        satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000, Vector3D.ZERO));
-    }
-
-    protected void addSatelliteQ(TimeScale gps, ArrayList<TimeStampedAngularCoordinates> satelliteQList, String absDate, double q0, double q1, double q2,
-            double q3) {
-        AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
-        Rotation rotation = new Rotation(q0, q1, q2, q3, true);
-        TimeStampedAngularCoordinates pair =
-                new TimeStampedAngularCoordinates(attitudeDate, rotation, Vector3D.ZERO, Vector3D.ZERO);
-        satelliteQList.add(pair);
-    }
-
     private void checkInverseLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                       double maxLineError, double maxPixelError)
         throws RuggedException, OrekitException, URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -1013,10 +942,10 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                    Vector3D.PLUS_I,
-                                                    FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                           FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                              Vector3D.PLUS_I,
+                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
 
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -1036,9 +965,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 setLightTimeCorrection(lightTimeCorrection).
                 setAberrationOfLightCorrection(aberrationOfLightCorrection).
@@ -1095,8 +1024,8 @@ public class RuggedTest {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
-        final BodyShape  earth = createEarth();
-        final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -1104,10 +1033,10 @@ public class RuggedTest {
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
-        TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
-                                                    Vector3D.PLUS_I,
-                                                    FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                           FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                              Vector3D.PLUS_I,
+                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -1127,9 +1056,9 @@ public class RuggedTest {
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
                 setTrajectory(InertialFrameId.EME2000,
-                              orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               8, CartesianDerivativesFilter.USE_PV,
-                              orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R).
                 setLightTimeCorrection(lightTimeCorrection).
                 setAberrationOfLightCorrection(aberrationOfLightCorrection).
@@ -1165,137 +1094,6 @@ public class RuggedTest {
                                                     -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
                                                     0, dimension));
 
-    }
-
-    private BodyShape createEarth()
-       throws OrekitException {
-        return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                    Constants.WGS84_EARTH_FLATTENING,
-                                    FramesFactory.getITRF(IERSConventions.IERS_2010, true));
-    }
-
-    private NormalizedSphericalHarmonicsProvider createGravityField()
-        throws OrekitException {
-        return GravityFieldFactory.getNormalizedProvider(12, 12);
-    }
-
-    private Orbit createOrbit(double mu)
-        throws OrekitException {
-        // the following orbital parameters have been computed using
-        // Orekit tutorial about phasing, using the following configuration:
-        //
-        //  orbit.date                          = 2012-01-01T00:00:00.000
-        //  phasing.orbits.number               = 143
-        //  phasing.days.number                 =  10
-        //  sun.synchronous.reference.latitude  = 0
-        //  sun.synchronous.reference.ascending = false
-        //  sun.synchronous.mean.solar.time     = 10:30:00
-        //  gravity.field.degree                = 12
-        //  gravity.field.order                 = 12
-        AbsoluteDate date = new AbsoluteDate("2012-01-01T00:00:00.000", TimeScalesFactory.getUTC());
-        Frame eme2000 = FramesFactory.getEME2000();
-        return new CircularOrbit(7173352.811913891,
-                                 -4.029194321683225E-4, 0.0013530362644647786,
-                                 FastMath.toRadians(98.63218182243709),
-                                 FastMath.toRadians(77.55565567747836),
-                                 FastMath.PI, PositionAngle.TRUE,
-                                 eme2000, date, mu);
-    }
-
-    private Propagator createPropagator(BodyShape earth,
-                                        NormalizedSphericalHarmonicsProvider gravityField,
-                                        Orbit orbit)
-        throws OrekitException {
-
-        AttitudeProvider yawCompensation = new YawCompensation(new NadirPointing(earth));
-        SpacecraftState state = new SpacecraftState(orbit,
-                                                    yawCompensation.getAttitude(orbit,
-                                                                                orbit.getDate(),
-                                                                                orbit.getFrame()),
-                                                    1180.0);
-
-        // numerical model for improving orbit
-        OrbitType type = OrbitType.CIRCULAR;
-        double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit, type);
-        DormandPrince853Integrator integrator =
-                new DormandPrince853Integrator(1.0e-4 * orbit.getKeplerianPeriod(),
-                                               1.0e-1 * orbit.getKeplerianPeriod(),
-                                               tolerances[0], tolerances[1]);
-        integrator.setInitialStepSize(1.0e-2 * orbit.getKeplerianPeriod());
-        NumericalPropagator numericalPropagator = new NumericalPropagator(integrator);
-        numericalPropagator.addForceModel(new HolmesFeatherstoneAttractionModel(earth.getBodyFrame(), gravityField));
-        numericalPropagator.addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getSun()));
-        numericalPropagator.addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getMoon()));
-        numericalPropagator.setOrbitType(type);
-        numericalPropagator.setInitialState(state);
-        numericalPropagator.setAttitudeProvider(yawCompensation);
-        return numericalPropagator;
-
-    }
-
-    private TimeDependentLOS createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
-        List<Vector3D> list = new ArrayList<Vector3D>(n);
-        for (int i = 0; i < n; ++i) {
-            double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
-            list.add(new Rotation(normal, alpha).applyTo(center));
-        }
-        return new LOSBuilder(list).build();
-    }
-
-    private TimeDependentLOS createLOSCurvedLine(Vector3D center, Vector3D normal,
-                                                 double halfAperture, double sagitta, int n) {
-        Vector3D u = Vector3D.crossProduct(center, normal);
-        List<Vector3D> list = new ArrayList<Vector3D>(n);
-        for (int i = 0; i < n; ++i) {
-            double x = (2.0 * i + 1.0 - n) / (n - 1);
-            double alpha = x * halfAperture;
-            double beta  = x * x * sagitta;
-            list.add(new Rotation(normal, alpha).applyTo(new Rotation(u, beta).applyTo(center)));
-        }
-        return new LOSBuilder(list).build();
-    }
-
-    private List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
-                                                     AbsoluteDate minDate, AbsoluteDate maxDate,
-                                                     double step)
-        throws PropagationException {
-        Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(minDate);
-        final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }   
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedPVCoordinates(currentState.getDate(),
-                                                      currentState.getPVCoordinates().getPosition(),
-                                                      currentState.getPVCoordinates().getVelocity(),
-                                                      Vector3D.ZERO));
-            }
-        });
-        propagator.propagate(maxDate);
-        return list;
-    }
-
-    private List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
-                                                         AbsoluteDate minDate, AbsoluteDate maxDate,
-                                                         double step)
-        throws PropagationException {
-        Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
-        propagator.propagate(minDate);
-        final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }   
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
-                                                           currentState.getAttitude().getRotation(),
-                                                           Vector3D.ZERO, Vector3D.ZERO));
-            }
-        });
-        propagator.propagate(maxDate);
-        return list;
     }
 
 }
