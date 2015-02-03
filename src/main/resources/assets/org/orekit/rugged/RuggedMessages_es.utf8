@@ -45,3 +45,12 @@ NOT_INTERPOLATOR_DUMP_DATA = los datos no están en el volcado de datos del inte
 
 # number of estimated parameters mismatch, expected {0} got {1}
 ESTIMATED_PARAMETERS_NUMBER_MISMATCH = <MISSING TRANSLATION>
+
+# debug dump is already active for this thread
+DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>
+
+# unable to active debug dump with file {0}: {1}
+DEBUG_DUMP_ACTIVATION_ERROR = <MISSING TRANSLATION>
+
+# debug dump is not active for this thread
+DEBUG_DUMP_NOT_ACTIVE = <MISSING TRANSLATION>

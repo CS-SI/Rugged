@@ -45,3 +45,12 @@ NOT_INTERPOLATOR_DUMP_DATA = les données ne correspondent pas à une sauvegarde
 
 # number of estimated parameters mismatch, expected {0} got {1}
 ESTIMATED_PARAMETERS_NUMBER_MISMATCH = incohérence du nombre de paramètres estimés, {0} attendus, {1} renseignés
+
+# debug dump is already active for this thread
+DEBUG_DUMP_ALREADY_ACTIVE = capture de débogage déjà active pour ce fil d''exécution
+
+# unable to active debug dump with file {0}: {1}
+DEBUG_DUMP_ACTIVATION_ERROR = impossible d''activer la capture de débogage avec le fichier {0} : {1}
+
+# debug dump is not active for this thread
+DEBUG_DUMP_NOT_ACTIVE = capture de débogage inactive pour ce fil d''exécution

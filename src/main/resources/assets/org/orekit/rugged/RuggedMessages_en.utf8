@@ -45,3 +45,12 @@ NOT_INTERPOLATOR_DUMP_DATA = data is not an interpolator dump
 
 # number of estimated parameters mismatch, expected {0} got {1}
 ESTIMATED_PARAMETERS_NUMBER_MISMATCH = number of estimated parameters mismatch, expected {0} got {1}
+
+# debug dump is already active for this thread
+DEBUG_DUMP_ALREADY_ACTIVE = debug dump is already active for this thread
+
+# unable to active debug dump with file {0}: {1}
+DEBUG_DUMP_ACTIVATION_ERROR = unable to active debug dump with file {0}: {1}
+
+# debug dump is not active for this thread
+DEBUG_DUMP_NOT_ACTIVE = debug dump is not active for this thread
