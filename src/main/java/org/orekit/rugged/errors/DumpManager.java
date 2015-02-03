@@ -81,20 +81,17 @@ public class DumpManager {
         return DUMP.get() != null;
     }
 
-    /** Dump some context data.
+    /** Dump DEM cell data.
      * @param tile tile to which the cell belongs
-     * @param latitudeIndex latitude index of the South neighbors of the cell
-     * @param longitudeIndex longitude index of the West neighbors of the cell
-     * @param e00 elevation of the South-West neighbor of the cell
-     * @param e10 elevation of the South-East neighbor of the cell
-     * @param e01 elevation of the North-West neighbor of the cell
-     * @param e11 elevation of the North-East neighbor of the cell
+     * @param latitudeIndex latitude index of the cell
+     * @param longitudeIndex longitude index of the cell
+     * @param elevation elevation of the cell
      */
     public static void dumpTileCell(final Tile tile,
                                     final int latitudeIndex, final int longitudeIndex,
-                                    final double e00, final double e10, final double e01, final double e11) {
+                                    final double elevation) {
         if (isActive()) {
-            DUMP.get().dumpTileCell(tile, latitudeIndex, longitudeIndex, e00, e10, e01, e11);
+            DUMP.get().dumpTileCell(tile, latitudeIndex, longitudeIndex, elevation);
         }
     }
 

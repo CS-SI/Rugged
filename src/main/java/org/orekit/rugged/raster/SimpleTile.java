@@ -200,7 +200,9 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public double getElevationAtIndices(final int latitudeIndex, final int longitudeIndex) {
-        return elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex];
+        final double elevation = elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex];
+        DumpManager.dumpTileCell(this, latitudeIndex, longitudeIndex, elevation);
+        return elevation;
     }
 
     /** {@inheritDoc}
@@ -240,8 +242,6 @@ public class SimpleTile implements Tile {
         final double e10  = getElevationAtIndices(latitudeIndex,     longitudeIndex + 1);
         final double e01  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex);
         final double e11  = getElevationAtIndices(latitudeIndex + 1, longitudeIndex + 1);
-
-        DumpManager.dumpTileCell(this, latitudeIndex, longitudeIndex, e00, e10, e01, e11);
 
         return (e00 * (1.0 - dLon) + dLon * e10) * (1.0 - dLat) +
                (e01 * (1.0 - dLon) + dLon * e11) * dLat;
