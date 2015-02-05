@@ -135,14 +135,16 @@ public class MinMaxTreeTileTest {
     @Test
     public void testAncestor() throws RuggedException {
         RandomGenerator random = new Well1024a(0xca9883209c6e740cl);
-        for (int nbRows = 1; nbRows < 25; nbRows++) {
-            for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
+        for (int nbRows = 3; nbRows < 4; nbRows++) {
+            for (int nbColumns = 3; nbColumns < 4; nbColumns++) {
 
                 MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
                 tile.setGeometry(1.0, 2.0, 0.1, 0.2, nbRows, nbColumns);
                 for (int i = 0; i < nbRows; ++i) {
                     for (int j = 0; j < nbColumns; ++j) {
-                        tile.setElevation(i, j, 1000.0 * random.nextDouble());
+                        final double e  = 1000.0 * random.nextDouble();
+                        tile.setElevation(i, j, e);
+                        System.out.println(i + " " + j + " " + e);
                     }
                 }
                 tile.tileUpdateCompleted();
@@ -151,6 +153,9 @@ public class MinMaxTreeTileTest {
                     for (int j = 0; j < tile.getLongitudeColumns(); ++j) {
                         for (int l = 0; l < tile.getLevels(); ++l) {
                             int[] minAncestor = tile.findAncestor(i, j, l, true);
+                            System.out.println(i + " " + j + " " + l + " -> min = " + minAncestor[0] + " " + minAncestor[1]);
+                            System.out.println(tile.getMinElevation(i, j, l) + " / " +
+                                               tile.getElevationAtIndices(minAncestor[0], minAncestor[1]));
                             Assert.assertEquals(tile.getMinElevation(i, j, l),
                                                 tile.getElevationAtIndices(minAncestor[0], minAncestor[1]),
                                                 1.0e-10);
@@ -163,6 +168,21 @@ public class MinMaxTreeTileTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void testIssue189() throws RuggedException {
+        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
+        tile.setGeometry(1.0, 2.0, 0.1, 0.2, 2, 2);
+        tile.setElevation(0, 0, 1.0);
+        tile.setElevation(0, 1, 2.0);
+        tile.setElevation(1, 0, 3.0);
+        tile.setElevation(1, 1, 4.0);
+        tile.tileUpdateCompleted();
+        Assert.assertEquals(1.0, tile.getMinElevation(0, 0, 0), 1.0e-10);
+        Assert.assertEquals(3.0, tile.getMinElevation(1, 0, 0), 1.0e-10);
+        Assert.assertEquals(4.0, tile.getMaxElevation(0, 0, 0), 1.0e-10);
+        Assert.assertEquals(4.0, tile.getMaxElevation(1, 0, 0), 1.0e-10);
     }
 
     @Test
