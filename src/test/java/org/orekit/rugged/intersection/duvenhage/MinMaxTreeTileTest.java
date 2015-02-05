@@ -133,6 +133,21 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
+    public void testIssue189() throws RuggedException {
+        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
+        tile.setGeometry(1.0, 2.0, 0.1, 0.2, 2, 2);
+        tile.setElevation(0, 0, 1.0);
+        tile.setElevation(0, 1, 2.0);
+        tile.setElevation(1, 0, 3.0);
+        tile.setElevation(1, 1, 4.0);
+        tile.tileUpdateCompleted();
+        Assert.assertEquals(1.0, tile.getMinElevation(0, 0, 0), 1.0e-10);
+        Assert.assertEquals(3.0, tile.getMinElevation(1, 0, 0), 1.0e-10);
+        Assert.assertEquals(4.0, tile.getMaxElevation(0, 0, 0), 1.0e-10);
+        Assert.assertEquals(4.0, tile.getMaxElevation(1, 0, 0), 1.0e-10);
+    }
+
+    @Test
     public void testMergeLarge() throws RuggedException {
         MinMaxTreeTile tile = createTile(1201, 1201);
         Assert.assertEquals(21, tile.getLevels());
