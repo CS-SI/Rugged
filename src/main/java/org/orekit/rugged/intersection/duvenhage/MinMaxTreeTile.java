@@ -129,6 +129,27 @@ public class MinMaxTreeTile extends SimpleTile {
     }
 
     /** Get the minimum elevation at some level tree.
+     * <p>
+     * Note that the min elevation is <em>not</em> computed
+     * only at cell center, but considering that it is interpolated
+     * considering also Eastwards and Northwards neighbors, and extends
+     * up to the center of these neighbors. As an example, lets consider
+     * four neighboring cells in some Digital Elevation Model:
+     * <table border="0" cellpadding="5" bgcolor="#f5f5dc">
+     * <tr><th bgcolor="#c9d5c9">j+1</th><td>11</td><td>10</td></tr>
+     * <tr><th bgcolor="#c9d5c9">j</th><td>12</td><td>11</td></tr>
+     * <tr  bgcolor="#c9d5c9"><th>j/i</th><th>i</th><th>i+1</th></tr>
+     * </table>
+     * When we interpolate elevation at a point located slightly South-West
+     * to the center of the (i+1, j+1) cell, we use all four cells in the
+     * interpolation, and we will get a result very close to 10 if we start
+     * close to (i+1, j+1) cell center. As the min value for this interpolation
+     * is stored at (i, j) indices, this implies that {@code getMinElevation(i,
+     * j, l)} must return 10 if l is chosen such that the sub-tile at
+     * tree level l includes cell (i,j) but not cell (i+1, j+1). In other words,
+     * interpolation implies sub-tile boundaries are overshoot by one column to
+     * the East and one row to the North when computing min.
+     * </p>
      * @param i row index of the cell
      * @param j column index of the cell
      * @param level tree level
@@ -152,6 +173,27 @@ public class MinMaxTreeTile extends SimpleTile {
     }
 
     /** Get the maximum elevation at some level tree.
+     * <p>
+     * Note that the max elevation is <em>not</em> computed
+     * only at cell center, but considering that it is interpolated
+     * considering also Eastwards and Northwards neighbors, and extends
+     * up to the center of these neighbors. As an example, lets consider
+     * four neighboring cells in some Digital Elevation Model:
+     * <table border="0" cellpadding="5" bgcolor="#f5f5dc">
+     * <tr><th bgcolor="#c9d5c9">j+1</th><td>11</td><td>12</td></tr>
+     * <tr><th bgcolor="#c9d5c9">j</th><td>10</td><td>11</td></tr>
+     * <tr  bgcolor="#c9d5c9"><th>j/i</th><th>i</th><th>i+1</th></tr>
+     * </table>
+     * When we interpolate elevation at a point located slightly South-West
+     * to the center of the (i+1, j+1) cell, we use all four cells in the
+     * interpolation, and we will get a result very close to 12 if we start
+     * close to (i+1, j+1) cell center. As the max value for this interpolation
+     * is stored at (i, j) indices, this implies that {@code getMaxElevation(i,
+     * j, l)} must return 12 if l is chosen such that the sub-tile at
+     * tree level l includes cell (i,j) but not cell (i+1, j+1). In other words,
+     * interpolation implies sub-tile boundaries are overshoot by one column to
+     * the East and one row to the North when computing max.
+     * </p>
      * @param i row index of the cell
      * @param j column index of the cell
      * @param level tree level
