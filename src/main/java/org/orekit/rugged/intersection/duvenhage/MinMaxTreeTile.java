@@ -153,7 +153,8 @@ public class MinMaxTreeTile extends SimpleTile {
      * @param i row index of the cell
      * @param j column index of the cell
      * @param level tree level
-     * @return minimum elevation
+     * @return minimum value that can be reached when interpolating elevation
+     * in the sub-tile
      * @see #getLevels()
      * @see #getMaxElevation(int, int, int)
      * @see #getMergeLevel(int, int, int, int)
@@ -197,7 +198,8 @@ public class MinMaxTreeTile extends SimpleTile {
      * @param i row index of the cell
      * @param j column index of the cell
      * @param level tree level
-     * @return maximum elevation
+     * @return maximum value that can be reached when interpolating elevation
+     * in the sub-tile
      * @see #getLevels()
      * @see #getMinElevation(int, int, int)
      * @see #getMergeLevel(int, int, int, int)
