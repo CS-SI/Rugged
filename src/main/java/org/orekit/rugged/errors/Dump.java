@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 
@@ -39,6 +40,9 @@ class Dump {
     /** Tiles map. */
     private final List<DumpedTileData> tiles;
 
+    /** Flag for dumped algorithm. */
+    private boolean algorithmDumped;
+
     /** Flag for dumped ellipsoid. */
     private boolean ellipsoidDumped;
 
@@ -48,6 +52,7 @@ class Dump {
     public Dump(final PrintWriter writer) {
         this.writer          = writer;
         this.tiles           = new ArrayList<DumpedTileData>();
+        this.algorithmDumped = false;
         this.ellipsoidDumped = false;
         dumpHeader();
     }
@@ -72,6 +77,31 @@ class Dump {
                              final int latitudeIndex, final int longitudeIndex,
                              final double elevation) {
         getTileData(tile).setElevation(latitudeIndex, longitudeIndex, elevation);
+    }
+
+    /** Dump algorithm data.
+     * @param algorithmId algorithm ID
+     */
+    public void dumpAlgorithm(final AlgorithmId algorithmId) {
+        if (!algorithmDumped) {
+            writer.format(Locale.US,
+                          "algorithm: %s%n",
+                          algorithmId.name());            
+            algorithmDumped = true;
+        }
+    }
+
+    /** Dump algorithm data.
+     * @param algorithmId algorithm ID
+     * @param specific algorithm specific extra data
+     */
+    public void dumpAlgorithm(final AlgorithmId algorithmId, final double specific) {
+        if (!algorithmDumped) {
+            writer.format(Locale.US,
+                          "algorithm: %s %22.15e%n",
+                          algorithmId.name(), specific);            
+            algorithmDumped = true;
+        }
     }
 
     /** Dump ellipsoid data.

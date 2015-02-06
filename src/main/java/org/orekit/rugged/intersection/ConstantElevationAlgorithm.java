@@ -19,6 +19,8 @@ package org.orekit.rugged.intersection;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
+import org.orekit.rugged.api.AlgorithmId;
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
@@ -47,6 +49,7 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
                                                 final Vector3D position, final Vector3D los)
         throws RuggedException {
         try {
+            DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
             final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
             final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
             return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(), 0.0);
@@ -62,6 +65,7 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
                                                       final NormalizedGeodeticPoint closeGuess)
         throws RuggedException {
         try {
+            DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
             final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
             final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
             return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),

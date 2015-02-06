@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 
@@ -93,6 +94,25 @@ public class DumpManager {
                                     final double elevation) {
         if (isActive()) {
             DUMP.get().dumpTileCell(tile, latitudeIndex, longitudeIndex, elevation);
+        }
+    }
+
+    /** Dump algorithm data.
+     * @param algorithmId algorithm ID
+     */
+    public static void dumpAlgorithm(final AlgorithmId algorithmId) {
+        if (isActive()) {
+            DUMP.get().dumpAlgorithm(algorithmId);
+        }
+    }
+
+    /** Dump algorithm data.
+     * @param algorithmId algorithm ID
+     * @param specific algorithm specific extra data
+     */
+    public static void dumpAlgorithm(final AlgorithmId algorithmId, final double specific) {
+        if (isActive()) {
+            DUMP.get().dumpAlgorithm(algorithmId, specific);
         }
     }
 

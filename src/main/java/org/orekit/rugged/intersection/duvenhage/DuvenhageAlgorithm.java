@@ -20,6 +20,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
+import org.orekit.rugged.api.AlgorithmId;
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
@@ -70,6 +72,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                 final Vector3D position, final Vector3D los)
         throws RuggedException {
         try {
+
+            DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
 
             // compute intersection with ellipsoid
             final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
@@ -161,6 +165,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                       final NormalizedGeodeticPoint closeGuess)
         throws RuggedException {
         try {
+
+            DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+
             if (flatBody) {
                 // under the (bad) flat-body assumption, the reference point must remain
                 // at DEM entry and exit, even if we already have a much better close guess :-(
