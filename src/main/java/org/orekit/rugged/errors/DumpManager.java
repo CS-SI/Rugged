@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 
 /**
  * Class managing debug dumps.
@@ -92,6 +93,15 @@ public class DumpManager {
                                     final double elevation) {
         if (isActive()) {
             DUMP.get().dumpTileCell(tile, latitudeIndex, longitudeIndex, elevation);
+        }
+    }
+
+    /** Dump ellipsoid data.
+     * @param ellipsoid ellipsoid to dump
+     */
+    public static void dumpEllipsoid(final ExtendedEllipsoid ellipsoid) {
+        if (isActive()) {
+            DUMP.get().dumpEllipsoid(ellipsoid);
         }
     }
 

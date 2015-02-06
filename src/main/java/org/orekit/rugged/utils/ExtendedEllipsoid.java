@@ -23,6 +23,7 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
@@ -69,6 +70,8 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     public Vector3D pointAtLatitude(final Vector3D position, final Vector3D los,
                                     final double latitude, final Vector3D closeReference)
         throws RuggedException {
+
+        DumpManager.dumpEllipsoid(this);
 
         // find apex of iso-latitude cone, somewhere along polar axis
         final GeodeticPoint groundPoint = new GeodeticPoint(latitude, 0, 0);
@@ -139,6 +142,8 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     public Vector3D pointAtLongitude(final Vector3D position, final Vector3D los, final double longitude)
         throws RuggedException {
 
+        DumpManager.dumpEllipsoid(this);
+
         // normal to meridian
         final Vector3D normal = new Vector3D(-FastMath.sin(longitude), FastMath.cos(longitude), 0);
         final double d = Vector3D.dotProduct(los, normal);
@@ -164,6 +169,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
                                                  final double centralLongitude)
         throws RuggedException {
         try {
+            DumpManager.dumpEllipsoid(this);
             final GeodeticPoint gp =
                     getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),
                                          position, getBodyFrame(), null);
@@ -187,6 +193,8 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     public Vector3D pointAtAltitude(final Vector3D position, final Vector3D los, final double altitude)
         throws RuggedException {
         try {
+
+            DumpManager.dumpEllipsoid(this);
 
             // point on line closest to origin
             final double   los2   = los.getNormSq();
@@ -239,6 +247,8 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      */
     public Vector3D convertLos(final GeodeticPoint point, final Vector3D los) {
 
+        DumpManager.dumpEllipsoid(this);
+
         // Cartesian coordinates of the topocentric frame origin
         final Vector3D p3D = transform(point);
 
@@ -272,6 +282,8 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         throws RuggedException {
         try {
 
+            DumpManager.dumpEllipsoid(this);
+
             // switch to geodetic coordinates using primary point as reference
             final GeodeticPoint point = transform(primary, getBodyFrame(), null);
             final Vector3D      los   = secondary.subtract(primary);
@@ -296,6 +308,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     public NormalizedGeodeticPoint transform(final Vector3D point, final Frame frame, final AbsoluteDate date,
                                              final double centralLongitude)
         throws OrekitException {
+        DumpManager.dumpEllipsoid(this);
         final GeodeticPoint gp = transform(point, frame, date);
         return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
                                            centralLongitude);

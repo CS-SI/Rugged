@@ -25,6 +25,7 @@ import java.util.TimeZone;
 
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
 import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 
 /**
  * Dump data class.
@@ -38,12 +39,16 @@ class Dump {
     /** Tiles map. */
     private final List<DumpedTileData> tiles;
 
+    /** Flag for dumped ellipsoid. */
+    private boolean ellipsoidDumped;
+
     /** Simple constructor.
      * @param writer writer to the dump file
      */
     public Dump(final PrintWriter writer) {
-        this.writer = writer;
-        this.tiles  = new ArrayList<DumpedTileData>();
+        this.writer          = writer;
+        this.tiles           = new ArrayList<DumpedTileData>();
+        this.ellipsoidDumped = false;
         dumpHeader();
     }
 
@@ -67,6 +72,19 @@ class Dump {
                              final int latitudeIndex, final int longitudeIndex,
                              final double elevation) {
         getTileData(tile).setElevation(latitudeIndex, longitudeIndex, elevation);
+    }
+
+    /** Dump ellipsoid data.
+     * @param ellipsoid ellipsoid to dump
+     */
+    public void dumpEllipsoid(final ExtendedEllipsoid ellipsoid) {
+        if (!ellipsoidDumped) {
+            writer.format(Locale.US,
+                          "ellipsoid: ae = %22.15e f = %22.15e frame = %s%n",
+                          ellipsoid.getA(), ellipsoid.getFlattening(),
+                          ellipsoid.getBodyFrame().getName());            
+            ellipsoidDumped = true;
+        }
     }
 
     /** Get tile data.
