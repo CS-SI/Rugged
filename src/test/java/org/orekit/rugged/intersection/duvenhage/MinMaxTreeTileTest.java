@@ -133,10 +133,10 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testAncestor() throws RuggedException {
+    public void testLocateMinMax() throws RuggedException {
         RandomGenerator random = new Well1024a(0xca9883209c6e740cl);
-        for (int nbRows = 3; nbRows < 4; nbRows++) {
-            for (int nbColumns = 3; nbColumns < 4; nbColumns++) {
+        for (int nbRows = 1; nbRows < 25; nbRows++) {
+            for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
 
                 MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
                 tile.setGeometry(1.0, 2.0, 0.1, 0.2, nbRows, nbColumns);
@@ -144,7 +144,6 @@ public class MinMaxTreeTileTest {
                     for (int j = 0; j < nbColumns; ++j) {
                         final double e  = 1000.0 * random.nextDouble();
                         tile.setElevation(i, j, e);
-                        System.out.println(i + " " + j + " " + e);
                     }
                 }
                 tile.tileUpdateCompleted();
@@ -152,16 +151,13 @@ public class MinMaxTreeTileTest {
                 for (int i = 0; i < tile.getLatitudeRows(); ++i) {
                     for (int j = 0; j < tile.getLongitudeColumns(); ++j) {
                         for (int l = 0; l < tile.getLevels(); ++l) {
-                            int[] minAncestor = tile.findAncestor(i, j, l, true);
-                            System.out.println(i + " " + j + " " + l + " -> min = " + minAncestor[0] + " " + minAncestor[1]);
-                            System.out.println(tile.getMinElevation(i, j, l) + " / " +
-                                               tile.getElevationAtIndices(minAncestor[0], minAncestor[1]));
+                            int[] min = tile.locateMin(i, j, l);
                             Assert.assertEquals(tile.getMinElevation(i, j, l),
-                                                tile.getElevationAtIndices(minAncestor[0], minAncestor[1]),
+                                                tile.getElevationAtIndices(min[0], min[1]),
                                                 1.0e-10);
-                            int[] maxAncestor = tile.findAncestor(i, j, l, false);
+                            int[] max = tile.locateMax(i, j, l);
                             Assert.assertEquals(tile.getMaxElevation(i, j, l),
-                                                tile.getElevationAtIndices(maxAncestor[0], maxAncestor[1]),
+                                                tile.getElevationAtIndices(max[0], max[1]),
                                                 1.0e-10);
                         }
                     }

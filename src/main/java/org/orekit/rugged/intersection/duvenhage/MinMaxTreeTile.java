@@ -176,9 +176,9 @@ public class MinMaxTreeTile extends SimpleTile {
         final int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
         if (DumpManager.isActive()) {
-            final int[] ancestor = findAncestor(i, j, level, true);
-            DumpManager.dumpTileCell(this, ancestor[0], ancestor[1],
-                                     raw[ancestor[0] * getLongitudeColumns() + ancestor[1]]);
+            final int[] min = locateMin(i, j, level);
+            DumpManager.dumpTileCell(this, min[0], min[1],
+                                     raw[min[0] * getLongitudeColumns() + min[1]]);
         }
 
         return minTree[start[level] + levelI * levelC + levelJ];
@@ -227,28 +227,29 @@ public class MinMaxTreeTile extends SimpleTile {
         final int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
         if (DumpManager.isActive()) {
-            final int[] ancestor = findAncestor(i, j, level, false);
-            DumpManager.dumpTileCell(this, ancestor[0], ancestor[1],
-                                     raw[ancestor[0] * getLongitudeColumns() + ancestor[1]]);
+            final int[] max = locateMax(i, j, level);
+            DumpManager.dumpTileCell(this, max[0], max[1],
+                                     raw[max[0] * getLongitudeColumns() + max[1]]);
         }
 
         return maxTree[start[level] + levelI * levelC + levelJ];
 
     }
 
-    /** Find a min or max ancestor cell.
+    /** Locate the cell at which min elevation is reached for a specified level.
      * <p>
-     * The min/max ancestor is the cell that reaches the min (resp. max)
-     * elevation for the sub-tile containing cell (i, j) at specified level.
+     * Min is computed with respect to the continuous interpolated elevation, which
+     * takes four neighboring cells into account. This implies that the cell at which
+     * min value is reached for some level is either within the sub-tile for this level,
+     * or in some case it may be one column outside to the East or one row outside to
+     * the North. See {@link #getMinElevation()} for a more complete explanation.
      * </p>
      * @param i row index of the cell
      * @param j column index of the cell
      * @param level tree level of the sub-tile considered
-     * @param isMin if true, the min ancestor cell is desired, otherwise the max ancestor
-     * cell is desired
-     * @return row/column indices of the min/max ancestor cell
+     * @return row/column indices of the cell at which min elevation is reached
      */
-    public int[] findAncestor(final int i, final int j, final int level, final boolean isMin) {
+    public int[] locateMin(final int i, final int j, final int level) {
 
         final int k  = start.length - level;
         int rowShift = k / 2;
@@ -259,9 +260,9 @@ public class MinMaxTreeTile extends SimpleTile {
         int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
 
         // track the cell ancestors from merged tree at specified level up to tree at level 1
-        for (int l = level; l + 1 < start.length; ++l) {
+        for (int l = level + 1; l < start.length; ++l) {
 
-            if (isColumnMerging(l + 1)) {
+            if (isColumnMerging(l)) {
 
                 --colShift;
                 levelC = 1 + ((getLongitudeColumns() - 1) >> colShift);
@@ -269,16 +270,9 @@ public class MinMaxTreeTile extends SimpleTile {
 
                 if (levelJ + 1 < levelC) {
                     // the cell results from a regular merging of two columns
-                    if (isMin) {
-                        if (minTree[start[l] + levelI * levelC + levelJ] >
-                            minTree[start[l] + levelI * levelC + levelJ + 1]) {
-                            levelJ++;
-                        }
-                    } else {
-                        if (maxTree[start[l] + levelI * levelC + levelJ] <
-                            maxTree[start[l] + levelI * levelC + levelJ + 1]) {
-                            levelJ++;
-                        }
+                    if (minTree[start[l] + levelI * levelC + levelJ] >
+                    minTree[start[l] + levelI * levelC + levelJ + 1]) {
+                        levelJ++;
                     }
                 }
 
@@ -290,16 +284,9 @@ public class MinMaxTreeTile extends SimpleTile {
 
                 if (levelI + 1 < levelR) {
                     // the cell results from a regular merging of two rows
-                    if (isMin) {
-                        if (minTree[start[l] + levelI       * levelC + levelJ] >
-                            minTree[start[l] + (levelI + 1) * levelC + levelJ]) {
-                            levelI++;
-                        }
-                    } else {
-                        if (maxTree[start[l] + levelI       * levelC + levelJ] <
-                            maxTree[start[l] + (levelI + 1) * levelC + levelJ]) {
-                            levelI++;
-                        }
+                    if (minTree[start[l] + levelI       * levelC + levelJ] >
+                    minTree[start[l] + (levelI + 1) * levelC + levelJ]) {
+                        levelI++;
                     }
                 }
 
@@ -307,57 +294,119 @@ public class MinMaxTreeTile extends SimpleTile {
 
         }
 
-        // we are now at first merge level, which always results from a column merge of raw data
-        levelJ = levelJ << 1;
-        levelC = getLongitudeColumns();
-        final int[] interpolationBase;
-        if (levelJ + 1 < levelC) {
-            // the cell results from a regular merging of two columns
-            interpolationBase = selectExtreme(new int[] {
-                levelI, levelJ
-            }, new int[] {
-                levelI, levelJ + 1
-            }, isMin);
-        } else {
-            // the cell is on last column
-            interpolationBase = new int[] {
-                levelI, levelJ
-            };
+        // we are now at first merge level, which always results from a column merge
+        // or pre-processed data, which themselves result from merging four cells
+        // used in interpolation
+        // this imply the ancestor of min/max at (n, m) is one of
+        // (2n, m), (2n+1, m), (2n+2, m), (2n, m+1), (2n+1, m+1), (2n+2, m+1)
+        int minI = levelI;
+        int minJ = 2 * levelJ;
+        double minElevation = Double.POSITIVE_INFINITY;
+        for (int n = 2 * levelJ; n < 2 * levelJ + 3; ++n) {
+            if (n < getLongitudeColumns()) {
+                for (int m = levelI; m < levelI + 2; ++m) {
+                    if (m < getLatitudeRows()) {
+                        final double elevation = raw[m * getLongitudeColumns() + n];
+                        if (elevation < minElevation) {
+                            minI         = m;
+                            minJ         = n;
+                            minElevation = elevation;
+                        }
+                    }
+                }
+            }
         }
 
-        // as min/max are computed taking interpolation into account,
-        // we need to check 3 neighbors too (or fewer if on last row/column)
-        final int[] south = selectExtreme(interpolationBase,
-                                          new int[] {
-                                              interpolationBase[0]    , interpolationBase[1] + 1
-                                          }, isMin);
-        final int[] north = selectExtreme(new int[] {
-            interpolationBase[0] + 1, interpolationBase[1] + 1
-        }, new int[] {
-            interpolationBase[0] + 1, interpolationBase[1] + 1
-        }, isMin);
-
-        return selectExtreme(south, north, isMin);
+        return new int[] {
+            minI, minJ
+        };
 
     }
 
-    /** Select an extreme cell.
-     * @param x1 indices of first cell
-     * @param x2 indices of second cell (may be out of tile ...)
-     * @param isMin if true, the min ancestor cell is desired, otherwise the max ancestor
-     * cell is desired
-     * @return row/column indices of the min/max cell
+    /** Locate the cell at which max elevation is reached for a specified level.
+     * <p>
+     * Max is computed with respect to the continuous interpolated elevation, which
+     * takes four neighboring cells into account. This implies that the cell at which
+     * max value is reached for some level is either within the sub-tile for this level,
+     * or in some case it may be one column outside to the East or one row outside to
+     * the North. See {@link #getMaxElevation()} for a more complete explanation.
+     * </p>
+     * @param i row index of the cell
+     * @param j column index of the cell
+     * @param level tree level of the sub-tile considered
+     * @return row/column indices of the cell at which min elevation is reached
      */
-    private int[] selectExtreme(final int[] x1, final int[] x2, final boolean isMin) {
+    public int[] locateMax(final int i, final int j, final int level) {
 
-        if (x2[0] >= getLatitudeRows() || x2[1] >= getLongitudeColumns()) {
-            // the second cell is out of tile
-            return x1;
+        final int k  = start.length - level;
+        int rowShift = k / 2;
+        int colShift = (k + 1) / 2;
+        int levelI   = i >> rowShift;
+        int levelJ   = j >> colShift;
+        int levelR   = 1 + ((getLatitudeRows()     - 1) >> rowShift);
+        int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
+
+        // track the cell ancestors from merged tree at specified level up to tree at level 1
+        for (int l = level + 1; l < start.length; ++l) {
+
+            if (isColumnMerging(l)) {
+
+                --colShift;
+                levelC = 1 + ((getLongitudeColumns() - 1) >> colShift);
+                levelJ = levelJ << 1;
+
+                if (levelJ + 1 < levelC) {
+                    // the cell results from a regular merging of two columns
+                    if (maxTree[start[l] + levelI * levelC + levelJ] <
+                            maxTree[start[l] + levelI * levelC + levelJ + 1]) {
+                        levelJ++;
+                    }
+                }
+
+            } else {
+
+                --rowShift;
+                levelR = 1 + ((getLatitudeRows() - 1) >> rowShift);
+                levelI = levelI << 1;
+
+                if (levelI + 1 < levelR) {
+                    // the cell results from a regular merging of two rows
+                    if (maxTree[start[l] + levelI       * levelC + levelJ] <
+                            maxTree[start[l] + (levelI + 1) * levelC + levelJ]) {
+                        levelI++;
+                    }
+                }
+
+            }
+
         }
 
-        final double  e1 = raw[x1[0] * getLongitudeColumns() + x1[1]];
-        final double  e2 = raw[x2[0] * getLongitudeColumns() + x2[1]];
-        return (isMin ^ (e1 > e2)) ? x1 : x2;
+        // we are now at first merge level, which always results from a column merge
+        // or pre-processed data, which themselves result from merging four cells
+        // used in interpolation
+        // this imply the ancestor of min/max at (n, m) is one of
+        // (2n, m), (2n+1, m), (2n+2, m), (2n, m+1), (2n+1, m+1), (2n+2, m+1)
+        int maxI = levelI;
+        int maxJ = 2 * levelJ;
+        double maxElevation = Double.NEGATIVE_INFINITY;
+        for (int n = 2 * levelJ; n < 2 * levelJ + 3; ++n) {
+            if (n < getLongitudeColumns()) {
+                for (int m = levelI; m < levelI + 2; ++m) {
+                    if (m < getLatitudeRows()) {
+                        final double elevation = raw[m * getLongitudeColumns() + n];
+                        if (elevation > maxElevation) {
+                            maxI         = m;
+                            maxJ         = n;
+                            maxElevation = elevation;
+                        }
+                    }
+                }
+            }
+        }
+
+        return new int[] {
+            maxI, maxJ
+        };
 
     }
 
