@@ -292,7 +292,7 @@ public class RuggedBuilder {
      * Note that this method is relevant <em>only</em> if the algorithm specified
      * in {@link #setAlgorithm(AlgorithmId)} is {@link
      * AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID CONSTANT_ELEVATION_OVER_ELLIPSOID}.
-     * If it is called for this algorithm, the elevation set here will be ignored.
+     * If it is called for another algorithm, the elevation set here will be ignored.
      * </p>
      * @param constantElevation constant elevation to use
      * @return the builder instance
