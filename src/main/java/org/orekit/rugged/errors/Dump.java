@@ -23,10 +23,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
+import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.time.AbsoluteDate;
+import org.orekit.time.DateTimeComponents;
+import org.orekit.time.TimeScalesFactory;
 
 /**
  * Dump data class.
@@ -117,6 +122,26 @@ class Dump {
         }
     }
 
+    /** Dump a direct location computation.
+     * @param date computation date
+     * @param date date of the location
+     * @param position pixel position in spacecraft frame
+     * @param los normalized line-of-sight in spacecraft frame
+     * @param lightTimeCorrection flag for light time correction
+     * @param aberrationOfLightCorrection flag for aberration of light correction
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public void dumpDirectLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los,
+                                   final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection)
+        throws RuggedException {
+        writer.format(Locale.US,
+                      "direct location: date = %s position = %22.15e %22.15e %22.15e los = %22.15e %22.15e %22.15e ligthTime = %b aberration = %b%n",
+                      highAccuracyDate(date),
+                      position.getX(), position.getY(), position.getZ(),
+                      los.getX(),      los.getY(),      los.getZ(),
+                      lightTimeCorrection, aberrationOfLightCorrection);
+    }
+
     /** Get tile data.
      * @param tile tile to which the cell belongs
      * @return index of the tile
@@ -135,6 +160,23 @@ class Dump {
         tiles.add(dumpedTileData);
         return dumpedTileData;
 
+    }
+
+    /** Convert a date to string with high accuracy.
+     * @param date computation date
+     * @return converted date
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    private String highAccuracyDate(final AbsoluteDate date)
+        throws RuggedException {
+        try {
+            final DateTimeComponents dt = date.getComponents(TimeScalesFactory.getUTC());
+            return String.format(Locale.US, "%04d-%02d-%02dT%02d:%02d:%017.14fZ",
+                                 dt.getDate().getYear(), dt.getDate().getMonth(), dt.getDate().getDay(),
+                                 dt.getTime().getHour(), dt.getTime().getMinute(), dt.getTime().getSecond());
+        } catch (OrekitException oe) {
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        }
     }
 
     /** Deactivate dump.

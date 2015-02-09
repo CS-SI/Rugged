@@ -26,6 +26,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
@@ -197,6 +198,9 @@ public class Rugged {
         final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
 
+            DumpManager.dumpDirectLocation(date, sensor.getPosition(), sensor.getLos(date, i),
+                                           lightTimeCorrection, aberrationOfLightCorrection);
+
             final Vector3D obsLInert = scToInert.transformVector(sensor.getLos(date, i));
             final Vector3D lInert;
             if (aberrationOfLightCorrection) {
@@ -259,6 +263,8 @@ public class Rugged {
      */
     public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los)
         throws RuggedException {
+
+        DumpManager.dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection);
 
         // compute the approximate transform between spacecraft and observed body
         final Transform    scToInert   = scToBody.getScToInertial(date);

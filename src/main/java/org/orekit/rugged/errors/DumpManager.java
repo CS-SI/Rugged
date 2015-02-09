@@ -20,9 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.time.AbsoluteDate;
 
 /**
  * Class managing debug dumps.
@@ -122,6 +124,23 @@ public class DumpManager {
     public static void dumpEllipsoid(final ExtendedEllipsoid ellipsoid) {
         if (isActive()) {
             DUMP.get().dumpEllipsoid(ellipsoid);
+        }
+    }
+
+    /** Dump a direct location computation.
+     * @param date computation date
+     * @param date date of the location
+     * @param position pixel position in spacecraft frame
+     * @param los normalized line-of-sight in spacecraft frame
+     * @param lightTimeCorrection flag for light time correction
+     * @param aberrationOfLightCorrection flag for aberration of light correction
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public static void dumpDirectLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los,
+                                          final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection)
+        throws RuggedException {
+        if (isActive()) {
+            DUMP.get().dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection);
         }
     }
 
