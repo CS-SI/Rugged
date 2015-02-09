@@ -24,6 +24,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
@@ -270,6 +271,10 @@ public class SpacecraftToObservedBody implements Serializable {
 
         final double    s     = date.durationFrom(list.get(0).getDate()) / tStep;
         final int       index = FastMath.max(0, FastMath.min(list.size() - 1, (int) FastMath.rint(s)));
+
+        // we always dump the body to inertial transform, regardless of the one really asked for
+        DumpManager.dumpTransform(this, index, bodyToInertial.get(index));
+
         final Transform close = list.get(index);
         return close.shiftedBy(date.durationFrom(close.getDate()));
 

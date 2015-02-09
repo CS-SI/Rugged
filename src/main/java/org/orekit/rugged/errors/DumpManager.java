@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 
 /**
@@ -141,6 +143,20 @@ public class DumpManager {
         throws RuggedException {
         if (isActive()) {
             DUMP.get().dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection);
+        }
+    }
+
+    /** Dump an observation transform transform.
+     * @param scToBody provider for observation
+     * @param index index of the transform
+     * @param transform transform
+     * @exception RuggedException if reference date cannot be converted to UTC
+     */
+    public static void dumpTransform(final SpacecraftToObservedBody scToBody,
+                                     final int index, final Transform transform)
+        throws RuggedException {
+        if (isActive()) {
+            DUMP.get().dumpTransform(scToBody, index, transform);
         }
     }
 

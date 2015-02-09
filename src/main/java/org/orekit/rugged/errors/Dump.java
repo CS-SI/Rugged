@@ -24,11 +24,14 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
 import org.orekit.errors.OrekitException;
+import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.DateTimeComponents;
 import org.orekit.time.TimeScalesFactory;
@@ -51,6 +54,9 @@ class Dump {
     /** Flag for dumped ellipsoid. */
     private boolean ellipsoidDumped;
 
+    /** Flags for dumped observation transforms. */
+    private boolean[] tranformsDumped;
+
     /** Simple constructor.
      * @param writer writer to the dump file
      */
@@ -59,6 +65,7 @@ class Dump {
         this.tiles           = new ArrayList<DumpedTileData>();
         this.algorithmDumped = false;
         this.ellipsoidDumped = false;
+        this.tranformsDumped = null;
         dumpHeader();
     }
 
@@ -140,6 +147,38 @@ class Dump {
                       position.getX(), position.getY(), position.getZ(),
                       los.getX(),      los.getY(),      los.getZ(),
                       lightTimeCorrection, aberrationOfLightCorrection);
+    }
+
+    /** Dump an observation transform transform.
+     * @param scToBody provider for observation
+     * @param index index of the transform
+     * @param transform transform
+     * @exception RuggedException if reference date cannot be converted to UTC
+     */
+    public void dumpTransform(final SpacecraftToObservedBody scToBody,
+                              final int index, final Transform transform)
+        throws RuggedException {
+        if (tranformsDumped == null) {
+            final AbsoluteDate minDate = scToBody.getMinDate();
+            final AbsoluteDate maxDate = scToBody.getMaxDate();
+            final double       tStep   = scToBody.getTStep();
+            final int          n       = 1 + (int) FastMath.rint(maxDate.durationFrom(minDate) / tStep);
+            writer.format(Locale.US,
+                          "spacecraft to observed body: min date = %s max date = %s tStep = %22.15e inertial frame = %s body frame = %s%n",
+                          highAccuracyDate(minDate), highAccuracyDate(maxDate), tStep,
+                          scToBody.getInertialFrameName(), scToBody.getBodyFrameName());
+            tranformsDumped = new boolean[n];
+        }
+        if (!tranformsDumped[index]) {
+            writer.format(Locale.US,
+                          "transform: index = %d r = %22.15e %22.15e %22.15e %22.15e Ω = %22.15e %22.15e %22.15e ΩDot = %22.15e %22.15e %22.15e%n",
+                          index,
+                          transform.getRotation().getQ0(), transform.getRotation().getQ1(),
+                          transform.getRotation().getQ2(), transform.getRotation().getQ2(), 
+                          transform.getRotationRate().getX(), transform.getRotationRate().getY(), transform.getRotationRate().getZ(), 
+                          transform.getRotationAcceleration().getX(), transform.getRotationAcceleration().getY(), transform.getRotationAcceleration().getZ());
+            tranformsDumped[index] = true;
+        }
     }
 
     /** Get tile data.
