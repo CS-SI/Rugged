@@ -174,7 +174,7 @@ class Dump {
                           "transform: index = %d r = %22.15e %22.15e %22.15e %22.15e Ω = %22.15e %22.15e %22.15e ΩDot = %22.15e %22.15e %22.15e%n",
                           index,
                           transform.getRotation().getQ0(), transform.getRotation().getQ1(),
-                          transform.getRotation().getQ2(), transform.getRotation().getQ2(), 
+                          transform.getRotation().getQ2(), transform.getRotation().getQ3(), 
                           transform.getRotationRate().getX(), transform.getRotationRate().getY(), transform.getRotationRate().getZ(), 
                           transform.getRotationAcceleration().getX(), transform.getRotationAcceleration().getY(), transform.getRotationAcceleration().getZ());
             tranformsDumped[index] = true;
