@@ -43,11 +43,11 @@ public class SpacecraftToObservedBody implements Serializable {
     /** Serializable UID. */
     private static final long serialVersionUID = 20140909L;
 
-    /** Name of the inertial frame. */
-    private final String inertialFrameName;
+    /** Inertial frame. */
+    private final Frame inertialFrame;
 
-    /** Name of the body frame. */
-    private final String bodyFrameName;
+    /** Body frame. */
+    private final Frame bodyFrame;
 
     /** Start of search time span. */
     private final AbsoluteDate minDate;
@@ -98,8 +98,8 @@ public class SpacecraftToObservedBody implements Serializable {
         throws RuggedException {
         try {
 
-            this.inertialFrameName  = inertialFrame.getName();
-            this.bodyFrameName      = bodyFrame.getName();
+            this.inertialFrame      = inertialFrame;
+            this.bodyFrame          = bodyFrame;
             this.minDate            = minDate;
             this.maxDate            = maxDate;
             this.overshootTolerance = overshootTolerance;
@@ -183,18 +183,18 @@ public class SpacecraftToObservedBody implements Serializable {
         }
     }
 
-    /** Get the name of the inertial frame.
-     * @return inertial frame name
+    /** Get the inertial frame.
+     * @return inertial frame
      */
-    public String getInertialFrameName() {
-        return inertialFrameName;
+    public Frame getInertialFrame() {
+        return inertialFrame;
     }
 
-    /** Get the name of the body frame.
-     * @return body frame name
+    /** Get the body frame.
+     * @return body frame
      */
-    public String getBodyFrameName() {
-        return bodyFrameName;
+    public Frame getBodyFrame() {
+        return bodyFrame;
     }
 
     /** Get the start of search time span.

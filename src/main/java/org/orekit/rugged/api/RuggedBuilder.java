@@ -639,9 +639,9 @@ public class RuggedBuilder {
      */
     private void checkFramesConsistency() throws RuggedException {
         if (ellipsoid != null && scToBody != null &&
-            !ellipsoid.getBodyFrame().getName().equals(scToBody.getBodyFrameName())) {
+            !ellipsoid.getBodyFrame().getName().equals(scToBody.getBodyFrame().getName())) {
             throw new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
-                                      ellipsoid.getBodyFrame().getName(), scToBody.getBodyFrameName());
+                                      ellipsoid.getBodyFrame().getName(), scToBody.getBodyFrame().getName());
         }
     }
 

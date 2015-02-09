@@ -28,6 +28,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
 import org.orekit.errors.OrekitException;
+import org.orekit.frames.FactoryManagedFrame;
+import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
@@ -111,7 +113,7 @@ class Dump {
     public void dumpAlgorithm(final AlgorithmId algorithmId, final double specific) {
         if (!algorithmDumped) {
             writer.format(Locale.US,
-                          "algorithm: %s %22.15e%n",
+                          "algorithm: %s elevation %22.15e%n",
                           algorithmId.name(), specific);            
             algorithmDumped = true;
         }
@@ -123,9 +125,9 @@ class Dump {
     public void dumpEllipsoid(final ExtendedEllipsoid ellipsoid) {
         if (!ellipsoidDumped) {
             writer.format(Locale.US,
-                          "ellipsoid: ae = %22.15e f = %22.15e frame = %s%n",
+                          "ellipsoid: ae %22.15e f %22.15e frame %s%n",
                           ellipsoid.getA(), ellipsoid.getFlattening(),
-                          ellipsoid.getBodyFrame().getName());            
+                          getKeyOrName(ellipsoid.getBodyFrame()));            
             ellipsoidDumped = true;
         }
     }
@@ -143,7 +145,7 @@ class Dump {
                                    final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection)
         throws RuggedException {
         writer.format(Locale.US,
-                      "direct location: date = %s position = %22.15e %22.15e %22.15e los = %22.15e %22.15e %22.15e ligthTime = %b aberration = %b%n",
+                      "direct location: date %s position %22.15e %22.15e %22.15e los %22.15e %22.15e %22.15e lightTime %b aberration %b%n",
                       convertDate(date),
                       position.getX(), position.getY(), position.getZ(),
                       los.getX(),      los.getY(),      los.getZ(),
@@ -164,21 +166,35 @@ class Dump {
             final AbsoluteDate minDate = scToBody.getMinDate();
             final AbsoluteDate maxDate = scToBody.getMaxDate();
             final double       tStep   = scToBody.getTStep();
-            final int          n       = 1 + (int) FastMath.rint(maxDate.durationFrom(minDate) / tStep);
+            final int          n       = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
             writer.format(Locale.US,
-                          "spacecraft to observed body: min date = %s max date = %s tStep = %22.15e inertial frame = %s body frame = %s%n",
+                          "span: minDate %s maxDate %s tStep %22.15e inertialFrame %s%n",
                           convertDate(minDate), convertDate(maxDate), tStep,
-                          scToBody.getInertialFrameName(), scToBody.getBodyFrameName());
+                          getKeyOrName(scToBody.getInertialFrame()));
             tranformsDumped = new boolean[n];
         }
         if (!tranformsDumped[index]) {
             writer.format(Locale.US,
-                          "transform: index = %d body %s spacecraft %s %s%n",
+                          "transform: index %d body %s spacecraft %s %s%n",
                           index,
                           convertRotation(bodyToInertial.getRotation(), bodyToInertial.getRotationRate(), bodyToInertial.getRotationAcceleration()),
                           convertTranslation(scToInertial.getTranslation(), scToInertial.getVelocity(), scToInertial.getAcceleration()),
                           convertRotation(scToInertial.getRotation(), scToInertial.getRotationRate(), scToInertial.getRotationAcceleration()));
             tranformsDumped[index] = true;
+        }
+    }
+
+    /** Get a frame key or name.
+     * @param frame
+     * @return frame key or name
+     */
+    private String getKeyOrName(final Frame frame) {
+        if (frame instanceof FactoryManagedFrame) {
+            // if possible, use the predefined frames key, as it is easier to parse
+           return ((FactoryManagedFrame) frame).getFactoryKey().toString();
+        } else {
+            // as a fallback, use the full name of the frame
+            return frame.getName();
         }
     }
 
@@ -227,7 +243,7 @@ class Dump {
      */
     private String convertTranslation(final Vector3D translation, final Vector3D velocity, final Vector3D acceleration) {
         return String.format(Locale.US,
-                             "p = %22.15e %22.15e %22.15e v = %22.15e %22.15e %22.15e a = %22.15e %22.15e %22.15e",
+                             "p %22.15e %22.15e %22.15e v %22.15e %22.15e %22.15e a %22.15e %22.15e %22.15e",
                              translation.getX(),  translation.getY(),  translation.getZ(), 
                              velocity.getX(),     velocity.getY(),     velocity.getZ(), 
                              acceleration.getX(), acceleration.getY(), acceleration.getZ());
@@ -241,7 +257,7 @@ class Dump {
      */
     private String convertRotation(final Rotation rotation, final Vector3D rate, final Vector3D acceleration) {
         return String.format(Locale.US,
-                             "r = %22.15e %22.15e %22.15e %22.15e Ω = %22.15e %22.15e %22.15e ΩDot = %22.15e %22.15e %22.15e",
+                             "r %22.15e %22.15e %22.15e %22.15e Ω %22.15e %22.15e %22.15e ΩDot %22.15e %22.15e %22.15e",
                              rotation.getQ0(), rotation.getQ1(), rotation.getQ2(), rotation.getQ3(), 
                              rate.getX(), rate.getY(), rate.getZ(), 
                              acceleration.getX(), acceleration.getY(), acceleration.getZ());
@@ -274,10 +290,10 @@ class Dump {
             this.tile       = tile;
             this.elevations = new OpenIntToDoubleHashMap();
             writer.format(Locale.US,
-                          "DEM tile: %s latMin = %22.15e latStep = %22.15e lonMin = %22.15e lonStep = %22.15e%n",
+                          "DEM tile: %s latMin %22.15e latStep %22.15e latRows %d lonMin %22.15e lonStep %22.15e lonCols %d%n",
                           name,
-                          tile.getMinimumLatitude(), tile.getLatitudeStep(),
-                          tile.getMinimumLongitude(), tile.getLongitudeStep());
+                          tile.getMinimumLatitude(), tile.getLatitudeStep(), tile.getLatitudeRows(),
+                          tile.getMinimumLongitude(), tile.getLongitudeStep(), tile.getLongitudeColumns());
         }
 
         /** Get tile associated with this dump.
@@ -298,7 +314,7 @@ class Dump {
                 // new cell
                 elevations.put(key, elevation);
                 writer.format(Locale.US,
-                              "DEM cell: %s latIndex = %d lonIndex = %d elevation = %22.15e%n",
+                              "DEM cell: %s latIndex %d lonIndex %d elevation %22.15e%n",
                               name, latitudeIndex, longitudeIndex, elevation);
             }
         }
