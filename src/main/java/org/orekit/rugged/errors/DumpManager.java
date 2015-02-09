@@ -149,14 +149,15 @@ public class DumpManager {
     /** Dump an observation transform transform.
      * @param scToBody provider for observation
      * @param index index of the transform
-     * @param transform transform
+     * @param bodyToInertial transform from body frame to inertial frame
+     * @param scToInertial transfrom from spacecraft frame to inertial frame
      * @exception RuggedException if reference date cannot be converted to UTC
      */
-    public static void dumpTransform(final SpacecraftToObservedBody scToBody,
-                                     final int index, final Transform transform)
+    public static void dumpTransform(final SpacecraftToObservedBody scToBody, final int index,
+                                     final Transform bodyToInertial, final Transform scToInertial)
         throws RuggedException {
         if (isActive()) {
-            DUMP.get().dumpTransform(scToBody, index, transform);
+            DUMP.get().dumpTransform(scToBody, index, bodyToInertial, scToInertial);
         }
     }
 

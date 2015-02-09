@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
@@ -143,7 +144,7 @@ class Dump {
         throws RuggedException {
         writer.format(Locale.US,
                       "direct location: date = %s position = %22.15e %22.15e %22.15e los = %22.15e %22.15e %22.15e ligthTime = %b aberration = %b%n",
-                      highAccuracyDate(date),
+                      convertDate(date),
                       position.getX(), position.getY(), position.getZ(),
                       los.getX(),      los.getY(),      los.getZ(),
                       lightTimeCorrection, aberrationOfLightCorrection);
@@ -152,11 +153,12 @@ class Dump {
     /** Dump an observation transform transform.
      * @param scToBody provider for observation
      * @param index index of the transform
-     * @param transform transform
+     * @param bodyToInertial transform from body frame to inertial frame
+     * @param scToInertial transfrom from spacecraft frame to inertial frame
      * @exception RuggedException if reference date cannot be converted to UTC
      */
-    public void dumpTransform(final SpacecraftToObservedBody scToBody,
-                              final int index, final Transform transform)
+    public void dumpTransform(final SpacecraftToObservedBody scToBody, final int index,
+                              final Transform bodyToInertial, final Transform scToInertial)
         throws RuggedException {
         if (tranformsDumped == null) {
             final AbsoluteDate minDate = scToBody.getMinDate();
@@ -165,18 +167,17 @@ class Dump {
             final int          n       = 1 + (int) FastMath.rint(maxDate.durationFrom(minDate) / tStep);
             writer.format(Locale.US,
                           "spacecraft to observed body: min date = %s max date = %s tStep = %22.15e inertial frame = %s body frame = %s%n",
-                          highAccuracyDate(minDate), highAccuracyDate(maxDate), tStep,
+                          convertDate(minDate), convertDate(maxDate), tStep,
                           scToBody.getInertialFrameName(), scToBody.getBodyFrameName());
             tranformsDumped = new boolean[n];
         }
         if (!tranformsDumped[index]) {
             writer.format(Locale.US,
-                          "transform: index = %d r = %22.15e %22.15e %22.15e %22.15e Ω = %22.15e %22.15e %22.15e ΩDot = %22.15e %22.15e %22.15e%n",
+                          "transform: index = %d body %s spacecraft %s %s%n",
                           index,
-                          transform.getRotation().getQ0(), transform.getRotation().getQ1(),
-                          transform.getRotation().getQ2(), transform.getRotation().getQ3(), 
-                          transform.getRotationRate().getX(), transform.getRotationRate().getY(), transform.getRotationRate().getZ(), 
-                          transform.getRotationAcceleration().getX(), transform.getRotationAcceleration().getY(), transform.getRotationAcceleration().getZ());
+                          convertRotation(bodyToInertial.getRotation(), bodyToInertial.getRotationRate(), bodyToInertial.getRotationAcceleration()),
+                          convertTranslation(scToInertial.getTranslation(), scToInertial.getVelocity(), scToInertial.getAcceleration()),
+                          convertRotation(scToInertial.getRotation(), scToInertial.getRotationRate(), scToInertial.getRotationAcceleration()));
             tranformsDumped[index] = true;
         }
     }
@@ -206,7 +207,7 @@ class Dump {
      * @return converted date
      * @exception RuggedException if date cannot be converted to UTC
      */
-    private String highAccuracyDate(final AbsoluteDate date)
+    private String convertDate(final AbsoluteDate date)
         throws RuggedException {
         try {
             final DateTimeComponents dt = date.getComponents(TimeScalesFactory.getUTC());
@@ -216,6 +217,34 @@ class Dump {
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+    }
+
+    /** Convert a translation to string.
+     * @param translation translation
+     * @param velocity linear velocity
+     * @param acceleration linear acceleration
+     * @return converted rotation
+     */
+    private String convertTranslation(final Vector3D translation, final Vector3D velocity, final Vector3D acceleration) {
+        return String.format(Locale.US,
+                             "p = %22.15e %22.15e %22.15e v = %22.15e %22.15e %22.15e a = %22.15e %22.15e %22.15e",
+                             translation.getX(),  translation.getY(),  translation.getZ(), 
+                             velocity.getX(),     velocity.getY(),     velocity.getZ(), 
+                             acceleration.getX(), acceleration.getY(), acceleration.getZ());
+    }
+
+    /** Convert a rotation to string.
+     * @param rotation rotation
+     * @param rate rate of the rotation
+     * @param acceleration angular acceleration
+     * @return converted rotation
+     */
+    private String convertRotation(final Rotation rotation, final Vector3D rate, final Vector3D acceleration) {
+        return String.format(Locale.US,
+                             "r = %22.15e %22.15e %22.15e %22.15e Ω = %22.15e %22.15e %22.15e ΩDot = %22.15e %22.15e %22.15e",
+                             rotation.getQ0(), rotation.getQ1(), rotation.getQ2(), rotation.getQ3(), 
+                             rate.getX(), rate.getY(), rate.getZ(), 
+                             acceleration.getX(), acceleration.getY(), acceleration.getZ());
     }
 
     /** Deactivate dump.
