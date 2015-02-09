@@ -564,17 +564,17 @@ public class RuggedBuilder {
      * {@link #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)},
      * or {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}.
      * </p>
-     * @param dumpStream stream from where to read previous instance dumped interpolator
-     * (caller opened it and remains responsible for closing it)
+     * @param storageStream stream from where to read previous instance {@link #storeInterpolator(OutputStream)
+     * stored interpolator} (caller opened it and remains responsible for closing it)
      * @return the builder instance
-     * @exception RuggedException if dump file cannot be loaded
-     * or if frames do not match the ones referenced in the dump file
+     * @exception RuggedException if storage stream cannot be parsed
+     * or if frames do not match the ones referenced in the storage stream
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
-     * @see #dumpInterpolator(OutputStream)
+     * @see #storeInterpolator(OutputStream)
      */
-    public RuggedBuilder setTrajectoryAndTimeSpan(final InputStream dumpStream)
+    public RuggedBuilder setTrajectoryAndTimeSpan(final InputStream storageStream)
         throws RuggedException {
         try {
             this.inertial           = null;
@@ -587,7 +587,7 @@ public class RuggedBuilder {
             this.pvaPropagator      = null;
             this.iStep              = Double.NaN;
             this.iN                 = -1;
-            this.scToBody           = (SpacecraftToObservedBody) new ObjectInputStream(dumpStream).readObject();
+            this.scToBody           = (SpacecraftToObservedBody) new ObjectInputStream(storageStream).readObject();
             this.minDate            = scToBody.getMinDate();
             this.maxDate            = scToBody.getMaxDate();
             this.tStep              = scToBody.getTStep();
@@ -603,7 +603,7 @@ public class RuggedBuilder {
         }
     }
 
-    /** Dump frames transform interpolator.
+    /** Store frames transform interpolator.
      * <p>
      * This method allows to reuse the interpolator built in one instance, to build
      * another instance by calling {@link #setTrajectoryAndTimeSpan(InputStream)}.
@@ -614,9 +614,9 @@ public class RuggedBuilder {
      * <p>
      * This method must be called <em>after</em> both the ellipsoid and trajectory have been set.
      * </p>
-     * @param dumpStream stream where to dump the interpolator
+     * @param storageStream stream where to store the interpolator
      * (caller opened it and remains responsible for closing it)
-     * @exception RuggedException if interpolator cannot be written to file
+     * @exception RuggedException if interpolator cannot be written to stream
      * @see #setEllipsoid(EllipsoidId, BodyRotatingFrameId)
      * @see #setEllipsoid(OneAxisEllipsoid)
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
@@ -624,10 +624,10 @@ public class RuggedBuilder {
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #setTrajectoryAndTimeSpan(InputStream)
      */
-    public void dumpInterpolator(final OutputStream dumpStream) throws RuggedException {
+    public void storeInterpolator(final OutputStream storageStream) throws RuggedException {
         try {
             createInterpolatorIfNeeded();
-            new ObjectOutputStream(dumpStream).writeObject(scToBody);
+            new ObjectOutputStream(storageStream).writeObject(scToBody);
         } catch (IOException ioe) {
             throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getMessage());
         }
