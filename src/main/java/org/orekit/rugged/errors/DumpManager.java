@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.Tile;
@@ -60,7 +61,7 @@ public class DumpManager {
             throw new RuggedException(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE);
         } else {
             try {
-                DUMP.set(new Dump(new PrintWriter(file)));
+                DUMP.set(new Dump(new PrintWriter(file, "UTF-8")));
             } catch (IOException ioe) {
                 throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR,
                                           file.getAbsolutePath(), ioe.getLocalizedMessage());
@@ -142,6 +143,17 @@ public class DumpManager {
         throws RuggedException {
         if (isActive()) {
             DUMP.get().dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection);
+        }
+    }
+
+    /** Dump a direct location result.
+     * @param gp resulting geodetic point
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public static void dumpDirectLocationResult(final GeodeticPoint gp)
+        throws RuggedException {
+        if (isActive()) {
+            DUMP.get().dumpDirectLocationResult(gp);
         }
     }
 

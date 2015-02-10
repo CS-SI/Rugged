@@ -215,10 +215,26 @@ public interface Tile extends UpdatableTile {
      */
     double getMinElevation();
 
-    /** Get the maximum elevation in the tile.
+    /** Get the latitude index of min elevation.
+     * @return latitude index of min elevation*/
+    int getMinElevationLatitudeIndex();
+
+    /** Get the longitude index of min elevation.
+     * @return longitude index of min elevation*/
+    int getMinElevationLongitudeIndex();
+
+   /** Get the maximum elevation in the tile.
      * @return maximum elevation in the tile
      */
     double getMaxElevation();
+
+    /** Get the latitude index of max elevation.
+     * @return latitude index of max elevation*/
+    int getMaxElevationLatitudeIndex();
+
+    /** Get the longitude index of max elevation.
+     * @return longitude index of max elevation*/
+    int getMaxElevationLongitudeIndex();
 
     /** Get the elevation of an exact grid point.
      * @param latitudeIndex grid point index along latitude

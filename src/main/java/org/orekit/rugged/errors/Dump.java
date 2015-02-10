@@ -27,6 +27,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.FactoryManagedFrame;
 import org.orekit.frames.Frame;
@@ -151,6 +152,19 @@ class Dump {
                       lightTimeCorrection, aberrationOfLightCorrection);
     }
 
+    /** Dump a direct location result.
+     * @param gp resulting geodetic point
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public void dumpDirectLocationResult(final GeodeticPoint gp)
+        throws RuggedException {
+        if (gp != null) {
+            writer.format(Locale.US,
+                          "direct location result: latitude %22.15e longitude %22.15e elevation %22.15e%n",
+                          gp.getLatitude(), gp.getLongitude(), gp.getAltitude());
+        }
+    }
+
     /** Dump an observation transform transform.
      * @param scToBody provider for observation
      * @param index index of the transform
@@ -214,6 +228,12 @@ class Dump {
         // it is the first time we encounter this tile, we need to dump its data
         final DumpedTileData dumpedTileData = new DumpedTileData("t" + tiles.size(), tile);
         tiles.add(dumpedTileData);
+        dumpedTileData.setElevation(tile.getMinElevationLatitudeIndex(),
+                                    tile.getMinElevationLongitudeIndex(),
+                                    tile.getMinElevation());
+        dumpedTileData.setElevation(tile.getMaxElevationLatitudeIndex(),
+                                    tile.getMaxElevationLongitudeIndex(),
+                                    tile.getMaxElevation());
         return dumpedTileData;
 
     }

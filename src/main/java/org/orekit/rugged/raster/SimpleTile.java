@@ -189,15 +189,37 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public double getMinElevation() {
-        DumpManager.dumpTileCell(this, minElevationLatitudeIndex, minElevationLongitudeIndex, minElevation);
         return minElevation;
     }
 
     /** {@inheritDoc} */
     @Override
+    public int getMinElevationLatitudeIndex() {
+        return minElevationLatitudeIndex;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getMinElevationLongitudeIndex() {
+        return minElevationLongitudeIndex;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public double getMaxElevation() {
-        DumpManager.dumpTileCell(this, maxElevationLatitudeIndex, maxElevationLongitudeIndex, maxElevation);
         return maxElevation;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getMaxElevationLatitudeIndex() {
+        return maxElevationLatitudeIndex;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getMaxElevationLongitudeIndex() {
+        return maxElevationLongitudeIndex;
     }
 
     /** {@inheritDoc} */
