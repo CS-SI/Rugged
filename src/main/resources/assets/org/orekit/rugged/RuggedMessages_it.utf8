@@ -54,3 +54,18 @@ DEBUG_DUMP_ACTIVATION_ERROR = <MISSING TRANSLATION>
 
 # debug dump is not active for this thread
 DEBUG_DUMP_NOT_ACTIVE = <MISSING TRANSLATION>
+
+# cannot parse line {0}, file {1}: {2}
+CANNOT_PARSE_LINE = <MISSING TRANSLATION>
+
+# light time correction redefined, line {0}, file {1}: {2}
+LIGHT_TIME_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+
+# aberration of light correction redefined, line {0}, file {1}: {2}
+ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+
+# tile {0} already defined, line {1}, file {2}: {3}
+TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
+
+# unknown tile {0}, line {1}, file {2}: {3}
+UNKNOWN_TILE = <MISSING TRANSLATION>

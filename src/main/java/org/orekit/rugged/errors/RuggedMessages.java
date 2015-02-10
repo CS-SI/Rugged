@@ -68,7 +68,12 @@ public enum RuggedMessages implements Localizable {
     ESTIMATED_PARAMETERS_NUMBER_MISMATCH("number of estimated parameters mismatch, expected {0} got {1}"),
     DEBUG_DUMP_ALREADY_ACTIVE("debug dump is already active for this thread"),
     DEBUG_DUMP_ACTIVATION_ERROR("unable to active debug dump with file {0}: {1}"),
-    DEBUG_DUMP_NOT_ACTIVE("debug dump is not active for this thread");
+    DEBUG_DUMP_NOT_ACTIVE("debug dump is not active for this thread"),
+    CANNOT_PARSE_LINE("cannot parse line {0}, file {1}: {2}"),
+    LIGHT_TIME_CORRECTION_REDEFINED("light time correction redefined, line {0}, file {1}: {2}"),
+    ABERRATION_OF_LIGHT_CORRECTION_REDEFINED("aberration of light correction redefined, line {0}, file {1}: {2}"),
+    TILE_ALREADY_DEFINED("tile {0} already defined, line {1}, file {2}: {3}"),
+    UNKNOWN_TILE("unknown tile {0}, line {1}, file {2}: {3}");
 
     // CHECKSTYLE: resume JavadocVariable check
 
