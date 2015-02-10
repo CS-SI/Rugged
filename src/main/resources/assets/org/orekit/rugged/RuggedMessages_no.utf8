@@ -7,6 +7,9 @@ OUT_OF_TILE_INDICES = ingen data funnet på [{0}, {1}], flisen dekker kun fra [0
 # no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
 OUT_OF_TILE_ANGLES = ingen data på breddegrad {0} og lengdegrad {1}, flisen dekker kun breddegradene {2} til {3} og lengdegradene {4} til {5} 
 
+# no Digital Elevation Model data at latitude {0} and longitude {1}
+NO_DEM_DATA = <MISSING TRANSLATION>
+
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = den valgte flisen for breddegrad {0} og lengdegrad {1} inneholder ikke nødvendig nabopunkt
 

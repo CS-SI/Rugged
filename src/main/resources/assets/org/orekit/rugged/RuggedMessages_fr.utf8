@@ -7,6 +7,9 @@ OUT_OF_TILE_INDICES = aucune donnée aux indices [{0}, {1}], la tuile ne couvre 
 # no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
 OUT_OF_TILE_ANGLES = aucune donnée à la latitude {0} et à la longitude {1}, la tuile ne couvre que les latitudes de {2} à {3} et les longitudes de {4} à {5}
 
+# no Digital Elevation Model data at latitude {0} and longitude {1}
+NO_DEM_DATA = aucune donnée à la latitude {0} et à la longitude {1} dans le Modèle Numérique de Terrain
+
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = la tuile sélectionnée pour la latitude {0} et la longitude {1} ne contient pas le voisinage requis pour ce point
 
