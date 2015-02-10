@@ -183,6 +183,38 @@ public class SpacecraftToObservedBody implements Serializable {
         }
     }
 
+    /** Simple constructor.
+     * @param inertialFrame inertial frame
+     * @param bodyFrame observed body frame
+     * @param minDate start of search time span
+     * @param maxDate end of search time span
+     * @param tStep step to use for inertial frame to body frame transforms cache computations
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
+     * slightly the position, velocity and quaternions ephemerides
+     * @param bodyToInertial transforms sample from observed body frame to inertial frame
+     * @param scToInertial transforms sample from spacecraft frame to inertial frame
+     */
+    public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
+                                    final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
+                                    final double overshootTolerance,
+                                    final List<Transform> bodyToInertial, final List<Transform> scToInertial) {
+
+        this.inertialFrame      = inertialFrame;
+        this.bodyFrame          = bodyFrame;
+        this.minDate            = minDate;
+        this.maxDate            = maxDate;
+        this.tStep              = tStep;
+        this.overshootTolerance = overshootTolerance;
+        this.bodyToInertial     = bodyToInertial;
+        this.scToInertial       = scToInertial;
+
+        this.inertialToBody = new ArrayList<Transform>(bodyToInertial.size());
+        for (final Transform b2i : bodyToInertial) {
+            inertialToBody.add(b2i.getInverse());
+        }
+
+    }
+
     /** Get the inertial frame.
      * @return inertial frame
      */

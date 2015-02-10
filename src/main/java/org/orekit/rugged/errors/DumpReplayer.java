@@ -17,9 +17,13 @@
 package org.orekit.rugged.errors;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +42,7 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
+import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 
@@ -172,10 +177,10 @@ public class DumpReplayer {
     private Frame inertialFrame;
 
     /** Transforms sample from observed body frame to inertial frame. */
-    private Transform[] bodyToInertial;
+    private List<Transform> bodyToInertial;
 
     /** Transforms sample from spacecraft frame to inertial frame. */
-    private Transform[] scToInertial;
+    private List<Transform> scToInertial;
 
     /** Flag for light time correction. */
     private boolean lightTimeCorrection;
@@ -216,25 +221,39 @@ public class DumpReplayer {
      * @exception RuggedException if some data are inconsistent or incomplete
      */
     public Rugged createRugged() throws RuggedException {
+        try {
+            final RuggedBuilder builder = new RuggedBuilder();
 
-        final RuggedBuilder builder = new RuggedBuilder();
+            builder.setAlgorithm(algorithmId);
+            if (algorithmId == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
+                builder.setConstantElevation(constantElevation);
+            } else if (algorithmId != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID) {
+                builder.setDigitalElevationModel(new ParsedTilesUpdater(), 8);
+            }
 
-        builder.setAlgorithm(algorithmId);
-        if (algorithmId == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
-            builder.setConstantElevation(constantElevation);
-        } else if (algorithmId != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID) {
-            builder.setDigitalElevationModel(new ParsedTilesUpdater(), 8);
+            builder.setLightTimeCorrection(lightTimeCorrection);
+            builder.setAberrationOfLightCorrection(aberrationOfLightCorrection);
+
+            builder.setEllipsoid(ellipsoid);
+
+            // we use Rugged transforms reloading mechanism to ensure the spacecraft
+            // to body transforms will be the same as the ones dumped
+            final SpacecraftToObservedBody sc2Body =
+                    new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
+                                                 minDate, maxDate, tStep, tolerance,
+                                                 bodyToInertial, scToInertial);
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            final ObjectOutputStream    oos = new ObjectOutputStream(bos);
+            oos.writeObject(sc2Body);
+            final ByteArrayInputStream  bis = new ByteArrayInputStream(bos.toByteArray());
+            final ObjectInputStream     ois = new ObjectInputStream(bis);
+            builder.setTrajectoryAndTimeSpan(ois);
+
+            return builder.build();
+
+        } catch (IOException ioe) {
+            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
         }
-
-        builder.setLightTimeCorrection(lightTimeCorrection);
-        builder.setAberrationOfLightCorrection(aberrationOfLightCorrection);
-
-        builder.setEllipsoid(ellipsoid);
-
-        // TODO: set up a SpacecraftToObservedBody instance, serialize it and load it back into the Rugged instance
-
-        return builder.build();
-
     }
 
     /** Execute all dumped calls.
@@ -375,8 +394,8 @@ public class DumpReplayer {
                     global.tStep          = Double.parseDouble(fields[5]);
                     global.tolerance      = Double.parseDouble(fields[7]);
                     final int n           = (int) FastMath.ceil(global.maxDate.durationFrom(global.minDate) / global.tStep);
-                    global.bodyToInertial = new Transform[n];
-                    global.scToInertial   = new Transform[n];
+                    global.bodyToInertial = new ArrayList<Transform>(n);
+                    global.scToInertial   = new ArrayList<Transform>(n);
                     try {
                         global.inertialFrame = FramesFactory.getFrame(Predefined.valueOf(fields[9]));
                     } catch (IllegalArgumentException iae) {
@@ -407,7 +426,7 @@ public class DumpReplayer {
                 }
                 final int i   = Integer.parseInt(fields[1]);
                 final AbsoluteDate date = global.minDate.shiftedBy(i * global.tStep);
-                global.bodyToInertial[i] =
+                global.bodyToInertial.add(
                         new Transform(date,
                                       new Rotation(Double.parseDouble(fields[4]),
                                                    Double.parseDouble(fields[5]),
@@ -419,8 +438,8 @@ public class DumpReplayer {
                                                    Double.parseDouble(fields[11])),
                                       new Vector3D(Double.parseDouble(fields[13]),
                                                    Double.parseDouble(fields[14]),
-                                                   Double.parseDouble(fields[15])));
-                global.scToInertial[i] =
+                                                   Double.parseDouble(fields[15]))));
+                global.scToInertial.add(
                         new Transform(date,
                                       new Transform(date,
                                                     new Vector3D(Double.parseDouble(fields[18]),
@@ -443,7 +462,7 @@ public class DumpReplayer {
                                                                  Double.parseDouble(fields[37])),
                                                     new Vector3D(Double.parseDouble(fields[39]),
                                                                  Double.parseDouble(fields[40]),
-                                                                 Double.parseDouble(fields[41]))));
+                                                                 Double.parseDouble(fields[41])))));
             }
 
         },
