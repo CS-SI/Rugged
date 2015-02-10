@@ -17,8 +17,6 @@
 package org.orekit.rugged.intersection.duvenhage;
 
 import org.apache.commons.math3.analysis.BivariateFunction;
-import org.apache.commons.math3.analysis.function.Max;
-import org.apache.commons.math3.analysis.function.Min;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.raster.SimpleTile;
@@ -114,11 +112,41 @@ public class MinMaxTreeTile extends SimpleTile {
 
             final double[] preprocessed = new double[raw.length];
 
-            preprocess(preprocessed, raw, nbRows, nbCols, new Min());
-            applyRecursively(minTree, start.length - 1, nbRows, nbCols, new Min(), preprocessed, 0);
+            // we don't use org.apache.commons.math3.analysis.function.Min
+            // because we want to ignore NaN values instead of spreading them
+            final BivariateFunction min = new BivariateFunction() {
+                /** {@inheritDoc} */
+                @Override
+                public double value(final double x, final double y) {
+                    if (Double.isNaN(x)) {
+                        return y;
+                    } else if (Double.isNaN(y)) {
+                        return x;
+                    } else {
+                        return x <= y ? x : y;
+                    }
+                }
+            };
+            preprocess(preprocessed, raw, nbRows, nbCols, min);
+            applyRecursively(minTree, start.length - 1, nbRows, nbCols, min, preprocessed, 0);
 
-            preprocess(preprocessed, raw, nbRows, nbCols, new Max());
-            applyRecursively(maxTree, start.length - 1, nbRows, nbCols, new Max(), preprocessed, 0);
+            // we don't use org.apache.commons.math3.analysis.function.Max
+            // because we want to ignore NaN values instead of spreading them
+            final BivariateFunction max = new BivariateFunction() {
+                /** {@inheritDoc} */
+                @Override
+                public double value(final double x, final double y) {
+                    if (Double.isNaN(x)) {
+                        return y;
+                    } else if (Double.isNaN(y)) {
+                        return x;
+                    } else {
+                        return x <= y ? y : x;
+                    }
+                }
+            };
+            preprocess(preprocessed, raw, nbRows, nbCols, max);
+            applyRecursively(maxTree, start.length - 1, nbRows, nbCols, max, preprocessed, 0);
 
         }
 
@@ -177,8 +205,11 @@ public class MinMaxTreeTile extends SimpleTile {
 
         if (DumpManager.isActive()) {
             final int[] min = locateMin(i, j, level);
-            DumpManager.dumpTileCell(this, min[0], min[1],
-                                     raw[min[0] * getLongitudeColumns() + min[1]]);
+            final int index = min[0] * getLongitudeColumns() + min[1];
+            DumpManager.dumpTileCell(this, min[0],     min[1],     raw[index]);
+            DumpManager.dumpTileCell(this, min[0] + 1, min[1],     raw[index + getLongitudeColumns()]);
+            DumpManager.dumpTileCell(this, min[0],     min[1] + 1, raw[index + 1]);
+            DumpManager.dumpTileCell(this, min[0] + 1, min[1] + 1, raw[index + getLongitudeColumns() + 1]);
         }
 
         return minTree[start[level] + levelI * levelC + levelJ];
@@ -228,8 +259,11 @@ public class MinMaxTreeTile extends SimpleTile {
 
         if (DumpManager.isActive()) {
             final int[] max = locateMax(i, j, level);
-            DumpManager.dumpTileCell(this, max[0], max[1],
-                                     raw[max[0] * getLongitudeColumns() + max[1]]);
+            final int index = max[0] * getLongitudeColumns() + max[1];
+            DumpManager.dumpTileCell(this, max[0],     max[1],     raw[index]);
+            DumpManager.dumpTileCell(this, max[0] + 1, max[1],     raw[index + getLongitudeColumns()]);
+            DumpManager.dumpTileCell(this, max[0],     max[1] + 1, raw[index + 1]);
+            DumpManager.dumpTileCell(this, max[0] + 1, max[1] + 1, raw[index + getLongitudeColumns() + 1]);
         }
 
         return maxTree[start[level] + levelI * levelC + levelJ];
