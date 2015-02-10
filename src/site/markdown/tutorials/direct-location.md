@@ -190,10 +190,10 @@ Finally we can initialize Rugged. It looks like this:
     import org.orekit.rugged.api.EllipsoidId;
     import org.orekit.rugged.api.InertialFrameId;
     import org.orekit.rugged.api.Rugged;
+    import org.orekit.rugged.api.RuggedBuilder;
     import org.orekit.rugged.errors.RuggedException;
     import org.orekit.utils.AngularDerivativesFilter;
     import org.orekit.utils.CartesianDerivativesFilter;
-    import org.orekit.utils.IERSConventions;
     Rugged rugged = new RuggedBuilder().
                     setAlgorithm(demAlgoId). 
                     setDigitalElevationModel(demTileUpdater, nbTiles).
@@ -225,7 +225,7 @@ Elevation Model in this tutorial, we could have omitted this call and it would h
 We preferred to let it in so users do not forget to set the Digital Elevation Model for intersection
 algorithms that really use them. As the model will be ignored, we can put the parameters for this
 setter to `null` and `0`. Of course if another algorithm had been chosen,  null parameters would clearly
-not work, this is explained in another tutorial: [[DirectLocationWithDEM|Direct location with a DEM]].
+not work, this is explained in another tutorial: [Direct location with a DEM](direct-location-with-DEM.html).
 
 The *setEllipsoid* setter defines the shape and orientation of the ellipsoid. We use simple predefined enumerates:
 `EllipsoidId.WGS84`, `InertialFrameId.EME2000`, but could also use a custom ellipsoid if needed.
@@ -246,14 +246,13 @@ final timeTolerance parameter is simply a margin used before and after the final
 allow a slight extrapolation if during a search the interval is slightly overshoot. A typical value is
 to allow a few images lines so for example a 5 lines tolerance would imply computing the tolerance as:
 timeTolerance = 5 / lineSensor.getRate(0)).
-`BodyRotatingFrameId.ITRF`
 
 The *setTrajectory* setter defines the spacecraft evolution. The arguments are the list of time-stamped positions and
 velocities as well as the inertial frame with respect to which they are defined and options for interpolation:
 number of points to use and type of filter for derivatives. The interpolation polynomials for nbPVPoints
-without any derivatives (case of CartesianDerivativesFilter.USE_P: only positions are used, without velocities)
+without any derivatives (case of `CartesianDerivativesFilter.USE_P`: only positions are used, without velocities)
 have a degree nbPVPoints - 1. In case of computation with velocities included (case of
-CartesianDerivativesFilter.USE_PV), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the
+`CartesianDerivativesFilter.USE_PV`), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the
 positions/velocities data are of good quality and separated by a few seconds, one may choose only a few points
 but interpolate with both positions and velocities; in other cases, one may choose more points but interpolate
 only with positions. We find similar arguments for the attitude quaternions. 
