@@ -56,8 +56,20 @@ public class SimpleTile implements Tile {
     /** Minimum elevation. */
     private double minElevation;
 
+    /** Latitude index of min elevation. */
+    private int minElevationLatitudeIndex;
+
+    /** Longitude index of min elevation. */
+    private int minElevationLongitudeIndex;
+
     /** Maximum elevation. */
     private double maxElevation;
+
+    /** Latitude index of max elevation. */
+    private int maxElevationLatitudeIndex;
+
+    /** Longitude index of max elevation. */
+    private int maxElevationLongitudeIndex;
 
     /** Elevation array. */
     private double[] elevations;
@@ -76,14 +88,18 @@ public class SimpleTile implements Tile {
                             final double newLatitudeStep, final double newLongitudeStep,
                             final int newLatitudeRows, final int newLongitudeColumns)
         throws RuggedException {
-        this.minLatitude      = newMinLatitude;
-        this.minLongitude     = newMinLongitude;
-        this.latitudeStep     = newLatitudeStep;
-        this.longitudeStep    = newLongitudeStep;
-        this.latitudeRows     = newLatitudeRows;
-        this.longitudeColumns = newLongitudeColumns;
-        this.minElevation     = Double.POSITIVE_INFINITY;
-        this.maxElevation     = Double.NEGATIVE_INFINITY;
+        this.minLatitude                = newMinLatitude;
+        this.minLongitude               = newMinLongitude;
+        this.latitudeStep               = newLatitudeStep;
+        this.longitudeStep              = newLongitudeStep;
+        this.latitudeRows               = newLatitudeRows;
+        this.longitudeColumns           = newLongitudeColumns;
+        this.minElevation               = Double.POSITIVE_INFINITY;
+        this.minElevationLatitudeIndex  = -1;
+        this.minElevationLongitudeIndex = -1;
+        this.maxElevation               = Double.NEGATIVE_INFINITY;
+        this.maxElevationLatitudeIndex  = -1;
+        this.maxElevationLongitudeIndex = -1;
 
         if (newLatitudeRows < 1 || newLongitudeColumns < 1) {
             throw new RuggedException(RuggedMessages.EMPTY_TILE, newLatitudeRows, newLongitudeColumns);
@@ -173,12 +189,14 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public double getMinElevation() {
+        DumpManager.dumpTileCell(this, minElevationLatitudeIndex, minElevationLongitudeIndex, minElevation);
         return minElevation;
     }
 
     /** {@inheritDoc} */
     @Override
     public double getMaxElevation() {
+        DumpManager.dumpTileCell(this, maxElevationLatitudeIndex, maxElevationLongitudeIndex, maxElevation);
         return maxElevation;
     }
 
@@ -192,8 +210,16 @@ public class SimpleTile implements Tile {
                                       latitudeIndex, longitudeIndex,
                                       latitudeRows - 1, longitudeColumns - 1);
         }
-        minElevation = FastMath.min(minElevation, elevation);
-        maxElevation = FastMath.max(maxElevation, elevation);
+        if (elevation < minElevation) {
+            minElevation               = elevation;
+            minElevationLatitudeIndex  = latitudeIndex;
+            minElevationLongitudeIndex = longitudeIndex;
+        }
+        if (elevation > maxElevation) {
+            maxElevation               = elevation;
+            maxElevationLatitudeIndex  = latitudeIndex;
+            maxElevationLongitudeIndex = longitudeIndex;
+        }
         elevations[latitudeIndex * getLongitudeColumns() + longitudeIndex] = elevation;
     }
 
