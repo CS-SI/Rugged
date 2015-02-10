@@ -101,7 +101,7 @@ class Dump {
         if (!algorithmDumped) {
             writer.format(Locale.US,
                           "algorithm: %s%n",
-                          algorithmId.name());            
+                          algorithmId.name());
             algorithmDumped = true;
         }
     }
@@ -114,7 +114,7 @@ class Dump {
         if (!algorithmDumped) {
             writer.format(Locale.US,
                           "algorithm: %s elevation %22.15e%n",
-                          algorithmId.name(), specific);            
+                          algorithmId.name(), specific);
             algorithmDumped = true;
         }
     }
@@ -127,13 +127,12 @@ class Dump {
             writer.format(Locale.US,
                           "ellipsoid: ae %22.15e f %22.15e frame %s%n",
                           ellipsoid.getA(), ellipsoid.getFlattening(),
-                          getKeyOrName(ellipsoid.getBodyFrame()));            
+                          getKeyOrName(ellipsoid.getBodyFrame()));
             ellipsoidDumped = true;
         }
     }
 
     /** Dump a direct location computation.
-     * @param date computation date
      * @param date date of the location
      * @param position pixel position in spacecraft frame
      * @param los normalized line-of-sight in spacecraft frame
@@ -185,13 +184,13 @@ class Dump {
     }
 
     /** Get a frame key or name.
-     * @param frame
+     * @param frame frame to convert
      * @return frame key or name
      */
     private String getKeyOrName(final Frame frame) {
         if (frame instanceof FactoryManagedFrame) {
             // if possible, use the predefined frames key, as it is easier to parse
-           return ((FactoryManagedFrame) frame).getFactoryKey().toString();
+            return ((FactoryManagedFrame) frame).getFactoryKey().toString();
         } else {
             // as a fallback, use the full name of the frame
             return frame.getName();
@@ -244,8 +243,8 @@ class Dump {
     private String convertTranslation(final Vector3D translation, final Vector3D velocity, final Vector3D acceleration) {
         return String.format(Locale.US,
                              "p %22.15e %22.15e %22.15e v %22.15e %22.15e %22.15e a %22.15e %22.15e %22.15e",
-                             translation.getX(),  translation.getY(),  translation.getZ(), 
-                             velocity.getX(),     velocity.getY(),     velocity.getZ(), 
+                             translation.getX(),  translation.getY(),  translation.getZ(),
+                             velocity.getX(),     velocity.getY(),     velocity.getZ(),
                              acceleration.getX(), acceleration.getY(), acceleration.getZ());
     }
 
@@ -258,8 +257,8 @@ class Dump {
     private String convertRotation(final Rotation rotation, final Vector3D rate, final Vector3D acceleration) {
         return String.format(Locale.US,
                              "r %22.15e %22.15e %22.15e %22.15e Ω %22.15e %22.15e %22.15e ΩDot %22.15e %22.15e %22.15e",
-                             rotation.getQ0(), rotation.getQ1(), rotation.getQ2(), rotation.getQ3(), 
-                             rate.getX(), rate.getY(), rate.getZ(), 
+                             rotation.getQ0(), rotation.getQ1(), rotation.getQ2(), rotation.getQ3(),
+                             rate.getX(), rate.getY(), rate.getZ(),
                              acceleration.getX(), acceleration.getY(), acceleration.getZ());
     }
 

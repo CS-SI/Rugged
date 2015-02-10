@@ -130,7 +130,6 @@ public class DumpManager {
     }
 
     /** Dump a direct location computation.
-     * @param date computation date
      * @param date date of the location
      * @param position pixel position in spacecraft frame
      * @param los normalized line-of-sight in spacecraft frame

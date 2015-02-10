@@ -271,7 +271,7 @@ public class MinMaxTreeTile extends SimpleTile {
                 if (levelJ + 1 < levelC) {
                     // the cell results from a regular merging of two columns
                     if (minTree[start[l] + levelI * levelC + levelJ] >
-                    minTree[start[l] + levelI * levelC + levelJ + 1]) {
+                        minTree[start[l] + levelI * levelC + levelJ + 1]) {
                         levelJ++;
                     }
                 }
@@ -285,7 +285,7 @@ public class MinMaxTreeTile extends SimpleTile {
                 if (levelI + 1 < levelR) {
                     // the cell results from a regular merging of two rows
                     if (minTree[start[l] + levelI       * levelC + levelJ] >
-                    minTree[start[l] + (levelI + 1) * levelC + levelJ]) {
+                        minTree[start[l] + (levelI + 1) * levelC + levelJ]) {
                         levelI++;
                     }
                 }
