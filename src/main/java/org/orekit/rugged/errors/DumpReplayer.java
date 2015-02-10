@@ -57,88 +57,88 @@ public class DumpReplayer {
     /** Keyword for ellipsoid equatorial radius fields. */
     private static final String AE = "ae";
 
-    /** Keyword for x fields. */
+    /** Keyword for ellipsoid flattening fields. */
     private static final String F = "f";
 
-    /** Keyword for x fields. */
+    /** Keyword for frame fields. */
     private static final String FRAME = "frame";
 
-    /** Keyword for x fields. */
+    /** Keyword for date fields. */
     private static final String DATE = "date";
 
-    /** Keyword for x fields. */
+    /** Keyword for sensor position fields. */
     private static final String POSITION = "position";
 
-    /** Keyword for x fields. */
+    /** Keyword for sensor line-of-sight fields. */
     private static final String LOS = "los";
 
-    /** Keyword for x fields. */
+    /** Keyword for light-time correction fields. */
     private static final String LIGHT_TIME = "lightTime";
 
-    /** Keyword for x fields. */
+    /** Keyword for aberration of light correction fields. */
     private static final String ABERRATION = "aberration";
 
-    /** Keyword for x fields. */
+    /** Keyword for min date fields. */
     private static final String MIN_DATE = "minDate";
 
-    /** Keyword for x fields. */
+    /** Keyword for max date fields. */
     private static final String MAX_DATE = "maxDate";
 
-    /** Keyword for x fields. */
+    /** Keyword for time step fields. */
     private static final String T_STEP = "tStep";
 
-    /** Keyword for x fields. */
+    /** Keyword for inertial frames fields. */
     private static final String INERTIAL_FRAME = "inertialFrame";
 
-    /** Keyword for x fields. */
+    /** Keyword for observation transform index fields. */
     private static final String INDEX = "index";
 
-    /** Keyword for x fields. */
+    /** Keyword for body meta-fields. */
     private static final String BODY = "body";
 
-    /** Keyword for x fields. */
+    /** Keyword for rotation fields. */
     private static final String R = "r";
 
-    /** Keyword for x fields. */
+    /** Keyword for rotation rate fields. */
     private static final String OMEGA = "Ω";
 
-    /** Keyword for x fields. */
+    /** Keyword for rotation acceleration fields. */
     private static final String OMEGA_DOT = "ΩDot";
 
-    /** Keyword for x fields. */
+    /** Keyword for spacecraft meta-fields. */
     private static final String SPACECRAFT = "spacecraft";
 
-    /** Keyword for x fields. */
+    /** Keyword for position fields. */
     private static final String P = "p";
 
-    /** Keyword for x fields. */
+    /** Keyword for velocity fields. */
     private static final String V = "v";
 
-    /** Keyword for x fields. */
+    /** Keyword for acceleration fields. */
     private static final String A = "a";
 
-    /** Keyword for x fields. */
+    /** Keyword for minimum latitude fields. */
     private static final String LAT_MIN = "latMin";
 
-    /** Keyword for x fields. */
+    /** Keyword for latitude step fields. */
     private static final String LAT_STEP = "latStep";
 
-    /** Keyword for x fields. */
+    /** Keyword for latitude rows fields. */
     private static final String LAT_ROWS = "latRows";
 
-    /** Keyword for x fields. */
+    /** Keyword for minimum longitude fields. */
     private static final String LON_MIN = "lonMin";
 
-    /** Keyword for x fields. */
+    /** Keyword for longitude step fields. */
     private static final String LON_STEP = "lonStep";
 
-    /** Keyword for x fields. */
+    /** Keyword for longitude rows fields. */
     private static final String LON_ROWS = "lonRows";
 
-    /** Keyword for x fields. */
+    /** Keyword for latitude index fields. */
     private static final String LAT_INDEX = "latIndex";
 
-    /** Keyword for x fields. */
+    /** Keyword for longitude index fields. */
     private static final String LON_INDEX = "lonIndex";
 
     /** Constant elevation for constant elevation algorithm. */
