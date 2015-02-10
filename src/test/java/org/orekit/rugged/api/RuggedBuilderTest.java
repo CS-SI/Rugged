@@ -370,7 +370,7 @@ public class RuggedBuilderTest {
                                 addLineSensor(lineSensor);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        original.dumpInterpolator(bos);
+        original.storeInterpolator(bos);
         Assert.assertTrue(bos.size() > 100000);
         Assert.assertTrue(bos.size() < 200000);
 
@@ -434,7 +434,7 @@ public class RuggedBuilderTest {
         FileOutputStream fos = new FileOutputStream(tempFolder.newFile());
         fos.close();
         try {
-            original.dumpInterpolator(fos);
+            original.storeInterpolator(fos);
             Assert.fail("an exception should have been thrown");
         } catch (RuggedException re) {
             Assert.assertEquals(IOException.class, re.getCause().getClass());
@@ -482,7 +482,7 @@ public class RuggedBuilderTest {
                               2, AngularDerivativesFilter.USE_R);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        original.dumpInterpolator(bos);
+        original.storeInterpolator(bos);
         Assert.assertTrue(bos.size() > 100000);
         Assert.assertTrue(bos.size() < 200000);
 
