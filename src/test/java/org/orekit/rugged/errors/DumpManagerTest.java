@@ -67,11 +67,46 @@ public class DumpManagerTest {
         DumpManager.activate(dump);
         locationsinglePoint();
         DumpManager.deactivate();
+
+        int countAlgorithm = 0;
+        int countEllipsoid = 0;
+        int countSpan      = 0;
+        int countTransform = 0;
+        int countDEMTile   = 0;
+        int countDEMCell   = 0;
+        int countDirectLoc = 0;
         BufferedReader br = new BufferedReader(new FileReader(dump));
         for (String line = br.readLine(); line != null; line = br.readLine()) {
-            System.out.println(line);
+            String trimmed = line.trim();
+            if (trimmed.length() > 0 && !trimmed.startsWith("#")){
+                if (trimmed.startsWith("algorithm:")) {
+                    ++countAlgorithm;
+                } else if (trimmed.startsWith("ellipsoid:")) {
+                    ++countEllipsoid;
+                } else if (trimmed.startsWith("span:")) {
+                    ++countSpan;
+                } else if (trimmed.startsWith("transform:")) {
+                    ++countTransform;
+                } else if (trimmed.startsWith("DEM tile:")) {
+                    ++countDEMTile;
+                } else if (trimmed.startsWith("DEM cell:")) {
+                    ++countDEMCell;
+                } else if (trimmed.startsWith("direct location:")) {
+                    ++countDirectLoc;
+                } else {
+                   Assert.fail(line);
+                }
+            }
         }
         br.close();
+        Assert.assertEquals(1,   countAlgorithm);
+        Assert.assertEquals(1,   countEllipsoid);
+        Assert.assertEquals(1,   countSpan);
+        Assert.assertEquals(1,   countTransform);
+        Assert.assertEquals(2,   countDEMTile);
+        Assert.assertEquals(884, countDEMCell);
+        Assert.assertEquals(400, countDirectLoc);
+
     }
 
    public void locationsinglePoint()
