@@ -68,13 +68,14 @@ public class DumpManagerTest {
         locationsinglePoint();
         DumpManager.deactivate();
 
-        int countAlgorithm = 0;
-        int countEllipsoid = 0;
-        int countSpan      = 0;
-        int countTransform = 0;
-        int countDEMTile   = 0;
-        int countDEMCell   = 0;
-        int countDirectLoc = 0;
+        int countAlgorithm       = 0;
+        int countEllipsoid       = 0;
+        int countSpan            = 0;
+        int countTransform       = 0;
+        int countDEMTile         = 0;
+        int countDEMCell         = 0;
+        int countDirectLoc       = 0;
+        int countDirectLocResult = 0;
         BufferedReader br = new BufferedReader(new FileReader(dump));
         for (String line = br.readLine(); line != null; line = br.readLine()) {
             String trimmed = line.trim();
@@ -93,6 +94,8 @@ public class DumpManagerTest {
                     ++countDEMCell;
                 } else if (trimmed.startsWith("direct location:")) {
                     ++countDirectLoc;
+                } else if (trimmed.startsWith("direct location result:")) {
+                    ++countDirectLocResult;
                 } else {
                    Assert.fail(line);
                 }
@@ -104,8 +107,9 @@ public class DumpManagerTest {
         Assert.assertEquals(1,   countSpan);
         Assert.assertEquals(1,   countTransform);
         Assert.assertEquals(2,   countDEMTile);
-        Assert.assertEquals(884, countDEMCell);
+        Assert.assertEquals(887, countDEMCell);
         Assert.assertEquals(400, countDirectLoc);
+        Assert.assertEquals(400, countDirectLocResult);
 
     }
 

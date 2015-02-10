@@ -248,6 +248,8 @@ public class Rugged {
                                                      algorithm.intersection(ellipsoid, pBody, lBody));
             }
 
+            DumpManager.dumpDirectLocationResult(gp[i]);
+
         }
 
         return gp;
@@ -297,6 +299,7 @@ public class Rugged {
             lInert = obsLInert;
         }
 
+        final NormalizedGeodeticPoint result;
         if (lightTimeCorrection) {
             // compute DEM intersection with light time correction
             final Vector3D  sP       = approximate.transformPosition(position);
@@ -311,18 +314,21 @@ public class Rugged {
             final Vector3D  eP2      = ellipsoid.transform(gp1);
             final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
             final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
-            return algorithm.refineIntersection(ellipsoid,
-                                                shifted2.transformPosition(pInert),
-                                                shifted2.transformVector(lInert),
-                                                gp1);
+            result = algorithm.refineIntersection(ellipsoid,
+                                                  shifted2.transformPosition(pInert),
+                                                  shifted2.transformVector(lInert),
+                                                  gp1);
 
         } else {
             // compute DEM intersection without light time correction
             final Vector3D pBody = inertToBody.transformPosition(pInert);
             final Vector3D lBody = inertToBody.transformVector(lInert);
-            return algorithm.refineIntersection(ellipsoid, pBody, lBody,
-                                                algorithm.intersection(ellipsoid, pBody, lBody));
+            result = algorithm.refineIntersection(ellipsoid, pBody, lBody,
+                                                  algorithm.intersection(ellipsoid, pBody, lBody));
         }
+
+        DumpManager.dumpDirectLocationResult(result);
+        return result;
 
     }
 

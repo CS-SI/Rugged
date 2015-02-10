@@ -41,11 +41,17 @@ public class DumpReplayerTest {
         DumpReplayer replayer = new DumpReplayer();
         replayer.parse(new File(dumpPath));
         Rugged rugged = replayer.createRugged();
-        Object[] results = replayer.execute(rugged);
-        Assert.assertEquals(3, results.length);
-        Assert.assertTrue(results[0] instanceof GeodeticPoint);
-        Assert.assertTrue(results[1] instanceof GeodeticPoint);
-        Assert.assertTrue(results[2] instanceof GeodeticPoint);
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+
+        Assert.assertEquals(5, results.length);
+        for (final DumpReplayer.Result result : results) {
+            GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
+            GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
+            Assert.assertEquals(expectedGP.getLatitude(),  replayedGP.getLatitude(),  1.0e-12);
+            Assert.assertEquals(expectedGP.getLongitude(), replayedGP.getLongitude(), 1.0e-12);
+            Assert.assertEquals(expectedGP.getAltitude(),  replayedGP.getAltitude(),  1.0e-6);
+        }
+
     }
 
 }

@@ -1,11 +1,13 @@
-# Rugged library dump file, created on 2015-02-10T13:52:19Z
+# Rugged library dump file, created on 2015-02-10T16:00:15Z
 # all units are SI units (m, m/s, rad ...)
+direct location: date 2012-01-01T12:30:00.00000000000000Z position  1.500000000000000e+00  0.000000000000000e+00 -2.000000000000000e-01 los  0.000000000000000e+00 -7.547095802227720e-01  6.560590289905073e-01 lightTime true aberration true
 span: minDate 2012-01-01T12:29:59.85000000000000Z maxDate 2012-01-01T12:30:00.15000000000000Z tStep  1.000000000000000e-03 tolerance  5.000000000000000e+00 inertialFrame EME2000
 transform: index 150 body r -8.085963389171905e-01 -3.465415132416125e-04  4.896468952533137e-04 -5.883634938068593e-01 Ω -8.740475534355122e-08  1.215132763920864e-09 -7.292109805268457e-05 ΩDot -1.642299174832679e-16  8.973031065665686e-17  1.983408395824453e-19 spacecraft p  1.384771423708159e+04  3.157872644483112e+03 -7.179504513218164e+06 v -3.193269831348565e+01 -8.025700179158079e+00  8.276060585645734e+00 a -9.306388141791047e-01 -8.320023410534990e+00  1.352798021525103e-03 r -6.828948932066574e-01  4.142451147005848e-01 -3.878489669799004e-01  4.600312256701621e-01 Ω -1.009835959093257e-03  1.982938126604663e-04  1.645927204535755e-04 ΩDot -3.647403055483546e-07  2.008714378022283e-07 -1.257148591486377e-06
-direct location: date 2012-01-01T12:30:00.00000000000000Z position  1.500000000000000e+00  0.000000000000000e+00 -2.000000000000000e-01 los  0.000000000000000e+00 -7.547095802227720e-01  6.560590289905073e-01 lightTime true aberration true
 ellipsoid: ae  6.378137000000000e+06 f  3.352810664747481e-03 frame ITRF_CIO_CONV_2010_SIMPLE_EOP
 algorithm: DUVENHAGE
 DEM tile: t0 latMin -4.014257279586958e-01 latStep  6.817692390602850e-05 latRows 257 lonMin  2.495820830351891e+00 lonStep  6.817692390602850e-05 lonCols 257
+DEM cell: t0 latIndex 192 lonIndex 0 elevation -1.282721242683617e+03
+DEM cell: t0 latIndex 80 lonIndex 192 elevation  3.211682285355159e+03
 DEM cell: t0 latIndex 96 lonIndex 64 elevation  1.075720914066972e+03
 DEM cell: t0 latIndex 97 lonIndex 64 elevation  9.498384803599795e+02
 DEM cell: t0 latIndex 96 lonIndex 65 elevation  1.001623033275892e+03
@@ -27,6 +29,7 @@ DEM cell: t0 latIndex 98 lonIndex 50 elevation  7.769426987315585e+01
 DEM cell: t0 latIndex 99 lonIndex 50 elevation  4.265142906455210e+01
 DEM cell: t0 latIndex 97 lonIndex 50 elevation  4.500756443755694e+01
 DEM cell: t0 latIndex 97 lonIndex 51 elevation  7.421501844304876e+01
+direct location result: latitude -3.947445425992010e-01 longitude  2.499243584750142e+00 elevation  8.434706922629509e+01
 direct location: date 2012-01-01T12:30:00.00000000000000Z position  1.500000000000000e+00  0.000000000000000e+00 -2.000000000000000e-01 los  0.000000000000000e+00 -7.548246479094037e-01  6.559266353095021e-01 lightTime true aberration true
 DEM cell: t0 latIndex 96 lonIndex 52 elevation  1.110753711365716e+02
 DEM cell: t0 latIndex 97 lonIndex 52 elevation  8.027308091623061e+01
@@ -36,19 +39,44 @@ DEM cell: t0 latIndex 97 lonIndex 49 elevation -1.609219755441909e+01
 DEM cell: t0 latIndex 98 lonIndex 49 elevation -2.653137720265925e+01
 DEM cell: t0 latIndex 97 lonIndex 48 elevation -9.460844691182658e+01
 DEM cell: t0 latIndex 98 lonIndex 48 elevation -6.303622859747302e+01
+direct location result: latitude -3.947611273580563e-01 longitude  2.499133846389992e+00 elevation -4.295871413137783e+01
+DEM cell: t0 latIndex 91 lonIndex 0 elevation -4.644285910379659e+02
+DEM cell: t0 latIndex 92 lonIndex 0 elevation -6.361521230433466e+02
+DEM cell: t0 latIndex 91 lonIndex 1 elevation -6.695324221432916e+02
+DEM cell: t0 latIndex 92 lonIndex 1 elevation -6.941696826528058e+02
+DEM cell: t0 latIndex 91 lonIndex 2 elevation -7.590003401646543e+02
+DEM cell: t0 latIndex 90 lonIndex 3 elevation -8.207436833089408e+02
+DEM cell: t0 latIndex 90 lonIndex 4 elevation -8.534523757445398e+02
+DEM cell: t0 latIndex 90 lonIndex 2 elevation -7.924361301694835e+02
+DEM cell: t0 latIndex 90 lonIndex 1 elevation -7.251222469503653e+02
+direct location: date 2012-01-01T12:30:00.00000000000000Z position  1.500000000000000e+00  0.000000000000000e+00 -2.000000000000000e-01 los  0.000000000000000e+00 -7.595223858294946e-01  6.504811645419663e-01 lightTime true aberration true
+DEM cell: t0 latIndex 90 lonIndex 0 elevation -5.786400093316511e+02
+direct location result: latitude -3.952555711362365e-01 longitude  2.495847653590435e+00 elevation -5.905034290161145e+02
 direct location: date 2012-01-01T12:30:00.00000000000000Z position  1.500000000000000e+00  0.000000000000000e+00 -2.000000000000000e-01 los  0.000000000000000e+00 -7.596364750290255e-01  6.503479267326657e-01 lightTime true aberration true
 DEM tile: t1 latMin -4.014257279586958e-01 latStep  6.817692390602850e-05 latRows 257 lonMin  2.478367537831948e+00 lonStep  6.817692390602850e-05 lonCols 257
+DEM cell: t1 latIndex 192 lonIndex 0 elevation -1.282721242683617e+03
+DEM cell: t1 latIndex 80 lonIndex 192 elevation  3.211682285355159e+03
 DEM cell: t1 latIndex 90 lonIndex 255 elevation -6.028136533065612e+02
 DEM cell: t1 latIndex 90 lonIndex 256 elevation -5.786400093316511e+02
 DEM cell: t1 latIndex 91 lonIndex 255 elevation -6.221990476940956e+02
 DEM cell: t1 latIndex 91 lonIndex 256 elevation -4.644285910379659e+02
+DEM cell: t1 latIndex 88 lonIndex 252 elevation  0.000000000000000e+00
+DEM cell: t1 latIndex 89 lonIndex 252 elevation -4.877794667497003e+02
+DEM cell: t1 latIndex 88 lonIndex 253 elevation  0.000000000000000e+00
+DEM cell: t1 latIndex 89 lonIndex 253 elevation -5.757446064041551e+02
+DEM cell: t1 latIndex 91 lonIndex 252 elevation  0.000000000000000e+00
+DEM cell: t1 latIndex 92 lonIndex 252 elevation  0.000000000000000e+00
+DEM cell: t1 latIndex 91 lonIndex 253 elevation -6.152228016740617e+02
+DEM cell: t1 latIndex 92 lonIndex 253 elevation  0.000000000000000e+00
 DEM cell: t1 latIndex 92 lonIndex 256 elevation -6.361521230433466e+02
 DEM cell: t1 latIndex 91 lonIndex 257 elevation -6.361521230433466e+02
 DEM cell: t1 latIndex 92 lonIndex 257 elevation -5.119072938899205e+02
+direct location result: latitude -3.952672865845636e-01 longitude  2.495769458919830e+00 elevation -5.923807760050810e+02
 direct location: date 2012-01-01T12:30:00.00000000000000Z position  1.500000000000000e+00  0.000000000000000e+00 -2.000000000000000e-01 los  0.000000000000000e+00 -7.597505408555608e-01  6.502146689130315e-01 lightTime true aberration true
-DEM cell: t1 latIndex 92 lonIndex 248 elevation -1.470524675650724e+02
-DEM cell: t1 latIndex 93 lonIndex 248 elevation -1.448837787295385e+02
-DEM cell: t1 latIndex 92 lonIndex 249 elevation -2.503632800423777e+02
-DEM cell: t1 latIndex 93 lonIndex 249 elevation -2.077565123004881e+02
+DEM cell: t1 latIndex 88 lonIndex 248 elevation  0.000000000000000e+00
+DEM cell: t1 latIndex 89 lonIndex 248 elevation -2.769462712597335e+02
+DEM cell: t1 latIndex 88 lonIndex 249 elevation  0.000000000000000e+00
+DEM cell: t1 latIndex 89 lonIndex 249 elevation -3.314207112316006e+02
 DEM cell: t1 latIndex 90 lonIndex 254 elevation -5.859504161342276e+02
 DEM cell: t1 latIndex 91 lonIndex 254 elevation -6.458840770174961e+02
+direct location result: latitude -3.952790935038382e-01 longitude  2.495690638626864e+00 elevation -5.963149908542051e+02

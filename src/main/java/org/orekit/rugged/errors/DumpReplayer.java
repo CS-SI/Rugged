@@ -20,8 +20,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -58,6 +60,12 @@ public class DumpReplayer {
 
     /** Comment start marker. */
     private static final String COMMENT_START = "#";
+
+    /** Keyword for latitude fields. */
+    private static final String LATITUDE = "latitude";
+
+    /** Keyword for longitude fields. */
+    private static final String LONGITUDE = "longitude";
 
     /** Keyword for elevation fields. */
     private static final String ELEVATION = "elevation";
@@ -207,11 +215,11 @@ public class DumpReplayer {
      */
     public void parse(final File file) throws RuggedException {
         try {
-            final BufferedReader reader = new BufferedReader(new FileReader(file));
+            final BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             int l = 0;
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                ++l;
-                LineParser.parse(l, file, line, this);
+                LineParser.parse(++l, file, line, this);
             }
             reader.close();
         } catch (IOException ioe) {
@@ -308,12 +316,47 @@ public class DumpReplayer {
      * @return results of all dumped calls
      * @exception RuggedException if a call fails
      */
-    public Object[] execute(final Rugged rugged) throws RuggedException {
-        final Object[] results = new Object[calls.size()];
+    public Result[] execute(final Rugged rugged) throws RuggedException {
+        final Result[] results = new Result[calls.size()];
         for (int i = 0; i < calls.size(); ++i) {
-            results[i] = calls.get(i).execute(rugged);
+            results[i] = new Result(calls.get(i).expected,
+                                    calls.get(i).execute(rugged));
         }
         return results;
+    }
+
+    /** Container for replay results. */
+    public static class Result {
+
+        /** Expected result. */
+        private final Object expected;
+
+        /** Replayed result. */
+        private final Object replayed;
+
+        /** Simple constructor.
+         * @param expected expected result
+         * @param replayed replayed result
+         */
+        private Result(final Object expected, final Object replayed) {
+            this.expected = expected;
+            this.replayed = replayed;
+        }
+
+        /** Get the expected result.
+         * @return expected result
+         */
+        public Object getExpected() {
+            return expected;
+        }
+
+        /** Get the replayed result.
+         * @return replayed result
+         */
+        public Object getReplayed() {
+            return replayed;
+        }
+
     }
 
     /** Line parsers. */
@@ -415,6 +458,26 @@ public class DumpReplayer {
                 } catch (OrekitException oe) {
                     throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
                 }
+            }
+
+        },
+
+        /** Parser for direct location result dump lines. */
+        DIRECT_LOCATION_RESULT() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                if (fields.length < 6 || !fields[0].equals(LATITUDE) ||
+                    !fields[2].equals(LONGITUDE) || !fields[4].equals(ELEVATION)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final GeodeticPoint gp = new GeodeticPoint(Double.parseDouble(fields[1]),
+                                                           Double.parseDouble(fields[3]),
+                                                           Double.parseDouble(fields[5]));
+                final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                last.expected = gp;
             }
 
         },
@@ -549,7 +612,7 @@ public class DumpReplayer {
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
                 throws RuggedException {
                 if (fields.length < 7 ||
-                        !fields[1].equals(LAT_INDEX) || !fields[3].equals(LON_INDEX) || !fields[5].equals(ELEVATION)) {
+                    !fields[1].equals(LAT_INDEX) || !fields[3].equals(LON_INDEX) || !fields[5].equals(ELEVATION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
                 final String name      = fields[0];
@@ -699,13 +762,18 @@ public class DumpReplayer {
     }
 
     /** Local interface for dumped calls. */
-    private interface DumpedCall {
+    private abstract static class DumpedCall {
+
+        /** Expected result. */
+        private Object expected;
+
         /** Execute a call.
          * @param rugged Rugged instance on which called should be performed
          * @return result of the call
          * @exception RuggedException if the call fails
          */
-        Object execute(Rugged rugged) throws RuggedException;
+        public abstract Object execute(Rugged rugged) throws RuggedException;
+
     }
 
 }
