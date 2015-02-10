@@ -87,6 +87,9 @@ public class DumpReplayer {
     /** Keyword for time step fields. */
     private static final String T_STEP = "tStep";
 
+    /** Keyword for overshoot tolerance fields. */
+    private static final String TOLERANCE = "tolerance";
+
     /** Keyword for inertial frames fields. */
     private static final String INERTIAL_FRAME = "inertialFrame";
 
@@ -161,6 +164,9 @@ public class DumpReplayer {
 
     /** Interpolator step. */
     private double tStep;
+
+    /** Interpolator overshoot tolerance. */
+    private double tolerance;
 
     /** Inertial frame. */
     private Frame inertialFrame;
@@ -359,19 +365,20 @@ public class DumpReplayer {
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
                 throws RuggedException {
                 try {
-                    if (fields.length < 8 ||
-                        !fields[0].equals(MIN_DATE) || !fields[2].equals(MAX_DATE) ||
-                        !fields[4].equals(T_STEP)   || !fields[6].equals(INERTIAL_FRAME)) {
+                    if (fields.length < 10 ||
+                        !fields[0].equals(MIN_DATE)  || !fields[2].equals(MAX_DATE) || !fields[4].equals(T_STEP)   ||
+                        !fields[6].equals(TOLERANCE) || !fields[8].equals(INERTIAL_FRAME)) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                     }
                     global.minDate        = new AbsoluteDate(fields[1], TimeScalesFactory.getUTC());
                     global.maxDate        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
                     global.tStep          = Double.parseDouble(fields[5]);
+                    global.tolerance      = Double.parseDouble(fields[7]);
                     final int n           = (int) FastMath.ceil(global.maxDate.durationFrom(global.minDate) / global.tStep);
                     global.bodyToInertial = new Transform[n];
                     global.scToInertial   = new Transform[n];
                     try {
-                        global.inertialFrame = FramesFactory.getFrame(Predefined.valueOf(fields[7]));
+                        global.inertialFrame = FramesFactory.getFrame(Predefined.valueOf(fields[9]));
                     } catch (IllegalArgumentException iae) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                     }

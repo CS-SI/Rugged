@@ -162,13 +162,14 @@ class Dump {
                               final Transform bodyToInertial, final Transform scToInertial)
         throws RuggedException {
         if (tranformsDumped == null) {
-            final AbsoluteDate minDate = scToBody.getMinDate();
-            final AbsoluteDate maxDate = scToBody.getMaxDate();
-            final double       tStep   = scToBody.getTStep();
-            final int          n       = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
+            final AbsoluteDate minDate   = scToBody.getMinDate();
+            final AbsoluteDate maxDate   = scToBody.getMaxDate();
+            final double       tStep     = scToBody.getTStep();
+            final double       tolerance = scToBody.getOvershootTolerance();
+            final int          n         = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
             writer.format(Locale.US,
-                          "span: minDate %s maxDate %s tStep %22.15e inertialFrame %s%n",
-                          convertDate(minDate), convertDate(maxDate), tStep,
+                          "span: minDate %s maxDate %s tStep %22.15e tolerance %22.15e inertialFrame %s%n",
+                          convertDate(minDate), convertDate(maxDate), tStep, tolerance,
                           getKeyOrName(scToBody.getInertialFrame()));
             tranformsDumped = new boolean[n];
         }
