@@ -23,7 +23,7 @@ import org.orekit.rugged.utils.ParametricModel;
 import org.orekit.time.AbsoluteDate;
 
 /** Interface representing a line-of-sight which depends on time.
- * @see LineSensor
+ * @see org.orekit.rugged.linesensor.LineSensor
  * @author Luc Maisonobe
  */
 public interface TimeDependentLOS extends ParametricModel {
