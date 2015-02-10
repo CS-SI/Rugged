@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +30,7 @@ import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -46,14 +46,14 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 
-/** Parser for Rugged debug dumps.
+/** Replayer for Rugged debug dumps.
  * @author Luc Maisonobe
  * @see DumpManager
  * @see Dump
  */
 public class DumpReplayer {
 
-    /** Keyword for x fields. */
+    /** Comment start marker. */
     private static final String COMMENT_START = "#";
 
     /** Keyword for elevation fields. */
@@ -140,8 +140,8 @@ public class DumpReplayer {
     /** Keyword for longitude step fields. */
     private static final String LON_STEP = "lonStep";
 
-    /** Keyword for longitude rows fields. */
-    private static final String LON_ROWS = "lonRows";
+    /** Keyword for longitude columns fields. */
+    private static final String LON_COLS = "lonCols";
 
     /** Keyword for latitude index fields. */
     private static final String LAT_INDEX = "latIndex";
@@ -228,7 +228,23 @@ public class DumpReplayer {
             if (algorithmId == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
                 builder.setConstantElevation(constantElevation);
             } else if (algorithmId != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID) {
-                builder.setDigitalElevationModel(new ParsedTilesUpdater(), 8);
+                builder.setDigitalElevationModel(new TileUpdater() {
+
+                    /** {@inheritDoc} */
+                    @Override
+                    public void updateTile(final double latitude, final double longitude, final UpdatableTile tile)
+                        throws RuggedException {
+                        for (final ParsedTile parsedTile : tiles) {
+                            if (parsedTile.isInterpolable(latitude, longitude)) {
+                                parsedTile.updateTile(tile);
+                                return;
+                            }
+                        }
+                        throw new RuggedException(RuggedMessages.NO_DEM_DATA,
+                                                  FastMath.toDegrees(latitude), FastMath.toDegrees(longitude));
+                    }
+
+                }, 8);
             }
 
             builder.setLightTimeCorrection(lightTimeCorrection);
@@ -243,11 +259,9 @@ public class DumpReplayer {
                                                  minDate, maxDate, tStep, tolerance,
                                                  bodyToInertial, scToInertial);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final ObjectOutputStream    oos = new ObjectOutputStream(bos);
-            oos.writeObject(sc2Body);
+            new ObjectOutputStream(bos).writeObject(sc2Body);
             final ByteArrayInputStream  bis = new ByteArrayInputStream(bos.toByteArray());
-            final ObjectInputStream     ois = new ObjectInputStream(bis);
-            builder.setTrajectoryAndTimeSpan(ois);
+            builder.setTrajectoryAndTimeSpan(bis);
 
             return builder.build();
 
@@ -312,7 +326,7 @@ public class DumpReplayer {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
                 final double ae   = Double.parseDouble(fields[1]);
-                final double f    = Double.parseDouble(fields[2]);
+                final double f    = Double.parseDouble(fields[3]);
                 final Frame  bodyFrame;
                 try {
                     bodyFrame = FramesFactory.getFrame(Predefined.valueOf(fields[5]));
@@ -476,7 +490,7 @@ public class DumpReplayer {
                 throws RuggedException {
                 if (fields.length < 13 ||
                         !fields[1].equals(LAT_MIN) || !fields[3].equals(LAT_STEP) || !fields[5].equals(LAT_ROWS) ||
-                        !fields[7].equals(LON_MIN) || !fields[9].equals(LON_STEP) || !fields[11].equals(LON_ROWS)) {
+                        !fields[7].equals(LON_MIN) || !fields[9].equals(LON_STEP) || !fields[11].equals(LON_COLS)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
                 final String name             = fields[0];
@@ -516,7 +530,9 @@ public class DumpReplayer {
                 final double elevation = Double.parseDouble(fields[6]);
                 for (final ParsedTile tile : global.tiles) {
                     if (tile.name.equals(name)) {
-                        tile.elevations[latIndex * tile.longitudeColumns + lonIndex] = elevation;
+                        final int index = latIndex * tile.longitudeColumns + lonIndex;
+                        tile.elevations.put(index, elevation);
+                        return;
                     }
                 }
                 throw new RuggedException(RuggedMessages.UNKNOWN_TILE,
@@ -593,7 +609,7 @@ public class DumpReplayer {
         private int longitudeColumns;
 
         /** Raster elevation data. */
-        private final double[] elevations;
+        private final OpenIntToDoubleHashMap elevations;
 
         /** Simple constructor.
          * @param name of the tile
@@ -614,7 +630,42 @@ public class DumpReplayer {
             this.longitudeStep    = longitudeStep;
             this.latitudeRows     = latitudeRows;
             this.longitudeColumns = longitudeColumns;
-            this.elevations       = new double[latitudeRows * longitudeColumns];
+            this.elevations       = new OpenIntToDoubleHashMap();
+        }
+
+        /** Check if a point is in the interpolable region of the tile.
+         * @param latitude point latitude
+         * @param longitude point longitude
+         * @return true if the point is in the interpolable region of the tile
+         */
+        public boolean isInterpolable(final double latitude, final double longitude) {
+            final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
+            final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
+            return (latitude  >= 0) && (latitudeIndex  <= latitudeRows     - 2) &&
+                   (longitude >= 0) && (longitudeIndex <= longitudeColumns - 2);
+        }
+
+        /** Update the tile according to the Digital Elevation Model.
+         * @param tile to update
+         * @exception RuggedException if tile cannot be updated
+         */
+        public void updateTile(final UpdatableTile tile)
+            throws RuggedException {
+
+            tile.setGeometry(minLatitude, minLongitude,
+                             latitudeStep, longitudeStep,
+                             latitudeRows, longitudeColumns);
+
+            final OpenIntToDoubleHashMap.Iterator iterator = elevations.iterator();
+            while (iterator.hasNext()) {
+                iterator.advance();
+                final int    index          = iterator.key();
+                final int    latitudeIndex  = index / longitudeColumns;
+                final int    longitudeIndex = index % longitudeColumns;
+                final double elevation      = iterator.value();
+                tile.setElevation(latitudeIndex, longitudeIndex, elevation);
+            }
+
         }
 
     }
@@ -627,18 +678,6 @@ public class DumpReplayer {
          * @exception RuggedException if the call fails
          */
         Object execute(Rugged rugged) throws RuggedException;
-    }
-
-    /** Local tile updater for parsed tiles. */
-    private class ParsedTilesUpdater implements TileUpdater {
-
-        /** {@inheritDoc} */
-        @Override
-        public void updateTile(final double latitude, final double longitude, final UpdatableTile tile)
-            throws RuggedException {
-            // TODO: implement method, based on the parsed tiles
-        }
-
     }
 
 }
