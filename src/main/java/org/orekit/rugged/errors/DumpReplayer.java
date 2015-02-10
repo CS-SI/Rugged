@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -177,10 +180,10 @@ public class DumpReplayer {
     private Frame inertialFrame;
 
     /** Transforms sample from observed body frame to inertial frame. */
-    private List<Transform> bodyToInertial;
+    private NavigableMap<Integer, Transform> bodyToInertial;
 
     /** Transforms sample from spacecraft frame to inertial frame. */
-    private List<Transform> scToInertial;
+    private NavigableMap<Integer, Transform> scToInertial;
 
     /** Flag for light time correction. */
     private boolean lightTimeCorrection;
@@ -252,12 +255,38 @@ public class DumpReplayer {
 
             builder.setEllipsoid(ellipsoid);
 
+            // build missing transforms by extrapolating the parsed ones
+            final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
+            final List<Transform> b2iList = new ArrayList<Transform>(n);
+            final List<Transform> s2iList = new ArrayList<Transform>(n);
+            for (int i = 0; i < n; ++i) {
+                if (bodyToInertial.containsKey(i)) {
+                    // the i-th transform was dumped
+                    b2iList.add(bodyToInertial.get(i));
+                    s2iList.add(scToInertial.get(i));
+                } else {
+                    // the i-th transformed was not dumped, we have to extrapolate it
+                    final Map.Entry<Integer, Transform> lower  = bodyToInertial.lowerEntry(i);
+                    final Map.Entry<Integer, Transform> higher = bodyToInertial.higherEntry(i);
+                    final int closest;
+                    if (lower == null) {
+                        closest = higher.getKey();
+                    } else if (higher == null) {
+                        closest = lower.getKey();
+                    } else {
+                        closest = (i - lower.getKey() <= higher.getKey() - i) ? lower.getKey() : higher.getKey();
+                    }
+                    b2iList.add(bodyToInertial.get(closest).shiftedBy((i - closest) * tStep));
+                    s2iList.add(scToInertial.get(closest).shiftedBy((i - closest) * tStep));
+                }
+            }
+
             // we use Rugged transforms reloading mechanism to ensure the spacecraft
             // to body transforms will be the same as the ones dumped
             final SpacecraftToObservedBody sc2Body =
                     new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
                                                  minDate, maxDate, tStep, tolerance,
-                                                 bodyToInertial, scToInertial);
+                                                 b2iList, s2iList);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
             new ObjectOutputStream(bos).writeObject(sc2Body);
             final ByteArrayInputStream  bis = new ByteArrayInputStream(bos.toByteArray());
@@ -407,9 +436,8 @@ public class DumpReplayer {
                     global.maxDate        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
                     global.tStep          = Double.parseDouble(fields[5]);
                     global.tolerance      = Double.parseDouble(fields[7]);
-                    final int n           = (int) FastMath.ceil(global.maxDate.durationFrom(global.minDate) / global.tStep);
-                    global.bodyToInertial = new ArrayList<Transform>(n);
-                    global.scToInertial   = new ArrayList<Transform>(n);
+                    global.bodyToInertial = new TreeMap<Integer, Transform>();
+                    global.scToInertial   = new TreeMap<Integer, Transform>();
                     try {
                         global.inertialFrame = FramesFactory.getFrame(Predefined.valueOf(fields[9]));
                     } catch (IllegalArgumentException iae) {
@@ -440,43 +468,43 @@ public class DumpReplayer {
                 }
                 final int i   = Integer.parseInt(fields[1]);
                 final AbsoluteDate date = global.minDate.shiftedBy(i * global.tStep);
-                global.bodyToInertial.add(
-                        new Transform(date,
-                                      new Rotation(Double.parseDouble(fields[4]),
-                                                   Double.parseDouble(fields[5]),
-                                                   Double.parseDouble(fields[6]),
-                                                   Double.parseDouble(fields[7]),
-                                                   false),
-                                      new Vector3D(Double.parseDouble(fields[9]),
-                                                   Double.parseDouble(fields[10]),
-                                                   Double.parseDouble(fields[11])),
-                                      new Vector3D(Double.parseDouble(fields[13]),
-                                                   Double.parseDouble(fields[14]),
-                                                   Double.parseDouble(fields[15]))));
-                global.scToInertial.add(
-                        new Transform(date,
-                                      new Transform(date,
-                                                    new Vector3D(Double.parseDouble(fields[18]),
-                                                                 Double.parseDouble(fields[19]),
-                                                                 Double.parseDouble(fields[20])),
-                                                    new Vector3D(Double.parseDouble(fields[22]),
-                                                                 Double.parseDouble(fields[23]),
-                                                                 Double.parseDouble(fields[24])),
-                                                    new Vector3D(Double.parseDouble(fields[26]),
-                                                                 Double.parseDouble(fields[27]),
-                                                                 Double.parseDouble(fields[28]))),
-                                      new Transform(date,
-                                                    new Rotation(Double.parseDouble(fields[30]),
-                                                                 Double.parseDouble(fields[31]),
-                                                                 Double.parseDouble(fields[32]),
-                                                                 Double.parseDouble(fields[33]),
-                                                                 false),
-                                                    new Vector3D(Double.parseDouble(fields[35]),
-                                                                 Double.parseDouble(fields[36]),
-                                                                 Double.parseDouble(fields[37])),
-                                                    new Vector3D(Double.parseDouble(fields[39]),
-                                                                 Double.parseDouble(fields[40]),
-                                                                 Double.parseDouble(fields[41])))));
+                global.bodyToInertial.put(i,
+                                          new Transform(date,
+                                                        new Rotation(Double.parseDouble(fields[4]),
+                                                                     Double.parseDouble(fields[5]),
+                                                                     Double.parseDouble(fields[6]),
+                                                                     Double.parseDouble(fields[7]),
+                                                                     false),
+                                                        new Vector3D(Double.parseDouble(fields[9]),
+                                                                     Double.parseDouble(fields[10]),
+                                                                     Double.parseDouble(fields[11])),
+                                                        new Vector3D(Double.parseDouble(fields[13]),
+                                                                     Double.parseDouble(fields[14]),
+                                                                     Double.parseDouble(fields[15]))));
+                global.scToInertial.put(i,
+                                        new Transform(date,
+                                                      new Transform(date,
+                                                                    new Vector3D(Double.parseDouble(fields[18]),
+                                                                                 Double.parseDouble(fields[19]),
+                                                                                 Double.parseDouble(fields[20])),
+                                                                    new Vector3D(Double.parseDouble(fields[22]),
+                                                                                 Double.parseDouble(fields[23]),
+                                                                                 Double.parseDouble(fields[24])),
+                                                                    new Vector3D(Double.parseDouble(fields[26]),
+                                                                                 Double.parseDouble(fields[27]),
+                                                                                 Double.parseDouble(fields[28]))),
+                                                      new Transform(date,
+                                                                    new Rotation(Double.parseDouble(fields[30]),
+                                                                                 Double.parseDouble(fields[31]),
+                                                                                 Double.parseDouble(fields[32]),
+                                                                                 Double.parseDouble(fields[33]),
+                                                                                 false),
+                                                                    new Vector3D(Double.parseDouble(fields[35]),
+                                                                                 Double.parseDouble(fields[36]),
+                                                                                 Double.parseDouble(fields[37])),
+                                                                    new Vector3D(Double.parseDouble(fields[39]),
+                                                                                 Double.parseDouble(fields[40]),
+                                                                                 Double.parseDouble(fields[41])))));
             }
 
         },
@@ -641,8 +669,8 @@ public class DumpReplayer {
         public boolean isInterpolable(final double latitude, final double longitude) {
             final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
             final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
-            return (latitude  >= 0) && (latitudeIndex  <= latitudeRows     - 2) &&
-                   (longitude >= 0) && (longitudeIndex <= longitudeColumns - 2);
+            return (latitudeIndex  >= 0) && (latitudeIndex  <= latitudeRows     - 2) &&
+                   (longitudeIndex >= 0) && (longitudeIndex <= longitudeColumns - 2);
         }
 
         /** Update the tile according to the Digital Elevation Model.
