@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URISyntaxException;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -78,8 +77,6 @@ public class DumpManagerTest {
         int countDirectLoc       = 0;
         int countDirectLocResult = 0;
         BufferedReader br = new BufferedReader(new FileReader(dump));
-        PrintStream out = new PrintStream("/home/luc/sources/eclipse/rugged/src/test/resources/replay/replay-direct-loc-02.txt",
-                                          "UTF-8");
         for (String line = br.readLine(); line != null; line = br.readLine()) {
             String trimmed = line.trim();
             if (trimmed.length() > 0 && !trimmed.startsWith("#")){
@@ -103,10 +100,8 @@ public class DumpManagerTest {
                    Assert.fail(line);
                 }
             }
-            out.println(line);
         }
         br.close();
-        out.close();
         Assert.assertEquals(1,   countAlgorithm);
         Assert.assertEquals(1,   countEllipsoid);
         Assert.assertEquals(1,   countSpan);
