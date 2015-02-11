@@ -178,7 +178,7 @@ added to the list, they must be transformed to EME2000:
     PVCoordinates pvITRF = new PVCoordinates(position, velocity);
     Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
     PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF); 
-    satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pvEME2000.getPosition(), pvEME2000.getVelocity(), Vector3D.ZERO)));
+    satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pvEME2000.getPosition(), pvEME2000.getVelocity(), Vector3D.ZERO));
 
 ## Rugged initialization
 
