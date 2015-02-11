@@ -16,6 +16,8 @@
  */
 package org.orekit.rugged.raster;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
@@ -23,6 +25,8 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
+import org.orekit.rugged.utils.MaxSelector;
+import org.orekit.rugged.utils.MinSelector;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 
@@ -105,6 +109,7 @@ public class SimpleTile implements Tile {
             throw new RuggedException(RuggedMessages.EMPTY_TILE, newLatitudeRows, newLongitudeColumns);
         }
         this.elevations = new double[newLatitudeRows * newLongitudeColumns];
+        Arrays.fill(elevations, Double.NaN);
 
     }
 
@@ -224,20 +229,20 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public void setElevation(final int latitudeIndex, final int longitudeIndex,
-                             final double elevation) throws RuggedException {
+    public void setElevation(final int latitudeIndex, final int longitudeIndex, final double elevation)
+        throws RuggedException {
         if (latitudeIndex  < 0 || latitudeIndex  > (latitudeRows - 1) ||
             longitudeIndex < 0 || longitudeIndex > (longitudeColumns - 1)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
                                       latitudeIndex, longitudeIndex,
                                       latitudeRows - 1, longitudeColumns - 1);
         }
-        if (elevation < minElevation) {
+        if (MinSelector.getInstance().selectFirst(elevation, minElevation)) {
             minElevation               = elevation;
             minElevationLatitudeIndex  = latitudeIndex;
             minElevationLongitudeIndex = longitudeIndex;
         }
-        if (elevation > maxElevation) {
+        if (MaxSelector.getInstance().selectFirst(elevation, maxElevation)) {
             maxElevation               = elevation;
             maxElevationLatitudeIndex  = latitudeIndex;
             maxElevationLongitudeIndex = longitudeIndex;

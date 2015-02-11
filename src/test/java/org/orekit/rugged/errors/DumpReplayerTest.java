@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
@@ -47,9 +48,9 @@ public class DumpReplayerTest {
         for (final DumpReplayer.Result result : results) {
             GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
             GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
-            Assert.assertEquals(expectedGP.getLatitude(),  replayedGP.getLatitude(),  1.0e-12);
-            Assert.assertEquals(expectedGP.getLongitude(), replayedGP.getLongitude(), 1.0e-12);
-            Assert.assertEquals(expectedGP.getAltitude(),  replayedGP.getAltitude(),  1.0e-6);
+            double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
+                                                rugged.getEllipsoid().transform(replayedGP));
+            Assert.assertEquals(0.0, distance, 3.0e-9);
         }
 
     }

@@ -173,7 +173,8 @@ public class SimpleTileTest {
         tile.setElevation(21, 15,  95.0);
         tile.tileUpdateCompleted();
         Assert.assertEquals(150.5, tile.interpolateElevation(20.0, 14.5), 1.0e-10);
-        Assert.assertEquals(128.5, tile.interpolateElevation(21.0, 14.5), 1.0e-10);
+        Assert.assertEquals(128.5, tile.interpolateElevation(FastMath.nextDown(21.0), 14.5), 1.0e-10);
+        Assert.assertTrue(Double.isNaN(tile.interpolateElevation(FastMath.nextUp(21.0), 14.5)));
         Assert.assertEquals(146.1, tile.interpolateElevation(20.2, 14.5), 1.0e-10);
     }
 

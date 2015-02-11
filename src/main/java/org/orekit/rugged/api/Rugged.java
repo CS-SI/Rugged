@@ -174,6 +174,13 @@ public class Rugged {
         return scToBody.isInRange(date);
     }
 
+    /** Get the observed body ellipsoid.
+     * @return observed body ellipsoid
+     */
+    public ExtendedEllipsoid getEllipsoid() {
+        return ellipsoid;
+    }
+
     /** Direct location of a sensor line.
      * @param sensorName name of the line sensor
      * @param lineNumber number of the line to localize on ground

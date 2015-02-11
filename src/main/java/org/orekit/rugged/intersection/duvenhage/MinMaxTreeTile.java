@@ -16,10 +16,12 @@
  */
 package org.orekit.rugged.intersection.duvenhage;
 
-import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.raster.SimpleTile;
+import org.orekit.rugged.utils.MaxSelector;
+import org.orekit.rugged.utils.MinSelector;
+import org.orekit.rugged.utils.Selector;
 
 /** Simple implementation of a {@link org.orekit.rugged.raster.Tile}
  * with a min/max kd tree.
@@ -112,41 +114,11 @@ public class MinMaxTreeTile extends SimpleTile {
 
             final double[] preprocessed = new double[raw.length];
 
-            // we don't use org.apache.commons.math3.analysis.function.Min
-            // because we want to ignore NaN values instead of spreading them
-            final BivariateFunction min = new BivariateFunction() {
-                /** {@inheritDoc} */
-                @Override
-                public double value(final double x, final double y) {
-                    if (Double.isNaN(x)) {
-                        return y;
-                    } else if (Double.isNaN(y)) {
-                        return x;
-                    } else {
-                        return x <= y ? x : y;
-                    }
-                }
-            };
-            preprocess(preprocessed, raw, nbRows, nbCols, min);
-            applyRecursively(minTree, start.length - 1, nbRows, nbCols, min, preprocessed, 0);
+            preprocess(preprocessed, raw, nbRows, nbCols, MinSelector.getInstance());
+            applyRecursively(minTree, start.length - 1, nbRows, nbCols, MinSelector.getInstance(), preprocessed, 0);
 
-            // we don't use org.apache.commons.math3.analysis.function.Max
-            // because we want to ignore NaN values instead of spreading them
-            final BivariateFunction max = new BivariateFunction() {
-                /** {@inheritDoc} */
-                @Override
-                public double value(final double x, final double y) {
-                    if (Double.isNaN(x)) {
-                        return y;
-                    } else if (Double.isNaN(y)) {
-                        return x;
-                    } else {
-                        return x <= y ? y : x;
-                    }
-                }
-            };
-            preprocess(preprocessed, raw, nbRows, nbCols, max);
-            applyRecursively(maxTree, start.length - 1, nbRows, nbCols, max, preprocessed, 0);
+            preprocess(preprocessed, raw, nbRows, nbCols, MaxSelector.getInstance());
+            applyRecursively(maxTree, start.length - 1, nbRows, nbCols, MaxSelector.getInstance(), preprocessed, 0);
 
         }
 
@@ -284,77 +256,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * @return row/column indices of the cell at which min elevation is reached
      */
     public int[] locateMin(final int i, final int j, final int level) {
-
-        final int k  = start.length - level;
-        int rowShift = k / 2;
-        int colShift = (k + 1) / 2;
-        int levelI   = i >> rowShift;
-        int levelJ   = j >> colShift;
-        int levelR   = 1 + ((getLatitudeRows()     - 1) >> rowShift);
-        int levelC   = 1 + ((getLongitudeColumns() - 1) >> colShift);
-
-        // track the cell ancestors from merged tree at specified level up to tree at level 1
-        for (int l = level + 1; l < start.length; ++l) {
-
-            if (isColumnMerging(l)) {
-
-                --colShift;
-                levelC = 1 + ((getLongitudeColumns() - 1) >> colShift);
-                levelJ = levelJ << 1;
-
-                if (levelJ + 1 < levelC) {
-                    // the cell results from a regular merging of two columns
-                    if (minTree[start[l] + levelI * levelC + levelJ] >
-                        minTree[start[l] + levelI * levelC + levelJ + 1]) {
-                        levelJ++;
-                    }
-                }
-
-            } else {
-
-                --rowShift;
-                levelR = 1 + ((getLatitudeRows() - 1) >> rowShift);
-                levelI = levelI << 1;
-
-                if (levelI + 1 < levelR) {
-                    // the cell results from a regular merging of two rows
-                    if (minTree[start[l] + levelI       * levelC + levelJ] >
-                        minTree[start[l] + (levelI + 1) * levelC + levelJ]) {
-                        levelI++;
-                    }
-                }
-
-            }
-
-        }
-
-        // we are now at first merge level, which always results from a column merge
-        // or pre-processed data, which themselves result from merging four cells
-        // used in interpolation
-        // this imply the ancestor of min/max at (n, m) is one of
-        // (2n, m), (2n+1, m), (2n+2, m), (2n, m+1), (2n+1, m+1), (2n+2, m+1)
-        int minI = levelI;
-        int minJ = 2 * levelJ;
-        double minElevation = Double.POSITIVE_INFINITY;
-        for (int n = 2 * levelJ; n < 2 * levelJ + 3; ++n) {
-            if (n < getLongitudeColumns()) {
-                for (int m = levelI; m < levelI + 2; ++m) {
-                    if (m < getLatitudeRows()) {
-                        final double elevation = raw[m * getLongitudeColumns() + n];
-                        if (elevation < minElevation) {
-                            minI         = m;
-                            minJ         = n;
-                            minElevation = elevation;
-                        }
-                    }
-                }
-            }
-        }
-
-        return new int[] {
-            minI, minJ
-        };
-
+        return locateMinMax(i, j, level, MinSelector.getInstance(), minTree);
     }
 
     /** Locate the cell at which max elevation is reached for a specified level.
@@ -371,6 +273,19 @@ public class MinMaxTreeTile extends SimpleTile {
      * @return row/column indices of the cell at which min elevation is reached
      */
     public int[] locateMax(final int i, final int j, final int level) {
+        return locateMinMax(i, j, level, MaxSelector.getInstance(), maxTree);
+    }
+
+    /** Locate the cell at which min/max elevation is reached for a specified level.
+     * @param i row index of the cell
+     * @param j column index of the cell
+     * @param level tree level of the sub-tile considered
+     * @param selector min/max selector to use
+     * @param tree min/max tree to use
+     * @return row/column indices of the cell at which min/max elevation is reached
+     */
+    private int[] locateMinMax(final int i, final int j, final int level,
+                               final Selector selector, final double[] tree) {
 
         final int k  = start.length - level;
         int rowShift = k / 2;
@@ -391,8 +306,8 @@ public class MinMaxTreeTile extends SimpleTile {
 
                 if (levelJ + 1 < levelC) {
                     // the cell results from a regular merging of two columns
-                    if (maxTree[start[l] + levelI * levelC + levelJ] <
-                            maxTree[start[l] + levelI * levelC + levelJ + 1]) {
+                    if (selector.selectFirst(tree[start[l] + levelI * levelC + levelJ + 1],
+                                             tree[start[l] + levelI * levelC + levelJ])) {
                         levelJ++;
                     }
                 }
@@ -405,8 +320,8 @@ public class MinMaxTreeTile extends SimpleTile {
 
                 if (levelI + 1 < levelR) {
                     // the cell results from a regular merging of two rows
-                    if (maxTree[start[l] + levelI       * levelC + levelJ] <
-                            maxTree[start[l] + (levelI + 1) * levelC + levelJ]) {
+                    if (selector.selectFirst(tree[start[l] + (levelI + 1) * levelC + levelJ],
+                                             tree[start[l] + levelI       * levelC + levelJ])) {
                         levelI++;
                     }
                 }
@@ -420,18 +335,18 @@ public class MinMaxTreeTile extends SimpleTile {
         // used in interpolation
         // this imply the ancestor of min/max at (n, m) is one of
         // (2n, m), (2n+1, m), (2n+2, m), (2n, m+1), (2n+1, m+1), (2n+2, m+1)
-        int maxI = levelI;
-        int maxJ = 2 * levelJ;
-        double maxElevation = Double.NEGATIVE_INFINITY;
+        int selectedI = levelI;
+        int selectedJ = 2 * levelJ;
+        double selectedElevation = Double.NaN;
         for (int n = 2 * levelJ; n < 2 * levelJ + 3; ++n) {
             if (n < getLongitudeColumns()) {
                 for (int m = levelI; m < levelI + 2; ++m) {
                     if (m < getLatitudeRows()) {
                         final double elevation = raw[m * getLongitudeColumns() + n];
-                        if (elevation > maxElevation) {
-                            maxI         = m;
-                            maxJ         = n;
-                            maxElevation = elevation;
+                        if (selector.selectFirst(elevation, selectedElevation)) {
+                            selectedI         = m;
+                            selectedJ         = n;
+                            selectedElevation = elevation;
                         }
                     }
                 }
@@ -439,7 +354,7 @@ public class MinMaxTreeTile extends SimpleTile {
         }
 
         return new int[] {
-            maxI, maxJ
+            selectedI, selectedJ
         };
 
     }
@@ -638,11 +553,11 @@ public class MinMaxTreeTile extends SimpleTile {
      * @param elevations raw elevations te preprocess
      * @param nbRows number of rows
      * @param nbCols number of columns
-     * @param f function to apply
+     * @param selector selector to use
      */
     private void preprocess(final double[] preprocessed, final double[] elevations,
                             final int nbRows, final int nbCols,
-                            final BivariateFunction f) {
+                            final Selector selector) {
 
         int k = 0;
 
@@ -650,20 +565,20 @@ public class MinMaxTreeTile extends SimpleTile {
 
             // regular elements with both a column at right and a row below
             for (int j = 0; j < nbCols - 1; ++j) {
-                preprocessed[k] = f.value(f.value(elevations[k],          elevations[k + 1]),
-                                          f.value(elevations[k + nbCols], elevations[k + nbCols + 1]));
+                preprocessed[k] = selector.select(selector.select(elevations[k],          elevations[k + 1]),
+                                                  selector.select(elevations[k + nbCols], elevations[k + nbCols + 1]));
                 k++;
             }
 
             // last column elements, lacking a right column
-            preprocessed[k] = f.value(elevations[k], elevations[k + nbCols]);
+            preprocessed[k] = selector.select(elevations[k], elevations[k + nbCols]);
             k++;
 
         }
 
         // last row elements, lacking a below row
         for (int j = 0; j < nbCols - 1; ++j) {
-            preprocessed[k] = f.value(elevations[k], elevations[k + 1]);
+            preprocessed[k] = selector.select(elevations[k], elevations[k + 1]);
             k++;
         }
 
@@ -677,13 +592,13 @@ public class MinMaxTreeTile extends SimpleTile {
      * @param level current level
      * @param levelRows number of rows at current level
      * @param levelColumns number of columns at current level
-     * @param f function to apply
+     * @param selector to apply
      * @param base base array from which function arguments are drawn
      * @param first index of the first element to consider in base array
      */
     private void applyRecursively(final double[] tree,
                                   final int level, final int levelRows, final int levelColumns,
-                                  final BivariateFunction f,
+                                  final Selector selector,
                                   final double[] base, final int first) {
 
         if (isColumnMerging(level + 1)) {
@@ -698,7 +613,7 @@ public class MinMaxTreeTile extends SimpleTile {
 
                 // regular pairs
                 for (int j = 0; j < jEnd; ++j) {
-                    tree[iTree++] = f.value(base[iBase], base[iBase + 1]);
+                    tree[iTree++] = selector.select(base[iBase], base[iBase + 1]);
                     iBase += 2;
                 }
 
@@ -711,7 +626,7 @@ public class MinMaxTreeTile extends SimpleTile {
             }
 
             if (level > 0) {
-                applyRecursively(tree, level - 1, levelRows, nextColumns, f, tree, start[level]);
+                applyRecursively(tree, level - 1, levelRows, nextColumns, selector, tree, start[level]);
             }
 
         } else {
@@ -727,7 +642,7 @@ public class MinMaxTreeTile extends SimpleTile {
             for (int i = 0; i < iEnd; ++i) {
 
                 for (int j = 0; j < levelColumns; ++j) {
-                    tree[iTree++] = f.value(base[iBase], base[iBase + levelColumns]);
+                    tree[iTree++] = selector.select(base[iBase], base[iBase + levelColumns]);
                     iBase++;
                 }
                 iBase += levelColumns;
@@ -740,7 +655,7 @@ public class MinMaxTreeTile extends SimpleTile {
             }
 
             if (level > 0) {
-                applyRecursively(tree, level - 1, nextRows, levelColumns, f, tree, start[level]);
+                applyRecursively(tree, level - 1, nextRows, levelColumns, selector, tree, start[level]);
             }
 
         }
