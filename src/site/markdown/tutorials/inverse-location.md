@@ -51,4 +51,4 @@ Similarly, for a point defined solely by its latitude en longitude (altitude det
      AbsoluteDate dateLine = rugged.dateLocation(sensorName, latitude, longitude, minLine, maxLine);
 
 ## Source code
-The source code is available in InverseLocTutorial.java 
+The source code is available in InverseLocation.java 

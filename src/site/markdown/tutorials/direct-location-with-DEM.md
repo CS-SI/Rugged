@@ -29,7 +29,7 @@ The calling application must implement the callback function for loading the til
  
 ### Implementing the interface TileUpdater for DEM loading. 
 
-In this tutorial, we will not include real DEM data. Instead we are going to create a fake DEM representing a volcanoe in a form of a perfect cone, similar to the Mayon volcano in the Philippines, except that we will locate it somewhere just below our satellite. This example is already part of Rugged tests cases, the source code is available in the package `org.orekit.rugged.raster`, file VolcanicConeElevationUpdater.java. 
+In this tutorial, we will not include real DEM data. Instead we are going to create a fake DEM representing a volcano in a form of a perfect cone, similar to the Mayon volcano in the Philippines, except that we will locate it somewhere just below our satellite. This example is already part of Rugged tests cases, the source code is available in the package `org.orekit.rugged.raster`, file VolcanicConeElevationUpdater.java. 
 
 The class `VolcanicConeElevationUpdater` implements the interface `TileUpdater` with its method `updateTile`. The method is in charge of loading a tile. The extent of the tile must be such that it covers at least the ground point with coordinates (latitude, longitude) which are passed as arguments to the method. The tile is an object of type `UpdatableTile` which has two methods :
 
@@ -169,4 +169,4 @@ In a similar way as in the first tutorial [DirectLocation](./direct-location.htm
     }
 
 ## Source code
-The source code is available in DirectLocationGrid.java
+The source code is available in DirectLocationWithDEM.java
