@@ -65,6 +65,13 @@ public class TilesCacheTest {
         }
         Assert.assertEquals(12, factory.getCount());
 
+        // ensure the (0.0, 0.0) tile is the least recently used one
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                cache.getTile(FastMath.toRadians(0.5 + j), FastMath.toRadians(0.5 + i));
+            }
+        }
+
         // ask for one point outside of the covered area, to evict the (0.0, 0.0) tile
         cache.getTile(FastMath.toRadians(20.5), FastMath.toRadians(30.5));
         Assert.assertEquals(13, factory.getCount());
