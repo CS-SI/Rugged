@@ -17,6 +17,8 @@
 package org.orekit.rugged.linesensor;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.errors.DumpManager;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
 
@@ -72,25 +74,37 @@ public class LineSensor {
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @return pixel normalized line-of-sight
+     * @exception RuggedException if date cannot be handled
      */
-    public Vector3D getLos(final AbsoluteDate date, final int i) {
-        return los.getLOS(i, date);
+    public Vector3D getLos(final AbsoluteDate date, final int i)
+        throws RuggedException {
+        final Vector3D l = los.getLOS(i, date);
+        DumpManager.dumpSensorLOS(name, date, i, l);
+        return l;
     }
 
     /** Get the date.
      * @param lineNumber line number
      * @return date corresponding to line number
+     * @exception RuggedException if date cannot be handled
      */
-    public AbsoluteDate getDate(final double lineNumber) {
-        return datationModel.getDate(lineNumber);
+    public AbsoluteDate getDate(final double lineNumber)
+        throws RuggedException {
+        final AbsoluteDate date = datationModel.getDate(lineNumber);
+        DumpManager.dumpSensorDate(name, lineNumber, date);
+        return date;
     }
 
     /** Get the line number.
      * @param date date
      * @return line number corresponding to date
+     * @exception RuggedException if date cannot be handled
      */
-    public double getLine(final AbsoluteDate date) {
-        return datationModel.getLine(date);
+    public double getLine(final AbsoluteDate date)
+        throws RuggedException {
+        final double lineNumber = datationModel.getLine(date);
+        DumpManager.dumpSensorLine(name, date, lineNumber);
+        return lineNumber;
     }
 
     /** Get the rate of lines scanning.
@@ -98,7 +112,9 @@ public class LineSensor {
      * @return rate of lines scanning (lines / seconds)
      */
     public double getRate(final double lineNumber) {
-        return datationModel.getRate(lineNumber);
+        final double rate = datationModel.getRate(lineNumber);
+        DumpManager.dumpSensorRate(name, lineNumber, rate);
+        return rate;
     }
 
     /** Get the sensor position.

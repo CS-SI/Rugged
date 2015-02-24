@@ -384,21 +384,7 @@ public class Rugged {
         throws RuggedException {
 
         final LineSensor sensor = getLineSensor(sensorName);
-        SensorMeanPlaneCrossing planeCrossing = finders.get(sensorName);
-        if (planeCrossing == null ||
-            planeCrossing.getMinLine() != minLine ||
-            planeCrossing.getMaxLine() != maxLine) {
-
-            // create a new finder for the specified sensor and range
-            planeCrossing = new SensorMeanPlaneCrossing(sensor, scToBody, minLine, maxLine,
-                                                        lightTimeCorrection, aberrationOfLightCorrection,
-                                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
-
-            // store the finder, in order to reuse it
-            // (and save some computation done in its constructor)
-            finders.put(sensorName, planeCrossing);
-
-        }
+        final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
 
         // find approximately the sensor line at which ground point crosses sensor mean plane
         final Vector3D   target = ellipsoid.transform(point);
@@ -449,22 +435,14 @@ public class Rugged {
                                        final int minLine, final int maxLine)
         throws RuggedException {
 
+        DumpManager.dumpInverseLocation(sensorName, point, minLine, maxLine,
+                                        lightTimeCorrection, aberrationOfLightCorrection);
+
         final LineSensor sensor = getLineSensor(sensorName);
-        SensorMeanPlaneCrossing planeCrossing = finders.get(sensorName);
-        if (planeCrossing == null ||
-            planeCrossing.getMinLine() != minLine ||
-            planeCrossing.getMaxLine() != maxLine) {
+        final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
 
-            // create a new finder for the specified sensor and range
-            planeCrossing = new SensorMeanPlaneCrossing(sensor, scToBody, minLine, maxLine,
-                                                        lightTimeCorrection, aberrationOfLightCorrection,
-                                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
-
-            // store the finder, in order to reuse it
-            // (and save some computation done in its constructor)
-            finders.put(sensorName, planeCrossing);
-
-        }
+        DumpManager.dumpSensor(sensor);
+        DumpManager.dumpSensorMeanPlane(planeCrossing);
 
         // find approximately the sensor line at which ground point crosses sensor mean plane
         final Vector3D   target = ellipsoid.transform(point);
@@ -511,8 +489,51 @@ public class Rugged {
                                                  Vector3D.dotProduct(fixedDirection, fixedX));
         final double fixedPixel = lowIndex + alpha / pixelWidth;
 
-        return new SensorPixel(fixedLine, fixedPixel);
+        final SensorPixel result = new SensorPixel(fixedLine, fixedPixel);
+        DumpManager.dumpInverseLocationResult(result);
+        return result;
 
+    }
+
+    /** Get the mean plane crossing finder for a sensor.
+     * @param sensorName name of the line  sensor
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @return mean plane crossing finder
+     * @exception RuggedException if sensor is unknown
+     */
+    private SensorMeanPlaneCrossing getPlaneCrossing(final String sensorName,
+                                                     final int minLine, final int maxLine)
+        throws RuggedException {
+
+        final LineSensor sensor = getLineSensor(sensorName);
+        SensorMeanPlaneCrossing planeCrossing = finders.get(sensorName);
+        if (planeCrossing == null ||
+            planeCrossing.getMinLine() != minLine ||
+            planeCrossing.getMaxLine() != maxLine) {
+
+            // create a new finder for the specified sensor and range
+            planeCrossing = new SensorMeanPlaneCrossing(sensor, scToBody, minLine, maxLine,
+                                                        lightTimeCorrection, aberrationOfLightCorrection,
+                                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
+
+            // store the finder, in order to reuse it
+            // (and save some computation done in its constructor)
+            setPlaneCrossing(planeCrossing);
+
+        }
+
+        return planeCrossing;
+
+    }
+
+    /** Set the mean plane crossing finder for a sensor.
+     * @param planeCrossing plane crossing finder
+     * @exception RuggedException if sensor is unknown
+     */
+    private void setPlaneCrossing(final SensorMeanPlaneCrossing planeCrossing)
+        throws RuggedException {
+        finders.put(planeCrossing.getSensor().getName(), planeCrossing);
     }
 
     /** Get transform from spacecraft to inertial frame.

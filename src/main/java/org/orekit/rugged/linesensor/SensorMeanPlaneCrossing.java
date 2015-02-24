@@ -92,6 +92,30 @@ public class SensorMeanPlaneCrossing {
                                    final boolean aberrationOfLightCorrection,
                                    final int maxEval, final double accuracy)
         throws RuggedException {
+        this(sensor, scToBody, minLine, maxLine, lightTimeCorrection, aberrationOfLightCorrection,
+             maxEval, accuracy, computeMeanPlaneNormal(sensor, minLine, maxLine));
+    }
+
+    /** Simple constructor.
+     * @param sensor sensor to consider
+     * @param scToBody converter between spacecraft and body
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @param lightTimeCorrection flag for light time correction
+     * @param aberrationOfLightCorrection flag for aberration of light correction.
+     * @param maxEval maximum number of evaluations
+     * @param accuracy accuracy to use for finding crossing line number
+     * @param meanPlaneNormal mean plane normal
+     * @exception RuggedException if some frame conversion fails
+     */
+    public SensorMeanPlaneCrossing(final LineSensor sensor,
+                                   final SpacecraftToObservedBody scToBody,
+                                   final int minLine, final int maxLine,
+                                   final boolean lightTimeCorrection,
+                                   final boolean aberrationOfLightCorrection,
+                                   final int maxEval, final double accuracy,
+                                   final Vector3D meanPlaneNormal)
+        throws RuggedException {
 
         this.sensor                      = sensor;
         this.minLine                     = minLine;
@@ -107,19 +131,25 @@ public class SensorMeanPlaneCrossing {
         this.midBodyToInert              = scToBody.getBodyToInertial(midDate);
         this.midScToInert                = scToBody.getScToInertial(midDate);
 
-        this.meanPlaneNormal             = computeMeanPlaneNormal(midDate);
+        this.meanPlaneNormal             = meanPlaneNormal;
 
     }
 
     /** Compute the plane containing origin that best fits viewing directions point cloud.
-     * @param midDate middle date
+     * @param sensor line sensor
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
      * <p>
      * The normal is oriented such that traversing pixels in increasing indices
      * order corresponds to trigonometric order (i.e. counterclockwise).
      * </p>
      * @return normal of the mean plane
+     * @exception RuggedException if mid date cannot be handled
      */
-    private Vector3D computeMeanPlaneNormal(final AbsoluteDate midDate) {
+    private static Vector3D computeMeanPlaneNormal(final LineSensor sensor, final int minLine, final int maxLine)
+        throws RuggedException {
+
+        final AbsoluteDate midDate = sensor.getDate(0.5 * (minLine + maxLine));
 
         // build a centered data matrix
         // (for each viewing direction, we add both the direction and its
@@ -154,6 +184,20 @@ public class SensorMeanPlaneCrossing {
 
     }
 
+    /** Get the underlying sensor.
+     * @return underlying sensor
+     */
+    public LineSensor getSensor() {
+        return sensor;
+    }
+
+    /** Get converter between spacecraft and body.
+     * @return converter between spacecraft and body
+     */
+    public SpacecraftToObservedBody getScToBody() {
+        return scToBody;
+    }
+
     /** Get the minimum line number in the search interval.
      * @return minimum line number in the search interval
      */
@@ -166,6 +210,20 @@ public class SensorMeanPlaneCrossing {
      */
     public int getMaxLine() {
         return maxLine;
+    }
+
+    /** Get the maximum number of evaluations.
+     * @return maximum number of evaluations
+     */
+    public int getMaxEval() {
+        return maxEval;
+    }
+
+    /** Get the accuracy to use for finding crossing line number.
+     * @return accuracy to use for finding crossing line number
+     */
+    public double getAccuracy() {
+        return accuracy;
     }
 
     /** Get the mean plane normal.

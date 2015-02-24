@@ -72,3 +72,6 @@ TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
 
 # unknown tile {0}, line {1}, file {2}: {3}
 UNKNOWN_TILE = <MISSING TRANSLATION>
+
+# sensor {0} already defined, line {1}, file {2}: {3}
+SENSOR_ALREADY_DEFINED = <MISSING TRANSLATION>

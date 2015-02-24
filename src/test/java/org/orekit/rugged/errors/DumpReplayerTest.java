@@ -29,6 +29,7 @@ import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.Rugged;
+import org.orekit.rugged.linesensor.SensorPixel;
 
 public class DumpReplayerTest {
 
@@ -51,6 +52,28 @@ public class DumpReplayerTest {
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                                 rugged.getEllipsoid().transform(replayedGP));
             Assert.assertEquals(0.0, distance, 3.0e-9);
+        }
+
+    }
+
+    @Test
+    public void testInverseLoc01() throws URISyntaxException, IOException, OrekitException, RuggedException {
+
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-01.txt").toURI().getPath();
+        DumpReplayer replayer = new DumpReplayer();
+        replayer.parse(new File(dumpPath));
+        Rugged rugged = replayer.createRugged();
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+
+        Assert.assertEquals(1, results.length);
+        for (final DumpReplayer.Result result : results) {
+            SensorPixel expectedSP = (SensorPixel) result.getExpected();
+            SensorPixel replayedSP = (SensorPixel) result.getReplayed();
+            Assert.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
+            Assert.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
         }
 
     }

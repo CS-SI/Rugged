@@ -33,6 +33,9 @@ import org.orekit.frames.FactoryManagedFrame;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
+import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -49,8 +52,14 @@ class Dump {
     /** Dump file. */
     private final PrintWriter writer;
 
-    /** Tiles map. */
+    /** Tiles list. */
     private final List<DumpedTileData> tiles;
+
+    /** Already dumped sensors. */
+    private final List<String> sensors;
+
+    /** Already dumped sensors mean planes. */
+    private final List<String> meanPlanes;
 
     /** Flag for dumped algorithm. */
     private boolean algorithmDumped;
@@ -67,6 +76,8 @@ class Dump {
     public Dump(final PrintWriter writer) {
         this.writer          = writer;
         this.tiles           = new ArrayList<DumpedTileData>();
+        this.sensors         = new ArrayList<String>();
+        this.meanPlanes      = new ArrayList<String>();
         this.algorithmDumped = false;
         this.ellipsoidDumped = false;
         this.tranformsDumped = null;
@@ -165,6 +176,36 @@ class Dump {
         }
     }
 
+    /** Dump an inverse location computation.
+     * @param sensorName name of the line  sensor
+     * @param point point to localize
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @param lightTimeCorrection flag for light time correction
+     * @param aberrationOfLightCorrection flag for aberration of light correction
+     */
+    public void dumpInverseLocation(final String sensorName, final GeodeticPoint point,
+                                    final int minLine, final int maxLine,
+                                    final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection) {
+        writer.format(Locale.US,
+                      "inverse location: sensorName %s latitude %22.15e longitude %22.15e elevation %22.15e minLine %d maxLine %d lightTime %b aberration %b%n",
+                      sensorName,
+                      point.getLatitude(), point.getLongitude(), point.getAltitude(),
+                      minLine, maxLine,
+                      lightTimeCorrection, aberrationOfLightCorrection);
+    }
+
+    /** Dump an inverse location result.
+     * @param pixel resulting sensor pixel
+     */
+    public void dumpInverseLocationResult(final SensorPixel pixel) {
+        if (pixel != null) {
+            writer.format(Locale.US,
+                          "inverse location result: lineNumber %22.15e pixelNumber %22.15e%n",
+                          pixel.getLineNumber(), pixel.getPixelNumber());
+        }
+    }
+
     /** Dump an observation transform transform.
      * @param scToBody provider for observation
      * @param index index of the transform
@@ -196,6 +237,94 @@ class Dump {
                           convertRotation(scToInertial.getRotation(), scToInertial.getRotationRate(), scToInertial.getRotationAcceleration()));
             tranformsDumped[index] = true;
         }
+    }
+
+    /** Dump a sensor.
+     * @param sensor sensor to dump
+     */
+    public void dumpSensor(final LineSensor sensor) {
+        if (!sensors.contains(sensor.getName())) {
+            writer.format(Locale.US,
+                          "sensor: sensorName %s nbPixels %d position %22.15e %22.15e %22.15e%n",
+                          sensor.getName(), sensor.getNbPixels(),
+                          sensor.getPosition().getX(), sensor.getPosition().getY(), sensor.getPosition().getZ());
+            sensors.add(sensor.getName());
+        }
+    }
+
+    /** Dump a sensor mean plane.
+     * @param meanPlane mean plane associated with sensor
+     * @exception RuggedException if some frames cannot be computed at mid date
+     */
+    public void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane)
+        throws RuggedException {
+        if (!meanPlanes.contains(meanPlane.getSensor().getName())) {
+            writer.format(Locale.US,
+                          "sensor mean plane: sensorName %s minLine %d maxLine %d maxEval %d accuracy %22.15e normal %22.15e %22.15e %22.15e%n",
+                          meanPlane.getSensor().getName(),
+                          meanPlane.getMinLine(), meanPlane.getMaxLine(),
+                          meanPlane.getMaxEval(), meanPlane.getAccuracy(),
+                          meanPlane.getMeanPlaneNormal().getX(), meanPlane.getMeanPlaneNormal().getY(), meanPlane.getMeanPlaneNormal().getZ());
+
+            // ensure the transforms for mid date are dumped
+            final AbsoluteDate midDate = meanPlane.getSensor().getDate(0.5 * (meanPlane.getMinLine() + meanPlane.getMaxLine()));
+            meanPlane.getScToBody().getBodyToInertial(midDate);
+            meanPlane.getScToBody().getScToInertial(midDate);
+
+            meanPlanes.add(meanPlane.getSensor().getName());
+
+        }
+    }
+
+    /** Dump a sensor LOS.
+     * @param name sensor name
+     * @param date date
+     * @param i pixel index
+     * @param los pixel normalized line-of-sight
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public void dumpSensorLOS(final String name, final AbsoluteDate date, final int i, final Vector3D los)
+        throws RuggedException {
+        writer.format(Locale.US,
+                      "sensor LOS: sensorName %s date %s pixelNumber %d => %22.15e %22.15e %22.15e%n",
+                      name, convertDate(date), i, los.getX(), los.getY(), los.getZ());
+    }
+
+    /** Dump a sensor date.
+     * @param name sensor name
+     * @param lineNumber line number
+     * @param date date
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public void dumpSensorDate(final String name, final double lineNumber, final AbsoluteDate date)
+        throws RuggedException {
+        writer.format(Locale.US,
+                      "sensor date: sensorName %s lineNumber %22.15e => %s%n",
+                      name, lineNumber, convertDate(date));
+    }
+
+    /** Dump a sensor line.
+     * @param name sensor name
+     * @param date date
+     * @param lineNumber line number
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public void dumpSensorLine(final String name, final AbsoluteDate date, final double lineNumber)
+        throws RuggedException {
+        writer.format(Locale.US,
+                      "sensor line: sensorName %s date => %22.15e%n",
+                      name, convertDate(date), lineNumber);
+    }
+
+    /** Dump a sensor rate.
+     * @param name sensor name
+     * @param lineNumber line number
+     * @param rate lines rate
+     */
+    public void dumpSensorRate(final String name, final double lineNumber, final double rate) {
+        writer.format(Locale.US,
+                      "sensor rate: sensorName %s lineNumber %s => %22.15e%n",
+                      name, lineNumber, rate);
     }
 
     /** Get a frame key or name.

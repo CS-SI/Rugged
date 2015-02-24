@@ -24,17 +24,23 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
+import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
+import org.apache.commons.math3.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
@@ -45,6 +51,11 @@ import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
+import org.orekit.rugged.linesensor.LineDatation;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
+import org.orekit.rugged.linesensor.SensorPixel;
+import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -160,6 +171,36 @@ public class DumpReplayer {
     /** Keyword for longitude index fields. */
     private static final String LON_INDEX = "lonIndex";
 
+    /** Keyword for sensor name. */
+    private static final String SENSOR_NAME = "sensorName";
+
+    /** Keyword for min line. */
+    private static final String MIN_LINE = "minLine";
+
+    /** Keyword for max line. */
+    private static final String MAX_LINE = "maxLine";
+
+    /** Keyword for line number. */
+    private static final String LINE_NUMBER = "lineNumber";
+
+    /** Keyword for number of pixels. */
+    private static final String NB_PIXELS = "nbPixels";
+
+    /** Keyword for pixel number. */
+    private static final String PIXEL_NUMBER = "pixelNumber";
+
+    /** Keyword for max number of evaluations. */
+    private static final String MAX_EVAL = "maxEval";
+
+    /** Keyword for accuracy. */
+    private static final String ACCURACY = "accuracy";
+
+    /** Keyword for normal. */
+    private static final String NORMAL = "normal";
+
+    /** Keyword for return arrow. */
+    private static final String RETURN_ARROW = "=>";
+
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
 
@@ -169,8 +210,11 @@ public class DumpReplayer {
     /** Ellipsoid. */
     private OneAxisEllipsoid ellipsoid;
 
-    /** Tiles map. */
+    /** Tiles list. */
     private final List<ParsedTile> tiles;
+
+    /** Sensors list. */
+    private final List<ParsedSensor> sensors;
 
     /** Interpolator min date. */
     private AbsoluteDate minDate;
@@ -205,8 +249,9 @@ public class DumpReplayer {
     /** Simple constructor.
      */
     public DumpReplayer() {
-        tiles = new ArrayList<ParsedTile>();
-        calls = new ArrayList<DumpedCall>();
+        tiles   = new ArrayList<ParsedTile>();
+        sensors = new ArrayList<ParsedSensor>();
+        calls   = new ArrayList<DumpedCall>();
     }
 
     /** Parse a dump file.
@@ -235,6 +280,9 @@ public class DumpReplayer {
         try {
             final RuggedBuilder builder = new RuggedBuilder();
 
+            if (algorithmId == null) {
+                algorithmId = AlgorithmId.IGNORE_DEM_USE_ELLIPSOID;
+            }
             builder.setAlgorithm(algorithmId);
             if (algorithmId == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
                 builder.setConstantElevation(constantElevation);
@@ -291,20 +339,63 @@ public class DumpReplayer {
 
             // we use Rugged transforms reloading mechanism to ensure the spacecraft
             // to body transforms will be the same as the ones dumped
-            final SpacecraftToObservedBody sc2Body =
+            final SpacecraftToObservedBody scToBody =
                     new SpacecraftToObservedBody(inertialFrame, ellipsoid.getBodyFrame(),
                                                  minDate, maxDate, tStep, tolerance,
                                                  b2iList, s2iList);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            new ObjectOutputStream(bos).writeObject(sc2Body);
+            new ObjectOutputStream(bos).writeObject(scToBody);
             final ByteArrayInputStream  bis = new ByteArrayInputStream(bos.toByteArray());
             builder.setTrajectoryAndTimeSpan(bis);
 
-            return builder.build();
+            final List<SensorMeanPlaneCrossing> planeCrossings = new ArrayList<SensorMeanPlaneCrossing>();
+            for (final ParsedSensor parsedSensor : sensors) {
+                final LineSensor sensor = new LineSensor(parsedSensor.name,
+                                                         parsedSensor,
+                                                         parsedSensor.position,
+                                                         parsedSensor);
+                if (parsedSensor.meanPlane != null) {
+                    planeCrossings.add(new SensorMeanPlaneCrossing(sensor, scToBody,
+                                                                   parsedSensor.meanPlane.minLine,
+                                                                   parsedSensor.meanPlane.maxLine,
+                                                                   lightTimeCorrection, aberrationOfLightCorrection,
+                                                                   parsedSensor.meanPlane.maxEval,
+                                                                   parsedSensor.meanPlane.accuracy,
+                                                                   parsedSensor.meanPlane.normal));
+                }
+                builder.addLineSensor(sensor);
+            }
+
+            final Rugged rugged = builder.build();
+
+            final Method setPlaneCrossing = Rugged.class.getDeclaredMethod("setPlaneCrossing",
+                                                                           SensorMeanPlaneCrossing.class);
+            setPlaneCrossing.setAccessible(true);
+            for (final SensorMeanPlaneCrossing planeCrossing : planeCrossings) {
+                setPlaneCrossing.invoke(rugged, planeCrossing);
+            }
+
+            return rugged;
 
         } catch (IOException ioe) {
             throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
+        } catch (SecurityException e) {
+            // this should never happen
+            throw RuggedException.createInternalError(e);
+        } catch (NoSuchMethodException e) {
+            // this should never happen
+            throw RuggedException.createInternalError(e);
+        } catch (IllegalArgumentException e) {
+            // this should never happen
+            throw RuggedException.createInternalError(e);
+        } catch (IllegalAccessException e) {
+            // this should never happen
+            throw RuggedException.createInternalError(e);
+        } catch (InvocationTargetException e) {
+            // this should never happen
+            throw RuggedException.createInternalError(e);
         }
+
     }
 
     /** Execute all dumped calls.
@@ -630,6 +721,254 @@ public class DumpReplayer {
                                           name, l, file.getAbsolutePath(), line);
             }
 
+        },
+
+        /** Parser for inverse location calls dump lines. */
+        INVERSE_LOCATION() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                if (fields.length < 16 ||
+                        !fields[0].equals(SENSOR_NAME) ||
+                        !fields[2].equals(LATITUDE) || !fields[4].equals(LONGITUDE) || !fields[6].equals(ELEVATION) ||
+                        !fields[8].equals(MIN_LINE) || !fields[10].equals(MAX_LINE) ||
+                        !fields[12].equals(LIGHT_TIME) || !fields[14].equals(ABERRATION)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final String sensorName = fields[1];
+                final GeodeticPoint point = new GeodeticPoint(Double.parseDouble(fields[3]),
+                                                              Double.parseDouble(fields[5]),
+                                                              Double.parseDouble(fields[7]));
+                final int minLine = Integer.parseInt(fields[9]);
+                final int maxLine = Integer.parseInt(fields[11]);
+                if (global.calls.isEmpty()) {
+                    global.lightTimeCorrection         = Boolean.parseBoolean(fields[11]);
+                    global.aberrationOfLightCorrection = Boolean.parseBoolean(fields[13]);
+                } else {
+                    if (global.lightTimeCorrection != Boolean.parseBoolean(fields[11])) {
+                        throw new RuggedException(RuggedMessages.LIGHT_TIME_CORRECTION_REDEFINED,
+                                                  l, file.getAbsolutePath(), line);
+                    }
+                    if (global.aberrationOfLightCorrection != Boolean.parseBoolean(fields[13])) {
+                        throw new RuggedException(RuggedMessages.ABERRATION_OF_LIGHT_CORRECTION_REDEFINED,
+                                                  l, file.getAbsolutePath(), line);
+                    }
+                }
+                global.calls.add(new DumpedCall() {
+
+                    /** {@inheritDoc} */
+                    @Override
+                    public Object execute(final Rugged rugged) throws RuggedException {
+                        return rugged.inverseLocation(sensorName, point, minLine, maxLine);
+                    }
+
+                });
+            }
+
+        },
+
+        /** Parser for inverse location result dump lines. */
+        INVERSE_LOCATION_RESULT() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                if (fields.length < 4 || !fields[0].equals(LINE_NUMBER) || !fields[2].equals(PIXEL_NUMBER)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final SensorPixel sp = new SensorPixel(Double.parseDouble(fields[1]),
+                                                       Double.parseDouble(fields[3]));
+                final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                last.expected = sp;
+            }
+
+        },
+
+        /** Parser for sensor dump lines. */
+        SENSOR() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                if (fields.length < 8 || !fields[0].equals(SENSOR_NAME) ||
+                    !fields[2].equals(NB_PIXELS) || !fields[4].equals(POSITION)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final String   sensorName = fields[1];
+                final int      nbPixels   = Integer.parseInt(fields[3]);
+                final Vector3D position   = new Vector3D(Double.parseDouble(fields[5]),
+                                                         Double.parseDouble(fields[6]),
+                                                         Double.parseDouble(fields[7]));
+                for (final ParsedSensor sensor : global.sensors) {
+                    if (sensor.name.equals(sensorName)) {
+                        throw new RuggedException(RuggedMessages.SENSOR_ALREADY_DEFINED,
+                                                  sensorName, l, file.getAbsolutePath(), line);
+                    }
+                }
+                global.sensors.add(new ParsedSensor(sensorName, nbPixels, position));
+            }
+
+        },
+
+        /** Parser for sensor mean plane dump lines. */
+        SENSOR_MEAN_PLANE() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                if (fields.length < 14 || !fields[0].equals(SENSOR_NAME) ||
+                    !fields[2].equals(MIN_LINE) || !fields[4].equals(MAX_LINE) ||
+                    !fields[6].equals(MAX_EVAL) || !fields[8].equals(ACCURACY) ||
+                    !fields[10].equals(NORMAL)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final String   sensorName = fields[1];
+                final int      minLine    = Integer.parseInt(fields[3]);
+                final int      maxLine    = Integer.parseInt(fields[5]);
+                final int      maxEval    = Integer.parseInt(fields[7]);
+                final double   accuracy   = Double.parseDouble(fields[9]);
+                final Vector3D normal     = new Vector3D(Double.parseDouble(fields[11]),
+                                                         Double.parseDouble(fields[12]),
+                                                         Double.parseDouble(fields[13]));
+                for (final ParsedSensor sensor : global.sensors) {
+                    if (sensor.name.equals(sensorName)) {
+                        sensor.meanPlane = new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal);
+                        return;
+                    }
+                }
+
+                throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+
+            }
+
+        },
+
+        /** Parser for sensor LOS dump lines. */
+        SENSOR_LOS() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                try {
+                    if (fields.length < 10 || !fields[0].equals(SENSOR_NAME) ||
+                            !fields[2].equals(DATE) || !fields[4].equals(PIXEL_NUMBER) ||
+                            !fields[6].equals(RETURN_ARROW)) {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                    final String       sensorName  = fields[1];
+                    final AbsoluteDate date        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
+                    final int          pixelNumber = Integer.parseInt(fields[5]);
+                    final Vector3D     los         = new Vector3D(Double.parseDouble(fields[7]),
+                                                                  Double.parseDouble(fields[8]),
+                                                                  Double.parseDouble(fields[9]));
+                    for (final ParsedSensor sensor : global.sensors) {
+                        if (sensor.name.equals(sensorName)) {
+                            sensor.setLOS(date, pixelNumber, los);
+                            return;
+                        }
+                    }
+
+                    throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+                } catch (OrekitException oe) {
+                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+                }
+            }
+
+        },
+
+        /** Parser for sensor date dump lines. */
+        SENSOR_DATE() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                try {
+                    if (fields.length < 5 || !fields[0].equals(SENSOR_NAME) ||
+                        !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RETURN_ARROW)) {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                    final String       sensorName  = fields[1];
+                    final double       lineNumber  = Double.parseDouble(fields[3]);
+                    final AbsoluteDate date        = new AbsoluteDate(fields[5], TimeScalesFactory.getUTC());
+                    for (final ParsedSensor sensor : global.sensors) {
+                        if (sensor.name.equals(sensorName)) {
+                            sensor.setDatation(lineNumber, date);
+                            return;
+                        }
+                    }
+
+                    throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+                } catch (OrekitException oe) {
+                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+                }
+
+            }
+
+        },
+
+        /** Parser for sensor line dump lines. */
+        SENSOR_LINE() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                try {
+                    if (fields.length < 10 || !fields[0].equals(SENSOR_NAME) ||
+                            !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RETURN_ARROW)) {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                    final String       sensorName  = fields[1];
+                    final AbsoluteDate date        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
+                    final double       lineNumber  = Double.parseDouble(fields[5]);
+                    for (final ParsedSensor sensor : global.sensors) {
+                        if (sensor.name.equals(sensorName)) {
+                            sensor.setDatation(lineNumber, date);
+                            return;
+                        }
+                    }
+
+                    throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+                } catch (OrekitException oe) {
+                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+                }
+
+            }
+
+        },
+
+        /** Parser for sensor rate dump lines. */
+        SENSOR_RATE() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                if (fields.length < 5 || !fields[0].equals(SENSOR_NAME) ||
+                    !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RETURN_ARROW)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final String       sensorName  = fields[1];
+                final double       lineNumber  = Double.parseDouble(fields[3]);
+                final double       rate  = Double.parseDouble(fields[5]);
+                for (final ParsedSensor sensor : global.sensors) {
+                    if (sensor.name.equals(sensorName)) {
+                        sensor.setRate(lineNumber, rate);
+                        return;
+                    }
+                }
+
+                throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+
+            }
+
         };
 
         /** Parse a line.
@@ -652,7 +991,7 @@ public class DumpReplayer {
                 final String parsedKey = line.substring(0, colon).trim().replaceAll(" ", "_").toUpperCase();
                 try {
                     final LineParser parser = LineParser.valueOf(parsedKey);
-                    parser.parse(colon, file, line, line.substring(colon + 1).trim().split("\\s+"), global);
+                    parser.parse(l, file, line, line.substring(colon + 1).trim().split("\\s+"), global);
                 } catch (IllegalArgumentException iae) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
@@ -757,6 +1096,201 @@ public class DumpReplayer {
                 tile.setElevation(latitudeIndex, longitudeIndex, elevation);
             }
 
+        }
+
+    }
+
+    /** Local class for handling already parsed sensor data. */
+    private static class ParsedSensor implements LineDatation, TimeDependentLOS {
+
+        /** Name of the sensor. */
+        private final String name;
+
+        /** Number of pixels. */
+        private final int nbPixels;
+
+        /** Position. */
+        private final Vector3D position;
+
+        /** Mean plane crossing finder. */
+        private ParsedMeanPlane meanPlane;
+
+        /** LOS map. */
+        private final Map<Integer, List<Pair<AbsoluteDate, Vector3D>>> losMap;
+
+        /** Datation. */
+        private final List<Pair<Double, AbsoluteDate>> datation;
+
+        /** Rate. */
+        private final List<Pair<Double, Double>> rates;
+
+        /** simple constructor.
+         * @param name name of the sensor
+         * @param nbPixels number of pixels
+         * @param position position
+         */
+        public ParsedSensor(final String name, final int nbPixels, final Vector3D position) {
+            this.name     = name;
+            this.nbPixels = nbPixels;
+            this.position = position;
+            this.losMap   = new HashMap<Integer, List<Pair<AbsoluteDate, Vector3D>>>();
+            this.datation = new ArrayList<Pair<Double, AbsoluteDate>>();
+            this.rates    = new ArrayList<Pair<Double, Double>>();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public int getNbEstimatedParameters() {
+            return 0;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void getEstimatedParameters(final double[] parameters, final int start, final int length)
+            throws RuggedException {
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
+            throws RuggedException {
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public int getNbPixels() {
+            return nbPixels;
+        }
+
+        /** Set a los direction.
+         * @param date date
+         * @param pixelNumber number of the pixel
+         * @param los los direction
+         */
+        public void setLOS(final AbsoluteDate date, final int pixelNumber, final Vector3D los) {
+            List<Pair<AbsoluteDate, Vector3D>> list = losMap.get(pixelNumber);
+            if (list == null) {
+                list = new ArrayList<Pair<AbsoluteDate, Vector3D>>();
+                losMap.put(pixelNumber, list);
+            }
+            list.add(new Pair<AbsoluteDate, Vector3D>(date, los));
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public Vector3D getLOS(final int index, final AbsoluteDate date) {
+            final List<Pair<AbsoluteDate, Vector3D>> list = losMap.get(index);
+            if (list == null) {
+                throw RuggedException.createInternalError(null);
+            }
+            int selected = 0;
+            for (int i = 0; i < list.size(); ++i) {
+                if (FastMath.abs(list.get(i).getFirst().durationFrom(date)) <
+                    FastMath.abs(list.get(selected).getFirst().durationFrom(date))) {
+                    selected = i;
+                }
+            }
+            return list.get(selected).getSecond();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public FieldVector3D<DerivativeStructure> getLOS(final int index, final AbsoluteDate date, final double[] parameters) {
+            final Vector3D los = getLOS(index, date);
+            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, los.getX()),
+                                                          new DerivativeStructure(parameters.length, 1, los.getY()),
+                                                          new DerivativeStructure(parameters.length, 1, los.getZ()));
+        }
+
+        /** Set a datation pair.
+         * @param lineNumber line number
+         * @param date date
+         */
+        public void setDatation(final double lineNumber, final AbsoluteDate date) {
+            datation.add(new Pair<Double, AbsoluteDate>(lineNumber, date));
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public AbsoluteDate getDate(final double lineNumber) {
+            int selected = 0;
+            for (int i = 0; i < datation.size(); ++i) {
+                if (FastMath.abs(datation.get(i).getFirst()        - lineNumber) <
+                    FastMath.abs(datation.get(selected).getFirst() - lineNumber)) {
+                    selected = i;
+                }
+            }
+            return datation.get(selected).getSecond();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public double getLine(final AbsoluteDate date) {
+            int selected = 0;
+            for (int i = 0; i < datation.size(); ++i) {
+                if (FastMath.abs(datation.get(i).getSecond().durationFrom(date)) <
+                    FastMath.abs(datation.get(selected).getSecond().durationFrom(date))) {
+                    selected = i;
+                }
+            }
+            return datation.get(selected).getFirst();
+        }
+
+        /** Set a rate.
+         * @param lineNumber line number
+         * @param rate lines rate
+         */
+        public void setRate(final double lineNumber, final double rate) {
+            rates.add(new Pair<Double, Double>(lineNumber, rate));
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public double getRate(final double lineNumber) {
+            int selected = 0;
+            for (int i = 0; i < rates.size(); ++i) {
+                if (FastMath.abs(rates.get(i).getFirst()        - lineNumber) <
+                    FastMath.abs(rates.get(selected).getFirst() - lineNumber)) {
+                    selected = i;
+                }
+            }
+            return rates.get(selected).getSecond();
+        }
+
+    }
+
+    /** Local class for handling already parsed mean plane data. */
+    private static class ParsedMeanPlane {
+
+        /** Min line. */
+        private final int minLine;
+
+        /** Max line. */
+        private final int maxLine;
+
+        /** Maximum number of evaluations. */
+        private final int maxEval;
+
+        /** Accuracy to use for finding crossing line number. */
+        private final double accuracy;
+
+        /** Mean plane normal. */
+        private final Vector3D normal;
+
+        /** simple constructor.
+         * @param minLine min line
+         * @param maxLine max line
+         * @param maxEval maximum number of evaluations
+         * @param accuracy accuracy to use for finding crossing line number
+         * @param normal mean plane normal
+         */
+        public ParsedMeanPlane(final int minLine, final int maxLine,
+                               final int maxEval, final double accuracy, final Vector3D normal) {
+            this.minLine  = minLine;
+            this.maxLine  = maxLine;
+            this.maxEval  = maxEval;
+            this.accuracy = accuracy;
+            this.normal   = normal;
         }
 
     }

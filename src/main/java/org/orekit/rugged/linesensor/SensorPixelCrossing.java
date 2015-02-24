@@ -23,8 +23,8 @@ import org.apache.commons.math3.exception.NoBracketingException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.time.AbsoluteDate;
 
 /** Class devoted to locate where ground point crosses a sensor line.
@@ -79,8 +79,12 @@ public class SensorPixelCrossing {
             final UnivariateFunction f = new UnivariateFunction() {
                 /** {@inheritDoc} */
                 @Override
-                public double value(final double x) throws OrekitExceptionWrapper {
-                    return Vector3D.angle(cross, getLOS(date, x)) - 0.5 * FastMath.PI;
+                public double value(final double x) throws RuggedExceptionWrapper {
+                    try {
+                        return Vector3D.angle(cross, getLOS(date, x)) - 0.5 * FastMath.PI;
+                    } catch (RuggedException re) {
+                        throw new RuggedExceptionWrapper(re);
+                    }
                 }
             };
 
@@ -94,6 +98,8 @@ public class SensorPixelCrossing {
             return Double.NaN;
         } catch (TooManyEvaluationsException tmee) {
             throw new RuggedException(tmee);
+        } catch (RuggedExceptionWrapper rew) {
+            throw rew.getException();
         }
     }
 
@@ -101,8 +107,10 @@ public class SensorPixelCrossing {
      * @param date current date
      * @param x pixel index
      * @return interpolated direction for specified index
+     * @exception RuggedException if date cannot be handled
      */
-    private Vector3D getLOS(final AbsoluteDate date, final double x) {
+    private Vector3D getLOS(final AbsoluteDate date, final double x)
+        throws RuggedException {
 
         // find surrounding pixels
         final int iInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(x)));

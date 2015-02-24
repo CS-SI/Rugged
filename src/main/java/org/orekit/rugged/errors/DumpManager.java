@@ -24,6 +24,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
+import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -157,6 +160,32 @@ public class DumpManager {
         }
     }
 
+    /** Dump an inverse location computation.
+     * @param sensorName name of the line  sensor
+     * @param point point to localize
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @param lightTimeCorrection flag for light time correction
+     * @param aberrationOfLightCorrection flag for aberration of light correction
+     */
+    public static void dumpInverseLocation(final String sensorName, final GeodeticPoint point,
+                                           final int minLine, final int maxLine,
+                                           final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection) {
+        if (isActive()) {
+            DUMP.get().dumpInverseLocation(sensorName, point, minLine, maxLine,
+                                        lightTimeCorrection, aberrationOfLightCorrection);
+        }
+    }
+
+    /** Dump an inverse location result.
+     * @param pixel resulting sensor pixel
+     */
+    public static void dumpInverseLocationResult(final SensorPixel pixel) {
+        if (isActive()) {
+            DUMP.get().dumpInverseLocationResult(pixel);
+        }
+    }
+
     /** Dump an observation transform transform.
      * @param scToBody provider for observation
      * @param index index of the transform
@@ -169,6 +198,77 @@ public class DumpManager {
         throws RuggedException {
         if (isActive()) {
             DUMP.get().dumpTransform(scToBody, index, bodyToInertial, scToInertial);
+        }
+    }
+
+    /** Dump a sensor.
+     * @param sensor sensor to dump
+     */
+    public static void dumpSensor(final LineSensor sensor) {
+        if (isActive()) {
+            DUMP.get().dumpSensor(sensor);
+        }
+    }
+
+    /** Dump a sensor mean plane.
+     * @param meanPlane mean plane associated with sensor
+     * @exception RuggedException if some frames cannot be computed at mid date
+     */
+    public static void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane)
+        throws RuggedException {
+        if (isActive()) {
+            DUMP.get().dumpSensorMeanPlane(meanPlane);
+        }
+    }
+
+    /** Dump a sensor LOS.
+     * @param name sensor name
+     * @param date date
+     * @param i pixel index
+     * @param los pixel normalized line-of-sight
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public static void dumpSensorLOS(final String name, final AbsoluteDate date, final int i, final Vector3D los)
+        throws RuggedException {
+        if (isActive()) {
+            DUMP.get().dumpSensorLOS(name, date, i, los);
+        }
+    }
+
+    /** Dump a sensor date.
+     * @param name sensor name
+     * @param lineNumber line number
+     * @param date date
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public static void dumpSensorDate(final String name, final double lineNumber, final AbsoluteDate date)
+        throws RuggedException {
+        if (isActive()) {
+            DUMP.get().dumpSensorDate(name, lineNumber, date);
+        }
+    }
+
+    /** Dump a sensor line.
+     * @param name sensor name
+     * @param date date
+     * @param lineNumber line number
+     * @exception RuggedException if date cannot be converted to UTC
+     */
+    public static void dumpSensorLine(final String name, final AbsoluteDate date, final double lineNumber)
+        throws RuggedException {
+        if (isActive()) {
+            DUMP.get().dumpSensorLine(name, date, lineNumber);
+        }
+    }
+
+    /** Dump a sensor rate.
+     * @param name sensor name
+     * @param lineNumber line number
+     * @param rate lines rate
+     */
+    public static void dumpSensorRate(final String name, final double lineNumber, final double rate) {
+        if (isActive()) {
+            DUMP.get().dumpSensorRate(name, lineNumber, rate);
         }
     }
 

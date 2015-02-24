@@ -58,6 +58,21 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         b2 = b * b;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public Vector3D transform(final GeodeticPoint point) {
+        DumpManager.dumpEllipsoid(this);
+        return super.transform(point);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public GeodeticPoint transform(final Vector3D point, final Frame frame, final AbsoluteDate date)
+        throws OrekitException {
+        DumpManager.dumpEllipsoid(this);
+        return super.transform(point, frame, date);
+    }
+
     /** Get point at some latitude along a pixel line of sight.
      * @param position cell position (in body frame)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
@@ -247,8 +262,6 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      */
     public Vector3D convertLos(final GeodeticPoint point, final Vector3D los) {
 
-        DumpManager.dumpEllipsoid(this);
-
         // Cartesian coordinates of the topocentric frame origin
         final Vector3D p3D = transform(point);
 
@@ -282,8 +295,6 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         throws RuggedException {
         try {
 
-            DumpManager.dumpEllipsoid(this);
-
             // switch to geodetic coordinates using primary point as reference
             final GeodeticPoint point = transform(primary, getBodyFrame(), null);
             final Vector3D      los   = secondary.subtract(primary);
@@ -308,7 +319,6 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     public NormalizedGeodeticPoint transform(final Vector3D point, final Frame frame, final AbsoluteDate date,
                                              final double centralLongitude)
         throws OrekitException {
-        DumpManager.dumpEllipsoid(this);
         final GeodeticPoint gp = transform(point, frame, date);
         return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
                                            centralLongitude);
