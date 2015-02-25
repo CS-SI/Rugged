@@ -435,13 +435,12 @@ public class Rugged {
                                        final int minLine, final int maxLine)
         throws RuggedException {
 
-        DumpManager.dumpInverseLocation(sensorName, point, minLine, maxLine,
+        final LineSensor sensor = getLineSensor(sensorName);
+        DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine,
                                         lightTimeCorrection, aberrationOfLightCorrection);
 
-        final LineSensor sensor = getLineSensor(sensorName);
         final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
 
-        DumpManager.dumpSensor(sensor);
         DumpManager.dumpSensorMeanPlane(planeCrossing);
 
         // find approximately the sensor line at which ground point crosses sensor mean plane

@@ -79,7 +79,7 @@ public class LineSensor {
     public Vector3D getLos(final AbsoluteDate date, final int i)
         throws RuggedException {
         final Vector3D l = los.getLOS(i, date);
-        DumpManager.dumpSensorLOS(name, date, i, l);
+        DumpManager.dumpSensorLOS(this, date, i, l);
         return l;
     }
 
@@ -91,7 +91,7 @@ public class LineSensor {
     public AbsoluteDate getDate(final double lineNumber)
         throws RuggedException {
         final AbsoluteDate date = datationModel.getDate(lineNumber);
-        DumpManager.dumpSensorDate(name, lineNumber, date);
+        DumpManager.dumpSensorDatation(this, lineNumber, date);
         return date;
     }
 
@@ -103,7 +103,7 @@ public class LineSensor {
     public double getLine(final AbsoluteDate date)
         throws RuggedException {
         final double lineNumber = datationModel.getLine(date);
-        DumpManager.dumpSensorLine(name, date, lineNumber);
+        DumpManager.dumpSensorDatation(this, lineNumber, date);
         return lineNumber;
     }
 
@@ -113,7 +113,7 @@ public class LineSensor {
      */
     public double getRate(final double lineNumber) {
         final double rate = datationModel.getRate(lineNumber);
-        DumpManager.dumpSensorRate(name, lineNumber, rate);
+        DumpManager.dumpSensorRate(this, lineNumber, rate);
         return rate;
     }
 

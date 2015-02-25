@@ -198,8 +198,8 @@ public class DumpReplayer {
     /** Keyword for normal. */
     private static final String NORMAL = "normal";
 
-    /** Keyword for return arrow. */
-    private static final String RETURN_ARROW = "=>";
+    /** Keyword for rate. */
+    private static final String RATE = "rate";
 
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
@@ -396,6 +396,21 @@ public class DumpReplayer {
             throw RuggedException.createInternalError(e);
         }
 
+    }
+
+    /** Get a sensor by name.
+     * @param name sensor name
+     * @return parsed sensor
+     */
+    private ParsedSensor getSensor(final String name) {
+        for (final ParsedSensor sensor : sensors) {
+            if (sensor.name.equals(name)) {
+                return sensor;
+            }
+        }
+        ParsedSensor sensor = new ParsedSensor(name);
+        sensors.add(sensor);
+        return sensor;
     }
 
     /** Execute all dumped calls.
@@ -798,18 +813,11 @@ public class DumpReplayer {
                     !fields[2].equals(NB_PIXELS) || !fields[4].equals(POSITION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
-                final String   sensorName = fields[1];
-                final int      nbPixels   = Integer.parseInt(fields[3]);
-                final Vector3D position   = new Vector3D(Double.parseDouble(fields[5]),
-                                                         Double.parseDouble(fields[6]),
-                                                         Double.parseDouble(fields[7]));
-                for (final ParsedSensor sensor : global.sensors) {
-                    if (sensor.name.equals(sensorName)) {
-                        throw new RuggedException(RuggedMessages.SENSOR_ALREADY_DEFINED,
-                                                  sensorName, l, file.getAbsolutePath(), line);
-                    }
-                }
-                global.sensors.add(new ParsedSensor(sensorName, nbPixels, position));
+                final ParsedSensor sensor = global.getSensor(fields[1]);
+                sensor.setNbPixels(Integer.parseInt(fields[3]));
+                sensor.setPosition(new Vector3D(Double.parseDouble(fields[5]),
+                                                Double.parseDouble(fields[6]),
+                                                Double.parseDouble(fields[7])));
             }
 
         },
@@ -835,14 +843,7 @@ public class DumpReplayer {
                 final Vector3D normal     = new Vector3D(Double.parseDouble(fields[11]),
                                                          Double.parseDouble(fields[12]),
                                                          Double.parseDouble(fields[13]));
-                for (final ParsedSensor sensor : global.sensors) {
-                    if (sensor.name.equals(sensorName)) {
-                        sensor.meanPlane = new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal);
-                        return;
-                    }
-                }
-
-                throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+                global.getSensor(sensorName).setMeanPlane(new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal));
 
             }
 
@@ -858,7 +859,7 @@ public class DumpReplayer {
                 try {
                     if (fields.length < 10 || !fields[0].equals(SENSOR_NAME) ||
                             !fields[2].equals(DATE) || !fields[4].equals(PIXEL_NUMBER) ||
-                            !fields[6].equals(RETURN_ARROW)) {
+                            !fields[6].equals(LOS)) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                     }
                     final String       sensorName  = fields[1];
@@ -867,14 +868,8 @@ public class DumpReplayer {
                     final Vector3D     los         = new Vector3D(Double.parseDouble(fields[7]),
                                                                   Double.parseDouble(fields[8]),
                                                                   Double.parseDouble(fields[9]));
-                    for (final ParsedSensor sensor : global.sensors) {
-                        if (sensor.name.equals(sensorName)) {
-                            sensor.setLOS(date, pixelNumber, los);
-                            return;
-                        }
-                    }
+                    global.getSensor(sensorName).setLOS(date, pixelNumber, los);
 
-                    throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
                 } catch (OrekitException oe) {
                     throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
                 }
@@ -882,8 +877,8 @@ public class DumpReplayer {
 
         },
 
-        /** Parser for sensor date dump lines. */
-        SENSOR_DATE() {
+        /** Parser for sensor datation dump lines. */
+        SENSOR_DATATION() {
 
             /** {@inheritDoc} */
             @Override
@@ -891,51 +886,14 @@ public class DumpReplayer {
                 throws RuggedException {
                 try {
                     if (fields.length < 5 || !fields[0].equals(SENSOR_NAME) ||
-                        !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RETURN_ARROW)) {
+                        !fields[2].equals(LINE_NUMBER) || !fields[4].equals(DATE)) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                     }
                     final String       sensorName  = fields[1];
                     final double       lineNumber  = Double.parseDouble(fields[3]);
                     final AbsoluteDate date        = new AbsoluteDate(fields[5], TimeScalesFactory.getUTC());
-                    for (final ParsedSensor sensor : global.sensors) {
-                        if (sensor.name.equals(sensorName)) {
-                            sensor.setDatation(lineNumber, date);
-                            return;
-                        }
-                    }
+                    global.getSensor(sensorName).setDatation(lineNumber, date);
 
-                    throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
-                } catch (OrekitException oe) {
-                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-                }
-
-            }
-
-        },
-
-        /** Parser for sensor line dump lines. */
-        SENSOR_LINE() {
-
-            /** {@inheritDoc} */
-            @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
-                try {
-                    if (fields.length < 10 || !fields[0].equals(SENSOR_NAME) ||
-                            !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RETURN_ARROW)) {
-                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                    }
-                    final String       sensorName  = fields[1];
-                    final AbsoluteDate date        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
-                    final double       lineNumber  = Double.parseDouble(fields[5]);
-                    for (final ParsedSensor sensor : global.sensors) {
-                        if (sensor.name.equals(sensorName)) {
-                            sensor.setDatation(lineNumber, date);
-                            return;
-                        }
-                    }
-
-                    throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
                 } catch (OrekitException oe) {
                     throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
                 }
@@ -952,20 +910,13 @@ public class DumpReplayer {
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
                 throws RuggedException {
                 if (fields.length < 5 || !fields[0].equals(SENSOR_NAME) ||
-                    !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RETURN_ARROW)) {
+                    !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RATE)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
                 final String       sensorName  = fields[1];
                 final double       lineNumber  = Double.parseDouble(fields[3]);
                 final double       rate  = Double.parseDouble(fields[5]);
-                for (final ParsedSensor sensor : global.sensors) {
-                    if (sensor.name.equals(sensorName)) {
-                        sensor.setRate(lineNumber, rate);
-                        return;
-                    }
-                }
-
-                throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
+                global.getSensor(sensorName).setRate(lineNumber, rate);
 
             }
 
@@ -1107,10 +1058,10 @@ public class DumpReplayer {
         private final String name;
 
         /** Number of pixels. */
-        private final int nbPixels;
+        private int nbPixels;
 
         /** Position. */
-        private final Vector3D position;
+        private Vector3D position;
 
         /** Mean plane crossing finder. */
         private ParsedMeanPlane meanPlane;
@@ -1129,10 +1080,8 @@ public class DumpReplayer {
          * @param nbPixels number of pixels
          * @param position position
          */
-        public ParsedSensor(final String name, final int nbPixels, final Vector3D position) {
+        public ParsedSensor(final String name) {
             this.name     = name;
-            this.nbPixels = nbPixels;
-            this.position = position;
             this.losMap   = new HashMap<Integer, List<Pair<AbsoluteDate, Vector3D>>>();
             this.datation = new ArrayList<Pair<Double, AbsoluteDate>>();
             this.rates    = new ArrayList<Pair<Double, Double>>();
@@ -1156,6 +1105,27 @@ public class DumpReplayer {
             throws RuggedException {
         }
 
+        /** Set the mean place finder.
+         * @param meanPlane mean plane finder
+         */
+        public void setMeanPlane(final ParsedMeanPlane meanPlane) {
+            this.meanPlane = meanPlane;
+        }
+
+        /** Set the position.
+         * @param position position
+         */
+        public void setPosition(final Vector3D position) {
+            this.position = position;
+        }
+
+        /** Set the number of pixels.
+         * @param nbPixels number of pixels
+         */
+        public void setNbPixels(final int nbPixels) {
+            this.nbPixels = nbPixels;
+        }
+
         /** {@inheritDoc} */
         @Override
         public int getNbPixels() {
@@ -1173,7 +1143,15 @@ public class DumpReplayer {
                 list = new ArrayList<Pair<AbsoluteDate, Vector3D>>();
                 losMap.put(pixelNumber, list);
             }
-            list.add(new Pair<AbsoluteDate, Vector3D>(date, los));
+            // find insertion index to have LOS sorted chronologically
+            int index = 0;
+            while (index < list.size()) {
+                if (list.get(index).getFirst().compareTo(date) > 0) {
+                    break;
+                }
+                ++index;
+            }
+            list.add(index, new Pair<AbsoluteDate, Vector3D>(date, los));
         }
 
         /** {@inheritDoc} */
@@ -1183,14 +1161,28 @@ public class DumpReplayer {
             if (list == null) {
                 throw RuggedException.createInternalError(null);
             }
-            int selected = 0;
-            for (int i = 0; i < list.size(); ++i) {
-                if (FastMath.abs(list.get(i).getFirst().durationFrom(date)) <
-                    FastMath.abs(list.get(selected).getFirst().durationFrom(date))) {
-                    selected = i;
-                }
+
+            if (list.size() < 2) {
+                return list.get(0).getSecond();
             }
-            return list.get(selected).getSecond();
+
+            // find entries bracketing the the date
+            int sup = 0;
+            while (sup < list.size() - 1) {
+                if (list.get(sup).getFirst().compareTo(date) >= 0) {
+                    break;
+                }
+                ++sup;
+            }
+            final int inf = (sup == 0) ? sup++ : (sup - 1);
+
+            final AbsoluteDate dInf  = list.get(inf).getFirst();
+            final Vector3D     lInf  = list.get(inf).getSecond();
+            final AbsoluteDate dSup  = list.get(sup).getFirst();
+            final Vector3D     lSup  = list.get(sup).getSecond();
+            final double       alpha = date.durationFrom(dInf) / dSup.durationFrom(dInf);
+            return new Vector3D(alpha, lSup, 1 - alpha, lInf);
+
         }
 
         /** {@inheritDoc} */
@@ -1207,33 +1199,69 @@ public class DumpReplayer {
          * @param date date
          */
         public void setDatation(final double lineNumber, final AbsoluteDate date) {
-            datation.add(new Pair<Double, AbsoluteDate>(lineNumber, date));
+            // find insertion index to have datations sorted chronologically
+            int index = 0;
+            while (index < datation.size()) {
+                if (datation.get(index).getSecond().compareTo(date) > 0) {
+                    break;
+                }
+                ++index;
+            }
+            datation.add(index, new Pair<Double, AbsoluteDate>(lineNumber, date));
         }
 
         /** {@inheritDoc} */
         @Override
         public AbsoluteDate getDate(final double lineNumber) {
-            int selected = 0;
-            for (int i = 0; i < datation.size(); ++i) {
-                if (FastMath.abs(datation.get(i).getFirst()        - lineNumber) <
-                    FastMath.abs(datation.get(selected).getFirst() - lineNumber)) {
-                    selected = i;
-                }
+
+            if (datation.size() < 2) {
+                return datation.get(0).getSecond();
             }
-            return datation.get(selected).getSecond();
+
+            // find entries bracketing the line number
+            int sup = 0;
+            while (sup < datation.size() - 1) {
+                if (datation.get(sup).getFirst() >= lineNumber) {
+                    break;
+                }
+                ++sup;
+            }
+            final int inf = (sup == 0) ? sup++ : (sup - 1);
+
+            final double       lInf  = datation.get(inf).getFirst();
+            final AbsoluteDate dInf  = datation.get(inf).getSecond();
+            final double       lSup  = datation.get(sup).getFirst();
+            final AbsoluteDate dSup  = datation.get(sup).getSecond();
+            final double       alpha = (lineNumber - lInf) / (lSup - lInf);
+            return dInf.shiftedBy(alpha * dSup.durationFrom(dInf));
+
         }
 
         /** {@inheritDoc} */
         @Override
         public double getLine(final AbsoluteDate date) {
-            int selected = 0;
-            for (int i = 0; i < datation.size(); ++i) {
-                if (FastMath.abs(datation.get(i).getSecond().durationFrom(date)) <
-                    FastMath.abs(datation.get(selected).getSecond().durationFrom(date))) {
-                    selected = i;
-                }
+
+            if (datation.size() < 2) {
+                return datation.get(0).getFirst();
             }
-            return datation.get(selected).getFirst();
+
+            // find entries bracketing the date
+            int sup = 0;
+            while (sup < datation.size() - 1) {
+                if (datation.get(sup).getSecond().compareTo(date) >= 0) {
+                    break;
+                }
+                ++sup;
+            }
+            final int inf = (sup == 0) ? sup++ : (sup - 1);
+
+            final double       lInf  = datation.get(inf).getFirst();
+            final AbsoluteDate dInf  = datation.get(inf).getSecond();
+            final double       lSup  = datation.get(sup).getFirst();
+            final AbsoluteDate dSup  = datation.get(sup).getSecond();
+            final double       alpha = date.durationFrom(dInf) / dSup.durationFrom(dInf);
+            return alpha * lSup + (1 - alpha) * lInf;
+
         }
 
         /** Set a rate.
@@ -1241,20 +1269,42 @@ public class DumpReplayer {
          * @param rate lines rate
          */
         public void setRate(final double lineNumber, final double rate) {
-            rates.add(new Pair<Double, Double>(lineNumber, rate));
+            // find insertion index to have rates sorted by line numbers
+            int index = 0;
+            while (index < rates.size()) {
+                if (rates.get(index).getFirst() > lineNumber) {
+                    break;
+                }
+                ++index;
+            }
+            rates.add(index, new Pair<Double, Double>(lineNumber, rate));
         }
 
         /** {@inheritDoc} */
         @Override
         public double getRate(final double lineNumber) {
-            int selected = 0;
-            for (int i = 0; i < rates.size(); ++i) {
-                if (FastMath.abs(rates.get(i).getFirst()        - lineNumber) <
-                    FastMath.abs(rates.get(selected).getFirst() - lineNumber)) {
-                    selected = i;
-                }
+
+            if (rates.size() < 2) {
+                return rates.get(0).getSecond();
             }
-            return rates.get(selected).getSecond();
+
+            // find entries bracketing the line number
+            int sup = 0;
+            while (sup < rates.size() - 1) {
+                if (rates.get(sup).getFirst() >= lineNumber) {
+                    break;
+                }
+                ++sup;
+            }
+            final int inf = (sup == 0) ? sup++ : (sup - 1);
+
+            final double lInf  = rates.get(inf).getFirst();
+            final double rInf  = rates.get(inf).getSecond();
+            final double lSup  = rates.get(sup).getFirst();
+            final double rSup  = rates.get(sup).getSecond();
+            final double alpha = (lineNumber - lInf) / (lSup - lInf);
+            return alpha * rSup + (1 - alpha) * rInf;
+
         }
 
     }

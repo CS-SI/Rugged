@@ -161,19 +161,19 @@ public class DumpManager {
     }
 
     /** Dump an inverse location computation.
-     * @param sensorName name of the line  sensor
+     * @param sensor sensor
      * @param point point to localize
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
      */
-    public static void dumpInverseLocation(final String sensorName, final GeodeticPoint point,
+    public static void dumpInverseLocation(final LineSensor sensor, final GeodeticPoint point,
                                            final int minLine, final int maxLine,
                                            final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection) {
         if (isActive()) {
-            DUMP.get().dumpInverseLocation(sensorName, point, minLine, maxLine,
-                                        lightTimeCorrection, aberrationOfLightCorrection);
+            DUMP.get().dumpInverseLocation(sensor, point, minLine, maxLine,
+                                           lightTimeCorrection, aberrationOfLightCorrection);
         }
     }
 
@@ -201,15 +201,6 @@ public class DumpManager {
         }
     }
 
-    /** Dump a sensor.
-     * @param sensor sensor to dump
-     */
-    public static void dumpSensor(final LineSensor sensor) {
-        if (isActive()) {
-            DUMP.get().dumpSensor(sensor);
-        }
-    }
-
     /** Dump a sensor mean plane.
      * @param meanPlane mean plane associated with sensor
      * @exception RuggedException if some frames cannot be computed at mid date
@@ -222,53 +213,40 @@ public class DumpManager {
     }
 
     /** Dump a sensor LOS.
-     * @param name sensor name
+     * @param sensor sensor
      * @param date date
      * @param i pixel index
      * @param los pixel normalized line-of-sight
      * @exception RuggedException if date cannot be converted to UTC
      */
-    public static void dumpSensorLOS(final String name, final AbsoluteDate date, final int i, final Vector3D los)
+    public static void dumpSensorLOS(final LineSensor sensor, final AbsoluteDate date, final int i, final Vector3D los)
         throws RuggedException {
         if (isActive()) {
-            DUMP.get().dumpSensorLOS(name, date, i, los);
+            DUMP.get().dumpSensorLOS(sensor, date, i, los);
         }
     }
 
-    /** Dump a sensor date.
-     * @param name sensor name
+    /** Dump a sensor datation.
+     * @param sensor sensor
      * @param lineNumber line number
      * @param date date
      * @exception RuggedException if date cannot be converted to UTC
      */
-    public static void dumpSensorDate(final String name, final double lineNumber, final AbsoluteDate date)
+    public static void dumpSensorDatation(final LineSensor sensor, final double lineNumber, final AbsoluteDate date)
         throws RuggedException {
         if (isActive()) {
-            DUMP.get().dumpSensorDate(name, lineNumber, date);
-        }
-    }
-
-    /** Dump a sensor line.
-     * @param name sensor name
-     * @param date date
-     * @param lineNumber line number
-     * @exception RuggedException if date cannot be converted to UTC
-     */
-    public static void dumpSensorLine(final String name, final AbsoluteDate date, final double lineNumber)
-        throws RuggedException {
-        if (isActive()) {
-            DUMP.get().dumpSensorLine(name, date, lineNumber);
+            DUMP.get().dumpSensorDatation(sensor, lineNumber, date);
         }
     }
 
     /** Dump a sensor rate.
-     * @param name sensor name
+     * @param sensor sensor
      * @param lineNumber line number
      * @param rate lines rate
      */
-    public static void dumpSensorRate(final String name, final double lineNumber, final double rate) {
+    public static void dumpSensorRate(final LineSensor sensor, final double lineNumber, final double rate) {
         if (isActive()) {
-            DUMP.get().dumpSensorRate(name, lineNumber, rate);
+            DUMP.get().dumpSensorRate(sensor, lineNumber, rate);
         }
     }
 

@@ -19,14 +19,17 @@ package org.orekit.rugged.errors;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
+import org.apache.commons.math3.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.FactoryManagedFrame;
@@ -56,10 +59,7 @@ class Dump {
     private final List<DumpedTileData> tiles;
 
     /** Already dumped sensors. */
-    private final List<String> sensors;
-
-    /** Already dumped sensors mean planes. */
-    private final List<String> meanPlanes;
+    private final List<DumpedSensorData> sensors;
 
     /** Flag for dumped algorithm. */
     private boolean algorithmDumped;
@@ -76,8 +76,7 @@ class Dump {
     public Dump(final PrintWriter writer) {
         this.writer          = writer;
         this.tiles           = new ArrayList<DumpedTileData>();
-        this.sensors         = new ArrayList<String>();
-        this.meanPlanes      = new ArrayList<String>();
+        this.sensors         = new ArrayList<DumpedSensorData>();
         this.algorithmDumped = false;
         this.ellipsoidDumped = false;
         this.tranformsDumped = null;
@@ -177,19 +176,20 @@ class Dump {
     }
 
     /** Dump an inverse location computation.
-     * @param sensorName name of the line  sensor
+     * @param sensor sensor
      * @param point point to localize
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
      */
-    public void dumpInverseLocation(final String sensorName, final GeodeticPoint point,
+    public void dumpInverseLocation(final LineSensor sensor, final GeodeticPoint point,
                                     final int minLine, final int maxLine,
                                     final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection) {
+        DumpedSensorData ds = getSensorData(sensor);
         writer.format(Locale.US,
                       "inverse location: sensorName %s latitude %22.15e longitude %22.15e elevation %22.15e minLine %d maxLine %d lightTime %b aberration %b%n",
-                      sensorName,
+                      ds.getDumpName(),
                       point.getLatitude(), point.getLongitude(), point.getAltitude(),
                       minLine, maxLine,
                       lightTimeCorrection, aberrationOfLightCorrection);
@@ -239,92 +239,45 @@ class Dump {
         }
     }
 
-    /** Dump a sensor.
-     * @param sensor sensor to dump
-     */
-    public void dumpSensor(final LineSensor sensor) {
-        if (!sensors.contains(sensor.getName())) {
-            writer.format(Locale.US,
-                          "sensor: sensorName %s nbPixels %d position %22.15e %22.15e %22.15e%n",
-                          sensor.getName(), sensor.getNbPixels(),
-                          sensor.getPosition().getX(), sensor.getPosition().getY(), sensor.getPosition().getZ());
-            sensors.add(sensor.getName());
-        }
-    }
-
     /** Dump a sensor mean plane.
      * @param meanPlane mean plane associated with sensor
      * @exception RuggedException if some frames cannot be computed at mid date
      */
     public void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane)
         throws RuggedException {
-        if (!meanPlanes.contains(meanPlane.getSensor().getName())) {
-            writer.format(Locale.US,
-                          "sensor mean plane: sensorName %s minLine %d maxLine %d maxEval %d accuracy %22.15e normal %22.15e %22.15e %22.15e%n",
-                          meanPlane.getSensor().getName(),
-                          meanPlane.getMinLine(), meanPlane.getMaxLine(),
-                          meanPlane.getMaxEval(), meanPlane.getAccuracy(),
-                          meanPlane.getMeanPlaneNormal().getX(), meanPlane.getMeanPlaneNormal().getY(), meanPlane.getMeanPlaneNormal().getZ());
-
-            // ensure the transforms for mid date are dumped
-            final AbsoluteDate midDate = meanPlane.getSensor().getDate(0.5 * (meanPlane.getMinLine() + meanPlane.getMaxLine()));
-            meanPlane.getScToBody().getBodyToInertial(midDate);
-            meanPlane.getScToBody().getScToInertial(midDate);
-
-            meanPlanes.add(meanPlane.getSensor().getName());
-
-        }
+        getSensorData(meanPlane.getSensor()).setMeanPlane(meanPlane);
     }
 
     /** Dump a sensor LOS.
-     * @param name sensor name
+     * @param sensor sensor
      * @param date date
      * @param i pixel index
      * @param los pixel normalized line-of-sight
      * @exception RuggedException if date cannot be converted to UTC
      */
-    public void dumpSensorLOS(final String name, final AbsoluteDate date, final int i, final Vector3D los)
+    public void dumpSensorLOS(final LineSensor sensor, final AbsoluteDate date, final int i, final Vector3D los)
         throws RuggedException {
-        writer.format(Locale.US,
-                      "sensor LOS: sensorName %s date %s pixelNumber %d => %22.15e %22.15e %22.15e%n",
-                      name, convertDate(date), i, los.getX(), los.getY(), los.getZ());
+        getSensorData(sensor).setLOS(date, i, los);
     }
 
-    /** Dump a sensor date.
-     * @param name sensor name
+    /** Dump a sensor datation.
+     * @param sensor sensor
      * @param lineNumber line number
      * @param date date
      * @exception RuggedException if date cannot be converted to UTC
      */
-    public void dumpSensorDate(final String name, final double lineNumber, final AbsoluteDate date)
+    public void dumpSensorDatation(final LineSensor sensor, final double lineNumber, final AbsoluteDate date)
         throws RuggedException {
-        writer.format(Locale.US,
-                      "sensor date: sensorName %s lineNumber %22.15e => %s%n",
-                      name, lineNumber, convertDate(date));
-    }
-
-    /** Dump a sensor line.
-     * @param name sensor name
-     * @param date date
-     * @param lineNumber line number
-     * @exception RuggedException if date cannot be converted to UTC
-     */
-    public void dumpSensorLine(final String name, final AbsoluteDate date, final double lineNumber)
-        throws RuggedException {
-        writer.format(Locale.US,
-                      "sensor line: sensorName %s date => %22.15e%n",
-                      name, convertDate(date), lineNumber);
+        getSensorData(sensor).setDatation(lineNumber, date);
     }
 
     /** Dump a sensor rate.
-     * @param name sensor name
+     * @param sensor sensor
      * @param lineNumber line number
      * @param rate lines rate
      */
-    public void dumpSensorRate(final String name, final double lineNumber, final double rate) {
-        writer.format(Locale.US,
-                      "sensor rate: sensorName %s lineNumber %s => %22.15e%n",
-                      name, lineNumber, rate);
+    public void dumpSensorRate(final LineSensor sensor, final double lineNumber, final double rate) {
+        getSensorData(sensor).setRate(lineNumber, rate);
     }
 
     /** Get a frame key or name.
@@ -364,6 +317,25 @@ class Dump {
                                     tile.getMaxElevationLongitudeIndex(),
                                     tile.getMaxElevation());
         return dumpedTileData;
+
+    }
+
+    /** Get sensor data.
+     * @param sensor sensor
+     */
+    private DumpedSensorData getSensorData(final LineSensor sensor) {
+
+        for (final DumpedSensorData dumpedSensorData : sensors) {
+            if (sensor == dumpedSensorData.getSensor()) {
+                // the sensor is already known
+                return dumpedSensorData;
+            }
+        }
+
+        // it is the first time we encounter this sensor, we need to dump its data
+        final DumpedSensorData dumpedSensorData = new DumpedSensorData("s" + sensors.size(), sensor);
+        sensors.add(dumpedSensorData);
+        return dumpedSensorData;
 
     }
 
@@ -466,6 +438,142 @@ class Dump {
                               "DEM cell: %s latIndex %d lonIndex %d elevation %22.15e%n",
                               name, latitudeIndex, longitudeIndex, elevation);
             }
+        }
+
+    }
+
+    /** Local class for handling already dumped sensor data. */
+    private class DumpedSensorData {
+
+        /** Name of the dump. */
+        private final String dumpName;
+
+        /** Dumped sensor sensor. */
+        private final LineSensor sensor;
+
+        /** LOS map. */
+        private final Map<Integer, List<Pair<AbsoluteDate, Vector3D>>> losMap;
+
+        /** Datation. */
+        private final List<Pair<Double, AbsoluteDate>> datation;
+
+        /** Rate. */
+        private final List<Pair<Double, Double>> rates;
+
+        /** Mean plane finder. */
+        private SensorMeanPlaneCrossing meanPlane;
+
+        /** Simple constructor.
+         * @param dumpName name of the sensor dump (not the name of the sensor itself, for confidentiality reasons)
+         * @param sensor dumped sensor
+         */
+        public DumpedSensorData(final String dumpName, final LineSensor sensor) {
+            this.dumpName = dumpName;
+            this.sensor   = sensor;
+            this.losMap   = new HashMap<Integer, List<Pair<AbsoluteDate, Vector3D>>>();
+            this.datation = new ArrayList<Pair<Double, AbsoluteDate>>();
+            this.rates    = new ArrayList<Pair<Double, Double>>();
+            writer.format(Locale.US,
+                          "sensor: sensorName %s nbPixels %d position %22.15e %22.15e %22.15e%n",
+                          dumpName, sensor.getNbPixels(),
+                          sensor.getPosition().getX(), sensor.getPosition().getY(), sensor.getPosition().getZ());
+        }
+
+        /** Get the anonymized dump sensor name.
+         * @return dump sensorname
+         */
+        public String getDumpName() {
+            return dumpName;
+        }
+
+        /** Get dumped sensor.
+         * @return dumped sensor
+         */
+        public LineSensor getSensor() {
+            return sensor;
+        }
+
+        /** Set the mean plane finder.
+         * @param meanPlane mean plane finder
+         * @exception RuggedException if frames cannot be computed at mid date
+         */
+        public void setMeanPlane(final SensorMeanPlaneCrossing meanPlane) throws RuggedException {
+            if (this.meanPlane == null) {
+                this.meanPlane = meanPlane;
+                writer.format(Locale.US,
+                              "sensor mean plane: sensorName %s minLine %d maxLine %d maxEval %d accuracy %22.15e normal %22.15e %22.15e %22.15e%n",
+                              dumpName,
+                              meanPlane.getMinLine(), meanPlane.getMaxLine(),
+                              meanPlane.getMaxEval(), meanPlane.getAccuracy(),
+                              meanPlane.getMeanPlaneNormal().getX(), meanPlane.getMeanPlaneNormal().getY(), meanPlane.getMeanPlaneNormal().getZ());
+
+                // ensure the transforms for mid date are dumped
+                final AbsoluteDate midDate = meanPlane.getSensor().getDate(0.5 * (meanPlane.getMinLine() + meanPlane.getMaxLine()));
+                meanPlane.getScToBody().getBodyToInertial(midDate);
+                meanPlane.getScToBody().getScToInertial(midDate);
+
+            }
+        }
+
+        /** Set a los direction.
+         * @param date date
+         * @param pixelNumber number of the pixel
+         * @param los los direction
+         * @exception RuggedException if date cannot be converted to UTC
+         */
+        public void setLOS(final AbsoluteDate date, final int pixelNumber, final Vector3D los)
+            throws RuggedException {
+            List<Pair<AbsoluteDate, Vector3D>> list = losMap.get(pixelNumber);
+            if (list == null) {
+                list = new ArrayList<Pair<AbsoluteDate, Vector3D>>();
+                losMap.put(pixelNumber, list);
+            }
+            for (final Pair<AbsoluteDate, Vector3D> alreadyDumped : list) {
+                if (FastMath.abs(date.durationFrom(alreadyDumped.getFirst())) < 1.0e-12 &&
+                    Vector3D.angle(los, alreadyDumped.getSecond()) < 1.0e-12) {
+                    return;
+                }
+            }
+            list.add(new Pair<AbsoluteDate, Vector3D>(date, los));
+            writer.format(Locale.US,
+                          "sensor LOS: sensorName %s date %s pixelNumber %d los %22.15e %22.15e %22.15e%n",
+                          dumpName, convertDate(date), pixelNumber, los.getX(), los.getY(), los.getZ());
+        }
+
+        /** Set a datation pair.
+         * @param lineNumber line number
+         * @param date date
+         * @exception RuggedException if date cannot be converted to UTC
+         */
+        public void setDatation(final double lineNumber, final AbsoluteDate date)
+            throws RuggedException {
+            for (final Pair<Double, AbsoluteDate> alreadyDumped : datation) {
+                if (FastMath.abs(date.durationFrom(alreadyDumped.getSecond())) < 1.0e-12 &&
+                    FastMath.abs(lineNumber - alreadyDumped.getFirst()) < 1.0e-12) {
+                    return;
+                }
+            }
+            datation.add(new Pair<Double, AbsoluteDate>(lineNumber, date));
+            writer.format(Locale.US,
+                          "sensor datation: sensorName %s lineNumber %22.15e date %s%n",
+                          dumpName, lineNumber, convertDate(date));
+        }
+
+        /** Set a rate.
+         * @param lineNumber line number
+         * @param rate lines rate
+         */
+        public void setRate(final double lineNumber, final double rate) {
+            for (final Pair<Double, Double> alreadyDumped : rates) {
+                if (FastMath.abs(rate - alreadyDumped.getSecond()) < 1.0e-12 &&
+                    FastMath.abs(lineNumber - alreadyDumped.getFirst()) < 1.0e-12) {
+                    return;
+                }
+            }
+            rates.add(new Pair<Double, Double>(lineNumber, rate));
+            writer.format(Locale.US,
+                          "sensor rate: sensorName %s lineNumber %22.15e rate %22.15e%n",
+                          dumpName, lineNumber, rate);
         }
 
     }
