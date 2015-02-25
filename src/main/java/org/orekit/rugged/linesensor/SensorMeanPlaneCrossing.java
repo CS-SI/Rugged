@@ -16,7 +16,10 @@
  */
 package org.orekit.rugged.linesensor;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
+import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -25,6 +28,7 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
@@ -303,30 +307,32 @@ public class SensorMeanPlaneCrossing {
         // as we know the solution is improved in the second stage of inverse location.
         // We expect two or three evaluations only. Each new evaluation shows up quickly in
         // the performances as it involves frames conversions
-        double  crossingLine  = midLine;
-        Transform bodyToInert = midBodyToInert;
-        Transform scToInert   = midScToInert;
-        boolean atMin         = false;
-        boolean atMax         = false;
-        double deltaL         = Double.NaN;
+        double[]  searchHistory = new double[maxEval];
+        double crossingLine     = midLine;
+        Transform bodyToInert   = midBodyToInert;
+        Transform scToInert     = midScToInert;
+        boolean atMin           = false;
+        boolean atMax           = false;
         for (int i = 0; i < maxEval; ++i) {
 
+            searchHistory[i] = crossingLine;
             final FieldVector3D<DerivativeStructure> targetDirection =
                     evaluateLine(crossingLine, targetPV, bodyToInert, scToInert);
             final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
 
-            final double previousDeltaL = deltaL;
-            deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
+            final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
             if (FastMath.abs(deltaL) <= accuracy) {
                 // return immediately, without doing any additional evaluation!
                 return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetDirection);
             }
-            if (FastMath.abs(deltaL + previousDeltaL) <= 0.01 * FastMath.abs(deltaL)) {
-                // we are stuck in a loop between two values!
-                // try to escape from the loop by targeting the middle point
-                deltaL = 0.5 * deltaL;
-            }
             crossingLine += deltaL;
+            for (int j = 0; j < i; ++j) {
+                if (FastMath.abs(crossingLine - searchHistory[j]) <= 0.01 * FastMath.abs(deltaL)) {
+                    // rare case: we are stuck in a loop!
+                    // switch to a more robust (but slower) algorithm in this case
+                    return slowFind(targetPV, crossingLine);
+                }
+            }
 
             if (crossingLine < minLine) {
                 if (atMin) {
@@ -357,6 +363,45 @@ public class SensorMeanPlaneCrossing {
 
         return null;
 
+    }
+
+    /** Find mean plane crossing using a slow but robust method.
+     * @param targetPV target ground point
+     * @param initialGuess initial guess for the crossing line
+     * @return line number and target direction at mean plane crossing,
+     * or null if search interval does not bracket a solution
+     * @exception RuggedException if geometry cannot be computed for some line or
+     * if the maximum number of evaluations is exceeded
+     */
+    public CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess)
+        throws RuggedException {
+        try {
+
+            final UnivariateSolver solver = new BracketingNthOrderBrentSolver(accuracy, 5);
+            double crossingLine = solver.solve(maxEval, new UnivariateFunction() {
+                /** {@inheritDoc} */
+                @Override
+                public double value(final double x) throws RuggedExceptionWrapper {
+                    try {
+                        final AbsoluteDate date = sensor.getDate(x);
+                        final FieldVector3D<DerivativeStructure> targetDirection =
+                                evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
+                        final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
+                        return 0.5 * FastMath.PI - beta.getValue();
+                    } catch (RuggedException re) {
+                        throw new RuggedExceptionWrapper(re);
+                    }
+                }
+            }, minLine, maxLine, initialGuess);
+
+            final AbsoluteDate date = sensor.getDate(crossingLine);
+            final FieldVector3D<DerivativeStructure> targetDirection =
+                    evaluateLine(crossingLine, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
+            return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetDirection);
+
+        } catch (RuggedExceptionWrapper rew) {
+            throw rew.getException();
+        }
     }
 
     /** Evaluate geometry for a given line number.
