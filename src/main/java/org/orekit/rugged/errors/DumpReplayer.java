@@ -744,14 +744,14 @@ public class DumpReplayer {
                 final int minLine = Integer.parseInt(fields[9]);
                 final int maxLine = Integer.parseInt(fields[11]);
                 if (global.calls.isEmpty()) {
-                    global.lightTimeCorrection         = Boolean.parseBoolean(fields[11]);
-                    global.aberrationOfLightCorrection = Boolean.parseBoolean(fields[13]);
+                    global.lightTimeCorrection         = Boolean.parseBoolean(fields[13]);
+                    global.aberrationOfLightCorrection = Boolean.parseBoolean(fields[15]);
                 } else {
-                    if (global.lightTimeCorrection != Boolean.parseBoolean(fields[11])) {
+                    if (global.lightTimeCorrection != Boolean.parseBoolean(fields[13])) {
                         throw new RuggedException(RuggedMessages.LIGHT_TIME_CORRECTION_REDEFINED,
                                                   l, file.getAbsolutePath(), line);
                     }
-                    if (global.aberrationOfLightCorrection != Boolean.parseBoolean(fields[13])) {
+                    if (global.aberrationOfLightCorrection != Boolean.parseBoolean(fields[15])) {
                         throw new RuggedException(RuggedMessages.ABERRATION_OF_LIGHT_CORRECTION_REDEFINED,
                                                   l, file.getAbsolutePath(), line);
                     }
