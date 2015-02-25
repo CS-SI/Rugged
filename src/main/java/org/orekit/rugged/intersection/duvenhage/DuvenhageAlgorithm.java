@@ -199,6 +199,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     @Override
     public double getElevation(final double latitude, final double longitude)
         throws RuggedException {
+        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
         final Tile tile = cache.getTile(latitude, longitude);
         return tile.interpolateElevation(latitude, longitude);
     }

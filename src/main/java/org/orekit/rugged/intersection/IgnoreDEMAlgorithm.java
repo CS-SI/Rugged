@@ -63,6 +63,7 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
      */
     @Override
     public double getElevation(final double latitude, final double longitude) {
+        DumpManager.dumpAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
         return 0.0;
     }
 

@@ -185,6 +185,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     @Override
     public double getElevation(final double latitude, final double longitude)
         throws RuggedException {
+        DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
         final Tile tile = cache.getTile(latitude, longitude);
         return tile.interpolateElevation(latitude, longitude);
     }

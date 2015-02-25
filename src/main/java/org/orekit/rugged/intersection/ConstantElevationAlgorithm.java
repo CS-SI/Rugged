@@ -83,6 +83,7 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
      */
     @Override
     public double getElevation(final double latitude, final double longitude) {
+        DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
         return constantElevation;
     }
 
