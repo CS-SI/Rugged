@@ -308,16 +308,23 @@ public class SensorMeanPlaneCrossing {
         Transform scToInert   = midScToInert;
         boolean atMin         = false;
         boolean atMax         = false;
+        double deltaL         = Double.NaN;
         for (int i = 0; i < maxEval; ++i) {
 
             final FieldVector3D<DerivativeStructure> targetDirection =
                     evaluateLine(crossingLine, targetPV, bodyToInert, scToInert);
             final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
 
-            final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
+            final double previousDeltaL = deltaL;
+            deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
             if (FastMath.abs(deltaL) <= accuracy) {
                 // return immediately, without doing any additional evaluation!
                 return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetDirection);
+            }
+            if (FastMath.abs(deltaL + previousDeltaL) <= 0.01 * FastMath.abs(deltaL)) {
+                // we are stuck in a loop between two values!
+                // try to escape from the loop by targeting the middle point
+                deltaL = 0.5 * deltaL;
             }
             crossingLine += deltaL;
 
