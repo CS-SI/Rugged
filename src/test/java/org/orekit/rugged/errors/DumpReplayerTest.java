@@ -51,7 +51,7 @@ public class DumpReplayerTest {
             GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                                 rugged.getEllipsoid().transform(replayedGP));
-            Assert.assertEquals(0.0, distance, 3.0e-9);
+            Assert.assertEquals(0.0, distance, 1.0e-8);
         }
 
     }
