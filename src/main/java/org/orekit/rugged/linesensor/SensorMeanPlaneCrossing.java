@@ -327,7 +327,7 @@ public class SensorMeanPlaneCrossing {
             }
             crossingLine += deltaL;
             for (int j = 0; j < i; ++j) {
-                if (FastMath.abs(crossingLine - searchHistory[j]) <= 0.01 * FastMath.abs(deltaL)) {
+                if (FastMath.abs(crossingLine - searchHistory[j]) <= 1.0) {
                     // rare case: we are stuck in a loop!
                     // switch to a more robust (but slower) algorithm in this case
                     return slowFind(targetPV, crossingLine);
