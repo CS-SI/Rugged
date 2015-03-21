@@ -408,7 +408,7 @@ public class DumpReplayer {
                 return sensor;
             }
         }
-        ParsedSensor sensor = new ParsedSensor(name);
+        final ParsedSensor sensor = new ParsedSensor(name);
         sensors.add(sensor);
         return sensor;
     }
@@ -1077,8 +1077,6 @@ public class DumpReplayer {
 
         /** simple constructor.
          * @param name name of the sensor
-         * @param nbPixels number of pixels
-         * @param position position
          */
         public ParsedSensor(final String name) {
             this.name     = name;

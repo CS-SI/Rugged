@@ -307,7 +307,7 @@ public class SensorMeanPlaneCrossing {
         // as we know the solution is improved in the second stage of inverse location.
         // We expect two or three evaluations only. Each new evaluation shows up quickly in
         // the performances as it involves frames conversions
-        double[]  searchHistory = new double[maxEval];
+        final double[]  searchHistory = new double[maxEval];
         double crossingLine     = midLine;
         Transform bodyToInert   = midBodyToInert;
         Transform scToInert     = midScToInert;

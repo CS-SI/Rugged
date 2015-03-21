@@ -186,7 +186,7 @@ class Dump {
     public void dumpInverseLocation(final LineSensor sensor, final GeodeticPoint point,
                                     final int minLine, final int maxLine,
                                     final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection) {
-        DumpedSensorData ds = getSensorData(sensor);
+        final DumpedSensorData ds = getSensorData(sensor);
         writer.format(Locale.US,
                       "inverse location: sensorName %s latitude %22.15e longitude %22.15e elevation %22.15e minLine %d maxLine %d lightTime %b aberration %b%n",
                       ds.getDumpName(),
@@ -322,6 +322,7 @@ class Dump {
 
     /** Get sensor data.
      * @param sensor sensor
+     * @return dumped data
      */
     private DumpedSensorData getSensorData(final LineSensor sensor) {
 
