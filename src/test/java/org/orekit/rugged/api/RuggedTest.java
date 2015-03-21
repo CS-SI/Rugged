@@ -573,8 +573,8 @@ public class RuggedTest {
             sensors.add(new LineSensor("line-" + i, lineDatation, position, los));
         }
 
-        int firstLine = 0;
-        int lastLine  = dimension;
+        int firstLine = -10 * dimension;
+        int lastLine  = 100 * dimension;
         AbsoluteDate minDate = sensors.get(0).getDate(firstLine).shiftedBy(-1.0);
         AbsoluteDate maxDate = sensors.get(sensors.size() - 1).getDate(lastLine).shiftedBy(+1.0);
 
@@ -619,7 +619,8 @@ public class RuggedTest {
                     }
                     for (int j = 0; j < dimension; ++j) {
                         double longitude = lon0 + (j * delta) / dimension;
-                        SensorPixel sp = rugged.inverseLocation(lineSensor.getName(), latitude, longitude, 0, dimension);
+                        SensorPixel sp = rugged.inverseLocation(lineSensor.getName(), latitude, longitude,
+                                                                firstLine, lastLine);
                         if (sp == null) {
                             ++badPixels;
                             buffer.putInt(-1);
@@ -663,10 +664,10 @@ public class RuggedTest {
     @Test
     public void testDateLocation()
         throws RuggedException, OrekitException, URISyntaxException {
-        checkDateLocation(2000, false, false, 4.0e-8);
-        checkDateLocation(2000, false, true,  6.0e-8);
-        checkDateLocation(2000, true,  false, 3.0e-8);
-        checkDateLocation(2000, true,  true,  8.0e-8);
+        checkDateLocation(2000, false, false, 7.0e-7);
+        checkDateLocation(2000, false, true,  2.0e-5);
+        checkDateLocation(2000, true,  false, 8.0e-7);
+        checkDateLocation(2000, true,  true,  3.0e-6);
     }
 
     @Test

@@ -22,10 +22,17 @@ import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.QRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Precision;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
@@ -41,6 +48,9 @@ import org.orekit.utils.PVCoordinates;
  * @author Luc Maisonobe
  */
 public class SensorMeanPlaneCrossing {
+
+    /** Number of cached results for guessing the line number. */
+    private static final int CACHED_RESULTS = 6;
 
     /** Converter between spacecraft and body. */
     private final SpacecraftToObservedBody scToBody;
@@ -77,6 +87,9 @@ public class SensorMeanPlaneCrossing {
 
     /** Accuracy to use for finding crossing line number. */
     private final double accuracy;
+
+    /** Cached results. */
+    private final CrossingResult[] cachedResults;
 
     /** Simple constructor.
      * @param sensor sensor to consider
@@ -136,6 +149,8 @@ public class SensorMeanPlaneCrossing {
         this.midScToInert                = scToBody.getScToInertial(midDate);
 
         this.meanPlaneNormal             = meanPlaneNormal;
+
+        this.cachedResults               = new CrossingResult[CACHED_RESULTS];
 
     }
 
@@ -251,18 +266,24 @@ public class SensorMeanPlaneCrossing {
         /** Crossing line. */
         private final double crossingLine;
 
+        /** Target ground point. */
+        private final Vector3D target;
+
         /** Target direction in spacecraft frame. */
         private final FieldVector3D<DerivativeStructure> targetDirection;
 
         /** Simple constructor.
          * @param crossingDate crossing date
          * @param crossingLine crossing line
+         * @param target target ground point
          * @param targetDirection target direction in spacecraft frame
          */
         private CrossingResult(final AbsoluteDate crossingDate, final double crossingLine,
+                               final Vector3D target,
                                final FieldVector3D<DerivativeStructure> targetDirection) {
             this.crossingDate    = crossingDate;
             this.crossingLine    = crossingLine;
+            this.target          = target;
             this.targetDirection = targetDirection;
         }
 
@@ -278,6 +299,13 @@ public class SensorMeanPlaneCrossing {
          */
         public double getLine() {
             return crossingLine;
+        }
+
+        /** Get the target ground point.
+         * @return target ground point
+         */
+        public Vector3D getTarget() {
+            return target;
         }
 
         /** Get the normalized target direction in spacecraft frame at crossing.
@@ -300,6 +328,27 @@ public class SensorMeanPlaneCrossing {
     public CrossingResult find(final Vector3D target)
         throws RuggedException {
 
+        double crossingLine     = midLine;
+        Transform bodyToInert   = midBodyToInert;
+        Transform scToInert     = midScToInert;
+
+        // count the number of available results
+        int n = 0;
+        while (n < cachedResults.length && cachedResults[n] != null) {
+            ++n;
+        }
+        if (n >= 4) {
+            // we already have computed at lest 4 values, we attempt to build a linear
+            // model to guess a better start line
+            final double guessedCrossingLine = guessStartLine(n, target);
+            if (guessedCrossingLine >= minLine && guessedCrossingLine <= maxLine) {
+                crossingLine = guessedCrossingLine;
+                final AbsoluteDate date = sensor.getDate(crossingLine);
+                bodyToInert = scToBody.getBodyToInertial(date);
+                scToInert   = scToBody.getScToInertial(date);
+            }
+        }
+
         final PVCoordinates targetPV = new PVCoordinates(target, Vector3D.ZERO);
 
         // we don't use an Apache Commons Math solver here because we are more
@@ -308,9 +357,6 @@ public class SensorMeanPlaneCrossing {
         // We expect two or three evaluations only. Each new evaluation shows up quickly in
         // the performances as it involves frames conversions
         final double[]  searchHistory = new double[maxEval];
-        double crossingLine     = midLine;
-        Transform bodyToInert   = midBodyToInert;
-        Transform scToInert     = midScToInert;
         boolean atMin           = false;
         boolean atMax           = false;
         for (int i = 0; i < maxEval; ++i) {
@@ -323,14 +369,22 @@ public class SensorMeanPlaneCrossing {
             final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
             if (FastMath.abs(deltaL) <= accuracy) {
                 // return immediately, without doing any additional evaluation!
-                return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetDirection);
+                for (int k = cachedResults.length - 1; k > 0; --k) {
+                    cachedResults[k] = cachedResults[k - 1];
+                }
+                cachedResults[0] = new CrossingResult(sensor.getDate(crossingLine), crossingLine, target, targetDirection);
+                return cachedResults[0];
             }
             crossingLine += deltaL;
             for (int j = 0; j < i; ++j) {
                 if (FastMath.abs(crossingLine - searchHistory[j]) <= 1.0) {
                     // rare case: we are stuck in a loop!
                     // switch to a more robust (but slower) algorithm in this case
-                    return slowFind(targetPV, crossingLine);
+                    for (int k = cachedResults.length - 1; k > 0; --k) {
+                        cachedResults[k] = cachedResults[k - 1];
+                    }
+                    cachedResults[0] = slowFind(targetPV, crossingLine);
+                    return cachedResults[0];
                 }
             }
 
@@ -365,6 +419,40 @@ public class SensorMeanPlaneCrossing {
 
     }
 
+    /** Guess a start line using the last four results.
+     * @param n number of cached results available
+     * @param target target ground point
+     * @return guessed start line
+     */
+    private double guessStartLine(final int n, final Vector3D target) {
+        try {
+
+            // assume a linear model of the form: l = ax + by + cz + d
+            final RealMatrix m = new Array2DRowRealMatrix(n, 4);
+            final RealVector v = new ArrayRealVector(n);
+            for (int i = 0; i < n; ++i) {
+                m.setEntry(i, 0, cachedResults[i].getTarget().getX());
+                m.setEntry(i, 1, cachedResults[i].getTarget().getY());
+                m.setEntry(i, 2, cachedResults[i].getTarget().getZ());
+                m.setEntry(i, 3, 1.0);
+                v.setEntry(i, cachedResults[i].getLine());
+            }
+
+            final DecompositionSolver solver = new QRDecomposition(m, Precision.SAFE_MIN).getSolver();
+            final RealVector coefficients = solver.solve(v);
+
+            // apply the linear model
+            return target.getX() * coefficients.getEntry(0) +
+                   target.getY() * coefficients.getEntry(1) +
+                   target.getZ() * coefficients.getEntry(2) +
+                   coefficients.getEntry(3);
+
+        } catch (SingularMatrixException sme) {
+            // the points are not independent
+            return Double.NaN;
+        }
+    }
+
     /** Find mean plane crossing using a slow but robust method.
      * @param targetPV target ground point
      * @param initialGuess initial guess for the crossing line
@@ -397,7 +485,7 @@ public class SensorMeanPlaneCrossing {
             final AbsoluteDate date = sensor.getDate(crossingLine);
             final FieldVector3D<DerivativeStructure> targetDirection =
                     evaluateLine(crossingLine, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
-            return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetDirection);
+            return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetPV.getPosition(), targetDirection);
 
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
