@@ -573,8 +573,8 @@ public class RuggedTest {
             sensors.add(new LineSensor("line-" + i, lineDatation, position, los));
         }
 
-        int firstLine = -10 * dimension;
-        int lastLine  = 100 * dimension;
+        int firstLine = 0;
+        int lastLine  = dimension;
         AbsoluteDate minDate = sensors.get(0).getDate(firstLine).shiftedBy(-1.0);
         AbsoluteDate maxDate = sensors.get(sensors.size() - 1).getDate(lastLine).shiftedBy(+1.0);
 
@@ -922,7 +922,7 @@ public class RuggedTest {
         GeodeticPoint[] gp = rugged.directLocation("curved", lineNumber);
         for (int i = 0; i < gp.length; ++i) {
             SensorPixel pixel = rugged.inverseLocation("curved", gp[i], firstLine, lastLine);
-            Assert.assertEquals(lineNumber, pixel.getLineNumber(),  1.5e-7);
+            Assert.assertEquals(lineNumber, pixel.getLineNumber(),  5.0e-4);
             Assert.assertEquals(i,          pixel.getPixelNumber(), 3.1e-7);
         }
 
