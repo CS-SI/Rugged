@@ -307,7 +307,8 @@ public class SensorMeanPlaneCrossing {
         // as we know the solution is improved in the second stage of inverse location.
         // We expect two or three evaluations only. Each new evaluation shows up quickly in
         // the performances as it involves frames conversions
-        final double[]  searchHistory = new double[maxEval];
+        final double[]               crossingLineHistory = new double[maxEval];
+        final DerivativeStructure[]  betaHistory         = new DerivativeStructure[maxEval];
         double crossingLine     = midLine;
         Transform bodyToInert   = midBodyToInert;
         Transform scToInert     = midScToInert;
@@ -315,19 +316,36 @@ public class SensorMeanPlaneCrossing {
         boolean atMax           = false;
         for (int i = 0; i < maxEval; ++i) {
 
-            searchHistory[i] = crossingLine;
+            crossingLineHistory[i] = crossingLine;
             final FieldVector3D<DerivativeStructure> targetDirection =
                     evaluateLine(crossingLine, targetPV, bodyToInert, scToInert);
-            final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
+            betaHistory[i] = FieldVector3D.angle(targetDirection, meanPlaneNormal);
 
-            final double deltaL = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
+            final double deltaL;
+            if (i == 0) {
+                // simple Newton iteration
+                deltaL        = (0.5 * FastMath.PI - betaHistory[i].getValue()) / betaHistory[i].getPartialDerivative(1);
+                crossingLine += deltaL;
+            } else {
+                // inverse cubic iteration
+                final double a0    = betaHistory[i - 1].getValue() - 0.5 * FastMath.PI;
+                final double l0    = crossingLineHistory[i - 1];
+                final double d0    = betaHistory[i - 1].getPartialDerivative(1);
+                final double a1    = betaHistory[i].getValue()     - 0.5 * FastMath.PI;
+                final double l1    = crossingLineHistory[i];
+                final double d1    = betaHistory[i].getPartialDerivative(1);
+                final double a1Ma0 = a1 - a0;
+                crossingLine = ((l0 * (a1 - 3 * a0) - a0 * a1Ma0 / d0) * a1 * a1 +
+                                (l1 * (3 * a1 - a0) - a1 * a1Ma0 / d1) * a0 * a0
+                               ) / (a1Ma0 * a1Ma0 * a1Ma0);
+                deltaL = crossingLine - l1;
+            }
             if (FastMath.abs(deltaL) <= accuracy) {
                 // return immediately, without doing any additional evaluation!
                 return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetDirection);
             }
-            crossingLine += deltaL;
             for (int j = 0; j < i; ++j) {
-                if (FastMath.abs(crossingLine - searchHistory[j]) <= 1.0) {
+                if (FastMath.abs(crossingLine - crossingLineHistory[j]) <= 1.0) {
                     // rare case: we are stuck in a loop!
                     // switch to a more robust (but slower) algorithm in this case
                     return slowFind(targetPV, crossingLine);
