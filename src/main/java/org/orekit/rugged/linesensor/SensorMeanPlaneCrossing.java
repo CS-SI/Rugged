@@ -483,6 +483,14 @@ public class SensorMeanPlaneCrossing {
         throws RuggedException {
         try {
 
+            // safety check
+            final double startValue;
+            if (initialGuess < minLine || initialGuess > maxLine) {
+                startValue = midLine;
+            } else {
+                startValue = initialGuess;
+            }
+
             final UnivariateSolver solver = new BracketingNthOrderBrentSolver(accuracy, 5);
             double crossingLine = solver.solve(maxEval, new UnivariateFunction() {
                 /** {@inheritDoc} */
@@ -498,7 +506,7 @@ public class SensorMeanPlaneCrossing {
                         throw new RuggedExceptionWrapper(re);
                     }
                 }
-            }, minLine, maxLine, initialGuess);
+            }, minLine, maxLine, startValue);
 
             final AbsoluteDate date = sensor.getDate(crossingLine);
             final FieldVector3D<DerivativeStructure> targetDirection =
