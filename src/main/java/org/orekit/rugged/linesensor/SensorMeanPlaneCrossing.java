@@ -20,6 +20,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
+import org.apache.commons.math3.exception.NoBracketingException;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -398,10 +399,14 @@ public class SensorMeanPlaneCrossing {
                 if (FastMath.abs(crossingLine - crossingLineHistory[j]) <= 1.0) {
                     // rare case: we are stuck in a loop!
                     // switch to a more robust (but slower) algorithm in this case
+                    final CrossingResult slowResult = slowFind(targetPV, crossingLine);
+                    if (slowResult == null) {
+                        return null;
+                    }
                     for (int k = cachedResults.length - 1; k > 0; --k) {
                         cachedResults[k] = cachedResults[k - 1];
                     }
-                    cachedResults[0] = slowFind(targetPV, crossingLine);
+                    cachedResults[0] = slowResult;
                     return cachedResults[0];
                 }
             }
@@ -513,6 +518,8 @@ public class SensorMeanPlaneCrossing {
                     evaluateLine(crossingLine, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
             return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetPV.getPosition(), targetDirection);
 
+        } catch (NoBracketingException nbe) {
+            return null;
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
         }
