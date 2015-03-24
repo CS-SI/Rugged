@@ -39,6 +39,7 @@ import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
+import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -501,12 +502,33 @@ class Dump {
         public void setMeanPlane(final SensorMeanPlaneCrossing meanPlane) throws RuggedException {
             if (this.meanPlane == null) {
                 this.meanPlane = meanPlane;
+                int nbResults = 0;
+                for (final CrossingResult result : meanPlane.getCachedResults()) {
+                    if (result != null) {
+                        ++nbResults;
+                    }
+                }
                 writer.format(Locale.US,
-                              "sensor mean plane: sensorName %s minLine %d maxLine %d maxEval %d accuracy %22.15e normal %22.15e %22.15e %22.15e%n",
+                              "sensor mean plane: sensorName %s minLine %d maxLine %d maxEval %d accuracy %22.15e normal %22.15e %22.15e %22.15e cachedResults %d",
                               dumpName,
                               meanPlane.getMinLine(), meanPlane.getMaxLine(),
                               meanPlane.getMaxEval(), meanPlane.getAccuracy(),
-                              meanPlane.getMeanPlaneNormal().getX(), meanPlane.getMeanPlaneNormal().getY(), meanPlane.getMeanPlaneNormal().getZ());
+                              meanPlane.getMeanPlaneNormal().getX(), meanPlane.getMeanPlaneNormal().getY(), meanPlane.getMeanPlaneNormal().getZ(),
+                              nbResults);
+                for (int i = 0; i < nbResults; ++i) {
+                    final CrossingResult result = meanPlane.getCachedResults()[i];
+                    writer.format(Locale.US,
+                                  " lineNumber %22.15e date %s target %22.15e %22.15e %22.15e targetDirection %22.15e %22.15e %22.15e %22.15e %22.15e %22.15e",
+                                  result.getLine(), convertDate(result.getDate()),
+                                  result.getTarget().getX(), result.getTarget().getY(), result.getTarget().getZ(),
+                                  result.getTargetDirection().getX().getValue(),
+                                  result.getTargetDirection().getY().getValue(),
+                                  result.getTargetDirection().getZ().getValue(),
+                                  result.getTargetDirection().getZ().getPartialDerivative(1),
+                                  result.getTargetDirection().getY().getPartialDerivative(1),
+                                  result.getTargetDirection().getZ().getPartialDerivative(1));
+                }
+                writer.format(Locale.US,"%n");
 
                 // ensure the transforms for mid date are dumped
                 final AbsoluteDate midDate = meanPlane.getSensor().getDate(0.5 * (meanPlane.getMinLine() + meanPlane.getMaxLine()));

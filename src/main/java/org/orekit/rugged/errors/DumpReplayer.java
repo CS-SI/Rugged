@@ -54,6 +54,7 @@ import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
+import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.TileUpdater;
@@ -200,6 +201,15 @@ public class DumpReplayer {
 
     /** Keyword for rate. */
     private static final String RATE = "rate";
+
+    /** Keyword for cached results. */
+    private static final String CACHED_RESULTS = "cachedResults";
+
+    /** Keyword for target. */
+    private static final String TARGET = "target";
+
+    /** Keyword for target direction. */
+    private static final String TARGET_DIRECTION = "targetDirection";
 
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
@@ -361,7 +371,8 @@ public class DumpReplayer {
                                                                    lightTimeCorrection, aberrationOfLightCorrection,
                                                                    parsedSensor.meanPlane.maxEval,
                                                                    parsedSensor.meanPlane.accuracy,
-                                                                   parsedSensor.meanPlane.normal));
+                                                                   parsedSensor.meanPlane.normal,
+                                                                   parsedSensor.meanPlane.cachedResults));
                 }
                 builder.addLineSensor(sensor);
             }
@@ -829,22 +840,54 @@ public class DumpReplayer {
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
                 throws RuggedException {
-                if (fields.length < 14 || !fields[0].equals(SENSOR_NAME) ||
-                    !fields[2].equals(MIN_LINE) || !fields[4].equals(MAX_LINE) ||
-                    !fields[6].equals(MAX_EVAL) || !fields[8].equals(ACCURACY) ||
-                    !fields[10].equals(NORMAL)) {
-                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                }
-                final String   sensorName = fields[1];
-                final int      minLine    = Integer.parseInt(fields[3]);
-                final int      maxLine    = Integer.parseInt(fields[5]);
-                final int      maxEval    = Integer.parseInt(fields[7]);
-                final double   accuracy   = Double.parseDouble(fields[9]);
-                final Vector3D normal     = new Vector3D(Double.parseDouble(fields[11]),
-                                                         Double.parseDouble(fields[12]),
-                                                         Double.parseDouble(fields[13]));
-                global.getSensor(sensorName).setMeanPlane(new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal));
+                try {
+                    if (fields.length < 16 || !fields[0].equals(SENSOR_NAME) ||
+                        !fields[2].equals(MIN_LINE) || !fields[4].equals(MAX_LINE) ||
+                        !fields[6].equals(MAX_EVAL) || !fields[8].equals(ACCURACY) ||
+                        !fields[10].equals(NORMAL)  || !fields[14].equals(CACHED_RESULTS)) {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                    final String   sensorName = fields[1];
+                    final int      minLine    = Integer.parseInt(fields[3]);
+                    final int      maxLine    = Integer.parseInt(fields[5]);
+                    final int      maxEval    = Integer.parseInt(fields[7]);
+                    final double   accuracy   = Double.parseDouble(fields[9]);
+                    final Vector3D normal     = new Vector3D(Double.parseDouble(fields[11]),
+                                                             Double.parseDouble(fields[12]),
+                                                             Double.parseDouble(fields[13]));
+                    final int      n          = Integer.parseInt(fields[15]);
+                    final CrossingResult[] cachedResults = new CrossingResult[n];
+                    int base = 16;
+                    for (int i = 0; i < n; ++i) {
+                        if (fields.length < base + 15 || !fields[base].equals(LINE_NUMBER) ||
+                            !fields[base + 2].equals(DATE) || !fields[base + 4].equals(TARGET) ||
+                            !fields[base + 8].equals(TARGET_DIRECTION)) {
+                            throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                        }
+                        final double       ln     = Double.parseDouble(fields[base + 1]);
+                        final AbsoluteDate date   = new AbsoluteDate(fields[base + 3], TimeScalesFactory.getUTC());
+                        final Vector3D     target = new Vector3D(Double.parseDouble(fields[base + 5]),
+                                                                 Double.parseDouble(fields[base + 6]),
+                                                                 Double.parseDouble(fields[base + 7]));
+                        final DerivativeStructure tdX = new DerivativeStructure(1, 1,
+                                                                                Double.parseDouble(fields[base +  9]),
+                                                                                Double.parseDouble(fields[base + 12]));
+                        final DerivativeStructure tdY = new DerivativeStructure(1, 1,
+                                                                                Double.parseDouble(fields[base + 10]),
+                                                                                Double.parseDouble(fields[base + 13]));
+                        final DerivativeStructure tdZ = new DerivativeStructure(1, 1,
+                                                                                Double.parseDouble(fields[base + 11]),
+                                                                                Double.parseDouble(fields[base + 14]));
+                        final FieldVector3D<DerivativeStructure> targetDirection =
+                                new FieldVector3D<DerivativeStructure>(tdX, tdY, tdZ);
+                        cachedResults[i] = new CrossingResult(date, ln, target, targetDirection);
+                        base += 15;
+                    }
+                    global.getSensor(sensorName).setMeanPlane(new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal, cachedResults));
 
+                } catch (OrekitException oe) {
+                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+                }
             }
 
         },
@@ -1325,20 +1368,26 @@ public class DumpReplayer {
         /** Mean plane normal. */
         private final Vector3D normal;
 
+        /** Cached results. */
+        private final CrossingResult[] cachedResults;
+
         /** simple constructor.
          * @param minLine min line
          * @param maxLine max line
          * @param maxEval maximum number of evaluations
          * @param accuracy accuracy to use for finding crossing line number
          * @param normal mean plane normal
+         * @param cachedResults cached results
          */
         public ParsedMeanPlane(final int minLine, final int maxLine,
-                               final int maxEval, final double accuracy, final Vector3D normal) {
-            this.minLine  = minLine;
-            this.maxLine  = maxLine;
-            this.maxEval  = maxEval;
-            this.accuracy = accuracy;
-            this.normal   = normal;
+                               final int maxEval, final double accuracy, final Vector3D normal,
+                               final CrossingResult[] cachedResults) {
+            this.minLine       = minLine;
+            this.maxLine       = maxLine;
+            this.maxEval       = maxEval;
+            this.accuracy      = accuracy;
+            this.normal        = normal;
+            this.cachedResults = cachedResults.clone();
         }
 
     }

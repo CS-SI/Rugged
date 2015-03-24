@@ -111,7 +111,7 @@ public class SensorMeanPlaneCrossing {
                                    final int maxEval, final double accuracy)
         throws RuggedException {
         this(sensor, scToBody, minLine, maxLine, lightTimeCorrection, aberrationOfLightCorrection,
-             maxEval, accuracy, computeMeanPlaneNormal(sensor, minLine, maxLine));
+             maxEval, accuracy, computeMeanPlaneNormal(sensor, minLine, maxLine), new CrossingResult[0]);
     }
 
     /** Simple constructor.
@@ -124,6 +124,7 @@ public class SensorMeanPlaneCrossing {
      * @param maxEval maximum number of evaluations
      * @param accuracy accuracy to use for finding crossing line number
      * @param meanPlaneNormal mean plane normal
+     * @param cachedResults cached results
      * @exception RuggedException if some frame conversion fails
      */
     public SensorMeanPlaneCrossing(final LineSensor sensor,
@@ -132,7 +133,8 @@ public class SensorMeanPlaneCrossing {
                                    final boolean lightTimeCorrection,
                                    final boolean aberrationOfLightCorrection,
                                    final int maxEval, final double accuracy,
-                                   final Vector3D meanPlaneNormal)
+                                   final Vector3D meanPlaneNormal,
+                                   final CrossingResult[] cachedResults)
         throws RuggedException {
 
         this.sensor                      = sensor;
@@ -152,6 +154,7 @@ public class SensorMeanPlaneCrossing {
         this.meanPlaneNormal             = meanPlaneNormal;
 
         this.cachedResults               = new CrossingResult[CACHED_RESULTS];
+        System.arraycopy(cachedResults, 0, this.cachedResults, 0, cachedResults.length);
 
     }
 
@@ -258,6 +261,13 @@ public class SensorMeanPlaneCrossing {
         return meanPlaneNormal;
     }
 
+    /** Get the cached previous results.
+     * @return mean plane normal
+     */
+    public CrossingResult[] getCachedResults() {
+        return cachedResults;
+    }
+
     /** Container for mean plane crossing result. */
     public static class CrossingResult {
 
@@ -279,9 +289,9 @@ public class SensorMeanPlaneCrossing {
          * @param target target ground point
          * @param targetDirection target direction in spacecraft frame
          */
-        private CrossingResult(final AbsoluteDate crossingDate, final double crossingLine,
-                               final Vector3D target,
-                               final FieldVector3D<DerivativeStructure> targetDirection) {
+        public CrossingResult(final AbsoluteDate crossingDate, final double crossingLine,
+                              final Vector3D target,
+                              final FieldVector3D<DerivativeStructure> targetDirection) {
             this.crossingDate    = crossingDate;
             this.crossingLine    = crossingLine;
             this.target          = target;

@@ -78,7 +78,7 @@ public class DumpManagerTest {
         int countDirectLocResult = 0;
         int countSensor          = 0;
         int countSensorLOS       = 0;
-        int countSensorDate      = 0;
+        int countSensorDatation      = 0;
         int countSensorRate      = 0;
         BufferedReader br = new BufferedReader(new FileReader(dump));
         for (String line = br.readLine(); line != null; line = br.readLine()) {
@@ -102,8 +102,8 @@ public class DumpManagerTest {
                     ++countDirectLocResult;
                 } else if (trimmed.startsWith("sensor:")) {
                     ++countSensor;
-                } else if (trimmed.startsWith("sensor date:")) {
-                    ++countSensorDate;
+                } else if (trimmed.startsWith("sensor datation:")) {
+                    ++countSensorDatation;
                 } else if (trimmed.startsWith("sensor LOS:")) {
                     ++countSensorLOS;
                 } else if (trimmed.startsWith("sensor rate:")) {
@@ -122,9 +122,9 @@ public class DumpManagerTest {
         Assert.assertEquals(887, countDEMCell);
         Assert.assertEquals(400, countDirectLoc);
         Assert.assertEquals(400, countDirectLocResult);
-        Assert.assertEquals(0,   countSensor);
-        Assert.assertEquals(800, countSensorLOS);
-        Assert.assertEquals(403, countSensorDate);
+        Assert.assertEquals(1,   countSensor);
+        Assert.assertEquals(200, countSensorLOS);
+        Assert.assertEquals(3,   countSensorDatation);
         Assert.assertEquals(0,   countSensorRate);
 
     }
