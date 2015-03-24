@@ -80,7 +80,7 @@ public class DumpManager {
             DUMP.get().deactivate();
             DUMP.set(null);
         } else {
-            throw new RuggedException(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE);
+            throw new RuggedException(RuggedMessages.DEBUG_DUMP_NOT_ACTIVE);
         }
     }
 
