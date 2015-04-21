@@ -246,9 +246,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             return null;
         }
 
-        NormalizedGeodeticPoint previousGP  = entry;
-        int           previousLat = entryLat;
-        int           previousLon = entryLon;
+        NormalizedGeodeticPoint previousGP    = entry;
+        int                     previousLat   = entryLat;
+        int                     previousLon   = entryLon;
+        final double            angularMargin = STEP / ellipsoid.getEquatorialRadius();
 
         // introduce all intermediate points corresponding to the line-of-sight
         // intersecting the boundary between level 0 sub-tiles
@@ -260,8 +261,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                 // compute segment endpoints
                 final double longitude = tile.getLongitudeAtIndex(crossingLon);
-                if (longitude >= FastMath.min(entry.getLongitude(), exit.getLongitude()) &&
-                    longitude <= FastMath.max(entry.getLongitude(), exit.getLongitude())) {
+                if (longitude >= FastMath.min(entry.getLongitude(), exit.getLongitude()) - angularMargin &&
+                    longitude <= FastMath.max(entry.getLongitude(), exit.getLongitude()) + angularMargin) {
 
                     NormalizedGeodeticPoint crossingGP = null;
                     if (!flatBody) {
@@ -317,8 +318,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                 // compute segment endpoints
                 final double latitude = tile.getLatitudeAtIndex(crossingLat);
-                if (latitude >= FastMath.min(entry.getLatitude(), exit.getLatitude()) &&
-                    latitude <= FastMath.max(entry.getLatitude(), exit.getLatitude())) {
+                if (latitude >= FastMath.min(entry.getLatitude(), exit.getLatitude()) - angularMargin &&
+                    latitude <= FastMath.max(entry.getLatitude(), exit.getLatitude()) + angularMargin) {
 
                     NormalizedGeodeticPoint crossingGP = null;
                     if (!flatBody) {
