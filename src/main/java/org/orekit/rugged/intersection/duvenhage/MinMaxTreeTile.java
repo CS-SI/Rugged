@@ -178,9 +178,15 @@ public class MinMaxTreeTile extends SimpleTile {
             final int[] min = locateMin(i, j, level);
             final int index = min[0] * getLongitudeColumns() + min[1];
             DumpManager.dumpTileCell(this, min[0],     min[1],     raw[index]);
-            DumpManager.dumpTileCell(this, min[0] + 1, min[1],     raw[index + getLongitudeColumns()]);
-            DumpManager.dumpTileCell(this, min[0],     min[1] + 1, raw[index + 1]);
-            DumpManager.dumpTileCell(this, min[0] + 1, min[1] + 1, raw[index + getLongitudeColumns() + 1]);
+            if (index + getLongitudeColumns() < raw.length) {
+                DumpManager.dumpTileCell(this, min[0] + 1, min[1],     raw[index + getLongitudeColumns()]);
+            }
+            if (index + 1 < raw.length) {
+                DumpManager.dumpTileCell(this, min[0],     min[1] + 1, raw[index + 1]);
+            }
+            if (index + getLongitudeColumns() + 1 < raw.length) {
+                DumpManager.dumpTileCell(this, min[0] + 1, min[1] + 1, raw[index + getLongitudeColumns() + 1]);
+            }
         }
 
         return minTree[start[level] + levelI * levelC + levelJ];
@@ -232,9 +238,15 @@ public class MinMaxTreeTile extends SimpleTile {
             final int[] max = locateMax(i, j, level);
             final int index = max[0] * getLongitudeColumns() + max[1];
             DumpManager.dumpTileCell(this, max[0],     max[1],     raw[index]);
-            DumpManager.dumpTileCell(this, max[0] + 1, max[1],     raw[index + getLongitudeColumns()]);
-            DumpManager.dumpTileCell(this, max[0],     max[1] + 1, raw[index + 1]);
-            DumpManager.dumpTileCell(this, max[0] + 1, max[1] + 1, raw[index + getLongitudeColumns() + 1]);
+            if (index + getLongitudeColumns() < raw.length) {
+                DumpManager.dumpTileCell(this, max[0] + 1, max[1],     raw[index + getLongitudeColumns()]);
+            }
+            if (index + 1 < raw.length) {
+                DumpManager.dumpTileCell(this, max[0],     max[1] + 1, raw[index + 1]);
+            }
+            if (index + getLongitudeColumns() + 1 < raw.length) {
+                DumpManager.dumpTileCell(this, max[0] + 1, max[1] + 1, raw[index + getLongitudeColumns() + 1]);
+            }
         }
 
         return maxTree[start[level] + levelI * levelC + levelJ];
