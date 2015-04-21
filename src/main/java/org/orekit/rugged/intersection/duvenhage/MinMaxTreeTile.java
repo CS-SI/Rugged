@@ -23,8 +23,7 @@ import org.orekit.rugged.utils.MaxSelector;
 import org.orekit.rugged.utils.MinSelector;
 import org.orekit.rugged.utils.Selector;
 
-/** Simple implementation of a {@link org.orekit.rugged.raster.Tile}
- * with a min/max kd tree.
+/** Implementation of a {@link org.orekit.rugged.raster.Tile} with a min/max kd tree.
  * <p>
  * A n level min/max kd-tree contains sub-tiles merging individual cells
  * together from coarse-grained (at level 0) to fine-grained (at level n-1).
