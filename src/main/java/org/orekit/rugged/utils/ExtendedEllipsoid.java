@@ -19,6 +19,7 @@ package org.orekit.rugged.utils;
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.MathArrays;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
@@ -89,31 +90,48 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         DumpManager.dumpEllipsoid(this);
 
         // find apex of iso-latitude cone, somewhere along polar axis
-        final GeodeticPoint groundPoint = new GeodeticPoint(latitude, 0, 0);
-        final Vector3D gpCartesian = transform(groundPoint);
-        final double r             = FastMath.sqrt(gpCartesian.getX() * gpCartesian.getX() +
-                                                   gpCartesian.getY() * gpCartesian.getY());
-        final Vector3D zenith      = groundPoint.getZenith();
-        final Vector3D apex        = new Vector3D(1, gpCartesian, -r / FastMath.cos(latitude), zenith);
+        final double sinPhi  = FastMath.sin(latitude);
+        final double sinPhi2 = sinPhi * sinPhi;
+        final double e2      = getFlattening() * (2 - getFlattening());
+        final double apexZ   = -getA() * e2 * sinPhi / FastMath.sqrt(1 - e2 * sinPhi2);
 
         // quadratic equation representing line intersection with iso-latitude cone
         // a k² + 2 b k + c = 0
-        final Vector3D delta = position.subtract(apex);
-        final double zz2     = zenith.getZ() * zenith.getZ();
-        final double   a     = zz2 * los.getNormSq()                 - los.getZ()   * los.getZ();
-        final double   b     = zz2 * Vector3D.dotProduct(delta, los) - delta.getZ() * los.getZ();
-        final double   c     = zz2 * delta.getNormSq()               - delta.getZ() * delta.getZ();
+        // when line of sight is almost along an iso-latitude generatrix, the quadratic
+        // equation above may become unsolvable due to numerical noise (we get catastrophic
+        // cancellation when computing b * b - a * c). So we set up the model in two steps,
+        // first computing searching k₀ such that a₀ k₀² + 2 b₀ k₀ + c₀, and then using
+        // position + k₀ los as the new initial position, which should lie between the
+        // expected 2 roots
+        final double cosPhi  = FastMath.cos(latitude);
+        final double cosPhi2 = cosPhi * cosPhi;
+        final Vector3D delta0 = new Vector3D(position.getX(), position.getY(), position.getZ() - apexZ);
+        final double   a0     = MathArrays.linearCombination(+sinPhi2, los.getX() * los.getX() + los.getY() * los.getY(),
+                                                             -cosPhi2, los.getZ() * los.getZ());
+        final double   b0     = MathArrays.linearCombination(+sinPhi2, MathArrays.linearCombination(delta0.getX(), los.getX(),
+                                                                                                    delta0.getY(), los.getY()),
+                                                            -cosPhi2, delta0.getZ() * los.getZ());
+        final double k0 = -b0 / a0;
+
+        final Vector3D delta  = new Vector3D(MathArrays.linearCombination(1, position.getX(), k0, los.getX()),
+                                             MathArrays.linearCombination(1, position.getY(), k0, los.getY()),
+                                             MathArrays.linearCombination(1, position.getZ(), k0, los.getZ(), -1.0, apexZ));
+        final double   b      = MathArrays.linearCombination(+sinPhi2, MathArrays.linearCombination(delta.getX(), los.getX(),
+                                                                                                    delta.getY(), los.getY()),
+                                                             -cosPhi2, delta.getZ() * los.getZ());
+        final double   c      = MathArrays.linearCombination(+sinPhi2, delta.getX() * delta.getX() + delta.getY() * delta.getY(),
+                                                             -cosPhi2, delta.getZ() * delta.getZ());
 
         // find the two intersections along the line
-        final double   bb    = b * b;
-        final double   ac    = a * c;
+        final double   bb     = b  * b;
+        final double   ac     = a0 * c;
         if (bb < ac) {
             throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE,
                                       FastMath.toDegrees(latitude));
         }
         final double s  = FastMath.sqrt(bb - ac);
-        final double k1 = (b > 0) ? -(s + b) / a : c / (s - b);
-        final double k2 = c / (a * k1);
+        final double k1 = (b > 0) ? -(s + b) / a0 : c / (s - b);
+        final double k2 = c / (a0 * k1);
 
         // the quadratic equation has two solutions
         final boolean  k1IsOK = (delta.getZ() + k1 * los.getZ()) * latitude >= 0;
@@ -124,7 +142,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
                 // both solutions are in the good nappe,
                 // select the one closest to the specified reference
                 final double kRef = Vector3D.dotProduct(los, closeReference.subtract(position)) /
-                                    los.getNormSq();
+                                    los.getNormSq() - k0;
                 selectedK = FastMath.abs(k1 - kRef) <= FastMath.abs(k2 - kRef) ? k1 : k2;
             } else {
                 // only k1 is in the good nappe
@@ -143,7 +161,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         }
 
         // compute point
-        return new Vector3D(1, position, selectedK, los);
+        return new Vector3D(1, position, k0 + selectedK, los);
 
     }
 

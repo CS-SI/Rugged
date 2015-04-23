@@ -78,10 +78,12 @@ public class ExtendedEllipsoidTest {
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
 
-        for (double latitude = -d.getDelta() + 1.0e-6; latitude < d.getDelta(); latitude += 0.1) {
+        double epsilon = 7.0e-8; // will be used only for the first point, as intersection is almost along a generatrix
+        for (double latitude = -d.getDelta() + 1.0e-5; latitude < d.getDelta(); latitude += 0.1) {
             GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtLatitude(p, d, latitude, p),
                                                    ellipsoid.getBodyFrame(), null);
-            Assert.assertEquals(latitude, gp.getLatitude(), 1.0e-12);
+            Assert.assertEquals(latitude, gp.getLatitude(), epsilon);
+            epsilon = 1.0e-15; // after first point, far from the generatrix, intersection is very accurate
         }
 
     }
@@ -139,6 +141,18 @@ public class ExtendedEllipsoidTest {
         Assert.assertEquals(latitude, gpMinus.getLatitude(), 1.0e-12);
         Assert.assertEquals(-31797895.234, Vector3D.dotProduct(d, pMinus.subtract(p)), 0.001);
 
+    }
+
+    @Test
+    public void testPointAtLatitudeAlmostEquator() throws RuggedException, OrekitException {
+        Vector3D      p              = new Vector3D(5767483.098580201, 4259689.325372237, -41553.67750784925);
+        Vector3D      d              = new Vector3D(-0.7403523952347795, -0.6701811835520302, 0.05230212180799747);
+        double        latitude       = -3.469446951953614E-18;
+        Vector3D      closeReference = new Vector3D(5177991.74844521, 3726070.452427455, 90.88067547897226);
+        Vector3D      intersection   = ellipsoid.pointAtLatitude(p, d, latitude, closeReference);
+        GeodeticPoint gp             = ellipsoid.transform(intersection, ellipsoid.getBodyFrame(), null);
+        Assert.assertEquals(latitude, gp.getLatitude(), 1.0e-10);
+        Assert.assertEquals(2866.297, gp.getAltitude(), 1.0e-3);
     }
 
     @Test
@@ -241,9 +255,8 @@ public class ExtendedEllipsoidTest {
     public void testPointAtLatitudeError() throws RuggedException, OrekitException {
 
         Vector3D p = new Vector3D(-3052690.88784496, 6481300.309857268, 25258.7478104745);
-
-        Vector3D d = new Vector3D(0.3063261631703422, -0.951393802931811, -0.0318451487715828);
-        double latitude = 1.3959699281945737E-14;
+        Vector3D d = new Vector3D(0.6, -0.8, 0.0);
+        double latitude = 0.1;
         Vector3D c = new Vector3D(-2809972.5765414005, 5727461.020250551, 26.163518446261833);
 
         try {

@@ -655,10 +655,10 @@ public class RuggedTest {
     @Test
     public void testInverseLocation()
         throws RuggedException, OrekitException, URISyntaxException {
-        checkInverseLocation(2000, false, false, 7.0e-6, 6.0e-6);
-        checkInverseLocation(2000, false, true,  1.0e-5, 8.0e-4);
-        checkInverseLocation(2000, true,  false, 6.0e-6, 5.0e-3);
-        checkInverseLocation(2000, true,  true,  8.0e-6, 9.0e-4);
+        checkInverseLocation(2000, false, false, 3.0e-7, 5.0e-6);
+        checkInverseLocation(2000, false, true,  6.0e-6, 2.0e-7);
+        checkInverseLocation(2000, true,  false, 4.0e-7, 4.0e-7);
+        checkInverseLocation(2000, true,  true,  2.0e-5, 3.0e-7);
     }
 
     @Test
