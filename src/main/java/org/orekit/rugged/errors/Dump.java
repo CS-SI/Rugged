@@ -528,7 +528,7 @@ class Dump {
                                   result.getTargetDirection().getY().getPartialDerivative(1),
                                   result.getTargetDirection().getZ().getPartialDerivative(1));
                 }
-                writer.format(Locale.US,"%n");
+                writer.format(Locale.US, "%n");
 
                 // ensure the transforms for mid date are dumped
                 final AbsoluteDate midDate = meanPlane.getSensor().getDate(0.5 * (meanPlane.getMinLine() + meanPlane.getMaxLine()));
