@@ -36,6 +36,8 @@
     <rugged.maven-surefire-report-plugin.version>2.18.1</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.8</rugged.jgit.buildnumber.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
+    <rugged.orekit.version>7.1-SNAPSHOT</rugged.orekit.version>
+    <rugged.apache-commons-math.version>3.5</rugged.apache-commons-math.version>
     <rugged.compiler.source>1.6</rugged.compiler.source>
     <rugged.compiler.target>1.6</rugged.compiler.target>
     <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
@@ -136,14 +138,14 @@
     <dependency>
         <groupId>org.orekit</groupId>
         <artifactId>orekit</artifactId>
-        <version>7.0</version>
+        <version>${rugged.orekit.version}</version>
         <type>jar</type>
         <optional>false</optional>
     </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-math3</artifactId>
-        <version>3.5</version>
+        <version>${rugged.apache-commons-math.version}</version>
         <type>jar</type>
         <optional>false</optional>
     </dependency>
@@ -406,9 +408,9 @@
         <configuration>
           <overview>${basedir}/core/src/main/java/org/orekit/rugged/overview.html</overview>
           <links>
-            <link>http://download.oracle.com/javase/1.6.0/docs/api/</link>
-            <link>http://commons.apache.org/math/apidocs/</link>
-            <link>https://www.orekit.org/static/apidocs/</link>
+            <link>http://docs.oracle.com/javase/6/docs/api/</link>
+            <link>http://commons.apache.org/math/javadocs/api-${rugged.apache-commons-math.version}</link>
+            <link>https://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
           </links>
           <charset>${project.reporting.outputEncoding}</charset>
         </configuration>
