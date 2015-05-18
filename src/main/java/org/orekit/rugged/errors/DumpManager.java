@@ -186,6 +186,15 @@ public class DumpManager {
         }
     }
 
+    /** Dump an exception.
+     * @param e exception to dump
+     */
+    public static void dumpException(final RuggedException e) {
+        if (isActive()) {
+            DUMP.get().dumpException(e);
+        }
+    }
+
     /** Dump an observation transform transform.
      * @param scToBody provider for observation
      * @param index index of the transform

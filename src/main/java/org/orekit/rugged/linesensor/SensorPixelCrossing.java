@@ -23,6 +23,7 @@ import org.apache.commons.math3.exception.NoBracketingException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.rugged.errors.InverseLocOutOfColumnRangeException;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.time.AbsoluteDate;
@@ -68,25 +69,27 @@ public class SensorPixelCrossing {
 
     /** Locate pixel along sensor line.
      * @param date current date
-     * @return pixel location ({@code Double.NaN} if the first and last
-     * pixels of the line do not bracket a location)
+     * @return pixel location
+     * @exception InverseLocOutOfColumnRangeException if the ground point is out of column range
      * @exception RuggedException if the maximum number of evaluations is exceeded
      */
-    public double locatePixel(final AbsoluteDate date) throws RuggedException {
-        try {
+    public double locatePixel(final AbsoluteDate date)
+        throws InverseLocOutOfColumnRangeException, RuggedException {
 
-            // set up function evaluating to 0.0 where target matches pixel
-            final UnivariateFunction f = new UnivariateFunction() {
-                /** {@inheritDoc} */
-                @Override
-                public double value(final double x) throws RuggedExceptionWrapper {
-                    try {
-                        return Vector3D.angle(cross, getLOS(date, x)) - 0.5 * FastMath.PI;
-                    } catch (RuggedException re) {
-                        throw new RuggedExceptionWrapper(re);
-                    }
+        // set up function evaluating to 0.0 where target matches pixel
+        final UnivariateFunction f = new UnivariateFunction() {
+            /** {@inheritDoc} */
+            @Override
+            public double value(final double x) throws RuggedExceptionWrapper {
+                try {
+                    return Vector3D.angle(cross, getLOS(date, x)) - 0.5 * FastMath.PI;
+                } catch (RuggedException re) {
+                    throw new RuggedExceptionWrapper(re);
                 }
-            };
+            }
+        };
+
+        try {
 
             // find the root
             final UnivariateSolver solver =
@@ -94,8 +97,12 @@ public class SensorPixelCrossing {
             return solver.solve(maxEval, f, -MARGIN, sensor.getNbPixels() - 1 + MARGIN);
 
         } catch (NoBracketingException nbe) {
-            // there are no solutions in the search interval
-            return Double.NaN;
+            final int minPixel         = 0;
+            final int maxPixel         = sensor.getNbPixels() - 1;
+            final double fMinPixel     = f.value(minPixel);
+            final double fMaxPixel     = f.value(maxPixel);
+            final double expectedPixel = (fMaxPixel * minPixel - fMinPixel * maxPixel) / (fMaxPixel - fMinPixel);
+            throw new InverseLocOutOfColumnRangeException(expectedPixel, minPixel, maxPixel);
         } catch (TooManyEvaluationsException tmee) {
             throw new RuggedException(tmee);
         } catch (RuggedExceptionWrapper rew) {

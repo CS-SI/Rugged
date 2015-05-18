@@ -207,6 +207,19 @@ class Dump {
         }
     }
 
+    /** Dump an exception.
+     * @param e exception to dump
+     */
+    public void dumpException(final RuggedException e) {
+        writer.format(Locale.US,
+                      "Rugged exception: specifier %s parts",
+                      e.getSpecifier().toString());
+        for (final Object part : e.getParts()) {
+            writer.format(Locale.US, " %s", part);
+        }
+        writer.format(" %n");
+    }
+
     /** Dump an observation transform transform.
      * @param scToBody provider for observation
      * @param index index of the transform

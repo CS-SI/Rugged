@@ -34,6 +34,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.exception.util.Localizable;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -44,6 +45,7 @@ import org.apache.commons.math3.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
+import org.orekit.errors.OrekitMessages;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Predefined;
@@ -210,6 +212,12 @@ public class DumpReplayer {
 
     /** Keyword for target direction. */
     private static final String TARGET_DIRECTION = "targetDirection";
+
+    /** Keyword for exception specifier. */
+    private static final String SPECIFIER = "specifier";
+
+    /** Keyword for exception parts. */
+    private static final String PARTS = "parts";
 
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
@@ -436,8 +444,13 @@ public class DumpReplayer {
     public Result[] execute(final Rugged rugged) throws RuggedException {
         final Result[] results = new Result[calls.size()];
         for (int i = 0; i < calls.size(); ++i) {
-            results[i] = new Result(calls.get(i).expected,
-                                    calls.get(i).execute(rugged));
+            Object result = null;
+            try {
+                result = calls.get(i).execute(rugged);
+            } catch (RuggedException re) {
+                result = re;
+            }
+            results[i] = new Result(calls.get(i).expected, result);
         }
         return results;
     }
@@ -961,6 +974,35 @@ public class DumpReplayer {
                 final double       rate  = Double.parseDouble(fields[5]);
                 global.getSensor(sensorName).setRate(lineNumber, rate);
 
+            }
+
+        },
+
+        /** Parser for exception dump lines. */
+        RUGGED_EXCEPTION() {
+
+            /** {@inheritDoc} */
+            @Override
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
+                throws RuggedException {
+                if (fields.length < 3 || !fields[0].equals(SPECIFIER) || !fields[2].equals(PARTS)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                Localizable specifier = null;
+                try {
+                    specifier = RuggedMessages.valueOf(fields[1]);
+                } catch (IllegalArgumentException e1) {
+                    try {
+                        specifier = OrekitMessages.valueOf(fields[1]);
+                    } catch (IllegalArgumentException e2) {
+                        specifier = LocalizedFormats.valueOf(fields[1]);
+                    }
+                }
+                final Object[] parts = new Object[fields.length -  3];
+                System.arraycopy(fields, 3, parts, 0, parts.length);
+                final RuggedException re = new RuggedException(specifier, parts);
+                final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                last.expected = re;
             }
 
         };

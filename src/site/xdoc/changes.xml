@@ -22,6 +22,11 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="update" >
+        Use specific exceptions rather than returning null when inverse location identifies
+        out of range errors along lines or columns. This helps caller to set fix the
+        min/max lines as we can provide information about where the point is expected.
+      </action>
       <action dev="luc" type="add" >
         Added a CONSTANT_ELEVATION_OVER_ELLIPSOID algorithm, similar in spirit
         to the IGNORE_DEM_USE_ELLIPSOID, but with a user-specified elevation

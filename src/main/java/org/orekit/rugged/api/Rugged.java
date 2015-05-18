@@ -27,6 +27,8 @@ import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
+import org.orekit.rugged.errors.InverseLocOutOfColumnRangeException;
+import org.orekit.rugged.errors.InverseLocOutOfLineRangeException;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
@@ -376,25 +378,20 @@ public class Rugged {
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return date at which ground point is seen by line sensor
+     * @exception InverseLocOutOfLineRangeException if the ground point is out of line range
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #inverseLocation(String, GeodeticPoint, int, int)
      */
     public AbsoluteDate dateLocation(final String sensorName, final GeodeticPoint point,
                                      final int minLine, final int maxLine)
-        throws RuggedException {
+        throws InverseLocOutOfLineRangeException, RuggedException {
 
         final LineSensor sensor = getLineSensor(sensorName);
         final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
 
         // find approximately the sensor line at which ground point crosses sensor mean plane
         final Vector3D   target = ellipsoid.transform(point);
-        final SensorMeanPlaneCrossing.CrossingResult crossingResult = planeCrossing.find(target);
-        if (crossingResult == null) {
-            // target is out of search interval
-            return null;
-        } else {
-            return sensor.getDate(crossingResult.getLine());
-        }
+        return sensor.getDate(planeCrossing.find(target).getLine());
 
     }
 
@@ -408,14 +405,15 @@ public class Rugged {
      * @param longitude ground point longitude
      * @param minLine minimum line number
      * @param maxLine maximum line number
-     * @return sensor pixel seeing ground point, or null if ground point cannot
-     * be seen between the prescribed line numbers
+     * @return sensor pixel seeing ground point
+     * @exception InverseLocOutOfLineRangeException if the ground point is out of line range
+     * @exception InverseLocOutOfColumnRangeException if the ground point is out of column range
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
     public SensorPixel inverseLocation(final String sensorName,
                                        final double latitude, final double longitude,
                                        final int minLine,  final int maxLine)
-        throws RuggedException {
+        throws InverseLocOutOfLineRangeException, InverseLocOutOfColumnRangeException, RuggedException {
         final GeodeticPoint groundPoint =
                 new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
         return inverseLocation(sensorName, groundPoint, minLine, maxLine);
@@ -426,71 +424,73 @@ public class Rugged {
      * @param point point to localize
      * @param minLine minimum line number
      * @param maxLine maximum line number
-     * @return sensor pixel seeing point, or null if point cannot be seen between the
-     * prescribed line numbers
+     * @return sensor pixel seeing point
+     * @exception InverseLocOutOfLineRangeException if the ground point is out of line range
+     * @exception InverseLocOutOfColumnRangeException if the ground point is out of column range
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #dateLocation(String, GeodeticPoint, int, int)
      */
     public SensorPixel inverseLocation(final String sensorName, final GeodeticPoint point,
                                        final int minLine, final int maxLine)
-        throws RuggedException {
+        throws InverseLocOutOfLineRangeException, InverseLocOutOfColumnRangeException, RuggedException {
 
-        final LineSensor sensor = getLineSensor(sensorName);
-        DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine,
-                                        lightTimeCorrection, aberrationOfLightCorrection);
+        try {
+            final LineSensor sensor = getLineSensor(sensorName);
+            DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine,
+                                            lightTimeCorrection, aberrationOfLightCorrection);
 
-        final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
+            final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
 
-        DumpManager.dumpSensorMeanPlane(planeCrossing);
+            DumpManager.dumpSensorMeanPlane(planeCrossing);
 
-        // find approximately the sensor line at which ground point crosses sensor mean plane
-        final Vector3D   target = ellipsoid.transform(point);
-        final SensorMeanPlaneCrossing.CrossingResult crossingResult = planeCrossing.find(target);
-        if (crossingResult == null) {
-            // target is out of search interval
-            return null;
+            // find approximately the sensor line at which ground point crosses sensor mean plane
+            final Vector3D   target = ellipsoid.transform(point);
+            final SensorMeanPlaneCrossing.CrossingResult crossingResult = planeCrossing.find(target);
+
+            // find approximately the pixel along this sensor line
+            final SensorPixelCrossing pixelCrossing =
+                    new SensorPixelCrossing(sensor, planeCrossing.getMeanPlaneNormal(),
+                                            crossingResult.getTargetDirection().toVector3D(),
+                                            MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
+            final double coarsePixel = pixelCrossing.locatePixel(crossingResult.getDate());
+            if (Double.isNaN(coarsePixel)) {
+                // target is out of search interval
+                return null;
+            }
+
+            // fix line by considering the closest pixel exact position and line-of-sight
+            // (this pixel might point towards a direction slightly above or below the mean sensor plane)
+            final int      lowIndex        = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
+            final Vector3D lowLOS          = sensor.getLos(crossingResult.getDate(), lowIndex);
+            final Vector3D highLOS         = sensor.getLos(crossingResult.getDate(), lowIndex + 1);
+            final Vector3D localZ          = Vector3D.crossProduct(lowLOS, highLOS);
+            final DerivativeStructure beta = FieldVector3D.angle(crossingResult.getTargetDirection(), localZ);
+            final double   deltaL          = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
+            final double   fixedLine       = crossingResult.getLine() + deltaL;
+            final Vector3D fixedDirection  = new Vector3D(crossingResult.getTargetDirection().getX().taylor(deltaL),
+                                                          crossingResult.getTargetDirection().getY().taylor(deltaL),
+                                                          crossingResult.getTargetDirection().getZ().taylor(deltaL)).normalize();
+
+            // fix neighbouring pixels
+            final AbsoluteDate fixedDate   = sensor.getDate(fixedLine);
+            final Vector3D fixedX          = sensor.getLos(fixedDate, lowIndex);
+            final Vector3D fixedZ          = Vector3D.crossProduct(fixedX, sensor.getLos(fixedDate, lowIndex + 1));
+            final Vector3D fixedY          = Vector3D.crossProduct(fixedZ, fixedX);
+
+            // fix pixel
+            final double pixelWidth = FastMath.atan2(Vector3D.dotProduct(highLOS,        fixedY),
+                                                     Vector3D.dotProduct(highLOS,        fixedX));
+            final double alpha      = FastMath.atan2(Vector3D.dotProduct(fixedDirection, fixedY),
+                                                     Vector3D.dotProduct(fixedDirection, fixedX));
+            final double fixedPixel = lowIndex + alpha / pixelWidth;
+
+            final SensorPixel result = new SensorPixel(fixedLine, fixedPixel);
+            DumpManager.dumpInverseLocationResult(result);
+            return result;
+        } catch (RuggedException re) {
+            DumpManager.dumpException(re);
+            throw(re);
         }
-
-        // find approximately the pixel along this sensor line
-        final SensorPixelCrossing pixelCrossing =
-                new SensorPixelCrossing(sensor, planeCrossing.getMeanPlaneNormal(),
-                                        crossingResult.getTargetDirection().toVector3D(),
-                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
-        final double coarsePixel = pixelCrossing.locatePixel(crossingResult.getDate());
-        if (Double.isNaN(coarsePixel)) {
-            // target is out of search interval
-            return null;
-        }
-
-        // fix line by considering the closest pixel exact position and line-of-sight
-        // (this pixel might point towards a direction slightly above or below the mean sensor plane)
-        final int      lowIndex        = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
-        final Vector3D lowLOS          = sensor.getLos(crossingResult.getDate(), lowIndex);
-        final Vector3D highLOS         = sensor.getLos(crossingResult.getDate(), lowIndex + 1);
-        final Vector3D localZ          = Vector3D.crossProduct(lowLOS, highLOS);
-        final DerivativeStructure beta = FieldVector3D.angle(crossingResult.getTargetDirection(), localZ);
-        final double   deltaL          = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
-        final double   fixedLine       = crossingResult.getLine() + deltaL;
-        final Vector3D fixedDirection  = new Vector3D(crossingResult.getTargetDirection().getX().taylor(deltaL),
-                                                      crossingResult.getTargetDirection().getY().taylor(deltaL),
-                                                      crossingResult.getTargetDirection().getZ().taylor(deltaL)).normalize();
-
-        // fix neighbouring pixels
-        final AbsoluteDate fixedDate   = sensor.getDate(fixedLine);
-        final Vector3D fixedX          = sensor.getLos(fixedDate, lowIndex);
-        final Vector3D fixedZ          = Vector3D.crossProduct(fixedX, sensor.getLos(fixedDate, lowIndex + 1));
-        final Vector3D fixedY          = Vector3D.crossProduct(fixedZ, fixedX);
-
-        // fix pixel
-        final double pixelWidth = FastMath.atan2(Vector3D.dotProduct(highLOS,        fixedY),
-                                                 Vector3D.dotProduct(highLOS,        fixedX));
-        final double alpha      = FastMath.atan2(Vector3D.dotProduct(fixedDirection, fixedY),
-                                                 Vector3D.dotProduct(fixedDirection, fixedX));
-        final double fixedPixel = lowIndex + alpha / pixelWidth;
-
-        final SensorPixel result = new SensorPixel(fixedLine, fixedPixel);
-        DumpManager.dumpInverseLocationResult(result);
-        return result;
 
     }
 

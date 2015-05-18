@@ -37,6 +37,12 @@ LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = a liña de visión xamais atravesa a lon
 # line never crosses altitude {0}
 LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = a liña de visión xamais atravesa a altitude {0}
 
+# ground point is around line {0}, out of the [{1}, {2}] range
+GROUND_POINT_OUT_OF_LINE_RANGE = <MISSING TRANSLATION>
+
+# ground point is around column {0}, out of the [{1}, {2}] range
+GROUND_POINT_OUT_OF_COLUMN_RANGE = <MISSING TRANSLATION>
+
 # line-of-sight enters the Digital Elevation Model behind spacecraft!
 DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = ¡ a liña de visión entra no Modelo Dixital do Terren por detrás do satélite !
 

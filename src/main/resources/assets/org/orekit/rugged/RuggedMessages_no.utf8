@@ -37,6 +37,12 @@ LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = synslinjen krysser aldri lengdegrad {0}
 # line never crosses altitude {0}
 LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = linjen krysser aldri høyden {0}
 
+# ground point is around line {0}, out of the [{1}, {2}] range
+GROUND_POINT_OUT_OF_LINE_RANGE = <MISSING TRANSLATION>
+
+# ground point is around column {0}, out of the [{1}, {2}] range
+GROUND_POINT_OUT_OF_COLUMN_RANGE = <MISSING TRANSLATION>
+
 # line-of-sight enters the Digital Elevation Model behind spacecraft!
 DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = synslinjen går inn i den digital terrengmodellen bak romfartøyet
 
