@@ -13,8 +13,8 @@ NO_DEM_DATA = aucune donnée à la latitude {0} et à la longitude {1} dans le M
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = la tuile sélectionnée pour la latitude {0} et la longitude {1} ne contient pas le voisinage requis pour ce point
 
-# date {0} is out of time span [{1}, {2}]
-OUT_OF_TIME_RANGE = la date {0} est hors de la plage temporelle [{1}, {2}]
+# date {0} is out of time span [{1}, {2}] (UTC)
+OUT_OF_TIME_RANGE = la date {0} est hors de la plage temporelle [{1}, {2}] (UTC)
 
 # general context has not been initialized (missing call to {0})
 UNINITIALIZED_CONTEXT = le contexte général n''a pas été initialisé (appel manquant à {0})

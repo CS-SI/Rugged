@@ -13,8 +13,8 @@ NO_DEM_DATA = <MISSING TRANSLATION>
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = a faceta seleccionada para a latitude {0} e lonxitude {1} non cumpre o requisito de veciñanza
 
-# date {0} is out of time span [{1}, {2}]
-OUT_OF_TIME_RANGE = a data {0} está fora do intervalo temporal [{1}, {2}]
+# date {0} is out of time span [{1}, {2}] (UTC)
+OUT_OF_TIME_RANGE = a data {0} está fora do intervalo temporal [{1}, {2}] (UTC)
 
 # general context has not been initialized (missing call to {0})
 UNINITIALIZED_CONTEXT = o contexto xeral non foi inicializado (falta face-la chamada a {0})

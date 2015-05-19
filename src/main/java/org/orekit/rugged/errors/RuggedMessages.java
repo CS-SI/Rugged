@@ -55,7 +55,7 @@ public enum RuggedMessages implements Localizable {
     OUT_OF_TILE_ANGLES("no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}"),
     NO_DEM_DATA("no Digital Elevation Model data at latitude {0} and longitude {1}"),
     TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED("the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood"),
-    OUT_OF_TIME_RANGE("date {0} is out of time span [{1}, {2}]"),
+    OUT_OF_TIME_RANGE("date {0} is out of time span [{1}, {2}] (UTC)"),
     UNINITIALIZED_CONTEXT("general context has not been initialized (missing call to {0})"),
     EMPTY_TILE("tile is empty: {0} ⨉ {1}"),
     UNKNOWN_SENSOR("unknown sensor {0}"),

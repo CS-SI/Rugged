@@ -13,8 +13,8 @@ NO_DEM_DATA = no Digital Elevation Model data at latitude {0} and longitude {1}
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 
-# date {0} is out of time span [{1}, {2}]
-OUT_OF_TIME_RANGE = date {0} is out of time span [{1}, {2}]
+# date {0} is out of time span [{1}, {2}] (UTC)
+OUT_OF_TIME_RANGE = date {0} is out of time span [{1}, {2}] (UTC)
 
 # general context has not been initialized (missing call to {0})
 UNINITIALIZED_CONTEXT = general context has not been initialized (missing call to {0})
