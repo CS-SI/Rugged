@@ -21,7 +21,6 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
-import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -36,7 +35,6 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.orekit.frames.Transform;
-import org.orekit.rugged.errors.InverseLocOutOfLineRangeException;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -333,13 +331,13 @@ public class SensorMeanPlaneCrossing {
 
     /** Find mean plane crossing.
      * @param target target ground point
-     * @return line number and target direction at mean plane crossing
-     * @exception InverseLocOutOfLineRangeException if the ground point is out of line range
+     * @return line number and target direction at mean plane crossing,
+     * or null if search interval does not bracket a solution
      * @exception RuggedException if geometry cannot be computed for some line or
      * if the maximum number of evaluations is exceeded
      */
     public CrossingResult find(final Vector3D target)
-        throws InverseLocOutOfLineRangeException, RuggedException {
+        throws RuggedException {
 
         double crossingLine     = midLine;
         Transform bodyToInert   = midBodyToInert;
@@ -412,6 +410,9 @@ public class SensorMeanPlaneCrossing {
                     // rare case: we are stuck in a loop!
                     // switch to a more robust (but slower) algorithm in this case
                     final CrossingResult slowResult = slowFind(targetPV, crossingLine);
+                    if (slowResult == null) {
+                        return null;
+                    }
                     for (int k = cachedResults.length - 1; k > 0; --k) {
                         cachedResults[k] = cachedResults[k - 1];
                     }
@@ -424,7 +425,7 @@ public class SensorMeanPlaneCrossing {
                 if (atMin) {
                     // we were already trying at minLine and we need to go below that
                     // give up as the solution is out of search interval
-                    throw new InverseLocOutOfLineRangeException(crossingLine, minLine, maxLine);
+                    return null;
                 }
                 atMin        = true;
                 crossingLine = minLine;
@@ -432,7 +433,7 @@ public class SensorMeanPlaneCrossing {
                 if (atMax) {
                     // we were already trying at maxLine and we need to go above that
                     // give up as the solution is out of search interval
-                    throw new InverseLocOutOfLineRangeException(crossingLine, minLine, maxLine);
+                    return null;
                 }
                 atMax        = true;
                 crossingLine = maxLine;
@@ -447,7 +448,7 @@ public class SensorMeanPlaneCrossing {
             scToInert   = scToBody.getScToInertial(date);
         }
 
-        throw new RuggedException(LocalizedFormats.MAX_COUNT_EXCEEDED, maxEval);
+        return null;
 
     }
 
@@ -495,24 +496,6 @@ public class SensorMeanPlaneCrossing {
      */
     public CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess)
         throws RuggedException {
-
-        // set up function evaluating to 0.0 where target matches line
-        final UnivariateFunction f = new UnivariateFunction() {
-            /** {@inheritDoc} */
-            @Override
-            public double value(final double x) throws RuggedExceptionWrapper {
-                try {
-                    final AbsoluteDate date = sensor.getDate(x);
-                    final FieldVector3D<DerivativeStructure> targetDirection =
-                            evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
-                    final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
-                    return 0.5 * FastMath.PI - beta.getValue();
-                } catch (RuggedException re) {
-                    throw new RuggedExceptionWrapper(re);
-                }
-            }
-        };
-
         try {
 
             // safety check
@@ -524,7 +507,21 @@ public class SensorMeanPlaneCrossing {
             }
 
             final UnivariateSolver solver = new BracketingNthOrderBrentSolver(accuracy, 5);
-            double crossingLine = solver.solve(maxEval, f, minLine, maxLine, startValue);
+            double crossingLine = solver.solve(maxEval, new UnivariateFunction() {
+                /** {@inheritDoc} */
+                @Override
+                public double value(final double x) throws RuggedExceptionWrapper {
+                    try {
+                        final AbsoluteDate date = sensor.getDate(x);
+                        final FieldVector3D<DerivativeStructure> targetDirection =
+                                evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
+                        final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
+                        return 0.5 * FastMath.PI - beta.getValue();
+                    } catch (RuggedException re) {
+                        throw new RuggedExceptionWrapper(re);
+                    }
+                }
+            }, minLine, maxLine, startValue);
 
             final AbsoluteDate date = sensor.getDate(crossingLine);
             final FieldVector3D<DerivativeStructure> targetDirection =
@@ -532,14 +529,10 @@ public class SensorMeanPlaneCrossing {
             return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetPV.getPosition(), targetDirection);
 
         } catch (NoBracketingException nbe) {
-            final double fMinLine     = f.value(minLine);
-            final double fMaxLine     = f.value(maxLine);
-            final double expectedLine = (fMaxLine * minLine - fMinLine * maxLine) / (fMaxLine - fMinLine);
-            throw new InverseLocOutOfLineRangeException(expectedLine, minLine, maxLine);
+            return null;
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
         }
-
     }
 
     /** Evaluate geometry for a given line number.

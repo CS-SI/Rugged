@@ -48,8 +48,6 @@ import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.TestUtils;
-import org.orekit.rugged.errors.InverseLocOutOfColumnRangeException;
-import org.orekit.rugged.errors.InverseLocOutOfLineRangeException;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineDatation;
@@ -992,52 +990,32 @@ public class RuggedTest {
         }
 
         // point out of line (20 pixels before first pixel)
-        try {
-            rugged.inverseLocation("line",
+        Assert.assertNull(rugged.inverseLocation("line",
                                                     21 * gp[0].getLatitude()  - 20 * gp[1].getLatitude(),
                                                     21 * gp[0].getLongitude() - 20 * gp[1].getLongitude(),
-                                                    0, dimension);
-            Assert.fail("an exception should have been thrown");
-        } catch (InverseLocOutOfColumnRangeException e) {
-            Assert.assertEquals(-20, e.getExpectedColumn(), 1.0);
-        }
+                                                    0, dimension));
 
         // point out of line (20 pixels after last pixel)
-        try {
-            rugged.inverseLocation("line",
-                                   -20 * gp[gp.length - 2].getLatitude()  + 21 * gp[gp.length - 1].getLatitude(),
-                                   -20 * gp[gp.length - 2].getLongitude() + 21 * gp[gp.length - 1].getLongitude(),
-                                   0, dimension);
-            Assert.fail("an exception should have been thrown");
-        } catch (InverseLocOutOfColumnRangeException e) {
-            Assert.assertEquals(2019.0, e.getExpectedColumn(), 1.0);
-        }
+        Assert.assertNull(rugged.inverseLocation("line",
+                                                    -20 * gp[gp.length - 2].getLatitude()  + 21 * gp[gp.length - 1].getLatitude(),
+                                                    -20 * gp[gp.length - 2].getLongitude() + 21 * gp[gp.length - 1].getLongitude(),
+                                                    0, dimension));
 
         // point out of line (20 lines before first line)
         GeodeticPoint[] gp0 = rugged.directLocation("line", 0);
         GeodeticPoint[] gp1 = rugged.directLocation("line", 1);
-        try {
-            rugged.inverseLocation("line",
-                                   21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
-                                   21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
-                                   0, dimension);
-            Assert.fail("an exception should have been thrown");
-        } catch (InverseLocOutOfLineRangeException e) {
-            Assert.assertEquals(-20, e.getExpectedLine(), 1.0);
-        }
+        Assert.assertNull(rugged.inverseLocation("line",
+                                                    21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
+                                                    21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
+                                                    0, dimension));
 
         // point out of line (20 lines after last line)
         GeodeticPoint[] gp2 = rugged.directLocation("line", dimension - 2);
         GeodeticPoint[] gp3 = rugged.directLocation("line", dimension - 1);
-        try {
-            rugged.inverseLocation("line",
-                                   -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
-                                   -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
-                                   0, dimension);
-            Assert.fail("an exception should have been thrown");
-        } catch (InverseLocOutOfLineRangeException e) {
-            Assert.assertEquals(2019.0, e.getExpectedLine(), 1.0);
-        }
+        Assert.assertNull(rugged.inverseLocation("line",
+                                                    -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
+                                                    -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
+                                                    0, dimension));
 
     }
 
@@ -1104,28 +1082,18 @@ public class RuggedTest {
         // point out of line (20 lines before first line)
         GeodeticPoint[] gp0 = rugged.directLocation("line", 0);
         GeodeticPoint[] gp1 = rugged.directLocation("line", 1);
-        try {
-            rugged.dateLocation("line",
-                                21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
-                                21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
-                                0, dimension);
-            Assert.fail("an exception should have been thrown");
-        } catch (InverseLocOutOfLineRangeException e) {
-            Assert.assertEquals(-20.0, e.getExpectedLine(), 1.0);
-        }
+        Assert.assertNull(rugged.dateLocation("line",
+                                                    21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
+                                                    21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
+                                                    0, dimension));
 
         // point out of line (20 lines after last line)
         GeodeticPoint[] gp2 = rugged.directLocation("line", dimension - 2);
         GeodeticPoint[] gp3 = rugged.directLocation("line", dimension - 1);
-        try {
-            rugged.dateLocation("line",
-                                -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
-                                -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
-                                0, dimension);
-            Assert.fail("an exception should have been thrown");
-        } catch (InverseLocOutOfLineRangeException e) {
-            Assert.assertEquals(2019.0, e.getExpectedLine(), 1.0);
-        }
+        Assert.assertNull(rugged.dateLocation("line",
+                                                    -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
+                                                    -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
+                                                    0, dimension));
 
     }
 
