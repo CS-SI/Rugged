@@ -453,10 +453,6 @@ public class Rugged {
                                             crossingResult.getTargetDirection().toVector3D(),
                                             MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
             final double coarsePixel = pixelCrossing.locatePixel(crossingResult.getDate());
-            if (Double.isNaN(coarsePixel)) {
-                // target is out of search interval
-                return null;
-            }
 
             // fix line by considering the closest pixel exact position and line-of-sight
             // (this pixel might point towards a direction slightly above or below the mean sensor plane)

@@ -496,23 +496,6 @@ public class SensorMeanPlaneCrossing {
     public CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess)
         throws RuggedException {
 
-        // set up function evaluating to 0.0 where target matches line
-        final UnivariateFunction f = new UnivariateFunction() {
-            /** {@inheritDoc} */
-            @Override
-            public double value(final double x) throws RuggedExceptionWrapper {
-                try {
-                    final AbsoluteDate date = sensor.getDate(x);
-                    final FieldVector3D<DerivativeStructure> targetDirection =
-                            evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
-                    final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
-                    return 0.5 * FastMath.PI - beta.getValue();
-                } catch (RuggedException re) {
-                    throw new RuggedExceptionWrapper(re);
-                }
-            }
-        };
-
         try {
 
             // safety check
@@ -523,6 +506,19 @@ public class SensorMeanPlaneCrossing {
                 startValue = initialGuess;
             }
 
+            // set up function evaluating to 0.0 where target matches line
+            final UnivariateFunction f = new UnivariateFunction() {
+                /** {@inheritDoc} */
+                @Override
+                public double value(final double x) throws RuggedExceptionWrapper {
+                    try {
+                        return targetOffset(x, targetPV).getValue();
+                    } catch (RuggedException re) {
+                        throw new RuggedExceptionWrapper(re);
+                    }
+                }
+            };
+
             final UnivariateSolver solver = new BracketingNthOrderBrentSolver(accuracy, 5);
             final double crossingLine = solver.solve(maxEval, f, minLine, maxLine, startValue);
 
@@ -532,15 +528,38 @@ public class SensorMeanPlaneCrossing {
             return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetPV.getPosition(), targetDirection);
 
         } catch (NoBracketingException nbe) {
-            final double fMinLine     = f.value(minLine);
-            final double fMaxLine     = f.value(maxLine);
-            final double expectedLine = (fMaxLine * minLine - fMinLine * maxLine) / (fMaxLine - fMinLine);
-            throw new InverseLocOutOfLineRangeException(expectedLine, minLine, maxLine);
+            final DerivativeStructure fMinLine = targetOffset(minLine, targetPV);
+            final DerivativeStructure fMaxLine = targetOffset(maxLine, targetPV);
+            final double linearExpectedLine    = (fMaxLine.getValue() * minLine - fMinLine.getValue() * maxLine) /
+                                                 (fMaxLine.getValue() - fMinLine.getValue());
+            final double newtonExpectedLine;
+            if (linearExpectedLine < midLine) {
+                newtonExpectedLine = minLine - fMinLine.getPartialDerivative(1) / fMinLine.getValue();
+            } else {
+                newtonExpectedLine = maxLine - fMaxLine.getPartialDerivative(1) / fMaxLine.getValue();
+            }
+            throw new InverseLocOutOfLineRangeException(newtonExpectedLine, minLine, maxLine);
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
         }
 
     }
+
+    /** Target offset.
+     * @param lineNumber current line number
+     * @param targetPV target ground point
+     * @return target direction in spacecraft frame, with its first derivative
+     * with respect to line number
+     * @exception RuggedException if geometry cannot be computed
+     */
+    private DerivativeStructure targetOffset(final double lineNumber, final PVCoordinates targetPV)
+        throws RuggedException {
+        final AbsoluteDate date = sensor.getDate(lineNumber);
+        final FieldVector3D<DerivativeStructure> targetDirection =
+                        evaluateLine(lineNumber, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
+        final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
+        return beta.subtract(0.5 * FastMath.PI);
+    };
 
     /** Evaluate geometry for a given line number.
      * @param lineNumber current line number
