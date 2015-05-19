@@ -534,9 +534,9 @@ public class SensorMeanPlaneCrossing {
                                                  (fMaxLine.getValue() - fMinLine.getValue());
             final double newtonExpectedLine;
             if (linearExpectedLine < midLine) {
-                newtonExpectedLine = minLine - fMinLine.getPartialDerivative(1) / fMinLine.getValue();
+                newtonExpectedLine = minLine - fMinLine.getValue() / fMinLine.getPartialDerivative(1);
             } else {
-                newtonExpectedLine = maxLine - fMaxLine.getPartialDerivative(1) / fMaxLine.getValue();
+                newtonExpectedLine = maxLine - fMaxLine.getValue() / fMaxLine.getPartialDerivative(1);
             }
             throw new InverseLocOutOfLineRangeException(newtonExpectedLine, minLine, maxLine);
         } catch (RuggedExceptionWrapper rew) {
