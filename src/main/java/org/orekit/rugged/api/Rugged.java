@@ -489,7 +489,7 @@ public class Rugged {
             return result;
         } catch (RuggedException re) {
             DumpManager.dumpException(re);
-            throw(re);
+            throw re;
         }
 
     }

@@ -524,7 +524,7 @@ public class SensorMeanPlaneCrossing {
             }
 
             final UnivariateSolver solver = new BracketingNthOrderBrentSolver(accuracy, 5);
-            double crossingLine = solver.solve(maxEval, f, minLine, maxLine, startValue);
+            final double crossingLine = solver.solve(maxEval, f, minLine, maxLine, startValue);
 
             final AbsoluteDate date = sensor.getDate(crossingLine);
             final FieldVector3D<DerivativeStructure> targetDirection =
