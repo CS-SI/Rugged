@@ -286,7 +286,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                                  cN * entry.getAltitude() + cX * exit.getAltitude(),
                                                                  tile.getMinimumLongitude());
                     }
-                    final int crossingLat = tile.getFloorLatitudeIndex(crossingGP.getLatitude());
+                    final int crossingLat =
+                            FastMath.max(0,
+                                         FastMath.min(tile.getLatitudeRows() - 1,
+                                                      tile.getFloorLatitudeIndex(crossingGP.getLatitude())));
 
                     // adjust indices as the crossing point is by definition between the sub-tiles
                     final int crossingLonBefore = crossingLon - (entryLon <= exitLon ? 1 : 0);
@@ -345,7 +348,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                                  cN * entry.getAltitude()  + cX * exit.getAltitude(),
                                                                  tile.getMinimumLongitude());
                     }
-                    final int crossingLon = tile.getFloorLongitudeIndex(crossingGP.getLongitude());
+                    final int crossingLon =
+                            FastMath.max(0,
+                                         FastMath.min(tile.getLongitudeColumns() - 1,
+                                                      tile.getFloorLongitudeIndex(crossingGP.getLongitude())));
 
                     // adjust indices as the crossing point is by definition between the sub-tiles
                     final int crossingLatBefore = crossingLat - (entryLat <= exitLat ? 1 : 0);
