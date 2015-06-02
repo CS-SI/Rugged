@@ -35,7 +35,6 @@ import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.PropagationException;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
@@ -45,9 +44,6 @@ import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.linesensor.LinearLineDatation;
-import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -150,9 +146,9 @@ public class SensorMeanPlaneCrossingTest {
     private List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
                                                      AbsoluteDate minDate, AbsoluteDate maxDate,
                                                      double step)
-        throws PropagationException {
+        throws OrekitException {
         Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
@@ -172,9 +168,9 @@ public class SensorMeanPlaneCrossingTest {
     private List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
                                                          AbsoluteDate minDate, AbsoluteDate maxDate,
                                                          double step)
-        throws PropagationException {
+        throws OrekitException {
         Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {

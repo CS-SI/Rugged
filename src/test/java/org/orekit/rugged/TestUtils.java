@@ -31,7 +31,6 @@ import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.PropagationException;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
@@ -121,11 +120,11 @@ public class TestUtils {
     }
 
     public static Propagator createPropagator(BodyShape earth,
-                                        NormalizedSphericalHarmonicsProvider gravityField,
-                                        Orbit orbit)
+                                              NormalizedSphericalHarmonicsProvider gravityField,
+                                              Orbit orbit)
         throws OrekitException {
 
-        AttitudeProvider yawCompensation = new YawCompensation(new NadirPointing(earth));
+        AttitudeProvider yawCompensation = new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth));
         SpacecraftState state = new SpacecraftState(orbit,
                                                     yawCompensation.getAttitude(orbit,
                                                                                 orbit.getDate(),
@@ -176,9 +175,9 @@ public class TestUtils {
     public static List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
                                                      AbsoluteDate minDate, AbsoluteDate maxDate,
                                                      double step)
-        throws PropagationException {
+        throws OrekitException {
         Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
@@ -198,9 +197,9 @@ public class TestUtils {
     public static List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
                                                          AbsoluteDate minDate, AbsoluteDate maxDate,
                                                          double step)
-        throws PropagationException {
+        throws OrekitException {
         Propagator propagator = new KeplerianPropagator(orbit);
-        propagator.setAttitudeProvider(new YawCompensation(new NadirPointing(earth)));
+        propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
