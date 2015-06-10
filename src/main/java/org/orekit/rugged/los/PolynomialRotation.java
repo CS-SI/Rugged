@@ -109,7 +109,7 @@ public class PolynomialRotation implements LOSTransform {
     public void getEstimatedParameters(final double[] parameters, final int start, final int length)
         throws RuggedException {
         checkSlice(length);
-        System.arraycopy(angle.getCoefficients(), 0, length, start, length);
+        System.arraycopy(angle.getCoefficients(), 0, parameters, start, length);
     }
 
     /** {@inheritDoc}
