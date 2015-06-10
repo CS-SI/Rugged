@@ -26,7 +26,7 @@ import org.orekit.time.AbsoluteDate;
  * @author Luc Maisonobe
  * @see LOSBuilder
  */
-interface LOSTransform extends ParametricModel {
+public interface LOSTransform extends ParametricModel {
 
     /** Transform a line-of-sight.
      * @param i los pixel index

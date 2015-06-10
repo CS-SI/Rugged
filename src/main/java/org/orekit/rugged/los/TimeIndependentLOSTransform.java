@@ -25,7 +25,7 @@ import org.orekit.rugged.utils.ParametricModel;
  * @author Luc Maisonobe
  * @see LOSBuilder
  */
-interface TimeIndependentLOSTransform extends ParametricModel {
+public interface TimeIndependentLOSTransform extends ParametricModel {
 
     /** Transform a line-of-sight.
      * @param i los pixel index
