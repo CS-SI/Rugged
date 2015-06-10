@@ -68,9 +68,28 @@ public class PolynomialRotation implements LOSTransform {
                               final Vector3D axis,
                               final AbsoluteDate referenceDate,
                               final double ... angleCoeffs) {
+        this(type, axis, referenceDate, new PolynomialFunction(angleCoeffs));
+    }
+
+    /** Simple constructor.
+     * <p>
+     * The angle of the rotation is evaluated as a polynomial in t,
+     * where t is the duration in seconds between evaluation date and
+     * reference date. The parameters are the polynomial coefficients,
+     * with the constant term at index 0.
+     * </p>
+     * @param type parameters type
+     * @param axis rotation axis
+     * @param referenceDate reference date for the polynomial angle
+     * @param angle polynomial angle
+     */
+    public PolynomialRotation(final ParameterType type,
+                              final Vector3D axis,
+                              final AbsoluteDate referenceDate,
+                              final PolynomialFunction angle) {
         this.type          = type;
         this.axis          = axis;
-        this.angle         = new PolynomialFunction(angleCoeffs);
+        this.angle         = angle;
         this.referenceDate = referenceDate;
     }
 
