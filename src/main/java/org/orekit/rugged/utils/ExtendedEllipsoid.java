@@ -79,7 +79,8 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param latitude latitude with respect to ellipsoid
      * @param closeReference reference point used to select the closest solution
-     * when there are two points at the desired latitude along the line
+     * when there are two points at the desired latitude along the line, it should
+     * be close to los surface intersection
      * @return point at latitude
      * @exception RuggedException if no such point exists
      */
@@ -100,22 +101,18 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
         // when line of sight is almost along an iso-latitude generatrix, the quadratic
         // equation above may become unsolvable due to numerical noise (we get catastrophic
         // cancellation when computing b * b - a * c). So we set up the model in two steps,
-        // first computing searching k₀ such that a₀ k₀² + 2 b₀ k₀ + c₀, and then using
-        // position + k₀ los as the new initial position, which should lie between the
-        // expected 2 roots
+        // first searching k₀ such that position + k₀ los is close to closeReference, and
+        // then using position + k₀ los as the new initial position, which should be in
+        // the neighborhood of the solution
         final double cosPhi  = FastMath.cos(latitude);
         final double cosPhi2 = cosPhi * cosPhi;
-        final Vector3D delta0 = new Vector3D(position.getX(), position.getY(), position.getZ() - apexZ);
-        final double   a0     = MathArrays.linearCombination(+sinPhi2, los.getX() * los.getX() + los.getY() * los.getY(),
-                                                             -cosPhi2, los.getZ() * los.getZ());
-        final double   b0     = MathArrays.linearCombination(+sinPhi2, MathArrays.linearCombination(delta0.getX(), los.getX(),
-                                                                                                    delta0.getY(), los.getY()),
-                                                            -cosPhi2, delta0.getZ() * los.getZ());
-        final double k0 = -b0 / a0;
+        final double k0 = Vector3D.dotProduct(closeReference.subtract(position), los) / los.getNormSq();
 
         final Vector3D delta  = new Vector3D(MathArrays.linearCombination(1, position.getX(), k0, los.getX()),
                                              MathArrays.linearCombination(1, position.getY(), k0, los.getY()),
                                              MathArrays.linearCombination(1, position.getZ(), k0, los.getZ(), -1.0, apexZ));
+        final double   a     = MathArrays.linearCombination(+sinPhi2, los.getX() * los.getX() + los.getY() * los.getY(),
+                                                            -cosPhi2, los.getZ() * los.getZ());
         final double   b      = MathArrays.linearCombination(+sinPhi2, MathArrays.linearCombination(delta.getX(), los.getX(),
                                                                                                     delta.getY(), los.getY()),
                                                              -cosPhi2, delta.getZ() * los.getZ());
@@ -123,15 +120,13 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
                                                              -cosPhi2, delta.getZ() * delta.getZ());
 
         // find the two intersections along the line
-        final double   bb     = b  * b;
-        final double   ac     = a0 * c;
-        if (bb < ac) {
+        if (b * b < a * c) {
             throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE,
                                       FastMath.toDegrees(latitude));
         }
-        final double s  = FastMath.sqrt(bb - ac);
-        final double k1 = (b > 0) ? -(s + b) / a0 : c / (s - b);
-        final double k2 = c / (a0 * k1);
+        final double s  = FastMath.sqrt(MathArrays.linearCombination(b, b, -a, c));
+        final double k1 = (b > 0) ? -(s + b) / a : c / (s - b);
+        final double k2 = c / (a * k1);
 
         // the quadratic equation has two solutions
         final boolean  k1IsOK = (delta.getZ() + k1 * los.getZ()) * latitude >= 0;

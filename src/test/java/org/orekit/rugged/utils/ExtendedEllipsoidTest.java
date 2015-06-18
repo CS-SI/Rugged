@@ -78,12 +78,11 @@ public class ExtendedEllipsoidTest {
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
 
-        double epsilon = 7.0e-8; // will be used only for the first point, as intersection is almost along a generatrix
+        double epsilon = 5.0e-15;
         for (double latitude = -d.getDelta() + 1.0e-5; latitude < d.getDelta(); latitude += 0.1) {
             GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtLatitude(p, d, latitude, p),
                                                    ellipsoid.getBodyFrame(), null);
             Assert.assertEquals(latitude, gp.getLatitude(), epsilon);
-            epsilon = 1.0e-15; // after first point, far from the generatrix, intersection is very accurate
         }
 
     }
@@ -131,14 +130,14 @@ public class ExtendedEllipsoidTest {
         Vector3D d = new Vector3D(1.0, 2.0, 0.1);
         double latitude = -0.5;
 
-        Vector3D pPlus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, +1.0e10, d));
+        Vector3D pPlus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, +2.0e7, d));
         GeodeticPoint gpPlus = ellipsoid.transform(pPlus, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(latitude, gpPlus.getLatitude(), 1.0e-12);
+        Assert.assertEquals(latitude, gpPlus.getLatitude(), 3.0e-16);
         Assert.assertEquals(20646364.047, Vector3D.dotProduct(d, pPlus.subtract(p)), 0.001);
 
-        Vector3D pMinus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, -1.0e10, d));
+        Vector3D pMinus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, -3.0e7, d));
         GeodeticPoint gpMinus = ellipsoid.transform(pMinus, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(latitude, gpMinus.getLatitude(), 1.0e-12);
+        Assert.assertEquals(latitude, gpMinus.getLatitude(), 3.0e-16);
         Assert.assertEquals(-31797895.234, Vector3D.dotProduct(d, pMinus.subtract(p)), 0.001);
 
     }
@@ -266,6 +265,20 @@ public class ExtendedEllipsoidTest {
             Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
             Assert.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
         }
+
+    }
+
+    @Test
+    public void testPointAtLatitudeIssue1() throws RuggedException, OrekitException {
+
+        Vector3D position = new Vector3D(-1988136.619268088, -2905373.394638188, 6231185.484365295);
+        Vector3D los = new Vector3D(0.3489121277213534, 0.3447806500507106, -0.8714279261531437);
+        Vector3D close = new Vector3D(-1709383.0948608494, -2630206.8820586684, 5535282.169189105);
+        double latitude =  1.0581058590215624;
+
+        Vector3D s = ellipsoid.pointAtLatitude(position, los, latitude, close);
+        GeodeticPoint gp = ellipsoid.transform(s, ellipsoid.getBodyFrame(), null);
+        Assert.assertEquals(latitude, gp.getLatitude(), 1.0e-15);
 
     }
 
