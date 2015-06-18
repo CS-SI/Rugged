@@ -119,7 +119,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
             algorithm.intersection(earth,
                                    new Vector3D(-3041185.154503948, 6486750.132281409, -32335.022880173332),
                                    new Vector3D(0.5660218606298548 , -0.8233939240951769, 0.040517885584811814));
-        Assert.assertEquals(1164.339, gp.getAltitude(), 1.0e-3);
+        Assert.assertEquals(1164.35, gp.getAltitude(), 0.02);
     }
 
     @Test

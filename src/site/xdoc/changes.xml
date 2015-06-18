@@ -23,6 +23,9 @@
     <release version="1.0" date="TBD"
              description="TBD">
       <action dev="luc" type="add" >
+        Added a protection against infinite loops in Duvenhage algorithm.
+      </action>
+      <action dev="luc" type="add" >
         Added a CONSTANT_ELEVATION_OVER_ELLIPSOID algorithm, similar in spirit
         to the IGNORE_DEM_USE_ELLIPSOID, but with a user-specified elevation
         instead of always using 0.0 elevation.

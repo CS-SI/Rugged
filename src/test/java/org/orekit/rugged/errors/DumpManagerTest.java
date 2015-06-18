@@ -119,7 +119,7 @@ public class DumpManagerTest {
         Assert.assertEquals(1,   countSpan);
         Assert.assertEquals(1,   countTransform);
         Assert.assertEquals(2,   countDEMTile);
-        Assert.assertEquals(887, countDEMCell);
+        Assert.assertEquals(812, countDEMCell);
         Assert.assertEquals(400, countDirectLoc);
         Assert.assertEquals(400, countDirectLocResult);
         Assert.assertEquals(1,   countSensor);

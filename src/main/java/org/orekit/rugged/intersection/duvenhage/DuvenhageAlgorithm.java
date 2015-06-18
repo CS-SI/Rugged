@@ -121,9 +121,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final int exitLon  = FastMath.max(0,
                                                   FastMath.min(tile.getLongitudeColumns() - 1,
                                                                tile.getFloorLongitudeIndex(exit.getPoint().getLongitude())));
-                final NormalizedGeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
-                                                                       current, entryLat, entryLon,
-                                                                       exit.getPoint(), exitLat, exitLon);
+                NormalizedGeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
+                                                                           current, entryLat, entryLon,
+                                                                           exit.getPoint(), exitLat, exitLon);
 
                 if (intersection != null) {
                     // we have found the intersection
@@ -144,9 +144,19 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     }
 
                 } else {
+
                     // this should never happen
                     // we should have left the loop with an intersection point
-                    throw RuggedException.createInternalError(null);
+                    // try a fallback non-recursive search
+                    intersection = noRecurseIntersection(ellipsoid, position, los, tile,
+                                                         current, entryLat, entryLon,
+                                                         exitLat, exitLon);
+                    if (intersection != null) {
+                        return intersection;
+                    } else {
+                        throw RuggedException.createInternalError(null);
+                    }
+
                 }
 
 
@@ -233,9 +243,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             throw RuggedException.createInternalError(null);
         }
 
-        if (entryLat == exitLat && entryLon == exitLon) {
-            // we have narrowed the search down to a single Digital Elevation Model cell
-            return tile.cellIntersection(entry, ellipsoid.convertLos(entry, los), exitLat, exitLon);
+        if (searchDomainSize(entryLat, entryLon, exitLat, exitLon) < 4) {
+            // we have narrowed the search down to a few cells
+            return noRecurseIntersection(ellipsoid, position, los, tile,
+                                         entry, entryLat, entryLon, exitLat, exitLon);
         }
 
         // find the deepest level in the min/max kd-tree at which entry and exit share a sub-tile
@@ -297,10 +308,18 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                     if (inRange(crossingLonBefore, entryLon, exitLon)) {
                         // look for intersection
-                        final NormalizedGeodeticPoint intersection =
-                                recurseIntersection(depth + 1, ellipsoid, position, los, tile,
-                                                    previousGP, previousLat, previousLon,
-                                                    crossingGP, crossingLat, crossingLonBefore);
+                        final NormalizedGeodeticPoint intersection;
+                        if (searchDomainSize(previousLat, previousLon, crossingLat, crossingLonBefore) <
+                            searchDomainSize(entryLat, entryLon, exitLat, exitLon)) {
+                            intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                                                               previousGP, previousLat, previousLon,
+                                                               crossingGP, crossingLat, crossingLonBefore);
+                        } else {
+                            // we failed to reduce domain size, probably due to numerical problems
+                            intersection = noRecurseIntersection(ellipsoid, position, los, tile,
+                                                                 previousGP, previousLat, previousLon,
+                                                                 crossingLat, crossingLonBefore);
+                        }
                         if (intersection != null) {
                             return intersection;
                         }
@@ -359,9 +378,17 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                     if (inRange(crossingLatBefore, entryLat, exitLat)) {
                         // look for intersection
-                        final NormalizedGeodeticPoint intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
-                                                                               previousGP, previousLat, previousLon,
-                                                                               crossingGP, crossingLatBefore, crossingLon);
+                        final NormalizedGeodeticPoint intersection;
+                        if (searchDomainSize(previousLat, previousLon, crossingLatBefore, crossingLon) <
+                            searchDomainSize(entryLat, entryLon, exitLat, exitLon)) {
+                            intersection = recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                                                               previousGP, previousLat, previousLon,
+                                                               crossingGP, crossingLatBefore, crossingLon);
+                        } else {
+                            intersection = noRecurseIntersection(ellipsoid, position, los, tile,
+                                                                 previousGP, previousLat, previousLon,
+                                                                 crossingLatBefore, crossingLon);
+                        }
                         if (intersection != null) {
                             return intersection;
                         }
@@ -379,13 +406,86 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         if (inRange(previousLat, entryLat, exitLat) && inRange(previousLon, entryLon, exitLon)) {
             // last part of the segment, up to exit point
-            return recurseIntersection(depth + 1, ellipsoid, position, los, tile,
-                                       previousGP, previousLat, previousLon,
-                                       exit, exitLat, exitLon);
+            if (searchDomainSize(previousLat, previousLon, exitLat, exitLon) <
+                searchDomainSize(entryLat, entryLon, exitLat, exitLon)) {
+                return recurseIntersection(depth + 1, ellipsoid, position, los, tile,
+                                           previousGP, previousLat, previousLon,
+                                           exit, exitLat, exitLon);
+            } else {
+                return noRecurseIntersection(ellipsoid, position, los, tile,
+                                             previousGP, previousLat, previousLon,
+                                             exitLat, exitLon);
+            }
         } else {
             return null;
         }
 
+    }
+
+    /** Compute intersection of line with Digital Elevation Model in a sub-tile, without recursion.
+     * @param ellipsoid reference ellipsoid
+     * @param position pixel position in ellipsoid frame
+     * @param los pixel line-of-sight in ellipsoid frame
+     * @param tile Digital Elevation Model tile
+     * @param entry line-of-sight entry point in the sub-tile
+     * @param entryLat index to use for interpolating entry point elevation
+     * @param entryLon index to use for interpolating entry point elevation
+     * @param exitLat index to use for interpolating exit point elevation
+     * @param exitLon index to use for interpolating exit point elevation
+     * @return point at which the line first enters ground, or null if does not enter
+     * ground in the search sub-tile
+     * @exception RuggedException if intersection cannot be found
+     * @exception OrekitException if points cannot be converted to geodetic coordinates
+     */
+    private NormalizedGeodeticPoint noRecurseIntersection(final ExtendedEllipsoid ellipsoid,
+                                                          final Vector3D position, final Vector3D los,
+                                                          final MinMaxTreeTile tile,
+                                                          final NormalizedGeodeticPoint entry,
+                                                          final int entryLat, final int entryLon,
+                                                          final int exitLat, final int exitLon)
+       throws OrekitException, RuggedException {
+
+        NormalizedGeodeticPoint intersectionGP = null;
+        double intersectionDot = Double.POSITIVE_INFINITY;
+        for (int i = FastMath.min(entryLat, exitLat); i <= FastMath.max(entryLat, exitLat); ++i) {
+            for (int j = FastMath.min(entryLon, exitLon); j <= FastMath.max(entryLon, exitLon); ++j) {
+                final NormalizedGeodeticPoint gp = tile.cellIntersection(entry, ellipsoid.convertLos(entry, los), i, j);
+                if (gp != null) {
+
+                    // improve the point, by projecting it back on the 3D line, fixing the small body curvature at cell level
+                    final Vector3D      delta     = ellipsoid.transform(gp).subtract(position);
+                    final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                    final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                                                        ellipsoid.getBodyFrame(), null);
+                    final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(projected, ellipsoid.convertLos(projected, los), i, j);
+
+                    if (gpImproved != null) {
+                        final Vector3D point = ellipsoid.transform(gpImproved);
+                        final double dot = Vector3D.dotProduct(point.subtract(position), los);
+                        if (dot < intersectionDot) {
+                            intersectionGP  = gpImproved;
+                            intersectionDot = dot;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return intersectionGP;
+
+    }
+
+    /** Compute the size of a search domain.
+     * @param entryLat index to use for interpolating entry point elevation
+     * @param entryLon index to use for interpolating entry point elevation
+     * @param exitLat index to use for interpolating exit point elevation
+     * @param exitLon index to use for interpolating exit point elevation
+     * @return size of the search domain
+     */
+    private int searchDomainSize(final int entryLat, final int entryLon,
+                                 final int exitLat, final int exitLon) {
+        return (FastMath.abs(entryLat - exitLat) + 1) * (FastMath.abs(entryLon - exitLon) + 1);
     }
 
     /** Check if an index is inside a range.

@@ -51,7 +51,7 @@ public class DumpReplayerTest {
             GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                                 rugged.getEllipsoid().transform(replayedGP));
-            Assert.assertEquals(0.0, distance, 1.0e-8);
+            Assert.assertEquals(0.0, distance, 6.0e-8);
         }
 
     }
@@ -63,6 +63,29 @@ public class DumpReplayerTest {
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-02.txt").toURI().getPath();
+        DumpReplayer replayer = new DumpReplayer();
+        replayer.parse(new File(dumpPath));
+        Rugged rugged = replayer.createRugged();
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+
+        Assert.assertEquals(1, results.length);
+        for (final DumpReplayer.Result result : results) {
+            GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
+            GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
+            double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
+                                                rugged.getEllipsoid().transform(replayedGP));
+            Assert.assertEquals(0.0, distance, 1.0e-8);
+        }
+
+    }
+
+    @Test
+    public void testDirectLoc03() throws URISyntaxException, IOException, OrekitException, RuggedException {
+
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-03.txt").toURI().getPath();
         DumpReplayer replayer = new DumpReplayer();
         replayer.parse(new File(dumpPath));
         Rugged rugged = replayer.createRugged();
