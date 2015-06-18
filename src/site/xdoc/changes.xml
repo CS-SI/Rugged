@@ -22,6 +22,9 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="fix" >
+        Improved latitude crossing robustness.
+      </action>
       <action dev="luc" type="add" >
         Added a protection against infinite loops in Duvenhage algorithm.
       </action>
