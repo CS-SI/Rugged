@@ -348,6 +348,19 @@ public class Rugged {
      * The point is given only by its latitude and longitude, the elevation is
      * computed from the Digital Elevation Model.
      * </p>
+     * <p>
+     * Note that for each sensor name, the {@code minLine} and {@code maxLine} settings
+     * are cached, because they induce costly frames computation. So these settings
+     * should not be tuned very finely and changed at each call, but should rather be
+     * a few thousand lines wide and refreshed only when needed. If for example an
+     * inverse location is roughly estimated to occur near line 53764 (for example
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * and {@code maxLine} could be set for example to 50000 and 60000, which would
+     * be OK also if next line inverse location is expected to occur near line 53780,
+     * and next one ... The setting could be changed for example to 55000 and 65000 when
+     * an inverse location is expected to occur after 55750. Of course, these values
+     * are only an example and should be adjusted depending on mission needs.
+     * </p>
      * @param sensorName name of the line  sensor
      * @param latitude ground point latitude
      * @param longitude ground point longitude
@@ -356,6 +369,7 @@ public class Rugged {
      * @return date at which ground point is seen by line sensor
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #inverseLocation(String, double, double, int, int)
+     * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public AbsoluteDate dateLocation(final String sensorName,
                                      final double latitude, final double longitude,
@@ -371,6 +385,19 @@ public class Rugged {
      * This method is a partial {@link #inverseLocation(String,
      * GeodeticPoint, int, int) inverse location} focusing only on date.
      * </p>
+     * <p>
+     * Note that for each sensor name, the {@code minLine} and {@code maxLine} settings
+     * are cached, because they induce costly frames computation. So these settings
+     * should not be tuned very finely and changed at each call, but should rather be
+     * a few thousand lines wide and refreshed only when needed. If for example an
+     * inverse location is roughly estimated to occur near line 53764 (for example
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * and {@code maxLine} could be set for example to 50000 and 60000, which would
+     * be OK also if next line inverse location is expected to occur near line 53780,
+     * and next one ... The setting could be changed for example to 55000 and 65000 when
+     * an inverse location is expected to occur after 55750. Of course, these values
+     * are only an example and should be adjusted depending on mission needs.
+     * </p>
      * @param sensorName name of the line  sensor
      * @param point point to localize
      * @param minLine minimum line number
@@ -378,6 +405,7 @@ public class Rugged {
      * @return date at which ground point is seen by line sensor
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #inverseLocation(String, GeodeticPoint, int, int)
+     * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public AbsoluteDate dateLocation(final String sensorName, final GeodeticPoint point,
                                      final int minLine, final int maxLine)
@@ -403,6 +431,19 @@ public class Rugged {
      * The point is given only by its latitude and longitude, the elevation is
      * computed from the Digital Elevation Model.
      * </p>
+     * <p>
+     * Note that for each sensor name, the {@code minLine} and {@code maxLine} settings
+     * are cached, because they induce costly frames computation. So these settings
+     * should not be tuned very finely and changed at each call, but should rather be
+     * a few thousand lines wide and refreshed only when needed. If for example an
+     * inverse location is roughly estimated to occur near line 53764 (for example
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * and {@code maxLine} could be set for example to 50000 and 60000, which would
+     * be OK also if next line inverse location is expected to occur near line 53780,
+     * and next one ... The setting could be changed for example to 55000 and 65000 when
+     * an inverse location is expected to occur after 55750. Of course, these values
+     * are only an example and should be adjusted depending on mission needs.
+     * </p>
      * @param sensorName name of the line  sensor
      * @param latitude ground point latitude
      * @param longitude ground point longitude
@@ -411,6 +452,7 @@ public class Rugged {
      * @return sensor pixel seeing ground point, or null if ground point cannot
      * be seen between the prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
+     * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public SensorPixel inverseLocation(final String sensorName,
                                        final double latitude, final double longitude,
@@ -422,6 +464,19 @@ public class Rugged {
     }
 
     /** Inverse location of a point.
+     * <p>
+     * Note that for each sensor name, the {@code minLine} and {@code maxLine} settings
+     * are cached, because they induce costly frames computation. So these settings
+     * should not be tuned very finely and changed at each call, but should rather be
+     * a few thousand lines wide and refreshed only when needed. If for example an
+     * inverse location is roughly estimated to occur near line 53764 (for example
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * and {@code maxLine} could be set for example to 50000 and 60000, which would
+     * be OK also if next line inverse location is expected to occur near line 53780,
+     * and next one ... The setting could be changed for example to 55000 and 65000 when
+     * an inverse location is expected to occur after 55750. Of course, these values
+     * are only an example and should be adjusted depending on mission needs.
+     * </p>
      * @param sensorName name of the line  sensor
      * @param point point to localize
      * @param minLine minimum line number
@@ -430,6 +485,7 @@ public class Rugged {
      * prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #dateLocation(String, GeodeticPoint, int, int)
+     * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public SensorPixel inverseLocation(final String sensorName, final GeodeticPoint point,
                                        final int minLine, final int maxLine)
