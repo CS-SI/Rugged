@@ -88,6 +88,34 @@ public class RoughVisibilityEstimatorTest {
 
     }
 
+    @Test
+    public void testOneOrbitsSpan()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        BodyShape  earth                                  = createEarth();
+        NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
+        Orbit      orbit                                  = createOrbit(gravityField.getMu());
+        Propagator propagator                             = createPropagator(earth, gravityField, orbit);
+        final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
+        propagator.setMasterMode(1.0, new OrekitFixedStepHandler() {
+            public void init(SpacecraftState s0, AbsoluteDate t) {
+            }
+            public void handleStep(SpacecraftState currentState, boolean isLast) {
+                pv.add(currentState.getPVCoordinates());
+            }
+        });
+        propagator.propagate(orbit.getDate().shiftedBy(orbit.getKeplerianPeriod()));
+
+        RoughVisibilityEstimator estimator = new RoughVisibilityEstimator(ellipsoid, orbit.getFrame(), pv);
+        AbsoluteDate d = estimator.estimateVisibility(new GeodeticPoint(FastMath.toRadians(43.303),
+                                                                        FastMath.toRadians(-46.126),
+                                                                        0.0));
+        Assert.assertEquals("2012-01-01T01:02:39.123", d.toString(TimeScalesFactory.getUTC()));
+
+    }
+
     private BodyShape createEarth()
                     throws OrekitException {
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,

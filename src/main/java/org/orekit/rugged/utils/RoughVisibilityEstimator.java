@@ -110,8 +110,8 @@ public class RoughVisibilityEstimator {
         final Vector3D point = ellipsoid.transform(groundPoint);
         int closeIndex = findClose(last, point);
 
-        // check if there are closer points in previous half periods
-        final int repeat = (int) FastMath.rint(FastMath.PI / rateVSIndices);
+        // check if there are closer points in previous periods
+        final int repeat = (int) FastMath.rint(2.0 * FastMath.PI / rateVSIndices);
         for (int index = closeIndex - repeat; index > 0; index -= repeat) {
             final int otherIndex = findClose(index, point);
             if (otherIndex != closeIndex &&
@@ -121,7 +121,7 @@ public class RoughVisibilityEstimator {
             }
         }
 
-        // check if there are closer points in next half periods
+        // check if there are closer points in next periods
         for (int index = closeIndex + repeat; index < pvGround.size(); index += repeat) {
             final int otherIndex = findClose(index, point);
             if (otherIndex != closeIndex &&
@@ -160,6 +160,10 @@ public class RoughVisibilityEstimator {
     }
 
     /** Estimate angular motion needed to go past test point.
+     * <p>
+     * This estimation is quite crude. The sub-satellite point is properly on the
+     * ellipsoid surface, but we compute the angle assuming a spherical shape.
+     * </p>
      * @param subSatellite current sub-satellite position-velocity
      * @param point test point
      * @return angular motion to go past test point (positive is
@@ -170,12 +174,9 @@ public class RoughVisibilityEstimator {
 
         final Vector3D ssP      = subSatellite.getPosition();
         final Vector3D momentum = subSatellite.getMomentum();
+        final double   y        = Vector3D.dotProduct(point, Vector3D.crossProduct(momentum, ssP).normalize());
+        final double   x        = Vector3D.dotProduct(point, ssP.normalize());
 
-        // find phase angle around momentum
-        final Vector3D yAxis = Vector3D.crossProduct(momentum, ssP).normalize();
-        final Vector3D xAxis = Vector3D.crossProduct(yAxis, momentum).normalize();
-        final double   y     = Vector3D.dotProduct(point, yAxis);
-        final double   x     = Vector3D.dotProduct(point, xAxis);
         return FastMath.atan2(y, x);
 
     }
