@@ -36,7 +36,7 @@ import org.orekit.time.AbsoluteDate;
 public class SensorPixelCrossing {
 
     /** Margin before and after end pixels, in order to avoid search failures near boundaries. */
-    private static final double MARGIN = 5.0;
+    private static final double MARGIN = 10.0;
 
     /** Line sensor. */
     private final LineSensor sensor;

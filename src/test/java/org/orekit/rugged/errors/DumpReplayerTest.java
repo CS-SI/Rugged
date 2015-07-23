@@ -146,4 +146,26 @@ public class DumpReplayerTest {
 
     }
 
+    @Test
+    public void testInverseLoc03() throws URISyntaxException, IOException, OrekitException, RuggedException {
+
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-03.txt").toURI().getPath();
+        DumpReplayer replayer = new DumpReplayer();
+        replayer.parse(new File(dumpPath));
+        Rugged rugged = replayer.createRugged();
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+
+        Assert.assertEquals(1, results.length);
+        for (final DumpReplayer.Result result : results) {
+            SensorPixel expectedSP = (SensorPixel) result.getExpected();
+            SensorPixel replayedSP = (SensorPixel) result.getReplayed();
+            Assert.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
+            Assert.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
+        }
+
+    }
+
 }
