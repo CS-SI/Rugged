@@ -354,7 +354,7 @@ public class Rugged {
      * should not be tuned very finely and changed at each call, but should rather be
      * a few thousand lines wide and refreshed only when needed. If for example an
      * inverse location is roughly estimated to occur near line 53764 (for example
-     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator}), {@code minLine}
      * and {@code maxLine} could be set for example to 50000 and 60000, which would
      * be OK also if next line inverse location is expected to occur near line 53780,
      * and next one ... The setting could be changed for example to 55000 and 65000 when
@@ -391,7 +391,7 @@ public class Rugged {
      * should not be tuned very finely and changed at each call, but should rather be
      * a few thousand lines wide and refreshed only when needed. If for example an
      * inverse location is roughly estimated to occur near line 53764 (for example
-     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator}), {@code minLine}
      * and {@code maxLine} could be set for example to 50000 and 60000, which would
      * be OK also if next line inverse location is expected to occur near line 53780,
      * and next one ... The setting could be changed for example to 55000 and 65000 when
@@ -437,7 +437,7 @@ public class Rugged {
      * should not be tuned very finely and changed at each call, but should rather be
      * a few thousand lines wide and refreshed only when needed. If for example an
      * inverse location is roughly estimated to occur near line 53764 (for example
-     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator}), {@code minLine}
      * and {@code maxLine} could be set for example to 50000 and 60000, which would
      * be OK also if next line inverse location is expected to occur near line 53780,
      * and next one ... The setting could be changed for example to 55000 and 65000 when
@@ -470,7 +470,7 @@ public class Rugged {
      * should not be tuned very finely and changed at each call, but should rather be
      * a few thousand lines wide and refreshed only when needed. If for example an
      * inverse location is roughly estimated to occur near line 53764 (for example
-     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator), {@code minLine}
+     * using {@link org.orekit.rugged.utils.RoughVisibilityEstimator}), {@code minLine}
      * and {@code maxLine} could be set for example to 50000 and 60000, which would
      * be OK also if next line inverse location is expected to occur near line 53780,
      * and next one ... The setting could be changed for example to 55000 and 65000 when
