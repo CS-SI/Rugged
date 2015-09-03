@@ -195,10 +195,15 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
                 final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
                                                                     ellipsoid.getBodyFrame(), null);
-                final Tile          tile      = cache.getTile(projected.getLatitude(), projected.getLongitude());
-                return tile.cellIntersection(projected, ellipsoid.convertLos(projected, los),
-                                              tile.getFloorLatitudeIndex(projected.getLatitude()),
-                                              tile.getFloorLongitudeIndex(projected.getLongitude()));
+                final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
+                                                                                                projected.getLongitude(),
+                                                                                                projected.getAltitude(),
+                                                                                                closeGuess.getLongitude());
+                final Tile          tile      = cache.getTile(normalizedProjected.getLatitude(),
+                                                              normalizedProjected.getLongitude());
+                return tile.cellIntersection(normalizedProjected, ellipsoid.convertLos(normalizedProjected, los),
+                                              tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
+                                              tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
@@ -457,7 +462,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
                     final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
                                                                         ellipsoid.getBodyFrame(), null);
-                    final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(projected, ellipsoid.convertLos(projected, los), i, j);
+                    final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
+                                                                                                    projected.getLongitude(),
+                                                                                                    projected.getAltitude(),
+                                                                                                    gp.getLongitude());
+                    final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(normalizedProjected,
+                                                                                     ellipsoid.convertLos(normalizedProjected, los),
+                                                                                     i, j);
 
                     if (gpImproved != null) {
                         final Vector3D point = ellipsoid.transform(gpImproved);
