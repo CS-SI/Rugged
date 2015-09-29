@@ -448,7 +448,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                           final NormalizedGeodeticPoint entry,
                                                           final int entryLat, final int entryLon,
                                                           final int exitLat, final int exitLon)
-       throws OrekitException, RuggedException {
+        throws OrekitException, RuggedException {
 
         NormalizedGeodeticPoint intersectionGP = null;
         double intersectionDot = Double.POSITIVE_INFINITY;
