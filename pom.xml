@@ -37,7 +37,7 @@
     <rugged.jgit.buildnumber.version>1.2.8</rugged.jgit.buildnumber.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
     <rugged.orekit.version>7.1-SNAPSHOT</rugged.orekit.version>
-    <rugged.apache-commons-math.version>3.5</rugged.apache-commons-math.version>
+    <rugged.apache-commons-math.version>3.6-SNAPSHOT</rugged.apache-commons-math.version>
     <rugged.compiler.source>1.6</rugged.compiler.source>
     <rugged.compiler.target>1.6</rugged.compiler.target>
     <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
