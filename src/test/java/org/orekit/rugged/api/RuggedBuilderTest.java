@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.util.FastMath;
@@ -341,7 +342,8 @@ public class RuggedBuilderTest {
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                                 FastMath.toRadians(50.0),
+                                                                 RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                     Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
@@ -409,7 +411,8 @@ public class RuggedBuilderTest {
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                                 FastMath.toRadians(50.0),
+                                                                 RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                     Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
@@ -458,7 +461,8 @@ public class RuggedBuilderTest {
         // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                 FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                                 FastMath.toRadians(50.0),
+                                                                 RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                     Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
@@ -665,7 +669,7 @@ public class RuggedBuilderTest {
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
-            list.add(new Rotation(normal, alpha).applyTo(center));
+            list.add(new Rotation(normal, alpha, RotationConvention.VECTOR_OPERATOR).applyTo(center));
         }
         return new LOSBuilder(list).build();
     }

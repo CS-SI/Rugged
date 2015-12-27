@@ -20,6 +20,7 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldRotation;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
@@ -50,7 +51,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
      */
     public FixedRotation(final ParameterType type, final Vector3D axis, final double angle) {
         this.type     = type;
-        this.rotation = new Rotation(axis, angle);
+        this.rotation = new Rotation(axis, angle, RotationConvention.VECTOR_OPERATOR);
         this.rDS      = null;
     }
 
@@ -81,14 +82,14 @@ public class FixedRotation implements TimeIndependentLOSTransform {
     public void setEstimatedParameters(final double[] parameters, final int start, final int length)
         throws RuggedException {
         checkSlice(length);
-        final Vector3D axis = rotation.getAxis();
-        rotation = new Rotation(axis, parameters[start]);
+        final Vector3D axis = rotation.getAxis(RotationConvention.VECTOR_OPERATOR);
+        rotation = new Rotation(axis, parameters[start], RotationConvention.VECTOR_OPERATOR);
         final FieldVector3D<DerivativeStructure> axisDS =
                 new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, axis.getX()),
                                                        new DerivativeStructure(parameters.length, 1, axis.getY()),
                                                        new DerivativeStructure(parameters.length, 1, axis.getZ()));
         final DerivativeStructure angleDS = new DerivativeStructure(parameters.length, 1, start, parameters[start]);
-        rDS = new FieldRotation<DerivativeStructure>(axisDS, angleDS);
+        rDS = new FieldRotation<DerivativeStructure>(axisDS, angleDS, RotationConvention.VECTOR_OPERATOR);
     }
 
     /** Check the number of parameters of an array slice.

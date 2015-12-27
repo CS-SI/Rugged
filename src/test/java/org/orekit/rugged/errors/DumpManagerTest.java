@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
@@ -146,7 +147,8 @@ public class DumpManagerTest {
        // los: swath in the (YZ) plane, looking at 50° roll, ±1° aperture
        Vector3D position = new Vector3D(1.5, 0, -0.2);
        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                          FastMath.toRadians(50.0)).applyTo(Vector3D.PLUS_K),
+                                                                          FastMath.toRadians(50.0),
+                                                                          RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
 
        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms

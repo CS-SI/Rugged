@@ -21,6 +21,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldRotation;
 import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
@@ -153,7 +154,9 @@ public class PolynomialRotation implements LOSTransform {
     /** {@inheritDoc} */
     @Override
     public Vector3D transformLOS(final int i, final Vector3D los, final AbsoluteDate date) {
-        return new Rotation(axis, angle.value(date.durationFrom(referenceDate))).applyTo(los);
+        return new Rotation(axis,
+                            angle.value(date.durationFrom(referenceDate)),
+                            RotationConvention.VECTOR_OPERATOR).applyTo(los);
     }
 
     /** {@inheritDoc} */
@@ -168,7 +171,9 @@ public class PolynomialRotation implements LOSTransform {
             alpha = alpha.multiply(t).add(angleDS[k]);
         }
 
-        return new FieldRotation<DerivativeStructure>(axisDS, alpha).applyTo(los);
+        return new FieldRotation<DerivativeStructure>(axisDS,
+                                                      alpha,
+                                                      RotationConvention.VECTOR_OPERATOR).applyTo(los);
 
     }
 

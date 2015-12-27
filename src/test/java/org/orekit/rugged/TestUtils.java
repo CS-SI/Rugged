@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.util.FastMath;
@@ -154,7 +155,7 @@ public class TestUtils {
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
-            list.add(new Rotation(normal, alpha).applyTo(center));
+            list.add(new Rotation(normal, alpha, RotationConvention.VECTOR_OPERATOR).applyTo(center));
         }
         return new LOSBuilder(list).build();
     }
@@ -167,7 +168,9 @@ public class TestUtils {
             double x = (2.0 * i + 1.0 - n) / (n - 1);
             double alpha = x * halfAperture;
             double beta  = x * x * sagitta;
-            list.add(new Rotation(normal, alpha).applyTo(new Rotation(u, beta).applyTo(center)));
+            list.add(new Rotation(normal, alpha, RotationConvention.VECTOR_OPERATOR).
+                     applyTo(new Rotation(u, beta, RotationConvention.VECTOR_OPERATOR).
+                     applyTo(center)));
         }
         return new LOSBuilder(list).build();
     }
