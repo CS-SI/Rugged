@@ -36,7 +36,7 @@
     <rugged.maven-surefire-report-plugin.version>2.18.1</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.8</rugged.jgit.buildnumber.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
-    <rugged.orekit.version>7.1-SNAPSHOT</rugged.orekit.version>
+    <rugged.orekit.version>7.1</rugged.orekit.version>
     <rugged.apache-commons-math.version>3.6</rugged.apache-commons-math.version>
     <rugged.compiler.source>1.6</rugged.compiler.source>
     <rugged.compiler.target>1.6</rugged.compiler.target>

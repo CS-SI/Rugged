@@ -17,10 +17,8 @@ References
 
 ### Has Rugged already been used?
 
-Almost, as it is used in a project under development.
-
-The first operational use of Rugged will be Sentinel 2 ESA mission.
-Rugged is used in the Image Processing Facility.
+Yes. Rugged is used operationally in the Image Processing Facility
+of the Sentinel 2 ESA mission, which was launched in June 2015.
 
 ### Is Rugged validated?
 
@@ -73,17 +71,13 @@ often seen very early and is the first one unsuspecting users experience. It oft
 to configure Orekit to load data.
 
 Configuring data loading is explained in the configuration page For a start, the simplest configuration
-is to download the orekit-data.zip file from the download page and to either set the "orekit.data.path" Java
-property to this file or to manually configure the DataProvidersManager to use it. This example archive file
-contains the required UTC-TAI history file among others. Configuring Orekit to use this archive file can be done
-by keeping the file as a zip archive and pointing to this archive, or by unzipping it and pointing to the unzipped folder.
+is to download the orekit-data.zip file from the Orekit project download page, to unzip it anywhere you
+want, note the path of the orekit-data folder that will be created and add the following lines at the start
+of your program:
 
-Here is an example using the file in zip format:
+    File orekitData = new File("/path/to/the/folder/orekit-data");
+    DataProvidersManager manager = DataProvidersManager.getInstance();
+    manager.addProvider(new DirectoryCrawler(orekitData));
 
-    DataProvidersManager.getInstance().addProvider(new ZipJarCrawler(new File("/path/to/the/zip/file/orekit-data.zip")));
-
-Here is an example using the folder resulting from expanding the archive:
-
-    DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File("/path/to/the/folder/orekit-data")));
-
-Using a folder allows one to change the data in it, e.g., adding new EOP files as they are published by IERS.
+Using a folder allows one to change the data in it after the initial download, e.g., adding new EOP files as they
+are published by IERS.
