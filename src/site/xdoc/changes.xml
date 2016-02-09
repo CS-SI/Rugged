@@ -22,6 +22,10 @@
   <body>
     <release version="1.0" date="TBD"
              description="TBD">
+      <action dev="luc" type="add">
+        Added a getAlgorithm method at Rugged level. This allows for example to
+        retrieve the DEM elevation for a latitude/longitude pair.
+      </action>
       <action dev="luc" type="add" >
         Added a utility to help estimate visibility and set up min/max search lines.
       </action>
