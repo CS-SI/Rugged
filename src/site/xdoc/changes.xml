@@ -20,8 +20,9 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="1.0" date="TBD"
-             description="TBD">
+    <release version="1.0" date="2016-02-10"
+             description="This is the first official release of Rugged. It includes direct and
+             inverse location for push-broom sensors.">
       <action dev="luc" type="add">
         Added a getAlgorithm method at Rugged level. This allows for example to
         retrieve the DEM elevation for a latitude/longitude pair.
