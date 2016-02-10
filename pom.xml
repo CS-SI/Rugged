@@ -7,6 +7,7 @@
   <version>1.0</version>
   <packaging>jar</packaging>
   <name>Rugged</name>
+  <url>https://www.orekit.org/rugged</url>
 
   <inceptionYear>2014</inceptionYear>
   <description>

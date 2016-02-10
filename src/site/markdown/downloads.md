@@ -43,3 +43,43 @@ Rugged is also available in maven central repository,
 with groupID org.orekit and artifactId rugged so maven
 internal mechanism will download automatically all artifacts and dependencies
 as required.
+
+|  package |                                              link                                                         |
+|----------|-----------------------------------------------------------------------------------------------------------|
+|  source  | [rugged-1.0-sources.zip](https://www.orekit.org/forge/attachments/download/592/rugged-1.0-sources.zip)    |
+|  binary  | [rugged-1.0.jar](https://www.orekit.org/forge/attachments/download/593/rugged-1.0.jar)                    |
+|  javadoc | [rugged-1.0-javadoc.jar](https://www.orekit.org/forge/attachments/download/594/rugged-1.0-javadoc.jar)    |
+version 1.0 downloads (release date: 2016-02-10)
+
+## Data
+
+For convenience, a zip archive containing some configuration data is
+available for download. Similar files can be custom made by users with updated data.
+Configuring data loading is explained in the configuration page For a start, the simplest configuration
+is to download the orekit-data.zip file from the download page, to unzip it anywhere you want, note the
+path of the orekit-data folder that will be created and add the following lines at the start of
+your program:
+
+    File orekitData = new File("/path/to/the/folder/orekit-data");
+    DataProvidersManager manager = DataProvidersManager.getInstance();
+    manager.addProvider(new DirectoryCrawler(orekitData));
+
+This file contents is:
+
+  * leap seconds data up to early 2016,
+
+  * IERS Earth orientation parameters from 1973 to mid 2014
+    with predicted date to end 2014 for some parameters (both IAU-1980 and IAU-2000),
+
+  * Marshall Solar Activity Futur Estimation from 1999 to 2014,
+
+  * DE 430 planetary ephemerides from 1990 to 2069,
+
+  * Eigen 06S gravity field.
+
+There are no guarantees that this file will be available indefinitely or that its
+content will be updated. It should be considered as a simple configuration example.
+Users are encouraged to set up their own configuration data.
+
+The file is available by following this link: [orekit-data.zip](https://www.orekit.org/forge/attachments/download/584/orekit-data.zip).
+

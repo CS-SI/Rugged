@@ -18,8 +18,7 @@ Contacts
 Mailing lists
 -------------
 
-Most discussions should occur on the public mailing lists. As Rugged
-heavily depends on Orekit, they share the same low traffic announces list.
+Most discussions should occur on the public mailing lists.
 
 |     topic     |         post address         |                                            subscribe URL                                                           |                                               archive URL                                            |
 |---------------|------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
