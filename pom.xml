@@ -18,7 +18,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rugged.findbugs-maven-plugin.version>3.0.0</rugged.findbugs-maven-plugin.version>
-    <rugged.jacoco-maven-plugin.version>0.7.2.201409121644</rugged.jacoco-maven-plugin.version>
+    <rugged.jacoco-maven-plugin.version>0.7.6.201602180812</rugged.jacoco-maven-plugin.version>
     <rugged.maven-assembly-plugin.version>2.5.3</rugged.maven-assembly-plugin.version>
     <rugged.maven-bundle-plugin.version>2.5.3</rugged.maven-bundle-plugin.version>
     <rugged.maven-changes-plugin.version>2.11</rugged.maven-changes-plugin.version>
