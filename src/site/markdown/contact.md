@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2015 CS Systèmes d'Information
+<!--- Copyright 2013-2016 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -18,8 +18,7 @@ Contacts
 Mailing lists
 -------------
 
-Most discussions should occur on the public mailing lists. As Rugged
-heavily depends on Orekit, they share the same low traffic announces list.
+Most discussions should occur on the public mailing lists.
 
 |     topic     |         post address         |                                            subscribe URL                                                           |                                               archive URL                                            |
 |---------------|------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
