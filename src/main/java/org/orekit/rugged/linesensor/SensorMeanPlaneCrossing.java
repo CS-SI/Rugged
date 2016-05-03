@@ -16,24 +16,24 @@
  */
 package org.orekit.rugged.linesensor;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
-import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
-import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
-import org.apache.commons.math3.exception.NoBracketingException;
-import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.DecompositionSolver;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.QRDecomposition;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularMatrixException;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.Precision;
+import org.hipparchus.analysis.UnivariateFunction;
+import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.solvers.BracketingNthOrderBrentSolver;
+import org.hipparchus.analysis.solvers.UnivariateSolver;
+import org.hipparchus.exception.MathIllegalArgumentException;
+import org.hipparchus.exception.MathIllegalStateException;
+import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.linear.Array2DRowRealMatrix;
+import org.hipparchus.linear.ArrayRealVector;
+import org.hipparchus.linear.DecompositionSolver;
+import org.hipparchus.linear.MatrixUtils;
+import org.hipparchus.linear.QRDecomposition;
+import org.hipparchus.linear.RealMatrix;
+import org.hipparchus.linear.RealVector;
+import org.hipparchus.linear.SingularValueDecomposition;
+import org.hipparchus.util.FastMath;
+import org.hipparchus.util.Precision;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
@@ -480,7 +480,7 @@ public class SensorMeanPlaneCrossing {
                    target.getZ() * coefficients.getEntry(2) +
                    coefficients.getEntry(3);
 
-        } catch (SingularMatrixException sme) {
+        } catch (MathIllegalStateException sme) {
             // the points are not independent
             return Double.NaN;
         }
@@ -528,7 +528,7 @@ public class SensorMeanPlaneCrossing {
                     evaluateLine(crossingLine, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
             return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetPV.getPosition(), targetDirection);
 
-        } catch (NoBracketingException nbe) {
+        } catch (MathIllegalArgumentException nbe) {
             return null;
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();

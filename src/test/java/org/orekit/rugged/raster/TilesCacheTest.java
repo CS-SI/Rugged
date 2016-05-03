@@ -16,9 +16,9 @@
  */
 package org.orekit.rugged.raster;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937a;
-import org.apache.commons.math3.util.FastMath;
+import org.hipparchus.random.RandomGenerator;
+import org.hipparchus.random.Well19937a;
+import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.rugged.errors.RuggedException;

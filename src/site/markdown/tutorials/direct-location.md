@@ -41,11 +41,11 @@ pointing towards the Earth and Y is such that X,Y,Z forms a right-handed coordin
 
 For this we need the following packages
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
     import java.util.ArrayList;
     import java.util.List;
-    import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-    import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-    import org.apache.commons.math3.util.FastMath;
     import org.orekit.rugged.los.LOSBuilder;
     import org.orekit.rugged.los.FixedRotation;
     import org.orekit.rugged.los.TimeDependentLOS;

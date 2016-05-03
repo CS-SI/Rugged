@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.utils;
 
-import org.apache.commons.math3.util.MathUtils;
+import org.hipparchus.util.MathUtils;
 import org.orekit.bodies.GeodeticPoint;
 
 /** Geodetic point whose longitude can be selected with respect to the 2π boundary.

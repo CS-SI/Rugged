@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.orekit</groupId>
   <artifactId>rugged</artifactId>
-  <version>1.0</version>
+  <version>2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Rugged</name>
   <url>https://www.orekit.org/rugged</url>
@@ -37,10 +37,10 @@
     <rugged.maven-surefire-report-plugin.version>2.18.1</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.8</rugged.jgit.buildnumber.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
-    <rugged.orekit.version>7.1</rugged.orekit.version>
-    <rugged.apache-commons-math.version>3.6</rugged.apache-commons-math.version>
-    <rugged.compiler.source>1.6</rugged.compiler.source>
-    <rugged.compiler.target>1.6</rugged.compiler.target>
+    <rugged.orekit.version>8.0-SNAPSHOT</rugged.orekit.version>
+    <rugged.hipparchus.version>1.0-SNAPSHOT</rugged.hipparchus.version>
+    <rugged.compiler.source>1.8</rugged.compiler.source>
+    <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
 
@@ -143,13 +143,22 @@
         <type>jar</type>
         <optional>false</optional>
     </dependency>
+
     <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-math3</artifactId>
-        <version>${rugged.apache-commons-math.version}</version>
-        <type>jar</type>
-        <optional>false</optional>
+	<groupId>org.hipparchus</groupId>
+	<artifactId>hipparchus-core</artifactId>
+	<version>${rugged.hipparchus.version}</version>
+	<type>jar</type>
+	<optional>false</optional>
     </dependency>
+    <dependency>
+	<groupId>org.hipparchus</groupId>
+	<artifactId>hipparchus-geometry</artifactId>
+	<version>${rugged.hipparchus.version}</version>
+	<type>jar</type>
+	<optional>false</optional>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

@@ -16,11 +16,11 @@
  */
 package org.orekit.rugged.errors;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.api.AlgorithmId;

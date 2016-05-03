@@ -16,12 +16,12 @@
  */
 package org.orekit.rugged.errors;
 
+import org.hipparchus.exception.Localizable;
+import org.hipparchus.exception.MathRuntimeException;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 
-import org.apache.commons.math3.exception.util.ExceptionContext;
-import org.apache.commons.math3.exception.util.ExceptionContextProvider;
-import org.apache.commons.math3.exception.util.Localizable;
 
 /** This class is the base class for all specific exceptions thrown by
  * the rugged library classes.
@@ -35,13 +35,10 @@ import org.apache.commons.math3.exception.util.Localizable;
 
  */
 
-public class RuggedException extends Exception {
+public class RuggedException extends Exception implements LocalizedException {
 
     /** Serializable UID. */
     private static final long serialVersionUID = 20140309L;
-
-    /** Exception context (may be null). */
-    private final ExceptionContext context;
 
     /** Format specifier (to be translated). */
     private final Localizable specifier;
@@ -55,7 +52,6 @@ public class RuggedException extends Exception {
      * @param parts parts to insert in the format (no translation)
      */
     public RuggedException(final Localizable specifier, final Object ... parts) {
-        this.context   = null;
         this.specifier = specifier;
         this.parts     = (parts == null) ? new Object[0] : parts.clone();
     }
@@ -65,7 +61,6 @@ public class RuggedException extends Exception {
      */
     public RuggedException(final RuggedException exception) {
         super(exception);
-        this.context   = exception.context;
         this.specifier = exception.specifier;
         this.parts     = exception.parts.clone();
     }
@@ -77,7 +72,6 @@ public class RuggedException extends Exception {
      */
     public RuggedException(final Localizable message, final Throwable cause) {
         super(cause);
-        this.context   = null;
         this.specifier = message;
         this.parts     = new Object[0];
     }
@@ -91,30 +85,24 @@ public class RuggedException extends Exception {
     public RuggedException(final Throwable cause, final Localizable specifier,
                            final Object ... parts) {
         super(cause);
-        this.context   = null;
         this.specifier = specifier;
         this.parts     = (parts == null) ? new Object[0] : parts.clone();
     }
 
     /** Simple constructor.
-     * Build an exception from an Apache Commons Math exception context context
-     * @param provider underlying exception context provider
+     * Build an exception from an Hipparchus exception
+     * @param exception underlying Hipparchus exception
      */
-    public RuggedException(final ExceptionContextProvider provider) {
-        super(provider.getContext().getThrowable());
-        this.context   = provider.getContext();
-        this.specifier = null;
-        this.parts     = new Object[0];
+    public RuggedException(final MathRuntimeException exception) {
+        super(exception);
+        this.specifier = exception.getSpecifier();
+        this.parts     = exception.getParts();
     }
 
-    /** Gets the message in a specified locale.
-     * @param locale Locale in which the message should be translated
-     * @return localized message
-     */
+    /** {@inheritDoc} */
+    @Override
     public String getMessage(final Locale locale) {
-        return (context != null) ?
-                context.getMessage(locale) :
-                buildMessage(locale, specifier, parts);
+        return buildMessage(locale, specifier, parts);
     }
 
     /** {@inheritDoc} */

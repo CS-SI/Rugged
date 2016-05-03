@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.raster;
 
-import org.apache.commons.math3.util.FastMath;
+import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.utils.Constants;

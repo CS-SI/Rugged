@@ -16,13 +16,13 @@
  */
 package org.orekit.rugged.linesensor;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
-import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
-import org.apache.commons.math3.exception.NoBracketingException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.util.FastMath;
+import org.hipparchus.analysis.UnivariateFunction;
+import org.hipparchus.analysis.solvers.BracketingNthOrderBrentSolver;
+import org.hipparchus.analysis.solvers.UnivariateSolver;
+import org.hipparchus.exception.MathIllegalArgumentException;
+import org.hipparchus.exception.MathIllegalArgumentException;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.time.AbsoluteDate;
@@ -93,11 +93,12 @@ public class SensorPixelCrossing {
                     new BracketingNthOrderBrentSolver(0.0, accuracy, 5);
             return solver.solve(maxEval, f, -MARGIN, sensor.getNbPixels() - 1 + MARGIN);
 
-        } catch (NoBracketingException nbe) {
+        } catch (MathIllegalArgumentException nbe) {
             // there are no solutions in the search interval
             return Double.NaN;
-        } catch (TooManyEvaluationsException tmee) {
-            throw new RuggedException(tmee);
+// TODO hipparchus migration : no need for this catch ?
+//        } catch (MathIllegalArgumentException tmee) {
+//            throw new RuggedException(tmee);
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
         }

@@ -16,6 +16,13 @@
  */
 package org.orekit.rugged.errors;
 
+import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
+import org.hipparchus.util.OpenIntToDoubleHashMap;
+import org.hipparchus.util.Pair;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,14 +40,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
-import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.geometry.euclidean.threed.FieldVector3D;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
-import org.apache.commons.math3.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
@@ -278,7 +277,9 @@ public class DumpReplayer {
             }
             reader.close();
         } catch (IOException ioe) {
-            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
+// TODO hipparchus migration : change to the appropriate message 
+//            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
+            throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, file.getAbsolutePath(), ioe.getLocalizedMessage());
         }
     }
 
@@ -389,7 +390,9 @@ public class DumpReplayer {
             return rugged;
 
         } catch (IOException ioe) {
-            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
+// TODO hipparchus migration : change to the appropriate message 
+//            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
+            throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, ioe.getLocalizedMessage());
         } catch (SecurityException e) {
             // this should never happen
             throw RuggedException.createInternalError(e);

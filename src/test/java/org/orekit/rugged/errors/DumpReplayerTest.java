@@ -17,11 +17,11 @@
 package org.orekit.rugged.errors;
 
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;

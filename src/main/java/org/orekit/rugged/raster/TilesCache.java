@@ -16,9 +16,9 @@
  */
 package org.orekit.rugged.raster;
 
+import org.hipparchus.util.FastMath;
 import java.lang.reflect.Array;
 
-import org.apache.commons.math3.util.FastMath;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 

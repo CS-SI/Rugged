@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.intersection.duvenhage;
 
-import org.apache.commons.math3.util.FastMath;
+import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.raster.SimpleTile;
 import org.orekit.rugged.utils.MaxSelector;

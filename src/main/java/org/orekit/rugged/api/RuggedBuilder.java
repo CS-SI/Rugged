@@ -16,6 +16,8 @@
  */
 package org.orekit.rugged.api;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -25,9 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.errors.PropagationException;
@@ -629,7 +628,9 @@ public class RuggedBuilder {
             createInterpolatorIfNeeded();
             new ObjectOutputStream(storageStream).writeObject(scToBody);
         } catch (IOException ioe) {
-            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getMessage());
+// TODO hipparchus migration : change to the appropriate message 
+//            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getMessage());
+            throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, ioe.getLocalizedMessage());
         }
     }
 

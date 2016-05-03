@@ -16,12 +16,12 @@
  */
 package org.orekit.rugged.raster;
 
-import org.apache.commons.math3.exception.MathIllegalArgumentException;
-import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937a;
-import org.apache.commons.math3.util.ArithmeticUtils;
-import org.apache.commons.math3.util.FastMath;
+import org.hipparchus.exception.LocalizedCoreFormats;
+import org.hipparchus.exception.MathIllegalArgumentException;
+import org.hipparchus.random.RandomGenerator;
+import org.hipparchus.random.Well19937a;
+import org.hipparchus.util.ArithmeticUtils;
+import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.RuggedException;
 
 public class RandomLandscapeUpdater implements TileUpdater {
@@ -35,7 +35,11 @@ public class RandomLandscapeUpdater implements TileUpdater {
         throws MathIllegalArgumentException {
 
         if (!ArithmeticUtils.isPowerOfTwo(n - 1)) {
-            throw new MathIllegalArgumentException(LocalizedFormats.SIMPLE_MESSAGE,
+        	
+// TODO hipparchus migration : change to the appropriate message 
+//            throw new MathIllegalArgumentException(LocalizedFormats.SIMPLE_MESSAGE,
+//                                                   "tile size must be a power of two plus one");
+            throw new MathIllegalArgumentException(LocalizedCoreFormats.SIMPLE_MESSAGE,
                                                    "tile size must be a power of two plus one");
         }
 

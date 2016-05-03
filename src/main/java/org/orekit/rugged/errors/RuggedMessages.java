@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.errors;
 
+import org.hipparchus.exception.Localizable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,7 +27,6 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import org.apache.commons.math3.exception.util.Localizable;
 
 /**
  * Enumeration for localized messages formats.

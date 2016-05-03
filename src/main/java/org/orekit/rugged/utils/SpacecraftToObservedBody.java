@@ -16,11 +16,11 @@
  */
 package org.orekit.rugged.utils;
 
+import org.hipparchus.util.FastMath;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.util.FastMath;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;

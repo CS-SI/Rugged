@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.raster;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;

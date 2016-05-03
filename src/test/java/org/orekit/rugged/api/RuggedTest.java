@@ -17,6 +17,12 @@
 package org.orekit.rugged.api;
 
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.stat.descriptive.SummaryStatistics;
+import org.hipparchus.stat.descriptive.rank.Percentile;
+import org.hipparchus.util.FastMath;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -27,12 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -354,7 +354,9 @@ public class RuggedTest {
         GeodeticPoint[] gpWithoutFlatBodyCorrection =
                 builder.setAlgorithm(AlgorithmId.DUVENHAGE_FLAT_BODY).build().directLocation("line", 100);
 
-        SummaryStatistics stats = new SummaryStatistics();
+// TODO hipparchus migration : a verifier !
+//        SummaryStatistics stats = new SummaryStatistics();
+        SummaryStatistics stats = SummaryStatistics.create();
         for (int i = 0; i < gpWithFlatBodyCorrection.length; ++i) {
             Vector3D pWith    = earth.transform(gpWithFlatBodyCorrection[i]);
             Vector3D pWithout = earth.transform(gpWithoutFlatBodyCorrection[i]);
