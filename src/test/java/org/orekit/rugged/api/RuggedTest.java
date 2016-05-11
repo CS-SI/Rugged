@@ -20,7 +20,7 @@ package org.orekit.rugged.api;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.stat.descriptive.SummaryStatistics;
+import org.hipparchus.stat.descriptive.StreamingStatistics;
 import org.hipparchus.stat.descriptive.rank.Percentile;
 import org.hipparchus.util.FastMath;
 import java.io.File;
@@ -354,9 +354,7 @@ public class RuggedTest {
         GeodeticPoint[] gpWithoutFlatBodyCorrection =
                 builder.setAlgorithm(AlgorithmId.DUVENHAGE_FLAT_BODY).build().directLocation("line", 100);
 
-// TODO hipparchus migration : a verifier !
-//        SummaryStatistics stats = new SummaryStatistics();
-        SummaryStatistics stats = SummaryStatistics.create();
+        StreamingStatistics stats = new StreamingStatistics();
         for (int i = 0; i < gpWithFlatBodyCorrection.length; ++i) {
             Vector3D pWith    = earth.transform(gpWithFlatBodyCorrection[i]);
             Vector3D pWithout = earth.transform(gpWithoutFlatBodyCorrection[i]);
