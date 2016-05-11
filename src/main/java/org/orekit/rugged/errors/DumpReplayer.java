@@ -17,6 +17,7 @@
 package org.orekit.rugged.errors;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.exception.LocalizedCoreFormats;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -277,9 +278,7 @@ public class DumpReplayer {
             }
             reader.close();
         } catch (IOException ioe) {
-// TODO hipparchus migration : change to the appropriate message 
-//            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
-            throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, file.getAbsolutePath(), ioe.getLocalizedMessage());
+            throw new RuggedException(ioe, LocalizedCoreFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
         }
     }
 
@@ -390,9 +389,7 @@ public class DumpReplayer {
             return rugged;
 
         } catch (IOException ioe) {
-// TODO hipparchus migration : change to the appropriate message 
-//            throw new RuggedException(ioe, LocalizedFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
-            throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, ioe.getLocalizedMessage());
+            throw new RuggedException(ioe, LocalizedCoreFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
         } catch (SecurityException e) {
             // this should never happen
             throw RuggedException.createInternalError(e);

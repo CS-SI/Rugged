@@ -17,6 +17,7 @@
 package org.orekit.rugged.errors;
 
 import org.hipparchus.exception.Localizable;
+import org.hipparchus.exception.LocalizedException;
 import org.hipparchus.exception.MathRuntimeException;
 
 import java.text.MessageFormat;
