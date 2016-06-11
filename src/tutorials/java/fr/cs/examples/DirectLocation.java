@@ -83,7 +83,7 @@ public class DirectLocation {
             AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
             LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20); 
 
-            // With the LOS and the datation now defined , we can initialize a line sensor object in Rugged:
+            // With the LOS and the datation now defined, we can initialize a line sensor object in Rugged:
             LineSensor lineSensor = new LineSensor("mySensor", lineDatation, Vector3D.ZERO, lineOfSight);
 
             // In our application, we simply need to know the name of the frames we are working with. Positions and
