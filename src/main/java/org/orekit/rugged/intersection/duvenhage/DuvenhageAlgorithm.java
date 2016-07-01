@@ -78,6 +78,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             // compute intersection with ellipsoid
             final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
 
+            // compute atmosphere deviation
+
             // locate the entry tile along the line-of-sight
             MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
 
