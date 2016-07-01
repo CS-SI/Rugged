@@ -16,7 +16,7 @@ Overview
 --------
 
 The top level design describes the various libraries and their interactions. The lowest level
-corresponding to the Apache Commons Math library is not shown here for clarity.
+corresponding to the Hipparchus library is not shown here for clarity.
 
 The following sequence and class diagrams show the three most important functions: initialization
 of the libraries, direct location and inverse location.
@@ -90,7 +90,7 @@ The computation is performed in several steps. The line to which the points belo
 solver taking advantage of the first time derivatives automatically included in Orekit transforms. It can therefore set
 up a model of the angle between the target point and the mean sensor plane, and therefore compute in only two or three
 iterations the exact crossing of this plane, and hence the corresponding line number. Then, the position of this
-crossing along the line is searched using a general purpose solver available in Apache Commons Math. As all coordinates
+crossing along the line is searched using a general purpose solver available in Hipparchus. As all coordinates
 are already known in spacecraft frame at this stage, no conversions are performed and this solver find the corresponding
 pixel very fast. The last two steps correspond to fixing accurately the previous results, which can be important when
 the various pixels in the line sensor do not really form an exact line and therefore when the previous computation which

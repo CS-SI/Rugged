@@ -37,8 +37,8 @@
     <rugged.maven-surefire-report-plugin.version>2.18.1</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.8</rugged.jgit.buildnumber.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
-    <rugged.orekit.version>8.0-SNAPSHOT</rugged.orekit.version>
-    <rugged.hipparchus.version>1.0-SNAPSHOT</rugged.hipparchus.version>
+    <rugged.orekit.version>8.0</rugged.orekit.version>
+    <rugged.hipparchus.version>1.0</rugged.hipparchus.version>
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
@@ -143,20 +143,26 @@
         <type>jar</type>
         <optional>false</optional>
     </dependency>
-
     <dependency>
-	<groupId>org.hipparchus</groupId>
-	<artifactId>hipparchus-core</artifactId>
-	<version>${rugged.hipparchus.version}</version>
-	<type>jar</type>
-	<optional>false</optional>
+  	  <groupId>org.hipparchus</groupId>
+	    <artifactId>hipparchus-core</artifactId>
+	    <version>${rugged.hipparchus.version}</version>
+  	    <type>jar</type>
+	    <optional>false</optional>
     </dependency>
     <dependency>
-	<groupId>org.hipparchus</groupId>
-	<artifactId>hipparchus-geometry</artifactId>
-	<version>${rugged.hipparchus.version}</version>
-	<type>jar</type>
-	<optional>false</optional>
+        <groupId>org.hipparchus</groupId>
+        <artifactId>hipparchus-geometry</artifactId>
+        <version>${rugged.hipparchus.version}</version>
+        <type>jar</type>
+        <optional>false</optional>
+    </dependency>
+    <dependency>
+        <groupId>org.hipparchus</groupId>
+        <artifactId>hipparchus-stat</artifactId>
+        <version>${rugged.hipparchus.version}</version>
+        <type>jar</type>
+        <optional>false</optional>
     </dependency>
 
     <dependency>
@@ -428,8 +434,8 @@
         <configuration>
           <overview>${basedir}/core/src/main/java/org/orekit/rugged/overview.html</overview>
           <links>
-            <link>http://docs.oracle.com/javase/6/docs/api/</link>
-            <link>http://commons.apache.org/math/javadocs/api-${rugged.apache-commons-math.version}</link>
+            <link>http://docs.oracle.com/javase/8/docs/api/</link>
+            <link>https://hipparchus.org/site-hipparchus-${rugged.hipparchus.version}/apidocs/</link>
             <link>https://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
           </links>
           <charset>${project.reporting.outputEncoding}</charset>

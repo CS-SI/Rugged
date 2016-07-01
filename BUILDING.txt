@@ -25,13 +25,7 @@ Building with Eclipse:
    the source tab of the Configure Build Path dialog
  - set the external libraries to JRE system library (provided by Eclipse),
    Junit 4.x (provided by Eclipse) orekit (available at Orekit website
-   https://www.orekit.org/) and Apache Commons Math (available at
-   Apache Software Foundation commons-math
-   http://commons.apache.org/proper/commons-math/download_math.cgi
+   https://www.orekit.org/) and Hipparchus (available at
+    Hipparchus project downloads page https://www.hipparchus.org/downloads.html)
    in the libraries tab of the Configure Build Path dialog
- - if you want to also build the optional geotiff module, you should
-   add rugged/geotiff/src/main/java, rugged/geotiff/src/main/resources,
-   rugged/geotiff/src/test/java, rugged/geotiff/src/test/resources in
-   the source tab of the Configure Build Path dialog and add the
-   Apache Commons Imaging library to the external libraries
 

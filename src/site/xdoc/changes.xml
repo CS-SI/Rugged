@@ -20,6 +20,14 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
+    <release version="2.0" date="TBD" description="TTBD">
+      <action dev="luc" type="update">
+        Updated dependencies to Orekit 8.0 and Hipparchus 1.0.
+      </action>
+      <action dev="guylaine" type="update">
+        Converted Rugged to use the Hipparchus library.
+      </action>
+    </release>
     <release version="1.0" date="2016-02-10"
              description="This is the first official release of Rugged. It includes direct and
              inverse location for push-broom sensors.">

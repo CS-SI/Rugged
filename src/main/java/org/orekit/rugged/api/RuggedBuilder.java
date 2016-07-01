@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.PropagationException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.propagation.Propagator;
@@ -747,16 +746,12 @@ public class RuggedBuilder {
                 /** {@inheritDoc} */
                 @Override
                 public void handleStep(final SpacecraftState currentState, final boolean isLast)
-                    throws PropagationException {
-                    try {
-                        final AbsoluteDate  date = currentState.getDate();
-                        final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
-                        final Rotation      q    = currentState.getAttitude().getRotation();
-                        positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
-                        quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
-                    } catch (OrekitException oe) {
-                        throw new PropagationException(oe);
-                    }
+                    throws OrekitException {
+                    final AbsoluteDate  date = currentState.getDate();
+                    final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
+                    final Rotation      q    = currentState.getAttitude().getRotation();
+                    positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
+                    quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
                 }
 
             });
@@ -769,7 +764,7 @@ public class RuggedBuilder {
                                       pvFilter, quaternions, interpolationNumber,
                                       aFilter);
 
-        } catch (PropagationException pe) {
+        } catch (OrekitException pe) {
             throw new RuggedException(pe, pe.getSpecifier(), pe.getParts());
         }
     }

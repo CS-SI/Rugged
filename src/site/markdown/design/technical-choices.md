@@ -15,7 +15,7 @@
 Earth frames
 ------------
 
-As Rugged is built on top of Orekit and Apache Commons Math, all the flight dynamics and
+As Rugged is built on top of Orekit and Hipparchus, all the flight dynamics and
 mathematical computation are delegated to these two libraries and the full accuracy available
 is used. This implies for example that when computing frames conversions between the inertial
 frame and the Earth frame, the complete set of IERS Earth Orientation Parameters (EOP)
@@ -194,9 +194,9 @@ Both light-time correction and aberration of light correction are applied in the
 ignored (independently) at user choice. One use case for ignoring these important correction is for validation purposes and comparison
 with other libraries that do not take this correction into account. This use case is by definition restricted to validation phases and
 should not apply to operational systems. Another use case for ignoring light-time correction and aberration of light correction occurs
-when the effect is explicitely expected to be compensated at a later stage in the image processing chain, most probably using a
+when the effect is explicitly expected to be compensated at a later stage in the image processing chain, most probably using a
 posteriori polynomial models. This use case can occur in operational products. It seems however better to compensate these effects early
-as they can be computed to full accuracy with a neglectible computation overhead.
+as they can be computed to full accuracy with a negligible computation overhead.
 
 Arrival on ellipsoid
 --------------------

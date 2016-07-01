@@ -19,8 +19,8 @@ package org.orekit.rugged.errors;
 /** This class allows to wrap {@link RuggedException} instances in {@code RuntimeException}.
  * <p>Wrapping {@link RuggedException} instances is useful when a low level method throws
  * one such exception and this method must be called from another one which does not allow
- * this exception. Typical examples are propagation methods that are used inside Apache
- * Commons optimizers, integrators or solvers.</p>
+ * this exception. Typical examples are propagation methods that are used inside Hipparchus
+ * optimizers, integrators or solvers.</p>
  * <p>
  * This class is heavily based on Orekit {@link org.orekit.errors.OrekitException},
  * which is distributed under the terms of the Apache License V2.

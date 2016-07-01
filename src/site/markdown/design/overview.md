@@ -16,14 +16,14 @@ Global architecture
 -------------------
 
 Rugged is an intermediate level mission-independent library. It relies on
-the Orekit library and on the Apache Commons Math library. It is itself
+the Orekit library and on the Hipparchus library. It is itself
 intended to be used from a mission-specific interface by one or more
 image processing applications.
 
 ![architecture](../images/rugged-architecture.png)
 
-The Java platform provides the runtime environment, the Apache Commons
-Math library provides the mathematical algorithms (3D geometry, root
+The Java platform provides the runtime environment, the Hipparchus
+library provides the mathematical algorithms (3D geometry, root
 solvers ...), the Orekit library provides the space flight dynamics
 computation (frames transforms, orbits and attitude propagation and
 interpolation ...). The Rugged library itself provides the algorithms
@@ -45,7 +45,7 @@ image processing application and the interface layer, and is limited to very few
 level functions with few primitive types (raw arrays for pixels or ground coordinates).
 
 The Rugged library is developed in the Java language and has full access to the Orekit and
-Apache Commons Math libraries. It is designed and developed by space flight dynamics and
+Hipparchus libraries. It is designed and developed by space flight dynamics and
 geometry specialists, with support from the image processing specialists for the API definition.
 
 Functional Breakdown

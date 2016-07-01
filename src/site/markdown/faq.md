@@ -44,14 +44,10 @@ Installation
 
 ### What are the dependencies for Rugged?
 
-Rugged core relies on the Orekit space flight dynamics library and on
-Apache Commons Math mathematical libraries. Both libraries are free
+Rugged relies on the Orekit space flight dynamics library and on
+Hipparchus mathematical libraries. Both libraries are free
 software libraries distributed under the terms of the Apache Software
 License version 2.0.
-
-Rugged aster relies on Rugged core and on Apache Commons imaging libraries.
-Both libraries are free software libraries distributed under the terms of
-the Apache Software License version 2.0.
 
 Runtime errors
 --------------

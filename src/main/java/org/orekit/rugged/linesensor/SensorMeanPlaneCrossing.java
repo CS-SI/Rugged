@@ -192,7 +192,7 @@ public class SensorMeanPlaneCrossing {
         final SingularValueDecomposition svd = new SingularValueDecomposition(matrix);
 
         // extract the left singular vector corresponding to least singular value
-        // (i.e. last vector since Apache Commons Math returns the values
+        // (i.e. last vector since Hipparchus returns the values
         //  in non-increasing order)
         final Vector3D singularVector = new Vector3D(svd.getU().getColumn(2)).normalize();
 
@@ -362,7 +362,7 @@ public class SensorMeanPlaneCrossing {
 
         final PVCoordinates targetPV = new PVCoordinates(target, Vector3D.ZERO);
 
-        // we don't use an Apache Commons Math solver here because we are more
+        // we don't use an Hipparchus solver here because we are more
         // interested in reducing the number of evaluations than being accurate,
         // as we know the solution is improved in the second stage of inverse location.
         // We expect two or three evaluations only. Each new evaluation shows up quickly in

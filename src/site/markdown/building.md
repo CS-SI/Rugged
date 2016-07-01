@@ -87,9 +87,9 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
     in the source tab of the Configure Build Path dialog
 
   * set the external libraries to JRE system library (provided by Eclipse),
-    Junit 4.x (provided by Eclipse), Apache Commons Math (available at
-    Apache Software Foundation Commons Math
-    [downloads page](http://commons.apache.org/proper/commons-math/download_math.cgi),
+    Junit 4.x (provided by Eclipse), Hipparchus (available at
+    Hipparchus project
+    [downloads page](https://www.hipparchus.org/downloads.html),
     and Orekit (available at Orekit
     [downloads page](https://www.orekit.org/forge/projects/orekit/files)
     in the libraries tab of the Configure Build Path dialog

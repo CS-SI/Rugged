@@ -66,20 +66,22 @@ your program:
 
 This file contents is:
 
-  * leap seconds data up to early 2016,
+  * leap seconds data up to end of 2016,
 
-  * IERS Earth orientation parameters from 1973 to mid 2014
-    with predicted date to end 2014 for some parameters (both IAU-1980 and IAU-2000),
+  * IERS Earth orientation parameters from 1973 to mid 2016
+    with predicted date to fall 2016 for some parameters (both IAU-1980 and IAU-2000),
 
-  * Marshall Solar Activity Futur Estimation from 1999 to 2014,
+  * Marshall Solar Activity Futur Estimation from 1999 to mid 2016,
 
   * DE 430 planetary ephemerides from 1990 to 2069,
 
-  * Eigen 06S gravity field.
+  * Eigen 06S gravity field,
+
+  * FES 2004 ocean tides model.
 
 There are no guarantees that this file will be available indefinitely or that its
 content will be updated. It should be considered as a simple configuration example.
 Users are encouraged to set up their own configuration data.
 
-The file is available by following this link: [orekit-data.zip](https://www.orekit.org/forge/attachments/download/584/orekit-data.zip).
+The file is available by following this link: [orekit-data.zip](https://www.orekit.org/forge/attachments/download/610/orekit-data.zip).
 
