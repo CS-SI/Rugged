@@ -45,6 +45,8 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.frames.Transform;
+import org.orekit.rugged.atmosphericrefraction.AtmosphericRefraction;
+import org.orekit.rugged.atmosphericrefraction.MultiLayerModel;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
@@ -364,6 +366,11 @@ public class Rugged {
             final Vector3D lBody = inertToBody.transformVector(lInert);
             result = algorithm.refineIntersection(ellipsoid, pBody, lBody,
                                                   algorithm.intersection(ellipsoid, pBody, lBody));
+
+            // compute atmosphere deviation.
+            AtmosphericRefraction atmosphericRefraction = new MultiLayerModel();
+            long deviation = atmosphericRefraction.getDeviation(pBody, lBody, result.getAltitude());
+
         }
 
         DumpManager.dumpDirectLocationResult(result);
