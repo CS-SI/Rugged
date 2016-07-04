@@ -344,6 +344,7 @@ public class Rugged {
 
             // compute atmosphere deviation.
             AtmosphericRefraction atmosphericRefraction = new MultiLayerModel();
+            // result.getZenith()
             long deviation = atmosphericRefraction.getDeviation(pBody, lBody, result.getAltitude());
 
         }
