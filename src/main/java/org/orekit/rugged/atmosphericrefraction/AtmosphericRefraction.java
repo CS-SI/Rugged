@@ -25,6 +25,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  */
 public interface AtmosphericRefraction {
 
-    long getDeviation(Vector3D pos, Vector3D los, double altitude);
+    double getDeviation(Vector3D pos, Vector3D los, Vector3D zenith, double altitude);
 
 }
