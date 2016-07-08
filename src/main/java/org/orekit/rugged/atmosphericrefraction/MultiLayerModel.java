@@ -18,6 +18,9 @@ package org.orekit.rugged.atmosphericrefraction;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 import java.util.Collections;
 import java.util.Map;
@@ -53,7 +56,10 @@ public class MultiLayerModel implements AtmosphericRefraction {
     }
 
     @Override
-    public double getDeviation(Vector3D pos, Vector3D los, Vector3D zenith, double altitude) {
+    public double getDeviation(Vector3D pos, Vector3D los, Vector3D zenith, double altitude, Tile tile) {
+
+        new ExtendedEllipsoid(ellipsoid.getEquatorialRadius(), ellipsoid.getFlattening(),
+                ellipsoid.getBodyFrame());
 
         double incidenceAngleSin = FastMath.sin(Vector3D.angle(los, zenith));
         double previousRefractionIndex = -1;
@@ -72,6 +78,8 @@ public class MultiLayerModel implements AtmosphericRefraction {
             }
             previousRefractionIndex = entry.getValue();
         }
+
+        NormalizedGeodeticPoint geodeticPoint = tile.cellIntersection(pos, los, 0, 0);
 
         return pos.getX() + xDistance;
     }
