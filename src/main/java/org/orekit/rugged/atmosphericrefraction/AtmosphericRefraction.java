@@ -18,6 +18,7 @@ package org.orekit.rugged.atmosphericrefraction;
 
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.raster.Tile;
 
 /**
  * Interface for atmospheric refraction.
@@ -25,6 +26,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  */
 public interface AtmosphericRefraction {
 
-    double getDeviation(Vector3D pos, Vector3D los, Vector3D zenith, double altitude);
+    double getDeviation(Vector3D pos, Vector3D los, Vector3D zenith, double altitude, Tile tile);
 
 }
