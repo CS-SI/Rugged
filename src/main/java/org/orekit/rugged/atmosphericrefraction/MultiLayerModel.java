@@ -18,13 +18,17 @@ package org.orekit.rugged.atmosphericrefraction;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.bodies.OneAxisEllipsoid;
+import org.orekit.errors.OrekitException;
+import org.orekit.frames.FramesFactory;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
+import org.orekit.utils.Constants;
+import org.orekit.utils.IERSConventions;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Multi layer model for atmospheric refraction.
@@ -33,7 +37,9 @@ import java.util.TreeMap;
 public class MultiLayerModel implements AtmosphericRefraction {
 
     // maps altitude (lower bound) to refraction index
-    private static final Map<Double, Double> meanAtmoshpericRefractions;
+    private static final Map<Double, Double> meanAtmosphericRefractions;
+
+    private static final Map<Double, ExtendedEllipsoid> atmosphericEllipsoids;
 
     static {
         Map<Double, Double> refractions = new TreeMap(Collections.reverseOrder());
@@ -52,35 +58,69 @@ public class MultiLayerModel implements AtmosphericRefraction {
         refractions.put(40000.00000000000, 1.00000100000);
         refractions.put(50000.00000000000, 1.00000000000);
         refractions.put(100000.00000000000, 1.00000000000);
-        meanAtmoshpericRefractions = Collections.unmodifiableMap(refractions);
+        meanAtmosphericRefractions = Collections.unmodifiableMap(refractions);
+
+        Map<Double, ExtendedEllipsoid> ellipsoids = new HashMap<Double, ExtendedEllipsoid>();
+        try {
+            for (Double altitude : refractions.keySet()) {
+                OneAxisEllipsoid ellipsoid = new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS + altitude,
+                        Constants.WGS84_EARTH_FLATTENING, FramesFactory.getITRF(IERSConventions.IERS_2010, true));
+                ellipsoid = new ExtendedEllipsoid(ellipsoid.getEquatorialRadius(), ellipsoid.getFlattening(),
+                        ellipsoid.getBodyFrame());
+                ellipsoids.put(altitude, (ExtendedEllipsoid) ellipsoid);
+            }
+        } catch (OrekitException e) {
+            e.printStackTrace();
+        }
+        atmosphericEllipsoids = Collections.unmodifiableMap(ellipsoids);
     }
 
     @Override
-    public double getDeviation(Vector3D pos, Vector3D los, Vector3D zenith, double altitude, Tile tile) {
+    public NormalizedGeodeticPoint getPointOnGround(Vector3D initialPos, Vector3D initialLos, Vector3D initialZenith,
+                                                double altitude, Tile tile) {
+        NormalizedGeodeticPoint newGeodeticPoint = null;
+        try {
 
-        new ExtendedEllipsoid(ellipsoid.getEquatorialRadius(), ellipsoid.getFlattening(),
-                ellipsoid.getBodyFrame());
+            Vector3D pos = initialPos;
+            Vector3D los = initialLos;
+            Vector3D zenith = initialZenith;
+            double theta1 = Vector3D.angle(los, zenith), theta2;
+            double previousRefractionIndex = -1;
+            NormalizedGeodeticPoint gp = null;
+            for (Map.Entry<Double, Double> entry : meanAtmosphericRefractions.entrySet()) {
+                if (pos.getZ() < entry.getKey()) {
+                    continue;
+                }
 
-        double incidenceAngleSin = FastMath.sin(Vector3D.angle(los, zenith));
-        double previousRefractionIndex = -1;
-        double xDistance = 0;
-        for(Map.Entry<Double, Double> entry : meanAtmoshpericRefractions.entrySet()) {
-            if(pos.getZ() < entry.getKey()) {
-                continue;
-            }
-            if(previousRefractionIndex > 0) {
-                incidenceAngleSin = previousRefractionIndex * incidenceAngleSin / entry.getValue();
-            }
-            xDistance += (pos.getZ() - entry.getKey()) * FastMath.tan(incidenceAngleSin);
+                if (previousRefractionIndex > 0) {
+                    theta2 = previousRefractionIndex * FastMath.sin(theta1) / entry.getValue();
 
-            if(altitude > entry.getKey()) {
-                break;
+                    // get current los
+                    double a = FastMath.sqrt((1 - FastMath.pow(FastMath.cos(theta2), 2)) /
+                                             (1 - FastMath.pow(FastMath.cos(theta1), 2)));
+                    double b = a * FastMath.cos(theta1) - FastMath.cos(theta2);
+                    los = new Vector3D(a, los, b, zenith);
+
+                    theta1 = theta2;
+                }
+
+                // get intersection point
+                ExtendedEllipsoid ellipsoid = atmosphericEllipsoids.get(entry.getKey());
+                gp = ellipsoid.pointOnGround(pos, los, 0.0);
+                pos = ellipsoid.transform(gp);
+                zenith = gp.getZenith();
+
+                if (altitude > entry.getKey()) {
+                    break;
+                }
+                previousRefractionIndex = entry.getValue();
             }
-            previousRefractionIndex = entry.getValue();
+
+            newGeodeticPoint = tile.cellIntersection(gp, los, 0, 0);
+        } catch (RuggedException e) {
+            e.printStackTrace();
         }
 
-        NormalizedGeodeticPoint geodeticPoint = tile.cellIntersection(pos, los, 0, 0);
-
-        return pos.getX() + xDistance;
+        return newGeodeticPoint;
     }
 }
