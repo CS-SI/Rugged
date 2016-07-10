@@ -93,7 +93,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
                 }
 
                 if (previousRefractionIndex > 0) {
-                    theta2 = previousRefractionIndex * FastMath.sin(theta1) / entry.getValue();
+                    theta2 = FastMath.asin(previousRefractionIndex * FastMath.sin(theta1) / entry.getValue());
 
                     // get current los
                     double a = FastMath.sqrt((1 - FastMath.pow(FastMath.cos(theta2), 2)) /
