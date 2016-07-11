@@ -16,7 +16,6 @@
  */
 package org.orekit.rugged.atmosphericrefraction;
 
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.OneAxisEllipsoid;
@@ -29,7 +28,10 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Multi layer model for atmospheric refraction.
