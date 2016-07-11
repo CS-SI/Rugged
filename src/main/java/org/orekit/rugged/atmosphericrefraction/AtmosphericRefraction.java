@@ -18,6 +18,7 @@ package org.orekit.rugged.atmosphericrefraction;
 
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
@@ -27,6 +28,6 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  */
 public interface AtmosphericRefraction {
 
-    NormalizedGeodeticPoint getPointOnGround(Vector3D pos, Vector3D los, Vector3D zenith, double altitude, Tile tile);
+    NormalizedGeodeticPoint getPointOnGround(Vector3D pos, Vector3D los, Vector3D zenith, double altitude, Tile tile) throws RuggedException;
 
 }
