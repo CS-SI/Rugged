@@ -17,75 +17,56 @@
 package org.orekit.rugged.atmosphericrefraction;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.util.FastMath;
+import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
-import org.orekit.frames.FramesFactory;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
 import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
+import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.TileUpdater;
-import org.orekit.rugged.utils.ExtendedEllipsoid;
-import org.orekit.rugged.utils.NormalizedGeodeticPoint;
-import org.orekit.utils.Constants;
-import org.orekit.utils.IERSConventions;
+import org.orekit.rugged.raster.TilesCache;
 
 public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
     @Test
     public void testGetPointOnGround() throws OrekitException, RuggedException {
 
-//        Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
-//        Vector3D los = new Vector3D( 0.5127552821932051, -0.8254313129088879, -0.2361041470463311);
-//
-//        OneAxisEllipsoid oneAxisEllipsoid = new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-//                Constants.WGS84_EARTH_FLATTENING, FramesFactory.getITRF(IERSConventions.IERS_2010, true));
-//        ExtendedEllipsoid ellipsoid = new ExtendedEllipsoid(oneAxisEllipsoid.getEquatorialRadius(), ellipsoid.getFlattening(),
-//                ellipsoid.getBodyFrame());
-//
-//
-//        // compute intersection with ellipsoid
-//        final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
-//        // locate the entry tile along the line-of-sight
-//        MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
-
-        // check mayon volcano tiles
-
-
         setUpMayonVolcanoContext();
-
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
         Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         Vector3D los = new Vector3D( 0.5127552821932051, -0.8254313129088879, -0.2361041470463311);
         GeodeticPoint intersection = algorithm.refineIntersection(earth, position, los,
                 algorithm.intersection(earth, position, los));
 
+        Assert.assertNotNull(intersection);
+
+        // intersection {lat: 13.4045888388 deg, lon: 123.0160362249 deg, alt: 16}
 
 
+//        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
+//        updater.updateTile(intersection.getLatitude(), intersection.getLongitude(), tile);
+//        tile.interpolateElevation(intersection.getLatitude(), intersection.getLongitude());
+
+
+        TilesCache cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, 8);
+        // locate the entry tile along the line-of-sight
+        Tile tile = cache.getTile(intersection.getLatitude(), intersection.getLongitude());
+
+        System.out.println("TILE: minlat: " + tile.getMinimumLatitude() + ", maxlat: " + tile.getMaximumLatitude() +
+                ", minlon: " + tile.getMinimumLongitude() + ", maxlon: " + tile.getMaximumLongitude());
 
         MultiLayerModel model = new MultiLayerModel();
+        GeodeticPoint gp = model.getPointOnGround(position, los, intersection.getZenith(), intersection.getAltitude(),
+                tile);
 
+        Assert.assertNotNull(gp);
 
-
-        final double latitude  = FastMath.toRadians(13.27);
-        final double longitude = FastMath.toRadians(123.68);
-        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
-        updater.updateTile(latitude, longitude, tile);
-        double altitude = tile.interpolateElevation(latitude, longitude);
-        final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
-        Vector3D groundP = earth.transform(groundGP);
-
-
-
-        // Vector3D initialPos, Vector3D initialLos, Vector3D initialZenith, double altitude, Tile tile
-        // model.getPointOnGround();
-
-
+        System.out.println("Distance: " + Vector3D.distance(intersection.getWest(), gp.getWest()));
 
     }
 
