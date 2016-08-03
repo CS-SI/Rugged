@@ -18,11 +18,16 @@ package org.orekit.rugged.atmosphericrefraction;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
+import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
 import org.orekit.rugged.raster.Tile;
+import org.orekit.rugged.raster.TilesCache;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.utils.Constants;
@@ -45,7 +50,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
     private static Map<Double, ExtendedEllipsoid> atmosphericEllipsoids;
 
     public MultiLayerModel() throws OrekitException {
-        Map<Double, Double> meanAtmosphericRefractions = new TreeMap(Collections.reverseOrder());
+        meanAtmosphericRefractions = new TreeMap(Collections.reverseOrder());
         meanAtmosphericRefractions.put(-1000.00000000000, 1.00030600000);
         meanAtmosphericRefractions.put(0.00000000000, 1.00027800000);
         meanAtmosphericRefractions.put(1000.00000000000, 1.00025200000);
@@ -62,7 +67,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
         meanAtmosphericRefractions.put(50000.00000000000, 1.00000000000);
         meanAtmosphericRefractions.put(100000.00000000000, 1.00000000000);
 
-        Map<Double, ExtendedEllipsoid> atmosphericEllipsoids = new HashMap<Double, ExtendedEllipsoid>();
+        atmosphericEllipsoids = new HashMap<Double, ExtendedEllipsoid>();
         for (Double altitude : meanAtmosphericRefractions.keySet()) {
             OneAxisEllipsoid ellipsoid = new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS + altitude,
                     Constants.WGS84_EARTH_FLATTENING, FramesFactory.getITRF(IERSConventions.IERS_2010, true));
@@ -110,6 +115,8 @@ public class MultiLayerModel implements AtmosphericRefraction {
             }
             previousRefractionIndex = entry.getValue();
         }
+
+        System.out.println("GP: " + gp + ", LOS: " + los);
 
         NormalizedGeodeticPoint newGeodeticPoint = tile.cellIntersection(gp, los, 0, 0);
         return newGeodeticPoint;

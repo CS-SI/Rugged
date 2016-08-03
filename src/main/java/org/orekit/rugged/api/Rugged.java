@@ -368,9 +368,9 @@ public class Rugged {
                                                   algorithm.intersection(ellipsoid, pBody, lBody));
 
             // compute atmosphere deviation.
-            AtmosphericRefraction atmosphericRefraction = new MultiLayerModel();
+            //AtmosphericRefraction atmosphericRefraction = new MultiLayerModel();
             // result.getZenith()
-            long deviation = atmosphericRefraction.getDeviation(pBody, lBody, result.getAltitude());
+            //long deviation = atmosphericRefraction.getDeviation(pBody, lBody, result.getAltitude());
 
         }
 
