@@ -95,30 +95,41 @@ public class MultiLayerModel implements AtmosphericRefraction {
             if (previousRefractionIndex > 0) {
                 theta2 = FastMath.asin(previousRefractionIndex * FastMath.sin(theta1) / entry.getValue());
 
-                // get los
+                // get new los
                 double a = FastMath.sqrt((1 - FastMath.pow(FastMath.cos(theta2), 2)) /
                         (1 - FastMath.pow(FastMath.cos(theta1), 2)));
                 double b = a * FastMath.cos(theta1) - FastMath.cos(theta2);
                 los = new Vector3D(a, los, b, zenith);
+                System.out.println("LOS: " + los);
 
                 theta1 = theta2;
+            }
+
+            if (altitude > entry.getKey()) {
+                break;
             }
 
             // get intersection point
             ExtendedEllipsoid ellipsoid = atmosphericEllipsoids.get(entry.getKey());
             gp = ellipsoid.pointOnGround(pos, los, 0.0);
+            gp = new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), entry.getKey(), 0.0);
+
+            System.out.println("GP: " + gp);
+
             pos = ellipsoid.transform(gp);
             zenith = gp.getZenith();
 
-            if (altitude > entry.getKey()) {
-                break;
-            }
             previousRefractionIndex = entry.getValue();
         }
 
-        System.out.println("GP: " + gp + ", LOS: " + los);
 
-        NormalizedGeodeticPoint newGeodeticPoint = tile.cellIntersection(gp, los, 0, 0);
+        gp = new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), 17, 0.0);
+        NormalizedGeodeticPoint newGeodeticPoint = tile.cellIntersection(gp, los,
+                tile.getFloorLatitudeIndex(gp.getLatitude()), tile.getFloorLongitudeIndex(gp.getLongitude()));
+
+        System.out.println("latitude and longitude indexes: " + tile.getFloorLatitudeIndex(gp.getLatitude()) + ", " +
+                tile.getFloorLongitudeIndex(gp.getLongitude()));
+
         return newGeodeticPoint;
     }
 }
