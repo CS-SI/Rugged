@@ -19,29 +19,29 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rugged.findbugs-maven-plugin.version>3.0.0</rugged.findbugs-maven-plugin.version>
-    <rugged.jacoco-maven-plugin.version>0.7.5.201505241946</rugged.jacoco-maven-plugin.version>
-    <rugged.maven-assembly-plugin.version>2.5.3</rugged.maven-assembly-plugin.version>
-    <rugged.maven-bundle-plugin.version>2.5.3</rugged.maven-bundle-plugin.version>
-    <rugged.maven-changes-plugin.version>2.11</rugged.maven-changes-plugin.version>
+    <rugged.jacoco-maven-plugin.version>0.7.7.201606060606</rugged.jacoco-maven-plugin.version>
+    <rugged.maven-assembly-plugin.version>2.6</rugged.maven-assembly-plugin.version>
+    <rugged.maven-bundle-plugin.version>3.2.0</rugged.maven-bundle-plugin.version>
+    <rugged.maven-changes-plugin.version>2.12</rugged.maven-changes-plugin.version>
     <rugged.maven-checkstyle-plugin.version>2.17</rugged.maven-checkstyle-plugin.version>
-    <rugged.maven-clean-plugin.version>2.6.1</rugged.maven-clean-plugin.version>
-    <rugged.maven-compiler-plugin.version>3.2</rugged.maven-compiler-plugin.version>
-    <rugged.maven-javadoc-plugin.version>2.10.1</rugged.maven-javadoc-plugin.version>
-    <rugged.maven-jar-plugin.version>2.5</rugged.maven-jar-plugin.version>
+    <rugged.maven-clean-plugin.version>3.0.0</rugged.maven-clean-plugin.version>
+    <rugged.maven-compiler-plugin.version>3.5.1</rugged.maven-compiler-plugin.version>
+    <rugged.maven-javadoc-plugin.version>2.10.4</rugged.maven-javadoc-plugin.version>
+    <rugged.maven-jar-plugin.version>3.0.2</rugged.maven-jar-plugin.version>
     <rugged.maven-jxr-plugin.version>2.5</rugged.maven-jxr-plugin.version>
     <rugged.maven-plantuml-plugin.version>7940</rugged.maven-plantuml-plugin.version>
-    <rugged.maven-project-info-reports-plugin.version>2.7</rugged.maven-project-info-reports-plugin.version>
-    <rugged.maven-site-plugin.version>3.4</rugged.maven-site-plugin.version>
-    <rugged.maven-source-plugin.version>2.4</rugged.maven-source-plugin.version>
-    <rugged.maven-surefire-plugin.version>2.18.1</rugged.maven-surefire-plugin.version>
-    <rugged.maven-surefire-report-plugin.version>2.18.1</rugged.maven-surefire-report-plugin.version>
-    <rugged.jgit.buildnumber.version>1.2.8</rugged.jgit.buildnumber.version>
+    <rugged.maven-project-info-reports-plugin.version>2.9</rugged.maven-project-info-reports-plugin.version>
+    <rugged.maven-site-plugin.version>3.5.1</rugged.maven-site-plugin.version>
+    <rugged.maven-source-plugin.version>3.0.1</rugged.maven-source-plugin.version>
+    <rugged.maven-surefire-plugin.version>2.19.1</rugged.maven-surefire-plugin.version>
+    <rugged.maven-surefire-report-plugin.version>2.19.1</rugged.maven-surefire-report-plugin.version>
+    <rugged.maven-resources-plugin.version>3.0.1</rugged.maven-resources-plugin.version>
+    <rugged.jgit.buildnumber.version>1.2.10</rugged.jgit.buildnumber.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
     <rugged.orekit.version>8.0</rugged.orekit.version>
     <rugged.hipparchus.version>1.0</rugged.hipparchus.version>
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
-    <rugged.maven-resources-plugin.version>2.7</rugged.maven-resources-plugin.version>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
 
   </properties>
@@ -464,7 +464,7 @@
           <overview>${basedir}/core/src/main/java/org/orekit/rugged/overview.html</overview>
           <links>
             <link>http://docs.oracle.com/javase/8/docs/api/</link>
-            <link>https://hipparchus.org/site-hipparchus-${rugged.hipparchus.version}/apidocs/</link>
+            <link>https://hipparchus.org/apidocs/</link>
             <link>https://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
           </links>
           <charset>${project.reporting.outputEncoding}</charset>
