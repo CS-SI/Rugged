@@ -100,7 +100,6 @@ public class MultiLayerModel implements AtmosphericRefraction {
                         (1 - FastMath.pow(FastMath.cos(theta1), 2)));
                 double b = a * FastMath.cos(theta1) - FastMath.cos(theta2);
                 los = new Vector3D(a, los, b, zenith);
-                System.out.println("LOS: " + los);
 
                 theta1 = theta2;
             }
@@ -114,8 +113,6 @@ public class MultiLayerModel implements AtmosphericRefraction {
             gp = ellipsoid.pointOnGround(pos, los, 0.0);
             gp = new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), entry.getKey(), 0.0);
 
-            System.out.println("GP: " + gp);
-
             pos = ellipsoid.transform(gp);
             zenith = gp.getZenith();
 
@@ -123,12 +120,9 @@ public class MultiLayerModel implements AtmosphericRefraction {
         }
 
 
-        gp = new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), 17, 0.0);
+        // gp = new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), 16, 0.0);
         NormalizedGeodeticPoint newGeodeticPoint = tile.cellIntersection(gp, los,
                 tile.getFloorLatitudeIndex(gp.getLatitude()), tile.getFloorLongitudeIndex(gp.getLongitude()));
-
-        System.out.println("latitude and longitude indexes: " + tile.getFloorLatitudeIndex(gp.getLatitude()) + ", " +
-                tile.getFloorLongitudeIndex(gp.getLongitude()));
 
         return newGeodeticPoint;
     }

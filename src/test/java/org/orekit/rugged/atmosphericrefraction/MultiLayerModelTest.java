@@ -57,21 +57,12 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         // locate the entry tile along the line-of-sight
         Tile tile = cache.getTile(intersection.getLatitude(), intersection.getLongitude());
 
-        System.out.println("TILE: minlat: " + tile.getMinimumLatitude() + ", maxlat: " + tile.getMaximumLatitude() +
-                ", minlon: " + tile.getMinimumLongitude() + ", maxlon: " + tile.getMaximumLongitude());
-
-
-        System.out.println("IS IT NULL? " +
-                (tile.cellIntersection(intersection, los, tile.getFloorLatitudeIndex(intersection.getLatitude()),
-                        tile.getFloorLongitudeIndex(intersection.getLongitude())) == null));
 
         MultiLayerModel model = new MultiLayerModel();
         GeodeticPoint gp = model.getPointOnGround(position, los, intersection.getZenith(), intersection.getAltitude(),
                 tile);
 
         Assert.assertNotNull(gp);
-
-        System.out.println("Distance: " + Vector3D.distance(intersection.getWest(), gp.getWest()));
 
     }
 
