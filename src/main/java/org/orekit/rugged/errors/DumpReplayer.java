@@ -1044,9 +1044,9 @@ public class DumpReplayer {
          * @param longitudeStep step in longitude (size of one raster element)
          * @param longitudeColumns number of longitude columns
          */
-        public ParsedTile(final String name,
-                          final double minLatitude, final double latitudeStep, final int latitudeRows,
-                          final double minLongitude, final double longitudeStep, final int longitudeColumns) {
+        ParsedTile(final String name,
+                   final double minLatitude, final double latitudeStep, final int latitudeRows,
+                   final double minLongitude, final double longitudeStep, final int longitudeColumns) {
             this.name             = name;
             this.minLatitude      = minLatitude;
             this.latitudeStep     = latitudeStep;
@@ -1121,7 +1121,7 @@ public class DumpReplayer {
         /** simple constructor.
          * @param name name of the sensor
          */
-        public ParsedSensor(final String name) {
+        ParsedSensor(final String name) {
             this.name     = name;
             this.losMap   = new HashMap<Integer, List<Pair<AbsoluteDate, Vector3D>>>();
             this.datation = new ArrayList<Pair<Double, AbsoluteDate>>();
@@ -1379,9 +1379,9 @@ public class DumpReplayer {
          * @param normal mean plane normal
          * @param cachedResults cached results
          */
-        public ParsedMeanPlane(final int minLine, final int maxLine,
-                               final int maxEval, final double accuracy, final Vector3D normal,
-                               final CrossingResult[] cachedResults) {
+        ParsedMeanPlane(final int minLine, final int maxLine,
+                        final int maxEval, final double accuracy, final Vector3D normal,
+                        final CrossingResult[] cachedResults) {
             this.minLine       = minLine;
             this.maxLine       = maxLine;
             this.maxEval       = maxEval;

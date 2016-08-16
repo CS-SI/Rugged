@@ -645,8 +645,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
          * it is on a top/bottom limit
          * @exception OrekitException if geodetic coordinates cannot be computed
          */
-        public LimitPoint(final ExtendedEllipsoid ellipsoid, final double referenceLongitude,
-                          final Vector3D cartesian, final boolean side)
+        LimitPoint(final ExtendedEllipsoid ellipsoid, final double referenceLongitude,
+                   final Vector3D cartesian, final boolean side)
             throws OrekitException {
             this(ellipsoid.transform(cartesian, ellipsoid.getBodyFrame(), null, referenceLongitude), side);
         }
@@ -656,7 +656,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
          * @param side if true, the point is on a side limit, otherwise
          * it is on a top/bottom limit
          */
-        public LimitPoint(final NormalizedGeodeticPoint point, final boolean side) {
+        LimitPoint(final NormalizedGeodeticPoint point, final boolean side) {
             this.point = point;
             this.side  = side;
         }

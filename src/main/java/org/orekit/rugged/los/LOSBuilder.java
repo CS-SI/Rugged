@@ -109,7 +109,7 @@ public class LOSBuilder {
         /** Simple constructor.
          * @param transform underlying time-independent transform
          */
-        public TransformAdapter(final TimeIndependentLOSTransform transform) {
+        TransformAdapter(final TimeIndependentLOSTransform transform) {
             this.transform = transform;
         }
 
@@ -164,7 +164,7 @@ public class LOSBuilder {
          * @param raw raw directions
          * @param transforms transforms to apply
          */
-        public TransformsSequenceLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
+        TransformsSequenceLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
 
             // copy the lists, to ensure immutability of the built object,
             // in case addTransform is called again after build
@@ -277,7 +277,7 @@ public class LOSBuilder {
          * @param raw raw directions
          * @param transforms transforms to apply (must be time-independent!)
          */
-        public FixedLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
+        FixedLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
             super(raw, transforms);
             transformed = new Vector3D[raw.size()];
         }

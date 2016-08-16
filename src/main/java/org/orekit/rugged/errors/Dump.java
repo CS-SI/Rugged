@@ -74,7 +74,7 @@ class Dump {
     /** Simple constructor.
      * @param writer writer to the dump file
      */
-    public Dump(final PrintWriter writer) {
+    Dump(final PrintWriter writer) {
         this.writer          = writer;
         this.tiles           = new ArrayList<DumpedTileData>();
         this.sensors         = new ArrayList<DumpedSensorData>();
@@ -408,7 +408,7 @@ class Dump {
          * @param name of the tile
          * @param tile tile associated with this dump
          */
-        public DumpedTileData(final String name, final Tile tile) {
+        DumpedTileData(final String name, final Tile tile) {
             this.name       = name;
             this.tile       = tile;
             this.elevations = new OpenIntToDoubleHashMap();
@@ -469,7 +469,7 @@ class Dump {
          * @param dumpName name of the sensor dump (not the name of the sensor itself, for confidentiality reasons)
          * @param sensor dumped sensor
          */
-        public DumpedSensorData(final String dumpName, final LineSensor sensor) {
+        DumpedSensorData(final String dumpName, final LineSensor sensor) {
             this.dumpName = dumpName;
             this.sensor   = sensor;
             this.losMap   = new HashMap<Integer, List<Pair<AbsoluteDate, Vector3D>>>();

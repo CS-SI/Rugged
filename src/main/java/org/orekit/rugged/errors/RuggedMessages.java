@@ -88,7 +88,7 @@ public enum RuggedMessages implements Localizable {
      * @param sourceFormat source English format to use when no
      * localized version is available
      */
-    private RuggedMessages(final String sourceFormat) {
+    RuggedMessages(final String sourceFormat) {
         this.sourceFormat = sourceFormat;
     }
 
