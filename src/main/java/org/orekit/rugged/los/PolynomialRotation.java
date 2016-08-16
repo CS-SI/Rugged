@@ -16,6 +16,8 @@
  */
 package org.orekit.rugged.los;
 
+import java.util.stream.Stream;
+
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.polynomials.PolynomialFunction;
 import org.hipparchus.geometry.euclidean.threed.FieldRotation;
@@ -23,10 +25,13 @@ import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
+import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.utils.ParameterType;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.ParameterObserver;
 
 /** {@link LOSTransform LOS transform} based on a rotation with polynomial angle.
  * @author Luc Maisonobe
@@ -34,8 +39,13 @@ import org.orekit.time.AbsoluteDate;
  */
 public class PolynomialRotation implements LOSTransform {
 
-    /** Parameters type. */
-    private final ParameterType type;
+    /** Parameters scaling factor.
+     * <p>
+     * We use a power of 2 to avoid numeric noise introduction
+     * in the multiplications/divisions sequences.
+     * </p>
+     */
+    private final double SCALE = FastMath.scalb(1.0, -20);
 
     /** Rotation axis. */
     private final Vector3D axis;
@@ -52,6 +62,9 @@ public class PolynomialRotation implements LOSTransform {
     /** Reference date for polynomial evaluation. */
     private final AbsoluteDate referenceDate;
 
+    /** Drivers for rotation angle polynomial coefficients. */
+    private final ExtendedParameterDriver[] coefficientsDrivers;
+
     /** Simple constructor.
      * <p>
      * The angle of the rotation is evaluated as a polynomial in t,
@@ -59,17 +72,38 @@ public class PolynomialRotation implements LOSTransform {
      * reference date. The parameters are the polynomial coefficients,
      * with the constant term at index 0.
      * </p>
-     * @param type parameters type
+     * @param name name of the rotation (used for estimated parameters identification)
      * @param axis rotation axis
      * @param referenceDate reference date for the polynomial angle
      * @param angleCoeffs polynomial coefficients of the polynomial angle,
      * with the constant term at index 0
      */
-    public PolynomialRotation(final ParameterType type,
+    public PolynomialRotation(final String name,
                               final Vector3D axis,
                               final AbsoluteDate referenceDate,
                               final double ... angleCoeffs) {
-        this(type, axis, referenceDate, new PolynomialFunction(angleCoeffs));
+        this.axis                = axis;
+        this.referenceDate       = referenceDate;
+        this.coefficientsDrivers = new ExtendedParameterDriver[angleCoeffs.length];
+        final ParameterObserver resettingObserver = new ParameterObserver() {
+            @Override
+            public void valueChanged(final double previousValue, final ParameterDriver driver) {
+                // reset rotations to null, they will evaluated lazily if needed
+                angle   = null;
+                axisDS  = null;
+                angleDS = null;
+            }
+        };
+        try {
+            for (int i = 0; i < angleCoeffs.length; ++i) {
+                coefficientsDrivers[i] = new ExtendedParameterDriver(name + "[" + i + "]", angleCoeffs[i], SCALE,
+                                                                     Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                coefficientsDrivers[i].addObserver(resettingObserver);
+            }
+        } catch (OrekitException oe) {
+            // this should never happen
+            throw RuggedException.createInternalError(oe);
+        }
     }
 
     /** Simple constructor.
@@ -79,81 +113,35 @@ public class PolynomialRotation implements LOSTransform {
      * reference date. The parameters are the polynomial coefficients,
      * with the constant term at index 0.
      * </p>
-     * @param type parameters type
+     * @param name name of the rotation (used for estimated parameters identification)
      * @param axis rotation axis
      * @param referenceDate reference date for the polynomial angle
      * @param angle polynomial angle
      */
-    public PolynomialRotation(final ParameterType type,
+    public PolynomialRotation(final String name,
                               final Vector3D axis,
                               final AbsoluteDate referenceDate,
                               final PolynomialFunction angle) {
-        this.type          = type;
-        this.axis          = axis;
-        this.angle         = angle;
-        this.referenceDate = referenceDate;
+        this(name, axis, referenceDate, angle.getCoefficients());
     }
 
     /** {@inheritDoc} */
     @Override
-    public int getNbEstimatedParameters() {
-        return type == ParameterType.FIXED ? 0 : (angle.degree() + 1);
-    }
-
-    /** {@inheritDoc}
-     * <p>
-     * The parameters are the polynomial coefficients,
-     * with the constant term at index 0.
-     * </p>
-     */
-    @Override
-    public void getEstimatedParameters(final double[] parameters, final int start, final int length)
-        throws RuggedException {
-        checkSlice(length);
-        System.arraycopy(angle.getCoefficients(), 0, parameters, start, length);
-    }
-
-    /** {@inheritDoc}
-     * <p>
-     * The parameters are the polynomial coefficients,
-     * with the constant term at index 0.
-     * </p>
-     */
-    @Override
-    public void setEstimatedParameters(final double[] parameters, final int start, final int length)
-        throws RuggedException {
-
-        checkSlice(length);
-
-        // regular rotation
-        angle = new PolynomialFunction(parameters);
-
-        // prepare components to compute rotation with derivatives
-        axisDS = new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, axis.getX()),
-                                                        new DerivativeStructure(parameters.length, 1, axis.getY()),
-                                                        new DerivativeStructure(parameters.length, 1, axis.getZ()));
-        angleDS = new DerivativeStructure[length];
-        for (int i = 0; i < length; ++i) {
-            angleDS[i] = new DerivativeStructure(parameters.length, 1, start + i, parameters[start + i]);
-        }
-
-    }
-
-    /** Check the number of parameters of an array slice.
-     * @param length number of elements in the array slice to consider
-     * @exception RuggedException if the size of the slice does not match
-     * the {@link #getNbEstimatedParameters() number of estimated parameters}
-     */
-    private void checkSlice(final int length) throws RuggedException {
-        if (getNbEstimatedParameters() != length) {
-            throw new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH,
-                                      getNbEstimatedParameters(), length);
-        }
+    public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
+        return Stream.of(coefficientsDrivers);
     }
 
     /** {@inheritDoc} */
     @Override
     public Vector3D transformLOS(final int i, final Vector3D los, final AbsoluteDate date) {
+        if (angle == null) {
+            // lazy evaluation of the rotation
+            final double[] coefficients = new double[coefficientsDrivers.length];
+            for (int k = 0; k < coefficients.length; ++k) {
+                coefficients[k] = coefficientsDrivers[k].getValue();
+            }
+            angle = new PolynomialFunction(coefficients);
+        }
         return new Rotation(axis,
                             angle.value(date.durationFrom(referenceDate)),
                             RotationConvention.VECTOR_OPERATOR).applyTo(los);
@@ -164,6 +152,24 @@ public class PolynomialRotation implements LOSTransform {
     public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
                                                            final AbsoluteDate date) {
 
+        if (angleDS == null) {
+            // lazy evaluation of the rotation
+            final int nbEstimated = coefficientsDrivers[0].getNbEstimated();
+            axisDS = new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, axis.getX()),
+                                                            new DerivativeStructure(nbEstimated, 1, axis.getY()),
+                                                            new DerivativeStructure(nbEstimated, 1, axis.getZ()));
+            angleDS = new DerivativeStructure[coefficientsDrivers.length];
+            for (int k = 0; k < angleDS.length; ++k) {
+                final double value = coefficientsDrivers[k].getValue();
+                if (coefficientsDrivers[k].isSelected()) {
+                    // the coefficient is estimated
+                    angleDS[k] = new DerivativeStructure(nbEstimated, 1, coefficientsDrivers[k].getIndex(), value);
+                } else {
+                    // the coefficient is not estimated
+                    angleDS[k] = new DerivativeStructure(nbEstimated, 1, value);
+                }
+            }
+        }
         // evaluate polynomial, with all its partial derivatives
         final double t = date.durationFrom(referenceDate);
         DerivativeStructure alpha = axisDS.getX().getField().getZero();

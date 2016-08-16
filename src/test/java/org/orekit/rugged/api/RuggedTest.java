@@ -416,7 +416,7 @@ public class RuggedTest {
         for (int i = 0; i < gpLine.length; ++i) {
             GeodeticPoint gpPixel =
                     rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
-                                              lineSensor.getLos(lineSensor.getDate(100), i));
+                                              lineSensor.getLOS(lineSensor.getDate(100), i));
             Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
             Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
             Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
@@ -477,7 +477,7 @@ public class RuggedTest {
         for (int i = 0; i < gpLine.length; ++i) {
             GeodeticPoint gpPixel =
                     rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
-                                              lineSensor.getLos(lineSensor.getDate(100), i));
+                                              lineSensor.getLOS(lineSensor.getDate(100), i));
             Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
             Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
             Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);

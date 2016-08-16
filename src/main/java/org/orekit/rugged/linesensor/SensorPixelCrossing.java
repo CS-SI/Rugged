@@ -117,8 +117,8 @@ public class SensorPixelCrossing {
         final int iSup = iInf + 1;
 
         // interpolate
-        return new Vector3D(iSup - x, sensor.getLos(date, iInf),
-                            x - iInf, sensor.getLos(date, iSup)).normalize();
+        return new Vector3D(iSup - x, sensor.getLOS(date, iInf),
+                            x - iInf, sensor.getLOS(date, iSup)).normalize();
 
     }
 

@@ -16,17 +16,21 @@
  */
 package org.orekit.rugged.los;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
-import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.utils.ParametricModel;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.ParameterObserver;
 
 /** Builder for lines-of-sight list.
  * <p>
@@ -115,26 +119,6 @@ public class LOSBuilder {
 
         /** {@inheritDoc} */
         @Override
-        public int getNbEstimatedParameters() {
-            return transform.getNbEstimatedParameters();
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void getEstimatedParameters(final double[] parameters, final int start, final int length)
-            throws RuggedException {
-            transform.getEstimatedParameters(parameters, start, length);
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
-            throws RuggedException {
-            transform.setEstimatedParameters(parameters, start, length);
-        }
-
-        /** {@inheritDoc} */
-        @Override
         public Vector3D transformLOS(final int i, final Vector3D los, final AbsoluteDate date) {
             return transform.transformLOS(i, los);
         }
@@ -146,19 +130,22 @@ public class LOSBuilder {
             return transform.transformLOS(i, los);
         }
 
+        /** {@inheritDoc} */
+        @Override
+        public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
+            return transform.getExtendedParametersDrivers();
+        }
+
     }
 
     /** Implement time-independent LOS by recomputing directions by applying all transforms each time. */
-    private static class TransformsSequenceLOS implements ParametricModel, TimeDependentLOS {
+    private static class TransformsSequenceLOS implements TimeDependentLOS {
 
         /** Raw direction. */
         private final Vector3D[] raw;
 
         /** Transforms to be applied. */
-        private final LOSTransform[] transforms;
-
-        /** Total number of estimated parameters. */
-        private final int total;
+        private final List<LOSTransform> transforms;
 
         /** Simple constructor.
          * @param raw raw directions
@@ -174,69 +161,8 @@ public class LOSBuilder {
                 this.raw[i] = raw.get(i);
             }
 
-            this.transforms = new LOSTransform[transforms.size()];
-            int n = 0;
-            for (int i = 0; i < transforms.size(); ++i) {
-                final LOSTransform transform = transforms.get(i);
-                this.transforms[i] = transform;
-                n += transform.getNbEstimatedParameters();
-            }
-            this.total = n;
+            this.transforms = new ArrayList<LOSTransform>(transforms);
 
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public int getNbEstimatedParameters() {
-            return total;
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void getEstimatedParameters(final double[] parameters, final int start, final int length)
-            throws RuggedException {
-
-            // global check
-            checkSlice(length);
-
-            // retrieve parameters for all transforms
-            int offset = 0;
-            for (final ParametricModel model : transforms) {
-                final int n = model.getNbEstimatedParameters();
-                model.getEstimatedParameters(parameters, offset, n);
-                offset += n;
-            }
-
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
-            throws RuggedException {
-
-            // global check
-            checkSlice(length);
-
-            // set parameters for all transforms
-            int offset = 0;
-            for (final ParametricModel model : transforms) {
-                final int n = model.getNbEstimatedParameters();
-                model.setEstimatedParameters(parameters, offset, n);
-                offset += n;
-            }
-
-        }
-
-        /** Check the number of parameters of an array slice.
-         * @param length number of elements in the array slice to consider
-         * @exception RuggedException if the size of the slice does not match
-         * the {@link #getNbEstimatedParameters() number of estimated parameters}
-         */
-        private void checkSlice(final int length) throws RuggedException {
-            if (getNbEstimatedParameters() != length) {
-                throw new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH,
-                                          getNbEstimatedParameters(), length);
-            }
         }
 
         /** {@inheritDoc} */
@@ -256,13 +182,32 @@ public class LOSBuilder {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOS(final int index, final AbsoluteDate date,
-                                                         final double[] parameters) {
-            // non-adjustable LOS do not depend on any parameters
-            final Vector3D los = getLOS(index, date);
-            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, los.getX()),
-                                                          new DerivativeStructure(parameters.length, 1, los.getY()),
-                                                          new DerivativeStructure(parameters.length, 1, los.getZ()));
+        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date) {
+
+            // the raw line of sights are considered to be constant
+            final Optional<ExtendedParameterDriver> first = getExtendedParametersDrivers().findFirst();
+            final int nbEstimated = first.isPresent() ? first.get().getNbEstimated() : 0;
+            FieldVector3D<DerivativeStructure> los =
+                            new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, raw[index].getX()),
+                                                                   new DerivativeStructure(nbEstimated, 1, raw[index].getY()),
+                                                                   new DerivativeStructure(nbEstimated, 1, raw[index].getZ()));
+
+            // apply the transforms, which depend on parameters and hence may introduce non-zero derivatives
+            for (final LOSTransform transform : transforms) {
+                los = transform.transformLOS(index, los, date);
+            }
+
+            return los.normalize();
+
+        }
+
+        @Override
+        public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
+            Stream<ExtendedParameterDriver> drivers = Stream.<ExtendedParameterDriver>empty();
+            for (final LOSTransform transform : transforms) {
+                drivers = Stream.concat(drivers, transform.getExtendedParametersDrivers());
+            }
+            return drivers;
         }
 
     }
@@ -278,20 +223,26 @@ public class LOSBuilder {
          * @param transforms transforms to apply (must be time-independent!)
          */
         FixedLOS(final List<Vector3D> raw, final List<LOSTransform> transforms) {
+
             super(raw, transforms);
             transformed = new Vector3D[raw.size()];
-        }
 
-        /** {@inheritDoc} */
-        @Override
-        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
-            throws RuggedException {
-
-            // update the transforms
-            super.setEstimatedParameters(parameters, start, length);
-
-            // unset the directions, to ensure they get recomputed if needed
-            Arrays.fill(transformed, null);
+            // we will reset the transforms to null when parameters are changed
+            final ParameterObserver resettingObserver = new ParameterObserver() {
+                /** {@inheritDoc} */
+                @Override
+                public void valueChanged(final double previousValue, final ParameterDriver driver) {
+                    Arrays.fill(transformed, null);
+                }
+            };
+            getExtendedParametersDrivers().forEach(driver -> {
+                try {
+                    driver.addObserver(resettingObserver);
+                } catch (OrekitException oe) {
+                    // this should never happen
+                    throw RuggedException.createInternalError(oe);
+                }
+            });
 
         }
 

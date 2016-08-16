@@ -40,7 +40,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
@@ -60,6 +62,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -1129,24 +1132,6 @@ public class DumpReplayer {
             this.rates    = new ArrayList<Pair<Double, Double>>();
         }
 
-        /** {@inheritDoc} */
-        @Override
-        public int getNbEstimatedParameters() {
-            return 0;
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void getEstimatedParameters(final double[] parameters, final int start, final int length)
-            throws RuggedException {
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void setEstimatedParameters(final double[] parameters, final int start, final int length)
-            throws RuggedException {
-        }
-
         /** Set the mean place finder.
          * @param meanPlane mean plane finder
          */
@@ -1229,11 +1214,13 @@ public class DumpReplayer {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOS(final int index, final AbsoluteDate date, final double[] parameters) {
+        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date) {
+            final Optional<ExtendedParameterDriver> first = getExtendedParametersDrivers().findFirst();
+            final int nbEstimated = first.isPresent() ? first.get().getNbEstimated() : 0;
             final Vector3D los = getLOS(index, date);
-            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, los.getX()),
-                                                          new DerivativeStructure(parameters.length, 1, los.getY()),
-                                                          new DerivativeStructure(parameters.length, 1, los.getZ()));
+            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, los.getX()),
+                                                          new DerivativeStructure(nbEstimated, 1, los.getY()),
+                                                          new DerivativeStructure(nbEstimated, 1, los.getZ()));
         }
 
         /** Set a datation pair.
@@ -1347,6 +1334,12 @@ public class DumpReplayer {
             final double alpha = (lineNumber - lInf) / (lSup - lInf);
             return alpha * rSup + (1 - alpha) * rInf;
 
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
+            return Stream.<ExtendedParameterDriver>empty();
         }
 
     }

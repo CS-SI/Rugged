@@ -16,15 +16,20 @@
  */
 package org.orekit.rugged.los;
 
+import java.util.stream.Stream;
+
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldRotation;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
+import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.utils.ParameterType;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.ParameterObserver;
 
 /** {@link TimeIndependentLOSTransform LOS transform} based on a fixed rotation.
  * @author Luc Maisonobe
@@ -32,8 +37,16 @@ import org.orekit.rugged.utils.ParameterType;
  */
 public class FixedRotation implements TimeIndependentLOSTransform {
 
-    /** Parameters type. */
-    private final ParameterType type;
+    /** Parameters scaling factor.
+     * <p>
+     * We use a power of 2 to avoid numeric noise introduction
+     * in the multiplications/divisions sequences.
+     * </p>
+     */
+    private final double SCALE = FastMath.scalb(1.0, -20);
+
+    /** Rotation axis. */
+    private final Vector3D axis;
 
     /** Underlying rotation. */
     private Rotation rotation;
@@ -41,78 +54,74 @@ public class FixedRotation implements TimeIndependentLOSTransform {
     /** Underlying rotation with derivatives. */
     private FieldRotation<DerivativeStructure> rDS;
 
+    /** Driver for rotation angle. */
+    private final ExtendedParameterDriver angleDriver;
+
     /** Simple constructor.
      * <p>
      * The single parameter is the rotation angle.
      * </p>
-     * @param type parameter type
+     * @param name name of the rotation (used for estimated parameters identification)
      * @param axis rotation axis
      * @param angle rotation angle
      */
-    public FixedRotation(final ParameterType type, final Vector3D axis, final double angle) {
-        this.type     = type;
-        this.rotation = new Rotation(axis, angle, RotationConvention.VECTOR_OPERATOR);
+    public FixedRotation(final String name, final Vector3D axis, final double angle) {
+        this.axis     = axis;
+        this.rotation = null;
         this.rDS      = null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getNbEstimatedParameters() {
-        return type == ParameterType.FIXED ? 0 : 1;
-    }
-
-    /** {@inheritDoc}
-     * <p>
-     * The single parameter is the rotation angle.
-     * </p>
-     */
-    @Override
-    public void getEstimatedParameters(final double[] parameters, final int start, final int length)
-        throws RuggedException {
-        checkSlice(length);
-        parameters[start] = rotation.getAngle();
-    }
-
-    /** {@inheritDoc}
-     * <p>
-     * The single parameter is the rotation angle.
-     * </p>
-     */
-    @Override
-    public void setEstimatedParameters(final double[] parameters, final int start, final int length)
-        throws RuggedException {
-        checkSlice(length);
-        final Vector3D axis = rotation.getAxis(RotationConvention.VECTOR_OPERATOR);
-        rotation = new Rotation(axis, parameters[start], RotationConvention.VECTOR_OPERATOR);
-        final FieldVector3D<DerivativeStructure> axisDS =
-                new FieldVector3D<DerivativeStructure>(new DerivativeStructure(parameters.length, 1, axis.getX()),
-                                                       new DerivativeStructure(parameters.length, 1, axis.getY()),
-                                                       new DerivativeStructure(parameters.length, 1, axis.getZ()));
-        final DerivativeStructure angleDS = new DerivativeStructure(parameters.length, 1, start, parameters[start]);
-        rDS = new FieldRotation<DerivativeStructure>(axisDS, angleDS, RotationConvention.VECTOR_OPERATOR);
-    }
-
-    /** Check the number of parameters of an array slice.
-     * @param length number of elements in the array slice to consider
-     * @exception RuggedException if the size of the slice does not match
-     * the {@link #getNbEstimatedParameters() number of estimated parameters}
-     */
-    private void checkSlice(final int length) throws RuggedException {
-        if (getNbEstimatedParameters() != length) {
-            throw new RuggedException(RuggedMessages.ESTIMATED_PARAMETERS_NUMBER_MISMATCH,
-                                      getNbEstimatedParameters(), length);
+        try {
+            this.angleDriver = new ExtendedParameterDriver(name, angle, SCALE, 0, 2 * FastMath.PI);
+            angleDriver.addObserver(new ParameterObserver() {
+                @Override
+                public void valueChanged(final double previousValue, final ParameterDriver driver) {
+                    // reset rotations to null, they will evaluated lazily if needed
+                    rotation = null;
+                    rDS      = null;
+                }
+            });
+        } catch (OrekitException oe) {
+            // this should never happen
+            throw RuggedException.createInternalError(oe);
         }
     }
 
     /** {@inheritDoc} */
     @Override
+    public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
+        return Stream.of(angleDriver);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public Vector3D transformLOS(final int i, final Vector3D los) {
+        if (rotation == null) {
+            // lazy evaluation of the rotation
+            rotation = new Rotation(axis, angleDriver.getValue(), RotationConvention.VECTOR_OPERATOR);
+        }
         return rotation.applyTo(los);
     }
 
     /** {@inheritDoc} */
     @Override
     public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los) {
+        if (rDS == null) {
+            // lazy evaluation of the rotation
+            final int nbEstimated = angleDriver.getNbEstimated();
+            final FieldVector3D<DerivativeStructure> axisDS =
+                            new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, axis.getX()),
+                                                                   new DerivativeStructure(nbEstimated, 1, axis.getY()),
+                                                                   new DerivativeStructure(nbEstimated, 1, axis.getZ()));
+            final double value = angleDriver.getValue();
+            final DerivativeStructure angleDS;
+            if (angleDriver.isSelected()) {
+                // the angle is estimated
+                angleDS = new DerivativeStructure(nbEstimated, 1, angleDriver.getIndex(), value);
+            } else {
+                // the angle is not estimated
+                angleDS = new DerivativeStructure(nbEstimated, 1, value);
+            }
+            rDS = new FieldRotation<DerivativeStructure>(axisDS, angleDS, RotationConvention.VECTOR_OPERATOR);
+        }
         return rDS.applyTo(los);
     }
 

@@ -16,16 +16,18 @@
  */
 package org.orekit.rugged.los;
 
+import java.util.stream.Stream;
+
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.utils.ParametricModel;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
 
 /** Interface for lines-of-sight tranforms that do not depend on time.
  * @author Luc Maisonobe
  * @see LOSBuilder
  */
-public interface TimeIndependentLOSTransform extends ParametricModel {
+public interface TimeIndependentLOSTransform {
 
     /** Transform a line-of-sight.
      * @param i los pixel index
@@ -54,5 +56,11 @@ public interface TimeIndependentLOSTransform extends ParametricModel {
      * @return line of sight, and its first partial derivatives with respect to the parameters
      */
     FieldVector3D<DerivativeStructure> transformLOS(int index, FieldVector3D<DerivativeStructure> los);
+
+    /** Get the drivers for LOS parameters.
+     * @return drivers for LOS parameters
+     * @since 2.0
+     */
+    Stream<ExtendedParameterDriver> getExtendedParametersDrivers();
 
 }

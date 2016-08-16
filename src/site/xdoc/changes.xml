@@ -22,6 +22,10 @@
   <body>
     <release version="2.0" date="TBD" description="TTBD">
       <action dev="luc" type="update">
+        Replaced the ad-hoc parameters with Orekit ParameterDriver that are
+        used in Orekit orbit determination feature.
+      </action>
+      <action dev="luc" type="update">
         Updated dependencies to Orekit 8.0 and Hipparchus 1.0.
       </action>
       <action dev="guylaine" type="update">

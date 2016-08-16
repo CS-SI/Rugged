@@ -116,7 +116,7 @@ public class SensorMeanPlaneCrossing {
         throws RuggedException {
         this(sensor, scToBody, minLine, maxLine, lightTimeCorrection, aberrationOfLightCorrection,
              maxEval, accuracy, computeMeanPlaneNormal(sensor, minLine, maxLine),
-             Stream.<CrossingResult>builder().build());
+             Stream.<CrossingResult>empty());
     }
 
     /** Simple constructor.
@@ -188,7 +188,7 @@ public class SensorMeanPlaneCrossing {
         //  opposite, thus ensuring the plane will contain origin)
         final RealMatrix matrix = MatrixUtils.createRealMatrix(3, 2 * sensor.getNbPixels());
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
-            final Vector3D l = sensor.getLos(midDate, i);
+            final Vector3D l = sensor.getLOS(midDate, i);
             matrix.setEntry(0, 2 * i,      l.getX());
             matrix.setEntry(1, 2 * i,      l.getY());
             matrix.setEntry(2, 2 * i,      l.getZ());
@@ -206,8 +206,8 @@ public class SensorMeanPlaneCrossing {
         final Vector3D singularVector = new Vector3D(svd.getU().getColumn(2)).normalize();
 
         // check rotation order
-        final Vector3D first = sensor.getLos(midDate, 0);
-        final Vector3D last  = sensor.getLos(midDate, sensor.getNbPixels() - 1);
+        final Vector3D first = sensor.getLOS(midDate, 0);
+        final Vector3D last  = sensor.getLOS(midDate, sensor.getNbPixels() - 1);
         if (Vector3D.dotProduct(singularVector, Vector3D.crossProduct(first, last)) >= 0) {
             return singularVector;
         } else {

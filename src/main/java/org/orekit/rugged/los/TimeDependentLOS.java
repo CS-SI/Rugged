@@ -16,17 +16,19 @@
  */
 package org.orekit.rugged.los;
 
+import java.util.stream.Stream;
+
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.utils.ParametricModel;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
 import org.orekit.time.AbsoluteDate;
 
 /** Interface representing a line-of-sight which depends on time.
  * @see org.orekit.rugged.linesensor.LineSensor
  * @author Luc Maisonobe
  */
-public interface TimeDependentLOS extends ParametricModel {
+public interface TimeDependentLOS {
 
     /** Get the number of pixels.
      * @return number of pixels
@@ -43,23 +45,26 @@ public interface TimeDependentLOS extends ParametricModel {
     /** Get the line of sight and its partial derivatives for a given date.
      * <p>
      * This method is used for LOS calibration purposes. It allows to compute
-     * the Jacobian matrix of the LOS with respect to the parameters, which
+     * the Jacobian matrix of the LOS with respect to the estimated parameters, which
      * are typically polynomials coefficients representing rotation angles.
      * These polynomials can be used for example to model thermo-elastic effects.
      * </p>
      * <p>
      * Note that in order for the partial derivatives to be properly set up, the
-     * {@link #setEstimatedParameters(double[], int, int) setEstimatedParameters}
-     * <em>must</em> have been called at least once before this method and its
-     * {@code start} parameter will be used to ensure the partial derivatives are
-     * ordered in the same way in the returned vector as they were in the set
-     * parameters.
+     * {@link org.orekit.utils.ParameterDriver#setSelected(boolean) setSelected}
+     * method must have been set to {@code true} for the various parameters returned
+     * by {@link #getExtendedParametersDrivers()} that should be estimated.
      * </p>
      * @param index los pixel index
      * @param date date
-     * @param parameters current estimate of the adjusted parameters
      * @return line of sight, and its first partial derivatives with respect to the parameters
      */
-    FieldVector3D<DerivativeStructure> getLOS(int index, AbsoluteDate date, double[] parameters);
+    FieldVector3D<DerivativeStructure> getLOSDerivatives(int index, AbsoluteDate date);
+
+    /** Get the drivers for LOS parameters.
+     * @return drivers for LOS parameters
+     * @since 2.0
+     */
+    Stream<ExtendedParameterDriver> getExtendedParametersDrivers();
 
 }
