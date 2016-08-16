@@ -16,6 +16,10 @@
  */
 package org.orekit.rugged.linesensor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.hipparchus.analysis.UnivariateFunction;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.solvers.BracketingNthOrderBrentSolver;
@@ -90,7 +94,7 @@ public class SensorMeanPlaneCrossing {
     private final double accuracy;
 
     /** Cached results. */
-    private final CrossingResult[] cachedResults;
+    private final List<CrossingResult> cachedResults;
 
     /** Simple constructor.
      * @param sensor sensor to consider
@@ -111,7 +115,8 @@ public class SensorMeanPlaneCrossing {
                                    final int maxEval, final double accuracy)
         throws RuggedException {
         this(sensor, scToBody, minLine, maxLine, lightTimeCorrection, aberrationOfLightCorrection,
-             maxEval, accuracy, computeMeanPlaneNormal(sensor, minLine, maxLine), new CrossingResult[0]);
+             maxEval, accuracy, computeMeanPlaneNormal(sensor, minLine, maxLine),
+             Stream.<CrossingResult>builder().build());
     }
 
     /** Simple constructor.
@@ -134,7 +139,7 @@ public class SensorMeanPlaneCrossing {
                                    final boolean aberrationOfLightCorrection,
                                    final int maxEval, final double accuracy,
                                    final Vector3D meanPlaneNormal,
-                                   final CrossingResult[] cachedResults)
+                                   final Stream<CrossingResult> cachedResults)
         throws RuggedException {
 
         this.sensor                      = sensor;
@@ -153,8 +158,12 @@ public class SensorMeanPlaneCrossing {
 
         this.meanPlaneNormal             = meanPlaneNormal;
 
-        this.cachedResults               = new CrossingResult[CACHED_RESULTS];
-        System.arraycopy(cachedResults, 0, this.cachedResults, 0, cachedResults.length);
+        this.cachedResults               = new ArrayList<CrossingResult>(CACHED_RESULTS);
+        cachedResults.forEach(crossingResult -> {
+            if (crossingResult != null && this.cachedResults.size() < CACHED_RESULTS) {
+                this.cachedResults.add(crossingResult);
+            }
+        });
 
     }
 
@@ -261,11 +270,11 @@ public class SensorMeanPlaneCrossing {
         return meanPlaneNormal;
     }
 
-    /** Get the cached previous results.
-     * @return mean plane normal
+    /** Get cached previous results.
+     * @return cached previous results
      */
-    public CrossingResult[] getCachedResults() {
-        return cachedResults;
+    public Stream<CrossingResult> getCachedResults() {
+        return cachedResults.stream();
     }
 
     /** Container for mean plane crossing result. */
@@ -344,14 +353,10 @@ public class SensorMeanPlaneCrossing {
         Transform scToInert     = midScToInert;
 
         // count the number of available results
-        int n = 0;
-        while (n < cachedResults.length && cachedResults[n] != null) {
-            ++n;
-        }
-        if (n >= 4) {
+        if (cachedResults.size() >= 4) {
             // we already have computed at lest 4 values, we attempt to build a linear
             // model to guess a better start line
-            final double guessedCrossingLine = guessStartLine(n, target);
+            final double guessedCrossingLine = guessStartLine(target);
             if (guessedCrossingLine >= minLine && guessedCrossingLine <= maxLine) {
                 crossingLine = guessedCrossingLine;
                 final AbsoluteDate date = sensor.getDate(crossingLine);
@@ -399,11 +404,11 @@ public class SensorMeanPlaneCrossing {
             }
             if (FastMath.abs(deltaL) <= accuracy) {
                 // return immediately, without doing any additional evaluation!
-                for (int k = cachedResults.length - 1; k > 0; --k) {
-                    cachedResults[k] = cachedResults[k - 1];
+                if (cachedResults.size() >= CACHED_RESULTS) {
+                    cachedResults.remove(cachedResults.size() - 1);
                 }
-                cachedResults[0] = new CrossingResult(sensor.getDate(crossingLine), crossingLine, target, targetDirection);
-                return cachedResults[0];
+                cachedResults.add(0, new CrossingResult(sensor.getDate(crossingLine), crossingLine, target, targetDirection));
+                return cachedResults.get(0);
             }
             for (int j = 0; j < i; ++j) {
                 if (FastMath.abs(crossingLine - crossingLineHistory[j]) <= 1.0) {
@@ -413,11 +418,11 @@ public class SensorMeanPlaneCrossing {
                     if (slowResult == null) {
                         return null;
                     }
-                    for (int k = cachedResults.length - 1; k > 0; --k) {
-                        cachedResults[k] = cachedResults[k - 1];
+                    if (cachedResults.size() >= CACHED_RESULTS) {
+                        cachedResults.remove(cachedResults.size() - 1);
                     }
-                    cachedResults[0] = slowResult;
-                    return cachedResults[0];
+                    cachedResults.add(0, slowResult);
+                    return cachedResults.get(0);
                 }
             }
 
@@ -453,22 +458,23 @@ public class SensorMeanPlaneCrossing {
     }
 
     /** Guess a start line using the last four results.
-     * @param n number of cached results available
      * @param target target ground point
      * @return guessed start line
      */
-    private double guessStartLine(final int n, final Vector3D target) {
+    private double guessStartLine(final Vector3D target) {
         try {
 
             // assume a linear model of the form: l = ax + by + cz + d
+            final int        n = cachedResults.size();
             final RealMatrix m = new Array2DRowRealMatrix(n, 4);
             final RealVector v = new ArrayRealVector(n);
             for (int i = 0; i < n; ++i) {
-                m.setEntry(i, 0, cachedResults[i].getTarget().getX());
-                m.setEntry(i, 1, cachedResults[i].getTarget().getY());
-                m.setEntry(i, 2, cachedResults[i].getTarget().getZ());
+                final CrossingResult crossingResult = cachedResults.get(i);
+                m.setEntry(i, 0, crossingResult.getTarget().getX());
+                m.setEntry(i, 1, crossingResult.getTarget().getY());
+                m.setEntry(i, 2, crossingResult.getTarget().getZ());
                 m.setEntry(i, 3, 1.0);
-                v.setEntry(i, cachedResults[i].getLine());
+                v.setEntry(i, crossingResult.getLine());
             }
 
             final DecompositionSolver solver = new QRDecomposition(m, Precision.SAFE_MIN).getSolver();

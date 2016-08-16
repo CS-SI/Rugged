@@ -35,6 +35,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -372,7 +373,7 @@ public class DumpReplayer {
                                                                    parsedSensor.meanPlane.maxEval,
                                                                    parsedSensor.meanPlane.accuracy,
                                                                    parsedSensor.meanPlane.normal,
-                                                                   parsedSensor.meanPlane.cachedResults));
+                                                                   Arrays.stream(parsedSensor.meanPlane.cachedResults)));
                 }
                 builder.addLineSensor(sensor);
             }
