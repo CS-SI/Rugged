@@ -19,26 +19,14 @@ package org.orekit.rugged.atmosphericrefraction;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
-import org.orekit.frames.FramesFactory;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
-import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
-import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
-import org.orekit.rugged.raster.Tile;
-import org.orekit.rugged.raster.TilesCache;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
-import org.orekit.utils.Constants;
-import org.orekit.utils.IERSConventions;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Multi layer model for atmospheric refraction.
@@ -136,23 +124,5 @@ public class MultiLayerModel implements AtmosphericRefraction {
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
-    }
-}
-
-class ConstantRefractionLayer {
-    private double lowestAltitude;
-    private double refractionIndex;
-
-    public ConstantRefractionLayer(double lowestAltitude, double refractionIndex) {
-        this.lowestAltitude = lowestAltitude;
-        this.refractionIndex = refractionIndex;
-    }
-
-    public double getLowestAltitude() {
-        return lowestAltitude;
-    }
-
-    public double getRefractionIndex() {
-        return refractionIndex;
     }
 }
