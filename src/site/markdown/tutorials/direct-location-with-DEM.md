@@ -142,7 +142,7 @@ In a similar way as in the first tutorial [DirectLocation](./direct-location.htm
             // Call to direct localization on current line
             Vector3D position = lineSensor.getPosition();
             AbsoluteDate currentLineDate = lineSensor.getDate(currentLine);
-            Vector3D los = lineSensor.getLos(absDate, currentPx);
+            Vector3D los = lineSensor.getLOS(absDate, currentPx);
             pointList.add(rugged.directLocation(currentLineDate, position, los));
         }
         for (GeodeticPoint point : pointList) {

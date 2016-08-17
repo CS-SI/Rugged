@@ -49,7 +49,6 @@ For this we need the following packages
     import org.orekit.rugged.los.LOSBuilder;
     import org.orekit.rugged.los.FixedRotation;
     import org.orekit.rugged.los.TimeDependentLOS;
-    import org.orekit.rugged.utils.ParameterType;
  
 
 The raw viewing direction of pixel i with respect to the instrument is defined by the vector:
@@ -65,7 +64,7 @@ The instrument is oriented 10° off nadir around the X-axis, we need to rotate t
 direction to obtain the line of sight in the satellite frame
 
     LOSBuilder losBuilder = new LOSBuilder(rawDirs);
-    losBuilder.addTransform(new FixedRotation(ParameterType.FIXED, Vector3D.PLUS_I, FastMath.toRadians(10)));
+    losBuilder.addTransform(new FixedRotation("10-degrees-rotation", Vector3D.PLUS_I, FastMath.toRadians(10)));
 
 Here we have considered that the viewing directions are constant with time, it is also possible to
 have time-dependent lines-of-sight by using other transforms. It is also possible to append several
@@ -310,7 +309,7 @@ for upper left point (first line, first pixel):
     import org.orekit.bodies.GeodeticPoint;
     Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
     AbsoluteDate firstLineDate = lineSensor.getDate(0);
-    Vector3D los = lineSensor.getLos(firstLineDate, 0);
+    Vector3D los = lineSensor.getLOS(firstLineDate, 0);
     GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
 
 ## Source code 

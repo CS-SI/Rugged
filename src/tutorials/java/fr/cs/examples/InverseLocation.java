@@ -16,14 +16,14 @@
  */
 package fr.cs.examples;
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
@@ -41,10 +41,9 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.FixedRotation;
+import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.rugged.utils.ParameterType;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -76,7 +75,7 @@ public class InverseLocation {
             // The instrument is oriented 10° off nadir around the X-axis, we need to rotate the viewing
             // direction to obtain the line of sight in the satellite frame
             LOSBuilder losBuilder = new LOSBuilder(rawDirs);
-            losBuilder.addTransform(new FixedRotation(ParameterType.FIXED, Vector3D.PLUS_I, FastMath.toRadians(10)));
+            losBuilder.addTransform(new FixedRotation("10-degrees-rotation", Vector3D.PLUS_I, FastMath.toRadians(10)));
 
             TimeDependentLOS lineOfSight = losBuilder.build();
 
