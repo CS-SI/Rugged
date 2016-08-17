@@ -92,7 +92,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
                 if (previousRefractionIndex > 0) {
 
                     // get new los
-                    final double theta1 = Vector3D.angle(los, zenith);
+                    final double theta1 = FastMath.toRadians(Vector3D.angle(los, zenith));
                     final double theta2 = FastMath.asin(previousRefractionIndex * FastMath.sin(theta1) /
                             refractionLayer.getRefractionIndex());
 

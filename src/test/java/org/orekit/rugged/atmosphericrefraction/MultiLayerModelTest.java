@@ -49,8 +49,6 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
         double distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
 
-        System.out.println("DISTANCE: " + distance);
-
         // with the current code, this check fails, the distance is about 800m instead of a couple meters
         Assert.assertEquals(0.0, distance, 2.0);
     }
