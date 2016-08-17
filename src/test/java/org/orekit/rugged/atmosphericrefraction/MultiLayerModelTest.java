@@ -30,40 +30,29 @@ import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
 import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.TilesCache;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
     @Test
-    public void testGetPointOnGround() throws OrekitException, RuggedException {
+    public void testApplyCorrection() throws OrekitException, RuggedException {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
         Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         Vector3D los = new Vector3D( 0.5127552821932051, -0.8254313129088879, -0.2361041470463311);
-        GeodeticPoint intersection = algorithm.refineIntersection(earth, position, los,
+        NormalizedGeodeticPoint rawIntersection = algorithm.refineIntersection(earth, position, los,
                 algorithm.intersection(earth, position, los));
 
-        Assert.assertNotNull(intersection);
+        MultiLayerModel model = new MultiLayerModel(earth);
+        GeodeticPoint correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
 
-        // intersection {lat: 13.4045888388 deg, lon: 123.0160362249 deg, alt: 16}
+        double distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
 
+        System.out.println("DISTANCE: " + distance);
 
-//        MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
-//        updater.updateTile(intersection.getLatitude(), intersection.getLongitude(), tile);
-//        tile.interpolateElevation(intersection.getLatitude(), intersection.getLongitude());
-
-
-        TilesCache cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, 8);
-        // locate the entry tile along the line-of-sight
-        Tile tile = cache.getTile(intersection.getLatitude(), intersection.getLongitude());
-
-
-        MultiLayerModel model = new MultiLayerModel();
-        GeodeticPoint gp = model.getPointOnGround(position, los, intersection.getZenith(), intersection.getAltitude(),
-                tile);
-
-        Assert.assertNotNull(gp);
-
+        // with the current code, this check fails, the distance is about 800m instead of a couple meters
+        Assert.assertEquals(0.0, distance, 2.0);
     }
 
     @Override
