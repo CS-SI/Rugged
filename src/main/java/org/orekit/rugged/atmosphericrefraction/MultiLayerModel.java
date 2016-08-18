@@ -66,6 +66,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
             throws OrekitException {
         this.ellipsoid = ellipsoid;
         // TODO guarantee that list is already ordered by altitude?
+        // TODO guarantee that a minimum altitude value exists?
         this.refractionLayers = refractionLayers;
     }
 
