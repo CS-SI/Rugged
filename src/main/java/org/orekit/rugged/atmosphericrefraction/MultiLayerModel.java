@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * Multi layer model for atmospheric refraction.
- * @author Sergio Esteves
+ * @author Sergio Esteves, Luc Maisonobe
  */
 public class MultiLayerModel implements AtmosphericRefraction {
 
