@@ -93,7 +93,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
                     // get new los by applying Snell's law at atmosphere layers interfaces
                     // we avoid computing sequences of inverse-trigo/trigo/inverse-trigo functions
                     // we just use linear algebra and square roots, it is faster and more accurate
-                    final double n1On2 = previousRefractionIndex / refractionLayer.getRefractionIndex();
+                    final double n1On2 = previousRefractionIndex / refractionLayer.getRefractiveIndex();
                     final double k     = n1On2 * Vector3D.dotProduct(los, gp.getZenith());
                     los = new Vector3D(n1On2, los,
                                        -k - FastMath.sqrt(1 + k * k - n1On2 * n1On2), gp.getZenith());
@@ -108,7 +108,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
                 pos = ellipsoid.pointAtAltitude(pos, los, refractionLayer.getLowestAltitude());
                 gp = ellipsoid.transform(pos, ellipsoid.getBodyFrame(), null);
 
-                previousRefractionIndex = refractionLayer.getRefractionIndex();
+                previousRefractionIndex = refractionLayer.getRefractiveIndex();
             }
 
             final NormalizedGeodeticPoint newGeodeticPoint  =
