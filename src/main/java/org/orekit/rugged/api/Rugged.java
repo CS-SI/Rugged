@@ -16,18 +16,35 @@
  */
 package org.orekit.rugged.api;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.linear.RealMatrix;
+import org.hipparchus.linear.RealVector;
+import org.hipparchus.optim.ConvergenceChecker;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresBuilder;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
 import org.hipparchus.util.FastMath;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
+import org.hipparchus.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
+import org.orekit.errors.OrekitException;
+import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.linesensor.LineSensor;
@@ -35,6 +52,7 @@ import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -596,6 +614,166 @@ public class Rugged {
     private void setPlaneCrossing(final SensorMeanPlaneCrossing planeCrossing)
         throws RuggedException {
         finders.put(planeCrossing.getSensor().getName(), planeCrossing);
+    }
+
+    /** Estimate the free parameters in viewing model to match specified sensor
+     * to ground mappings.
+     * <p>
+     * This method is typically used for calibration of on-board sensor parameters,
+     * like rotation angles polynomial coefficients.
+     * </p>
+     * <p>
+     * Before using this method, the {@link ExtendedParameterDriver viewing model
+     * parameters} retrieved by calling the {@link
+     * LineSensor#getExtendedParametersDrivers() getExtendedParametersDrivers()}
+     * method on the desired sensors must be configured. The parameters that should
+     * be estimated must have their {@link ExtendedParameterDriver#setSelected(boolean)
+     * selection status} set to {@link true} whereas the parameters that should retain
+     * their current value must have their {@link ExtendedParameterDriver#setSelected(boolean)
+     * selection status} set to {@link false}. If needed, the {@link
+     * ExtendedParameterDriver#setValue(double) value} of the estimated/selected parameters
+     * can also be changed before calling the method, as this value will serve as the
+     * initial value in the estimation process.
+     * </p>
+     * <p>
+     * The method solves a least-squares problem to minimize the residuals between test
+     * locations and the reference mappings by adjusting the selected viewing models
+     * parameters.
+     * </p>
+     * <p>
+     * The estimated parameters can be retrieved after the method completes by calling
+     * again the {@link LineSensor#getExtendedParametersDrivers() getExtendedParametersDrivers()}
+     * method on the desired sensors and checking the updated values of the parameters.
+     * In fact, as the values of the parameters are already updated by this method, if
+     * wants to use the updated values immediately to perform new direct/inverse
+     * locations they can do so without looking at the parameters: the viewing models
+     * are already aware of the updated parameters.
+     * </p>
+     * @param references reference mappings between sensors pixels and ground point that
+     * should ultimately be reached by adjusting selected viewing models parameters
+     * @param maxEvaluations maximum number of evaluations
+     * @param parametersConvergenceThreshold convergence threshold on
+     * normalized parameters (dimensionless, related to parameters scales)
+     * @exception RuggedException if several parameters with the same name exist,
+     * or if parameters cannot be estimated (too few measurements, ill-conditioned problem ...)
+     */
+    public void estimateFreeParameters(final Collection<SensorToGroundMapping> references,
+                                       final int maxEvaluations,
+                                       final double parametersConvergenceThreshold)
+        throws RuggedException {
+        try {
+
+            // we are more stringent than Orekit orbit determination:
+            // we do not allow different parameters with the same name
+            final Set<String> names = new HashSet<>();
+            for (final SensorToGroundMapping reference : references) {
+                reference.getSensor().getExtendedParametersDrivers().forEach(driver -> {
+                    if (names.contains(driver.getName())) {
+                        throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME,
+                                                                             driver.getName()));
+                    }
+                });
+            }
+
+            // gather free parameters from all reference mappings
+            final List<ExtendedParameterDriver> freeParameters = new ArrayList<>();
+            for (final SensorToGroundMapping reference : references) {
+                reference.
+                    getSensor().
+                    getExtendedParametersDrivers().
+                    filter(driver -> driver.isSelected()).
+                    forEach(driver -> freeParameters.add(driver));
+            }
+
+            // set up the indices and number of estimated parameters,
+            // so DerivativeStructure instances with the proper characteristics can be built
+            int index = 0;
+            for (final ExtendedParameterDriver driver : freeParameters) {
+                driver.setNbEstimated(freeParameters.size());
+                driver.setIndex(index++);
+            }
+
+            // get start point (as a normalized value)
+            final double[] start = new double[freeParameters.size()];
+            for (int i = 0; i < start.length; ++i) {
+                start[i] = freeParameters.get(i).getNormalizedValue();
+            }
+
+            // set up target in sensor domain
+            int n = 0;
+            for (final SensorToGroundMapping reference : references) {
+                n += reference.getMappings().size();
+            }
+            final double[] target = new double[2 * n];
+            int k = 0;
+            for (final SensorToGroundMapping reference : references) {
+                for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMappings()) {
+                    target[k++] = mapping.getKey().getLineNumber();
+                    target[k++] = mapping.getKey().getPixelNumber();
+                }
+            }
+
+            // prevent parameters to exceed their prescribed bounds
+            final ParameterValidator validator = params -> {
+                try {
+                    int i = 0;
+                    for (final ExtendedParameterDriver driver : freeParameters) {
+                        // let the parameter handle min/max clipping
+                        driver.setNormalizedValue(params.getEntry(i));
+                        params.setEntry(i++, driver.getNormalizedValue());
+                    }
+                    return params;
+                } catch (OrekitException oe) {
+                    throw new OrekitExceptionWrapper(oe);
+                }
+            };
+
+            // convergence checker
+            final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker =
+                (iteration, previous, current) ->
+                current.getPoint().getLInfDistance(previous.getPoint()) <= parametersConvergenceThreshold;
+
+            // model function
+            final MultivariateJacobianFunction model = point -> {
+                try {
+
+                    // set the current parameters values
+                    int i = 0;
+                    for (final ExtendedParameterDriver driver : freeParameters) {
+                        driver.setNormalizedValue(point.getEntry(i++));
+                    }
+
+                    // TODO: compute inverse loc and its partial derivatives
+                    return new Pair<RealVector, RealMatrix>(null, null);
+
+                } catch (OrekitException oe) {
+                    throw new OrekitExceptionWrapper(oe);
+                }
+            };
+
+            // set up the least squares problem
+            final LeastSquaresProblem problem = new LeastSquaresBuilder().
+                            lazyEvaluation(false).
+                            weight(null).
+                            start(start).
+                            target(target).
+                            parameterValidator(validator).
+                            checker(checker).
+                            model(model).
+                            build();
+
+            // set up the optimizer
+            final LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
+
+            // solve the least squares problem
+            optimizer.optimize(problem);
+
+        } catch (RuggedExceptionWrapper rew) {
+            throw rew.getException();
+        } catch (OrekitExceptionWrapper oew) {
+            final OrekitException oe = oew.getException();
+            throw new RuggedException(oe,  oe.getSpecifier(), oe.getParts());
+        }
     }
 
     /** Get transform from spacecraft to inertial frame.

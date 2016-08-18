@@ -73,3 +73,6 @@ TILE_ALREADY_DEFINED = tile {0} already defined, line {1}, file {2}: {3}
 # unknown tile {0}, line {1}, file {2}: {3}
 UNKNOWN_TILE = unknown tile {0}, line {1}, file {2}: {3}
 
+# a different parameter with name {0} already exists
+DUPLICATED_PARAMETER_NAME = a different parameter with name {0} already exists
+
