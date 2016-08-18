@@ -78,30 +78,26 @@ public class MultiLayerModel implements AtmosphericRefraction {
         try {
 
             Vector3D pos = satPos;
-            Vector3D los = satLos;
-            Vector3D zenith = null;
+            Vector3D los = satLos.normalize();
             double previousRefractionIndex = -1;
             GeodeticPoint gp = ellipsoid.transform(satPos, ellipsoid.getBodyFrame(), null);
 
-            for(ConstantRefractionLayer refractionLayer : refractionLayers) {
+            for (ConstantRefractionLayer refractionLayer : refractionLayers) {
 
-                if(refractionLayer.getLowestAltitude() > gp.getAltitude()) {
+                if (refractionLayer.getLowestAltitude() > gp.getAltitude()) {
                     continue;
                 }
 
                 if (previousRefractionIndex > 0) {
 
-                    // get new los
-                    final double theta1 = FastMath.toRadians(Vector3D.angle(los, zenith));
-                    final double theta2 = FastMath.asin(previousRefractionIndex * FastMath.sin(theta1) /
-                            refractionLayer.getRefractionIndex());
+                    // get new los by applying Snell's law at atmosphere layers interfaces
+                    // we avoid computing sequences of inverse-trigo/trigo/inverse-trigo functions
+                    // we just use linear algebra and square roots, it is faster and more accurate
+                    final double n1On2 = previousRefractionIndex / refractionLayer.getRefractionIndex();
+                    final double k     = n1On2 * Vector3D.dotProduct(los, gp.getZenith());
+                    los = new Vector3D(n1On2, los,
+                                       -k - FastMath.sqrt(1 + k * k - n1On2 * n1On2), gp.getZenith());
 
-                    final double cosTheta1     = FastMath.cos(theta1);
-                    final double cosTheta2     = FastMath.cos(theta2);
-
-                    final double a = FastMath.sqrt((1 - cosTheta2 * cosTheta2) / (1 - cosTheta1 * cosTheta1));
-                    final double b = a * cosTheta1 - cosTheta2;
-                    los = new Vector3D(a, los, b, zenith);
                 }
 
                 if (rawIntersection.getAltitude() > refractionLayer.getLowestAltitude()) {
@@ -111,7 +107,6 @@ public class MultiLayerModel implements AtmosphericRefraction {
                 // get intersection point
                 pos = ellipsoid.pointAtAltitude(pos, los, refractionLayer.getLowestAltitude());
                 gp = ellipsoid.transform(pos, ellipsoid.getBodyFrame(), null);
-                zenith = gp.getZenith();
 
                 previousRefractionIndex = refractionLayer.getRefractionIndex();
             }

@@ -25,11 +25,7 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
-import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
-import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
-import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.TileUpdater;
-import org.orekit.rugged.raster.TilesCache;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 public class MultiLayerModelTest extends AbstractAlgorithmTest {
@@ -49,8 +45,9 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
         double distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
 
-        // with the current code, this check fails, the distance is about 800m instead of a couple meters
-        Assert.assertEquals(0.0, distance, 2.0);
+        // this is almost a Nadir observation (LOS deviates between 1.4 and 1.6 degrees from vertical)
+        // so the refraction correction is small
+        Assert.assertEquals(0.0553797, distance, 1.0e-6);
     }
 
     @Override
