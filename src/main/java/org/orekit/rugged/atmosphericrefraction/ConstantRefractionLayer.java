@@ -23,18 +23,18 @@ package org.orekit.rugged.atmosphericrefraction;
  */
 public class ConstantRefractionLayer {
     private double lowestAltitude;
-    private double refractionIndex;
+    private double refractiveIndex;
 
-    public ConstantRefractionLayer(double lowestAltitude, double refractionIndex) {
+    public ConstantRefractionLayer(double lowestAltitude, double refractiveIndex) {
         this.lowestAltitude = lowestAltitude;
-        this.refractionIndex = refractionIndex;
+        this.refractiveIndex = refractiveIndex;
     }
 
     public double getLowestAltitude() {
         return lowestAltitude;
     }
 
-    public double getRefractionIndex() {
-        return refractionIndex;
+    public double getRefractiveIndex() {
+        return refractiveIndex;
     }
 }
