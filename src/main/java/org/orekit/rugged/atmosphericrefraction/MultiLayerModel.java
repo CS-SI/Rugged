@@ -123,10 +123,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
                 previousRefractiveIndex = refractionLayer.getRefractiveIndex();
             }
 
-            final NormalizedGeodeticPoint newGeodeticPoint  =
-                    algorithm.refineIntersection(ellipsoid, pos, los, rawIntersection);
-
-            return newGeodeticPoint;
+            return algorithm.refineIntersection(ellipsoid, pos, los, rawIntersection);
 
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
