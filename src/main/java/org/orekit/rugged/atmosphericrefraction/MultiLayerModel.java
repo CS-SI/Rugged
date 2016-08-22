@@ -73,8 +73,8 @@ public class MultiLayerModel implements AtmosphericRefraction {
             throws OrekitException {
         this.ellipsoid = ellipsoid;
         this.refractionLayers = refractionLayers;
-        atmosphereLowestAltitude = refractionLayers.get(refractionLayers.size() - 1).getLowestAltitude();
         Collections.sort(this.refractionLayers, Collections.<ConstantRefractionLayer>reverseOrder());
+        atmosphereLowestAltitude = refractionLayers.get(refractionLayers.size() - 1).getLowestAltitude();
     }
 
     @Override
