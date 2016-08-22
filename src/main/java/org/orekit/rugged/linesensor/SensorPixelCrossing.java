@@ -95,9 +95,6 @@ public class SensorPixelCrossing {
         } catch (MathIllegalArgumentException nbe) {
             // there are no solutions in the search interval
             return Double.NaN;
-// TODO hipparchus migration : no need for this catch ?
-//        } catch (MathIllegalArgumentException tmee) {
-//            throw new RuggedException(tmee);
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
         }
