@@ -73,3 +73,6 @@ TILE_ALREADY_DEFINED = tuile {0} déjà définie ligne {1} du fichier {2}: {3}
 # unknown tile {0}, line {1}, file {2}: {3}
 UNKNOWN_TILE = tuile {0} inconnue ligne {1} du fichier {2}: {3}
 
+# no atmospheric layer data at altitude {0} (lowest altitude: {1})
+NO_LAYER_DATA = <MISSING TRANSLATION>
+

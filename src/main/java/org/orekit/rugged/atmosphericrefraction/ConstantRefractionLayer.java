@@ -21,8 +21,8 @@ package org.orekit.rugged.atmosphericrefraction;
  *
  * @author Sergio Esteves
  */
-public class ConstantRefractionLayer {
-    private double lowestAltitude;
+public class ConstantRefractionLayer implements Comparable<ConstantRefractionLayer> {
+    private Double lowestAltitude;
     private double refractiveIndex;
 
     public ConstantRefractionLayer(double lowestAltitude, double refractiveIndex) {
@@ -36,5 +36,10 @@ public class ConstantRefractionLayer {
 
     public double getRefractiveIndex() {
         return refractiveIndex;
+    }
+
+    @Override
+    public int compareTo(ConstantRefractionLayer o) {
+        return lowestAltitude.compareTo(o.lowestAltitude);
     }
 }

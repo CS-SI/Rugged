@@ -73,3 +73,5 @@ TILE_ALREADY_DEFINED = tile {0} already defined, line {1}, file {2}: {3}
 # unknown tile {0}, line {1}, file {2}: {3}
 UNKNOWN_TILE = unknown tile {0}, line {1}, file {2}: {3}
 
+# no atmospheric layer data at altitude {0} (lowest altitude: {1})
+NO_LAYER_DATA = no atmospheric layer data at altitude {0} (lowest altitude: {1})

@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.atmosphericrefraction;
 
+import org.apache.commons.math3.geometry.Vector;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
@@ -30,6 +31,7 @@ import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MultiLayerModelTest extends AbstractAlgorithmTest {
@@ -54,9 +56,9 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
 
         // a test with indices all set to 1.0 - correction must be zero
-        final int numberOfLayers = 15;
+        final int numberOfLayers = 16;
         List<ConstantRefractionLayer> refractionLayers = new ArrayList<ConstantRefractionLayer>(numberOfLayers);
-        for(int i = numberOfLayers; i > 0; i--) {
+        for(int i = numberOfLayers - 1; i >= 0; i--) {
             refractionLayers.add(new ConstantRefractionLayer(i * 1.0e4, 1.0));
         }
         model = new MultiLayerModel(earth, refractionLayers);
@@ -68,42 +70,43 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         // an intentionally flawed atmosphere with refractive indices decreasing with altitude,
         // that should exhibit a LOS bending upwards
         refractionLayers = new ArrayList<ConstantRefractionLayer>(numberOfLayers);
-        for(int i = numberOfLayers; i > 0; i--) {
+        for(int i = numberOfLayers - 1; i >= 0; i--) {
             refractionLayers.add(new ConstantRefractionLayer(i * 1.0e4, 1.0 + i*i*1e-6));
         }
         model = new MultiLayerModel(earth, refractionLayers);
         correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
-        distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
-        Assert.assertEquals(0.0, distance, 0.5);
-
+        double anglePosRawIntersection = Vector3D.angle(position, earth.transform(rawIntersection));
+        double anglePosCorrectedIntersection = Vector3D.angle(position, earth.transform(correctedIntersection));
+        Assert.assertTrue(anglePosRawIntersection < anglePosCorrectedIntersection);
 
         // a comparison between two atmospheres, one more dense than the other and showing correction
         // is more important with high indices
-        List<ConstantRefractionLayer> lessDenseRefracLayers = new ArrayList<ConstantRefractionLayer>(numberOfLayers);
-        List<ConstantRefractionLayer> moreDenseRefracLayers = new ArrayList<ConstantRefractionLayer>(numberOfLayers);
-        for(int i = numberOfLayers; i > 0; i--) {
+        List<ConstantRefractionLayer> baseRefracLayers = new ArrayList<ConstantRefractionLayer>(numberOfLayers);
+        List<ConstantRefractionLayer> denserRefracLayers = new ArrayList<ConstantRefractionLayer>(numberOfLayers);
+        for(int i = numberOfLayers - 1; i >= 0; i--) {
             double baseRefractiveIndex = FastMath.pow(numberOfLayers - i + 1, 2) * 1e-6;
-            lessDenseRefracLayers.add(new ConstantRefractionLayer(i * 1.0e4, baseRefractiveIndex));
-            moreDenseRefracLayers.add(new ConstantRefractionLayer(i * 1.0e4, baseRefractiveIndex + 1e-3));
+            baseRefracLayers.add(new ConstantRefractionLayer(i * 1.0e4, baseRefractiveIndex));
+            denserRefracLayers.add(new ConstantRefractionLayer(i * 1.0e4, baseRefractiveIndex + 1e-3));
         }
-        MultiLayerModel lessDenseModel = new MultiLayerModel(earth, lessDenseRefracLayers);
-        MultiLayerModel moreDenseModel = new MultiLayerModel(earth, moreDenseRefracLayers);
-        GeodeticPoint lessDenseIntersection = lessDenseModel.applyCorrection(position, los, rawIntersection, algorithm);
-        GeodeticPoint moreDenseIntersection = moreDenseModel.applyCorrection(position, los, rawIntersection, algorithm);
-        double LDDistance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(lessDenseIntersection));
-        double MDDistance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(moreDenseIntersection));
-
-        // LDDistance: 2860.295484362817, MDDistance: 251.62683758334745
-        // Assert.assertTrue(MDDistance > LDDistance);
+        MultiLayerModel baseModel = new MultiLayerModel(earth, baseRefracLayers);
+        MultiLayerModel denserModel = new MultiLayerModel(earth, denserRefracLayers);
+        GeodeticPoint baseIntersection = baseModel.applyCorrection(position, los, rawIntersection, algorithm);
+        GeodeticPoint denserIntersection = denserModel.applyCorrection(position, los, rawIntersection, algorithm);
+        double baseDistance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(baseIntersection));
+        double denserDistance = Vector3D.distance(earth.transform(rawIntersection),
+                earth.transform(denserIntersection));
+        // denserDistance: 291.6042252928431, baseDistance: 2710.1036961651967
+        Assert.assertTrue(denserDistance > baseDistance);
 
 
         // a test with a single refraction layer
         refractionLayers = new ArrayList<ConstantRefractionLayer>(numberOfLayers);
-        refractionLayers.add(new ConstantRefractionLayer(600000, 1.2));
+        refractionLayers.add(new ConstantRefractionLayer(0, 1.2));
         model = new MultiLayerModel(earth, refractionLayers);
         correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
         distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
         Assert.assertEquals(0.0, distance, 0.0);
+
     }
 
     @Override

@@ -21,11 +21,13 @@ import org.apache.commons.math3.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,6 +41,9 @@ public class MultiLayerModel implements AtmosphericRefraction {
 
     /** Constant refraction layers */
     private final List<ConstantRefractionLayer> refractionLayers;
+
+    /** Atmosphere lowest altitude */
+    private final double atmosphereLowestAltitude;
 
     public MultiLayerModel(final ExtendedEllipsoid ellipsoid)
             throws OrekitException {
@@ -60,14 +65,16 @@ public class MultiLayerModel implements AtmosphericRefraction {
         refractionLayers.add(new ConstantRefractionLayer(  1000.00, 1.000252));
         refractionLayers.add(new ConstantRefractionLayer(     0.00, 1.000278));
         refractionLayers.add(new ConstantRefractionLayer( -1000.00, 1.000306));
+
+        atmosphereLowestAltitude = refractionLayers.get(refractionLayers.size() - 1).getLowestAltitude();
     }
 
     public MultiLayerModel(final ExtendedEllipsoid ellipsoid, final List<ConstantRefractionLayer> refractionLayers)
             throws OrekitException {
         this.ellipsoid = ellipsoid;
-        // TODO guarantee that list is already ordered by altitude?
-        // TODO guarantee that a minimum altitude value exists?
         this.refractionLayers = refractionLayers;
+        atmosphereLowestAltitude = refractionLayers.get(refractionLayers.size() - 1).getLowestAltitude();
+        Collections.sort(this.refractionLayers, Collections.<ConstantRefractionLayer>reverseOrder());
     }
 
     @Override
@@ -77,6 +84,10 @@ public class MultiLayerModel implements AtmosphericRefraction {
             throws RuggedException {
 
         try {
+            if(rawIntersection.getAltitude() < atmosphereLowestAltitude) {
+                throw new RuggedException(RuggedMessages.NO_LAYER_DATA, rawIntersection.getAltitude(),
+                        atmosphereLowestAltitude);
+            }
 
             Vector3D pos = satPos;
             Vector3D los = satLos.normalize();
