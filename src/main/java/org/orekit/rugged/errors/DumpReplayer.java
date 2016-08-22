@@ -868,23 +868,18 @@ public class DumpReplayer {
                             !fields[base + 8].equals(TARGET_DIRECTION)) {
                             throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                         }
-                        final double       ln     = Double.parseDouble(fields[base + 1]);
-                        final AbsoluteDate date   = new AbsoluteDate(fields[base + 3], TimeScalesFactory.getUTC());
-                        final Vector3D     target = new Vector3D(Double.parseDouble(fields[base + 5]),
-                                                                 Double.parseDouble(fields[base + 6]),
-                                                                 Double.parseDouble(fields[base + 7]));
-                        final DerivativeStructure tdX = new DerivativeStructure(1, 1,
-                                                                                Double.parseDouble(fields[base +  9]),
-                                                                                Double.parseDouble(fields[base + 12]));
-                        final DerivativeStructure tdY = new DerivativeStructure(1, 1,
+                        final double       ln                    = Double.parseDouble(fields[base + 1]);
+                        final AbsoluteDate date                  = new AbsoluteDate(fields[base + 3], TimeScalesFactory.getUTC());
+                        final Vector3D     target                = new Vector3D(Double.parseDouble(fields[base +  5]),
+                                                                                Double.parseDouble(fields[base +  6]),
+                                                                                Double.parseDouble(fields[base +  7]));
+                        final Vector3D targetDirection           = new Vector3D(Double.parseDouble(fields[base +  9]),
                                                                                 Double.parseDouble(fields[base + 10]),
-                                                                                Double.parseDouble(fields[base + 13]));
-                        final DerivativeStructure tdZ = new DerivativeStructure(1, 1,
-                                                                                Double.parseDouble(fields[base + 11]),
+                                                                                Double.parseDouble(fields[base + 11]));
+                        final Vector3D targetDirectionDerivative = new Vector3D(Double.parseDouble(fields[base + 12]),
+                                                                                Double.parseDouble(fields[base + 13]),
                                                                                 Double.parseDouble(fields[base + 14]));
-                        final FieldVector3D<DerivativeStructure> targetDirection =
-                                new FieldVector3D<DerivativeStructure>(tdX, tdY, tdZ);
-                        cachedResults[i] = new CrossingResult(date, ln, target, targetDirection);
+                        cachedResults[i] = new CrossingResult(date, ln, target, targetDirection, targetDirectionDerivative);
                         base += 15;
                     }
                     global.getSensor(sensorName).setMeanPlane(new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal, cachedResults));

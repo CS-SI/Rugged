@@ -151,13 +151,13 @@ public class TestUtils {
 
     }
 
-    public static TimeDependentLOS createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
+    public static LOSBuilder createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
             list.add(new Rotation(normal, alpha, RotationConvention.VECTOR_OPERATOR).applyTo(center));
         }
-        return new LOSBuilder(list).build();
+        return new LOSBuilder(list);
     }
 
     public static TimeDependentLOS createLOSCurvedLine(Vector3D center, Vector3D normal,

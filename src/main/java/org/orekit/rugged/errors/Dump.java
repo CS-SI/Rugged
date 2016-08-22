@@ -516,12 +516,12 @@ class Dump {
                                           " lineNumber %22.15e date %s target %22.15e %22.15e %22.15e targetDirection %22.15e %22.15e %22.15e %22.15e %22.15e %22.15e",
                                           result.getLine(), convertDate(result.getDate()),
                                           result.getTarget().getX(), result.getTarget().getY(), result.getTarget().getZ(),
-                                          result.getTargetDirection().getX().getValue(),
-                                          result.getTargetDirection().getY().getValue(),
-                                          result.getTargetDirection().getZ().getValue(),
-                                          result.getTargetDirection().getZ().getPartialDerivative(1),
-                                          result.getTargetDirection().getY().getPartialDerivative(1),
-                                          result.getTargetDirection().getZ().getPartialDerivative(1));
+                                          result.getTargetDirection().getX(),
+                                          result.getTargetDirection().getY(),
+                                          result.getTargetDirection().getZ(),
+                                          result.getTargetDirectionDerivative().getZ(),
+                                          result.getTargetDirectionDerivative().getY(),
+                                          result.getTargetDirectionDerivative().getZ());
                         } catch (RuggedException re) {
                             throw new RuggedExceptionWrapper(re);
                         }

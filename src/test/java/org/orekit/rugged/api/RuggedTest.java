@@ -17,22 +17,27 @@
 package org.orekit.rugged.api;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.stat.descriptive.StreamingStatistics;
 import org.hipparchus.stat.descriptive.rank.Percentile;
 import org.hipparchus.util.FastMath;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.net.URISyntaxException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -55,11 +60,13 @@ import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
 import org.orekit.rugged.linesensor.SensorPixel;
+import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
+import org.orekit.rugged.utils.ExtendedParameterDriver;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -105,7 +112,7 @@ public class RuggedTest {
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                              FastMath.toRadians(10.0), dimension);
+                                                              FastMath.toRadians(10.0), dimension).build();
 
         // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -186,7 +193,7 @@ public class RuggedTest {
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                              FastMath.toRadians(10.0), dimension);
+                                                              FastMath.toRadians(10.0), dimension).build();
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -264,7 +271,7 @@ public class RuggedTest {
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                              FastMath.toRadians(10.0), dimension);
+                                                              FastMath.toRadians(10.0), dimension).build();
 
         // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -324,7 +331,7 @@ public class RuggedTest {
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                            FastMath.toRadians(50.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension).build();
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -386,7 +393,7 @@ public class RuggedTest {
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                            FastMath.toRadians(50.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension).build();
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -444,7 +451,7 @@ public class RuggedTest {
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                            FastMath.toRadians(50.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension).build();
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -505,7 +512,7 @@ public class RuggedTest {
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                            FastMath.toRadians(50.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+                                                              Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension).build();
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -572,7 +579,7 @@ public class RuggedTest {
             TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                                FastMath.toRadians(50.0 - 0.001 * i),
                                                                                RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                                  Vector3D.PLUS_I, FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+                                                                  Vector3D.PLUS_I, FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
 
             // linear datation model: at reference time we get roughly middle line, and the rate is one line every 1.5ms
             LineDatation lineDatation = new LinearLineDatation(crossing, i + dimension / 2, 1.0 / 1.5e-3);
@@ -661,7 +668,7 @@ public class RuggedTest {
     @Test
     public void testInverseLocation()
         throws RuggedException, OrekitException, URISyntaxException {
-        checkInverseLocation(2000, false, false, 3.0e-7, 5.0e-6);
+        checkInverseLocation(2000, false, false, 4.0e-7, 5.0e-6);
         checkInverseLocation(2000, false, true,  1.0e-5, 2.0e-7);
         checkInverseLocation(2000, true,  false, 4.0e-7, 4.0e-7);
         checkInverseLocation(2000, true,  true,  2.0e-5, 3.0e-7);
@@ -761,19 +768,19 @@ public class RuggedTest {
         Rugged rugged = builder.build();
         GeodeticPoint point1 = new GeodeticPoint(0.7053784581520293, -1.7354535645320581, 691.856741468848);
         SensorPixel sensorPixel1 = rugged.inverseLocation(lineSensor.getName(), point1, 1, 131328);
-        Assert.assertEquals(   2.01472, sensorPixel1.getLineNumber(), 1.0e-5);
+        Assert.assertEquals(   2.01474, sensorPixel1.getLineNumber(), 1.0e-5);
         Assert.assertEquals(   2.09271, sensorPixel1.getPixelNumber(), 1.0e-5);
         GeodeticPoint point2 = new GeodeticPoint(0.704463899881073, -1.7303503789334154, 648.9200602492216);
         SensorPixel sensorPixel2 = rugged.inverseLocation(lineSensor.getName(), point2, 1, 131328);
-        Assert.assertEquals(   2.02184, sensorPixel2.getLineNumber(), 1.0e-5);
+        Assert.assertEquals(   2.02185, sensorPixel2.getLineNumber(), 1.0e-5);
         Assert.assertEquals(  27.53008, sensorPixel2.getPixelNumber(), 1.0e-5);
         GeodeticPoint point3 = new GeodeticPoint(0.7009593480939814, -1.7314283804521957, 588.3075485689468);
         SensorPixel sensorPixel3 = rugged.inverseLocation(lineSensor.getName(), point3, 1, 131328);
-        Assert.assertEquals(2305.26174, sensorPixel3.getLineNumber(),  1.0e-5);
+        Assert.assertEquals(2305.26101, sensorPixel3.getLineNumber(),  1.0e-5);
         Assert.assertEquals(  27.18381, sensorPixel3.getPixelNumber(), 1.0e-5);
         GeodeticPoint point4 = new GeodeticPoint(0.7018731669637096, -1.73651769725183, 611.2759403696498);
         SensorPixel sensorPixel4 = rugged.inverseLocation(lineSensor.getName(), point4, 1, 131328);
-        Assert.assertEquals(2305.25506, sensorPixel4.getLineNumber(), 1.0e-5);
+        Assert.assertEquals(2305.25436, sensorPixel4.getLineNumber(), 1.0e-5);
         Assert.assertEquals(   1.54447, sensorPixel4.getPixelNumber(), 1.0e-5);
 
     }
@@ -953,7 +960,7 @@ public class RuggedTest {
                                                                            FastMath.toRadians(50.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                               Vector3D.PLUS_I,
-                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
 
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -1026,6 +1033,183 @@ public class RuggedTest {
 
     }
 
+    @Test
+    public void testInverseLocationDerivativesWithoutCorrections()
+        throws RuggedException, OrekitException {
+        doTestInverseLocationDerivatives(2000, false, false,
+                                         7.0e-9, 4.0e-11, 1.0e-20, 3.0e-5);
+    }
+
+    @Test
+    public void testInverseLocationDerivativesWithLightTimeCorrection()
+        throws RuggedException, OrekitException {
+        doTestInverseLocationDerivatives(2000, true, false,
+                                         3.0e-9, 9.0e-9, 1.0e-20, 2.0e-6);
+    }
+
+    @Test
+    public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
+        throws RuggedException, OrekitException {
+        doTestInverseLocationDerivatives(2000, false, true,
+                                         3.0e-10, 3.0e-10, 1.0e-20, 2.0e-6);
+    }
+
+    @Test
+    public void testInverseLocationDerivativesWithAllCorrections()
+        throws RuggedException, OrekitException {
+        doTestInverseLocationDerivatives(2000, true, true,
+                                         3.0e-10, 5.0e-10, 1.0e-20, 2.0e-6);
+    }
+
+    private void doTestInverseLocationDerivatives(int dimension,
+                                                  boolean lightTimeCorrection,
+                                                  boolean aberrationOfLightCorrection,
+                                                  double lineTolerance,
+                                                  double pixelTolerance,
+                                                  double lineDerivativeTolerance,
+                                                  double pixelDerivativeTolerance)
+        throws RuggedException, OrekitException {
+        try {
+
+            String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            final BodyShape  earth = TestUtils.createEarth();
+            final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+            AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+            // one line sensor
+            // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+            // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+            Vector3D position = new Vector3D(1.5, 0, -0.2);
+            LOSBuilder losBuilder =
+             TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                         FastMath.toRadians(50.0),
+                                                         RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+                                            Vector3D.PLUS_I,
+                                            FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+            losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.0));
+            losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.0));
+            TimeDependentLOS los = losBuilder.build();
+
+            // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
+            LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+            int firstLine = 0;
+            int lastLine  = dimension;
+            LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+            AbsoluteDate minDate = lineSensor.getDate(firstLine).shiftedBy(-1.0);
+            AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
+
+            TileUpdater updater =
+                            new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                                                       FastMath.toRadians(1.0), 257);
+
+            Rugged rugged = new RuggedBuilder().
+                            setDigitalElevationModel(updater, 8).
+                            setAlgorithm(AlgorithmId.DUVENHAGE).
+                            setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                            setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                            setTrajectory(InertialFrameId.EME2000,
+                                          TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                                          8, CartesianDerivativesFilter.USE_PV,
+                                          TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                                          2, AngularDerivativesFilter.USE_R).
+                            setLightTimeCorrection(lightTimeCorrection).
+                            setAberrationOfLightCorrection(aberrationOfLightCorrection).
+                            addLineSensor(lineSensor).
+                            build();
+
+            // we want to adjust sensor roll and pitch angles
+            ExtendedParameterDriver rollDriver =
+                rugged.getLineSensor("line").getExtendedParametersDrivers().
+                filter(driver -> driver.getName().equals("roll")).findFirst().get();
+            rollDriver.setSelected(true);
+            ExtendedParameterDriver pitchDriver =
+                rugged.getLineSensor("line").getExtendedParametersDrivers().
+                filter(driver -> driver.getName().equals("pitch")).findFirst().get();
+            pitchDriver.setSelected(true);
+
+            // prepare parameters (this is normally done by Rugged.estimateFreeParameters)
+            // this setup may seem complex, but DerivativeStructure are really an
+            // internal feature, user do not need to deal with them
+            final Map<String, int[]> map = new HashMap<>();
+            rugged.getLineSensor("line").getExtendedParametersDrivers().
+            filter(driver -> driver.isSelected()).
+            forEach(driver -> {
+                driver.setNbEstimated(2);
+                driver.setIndex(map.size());
+                int[] orders = new int[2];
+                orders[map.size()] = 1;
+                map.put(driver.getName(), orders);
+            });
+
+            double referenceLine = 0.87654 * dimension;
+            GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
+
+            Method inverseLoc = Rugged.class.getDeclaredMethod("inverseLocationDerivatives",
+                                                               String.class, GeodeticPoint.class,
+                                                               Integer.TYPE, Integer.TYPE);
+            inverseLoc.setAccessible(true);
+            int referencePixel = (3 * dimension) / 4;
+            DerivativeStructure[] result = 
+                            (DerivativeStructure[]) inverseLoc.invoke(rugged,
+                                                                      "line", gp[referencePixel], 0, dimension);
+            Assert.assertEquals(referenceLine,  result[0].getValue(), lineTolerance);
+            Assert.assertEquals(referencePixel, result[1].getValue(), pixelTolerance);
+            Assert.assertEquals(2, result[0].getFreeParameters());
+            Assert.assertEquals(1, result[0].getOrder());
+
+            // check the partial derivatives
+            double h = 1.0e-6;
+
+            rollDriver.setValue(-h);
+            pitchDriver.setValue(0);
+            SensorPixel rMp0 = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
+            rollDriver.setValue(+h);
+            pitchDriver.setValue(0);
+            SensorPixel rPp0 = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
+
+//            rollDriver.setValue(0);
+//            pitchDriver.setValue(-h);
+//            SensorPixel r0pM = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
+//            rollDriver.setValue(0);
+//            pitchDriver.setValue(+h);
+            // TODO: the following line leads to a singular matrix
+//            SensorPixel r0pP = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
+
+            Assert.assertEquals("dLine/dRoll error : " +
+                                ((rPp0.getLineNumber() - rMp0.getLineNumber()) / h -
+                                 result[0].getPartialDerivative(map.get("roll"))),
+                                (rPp0.getLineNumber() - rMp0.getLineNumber()) / h,
+                                result[0].getPartialDerivative(map.get("roll")),
+                                lineDerivativeTolerance);
+            Assert.assertEquals("dPixel/dRoll error : " +
+                                ((rPp0.getPixelNumber() - rMp0.getPixelNumber()) / h -
+                                 result[1].getPartialDerivative(map.get("roll"))),
+                                (rPp0.getPixelNumber() - rMp0.getPixelNumber()) / h,
+                                result[1].getPartialDerivative(map.get("roll")),
+                                pixelDerivativeTolerance);
+//            Assert.assertEquals("dLine/dPitch error : " +
+//                                ((r0pP.getLineNumber() - r0pM.getLineNumber()) / h -
+//                                 result[0].getPartialDerivative(map.get("pitch"))),
+//                                (r0pP.getLineNumber() - r0pM.getLineNumber()) / h,
+//                                result[0].getPartialDerivative(map.get("pitch")),
+//                                lineDerivativeTolerance);
+//            Assert.assertEquals("dPixel/dPitch error : " +
+//                                ((r0pP.getPixelNumber() - r0pM.getPixelNumber()) / h -
+//                                 result[1].getPartialDerivative(map.get("pitch"))),
+//                                (r0pP.getPixelNumber() - r0pM.getPixelNumber()) / h,
+//                                result[1].getPartialDerivative(map.get("picth")),
+//                                pixelDerivativeTolerance);
+            
+        } catch (InvocationTargetException | NoSuchMethodException |
+                 SecurityException | IllegalAccessException |
+                 IllegalArgumentException | URISyntaxException e) {
+            e.printStackTrace();
+            Assert.fail(e.getLocalizedMessage());
+        }
+    }
+
     private void checkDateLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                        double maxDateError)
         throws RuggedException, OrekitException, URISyntaxException {
@@ -1045,7 +1229,7 @@ public class RuggedTest {
                                                                            FastMath.toRadians(50.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                               Vector3D.PLUS_I,
-                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);

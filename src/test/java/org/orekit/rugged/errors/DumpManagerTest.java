@@ -149,7 +149,7 @@ public class DumpManagerTest {
        TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                           FastMath.toRadians(50.0),
                                                                           RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                             Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension);
+                                                             Vector3D.PLUS_I, FastMath.toRadians(1.0), dimension).build();
 
        // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);

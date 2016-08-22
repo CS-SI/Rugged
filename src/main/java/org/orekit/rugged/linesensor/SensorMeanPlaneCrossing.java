@@ -21,12 +21,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.hipparchus.analysis.UnivariateFunction;
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.solvers.BracketingNthOrderBrentSolver;
 import org.hipparchus.analysis.solvers.UnivariateSolver;
 import org.hipparchus.exception.MathIllegalArgumentException;
 import org.hipparchus.exception.MathIllegalStateException;
-import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.linear.Array2DRowRealMatrix;
 import org.hipparchus.linear.ArrayRealVector;
@@ -290,21 +288,27 @@ public class SensorMeanPlaneCrossing {
         private final Vector3D target;
 
         /** Target direction in spacecraft frame. */
-        private final FieldVector3D<DerivativeStructure> targetDirection;
+        private final Vector3D targetDirection;
+
+        /** Derivative of the target direction in spacecraft frame with respect to line number. */
+        private final Vector3D targetDirectionDerivative;
 
         /** Simple constructor.
          * @param crossingDate crossing date
          * @param crossingLine crossing line
          * @param target target ground point
          * @param targetDirection target direction in spacecraft frame
+         * @param targetDirectionDerivative derivative of the target direction in spacecraft frame with respect to line number
          */
         public CrossingResult(final AbsoluteDate crossingDate, final double crossingLine,
                               final Vector3D target,
-                              final FieldVector3D<DerivativeStructure> targetDirection) {
-            this.crossingDate    = crossingDate;
-            this.crossingLine    = crossingLine;
-            this.target          = target;
-            this.targetDirection = targetDirection;
+                              final Vector3D targetDirection,
+                              final Vector3D targetDirectionDerivative) {
+            this.crossingDate              = crossingDate;
+            this.crossingLine              = crossingLine;
+            this.target                    = target;
+            this.targetDirection           = targetDirection;
+            this.targetDirectionDerivative = targetDirectionDerivative;
         }
 
         /** Get the crossing date.
@@ -329,11 +333,19 @@ public class SensorMeanPlaneCrossing {
         }
 
         /** Get the normalized target direction in spacecraft frame at crossing.
-         * @return normalized target direction in spacecraft frame at crossing, with its first derivative
+         * @return normalized target direction in spacecraft frame at crossing
          * with respect to line number
          */
-        public FieldVector3D<DerivativeStructure> getTargetDirection() {
+        public Vector3D getTargetDirection() {
             return targetDirection;
+        }
+
+        /** Get the derivative of the normalized target direction in spacecraft frame at crossing.
+         * @return derivative of the normalized target direction in spacecraft frame at crossing
+         * with respect to line number
+         */
+        public Vector3D getTargetDirectionDerivative() {
+            return targetDirectionDerivative;
         }
 
     }
@@ -372,30 +384,33 @@ public class SensorMeanPlaneCrossing {
         // as we know the solution is improved in the second stage of inverse location.
         // We expect two or three evaluations only. Each new evaluation shows up quickly in
         // the performances as it involves frames conversions
-        final double[]               crossingLineHistory = new double[maxEval];
-        final DerivativeStructure[]  betaHistory         = new DerivativeStructure[maxEval];
-        boolean atMin           = false;
-        boolean atMax           = false;
+        final double[]  crossingLineHistory = new double[maxEval];
+        final double[]  betaHistory         = new double[maxEval];
+        final double[]  betaDerHistory      = new double[maxEval];
+        boolean         atMin               = false;
+        boolean         atMax               = false;
         for (int i = 0; i < maxEval; ++i) {
 
             crossingLineHistory[i] = crossingLine;
-            final FieldVector3D<DerivativeStructure> targetDirection =
+            final Vector3D[] targetDirection =
                     evaluateLine(crossingLine, targetPV, bodyToInert, scToInert);
-            betaHistory[i] = FieldVector3D.angle(targetDirection, meanPlaneNormal);
+            betaHistory[i] = FastMath.acos(Vector3D.dotProduct(targetDirection[0], meanPlaneNormal));
+            final double s = Vector3D.dotProduct(targetDirection[1], meanPlaneNormal);
+            betaDerHistory[i] = -s / FastMath.sqrt(1 - s * s);
 
             final double deltaL;
             if (i == 0) {
                 // simple Newton iteration
-                deltaL        = (0.5 * FastMath.PI - betaHistory[i].getValue()) / betaHistory[i].getPartialDerivative(1);
+                deltaL        = (0.5 * FastMath.PI - betaHistory[i]) / betaDerHistory[i];
                 crossingLine += deltaL;
             } else {
                 // inverse cubic iteration
-                final double a0    = betaHistory[i - 1].getValue() - 0.5 * FastMath.PI;
+                final double a0    = betaHistory[i - 1] - 0.5 * FastMath.PI;
                 final double l0    = crossingLineHistory[i - 1];
-                final double d0    = betaHistory[i - 1].getPartialDerivative(1);
-                final double a1    = betaHistory[i].getValue()     - 0.5 * FastMath.PI;
+                final double d0    = betaDerHistory[i - 1];
+                final double a1    = betaHistory[i]     - 0.5 * FastMath.PI;
                 final double l1    = crossingLineHistory[i];
-                final double d1    = betaHistory[i].getPartialDerivative(1);
+                final double d1    = betaDerHistory[i];
                 final double a1Ma0 = a1 - a0;
                 crossingLine = ((l0 * (a1 - 3 * a0) - a0 * a1Ma0 / d0) * a1 * a1 +
                                 (l1 * (3 * a1 - a0) - a1 * a1Ma0 / d1) * a0 * a0
@@ -407,7 +422,8 @@ public class SensorMeanPlaneCrossing {
                 if (cachedResults.size() >= CACHED_RESULTS) {
                     cachedResults.remove(cachedResults.size() - 1);
                 }
-                cachedResults.add(0, new CrossingResult(sensor.getDate(crossingLine), crossingLine, target, targetDirection));
+                cachedResults.add(0, new CrossingResult(sensor.getDate(crossingLine), crossingLine, target,
+                                                        targetDirection[0], targetDirection[1]));
                 return cachedResults.get(0);
             }
             for (int j = 0; j < i; ++j) {
@@ -519,10 +535,9 @@ public class SensorMeanPlaneCrossing {
                 public double value(final double x) throws RuggedExceptionWrapper {
                     try {
                         final AbsoluteDate date = sensor.getDate(x);
-                        final FieldVector3D<DerivativeStructure> targetDirection =
+                        final Vector3D[] targetDirection =
                                 evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
-                        final DerivativeStructure beta = FieldVector3D.angle(targetDirection, meanPlaneNormal);
-                        return 0.5 * FastMath.PI - beta.getValue();
+                        return 0.5 * FastMath.PI - FastMath.acos(Vector3D.dotProduct(targetDirection[0], meanPlaneNormal));
                     } catch (RuggedException re) {
                         throw new RuggedExceptionWrapper(re);
                     }
@@ -530,9 +545,10 @@ public class SensorMeanPlaneCrossing {
             }, minLine, maxLine, startValue);
 
             final AbsoluteDate date = sensor.getDate(crossingLine);
-            final FieldVector3D<DerivativeStructure> targetDirection =
+            final Vector3D[] targetDirection =
                     evaluateLine(crossingLine, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
-            return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetPV.getPosition(), targetDirection);
+            return new CrossingResult(sensor.getDate(crossingLine), crossingLine, targetPV.getPosition(),
+                                      targetDirection[0], targetDirection[1]);
 
         } catch (MathIllegalArgumentException nbe) {
             return null;
@@ -549,8 +565,8 @@ public class SensorMeanPlaneCrossing {
      * @return target direction in spacecraft frame, with its first derivative
      * with respect to line number
      */
-    private FieldVector3D<DerivativeStructure> evaluateLine(final double lineNumber, final PVCoordinates targetPV,
-                                                            final Transform bodyToInert, final Transform scToInert) {
+    private Vector3D[] evaluateLine(final double lineNumber, final PVCoordinates targetPV,
+                                    final Transform bodyToInert, final Transform scToInert) {
 
         // compute the transform between spacecraft and observed body
         final PVCoordinates refInert =
@@ -601,9 +617,9 @@ public class SensorMeanPlaneCrossing {
 
         // combine vector value and derivative
         final double rate = sensor.getRate(lineNumber);
-        return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(1, 1, dir.getX(), dirDot.getX() / rate),
-                                                      new DerivativeStructure(1, 1, dir.getY(), dirDot.getY() / rate),
-                                                      new DerivativeStructure(1, 1, dir.getZ(), dirDot.getZ() / rate));
+        return new Vector3D[] {
+            dir, dirDot.scalarMultiply(1.0 / rate)
+        };
 
     }
 

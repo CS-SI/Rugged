@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.linesensor;
 
+import org.hipparchus.geometry.euclidean.threed.Line;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
@@ -31,11 +32,13 @@ import org.junit.Test;
 import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
+import org.orekit.frames.Transform;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.PositionAngle;
@@ -118,6 +121,99 @@ public class SensorMeanPlaneCrossingTest {
                                                                    0, 2000, true, true, 50, 0.01);
         Assert.assertEquals(0.0, Vector3D.angle(normal, mean.getMeanPlaneNormal()), 8.0e-7);
 
+    }
+
+    @Test
+    public void testDerivativeWithoutCorrections() throws RuggedException, OrekitException {
+        doTestDerivative(false, false, 2.2e-11);
+    }
+
+    @Test
+    public void testDerivativeLightTimeCorrection() throws RuggedException, OrekitException {
+        doTestDerivative(true, false, 2.4e-7);
+    }
+
+    @Test
+    public void testDerivativeAberrationOfLightCorrection() throws RuggedException, OrekitException {
+        doTestDerivative(false, true, 1.1e-7);
+    }
+
+    @Test
+    public void testDerivativeWithAllCorrections() throws RuggedException, OrekitException {
+        doTestDerivative(true, true, 1.4e-7);
+    }
+
+    private void doTestDerivative(boolean lightTimeCorrection,
+                                  boolean aberrationOfLightCorrection,
+                                  double tol)
+        throws RuggedException, OrekitException {
+
+        final Vector3D position  = new Vector3D(1.5, Vector3D.PLUS_I);
+        final Vector3D normal    = Vector3D.PLUS_I;
+        final Vector3D fovCenter = Vector3D.PLUS_K;
+        final Vector3D cross     = Vector3D.crossProduct(normal, fovCenter);
+
+        // build lists of pixels regularly spread on a perfect plane
+        final List<Vector3D> los       = new ArrayList<Vector3D>();
+        for (int i = -1000; i <= 1000; ++i) {
+            final double alpha = i * 0.17 / 1000;
+            los.add(new Vector3D(FastMath.cos(alpha), fovCenter, FastMath.sin(alpha), cross));
+        }
+
+        final LineSensor sensor = new LineSensor("perfect line",
+                                                 new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
+                                                 position, new LOSBuilder(los).build());
+
+        Assert.assertEquals("perfect line", sensor.getName());
+        Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
+        Assert.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
+
+        SensorMeanPlaneCrossing mean = new SensorMeanPlaneCrossing(sensor, createInterpolator(sensor),
+                                                                   0, 2000, lightTimeCorrection,
+                                                                   aberrationOfLightCorrection, 50, 1.0e-6);
+
+        double       refLine = 1200.0;
+        AbsoluteDate refDate = sensor.getDate(refLine);
+        int          refPixel= 1800;
+        Transform    b2i     = mean.getScToBody().getBodyToInertial(refDate);
+        Transform    sc2i    = mean.getScToBody().getScToInertial(refDate);
+        Transform    sc2b    = new Transform(refDate, sc2i, b2i.getInverse());
+        Vector3D     p1      = sc2b.transformPosition(position);
+        Vector3D     p2      = sc2b.transformPosition(new Vector3D(1, position,
+                                                                   1.0e6, los.get(refPixel)));
+        Line         line    = new Line(p1, p2, 0.001);
+        BodyShape earth = new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                               Constants.WGS84_EARTH_FLATTENING,
+                                               mean.getScToBody().getBodyFrame());
+        GeodeticPoint groundPoint = earth.getIntersectionPoint(line, p1, mean.getScToBody().getBodyFrame(), refDate);
+        Vector3D      gpCartesian = earth.transform(groundPoint);
+        SensorMeanPlaneCrossing.CrossingResult result = mean.find(gpCartesian);
+
+        if (lightTimeCorrection) {
+            // applying corrections shifts the point with respect
+            // to the reference result computed from a simple model above
+            Assert.assertTrue(result.getLine() - refLine > 0.02);
+        } else if (aberrationOfLightCorrection) {
+            // applying corrections shifts the point with respect
+            // to the reference result computed from a simple model above
+            Assert.assertTrue(result.getLine() - refLine > 1.9);
+        } else {
+            // the simple model from which reference results have been compute applies here
+            Assert.assertEquals(refLine, result.getLine(), 7.0e-14 * refLine);
+            Assert.assertEquals(0.0, result.getDate().durationFrom(refDate), 2.0e-13);
+            Assert.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 5.1e-15);
+        }
+
+        double deltaL = 0.5;
+        Transform b2scPlus = sc2b.getInverse().shiftedBy(deltaL / sensor.getRate(refLine));
+        Vector3D dirPlus = b2scPlus.transformPosition(gpCartesian).subtract(position).normalize();
+        Transform b2scMinus = sc2b.getInverse().shiftedBy(-deltaL / sensor.getRate(refLine));
+        Vector3D dirMinus = b2scMinus.transformPosition(gpCartesian).subtract(position).normalize();
+        Vector3D dirDer = new Vector3D(1.0 / (2 * deltaL), dirPlus.subtract(dirMinus));
+        Assert.assertEquals(0.0,
+                            Vector3D.distance(result.getTargetDirectionDerivative(), dirDer),
+                            tol * dirDer.getNorm());
+        
     }
 
     private SpacecraftToObservedBody createInterpolator(LineSensor sensor)

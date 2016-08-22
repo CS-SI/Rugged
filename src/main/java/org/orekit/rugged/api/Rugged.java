@@ -27,6 +27,8 @@ import java.util.Set;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.linear.Array2DRowRealMatrix;
+import org.hipparchus.linear.ArrayRealVector;
 import org.hipparchus.linear.RealMatrix;
 import org.hipparchus.linear.RealVector;
 import org.hipparchus.optim.ConvergenceChecker;
@@ -75,6 +77,9 @@ public class Rugged {
 
     /** Maximum number of evaluations. */
     private static final int MAX_EVAL = 50;
+
+    /** Margin used in parameters estimation for the inverse location lines range. */
+    private static final int ESTIMATION_LINE_RANGE_MARGIN = 100;
 
     /** Reference ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
@@ -535,7 +540,7 @@ public class Rugged {
         // find approximately the pixel along this sensor line
         final SensorPixelCrossing pixelCrossing =
                 new SensorPixelCrossing(sensor, planeCrossing.getMeanPlaneNormal(),
-                                        crossingResult.getTargetDirection().toVector3D(),
+                                        crossingResult.getTargetDirection(),
                                         MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
         final double coarsePixel = pixelCrossing.locatePixel(crossingResult.getDate());
         if (Double.isNaN(coarsePixel)) {
@@ -545,22 +550,25 @@ public class Rugged {
 
         // fix line by considering the closest pixel exact position and line-of-sight
         // (this pixel might point towards a direction slightly above or below the mean sensor plane)
-        final int      lowIndex        = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
-        final Vector3D lowLOS          = sensor.getLOS(crossingResult.getDate(), lowIndex);
-        final Vector3D highLOS         = sensor.getLOS(crossingResult.getDate(), lowIndex + 1);
-        final Vector3D localZ          = Vector3D.crossProduct(lowLOS, highLOS);
-        final DerivativeStructure beta = FieldVector3D.angle(crossingResult.getTargetDirection(), localZ);
-        final double   deltaL          = (0.5 * FastMath.PI - beta.getValue()) / beta.getPartialDerivative(1);
-        final double   fixedLine       = crossingResult.getLine() + deltaL;
-        final Vector3D fixedDirection  = new Vector3D(crossingResult.getTargetDirection().getX().taylor(deltaL),
-                                                      crossingResult.getTargetDirection().getY().taylor(deltaL),
-                                                      crossingResult.getTargetDirection().getZ().taylor(deltaL)).normalize();
+        final int      lowIndex       = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
+        final Vector3D lowLOS         = sensor.getLOS(crossingResult.getDate(), lowIndex);
+        final Vector3D highLOS        = sensor.getLOS(crossingResult.getDate(), lowIndex + 1);
+        final Vector3D localZ         = Vector3D.crossProduct(lowLOS, highLOS).normalize();
+        final double   beta           = FastMath.acos(Vector3D.dotProduct(crossingResult.getTargetDirection(),
+                                                                          localZ));
+        final double   s              = Vector3D.dotProduct(crossingResult.getTargetDirectionDerivative(),
+                                                            localZ);
+        final double   betaDer        = -s / FastMath.sqrt(1 - s * s);
+        final double   deltaL         = (0.5 * FastMath.PI - beta) / betaDer;
+        final double   fixedLine      = crossingResult.getLine() + deltaL;
+        final Vector3D fixedDirection = new Vector3D(1, crossingResult.getTargetDirection(),
+                                                     deltaL, crossingResult.getTargetDirectionDerivative()).normalize();
 
         // fix neighbouring pixels
-        final AbsoluteDate fixedDate   = sensor.getDate(fixedLine);
-        final Vector3D fixedX          = sensor.getLOS(fixedDate, lowIndex);
-        final Vector3D fixedZ          = Vector3D.crossProduct(fixedX, sensor.getLOS(fixedDate, lowIndex + 1));
-        final Vector3D fixedY          = Vector3D.crossProduct(fixedZ, fixedX);
+        final AbsoluteDate fixedDate  = sensor.getDate(fixedLine);
+        final Vector3D fixedX         = sensor.getLOS(fixedDate, lowIndex);
+        final Vector3D fixedZ         = Vector3D.crossProduct(fixedX, sensor.getLOS(fixedDate, lowIndex + 1));
+        final Vector3D fixedY         = Vector3D.crossProduct(fixedZ, fixedX);
 
         // fix pixel
         final double pixelWidth = FastMath.atan2(Vector3D.dotProduct(highLOS,        fixedY),
@@ -614,6 +622,82 @@ public class Rugged {
     private void setPlaneCrossing(final SensorMeanPlaneCrossing planeCrossing)
         throws RuggedException {
         finders.put(planeCrossing.getSensor().getName(), planeCrossing);
+    }
+
+    /** Inverse location of a point with derivatives.
+     * @param sensorName name of the line  sensor
+     * @param point point to localize
+     * @param minLine minimum line number
+     * @param maxLine maximum line number
+     * @return sensor pixel seeing point with derivatives, or null if point cannot be seen between the
+     * prescribed line numbers
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
+     * @see #inverseLocation(String, GeodeticPoint, int, int)
+     */
+    private DerivativeStructure[] inverseLocationDerivatives(final String sensorName,
+                                                             final GeodeticPoint point,
+                                                             final int minLine,
+                                                             final int maxLine)
+        throws RuggedException {
+
+        final LineSensor sensor = getLineSensor(sensorName);
+
+        final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
+
+        // find approximately the sensor line at which ground point crosses sensor mean plane
+        final Vector3D   target = ellipsoid.transform(point);
+        final SensorMeanPlaneCrossing.CrossingResult crossingResult = planeCrossing.find(target);
+        if (crossingResult == null) {
+            // target is out of search interval
+            return null;
+        }
+
+        // find approximately the pixel along this sensor line
+        final SensorPixelCrossing pixelCrossing =
+                new SensorPixelCrossing(sensor, planeCrossing.getMeanPlaneNormal(),
+                                        crossingResult.getTargetDirection(),
+                                        MAX_EVAL, COARSE_INVERSE_LOCATION_ACCURACY);
+        final double coarsePixel = pixelCrossing.locatePixel(crossingResult.getDate());
+        if (Double.isNaN(coarsePixel)) {
+            // target is out of search interval
+            return null;
+        }
+
+        // fix line by considering the closest pixel exact position and line-of-sight
+        // (this pixel might point towards a direction slightly above or below the mean sensor plane)
+        final int lowIndex = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
+        final FieldVector3D<DerivativeStructure> lowLOS =
+                        sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex);
+        final FieldVector3D<DerivativeStructure> highLOS = sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex + 1);
+        final FieldVector3D<DerivativeStructure> localZ = FieldVector3D.crossProduct(lowLOS, highLOS).normalize();
+        final DerivativeStructure beta         = FieldVector3D.dotProduct(crossingResult.getTargetDirection(), localZ).acos();
+        final DerivativeStructure s            = FieldVector3D.dotProduct(crossingResult.getTargetDirectionDerivative(), localZ);
+        final DerivativeStructure minusBetaDer = s.divide(s.multiply(s).subtract(1).negate().sqrt());
+        final DerivativeStructure deltaL       = beta.subtract(0.5 * FastMath.PI) .divide(minusBetaDer);
+        final DerivativeStructure fixedLine    = deltaL.add(crossingResult.getLine());
+        final FieldVector3D<DerivativeStructure> fixedDirection =
+                        new FieldVector3D<DerivativeStructure>(deltaL.getField().getOne(), crossingResult.getTargetDirection(),
+                                                               deltaL, crossingResult.getTargetDirectionDerivative()).normalize();
+
+        // fix neighbouring pixels
+        final AbsoluteDate fixedDate  = sensor.getDate(fixedLine.getValue());
+        final FieldVector3D<DerivativeStructure> fixedX = sensor.getLOSDerivatives(fixedDate, lowIndex);
+        final FieldVector3D<DerivativeStructure> fixedZ = FieldVector3D.crossProduct(fixedX, sensor.getLOSDerivatives(fixedDate, lowIndex + 1));
+        final FieldVector3D<DerivativeStructure> fixedY = FieldVector3D.crossProduct(fixedZ, fixedX);
+
+        // fix pixel
+        final DerivativeStructure hY         = FieldVector3D.dotProduct(highLOS, fixedY);
+        final DerivativeStructure hX         = FieldVector3D.dotProduct(highLOS, fixedX);
+        final DerivativeStructure pixelWidth = hY.atan2(hX);
+        final DerivativeStructure fY         = FieldVector3D.dotProduct(fixedDirection, fixedY);
+        final DerivativeStructure fX         = FieldVector3D.dotProduct(fixedDirection, fixedX);
+        final DerivativeStructure alpha      = fY.atan2(fX);
+        final DerivativeStructure fixedPixel = alpha.divide(pixelWidth).add(lowIndex);
+
+        return new DerivativeStructure[] {
+            fixedLine, fixedPixel
+        };
+
     }
 
     /** Estimate the free parameters in viewing model to match specified sensor
@@ -705,13 +789,20 @@ public class Rugged {
                 n += reference.getMappings().size();
             }
             final double[] target = new double[2 * n];
+            double min = Double.POSITIVE_INFINITY;
+            double max = Double.NEGATIVE_INFINITY;
             int k = 0;
             for (final SensorToGroundMapping reference : references) {
                 for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMappings()) {
-                    target[k++] = mapping.getKey().getLineNumber();
-                    target[k++] = mapping.getKey().getPixelNumber();
+                    final SensorPixel sp = mapping.getKey();
+                    target[k++] = sp.getLineNumber();
+                    target[k++] = sp.getPixelNumber();
+                    min = FastMath.min(min, sp.getLineNumber());
+                    max = FastMath.max(max, sp.getLineNumber());
                 }
             }
+            int minLine = (int) FastMath.floor(min - ESTIMATION_LINE_RANGE_MARGIN);
+            int maxLine = (int) FastMath.ceil(max - ESTIMATION_LINE_RANGE_MARGIN);
 
             // prevent parameters to exceed their prescribed bounds
             final ParameterValidator validator = params -> {
@@ -743,9 +834,38 @@ public class Rugged {
                         driver.setNormalizedValue(point.getEntry(i++));
                     }
 
-                    // TODO: compute inverse loc and its partial derivatives
-                    return new Pair<RealVector, RealMatrix>(null, null);
+                    // compute inverse loc and its partial derivatives
+                    final RealVector value    = new ArrayRealVector(target.length);
+                    final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, freeParameters.size());
+                    int l = 0;
+                    for (final SensorToGroundMapping reference : references) {
+                        for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMappings()) {
+                            final GeodeticPoint gp = mapping.getValue();
+                            final DerivativeStructure[] ilResult =
+                                            inverseLocationDerivatives(reference.getSensor().getName(),
+                                                                       gp, minLine, maxLine);
 
+                            // extract the value
+                            value.setEntry(l,     ilResult[0].getValue());
+                            value.setEntry(l + 1, ilResult[1].getValue());
+
+                            // extract the Jacobian
+                            final int[] orders = new int[freeParameters.size()];
+                            for (int m = 0; m < freeParameters.size(); ++m) {
+                                orders[m] = 1;
+                                jacobian.setEntry(l,     m, ilResult[0].getPartialDerivative(orders));
+                                jacobian.setEntry(l + 1, m, ilResult[1].getPartialDerivative(orders));
+                                orders[m] = 0;
+                            }
+
+                        }
+                    }
+
+                    // inverse loc result with Jacobian for all reference points
+                    return new Pair<RealVector, RealMatrix>(value, jacobian);
+
+                } catch (RuggedException re) {
+                    throw new RuggedExceptionWrapper(re);
                 } catch (OrekitException oe) {
                     throw new OrekitExceptionWrapper(oe);
                 }
