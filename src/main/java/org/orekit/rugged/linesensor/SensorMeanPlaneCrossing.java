@@ -419,12 +419,22 @@ public class SensorMeanPlaneCrossing {
             }
             if (FastMath.abs(deltaL) <= accuracy) {
                 // return immediately, without doing any additional evaluation!
-                if (cachedResults.size() >= CACHED_RESULTS) {
-                    cachedResults.remove(cachedResults.size() - 1);
+                final CrossingResult crossingResult =
+                    new CrossingResult(sensor.getDate(crossingLine), crossingLine, target,
+                                       targetDirection[0], targetDirection[1]);
+                boolean isNew = true;
+                for (final CrossingResult existing : cachedResults) {
+                    isNew = isNew && FastMath.abs(crossingLine - existing.crossingLine) > accuracy;
                 }
-                cachedResults.add(0, new CrossingResult(sensor.getDate(crossingLine), crossingLine, target,
-                                                        targetDirection[0], targetDirection[1]));
-                return cachedResults.get(0);
+                if (isNew) {
+                    // this result is different from the existing ones,
+                    // it brings new sampling data to the cache
+                    if (cachedResults.size() >= CACHED_RESULTS) {
+                        cachedResults.remove(cachedResults.size() - 1);
+                    }
+                    cachedResults.add(0, crossingResult);
+                }
+                return crossingResult;
             }
             for (int j = 0; j < i; ++j) {
                 if (FastMath.abs(crossingLine - crossingLineHistory[j]) <= 1.0) {
