@@ -32,6 +32,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
+import org.hipparchus.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -48,6 +50,7 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
+import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
@@ -55,6 +58,7 @@ import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
@@ -168,7 +172,7 @@ public class RuggedTest {
                               "  Orekit initialization and DEM creation   : %5.1fs%n" +
                               "  direct location and %3dM grid writing: %5.1fs (%.1f px/s)%n",
                               lastLine - firstLine, los.getNbPixels(),
-                              1.0e-3 *(t1 - t0), sizeM, 1.0e-3 *(t2 - t1), pixels / (1.0e-3 * (t2 - t1)));
+                              1.0e-3 * (t1 - t0), sizeM, 1.0e-3 * (t2 - t1), pixels / (1.0e-3 * (t2 - t1)));
         } catch (IOException ioe) {
             Assert.fail(ioe.getLocalizedMessage());
         }
@@ -1037,28 +1041,28 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithoutCorrections()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, false,
-                                         7.0e-9, 4.0e-11, 1.0e-20, 3.0e-5);
+                                         7.0e-9, 4.0e-11, 2.0e-12, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithLightTimeCorrection()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, false,
-                                         3.0e-9, 9.0e-9, 1.0e-20, 2.0e-6);
+                                         3.0e-9, 9.0e-9, 3.0e-13, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, true,
-                                         3.0e-10, 3.0e-10, 1.0e-20, 2.0e-6);
+                                         3.0e-10, 3.0e-10, 7.0e-13, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAllCorrections()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, true,
-                                         3.0e-10, 5.0e-10, 1.0e-20, 2.0e-6);
+                                         3.0e-10, 5.0e-10, 7.0e-14, 7.0e-8);
     }
 
     private void doTestInverseLocationDerivatives(int dimension,
@@ -1066,8 +1070,8 @@ public class RuggedTest {
                                                   boolean aberrationOfLightCorrection,
                                                   double lineTolerance,
                                                   double pixelTolerance,
-                                                  double lineDerivativeTolerance,
-                                                  double pixelDerivativeTolerance)
+                                                  double lineDerivativeRelativeTolerance,
+                                                  double pixelDerivativeRelativeTolerance)
         throws RuggedException, OrekitException {
         try {
 
@@ -1096,7 +1100,7 @@ public class RuggedTest {
             LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
             int firstLine = 0;
             int lastLine  = dimension;
-            LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+            final LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
             AbsoluteDate minDate = lineSensor.getDate(firstLine).shiftedBy(-1.0);
             AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
@@ -1161,51 +1165,72 @@ public class RuggedTest {
 
             // check the partial derivatives
             double h = 1.0e-6;
+            FiniteDifferencesDifferentiator differentiator = new FiniteDifferencesDifferentiator(8, h);
 
-            rollDriver.setValue(-h);
-            pitchDriver.setValue(0);
-            SensorPixel rMp0 = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
-            rollDriver.setValue(+h);
-            pitchDriver.setValue(0);
-            SensorPixel rPp0 = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
+            UnivariateDifferentiableFunction lineVSroll =
+                            differentiator.differentiate((double roll) -> {
+                                try {
+                                    rollDriver.setValue(roll);
+                                    pitchDriver.setValue(0);
+                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
+                                } catch (OrekitException e) {
+                                    throw new OrekitExceptionWrapper(e);
+                                } catch (RuggedException e) {
+                                    throw new RuggedExceptionWrapper(e);
+                                }
+                            });
+            double dLdR = lineVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            Assert.assertEquals(dLdR, result[0].getPartialDerivative(map.get("roll")), dLdR * lineDerivativeRelativeTolerance);
 
-//            rollDriver.setValue(0);
-//            pitchDriver.setValue(-h);
-//            SensorPixel r0pM = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
-//            rollDriver.setValue(0);
-//            pitchDriver.setValue(+h);
-            // TODO: the following line leads to a singular matrix
-//            SensorPixel r0pP = rugged.inverseLocation("line", gp[referencePixel], 0, dimension);
+            UnivariateDifferentiableFunction lineVSpitch =
+                            differentiator.differentiate((double pitch) -> {
+                                try {
+                                    rollDriver.setValue(0);
+                                    pitchDriver.setValue(pitch);
+                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
+                                } catch (OrekitException e) {
+                                    throw new OrekitExceptionWrapper(e);
+                                } catch (RuggedException e) {
+                                    throw new RuggedExceptionWrapper(e);
+                                }
+                            });
+            double dLdP = lineVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            Assert.assertEquals(dLdP, result[0].getPartialDerivative(map.get("pitch")), dLdP * lineDerivativeRelativeTolerance);
 
-            Assert.assertEquals("dLine/dRoll error : " +
-                                ((rPp0.getLineNumber() - rMp0.getLineNumber()) / h -
-                                 result[0].getPartialDerivative(map.get("roll"))),
-                                (rPp0.getLineNumber() - rMp0.getLineNumber()) / h,
-                                result[0].getPartialDerivative(map.get("roll")),
-                                lineDerivativeTolerance);
-            Assert.assertEquals("dPixel/dRoll error : " +
-                                ((rPp0.getPixelNumber() - rMp0.getPixelNumber()) / h -
-                                 result[1].getPartialDerivative(map.get("roll"))),
-                                (rPp0.getPixelNumber() - rMp0.getPixelNumber()) / h,
-                                result[1].getPartialDerivative(map.get("roll")),
-                                pixelDerivativeTolerance);
-//            Assert.assertEquals("dLine/dPitch error : " +
-//                                ((r0pP.getLineNumber() - r0pM.getLineNumber()) / h -
-//                                 result[0].getPartialDerivative(map.get("pitch"))),
-//                                (r0pP.getLineNumber() - r0pM.getLineNumber()) / h,
-//                                result[0].getPartialDerivative(map.get("pitch")),
-//                                lineDerivativeTolerance);
-//            Assert.assertEquals("dPixel/dPitch error : " +
-//                                ((r0pP.getPixelNumber() - r0pM.getPixelNumber()) / h -
-//                                 result[1].getPartialDerivative(map.get("pitch"))),
-//                                (r0pP.getPixelNumber() - r0pM.getPixelNumber()) / h,
-//                                result[1].getPartialDerivative(map.get("picth")),
-//                                pixelDerivativeTolerance);
-            
+            UnivariateDifferentiableFunction pixelVSroll =
+                            differentiator.differentiate((double roll) -> {
+                                try {
+                                    rollDriver.setValue(roll);
+                                    pitchDriver.setValue(0);
+                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
+                                } catch (OrekitException e) {
+                                    throw new OrekitExceptionWrapper(e);
+                                } catch (RuggedException e) {
+                                    throw new RuggedExceptionWrapper(e);
+                                }
+                            });
+            double dXdR = pixelVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            Assert.assertEquals(dXdR, result[1].getPartialDerivative(map.get("roll")), dXdR * pixelDerivativeRelativeTolerance);
+
+            UnivariateDifferentiableFunction pixelVSpitch =
+                            differentiator.differentiate((double pitch) -> {
+                                try {
+                                    rollDriver.setValue(0);
+                                    pitchDriver.setValue(pitch);
+                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
+                                } catch (OrekitException e) {
+                                    throw new OrekitExceptionWrapper(e);
+                                } catch (RuggedException e) {
+                                    throw new RuggedExceptionWrapper(e);
+                                }
+                            });
+            double dXdP = pixelVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            Assert.assertEquals(dXdP, result[1].getPartialDerivative(map.get("pitch")), dXdP * pixelDerivativeRelativeTolerance);
+
         } catch (InvocationTargetException | NoSuchMethodException |
                  SecurityException | IllegalAccessException |
-                 IllegalArgumentException | URISyntaxException e) {
-            e.printStackTrace();
+                 IllegalArgumentException | URISyntaxException |
+                 OrekitExceptionWrapper | RuggedExceptionWrapper e) {
             Assert.fail(e.getLocalizedMessage());
         }
     }
