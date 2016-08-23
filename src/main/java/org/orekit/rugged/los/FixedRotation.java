@@ -27,7 +27,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
 
@@ -55,7 +55,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
     private FieldRotation<DerivativeStructure> rDS;
 
     /** Driver for rotation angle. */
-    private final ExtendedParameterDriver angleDriver;
+    private final ParameterDriver angleDriver;
 
     /** Simple constructor.
      * <p>
@@ -70,7 +70,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
         this.rotation = null;
         this.rDS      = null;
         try {
-            this.angleDriver = new ExtendedParameterDriver(name, angle, SCALE, -2 * FastMath.PI, 2 * FastMath.PI);
+            this.angleDriver = new ParameterDriver(name, angle, SCALE, -2 * FastMath.PI, 2 * FastMath.PI);
             angleDriver.addObserver(new ParameterObserver() {
                 @Override
                 public void valueChanged(final double previousValue, final ParameterDriver driver) {
@@ -87,7 +87,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
 
     /** {@inheritDoc} */
     @Override
-    public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
+    public Stream<ParameterDriver> getParametersDrivers() {
         return Stream.of(angleDriver);
     }
 
@@ -103,23 +103,15 @@ public class FixedRotation implements TimeIndependentLOSTransform {
 
     /** {@inheritDoc} */
     @Override
-    public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los) {
+    public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
+                                                           final DSGenerator generator) {
         if (rDS == null) {
             // lazy evaluation of the rotation
-            final int nbEstimated = angleDriver.getNbEstimated();
             final FieldVector3D<DerivativeStructure> axisDS =
-                            new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, axis.getX()),
-                                                                   new DerivativeStructure(nbEstimated, 1, axis.getY()),
-                                                                   new DerivativeStructure(nbEstimated, 1, axis.getZ()));
-            final double value = angleDriver.getValue();
-            final DerivativeStructure angleDS;
-            if (angleDriver.isSelected()) {
-                // the angle is estimated
-                angleDS = new DerivativeStructure(nbEstimated, 1, angleDriver.getIndex(), value);
-            } else {
-                // the angle is not estimated
-                angleDS = new DerivativeStructure(nbEstimated, 1, value);
-            }
+                            new FieldVector3D<DerivativeStructure>(generator.constant(axis.getX()),
+                                                                   generator.constant(axis.getY()),
+                                                                   generator.constant(axis.getZ()));
+            final DerivativeStructure angleDS = generator.variable(angleDriver);
             rDS = new FieldRotation<DerivativeStructure>(axisDS, angleDS, RotationConvention.VECTOR_OPERATOR);
         }
         return rDS.applyTo(los);

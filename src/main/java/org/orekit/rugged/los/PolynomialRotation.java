@@ -28,7 +28,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
@@ -63,7 +63,7 @@ public class PolynomialRotation implements LOSTransform {
     private final AbsoluteDate referenceDate;
 
     /** Drivers for rotation angle polynomial coefficients. */
-    private final ExtendedParameterDriver[] coefficientsDrivers;
+    private final ParameterDriver[] coefficientsDrivers;
 
     /** Simple constructor.
      * <p>
@@ -84,7 +84,7 @@ public class PolynomialRotation implements LOSTransform {
                               final double ... angleCoeffs) {
         this.axis                = axis;
         this.referenceDate       = referenceDate;
-        this.coefficientsDrivers = new ExtendedParameterDriver[angleCoeffs.length];
+        this.coefficientsDrivers = new ParameterDriver[angleCoeffs.length];
         final ParameterObserver resettingObserver = new ParameterObserver() {
             @Override
             public void valueChanged(final double previousValue, final ParameterDriver driver) {
@@ -96,7 +96,7 @@ public class PolynomialRotation implements LOSTransform {
         };
         try {
             for (int i = 0; i < angleCoeffs.length; ++i) {
-                coefficientsDrivers[i] = new ExtendedParameterDriver(name + "[" + i + "]", angleCoeffs[i], SCALE,
+                coefficientsDrivers[i] = new ParameterDriver(name + "[" + i + "]", angleCoeffs[i], SCALE,
                                                                      Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
                 coefficientsDrivers[i].addObserver(resettingObserver);
             }
@@ -127,7 +127,7 @@ public class PolynomialRotation implements LOSTransform {
 
     /** {@inheritDoc} */
     @Override
-    public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
+    public Stream<ParameterDriver> getParametersDrivers() {
         return Stream.of(coefficientsDrivers);
     }
 
@@ -150,24 +150,16 @@ public class PolynomialRotation implements LOSTransform {
     /** {@inheritDoc} */
     @Override
     public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
-                                                           final AbsoluteDate date) {
+                                                           final AbsoluteDate date, final DSGenerator generator) {
 
         if (angleDS == null) {
             // lazy evaluation of the rotation
-            final int nbEstimated = coefficientsDrivers[0].getNbEstimated();
-            axisDS = new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, axis.getX()),
-                                                            new DerivativeStructure(nbEstimated, 1, axis.getY()),
-                                                            new DerivativeStructure(nbEstimated, 1, axis.getZ()));
+            axisDS = new FieldVector3D<DerivativeStructure>(generator.constant(axis.getX()),
+                                                            generator.constant(axis.getY()),
+                                                            generator.constant(axis.getZ()));
             angleDS = new DerivativeStructure[coefficientsDrivers.length];
             for (int k = 0; k < angleDS.length; ++k) {
-                final double value = coefficientsDrivers[k].getValue();
-                if (coefficientsDrivers[k].isSelected()) {
-                    // the coefficient is estimated
-                    angleDS[k] = new DerivativeStructure(nbEstimated, 1, coefficientsDrivers[k].getIndex(), value);
-                } else {
-                    // the coefficient is not estimated
-                    angleDS[k] = new DerivativeStructure(nbEstimated, 1, value);
-                }
+                angleDS[k] = generator.variable(coefficientsDrivers[k]);
             }
         }
         // evaluate polynomial, with all its partial derivatives

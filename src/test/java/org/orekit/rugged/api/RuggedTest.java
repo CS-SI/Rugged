@@ -26,10 +26,9 @@ import java.net.URISyntaxException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
@@ -37,6 +36,7 @@ import org.hipparchus.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.stat.descriptive.StreamingStatistics;
 import org.hipparchus.stat.descriptive.rank.Percentile;
 import org.hipparchus.util.FastMath;
@@ -70,7 +70,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -78,6 +78,7 @@ import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
+import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
@@ -1124,40 +1125,33 @@ public class RuggedTest {
                             build();
 
             // we want to adjust sensor roll and pitch angles
-            ExtendedParameterDriver rollDriver =
-                rugged.getLineSensor("line").getExtendedParametersDrivers().
-                filter(driver -> driver.getName().equals("roll")).findFirst().get();
+            ParameterDriver rollDriver =
+                            lineSensor.getParametersDrivers().
+                            filter(driver -> driver.getName().equals("roll")).findFirst().get();
             rollDriver.setSelected(true);
-            ExtendedParameterDriver pitchDriver =
-                rugged.getLineSensor("line").getExtendedParametersDrivers().
-                filter(driver -> driver.getName().equals("pitch")).findFirst().get();
+            ParameterDriver pitchDriver =
+                            lineSensor.getParametersDrivers().
+                            filter(driver -> driver.getName().equals("pitch")).findFirst().get();
             pitchDriver.setSelected(true);
 
-            // prepare parameters (this is normally done by Rugged.estimateFreeParameters)
-            // this setup may seem complex, but DerivativeStructure are really an
-            // internal feature, user do not need to deal with them
-            final Map<String, int[]> map = new HashMap<>();
-            rugged.getLineSensor("line").getExtendedParametersDrivers().
-            filter(driver -> driver.isSelected()).
-            forEach(driver -> {
-                driver.setNbEstimated(2);
-                driver.setIndex(map.size());
-                int[] orders = new int[2];
-                orders[map.size()] = 1;
-                map.put(driver.getName(), orders);
-            });
+            // prepare generator
+            Method createGenerator = Rugged.class.getDeclaredMethod("createGenerator", List.class);
+            createGenerator.setAccessible(true);
+            DSGenerator generator = (DSGenerator) createGenerator.invoke(rugged, Collections.singletonList(lineSensor));
 
             double referenceLine = 0.87654 * dimension;
             GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
 
             Method inverseLoc = Rugged.class.getDeclaredMethod("inverseLocationDerivatives",
                                                                String.class, GeodeticPoint.class,
-                                                               Integer.TYPE, Integer.TYPE);
+                                                               Integer.TYPE, Integer.TYPE,
+                                                               DSGenerator.class);
             inverseLoc.setAccessible(true);
             int referencePixel = (3 * dimension) / 4;
             DerivativeStructure[] result = 
                             (DerivativeStructure[]) inverseLoc.invoke(rugged,
-                                                                      "line", gp[referencePixel], 0, dimension);
+                                                                      "line", gp[referencePixel], 0, dimension,
+                                                                      generator);
             Assert.assertEquals(referenceLine,  result[0].getValue(), lineTolerance);
             Assert.assertEquals(referencePixel, result[1].getValue(), pixelTolerance);
             Assert.assertEquals(2, result[0].getFreeParameters());
@@ -1180,7 +1174,7 @@ public class RuggedTest {
                                 }
                             });
             double dLdR = lineVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dLdR, result[0].getPartialDerivative(map.get("roll")), dLdR * lineDerivativeRelativeTolerance);
+            Assert.assertEquals(dLdR, result[0].getPartialDerivative(1, 0), dLdR * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction lineVSpitch =
                             differentiator.differentiate((double pitch) -> {
@@ -1195,7 +1189,7 @@ public class RuggedTest {
                                 }
                             });
             double dLdP = lineVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dLdP, result[0].getPartialDerivative(map.get("pitch")), dLdP * lineDerivativeRelativeTolerance);
+            Assert.assertEquals(dLdP, result[0].getPartialDerivative(0, 1), dLdP * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSroll =
                             differentiator.differentiate((double roll) -> {
@@ -1210,7 +1204,7 @@ public class RuggedTest {
                                 }
                             });
             double dXdR = pixelVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dXdR, result[1].getPartialDerivative(map.get("roll")), dXdR * pixelDerivativeRelativeTolerance);
+            Assert.assertEquals(dXdR, result[1].getPartialDerivative(1, 0), dXdR * pixelDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSpitch =
                             differentiator.differentiate((double pitch) -> {
@@ -1225,13 +1219,189 @@ public class RuggedTest {
                                 }
                             });
             double dXdP = pixelVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dXdP, result[1].getPartialDerivative(map.get("pitch")), dXdP * pixelDerivativeRelativeTolerance);
+            Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
 
         } catch (InvocationTargetException | NoSuchMethodException |
                  SecurityException | IllegalAccessException |
                  IllegalArgumentException | URISyntaxException |
                  OrekitExceptionWrapper | RuggedExceptionWrapper e) {
             Assert.fail(e.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void testViewingModelParametersEstimationWithoutCorrections()
+        throws OrekitException, RuggedException {
+        doTestViewingModelParametersEstimation(2000, false, false,
+                                               FastMath.toRadians( 0.01), 1.0e-8,
+                                               FastMath.toRadians(-0.03), 2.0e-9,
+                                               6);
+    }
+
+    @Test
+    public void testViewingModelParametersEstimationWithLightTimeCorrection()
+        throws OrekitException, RuggedException {
+        doTestViewingModelParametersEstimation(2000, true, false,
+                                               FastMath.toRadians( 0.01), 1.0e-8,
+                                               FastMath.toRadians(-0.03), 2.0e-9,
+                                               6);
+    }
+
+    @Test
+    public void testViewingModelParametersEstimationWithAberrationOfLightCorrection()
+        throws OrekitException, RuggedException {
+        doTestViewingModelParametersEstimation(2000, false, true,
+                                               FastMath.toRadians( 0.01), 1.0e-8,
+                                               FastMath.toRadians(-0.03), 2.0e-9,
+                                               6);
+    }
+
+    @Test
+    public void testViewingModelParametersEstimationWithAllCorrections()
+        throws OrekitException, RuggedException {
+        doTestViewingModelParametersEstimation(2000, true, true,
+                                               FastMath.toRadians( 0.01), 1.0e-8,
+                                               FastMath.toRadians(-0.03), 3.0e-9,
+                                               6);
+    }
+
+    private void doTestViewingModelParametersEstimation(int dimension,
+                                                        boolean lightTimeCorrection,
+                                                        boolean aberrationOfLightCorrection,
+                                                        double rollValue, double rollTolerance,
+                                                        double pitchValue, double pitchTolerance,
+                                                        int expectedEvaluations)
+        throws OrekitException, RuggedException {
+        try {
+
+            // set up a perfect Rugged instance, with prescribed roll and pitch values
+            Rugged perfect = createParameterEstimationContext(dimension,
+                                                              lightTimeCorrection,
+                                                              aberrationOfLightCorrection);
+            perfect.
+                getLineSensor("line").
+                getParametersDrivers().
+                filter(driver -> driver.getName().equals("roll")).
+                findFirst().get().setValue(rollValue);
+
+            perfect.
+                getLineSensor("line").
+                getParametersDrivers().
+                filter(driver -> driver.getName().equals("pitch")).
+                findFirst().get().setValue(pitchValue);
+
+            // generate reference mapping
+            SensorToGroundMapping mapping = new SensorToGroundMapping("line");
+            LineSensor sensor = perfect.getLineSensor(mapping.getSensorName());
+            for (double line = 0; line < dimension; line += 100) {
+                AbsoluteDate date = sensor.getDate(line);
+                for (int pixel = 0; pixel < sensor.getNbPixels(); pixel += 100) {
+                    GeodeticPoint gp = perfect.directLocation(date, sensor.getPosition(),
+                                                              sensor.getLOS(date, pixel));
+                    mapping.addMapping(new SensorPixel(line, pixel), gp);
+                }
+            }
+
+            // set up a completely independent Rugged instance,
+            // with 0.0 roll and pitch values and estimating rool and pitch
+            Rugged normal = createParameterEstimationContext(dimension,
+                                                             lightTimeCorrection,
+                                                             aberrationOfLightCorrection);
+            normal.
+                getLineSensor("line").
+                getParametersDrivers().
+                filter(driver -> driver.getName().equals("roll") || driver.getName().equals("pitch")).
+                forEach(driver -> {
+                    try {
+                        driver.setSelected(true);
+                        driver.setValue(0.0);
+                    } catch (OrekitException e) {
+                        throw new OrekitExceptionWrapper(e);
+                    }
+                });
+
+            // perform parameters estimation
+            Optimum optimum = normal.estimateFreeParameters(Collections.singletonList(mapping), 10, 1.0e-9);
+            Assert.assertEquals(expectedEvaluations, optimum.getEvaluations());
+
+            // check estimated values
+            double estimatedRoll = normal.getLineSensor("line").
+                                          getParametersDrivers().
+                                          filter(driver -> driver.getName().equals("roll")).
+                                          findFirst().get().getValue();
+            Assert.assertEquals("roll error = " + (estimatedRoll - rollValue),
+                                rollValue, estimatedRoll, rollTolerance);
+
+            double estimatedPitch = normal.getLineSensor("line").
+                                           getParametersDrivers().
+                                           filter(driver -> driver.getName().equals("pitch")).
+                                           findFirst().get().getValue();
+            Assert.assertEquals("pitch error = " + (estimatedPitch - pitchValue),
+                                pitchValue, estimatedPitch, pitchTolerance);
+
+        } catch (OrekitExceptionWrapper oew) {
+            throw oew.getException();
+        }
+    }
+
+    private Rugged createParameterEstimationContext(int dimension,
+                                                    boolean lightTimeCorrection,
+                                                    boolean aberrationOfLightCorrection)
+        throws OrekitException, RuggedException {
+        
+        try {
+
+            String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            final BodyShape  earth = TestUtils.createEarth();
+            final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+            AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+            // one line sensor
+            // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+            // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+            Vector3D position = new Vector3D(1.5, 0, -0.2);
+            LOSBuilder losBuilder =
+                            TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                                        FastMath.toRadians(50.0),
+                                                                        RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+                                                           Vector3D.PLUS_I,
+                                                           FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+            losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.0));
+            losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.0));
+            TimeDependentLOS los = losBuilder.build();
+
+            // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
+            LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+            int firstLine = 0;
+            int lastLine  = dimension;
+            final LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+            AbsoluteDate minDate = lineSensor.getDate(firstLine).shiftedBy(-1.0);
+            AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
+
+            TileUpdater updater =
+                            new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                                                       FastMath.toRadians(1.0), 257);
+
+            return new RuggedBuilder().
+                            setDigitalElevationModel(updater, 8).
+                            setAlgorithm(AlgorithmId.DUVENHAGE).
+                            setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                            setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                            setTrajectory(InertialFrameId.EME2000,
+                                          TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                                          8, CartesianDerivativesFilter.USE_PV,
+                                          TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                                          2, AngularDerivativesFilter.USE_R).
+                            setLightTimeCorrection(lightTimeCorrection).
+                            setAberrationOfLightCorrection(aberrationOfLightCorrection).
+                            addLineSensor(lineSensor).
+                            build();
+
+        } catch (URISyntaxException e) {
+            Assert.fail(e.getLocalizedMessage());
+            return null; // never reached
         }
     }
 

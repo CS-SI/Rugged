@@ -16,14 +16,6 @@
  */
 package org.orekit.rugged.errors;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
-import org.hipparchus.exception.LocalizedCoreFormats;
-import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
-import org.hipparchus.util.OpenIntToDoubleHashMap;
-import org.hipparchus.util.Pair;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,10 +32,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.exception.LocalizedCoreFormats;
+import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
+import org.hipparchus.util.OpenIntToDoubleHashMap;
+import org.hipparchus.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
@@ -62,10 +61,11 @@ import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
+import org.orekit.utils.ParameterDriver;
 
 /** Replayer for Rugged debug dumps.
  * @author Luc Maisonobe
@@ -1209,13 +1209,12 @@ public class DumpReplayer {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date) {
-            final Optional<ExtendedParameterDriver> first = getExtendedParametersDrivers().findFirst();
-            final int nbEstimated = first.isPresent() ? first.get().getNbEstimated() : 0;
+        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date,
+                                                                    final DSGenerator generator) {
             final Vector3D los = getLOS(index, date);
-            return new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, los.getX()),
-                                                          new DerivativeStructure(nbEstimated, 1, los.getY()),
-                                                          new DerivativeStructure(nbEstimated, 1, los.getZ()));
+            return new FieldVector3D<DerivativeStructure>(generator.constant(los.getX()),
+                                                          generator.constant(los.getY()),
+                                                          generator.constant(los.getZ()));
         }
 
         /** Set a datation pair.
@@ -1333,8 +1332,8 @@ public class DumpReplayer {
 
         /** {@inheritDoc} */
         @Override
-        public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
-            return Stream.<ExtendedParameterDriver>empty();
+        public Stream<ParameterDriver> getParametersDrivers() {
+            return Stream.<ParameterDriver>empty();
         }
 
     }

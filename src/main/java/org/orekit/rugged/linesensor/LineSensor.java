@@ -24,8 +24,9 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.utils.ParameterDriver;
 
 /** Line sensor model.
  * @author Luc Maisonobe
@@ -79,8 +80,8 @@ public class LineSensor {
      * @return drivers for LOS parameters
      * @since 2.0
      */
-    public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
-        return los.getExtendedParametersDrivers();
+    public Stream<ParameterDriver> getParametersDrivers() {
+        return los.getParametersDrivers();
     }
 
     /** Get the pixel normalized line-of-sight at some date.
@@ -100,10 +101,12 @@ public class LineSensor {
      * and their derivatives with respect to estimated parameters.
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
+     * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return pixel normalized line-of-sight
      */
-    public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final int i) {
-        return los.getLOSDerivatives(i, date);
+    public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final int i,
+                                                                final DSGenerator generator) {
+        return los.getLOSDerivatives(i, date, generator);
     }
 
     /** Get the date.

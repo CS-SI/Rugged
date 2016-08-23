@@ -21,8 +21,9 @@ import java.util.stream.Stream;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.utils.ParameterDriver;
 
 /** Interface for lines-of-sight tranforms.
  * @author Luc Maisonobe
@@ -48,14 +49,16 @@ public interface LOSTransform {
      * @param index los pixel index
      * @param date date
      * @param los line-of-sight to transform
+     * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return line of sight, and its first partial derivatives with respect to the parameters
      */
-    FieldVector3D<DerivativeStructure> transformLOS(int index, FieldVector3D<DerivativeStructure> los, AbsoluteDate date);
+    FieldVector3D<DerivativeStructure> transformLOS(int index, FieldVector3D<DerivativeStructure> los,
+                                                    AbsoluteDate date, DSGenerator generator);
 
     /** Get the drivers for LOS parameters.
      * @return drivers for LOS parameters
      * @since 2.0
      */
-    Stream<ExtendedParameterDriver> getExtendedParametersDrivers();
+    Stream<ParameterDriver> getParametersDrivers();
 
 }

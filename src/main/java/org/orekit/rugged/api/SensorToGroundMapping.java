@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for mapping between sensor pixels and ground points.
@@ -31,8 +30,8 @@ import org.orekit.rugged.linesensor.SensorPixel;
  */
 public class SensorToGroundMapping {
 
-    /** Sensor to which mapping applies. */
-    private final LineSensor sensor;
+    /** Name of the sensor to which mapping applies. */
+    private final String sensorName;
 
     /** Mapping from sensor to ground. */
     private final Map<SensorPixel, GeodeticPoint> sensorToGround;
@@ -41,19 +40,19 @@ public class SensorToGroundMapping {
     private final Map<GeodeticPoint, SensorPixel> groundToSensor;
 
     /** Build a new instance.
-     * @param sensor sensor to which mapping applies
+     * @param sensorName name of the sensor to which mapping applies
      */
-    public SensorToGroundMapping(final LineSensor sensor) {
-        this.sensor         = sensor;
+    public SensorToGroundMapping(final String sensorName) {
+        this.sensorName     = sensorName;
         this.sensorToGround = new IdentityHashMap<>();
         this.groundToSensor = new IdentityHashMap<>();
     }
 
-    /** Get the sensor to which mapping applies.
-     * @return sensor to which mapping applies
+    /** Get the name of the sensor to which mapping applies.
+     * @return name of the sensor to which mapping applies
      */
-    public LineSensor getSensor() {
-        return sensor;
+    public String getSensorName() {
+        return sensorName;
     }
 
     /** Add a mapping between one sensor pixel and one ground point.

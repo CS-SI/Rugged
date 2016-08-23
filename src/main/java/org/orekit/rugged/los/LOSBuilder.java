@@ -19,7 +19,6 @@ package org.orekit.rugged.los;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
@@ -27,7 +26,7 @@ import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
@@ -126,14 +125,14 @@ public class LOSBuilder {
         /** {@inheritDoc} */
         @Override
         public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
-                                                               final AbsoluteDate date) {
-            return transform.transformLOS(i, los);
+                                                               final AbsoluteDate date, final DSGenerator generator) {
+            return transform.transformLOS(i, los, generator);
         }
 
         /** {@inheritDoc} */
         @Override
-        public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
-            return transform.getExtendedParametersDrivers();
+        public Stream<ParameterDriver> getParametersDrivers() {
+            return transform.getParametersDrivers();
         }
 
     }
@@ -182,19 +181,18 @@ public class LOSBuilder {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date) {
+        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date,
+                                                                    final DSGenerator generator) {
 
             // the raw line of sights are considered to be constant
-            final Optional<ExtendedParameterDriver> first = getExtendedParametersDrivers().findFirst();
-            final int nbEstimated = first.isPresent() ? first.get().getNbEstimated() : 0;
             FieldVector3D<DerivativeStructure> los =
-                            new FieldVector3D<DerivativeStructure>(new DerivativeStructure(nbEstimated, 1, raw[index].getX()),
-                                                                   new DerivativeStructure(nbEstimated, 1, raw[index].getY()),
-                                                                   new DerivativeStructure(nbEstimated, 1, raw[index].getZ()));
+                            new FieldVector3D<DerivativeStructure>(generator.constant(raw[index].getX()),
+                                                                   generator.constant(raw[index].getY()),
+                                                                   generator.constant(raw[index].getZ()));
 
             // apply the transforms, which depend on parameters and hence may introduce non-zero derivatives
             for (final LOSTransform transform : transforms) {
-                los = transform.transformLOS(index, los, date);
+                los = transform.transformLOS(index, los, date, generator);
             }
 
             return los.normalize();
@@ -202,10 +200,10 @@ public class LOSBuilder {
         }
 
         @Override
-        public Stream<ExtendedParameterDriver> getExtendedParametersDrivers() {
-            Stream<ExtendedParameterDriver> drivers = Stream.<ExtendedParameterDriver>empty();
+        public Stream<ParameterDriver> getParametersDrivers() {
+            Stream<ParameterDriver> drivers = Stream.<ParameterDriver>empty();
             for (final LOSTransform transform : transforms) {
-                drivers = Stream.concat(drivers, transform.getExtendedParametersDrivers());
+                drivers = Stream.concat(drivers, transform.getParametersDrivers());
             }
             return drivers;
         }
@@ -235,7 +233,7 @@ public class LOSBuilder {
                     Arrays.fill(transformed, null);
                 }
             };
-            getExtendedParametersDrivers().forEach(driver -> {
+            getParametersDrivers().forEach(driver -> {
                 try {
                     driver.addObserver(resettingObserver);
                 } catch (OrekitException oe) {

@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
@@ -35,6 +34,7 @@ import org.hipparchus.linear.RealVector;
 import org.hipparchus.optim.ConvergenceChecker;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresBuilder;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
@@ -54,13 +54,14 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
+import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
-import org.orekit.rugged.utils.ExtendedParameterDriver;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.PVCoordinates;
+import org.orekit.utils.ParameterDriver;
 
 /** Main class of Rugged library API.
  * @see RuggedBuilder
@@ -630,6 +631,7 @@ public class Rugged {
      * @param point point to localize
      * @param minLine minimum line number
      * @param maxLine maximum line number
+     * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return sensor pixel seeing point with derivatives, or null if point cannot be seen between the
      * prescribed line numbers
      * @exception RuggedException if line cannot be localized, or sensor is unknown
@@ -638,7 +640,8 @@ public class Rugged {
     private DerivativeStructure[] inverseLocationDerivatives(final String sensorName,
                                                              final GeodeticPoint point,
                                                              final int minLine,
-                                                             final int maxLine)
+                                                             final int maxLine,
+                                                             final DSGenerator generator)
         throws RuggedException {
 
         final LineSensor sensor = getLineSensor(sensorName);
@@ -668,8 +671,8 @@ public class Rugged {
         // (this pixel might point towards a direction slightly above or below the mean sensor plane)
         final int lowIndex = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
         final FieldVector3D<DerivativeStructure> lowLOS =
-                        sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex);
-        final FieldVector3D<DerivativeStructure> highLOS = sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex + 1);
+                        sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex, generator);
+        final FieldVector3D<DerivativeStructure> highLOS = sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex + 1, generator);
         final FieldVector3D<DerivativeStructure> localZ = FieldVector3D.crossProduct(lowLOS, highLOS).normalize();
         final DerivativeStructure beta         = FieldVector3D.dotProduct(crossingResult.getTargetDirection(), localZ).acos();
         final DerivativeStructure s            = FieldVector3D.dotProduct(crossingResult.getTargetDirectionDerivative(), localZ);
@@ -682,8 +685,8 @@ public class Rugged {
 
         // fix neighbouring pixels
         final AbsoluteDate fixedDate  = sensor.getDate(fixedLine.getValue());
-        final FieldVector3D<DerivativeStructure> fixedX = sensor.getLOSDerivatives(fixedDate, lowIndex);
-        final FieldVector3D<DerivativeStructure> fixedZ = FieldVector3D.crossProduct(fixedX, sensor.getLOSDerivatives(fixedDate, lowIndex + 1));
+        final FieldVector3D<DerivativeStructure> fixedX = sensor.getLOSDerivatives(fixedDate, lowIndex, generator);
+        final FieldVector3D<DerivativeStructure> fixedZ = FieldVector3D.crossProduct(fixedX, sensor.getLOSDerivatives(fixedDate, lowIndex + 1, generator));
         final FieldVector3D<DerivativeStructure> fixedY = FieldVector3D.crossProduct(fixedZ, fixedX);
 
         // fix pixel
@@ -708,15 +711,15 @@ public class Rugged {
      * like rotation angles polynomial coefficients.
      * </p>
      * <p>
-     * Before using this method, the {@link ExtendedParameterDriver viewing model
+     * Before using this method, the {@link ParameterDriver viewing model
      * parameters} retrieved by calling the {@link
      * LineSensor#getExtendedParametersDrivers() getExtendedParametersDrivers()}
      * method on the desired sensors must be configured. The parameters that should
-     * be estimated must have their {@link ExtendedParameterDriver#setSelected(boolean)
+     * be estimated must have their {@link ParameterDriver#setSelected(boolean)
      * selection status} set to {@link true} whereas the parameters that should retain
-     * their current value must have their {@link ExtendedParameterDriver#setSelected(boolean)
+     * their current value must have their {@link ParameterDriver#setSelected(boolean)
      * selection status} set to {@link false}. If needed, the {@link
-     * ExtendedParameterDriver#setValue(double) value} of the estimated/selected parameters
+     * ParameterDriver#setValue(double) value} of the estimated/selected parameters
      * can also be changed before calling the method, as this value will serve as the
      * initial value in the estimation process.
      * </p>
@@ -739,52 +742,27 @@ public class Rugged {
      * @param maxEvaluations maximum number of evaluations
      * @param parametersConvergenceThreshold convergence threshold on
      * normalized parameters (dimensionless, related to parameters scales)
-     * @return a list of the estimated parameters (this return value is for convenience
-     * only, the viewing model is already aware of the estimated values, there is no need
-     * to do any updating)
+     * @return optimum of the least squares problem
      * @exception RuggedException if several parameters with the same name exist,
      * or if parameters cannot be estimated (too few measurements, ill-conditioned problem ...)
      */
-    public List<ExtendedParameterDriver> estimateFreeParameters(final Collection<SensorToGroundMapping> references,
-                                                                final int maxEvaluations,
-                                                                final double parametersConvergenceThreshold)
+    public Optimum estimateFreeParameters(final Collection<SensorToGroundMapping> references,
+                                          final int maxEvaluations,
+                                          final double parametersConvergenceThreshold)
         throws RuggedException {
         try {
 
-            // we are more stringent than Orekit orbit determination:
-            // we do not allow different parameters with the same name
-            final Set<String> names = new HashSet<>();
+            final List<LineSensor> selectedSensors = new ArrayList<>();
             for (final SensorToGroundMapping reference : references) {
-                reference.getSensor().getExtendedParametersDrivers().forEach(driver -> {
-                    if (names.contains(driver.getName())) {
-                        throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME,
-                                                                             driver.getName()));
-                    }
-                });
+                selectedSensors.add(getLineSensor(reference.getSensorName()));
             }
-
-            // gather free parameters from all reference mappings
-            final List<ExtendedParameterDriver> freeParameters = new ArrayList<>();
-            for (final SensorToGroundMapping reference : references) {
-                freeParameters.addAll(reference.
-                                      getSensor().
-                                      getExtendedParametersDrivers().
-                                      filter(driver -> driver.isSelected()).
-                                      collect(Collectors.toList()));
-            }
-
-            // set up the indices and number of estimated parameters,
-            // so DerivativeStructure instances with the proper characteristics can be built
-            int index = 0;
-            for (final ExtendedParameterDriver driver : freeParameters) {
-                driver.setNbEstimated(freeParameters.size());
-                driver.setIndex(index++);
-            }
+            final DSGenerator generator = createGenerator(selectedSensors);
+            final List<ParameterDriver> selected = generator.getSelected();
 
             // get start point (as a normalized value)
-            final double[] start = new double[freeParameters.size()];
+            final double[] start = new double[selected.size()];
             for (int i = 0; i < start.length; ++i) {
-                start[i] = freeParameters.get(i).getNormalizedValue();
+                start[i] = selected.get(i).getNormalizedValue();
             }
 
             // set up target in sensor domain
@@ -812,7 +790,7 @@ public class Rugged {
             final ParameterValidator validator = params -> {
                 try {
                     int i = 0;
-                    for (final ExtendedParameterDriver driver : freeParameters) {
+                    for (final ParameterDriver driver : selected) {
                         // let the parameter handle min/max clipping
                         driver.setNormalizedValue(params.getEntry(i));
                         params.setEntry(i++, driver.getNormalizedValue());
@@ -834,32 +812,38 @@ public class Rugged {
 
                     // set the current parameters values
                     int i = 0;
-                    for (final ExtendedParameterDriver driver : freeParameters) {
+                    for (final ParameterDriver driver : selected) {
                         driver.setNormalizedValue(point.getEntry(i++));
                     }
 
                     // compute inverse loc and its partial derivatives
                     final RealVector value    = new ArrayRealVector(target.length);
-                    final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, freeParameters.size());
+                    final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, selected.size());
                     int l = 0;
                     for (final SensorToGroundMapping reference : references) {
                         for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMappings()) {
                             final GeodeticPoint gp = mapping.getValue();
                             final DerivativeStructure[] ilResult =
-                                            inverseLocationDerivatives(reference.getSensor().getName(),
-                                                                       gp, minLine, maxLine);
+                                            inverseLocationDerivatives(reference.getSensorName(),
+                                                                       gp, minLine, maxLine, generator);
 
-                            // extract the value
-                            value.setEntry(l,     ilResult[0].getValue());
-                            value.setEntry(l + 1, ilResult[1].getValue());
+                            if (ilResult == null) {
+                                value.setEntry(l,     minLine - 100.0); // arbitrary line far away
+                                value.setEntry(l + 1, -100.0);          // arbitrary pixel far away
+                            } else {
+                                // extract the value
+                                value.setEntry(l,     ilResult[0].getValue());
+                                value.setEntry(l + 1, ilResult[1].getValue());
 
-                            // extract the Jacobian
-                            final int[] orders = new int[freeParameters.size()];
-                            for (int m = 0; m < freeParameters.size(); ++m) {
-                                orders[m] = 1;
-                                jacobian.setEntry(l,     m, ilResult[0].getPartialDerivative(orders));
-                                jacobian.setEntry(l + 1, m, ilResult[1].getPartialDerivative(orders));
-                                orders[m] = 0;
+                                // extract the Jacobian
+                                final int[] orders = new int[selected.size()];
+                                for (int m = 0; m < selected.size(); ++m) {
+                                    final double scale = selected.get(m).getScale();
+                                    orders[m] = 1;
+                                    jacobian.setEntry(l,     m, ilResult[0].getPartialDerivative(orders) * scale);
+                                    jacobian.setEntry(l + 1, m, ilResult[1].getPartialDerivative(orders) * scale);
+                                    orders[m] = 0;
+                                }
                             }
 
                             l += 2;
@@ -880,6 +864,8 @@ public class Rugged {
             // set up the least squares problem
             final LeastSquaresProblem problem = new LeastSquaresBuilder().
                             lazyEvaluation(false).
+                            maxIterations(maxEvaluations).
+                            maxEvaluations(maxEvaluations).
                             weight(null).
                             start(start).
                             target(target).
@@ -892,9 +878,7 @@ public class Rugged {
             final LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
 
             // solve the least squares problem
-            optimizer.optimize(problem);
-
-            return freeParameters;
+            return optimizer.optimize(problem);
 
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
@@ -902,6 +886,67 @@ public class Rugged {
             final OrekitException oe = oew.getException();
             throw new RuggedException(oe,  oe.getSpecifier(), oe.getParts());
         }
+    }
+
+    /** Create the generator for {@link DerivativeStructure} instances.
+     * @param selectedSensors sensors referencing the parameters drivers
+     * @return a new generator
+     * @exception RuggedException if several parameters with the same name exist
+     */
+    private DSGenerator createGenerator(final List<LineSensor> selectedSensors)
+        throws RuggedException {
+
+        // we are more stringent than Orekit orbit determination:
+        // we do not allow different parameters with the same name
+        final Set<String> names = new HashSet<>();
+        for (final LineSensor sensor : selectedSensors) {
+            sensor.getParametersDrivers().forEach(driver -> {
+                if (names.contains(driver.getName())) {
+                    throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME,
+                                                                         driver.getName()));
+                }
+            });
+        }
+
+        // set up generator list and map
+        final List<ParameterDriver> selected = new ArrayList<>();
+        final Map<String, Integer> map = new HashMap<>();
+        for (final LineSensor sensor : selectedSensors) {
+            sensor.
+                getParametersDrivers().
+                filter(driver -> driver.isSelected()).
+                forEach(driver -> {
+                        selected.add(driver);
+                        map.put(driver.getName(), map.size());
+                    });
+        }
+
+        return new DSGenerator() {
+
+            /** {@inheritDoc} */
+            @Override
+            public List<ParameterDriver> getSelected() {
+                return selected;
+            }
+
+            /** {@inheritDoc} */
+            @Override
+            public DerivativeStructure constant(final double value) {
+                return new DerivativeStructure(map.size(), 1, value);
+            }
+
+            /** {@inheritDoc} */
+            @Override
+            public DerivativeStructure variable(final ParameterDriver driver) {
+                final Integer index = map.get(driver.getName());
+                if (index == null) {
+                    return constant(driver.getValue());
+                } else {
+                    return new DerivativeStructure(map.size(), 1, index.intValue(), driver.getValue());
+                }
+            }
+
+        };
     }
 
     /** Get transform from spacecraft to inertial frame.
