@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
@@ -738,12 +739,15 @@ public class Rugged {
      * @param maxEvaluations maximum number of evaluations
      * @param parametersConvergenceThreshold convergence threshold on
      * normalized parameters (dimensionless, related to parameters scales)
+     * @return a list of the estimated parameters (this return value is for convenience
+     * only, the viewing model is already aware of the estimated values, there is no need
+     * to do any updating)
      * @exception RuggedException if several parameters with the same name exist,
      * or if parameters cannot be estimated (too few measurements, ill-conditioned problem ...)
      */
-    public void estimateFreeParameters(final Collection<SensorToGroundMapping> references,
-                                       final int maxEvaluations,
-                                       final double parametersConvergenceThreshold)
+    public List<ExtendedParameterDriver> estimateFreeParameters(final Collection<SensorToGroundMapping> references,
+                                                                final int maxEvaluations,
+                                                                final double parametersConvergenceThreshold)
         throws RuggedException {
         try {
 
@@ -762,11 +766,11 @@ public class Rugged {
             // gather free parameters from all reference mappings
             final List<ExtendedParameterDriver> freeParameters = new ArrayList<>();
             for (final SensorToGroundMapping reference : references) {
-                reference.
-                    getSensor().
-                    getExtendedParametersDrivers().
-                    filter(driver -> driver.isSelected()).
-                    forEach(driver -> freeParameters.add(driver));
+                freeParameters.addAll(reference.
+                                      getSensor().
+                                      getExtendedParametersDrivers().
+                                      filter(driver -> driver.isSelected()).
+                                      collect(Collectors.toList()));
             }
 
             // set up the indices and number of estimated parameters,
@@ -801,8 +805,8 @@ public class Rugged {
                     max = FastMath.max(max, sp.getLineNumber());
                 }
             }
-            int minLine = (int) FastMath.floor(min - ESTIMATION_LINE_RANGE_MARGIN);
-            int maxLine = (int) FastMath.ceil(max - ESTIMATION_LINE_RANGE_MARGIN);
+            final int minLine = (int) FastMath.floor(min - ESTIMATION_LINE_RANGE_MARGIN);
+            final int maxLine = (int) FastMath.ceil(max - ESTIMATION_LINE_RANGE_MARGIN);
 
             // prevent parameters to exceed their prescribed bounds
             final ParameterValidator validator = params -> {
@@ -858,6 +862,8 @@ public class Rugged {
                                 orders[m] = 0;
                             }
 
+                            l += 2;
+
                         }
                     }
 
@@ -887,6 +893,8 @@ public class Rugged {
 
             // solve the least squares problem
             optimizer.optimize(problem);
+
+            return freeParameters;
 
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
