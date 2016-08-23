@@ -70,7 +70,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
         this.rotation = null;
         this.rDS      = null;
         try {
-            this.angleDriver = new ExtendedParameterDriver(name, angle, SCALE, 0, 2 * FastMath.PI);
+            this.angleDriver = new ExtendedParameterDriver(name, angle, SCALE, -2 * FastMath.PI, 2 * FastMath.PI);
             angleDriver.addObserver(new ParameterObserver() {
                 @Override
                 public void valueChanged(final double previousValue, final ParameterDriver driver) {
