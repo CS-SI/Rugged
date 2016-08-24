@@ -713,7 +713,7 @@ public class Rugged {
      * <p>
      * Before using this method, the {@link ParameterDriver viewing model
      * parameters} retrieved by calling the {@link
-     * LineSensor#getExtendedParametersDrivers() getExtendedParametersDrivers()}
+     * LineSensor#getParametersDrivers() getParametersDrivers()}
      * method on the desired sensors must be configured. The parameters that should
      * be estimated must have their {@link ParameterDriver#setSelected(boolean)
      * selection status} set to {@link true} whereas the parameters that should retain
@@ -730,11 +730,11 @@ public class Rugged {
      * </p>
      * <p>
      * The estimated parameters can be retrieved after the method completes by calling
-     * again the {@link LineSensor#getExtendedParametersDrivers() getExtendedParametersDrivers()}
+     * again the {@link LineSensor#getParametersDrivers() getParametersDrivers()}
      * method on the desired sensors and checking the updated values of the parameters.
      * In fact, as the values of the parameters are already updated by this method, if
-     * wants to use the updated values immediately to perform new direct/inverse
-     * locations they can do so without looking at the parameters: the viewing models
+     * users want to use the updated values immediately to perform new direct/inverse
+     * locations, they can do so without looking at the parameters: the viewing models
      * are already aware of the updated parameters.
      * </p>
      * @param references reference mappings between sensors pixels and ground point that
@@ -744,7 +744,8 @@ public class Rugged {
      * normalized parameters (dimensionless, related to parameters scales)
      * @return optimum of the least squares problem
      * @exception RuggedException if several parameters with the same name exist,
-     * or if parameters cannot be estimated (too few measurements, ill-conditioned problem ...)
+     * if no parameters have been selected for estimation, or if parameters cannot be
+     * estimated (too few measurements, ill-conditioned problem ...)
      */
     public Optimum estimateFreeParameters(final Collection<SensorToGroundMapping> references,
                                           final int maxEvaluations,
@@ -758,6 +759,9 @@ public class Rugged {
             }
             final DSGenerator generator = createGenerator(selectedSensors);
             final List<ParameterDriver> selected = generator.getSelected();
+            if (selected.isEmpty()) {
+                throw new RuggedException(RuggedMessages.NO_PARAMETERS_SELECTED);
+            }
 
             // get start point (as a normalized value)
             final double[] start = new double[selected.size()];
@@ -769,6 +773,9 @@ public class Rugged {
             int n = 0;
             for (final SensorToGroundMapping reference : references) {
                 n += reference.getMappings().size();
+            }
+            if (n == 0) {
+                throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
             }
             final double[] target = new double[2 * n];
             double min = Double.POSITIVE_INFINITY;
@@ -905,6 +912,7 @@ public class Rugged {
                     throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME,
                                                                          driver.getName()));
                 }
+                names.add(driver.getName());
             });
         }
 

@@ -73,6 +73,11 @@ TILE_ALREADY_DEFINED = tuile {0} déjà définie ligne {1} du fichier {2}: {3}
 # unknown tile {0}, line {1}, file {2}: {3}
 UNKNOWN_TILE = tuile {0} inconnue ligne {1} du fichier {2}: {3}
 
+# no parameters have been selected for estimation
+NO_PARAMETERS_SELECTED = aucun paramètre n''a été sélectionné pour être estimé
+
+# no reference mappings for parameters estimation
+NO_REFERENCE_MAPPINGS = aucune projection de référence pour l''estimation des paramètres
+
 # a different parameter with name {0} already exists
 DUPLICATED_PARAMETER_NAME = il existe déjà un autre paramètre nommé {0}
-

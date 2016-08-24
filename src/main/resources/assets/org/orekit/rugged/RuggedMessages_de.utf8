@@ -72,6 +72,12 @@ TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
 
 # unknown tile {0}, line {1}, file {2}: {3}
 UNKNOWN_TILE = <MISSING TRANSLATION>
+ 
+# no parameters have been selected for estimation
+NO_PARAMETERS_SELECTED = <MISSING TRANSLATION>
+
+# no reference mappings for parameters estimation
+NO_REFERENCE_MAPPINGS = <MISSING TRANSLATION>
 
 # a different parameter with name {0} already exists
 DUPLICATED_PARAMETER_NAME = <MISSING TRANSLATION>

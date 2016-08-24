@@ -75,6 +75,8 @@ public enum RuggedMessages implements Localizable {
     ABERRATION_OF_LIGHT_CORRECTION_REDEFINED("aberration of light correction redefined, line {0}, file {1}: {2}"),
     TILE_ALREADY_DEFINED("tile {0} already defined, line {1}, file {2}: {3}"),
     UNKNOWN_TILE("unknown tile {0}, line {1}, file {2}: {3}"),
+    NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),
+    NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),
     DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists");
 
     // CHECKSTYLE: resume JavadocVariable check

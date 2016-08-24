@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -1230,6 +1231,62 @@ public class RuggedTest {
     }
 
     @Test
+    public void testNoParametersSelected()
+        throws OrekitException {
+        try {
+            Rugged perfect = createParameterEstimationContext(2000, false, false).build();
+            perfect.estimateFreeParameters(Collections.singletonList(new SensorToGroundMapping("line")),
+                                           100, 1.0e-3);
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.NO_PARAMETERS_SELECTED, re.getSpecifier());
+        }
+    }
+
+    @Test
+    public void testDuplicatedParameter()
+        throws OrekitException {
+        try {
+            TimeDependentLOS los =
+                            TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I, 0.1, 1000).
+                            addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.0)).build();
+            LineDatation lineDatation = new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 50, 1.0 / 1.5e-3);
+            Rugged perfect = createParameterEstimationContext(2000, false, false).
+                             addLineSensor(new LineSensor("other", lineDatation, Vector3D.ZERO, los)).
+                             build();
+            // the duplicated parameter is "pitch", it will be detected even despite only "roll" is estimated
+            perfect.getLineSensor("line").
+                    getParametersDrivers().
+                    filter(driver -> driver.getName().equals("roll")).
+                    forEach(driver -> driver.setSelected(true));
+            perfect.estimateFreeParameters(Arrays.asList(new SensorToGroundMapping("line"),
+                                                         new SensorToGroundMapping("other")),
+                                           100, 1.0e-3);
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.DUPLICATED_PARAMETER_NAME, re.getSpecifier());
+            Assert.assertEquals("pitch", re.getParts()[0]);
+        }
+    }
+
+    @Test
+    public void testNoReferenceMapping()
+        throws OrekitException {
+        try {
+            Rugged perfect = createParameterEstimationContext(2000, false, false).build();
+            perfect.getLineSensor("line").
+                    getParametersDrivers().
+                    filter(driver -> driver.getName().equals("roll") || driver.getName().equals("pitch")).
+                    forEach(driver -> driver.setSelected(true));
+            perfect.estimateFreeParameters(Collections.singletonList(new SensorToGroundMapping("line")),
+                                           100, 1.0e-3);
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.NO_REFERENCE_MAPPINGS, re.getSpecifier());
+        }
+    }
+
+    @Test
     public void testViewingModelParametersEstimationWithoutCorrections()
         throws OrekitException, RuggedException {
         doTestViewingModelParametersEstimation(2000, false, false,
@@ -1277,7 +1334,7 @@ public class RuggedTest {
             // set up a perfect Rugged instance, with prescribed roll and pitch values
             Rugged perfect = createParameterEstimationContext(dimension,
                                                               lightTimeCorrection,
-                                                              aberrationOfLightCorrection);
+                                                              aberrationOfLightCorrection).build();
             perfect.
                 getLineSensor("line").
                 getParametersDrivers().
@@ -1306,7 +1363,7 @@ public class RuggedTest {
             // with 0.0 roll and pitch values and estimating rool and pitch
             Rugged normal = createParameterEstimationContext(dimension,
                                                              lightTimeCorrection,
-                                                             aberrationOfLightCorrection);
+                                                             aberrationOfLightCorrection).build();
             normal.
                 getLineSensor("line").
                 getParametersDrivers().
@@ -1344,9 +1401,9 @@ public class RuggedTest {
         }
     }
 
-    private Rugged createParameterEstimationContext(int dimension,
-                                                    boolean lightTimeCorrection,
-                                                    boolean aberrationOfLightCorrection)
+    private RuggedBuilder createParameterEstimationContext(int dimension,
+                                                           boolean lightTimeCorrection,
+                                                           boolean aberrationOfLightCorrection)
         throws OrekitException, RuggedException {
         
         try {
@@ -1396,8 +1453,7 @@ public class RuggedTest {
                                           2, AngularDerivativesFilter.USE_R).
                             setLightTimeCorrection(lightTimeCorrection).
                             setAberrationOfLightCorrection(aberrationOfLightCorrection).
-                            addLineSensor(lineSensor).
-                            build();
+                            addLineSensor(lineSensor);
 
         } catch (URISyntaxException e) {
             Assert.fail(e.getLocalizedMessage());

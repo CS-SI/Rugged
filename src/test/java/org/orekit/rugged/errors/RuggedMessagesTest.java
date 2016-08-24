@@ -30,7 +30,7 @@ public class RuggedMessagesTest {
 
     @Test
     public void testMessageNumber() {
-        Assert.assertEquals(26, RuggedMessages.values().length);
+        Assert.assertEquals(28, RuggedMessages.values().length);
     }
 
     @Test
