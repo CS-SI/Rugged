@@ -121,18 +121,6 @@ public class LineSensor {
         return date;
     }
 
-    /** Get the line number.
-     * @param date date
-     * @return line number corresponding to date
-     * @exception RuggedException if date cannot be handled
-     */
-    public double getLine(final AbsoluteDate date)
-        throws RuggedException {
-        final double lineNumber = datationModel.getLine(date);
-        DumpManager.dumpSensorDatation(this, lineNumber, date);
-        return lineNumber;
-    }
-
     /** Get the rate of lines scanning.
      * @param lineNumber line number
      * @return rate of lines scanning (lines / seconds)
