@@ -16,12 +16,11 @@
  */
 package org.orekit.rugged.errors;
 
-import org.hipparchus.exception.Localizable;
-import org.hipparchus.exception.LocalizedException;
-import org.hipparchus.exception.MathRuntimeException;
-
 import java.text.MessageFormat;
 import java.util.Locale;
+
+import org.hipparchus.exception.Localizable;
+import org.hipparchus.exception.LocalizedException;
 
 
 /** This class is the base class for all specific exceptions thrown by
@@ -57,26 +56,6 @@ public class RuggedException extends Exception implements LocalizedException {
         this.parts     = (parts == null) ? new Object[0] : parts.clone();
     }
 
-    /** Copy constructor.
-     * @param exception exception to copy from
-     */
-    public RuggedException(final RuggedException exception) {
-        super(exception);
-        this.specifier = exception.specifier;
-        this.parts     = exception.parts.clone();
-    }
-
-    /** Simple constructor.
-     * Build an exception from a cause and with a specified message
-     * @param message descriptive message
-     * @param cause underlying cause
-     */
-    public RuggedException(final Localizable message, final Throwable cause) {
-        super(cause);
-        this.specifier = message;
-        this.parts     = new Object[0];
-    }
-
     /** Simple constructor.
      * Build an exception from a cause and with a translated and formatted message
      * @param cause underlying cause
@@ -88,16 +67,6 @@ public class RuggedException extends Exception implements LocalizedException {
         super(cause);
         this.specifier = specifier;
         this.parts     = (parts == null) ? new Object[0] : parts.clone();
-    }
-
-    /** Simple constructor.
-     * Build an exception from an Hipparchus exception
-     * @param exception underlying Hipparchus exception
-     */
-    public RuggedException(final MathRuntimeException exception) {
-        super(exception);
-        this.specifier = exception.getSpecifier();
-        this.parts     = exception.getParts();
     }
 
     /** {@inheritDoc} */

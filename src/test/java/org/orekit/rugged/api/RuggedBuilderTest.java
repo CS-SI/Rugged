@@ -154,26 +154,126 @@ public class RuggedBuilderTest {
         RuggedBuilder builder = new RuggedBuilder().
                                 setDigitalElevationModel(updater, 8).
                                 setAlgorithm(AlgorithmId.DUVENHAGE).
-                                setEllipsoid(EllipsoidId.GRS80, BodyRotatingFrameId.ITRF).
-                                setTimeSpan(pv.get(0).getDate(), pv.get(pv.size() - 1).getDate(), 0.001, 5.0).
-                                setTrajectory(InertialFrameId.EME2000,
-                                              pv, 8, CartesianDerivativesFilter.USE_PV,
-                                              q, 8, AngularDerivativesFilter.USE_R);
+                                setTimeSpan(pv.get(0).getDate(), pv.get(pv.size() - 1).getDate(), 0.001, 5.0);
+        try {
+            builder.build();
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assert.assertEquals("RuggedBuilder.setEllipsoid()", re.getParts()[0]);
+        }
+        builder.setEllipsoid(EllipsoidId.GRS80, BodyRotatingFrameId.ITRF);
+        try {
+            builder.build();
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assert.assertEquals("RuggedBuilder.setTrajectory()", re.getParts()[0]);
+        }
+        builder.setTrajectory(InertialFrameId.EME2000,
+                              pv, 8, CartesianDerivativesFilter.USE_PV,
+                              q, 8, AngularDerivativesFilter.USE_R);
+        Assert.assertSame(FramesFactory.getEME2000(), builder.getInertialFrame());
 
         // light time correction and aberration of light correction are enabled by default
         Rugged rugged = builder.build();
         Assert.assertTrue(rugged.isLightTimeCorrected());
         Assert.assertTrue(rugged.isAberrationOfLightCorrected());
+        Assert.assertTrue(builder.getLightTimeCorrection());
+        Assert.assertTrue(builder.getAberrationOfLightCorrection());
 
         builder.setLightTimeCorrection(false);
         rugged = builder.build();
         Assert.assertFalse(rugged.isLightTimeCorrected());
         Assert.assertTrue(rugged.isAberrationOfLightCorrected());
+        Assert.assertFalse(builder.getLightTimeCorrection());
+        Assert.assertTrue(builder.getAberrationOfLightCorrection());
 
         builder.setAberrationOfLightCorrection(false);
         rugged = builder.build();
         Assert.assertFalse(rugged.isLightTimeCorrected());
         Assert.assertFalse(rugged.isAberrationOfLightCorrected());
+        Assert.assertFalse(builder.getLightTimeCorrection());
+        Assert.assertFalse(builder.getAberrationOfLightCorrection());
+
+        Assert.assertEquals(AlgorithmId.DUVENHAGE, builder.getAlgorithm());
+        Assert.assertEquals(6378137.0, builder.getEllipsoid().getEquatorialRadius(), 1.0e-9);
+        Assert.assertEquals(1.0 / 298.257222101, builder.getEllipsoid().getFlattening(), 1.0e-10);
+        Assert.assertSame(updater, builder.getTileUpdater());
+        Assert.assertEquals(8, builder.getMaxCachedTiles());
+        Assert.assertTrue(Double.isNaN(builder.getConstantElevation()));
+        Assert.assertEquals(pv.get(0).getDate(), builder.getMinDate());
+        Assert.assertEquals(pv.get(pv.size() - 1).getDate(), builder.getMaxDate());
+        Assert.assertEquals(0.001, builder.getTStep(), 1.0e-10);
+        Assert.assertEquals(5.0, builder.getOvershootTolerance(), 1.0e-10);
+        Assert.assertSame(FramesFactory.getEME2000(), builder.getInertialFrame());
+        Assert.assertSame(pv, builder.getPositionsVelocities());
+        Assert.assertEquals(8, builder.getPVInterpolationNumber());
+        Assert.assertEquals(CartesianDerivativesFilter.USE_PV, builder.getPVFilter());
+        Assert.assertSame(q,  builder.getQuaternions());
+        Assert.assertEquals(8, builder.getAInterpolationNumber());
+        Assert.assertEquals(AngularDerivativesFilter.USE_R, builder.getAFilter());
+
+        Assert.assertTrue(builder.getLineSensors().isEmpty());
+        LineSensor lineSensor = new LineSensor("line", new LinearLineDatation(t0, 2000 / 2, 1.0 / 1.5e-3),
+                                               Vector3D.ZERO,
+                                               createLOSPerfectLine(Vector3D.PLUS_K,
+                                                                    Vector3D.PLUS_I, FastMath.toRadians(1.0), 2000));
+        builder.addLineSensor(lineSensor);
+        Assert.assertEquals(1, builder.getLineSensors().size());
+        Assert.assertSame(lineSensor, builder.getLineSensors().get(0));
+        builder.clearLineSensors();
+        Assert.assertTrue(builder.getLineSensors().isEmpty());
+
+        builder.setTrajectory(InertialFrameId.GCRF,
+                              pv, 8, CartesianDerivativesFilter.USE_PV,
+                              q, 8, AngularDerivativesFilter.USE_R);
+        Assert.assertSame(FramesFactory.getGCRF(), builder.getInertialFrame());
+        builder.setTrajectory(InertialFrameId.MOD,
+                              pv, 8, CartesianDerivativesFilter.USE_PV,
+                              q, 8, AngularDerivativesFilter.USE_R);
+        Assert.assertSame(FramesFactory.getMOD(IERSConventions.IERS_1996), builder.getInertialFrame());
+        builder.setTrajectory(InertialFrameId.TOD,
+                              pv, 8, CartesianDerivativesFilter.USE_PV,
+                              q, 8, AngularDerivativesFilter.USE_R);
+        Assert.assertSame(FramesFactory.getTOD(IERSConventions.IERS_1996, true), builder.getInertialFrame());
+        builder.setTrajectory(InertialFrameId.VEIS1950,
+                              pv, 8, CartesianDerivativesFilter.USE_PV,
+                              q, 8, AngularDerivativesFilter.USE_R);
+        Assert.assertSame(FramesFactory.getVeis1950(), builder.getInertialFrame());
+
+        builder.setAlgorithm(null);
+        try {
+            builder.build();
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assert.assertEquals("RuggedBuilder.setAlgorithmID()", re.getParts()[0]);
+        }
+
+        builder.setAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID);
+        builder.setConstantElevation(Double.NaN);
+        try {
+            builder.build();
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assert.assertEquals("RuggedBuilder.setConstantElevation()", re.getParts()[0]);
+        }
+        builder.setConstantElevation(100.0);
+        Assert.assertNotNull(builder.build());
+
+        builder.setAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
+        builder.setDigitalElevationModel(null, 8);
+        try {
+            builder.build();
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assert.assertEquals("RuggedBuilder.setDigitalElevationModel()", re.getParts()[0]);
+        }
+        builder.setDigitalElevationModel(updater, 8);
+        Assert.assertNotNull(builder.build());
 
     }
 

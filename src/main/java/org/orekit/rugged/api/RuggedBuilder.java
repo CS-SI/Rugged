@@ -405,7 +405,7 @@ public class RuggedBuilder {
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #setTrajectoryAndTimeSpan(InputStream)
      * @see #getInertialFrame()
-     * @see #getpositionsVelocities()
+     * @see #getPositionsVelocities()
      * @see #getPVInterpolationNumber()
      * @see #getPVInterpolationNumber()
      * @see #getQuaternions()
@@ -440,7 +440,7 @@ public class RuggedBuilder {
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #setTrajectoryAndTimeSpan(InputStream)
-     * @see #getpositionsVelocities()
+     * @see #getPositionsVelocities()
      * @see #getPVInterpolationNumber()
      * @see #getPVInterpolationNumber()
      * @see #getQuaternions()
@@ -510,7 +510,7 @@ public class RuggedBuilder {
      * @return satellite position and velocity (m and m/s in inertial frame)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      */
-    public List<TimeStampedPVCoordinates> getpositionsVelocities() {
+    public List<TimeStampedPVCoordinates> getPositionsVelocities() {
         return pvSample;
     }
 

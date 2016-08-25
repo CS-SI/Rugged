@@ -17,13 +17,20 @@
 package org.orekit.rugged.errors;
 
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
@@ -32,6 +39,9 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.SensorPixel;
 
 public class DumpReplayerTest {
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
     public void testDirectLoc01() throws URISyntaxException, IOException, OrekitException, RuggedException {
@@ -103,6 +113,37 @@ public class DumpReplayerTest {
     }
 
     @Test
+    public void testDirectLoc04() throws URISyntaxException, IOException, OrekitException, RuggedException {
+
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-04.txt").toURI().getPath();
+        File dump = tempFolder.newFile();
+        DumpManager.activate(dump);
+        DumpReplayer replayer = new DumpReplayer();
+        replayer.parse(new File(dumpPath));
+        Rugged rugged = replayer.createRugged();
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+        DumpManager.deactivate();
+
+        Assert.assertEquals(3, results.length);
+        for (final DumpReplayer.Result result : results) {
+            GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
+            GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
+            double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
+                                                rugged.getEllipsoid().transform(replayedGP));
+            Assert.assertEquals(0.0, distance, 1.0e-8);
+        }
+
+        try (FileReader fr = new FileReader(dump);
+             BufferedReader br = new BufferedReader(fr)) {
+            Assert.assertEquals(12, br.lines().count());
+        }
+
+    }
+
+    @Test
     public void testInverseLoc01() throws URISyntaxException, IOException, OrekitException, RuggedException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -166,6 +207,56 @@ public class DumpReplayerTest {
             Assert.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
         }
 
+    }
+
+    @Test
+    public void testCorruptedFiles() throws URISyntaxException, IOException, OrekitException, RuggedException {
+
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        File folder = new File(getClass().getClassLoader().getResource("replay/replay-direct-loc-01.txt").toURI().getPath()).getParentFile();
+        for (final File file : folder.listFiles()) {
+
+            // split all data lines into fields
+            final List<String[]> lines = new ArrayList<>();
+            try (FileReader fr = new FileReader(file);
+                 BufferedReader br = new BufferedReader(fr)) {
+                br.lines().
+                   filter(line -> {
+                       String trimmed = line.trim();
+                       return trimmed.length() > 0 && !trimmed.startsWith("#");
+                   }).
+                   forEach(line -> lines.add(line.split("\\s+")));
+            }
+
+            // for each field of each line, delete the field and check parsing fails
+            for (int i = 0; i < lines.size(); ++i) {
+                for (int j = 0; j < lines.get(i).length; ++j) {
+                    File corrupted = tempFolder.newFile();
+                    try (PrintWriter pw = new PrintWriter(corrupted)) {
+                        for (int k = 0; k < lines.size(); ++k) {
+                            for (int l = 0; l < lines.get(k).length; ++l) {
+                                if (k != i || l != j) {
+                                    pw.print(' ');
+                                    pw.print(lines.get(k)[l]);
+                                }
+                            }
+                            pw.println();
+                        }
+                    }
+                    try {
+                        new DumpReplayer().parse(corrupted);
+                        Assert.fail("an exception should have been thrown");
+                    } catch (RuggedException re) {
+                        Assert.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
+                        Assert.assertEquals(i + 1, ((Integer) re.getParts()[0]).intValue());
+                        Assert.assertEquals(corrupted, re.getParts()[1]);
+                    }
+                }
+            }
+        }
+        
     }
 
 }

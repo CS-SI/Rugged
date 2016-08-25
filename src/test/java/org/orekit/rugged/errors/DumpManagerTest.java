@@ -17,16 +17,16 @@
 package org.orekit.rugged.errors;
 
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.RotationConvention;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,6 +47,7 @@ import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
+import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
@@ -66,71 +67,85 @@ public class DumpManagerTest {
 
         File dump = tempFolder.newFile();
         DumpManager.activate(dump);
-        locationsinglePoint();
+        variousRuggedCalls();
         DumpManager.deactivate();
 
-        int countAlgorithm       = 0;
-        int countEllipsoid       = 0;
-        int countSpan            = 0;
-        int countTransform       = 0;
-        int countDEMTile         = 0;
-        int countDEMCell         = 0;
-        int countDirectLoc       = 0;
-        int countDirectLocResult = 0;
-        int countSensor          = 0;
-        int countSensorLOS       = 0;
-        int countSensorDatation      = 0;
-        int countSensorRate      = 0;
-        BufferedReader br = new BufferedReader(new FileReader(dump));
-        for (String line = br.readLine(); line != null; line = br.readLine()) {
-            String trimmed = line.trim();
-            if (trimmed.length() > 0 && !trimmed.startsWith("#")){
-                if (trimmed.startsWith("algorithm:")) {
-                    ++countAlgorithm;
-                } else if (trimmed.startsWith("ellipsoid:")) {
-                    ++countEllipsoid;
-                } else if (trimmed.startsWith("span:")) {
-                    ++countSpan;
-                } else if (trimmed.startsWith("transform:")) {
-                    ++countTransform;
-                } else if (trimmed.startsWith("DEM tile:")) {
-                    ++countDEMTile;
-                } else if (trimmed.startsWith("DEM cell:")) {
-                    ++countDEMCell;
-                } else if (trimmed.startsWith("direct location:")) {
-                    ++countDirectLoc;
-                } else if (trimmed.startsWith("direct location result:")) {
-                    ++countDirectLocResult;
-                } else if (trimmed.startsWith("sensor:")) {
-                    ++countSensor;
-                } else if (trimmed.startsWith("sensor datation:")) {
-                    ++countSensorDatation;
-                } else if (trimmed.startsWith("sensor LOS:")) {
-                    ++countSensorLOS;
-                } else if (trimmed.startsWith("sensor rate:")) {
-                    ++countSensorRate;
-                } else {
-                   Assert.fail(line);
+        int countAlgorithm        = 0;
+        int countEllipsoid        = 0;
+        int countDirectLoc        = 0;
+        int countDirectLocResult  = 0;
+        int countSpan             = 0;
+        int countTransform        = 0;
+        int countDEMTile          = 0;
+        int countDEMCell          = 0;
+        int countInverseLoc       = 0;
+        int countInverseLocResult = 0;
+        int countSensor           = 0;
+        int countSensorMeanPlane  = 0;
+        int countSensorLOS        = 0;
+        int countSensorDatation   = 0;
+        int countSensorRate       = 0;
+        try (final FileReader     fr = new FileReader(dump);
+             final BufferedReader br = new BufferedReader(fr)) {
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                String trimmed = line.trim();
+                if (trimmed.length() > 0 && !trimmed.startsWith("#")){
+                    if (trimmed.startsWith("algorithm:")) {
+                        ++countAlgorithm;
+                    } else if (trimmed.startsWith("ellipsoid:")) {
+                        ++countEllipsoid;
+                    } else if (trimmed.startsWith("direct location:")) {
+                        ++countDirectLoc;
+                    } else if (trimmed.startsWith("direct location result:")) {
+                        ++countDirectLocResult;
+                    } else if (trimmed.startsWith("span:")) {
+                        ++countSpan;
+                    } else if (trimmed.startsWith("transform:")) {
+                        ++countTransform;
+                    } else if (trimmed.startsWith("DEM tile:")) {
+                        ++countDEMTile;
+                    } else if (trimmed.startsWith("DEM cell:")) {
+                        ++countDEMCell;
+                    } else if (trimmed.startsWith("inverse location:")) {
+                        ++countInverseLoc;
+                    } else if (trimmed.startsWith("inverse location result:")) {
+                        ++countInverseLocResult;
+                    } else if (trimmed.startsWith("sensor:")) {
+                        ++countSensor;
+                    } else if (trimmed.startsWith("sensor mean plane:")) {
+                        ++countSensorMeanPlane;
+                    } else if (trimmed.startsWith("sensor LOS:")) {
+                        ++countSensorLOS;
+                    } else if (trimmed.startsWith("sensor datation:")) {
+                        ++countSensorDatation;
+                    } else if (trimmed.startsWith("sensor rate:")) {
+                        ++countSensorRate;
+                    } else {
+                        Assert.fail(line);
+                    }
                 }
             }
         }
-        br.close();
+
         Assert.assertEquals(1,   countAlgorithm);
         Assert.assertEquals(1,   countEllipsoid);
-        Assert.assertEquals(1,   countSpan);
-        Assert.assertEquals(1,   countTransform);
-        Assert.assertEquals(2,   countDEMTile);
-        Assert.assertEquals(812, countDEMCell);
         Assert.assertEquals(400, countDirectLoc);
         Assert.assertEquals(400, countDirectLocResult);
+        Assert.assertEquals(1,   countSpan);
+        Assert.assertEquals(2,   countTransform);
+        Assert.assertEquals(2,   countDEMTile);
+        Assert.assertEquals(812, countDEMCell);
+        Assert.assertEquals(5,   countInverseLoc);
+        Assert.assertEquals(5,   countInverseLocResult);
         Assert.assertEquals(1,   countSensor);
-        Assert.assertEquals(200, countSensorLOS);
-        Assert.assertEquals(3,   countSensorDatation);
-        Assert.assertEquals(0,   countSensorRate);
+        Assert.assertEquals(1,   countSensorMeanPlane);
+        Assert.assertEquals(422, countSensorLOS);
+        Assert.assertEquals(19,  countSensorDatation);
+        Assert.assertEquals(6,   countSensorRate);
 
     }
 
-   public void locationsinglePoint()
+   public void variousRuggedCalls()
         throws RuggedException, OrekitException, URISyntaxException {
 
        int dimension = 200;
@@ -183,8 +198,50 @@ public class DumpManagerTest {
            Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
            Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
            Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
+
+           if (i % 45 == 0) {
+               SensorPixel sp = rugged.inverseLocation(lineSensor.getName(), gpPixel, 0, 179);
+               Assert.assertEquals(100, sp.getLineNumber(), 1.0e-5);
+               Assert.assertEquals(i, sp.getPixelNumber(), 6.0e-9);
+           }
        }
 
     }
+
+   @Test
+   public void testAlreadyActive() throws URISyntaxException, IOException, OrekitException, RuggedException {
+
+       DumpManager.activate(tempFolder.newFile());
+       try {
+           DumpManager.activate(tempFolder.newFile());
+           Assert.fail("an exception should have been thrown");
+       } catch (RuggedException re) {
+           Assert.assertEquals(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE, re.getSpecifier());
+       } finally {
+           DumpManager.deactivate();
+       }
+   }
+
+   @Test
+   public void testNotActive() throws URISyntaxException, IOException, OrekitException, RuggedException {
+       try {
+           DumpManager.deactivate();
+           Assert.fail("an exception should have been thrown");
+       } catch (RuggedException re) {
+           Assert.assertEquals(RuggedMessages.DEBUG_DUMP_NOT_ACTIVE, re.getSpecifier());
+       }
+   }
+
+   @Test
+   public void testWriteError() throws URISyntaxException, IOException, OrekitException, RuggedException {
+       try {
+           File dump = tempFolder.newFile();
+           dump.setReadOnly();
+           DumpManager.activate(dump);
+           Assert.fail("an exception should have been thrown");
+       } catch (RuggedException re) {
+           Assert.assertEquals(RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, re.getSpecifier());
+       }
+   }
 
 }

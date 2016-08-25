@@ -927,7 +927,7 @@ public class DumpReplayer {
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
                 throws RuggedException {
                 try {
-                    if (fields.length < 5 || !fields[0].equals(SENSOR_NAME) ||
+                    if (fields.length < 6 || !fields[0].equals(SENSOR_NAME) ||
                         !fields[2].equals(LINE_NUMBER) || !fields[4].equals(DATE)) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                     }
@@ -951,7 +951,7 @@ public class DumpReplayer {
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
                 throws RuggedException {
-                if (fields.length < 5 || !fields[0].equals(SENSOR_NAME) ||
+                if (fields.length < 6 || !fields[0].equals(SENSOR_NAME) ||
                     !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RATE)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
@@ -984,11 +984,19 @@ public class DumpReplayer {
                 final String parsedKey = line.substring(0, colon).trim().replaceAll(" ", "_").toUpperCase();
                 try {
                     final LineParser parser = LineParser.valueOf(parsedKey);
-                    parser.parse(l, file, line, line.substring(colon + 1).trim().split("\\s+"), global);
+                    final String[] fields;
+                    if (colon + 1 >= line.length()) {
+                        fields = new String[0];
+                    } else {
+                        fields = line.substring(colon + 1).trim().split("\\s+");
+                    }
+                    parser.parse(l, file, line, fields, global);
                 } catch (IllegalArgumentException iae) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
 
+            } else {
+                throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
             }
 
         }
@@ -1257,33 +1265,6 @@ public class DumpReplayer {
             final AbsoluteDate dSup  = datation.get(sup).getSecond();
             final double       alpha = (lineNumber - lInf) / (lSup - lInf);
             return dInf.shiftedBy(alpha * dSup.durationFrom(dInf));
-
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public double getLine(final AbsoluteDate date) {
-
-            if (datation.size() < 2) {
-                return datation.get(0).getFirst();
-            }
-
-            // find entries bracketing the date
-            int sup = 0;
-            while (sup < datation.size() - 1) {
-                if (datation.get(sup).getSecond().compareTo(date) >= 0) {
-                    break;
-                }
-                ++sup;
-            }
-            final int inf = (sup == 0) ? sup++ : (sup - 1);
-
-            final double       lInf  = datation.get(inf).getFirst();
-            final AbsoluteDate dInf  = datation.get(inf).getSecond();
-            final double       lSup  = datation.get(sup).getFirst();
-            final AbsoluteDate dSup  = datation.get(sup).getSecond();
-            final double       alpha = date.durationFrom(dInf) / dSup.durationFrom(dInf);
-            return alpha * lSup + (1 - alpha) * lInf;
 
         }
 

@@ -89,6 +89,14 @@ public class RuggedMessagesTest {
     }
 
     @Test
+    public void testMissingLanguageFallback() {
+        for (RuggedMessages message : RuggedMessages.values()) {
+            String translated = message.getLocalizedString(Locale.TRADITIONAL_CHINESE);
+            Assert.assertEquals(message.getSourceString(), translated);
+        }
+    }
+
+    @Test
     public void testVariablePartsConsistency() {
         for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "no", "ro" } ) {
             Locale locale = new Locale(language);
