@@ -526,7 +526,7 @@ public class SensorMeanPlaneCrossing {
      * @exception RuggedException if geometry cannot be computed for some line or
      * if the maximum number of evaluations is exceeded
      */
-    public CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess)
+    private CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess)
         throws RuggedException {
         try {
 

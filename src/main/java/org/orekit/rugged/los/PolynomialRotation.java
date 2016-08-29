@@ -88,7 +88,7 @@ public class PolynomialRotation implements LOSTransform {
         final ParameterObserver resettingObserver = new ParameterObserver() {
             @Override
             public void valueChanged(final double previousValue, final ParameterDriver driver) {
-                // reset rotations to null, they will evaluated lazily if needed
+                // reset rotations to null, they will be evaluated lazily if needed
                 angle   = null;
                 axisDS  = null;
                 angleDS = null;
@@ -97,7 +97,7 @@ public class PolynomialRotation implements LOSTransform {
         try {
             for (int i = 0; i < angleCoeffs.length; ++i) {
                 coefficientsDrivers[i] = new ParameterDriver(name + "[" + i + "]", angleCoeffs[i], SCALE,
-                                                                     Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                                                             Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
                 coefficientsDrivers[i].addObserver(resettingObserver);
             }
         } catch (OrekitException oe) {

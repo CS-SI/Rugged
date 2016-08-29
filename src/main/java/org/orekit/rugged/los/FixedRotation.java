@@ -74,7 +74,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
             angleDriver.addObserver(new ParameterObserver() {
                 @Override
                 public void valueChanged(final double previousValue, final ParameterDriver driver) {
-                    // reset rotations to null, they will evaluated lazily if needed
+                    // reset rotations to null, they will be evaluated lazily if needed
                     rotation = null;
                     rDS      = null;
                 }

@@ -22,6 +22,8 @@ import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,7 @@ import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -54,6 +57,7 @@ import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
+import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
@@ -214,6 +218,72 @@ public class SensorMeanPlaneCrossingTest {
                             Vector3D.distance(result.getTargetDirectionDerivative(), dirDer),
                             tol * dirDer.getNorm());
         
+    }
+
+    @Test
+    public void testSlowFind()
+        throws RuggedException, OrekitException, NoSuchMethodException,
+               SecurityException, IllegalAccessException, IllegalArgumentException,
+               InvocationTargetException {
+
+        final Vector3D position  = new Vector3D(1.5, Vector3D.PLUS_I);
+        final Vector3D normal    = Vector3D.PLUS_I;
+        final Vector3D fovCenter = Vector3D.PLUS_K;
+        final Vector3D cross     = Vector3D.crossProduct(normal, fovCenter);
+
+        // build lists of pixels regularly spread on a perfect plane
+        final List<Vector3D> los       = new ArrayList<Vector3D>();
+        for (int i = -1000; i <= 1000; ++i) {
+            final double alpha = i * 0.17 / 1000;
+            los.add(new Vector3D(FastMath.cos(alpha), fovCenter, FastMath.sin(alpha), cross));
+        }
+
+        final LineSensor sensor = new LineSensor("perfect line",
+                                                 new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
+                                                 position, new LOSBuilder(los).build());
+
+        Assert.assertEquals("perfect line", sensor.getName());
+        Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
+        Assert.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
+
+        SensorMeanPlaneCrossing mean = new SensorMeanPlaneCrossing(sensor, createInterpolator(sensor),
+                                                                   0, 2000, true, true, 50, 1.0e-6);
+
+        double       refLine = 1200.0;
+        AbsoluteDate refDate = sensor.getDate(refLine);
+        int          refPixel= 1800;
+        Transform    b2i     = mean.getScToBody().getBodyToInertial(refDate);
+        Transform    sc2i    = mean.getScToBody().getScToInertial(refDate);
+        Transform    sc2b    = new Transform(refDate, sc2i, b2i.getInverse());
+        Vector3D     p1      = sc2b.transformPosition(position);
+        Vector3D     p2      = sc2b.transformPosition(new Vector3D(1, position,
+                                                                   1.0e6, los.get(refPixel)));
+        Line         line    = new Line(p1, p2, 0.001);
+        BodyShape earth = new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                               Constants.WGS84_EARTH_FLATTENING,
+                                               mean.getScToBody().getBodyFrame());
+        GeodeticPoint groundPoint = earth.getIntersectionPoint(line, p1, mean.getScToBody().getBodyFrame(), refDate);
+        Vector3D      gpCartesian = earth.transform(groundPoint);
+        SensorMeanPlaneCrossing.CrossingResult result = mean.find(gpCartesian);
+
+        Method slowFind = SensorMeanPlaneCrossing.class.getDeclaredMethod("slowFind",
+                                                                          PVCoordinates.class,
+                                                                          Double.TYPE);
+        slowFind.setAccessible(true);
+        SensorMeanPlaneCrossing.CrossingResult slowResult =
+                        (CrossingResult) slowFind.invoke(mean,
+                        new PVCoordinates(gpCartesian, Vector3D.ZERO),
+                        400.0);
+
+        Assert.assertEquals(result.getLine(), slowResult.getLine(), 2.0e-8);
+        Assert.assertEquals(0.0,
+                            Vector3D.distance(result.getTargetDirection(),
+                                              slowResult.getTargetDirection()),
+                            2.0e-13);
+        Assert.assertEquals(0.0,
+                            Vector3D.distance(result.getTargetDirectionDerivative(),
+                                              slowResult.getTargetDirectionDerivative()),
+                            1.0e-15);
     }
 
     private SpacecraftToObservedBody createInterpolator(LineSensor sensor)
