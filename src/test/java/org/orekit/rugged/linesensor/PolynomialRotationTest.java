@@ -47,7 +47,7 @@ import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
-public class PolynomialRotationtest {
+public class PolynomialRotationTest {
 
     private List<Vector3D> raw;
 

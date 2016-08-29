@@ -46,7 +46,7 @@ import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
-public class FixedRotationtest {
+public class FixedRotationTest {
 
     private List<Vector3D> raw;
 
