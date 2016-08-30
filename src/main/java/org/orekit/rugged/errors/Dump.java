@@ -150,17 +150,19 @@ class Dump {
      * @param los normalized line-of-sight in spacecraft frame
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
+     * @param refractionCorrection flag for refraction correction
      * @exception RuggedException if date cannot be converted to UTC
      */
     public void dumpDirectLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los,
-                                   final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection)
+                                   final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
+                                   final boolean refractionCorrection)
         throws RuggedException {
         writer.format(Locale.US,
-                      "direct location: date %s position %22.15e %22.15e %22.15e los %22.15e %22.15e %22.15e lightTime %b aberration %b%n",
+                      "direct location: date %s position %22.15e %22.15e %22.15e los %22.15e %22.15e %22.15e lightTime %b aberration %b refraction %b %n",
                       convertDate(date),
                       position.getX(), position.getY(), position.getZ(),
                       los.getX(),      los.getY(),      los.getZ(),
-                      lightTimeCorrection, aberrationOfLightCorrection);
+                      lightTimeCorrection, aberrationOfLightCorrection, refractionCorrection);
     }
 
     /** Dump a direct location result.

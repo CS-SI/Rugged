@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.atmosphericrefraction;
+package org.orekit.rugged.refraction;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
@@ -39,14 +39,16 @@ public class MultiLayerModel implements AtmosphericRefraction {
     /** Observed body ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
 
-    /** Constant refraction layers */
+    /** Constant refraction layers. */
     private final List<ConstantRefractionLayer> refractionLayers;
 
-    /** Atmosphere lowest altitude */
+    /** Atmosphere lowest altitude. */
     private final double atmosphereLowestAltitude;
 
-    public MultiLayerModel(final ExtendedEllipsoid ellipsoid)
-            throws OrekitException {
+    /** Simple constructor.
+     * @param ellipsoid the ellipsoid to be used.
+     */
+    public MultiLayerModel(final ExtendedEllipsoid ellipsoid) {
         this.ellipsoid = ellipsoid;
 
         refractionLayers = new ArrayList<ConstantRefractionLayer>(15);
@@ -69,22 +71,26 @@ public class MultiLayerModel implements AtmosphericRefraction {
         atmosphereLowestAltitude = refractionLayers.get(refractionLayers.size() - 1).getLowestAltitude();
     }
 
-    public MultiLayerModel(final ExtendedEllipsoid ellipsoid, final List<ConstantRefractionLayer> refractionLayers)
-            throws OrekitException {
+    /** Simple constructor.
+     * @param ellipsoid the ellipsoid to be used.
+     * @param refractionLayers the refraction layers to be used with this model.
+     */
+    public MultiLayerModel(final ExtendedEllipsoid ellipsoid, final List<ConstantRefractionLayer> refractionLayers) {
         this.ellipsoid = ellipsoid;
         this.refractionLayers = refractionLayers;
         Collections.sort(this.refractionLayers, Collections.<ConstantRefractionLayer>reverseOrder());
         atmosphereLowestAltitude = refractionLayers.get(refractionLayers.size() - 1).getLowestAltitude();
     }
 
+    /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint applyCorrection(final Vector3D satPos, final Vector3D satLos,
                                                    final NormalizedGeodeticPoint rawIntersection,
                                                    final IntersectionAlgorithm algorithm)
-            throws RuggedException {
+        throws RuggedException {
 
         try {
-            if(rawIntersection.getAltitude() < atmosphereLowestAltitude) {
+            if (rawIntersection.getAltitude() < atmosphereLowestAltitude) {
                 throw new RuggedException(RuggedMessages.NO_LAYER_DATA, rawIntersection.getAltitude(),
                         atmosphereLowestAltitude);
             }
