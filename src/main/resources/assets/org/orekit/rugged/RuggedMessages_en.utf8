@@ -81,3 +81,6 @@ NO_REFERENCE_MAPPINGS = no reference mappings for parameters estimation
 
 # a different parameter with name {0} already exists
 DUPLICATED_PARAMETER_NAME = a different parameter with name {0} already exists
+
+# no atmospheric layer data at altitude {0} (lowest altitude: {1})
+NO_LAYER_DATA = no atmospheric layer data at altitude {0} (lowest altitude: {1})

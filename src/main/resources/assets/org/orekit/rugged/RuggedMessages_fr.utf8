@@ -81,3 +81,6 @@ NO_REFERENCE_MAPPINGS = aucune projection de référence pour l''estimation des 
 
 # a different parameter with name {0} already exists
 DUPLICATED_PARAMETER_NAME = il existe déjà un autre paramètre nommé {0}
+
+# no atmospheric layer data at altitude {0} (lowest altitude: {1})
+NO_LAYER_DATA = <MISSING TRANSLATION>
