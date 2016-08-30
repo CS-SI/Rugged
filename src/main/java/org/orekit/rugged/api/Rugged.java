@@ -302,8 +302,9 @@ public class Rugged {
 
             if (atmosphericRefraction != null) {
                 // apply atmospheric refraction correction
-                gp[i] = atmosphericRefraction.applyCorrection(sensor.getPosition(), sensor.getLOS(date, i),
-                                                              (NormalizedGeodeticPoint) gp[i], algorithm);
+                final Vector3D pBody = inertToBody.transformPosition(pInert);
+                final Vector3D lBody = inertToBody.transformVector(lInert);
+                gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
             }
 
             DumpManager.dumpDirectLocationResult(gp[i]);
@@ -389,7 +390,9 @@ public class Rugged {
         final NormalizedGeodeticPoint result;
         if (atmosphericRefraction != null) {
             // apply atmospheric refraction correction
-            result = atmosphericRefraction.applyCorrection(position, los, gp, algorithm);
+            final Vector3D pBody = inertToBody.transformPosition(pInert);
+            final Vector3D lBody = inertToBody.transformVector(lInert);
+            result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
         } else {
             // don't apply atmospheric refraction correction
             result = gp;
