@@ -55,6 +55,7 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
