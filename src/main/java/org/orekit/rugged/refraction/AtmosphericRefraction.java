@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.atmosphericrefraction;
+package org.orekit.rugged.refraction;
 
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -23,13 +23,23 @@ import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /**
- * Interface for atmospheric refraction.
+ * Interface for atmospheric refraction model.
  * @author Sergio Esteves
  */
 public interface AtmosphericRefraction {
 
+    /** Apply correction to the intersected point with an atmospheric refraction model.
+     * @param satPos satellite position
+     * @param satLos satellite line of sight
+     * @param rawIntersection intersection point before refraction correction
+     * @param algorithm intersection algorithm
+     * @return corrected point with the effect of atmospheric refraction
+     * @throws RuggedException if there is no refraction data at altitude of rawIntersection or see
+     * {@link org.orekit.rugged.utils.ExtendedEllipsoid#pointAtAltitude(Vector3D, Vector3D, double)} or see
+     * {@link IntersectionAlgorithm#refineIntersection(ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
+     */
     NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
                                              IntersectionAlgorithm algorithm)
-            throws RuggedException;
+        throws RuggedException;
 
 }

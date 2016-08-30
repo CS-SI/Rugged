@@ -44,6 +44,7 @@ import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.raster.TileUpdater;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -153,6 +154,9 @@ public class RuggedBuilder {
 
     /** Flag for aberration of light correction. */
     private boolean aberrationOfLightCorrection;
+
+    /** Atmospheric refraction to use for line of sight correction. */
+    private AtmosphericRefraction atmosphericRefraction;
 
     /** Sensors. */
     private final List<LineSensor> sensors;
@@ -833,6 +837,32 @@ public class RuggedBuilder {
         return aberrationOfLightCorrection;
     }
 
+    /** Set atmospheric refraction for line of sight correction.
+     * <p>
+     * This method sets an atmospheric refraction model to be used between
+     * spacecraft and ground for the correction of intersected points on ground.
+     * Compensating for the effect of atmospheric refraction improves location
+     * accuracy.
+     * </p>
+     * @param atmosphericRefraction the atmospheric refraction model to be used for more accurate location
+     * @return the builder instance
+     * @see #getRefractionCorrection()
+     */
+    // CHECKSTYLE: stop HiddenField check
+    public RuggedBuilder setRefractionCorrection(final AtmosphericRefraction atmosphericRefraction) {
+        // CHECKSTYLE: resume HiddenField check
+        this.atmosphericRefraction = atmosphericRefraction;
+        return this;
+    }
+
+    /** Get the atmospheric refraction model.
+     * @return atmospheric refraction model
+     * @see #setRefractionCorrection(AtmosphericRefraction)
+     */
+    public AtmosphericRefraction getRefractionCorrection() {
+        return atmosphericRefraction;
+    }
+
     /** Set up line sensor model.
      * @param lineSensor line sensor model
      * @return the builder instance
@@ -991,7 +1021,7 @@ public class RuggedBuilder {
         }
         createInterpolatorIfNeeded();
         return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation), ellipsoid,
-                          lightTimeCorrection, aberrationOfLightCorrection, scToBody, sensors);
+                          lightTimeCorrection, aberrationOfLightCorrection, atmosphericRefraction, scToBody, sensors);
     }
 
 }

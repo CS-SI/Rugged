@@ -56,6 +56,7 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
@@ -121,11 +122,12 @@ public class Rugged {
      * @param aberrationOfLightCorrection if true, the aberration of light
      * is corrected for more accurate location
      * and spacecraft is compensated for more accurate location
+     * @param atmosphericRefraction the atmospheric refraction model to be used for more accurate location
      * @param scToBody transforms interpolator
      * @param sensors sensors
      */
-    Rugged(final IntersectionAlgorithm algorithm, final ExtendedEllipsoid ellipsoid,
-           final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
+    Rugged(final IntersectionAlgorithm algorithm, final ExtendedEllipsoid ellipsoid, final boolean lightTimeCorrection,
+           final boolean aberrationOfLightCorrection, final AtmosphericRefraction atmosphericRefraction,
            final SpacecraftToObservedBody scToBody, final Collection<LineSensor> sensors) {
 
         // space reference
@@ -145,7 +147,7 @@ public class Rugged {
 
         this.lightTimeCorrection         = lightTimeCorrection;
         this.aberrationOfLightCorrection = aberrationOfLightCorrection;
-
+        this.atmosphericRefraction       = atmosphericRefraction;
     }
 
     /** Get the DEM intersection algorithm.
@@ -169,6 +171,13 @@ public class Rugged {
      */
     public boolean isAberrationOfLightCorrected() {
         return aberrationOfLightCorrection;
+    }
+
+    /** Get the atmospheric refraction model.
+     * @return atmospheric refraction model
+     */
+    public AtmosphericRefraction getRefractionCorrection() {
+        return atmosphericRefraction;
     }
 
     /** Get the line sensors.
@@ -239,8 +248,8 @@ public class Rugged {
         final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
 
-            DumpManager.dumpDirectLocation(date, sensor.getPosition(), sensor.getLOS(date, i),
-                                           lightTimeCorrection, aberrationOfLightCorrection);
+            DumpManager.dumpDirectLocation(date, sensor.getPosition(), sensor.getLos(date, i), lightTimeCorrection,
+                                           aberrationOfLightCorrection, atmosphericRefraction != null);
 
             final Vector3D obsLInert = scToInert.transformVector(sensor.getLOS(date, i));
             final Vector3D lInert;
@@ -289,6 +298,12 @@ public class Rugged {
                                                      algorithm.intersection(ellipsoid, pBody, lBody));
             }
 
+            if (atmosphericRefraction != null) {
+                // apply atmospheric refraction correction
+                gp[i] = atmosphericRefraction.applyCorrection(sensor.getPosition(), sensor.getLOS(date, i),
+                                                              (NormalizedGeodeticPoint) gp[i], algorithm);
+            }
+
             DumpManager.dumpDirectLocationResult(gp[i]);
 
         }
@@ -307,7 +322,8 @@ public class Rugged {
     public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los)
         throws RuggedException {
 
-        DumpManager.dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection);
+        DumpManager.dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection,
+                                       atmosphericRefraction != null);
 
         // compute the approximate transform between spacecraft and observed body
         final Transform    scToInert   = scToBody.getScToInertial(date);
@@ -340,7 +356,7 @@ public class Rugged {
             lInert = obsLInert;
         }
 
-        final NormalizedGeodeticPoint result;
+        final NormalizedGeodeticPoint gp;
         if (lightTimeCorrection) {
             // compute DEM intersection with light time correction
             final Vector3D  sP       = approximate.transformPosition(position);
@@ -355,7 +371,7 @@ public class Rugged {
             final Vector3D  eP2      = ellipsoid.transform(gp1);
             final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
             final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
-            result = algorithm.refineIntersection(ellipsoid,
+            gp = algorithm.refineIntersection(ellipsoid,
                                                   shifted2.transformPosition(pInert),
                                                   shifted2.transformVector(lInert),
                                                   gp1);
@@ -364,14 +380,17 @@ public class Rugged {
             // compute DEM intersection without light time correction
             final Vector3D pBody = inertToBody.transformPosition(pInert);
             final Vector3D lBody = inertToBody.transformVector(lInert);
-            result = algorithm.refineIntersection(ellipsoid, pBody, lBody,
+            gp = algorithm.refineIntersection(ellipsoid, pBody, lBody,
                                                   algorithm.intersection(ellipsoid, pBody, lBody));
+        }
 
-            // compute atmosphere deviation.
-            //AtmosphericRefraction atmosphericRefraction = new MultiLayerModel();
-            // result.getZenith()
-            //long deviation = atmosphericRefraction.getDeviation(pBody, lBody, result.getAltitude());
-
+        final NormalizedGeodeticPoint result;
+        if (atmosphericRefraction != null) {
+            // apply atmospheric refraction correction
+            result = atmosphericRefraction.applyCorrection(position, los, gp, algorithm);
+        } else {
+            // don't apply atmospheric refraction correction
+            result = gp;
         }
 
         DumpManager.dumpDirectLocationResult(result);
