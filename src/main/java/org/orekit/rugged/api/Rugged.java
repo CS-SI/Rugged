@@ -45,8 +45,7 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.frames.Transform;
-import org.orekit.rugged.atmosphericrefraction.AtmosphericRefraction;
-import org.orekit.rugged.atmosphericrefraction.MultiLayerModel;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
@@ -56,7 +55,6 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
-import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
@@ -106,6 +104,9 @@ public class Rugged {
 
     /** Flag for aberration of light correction. */
     private boolean aberrationOfLightCorrection;
+
+    /** Atmospheric refraction for line of sight correction. */
+    private AtmosphericRefraction atmosphericRefraction;
 
     /** Build a configured instance.
      * <p>
@@ -248,7 +249,7 @@ public class Rugged {
         final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
 
-            DumpManager.dumpDirectLocation(date, sensor.getPosition(), sensor.getLos(date, i), lightTimeCorrection,
+            DumpManager.dumpDirectLocation(date, sensor.getPosition(), sensor.getLOS(date, i), lightTimeCorrection,
                                            aberrationOfLightCorrection, atmosphericRefraction != null);
 
             final Vector3D obsLInert = scToInert.transformVector(sensor.getLOS(date, i));

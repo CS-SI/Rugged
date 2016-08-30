@@ -17,7 +17,7 @@
 package org.orekit.rugged.refraction;
 
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;

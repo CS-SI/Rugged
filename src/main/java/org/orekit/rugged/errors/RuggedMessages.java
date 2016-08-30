@@ -27,7 +27,6 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import org.apache.commons.math3.exception.util.Localizable;
 
 /**
  * Enumeration for localized messages formats.
@@ -78,7 +77,7 @@ public enum RuggedMessages implements Localizable {
     UNKNOWN_TILE("unknown tile {0}, line {1}, file {2}: {3}"),
     NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),
     NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),
-    DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists");
+    DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})");
 
     // CHECKSTYLE: resume JavadocVariable check
