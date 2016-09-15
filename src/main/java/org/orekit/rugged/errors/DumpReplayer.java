@@ -69,6 +69,7 @@ import org.orekit.utils.ParameterDriver;
 
 /** Replayer for Rugged debug dumps.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  * @see DumpManager
  * @see Dump
  */
@@ -1268,6 +1269,33 @@ public class DumpReplayer {
 
         }
 
+        /** {@inheritDoc} */
+        @Override
+        public double getLine(final AbsoluteDate date) {
+
+            if (datation.size() < 2) {
+                return datation.get(0).getFirst();
+            }
+
+            // find entries bracketing the date
+            int sup = 0;
+            while (sup < datation.size() - 1) {
+                if (datation.get(sup).getSecond().compareTo(date) >= 0) {
+                    break;
+                }
+                ++sup;
+            }
+            final int inf = (sup == 0) ? sup++ : (sup - 1);
+
+            final double       lInf  = datation.get(inf).getFirst();
+            final AbsoluteDate dInf  = datation.get(inf).getSecond();
+            final double       lSup  = datation.get(sup).getFirst();
+            final AbsoluteDate dSup  = datation.get(sup).getSecond();
+            final double       alpha = date.durationFrom(dInf) / dSup.durationFrom(dInf);
+            return alpha * lSup + (1 - alpha) * lInf;
+
+        }
+        
         /** Set a rate.
          * @param lineNumber line number
          * @param rate lines rate

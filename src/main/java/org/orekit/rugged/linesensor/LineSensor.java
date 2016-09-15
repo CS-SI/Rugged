@@ -30,6 +30,7 @@ import org.orekit.utils.ParameterDriver;
 
 /** Line sensor model.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class LineSensor {
 
@@ -119,6 +120,18 @@ public class LineSensor {
         final AbsoluteDate date = datationModel.getDate(lineNumber);
         DumpManager.dumpSensorDatation(this, lineNumber, date);
         return date;
+    }
+
+    /** Get the line number.
+     * @param date date
+     * @return line number corresponding to date
+     * @exception RuggedException if date cannot be handled
+     */
+    public double getLine(final AbsoluteDate date)
+        throws RuggedException {
+        final double lineNumber = datationModel.getLine(date);
+        DumpManager.dumpSensorDatation(this, lineNumber, date);
+        return lineNumber;
     }
 
     /** Get the rate of lines scanning.
