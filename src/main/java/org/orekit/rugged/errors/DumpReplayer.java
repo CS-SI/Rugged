@@ -1295,7 +1295,7 @@ public class DumpReplayer {
             return alpha * lSup + (1 - alpha) * lInf;
 
         }
-        
+
         /** Set a rate.
          * @param lineNumber line number
          * @param rate lines rate
