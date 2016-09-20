@@ -19,8 +19,9 @@ package org.orekit.rugged.refraction;
 /**
  * Class that represents a constant refraction layer to be used with {@link MultiLayerModel}.
  * @author Sergio Esteves
+ * @since 2.0
  */
-public class ConstantRefractionLayer implements Comparable<ConstantRefractionLayer> {
+public class ConstantRefractionLayer {
 
     /** lowest altitude of this layer. */
     private final Double lowestAltitude;
@@ -45,30 +46,4 @@ public class ConstantRefractionLayer implements Comparable<ConstantRefractionLay
         return refractiveIndex;
     }
 
-    @Override
-    public int compareTo(final ConstantRefractionLayer o) {
-        return lowestAltitude.compareTo(o.lowestAltitude);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        final ConstantRefractionLayer that = (ConstantRefractionLayer) o;
-
-        if (Double.compare(that.refractiveIndex, refractiveIndex) != 0) return false;
-        return lowestAltitude != null ? lowestAltitude.equals(that.lowestAltitude) : that.lowestAltitude == null;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result;
-        long temp;
-        result = lowestAltitude != null ? lowestAltitude.hashCode() : 0;
-        temp = Double.doubleToLongBits(refractiveIndex);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        return result;
-    }
 }

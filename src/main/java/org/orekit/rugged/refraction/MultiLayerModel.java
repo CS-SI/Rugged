@@ -33,6 +33,7 @@ import java.util.List;
 /**
  * Multi layer model for atmospheric refraction.
  * @author Sergio Esteves, Luc Maisonobe
+ * @since 2.0
  */
 public class MultiLayerModel implements AtmosphericRefraction {
 
@@ -73,13 +74,14 @@ public class MultiLayerModel implements AtmosphericRefraction {
 
     /** Simple constructor.
      * @param ellipsoid the ellipsoid to be used.
-     * @param refractionLayers the refraction layers to be used with this model.
+     * @param refractionLayers the refraction layers to be used with this model (layers can be in any order).
      */
     public MultiLayerModel(final ExtendedEllipsoid ellipsoid, final List<ConstantRefractionLayer> refractionLayers) {
         this.ellipsoid = ellipsoid;
-        this.refractionLayers = refractionLayers;
-        Collections.sort(this.refractionLayers, Collections.<ConstantRefractionLayer>reverseOrder());
-        atmosphereLowestAltitude = refractionLayers.get(refractionLayers.size() - 1).getLowestAltitude();
+        this.refractionLayers = new ArrayList<>(refractionLayers);
+        Collections.sort(this.refractionLayers,
+                         (l1, l2) -> Double.compare(l2.getLowestAltitude(), l1.getLowestAltitude()));
+        atmosphereLowestAltitude = this.refractionLayers.get(this.refractionLayers.size() - 1).getLowestAltitude();
     }
 
     /** {@inheritDoc} */
