@@ -747,9 +747,9 @@ public class Rugged {
      * LineSensor#getParametersDrivers() getParametersDrivers()}
      * method on the desired sensors must be configured. The parameters that should
      * be estimated must have their {@link ParameterDriver#setSelected(boolean)
-     * selection status} set to {@link true} whereas the parameters that should retain
+     * selection status} set to {@code true} whereas the parameters that should retain
      * their current value must have their {@link ParameterDriver#setSelected(boolean)
-     * selection status} set to {@link false}. If needed, the {@link
+     * selection status} set to {@code false}. If needed, the {@link
      * ParameterDriver#setValue(double) value} of the estimated/selected parameters
      * can also be changed before calling the method, as this value will serve as the
      * initial value in the estimation process.
