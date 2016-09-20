@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Multi layer model for atmospheric refraction.
+ * Atmospheric refraction model based on multiple layers with associated refractive index.
  * @author Sergio Esteves, Luc Maisonobe
  * @since 2.0
  */
@@ -47,6 +47,9 @@ public class MultiLayerModel implements AtmosphericRefraction {
     private final double atmosphereLowestAltitude;
 
     /** Simple constructor.
+     * <p>
+     * This model uses a built-in set of layers.
+     * </p>
      * @param ellipsoid the ellipsoid to be used.
      */
     public MultiLayerModel(final ExtendedEllipsoid ellipsoid) {
