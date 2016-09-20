@@ -21,6 +21,11 @@
   </properties>
   <body>
     <release version="2.0" date="TBD" description="TTBD">
+      <action dev="luc" type="add" due-to="Sergio Esteves">
+        Added atmospheric refraction.
+        This work was done under the frame of ESA SOCIS 2016 program.
+        Implements feature #185.
+      </action>
       <action dev="luc" type="update">
         Replaced the ad-hoc parameters with Orekit ParameterDriver that are
         used in Orekit orbit determination feature.

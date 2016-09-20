@@ -64,7 +64,7 @@ Features
     * aberration of light correction (about 20m)
     * line-of-sight curvature in geodetic coordinates,
       (0m at nadir, 10m at 30° dive angle, hundreds of meters for skimming los)
-    * refraction not available in early 2016, but expected to be added soon
+    * atmospheric refraction
 
   * not limited to Earth
 
