@@ -56,7 +56,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
         // this is almost a Nadir observation (LOS deviates between 1.4 and 1.6 degrees from vertical)
         // so the refraction correction is small
-        Assert.assertEquals(0.0553797, distance, 1.0e-6);
+        Assert.assertEquals(0.0553796, distance, 1.0e-6);
 
     }
 
@@ -83,7 +83,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         model = new MultiLayerModel(earth, refractionLayers);
         correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
         distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
-        Assert.assertEquals(0.0, distance, 1.0e-9);
+        Assert.assertEquals(0.0, distance, 1.0e-20);
 
     }
 

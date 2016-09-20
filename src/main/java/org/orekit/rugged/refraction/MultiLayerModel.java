@@ -16,6 +16,10 @@
  */
 package org.orekit.rugged.refraction;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
@@ -25,10 +29,6 @@ import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Atmospheric refraction model based on multiple layers with associated refractive index.
@@ -102,7 +102,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
 
             Vector3D pos = satPos;
             Vector3D los = satLos.normalize();
-            double previousRefractiveIndex = -1;
+            double n1 = -1;
             GeodeticPoint gp = ellipsoid.transform(satPos, ellipsoid.getBodyFrame(), null);
 
             for (ConstantRefractionLayer refractionLayer : refractionLayers) {
@@ -111,7 +111,9 @@ public class MultiLayerModel implements AtmosphericRefraction {
                     continue;
                 }
 
-                if (previousRefractiveIndex > 0) {
+                final double n2 = refractionLayer.getRefractiveIndex();
+
+                if (n1 > 0) {
 
                     // when we get here, we have already performed one iteration in the loop
                     // so gp is the los intersection with the layers interface (it was a
@@ -146,24 +148,51 @@ public class MultiLayerModel implements AtmosphericRefraction {
                     //          = sin² θ₂ / sin² θ₁
                     // as α is positive, and both θ₁ and θ₂ are between 0 and π/2, we finally get
                     //       α  = sin θ₂ / sin θ₁
-                    //   (5) α  = n₁ / n₂
+                    //   (5) α  = n₁/n₂
                     // the α coefficient is independent from the incidence angle,
                     // it depends only on the ratio of refractive indices!
                     //
                     // back to equation (4) and using again the fact θ₂ is between 0 and π/2, we can now write
                     //       β = α cos θ₁ - cos θ₂
-                    //         = n₁ / n₂ cos θ₁ - cos θ₂
-                    //         = n₁ / n₂ cos θ₁ - √(1 - sin² θ₂)
-                    //         = n₁ / n₂ cos θ₁ - √(1 - (n₁ / n₂)² sin² θ₁)
-                    //         = n₁ / n₂ cos θ₁ - √(1 - (n₁ / n₂)² (1 - cos² θ₁))
-                    //         = n₁ / n₂ cos θ₁ - √(1 + (n₁ / n₂)² cos² θ₁ - (n₁ / n₂)²)
-                    //   (6) β = -k - √(1 + k² - (n₁ / n₂)²)
-                    // where k = n₁ / n₂ u·z
-                    final double n1On2 = previousRefractiveIndex / refractionLayer.getRefractiveIndex();
-                    final double k     = n1On2 * Vector3D.dotProduct(los, gp.getZenith());
-                    los = new Vector3D(n1On2, los,
-                                       -k - FastMath.sqrt(1 + k * k - n1On2 * n1On2), gp.getZenith());
-
+                    //         = n₁/n₂ cos θ₁ - cos θ₂
+                    //         = n₁/n₂ cos θ₁ - √(1 - sin² θ₂)
+                    //         = n₁/n₂ cos θ₁ - √(1 - (n₁/n₂)² sin² θ₁)
+                    //         = n₁/n₂ cos θ₁ - √(1 - (n₁/n₂)² (1 - cos² θ₁))
+                    //         = n₁/n₂ cos θ₁ - √(1 - (n₁/n₂)² + (n₁/n₂)² cos² θ₁)
+                    //   (6) β = -k - √(k² - ζ)
+                    // where ζ = (n₁/n₂)² - 1 and k = n₁/n₂ u·z, which is negative, and close to -1 for
+                    // nadir observations. As we expect atmosphere models to have small transitions between
+                    // layers, we have to handle accurately the case where n₁/n₂ ≈ 1 so ζ ≈ 0. In this case,
+                    // a cancellation occurs inside the square root: √(k² - ζ) ≈ √k² ≈ -k (because k is negative).
+                    // So β ≈ -k + k ≈ 0 and another cancellation occurs, outside of the square root.
+                    // This means that despite equation (6) is mathematically correct, it is prone to numerical
+                    // errors when consecutive layers have close refractive indices. A better equivalent
+                    // expression is needed. The fact β is close to 0 in this case was expected because
+                    // equation (1) reads v = α u + β z, and α = n₁/n₂, so when n₁/n₂ ≈ 1, we have
+                    // α ≈ 1 and β ≈ 0, so v ≈ u: when two layers have similar refractive indices, the
+                    // propagation direction is almost unchanged.
+                    //
+                    // The first step for the accurate computation of β is to compute ζ = (n₁/n₂)² - 1
+                    // accurately and avoid a cancellation just after a division (which is the least accurate
+                    // of the four operations) and a squaring. We will simply use:
+                    //   ζ = (n₁/n₂)² - 1
+                    //     = (n₁ - n₂) (n₁ + n₂) / n₂²
+                    // The cancellation is still there, but it occurs in the subtraction n₁ - n₂, which are
+                    // the most accurate values we can get.
+                    // The second step for the accurate computation of β is to rewrite equation (6)
+                    // by both multiplying and dividing by the dual factor -k + √(k² - ζ):
+                    //     β = -k - √(k² - ζ)
+                    //       = (-k - √(k² - ζ)) * (-k + √(k² - ζ)) / (-k + √(k² - ζ))
+                    //       = (k² - (k² - ζ)) / (-k + √(k² - ζ))
+                    // (7) β = ζ / (-k + √(k² - ζ))
+                    // expression (7) is more stable numerically than expression (6), because when ζ ≈ 0
+                    // its denominator is about -2k, there are no cancellation anymore after the square root.
+                    // β is computed with the same accuracy as ζ
+                    final double alpha = n1 / n2;
+                    final double k     = alpha * Vector3D.dotProduct(los, gp.getZenith());
+                    final double zeta  = (n1 - n2) * (n1 + n2) / (n2 * n2);
+                    final double beta  = zeta / (FastMath.sqrt(k * k - zeta) - k);
+                    los = new Vector3D(alpha, los, beta, gp.getZenith());
                 }
 
                 if (rawIntersection.getAltitude() > refractionLayer.getLowestAltitude()) {
@@ -174,7 +203,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
                 pos = ellipsoid.pointAtAltitude(pos, los, refractionLayer.getLowestAltitude());
                 gp  = ellipsoid.transform(pos, ellipsoid.getBodyFrame(), null);
 
-                previousRefractiveIndex = refractionLayer.getRefractiveIndex();
+                n1 = n2;
 
             }
 
