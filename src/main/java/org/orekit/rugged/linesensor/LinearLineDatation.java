@@ -24,6 +24,8 @@ import org.orekit.time.AbsoluteDate;
  * Instances of this class are guaranteed to be immutable.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
+
  */
 public class LinearLineDatation implements LineDatation {
 
@@ -52,6 +54,12 @@ public class LinearLineDatation implements LineDatation {
     @Override
     public AbsoluteDate getDate(final double lineNumber) {
         return referenceDate.shiftedBy((lineNumber - referenceLine) / rate);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double getLine(final AbsoluteDate date) {
+        return referenceLine + rate * date.durationFrom(referenceDate);
     }
 
     /** {@inheritDoc} */
