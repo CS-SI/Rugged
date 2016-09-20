@@ -83,7 +83,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
         this.ellipsoid = ellipsoid;
         this.refractionLayers = new ArrayList<>(refractionLayers);
         Collections.sort(this.refractionLayers,
-                         (l1, l2) -> Double.compare(l2.getLowestAltitude(), l1.getLowestAltitude()));
+            (l1, l2) -> Double.compare(l2.getLowestAltitude(), l1.getLowestAltitude()));
         atmosphereLowestAltitude = this.refractionLayers.get(this.refractionLayers.size() - 1).getLowestAltitude();
     }
 
