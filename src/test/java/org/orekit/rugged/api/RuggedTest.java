@@ -1051,28 +1051,28 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithoutCorrections()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, false,
-                                         7.0e-9, 4.0e-11, 2.0e-12, 7.0e-8);
+                                         8.0e-9, 3.0e-10, 2.0e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithLightTimeCorrection()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, false,
-                                         3.0e-9, 9.0e-9, 3.0e-13, 7.0e-8);
+                                         3.0e-9, 9.0e-9, 7.0e-13, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, true,
-                                         3.0e-10, 3.0e-10, 7.0e-13, 7.0e-8);
+                                         3.0e-10, 3.0e-10, 2.0e-12, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAllCorrections()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, true,
-                                         3.0e-10, 5.0e-10, 7.0e-14, 7.0e-8);
+                                         3.0e-10, 5.0e-10, 8.0e-13, 7.0e-8);
     }
 
     private void doTestInverseLocationDerivatives(int dimension,

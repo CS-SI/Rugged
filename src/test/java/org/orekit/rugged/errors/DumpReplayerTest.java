@@ -19,8 +19,10 @@ package org.orekit.rugged.errors;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -220,8 +222,9 @@ public class DumpReplayerTest {
 
             // split all data lines into fields
             final List<String[]> lines = new ArrayList<>();
-            try (FileReader fr = new FileReader(file);
-                 BufferedReader br = new BufferedReader(fr)) {
+            try (FileInputStream fis = new FileInputStream(file);
+                 InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+                 BufferedReader br = new BufferedReader(isr)) {
                 br.lines().
                    filter(line -> {
                        String trimmed = line.trim();
@@ -233,8 +236,8 @@ public class DumpReplayerTest {
             // for each field of each line, delete the field and check parsing fails
             for (int i = 0; i < lines.size(); ++i) {
                 for (int j = 0; j < lines.get(i).length; ++j) {
-                    File corrupted = tempFolder.newFile();
-                    try (PrintWriter pw = new PrintWriter(corrupted)) {
+                    final File corrupted = tempFolder.newFile();
+                    try (PrintWriter pw = new PrintWriter(corrupted, "UTF-8")) {
                         for (int k = 0; k < lines.size(); ++k) {
                             for (int l = 0; l < lines.get(k).length; ++l) {
                                 if (k != i || l != j) {
