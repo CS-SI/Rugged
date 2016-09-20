@@ -113,9 +113,52 @@ public class MultiLayerModel implements AtmosphericRefraction {
 
                 if (previousRefractiveIndex > 0) {
 
+                    // when we get here, we have already performed one iteration in the loop
+                    // so gp is the los intersection with the layers interface (it was a
+                    // point on ground at loop initialization, but is overridden at each iteration)
+
                     // get new los by applying Snell's law at atmosphere layers interfaces
                     // we avoid computing sequences of inverse-trigo/trigo/inverse-trigo functions
                     // we just use linear algebra and square roots, it is faster and more accurate
+
+                    // at interface crossing, the interface normal is z, the local zenith direction
+                    // the ray direction (i.e. los) is u in the upper layer and v in the lower layer
+                    // v is in the (u, zenith) plane, so we can say
+                    //  (1) v = α u + β z
+                    // with α>0 as u and v are roughly in the same direction as the ray is slightly bent
+
+                    // let θ₁ be the los incidence angle at interface crossing
+                    // θ₁ = π - angle(u, zenith) is between 0 and π/2 for a downwards observation
+                    // let θ₂ be the exit angle at interface crossing
+                    // from Snell's law, we have n₁ sin θ₁ = n₂ sin θ₂ and θ₂ is also between 0 and π/2
+                    // we have:
+                    //   (2) u·z = -cos θ₁
+                    //   (3) v·z = -cos θ₂
+                    // combining equations (1), (2) and (3) and remembering z·z = 1 as z is normalized , we get
+                    //   (4) β = α cos θ₁ - cos θ₂
+                    // with all the expressions above, we can rewrite the fact v is normalized:
+                    //       1 = v·v
+                    //         = α² u·u + 2αβ u·z + β² z·z
+                    //         = α² - 2αβ cos θ₁ + β²
+                    //         = α² - 2α² cos² θ₁ + 2 α cos θ₁ cos θ₂ + α² cos² θ₁ - 2 α cos θ₁ cos θ₂ + cos² θ₂
+                    //         = α²(1 - cos² θ₁) + cos² θ₂
+                    // hence α² = (1 - cos² θ₂)/(1 - cos² θ₁)
+                    //          = sin² θ₂ / sin² θ₁
+                    // as α is positive, and both θ₁ and θ₂ are between 0 and π/2, we finally get
+                    //       α  = sin θ₂ / sin θ₁
+                    //   (5) α  = n₁ / n₂
+                    // the α coefficient is independent from the incidence angle,
+                    // it depends only on the ratio of refractive indices!
+                    //
+                    // back to equation (4) and using again the fact θ₂ is between 0 and π/2, we can now write
+                    //       β = α cos θ₁ - cos θ₂
+                    //         = n₁ / n₂ cos θ₁ - cos θ₂
+                    //         = n₁ / n₂ cos θ₁ - √(1 - sin² θ₂)
+                    //         = n₁ / n₂ cos θ₁ - √(1 - (n₁ / n₂)² sin² θ₁)
+                    //         = n₁ / n₂ cos θ₁ - √(1 - (n₁ / n₂)² (1 - cos² θ₁))
+                    //         = n₁ / n₂ cos θ₁ - √(1 + (n₁ / n₂)² cos² θ₁ - (n₁ / n₂)²)
+                    //   (6) β = -k - √(1 + k² - (n₁ / n₂)²)
+                    // where k = n₁ / n₂ u·z
                     final double n1On2 = previousRefractiveIndex / refractionLayer.getRefractiveIndex();
                     final double k     = n1On2 * Vector3D.dotProduct(los, gp.getZenith());
                     los = new Vector3D(n1On2, los,
@@ -129,9 +172,10 @@ public class MultiLayerModel implements AtmosphericRefraction {
 
                 // get intersection point
                 pos = ellipsoid.pointAtAltitude(pos, los, refractionLayer.getLowestAltitude());
-                gp = ellipsoid.transform(pos, ellipsoid.getBodyFrame(), null);
+                gp  = ellipsoid.transform(pos, ellipsoid.getBodyFrame(), null);
 
                 previousRefractiveIndex = refractionLayer.getRefractiveIndex();
+
             }
 
             return algorithm.refineIntersection(ellipsoid, pos, los, rawIntersection);
