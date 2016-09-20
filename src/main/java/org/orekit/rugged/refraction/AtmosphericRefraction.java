@@ -25,12 +25,13 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 /**
  * Interface for atmospheric refraction model.
  * @author Sergio Esteves
+ * @since 2.0
  */
 public interface AtmosphericRefraction {
 
     /** Apply correction to the intersected point with an atmospheric refraction model.
-     * @param satPos satellite position
-     * @param satLos satellite line of sight
+     * @param satPos satellite position, in <em>body frame</em>
+     * @param satLos satellite line of sight, in <em>body frame</em>
      * @param rawIntersection intersection point before refraction correction
      * @param algorithm intersection algorithm
      * @return corrected point with the effect of atmospheric refraction
@@ -39,7 +40,7 @@ public interface AtmosphericRefraction {
      * {@link IntersectionAlgorithm#refineIntersection(ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
      */
     NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
-                                             IntersectionAlgorithm algorithm)
+                                            IntersectionAlgorithm algorithm)
         throws RuggedException;
 
 }
