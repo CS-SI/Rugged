@@ -28,6 +28,7 @@ import java.util.List;
 
 
 import org.orekit.rugged.los.FixedRotation;
+import org.orekit.rugged.los.FixedZHomothety;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
@@ -89,6 +90,7 @@ public class PleiadesViewingModel {
    
     losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.0));
     losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.0));
+    losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
       
     return  losBuilder.build();
 	}

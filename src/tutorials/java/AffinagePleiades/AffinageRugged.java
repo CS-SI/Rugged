@@ -62,7 +62,8 @@ public class AffinageRugged {
 
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
-            File orekitData = new File(home, "workspace/data/orekit-data");
+            //File orekitData = new File(home, "workspace/data/orekit-data");
+            File orekitData = new File(home, "COTS/orekit-data");
             DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
             
@@ -140,10 +141,10 @@ public class AffinageRugged {
             
             double rollValue =  FastMath.toRadians( 0.1);
             double pitchValue = FastMath.toRadians(-0.3);
+            double factorValue = 0.5;
                         
-            System.out.format("roll : %3.5f pitch : %3.5f \n",rollValue,pitchValue);
-
-            
+            System.out.format("roll : %3.5f pitch : %3.5f factor : %3.5f \n",rollValue,pitchValue,factorValue);
+                        
             rugged.
             getLineSensor("line").
             getParametersDrivers().
@@ -155,6 +156,13 @@ public class AffinageRugged {
             getParametersDrivers().
             filter(driver -> driver.getName().equals("pitch")).
             findFirst().get().setValue(pitchValue);
+            
+            rugged.
+            getLineSensor("line").
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals("factor")).
+            findFirst().get().setValue(factorValue);
+            
 
             
             System.out.format(" **** Generate Measures **** %n");
@@ -162,7 +170,7 @@ public class AffinageRugged {
             MeasureGenerator measure = new MeasureGenerator(pleiadesViewingModel,rugged);
             measure.CreateMeasure(1000, 1000);
 
-            System.out.format(" **** Reset Roll/Pitch **** %n");
+            System.out.format(" **** Reset Roll/Pitch/Factor **** %n");
             rugged.
             getLineSensor(pleiadesViewingModel.getSensorName()).
             getParametersDrivers().
@@ -175,7 +183,18 @@ public class AffinageRugged {
                     throw new OrekitExceptionWrapper(e);
                 }
             });
-            
+            rugged.
+            getLineSensor(pleiadesViewingModel.getSensorName()).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals("factor")).
+            forEach(driver -> {
+                try {
+                    driver.setSelected(true);
+                    driver.setValue(1.0);		// default value: no Z scale factor applied
+                } catch (OrekitException e) {
+                    throw new OrekitExceptionWrapper(e);
+                }
+            });
             
             
             System.out.format(" **** Start optimization  **** %n");
@@ -204,7 +223,14 @@ public class AffinageRugged {
                                            filter(driver -> driver.getName().equals("pitch")).
                                            findFirst().get().getValue();
             double pitchError = (estimatedPitch - pitchValue);
-            System.out.format("Estimated pitch %3.5f pitch  error %3.6e  %n ", estimatedPitch, pitchError);
+            System.out.format("Estimated pitch %3.5f pitch error %3.6e  %n ", estimatedPitch, pitchError);
+            
+            double estimatedFactor = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
+                    getParametersDrivers().
+                    filter(driver -> driver.getName().equals("factor")).
+                    findFirst().get().getValue();
+            double factorError = (estimatedFactor - factorValue);
+            System.out.format("Estimated factor %3.5f factor error %3.6e  %n ", estimatedFactor, factorError);
             
             
 
