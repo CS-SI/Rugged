@@ -40,6 +40,8 @@ public class MeasureGenerator {
 
     private PleiadesViewingModel viewingModel;
     
+    private int measureCount;
+    
     
     
     /** Simple constructor.
@@ -56,6 +58,7 @@ public class MeasureGenerator {
     this.rugged = rugged;
     this.viewingModel = viewingModel;
     sensor = rugged.getLineSensor(mapping.getSensorName());
+    measureCount = 0;
     
     }
     
@@ -63,6 +66,9 @@ public class MeasureGenerator {
     	return mapping;
     }
     
+    public int  getMeasureCount() {
+    	return measureCount;
+    }    
     
     public void CreateMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
     {
@@ -74,6 +80,7 @@ public class MeasureGenerator {
             GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
                                                       sensor.getLOS(date, pixel));
             mapping.addMapping(new SensorPixel(line, pixel), gp2);
+            measureCount++;
         }
     }
     }

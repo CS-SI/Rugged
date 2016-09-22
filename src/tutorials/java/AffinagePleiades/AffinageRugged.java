@@ -19,7 +19,6 @@ package AffinagePleiades;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
-
 import java.io.File;
 import java.util.Locale;
 import java.util.Collections;
@@ -48,6 +47,8 @@ import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.PVCoordinates;
+
+
 
 /**
  * Parameter estimation context 
@@ -168,7 +169,10 @@ public class AffinageRugged {
             System.out.format(" **** Generate Measures **** %n");
             
             MeasureGenerator measure = new MeasureGenerator(pleiadesViewingModel,rugged);
-            measure.CreateMeasure(1000, 1000);
+            int lineSampling = 1000;
+            int pixelSampling = 1000;		
+            measure.CreateMeasure(lineSampling, pixelSampling);
+            System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
 
             System.out.format(" **** Reset Roll/Pitch/Factor **** %n");
             rugged.
@@ -196,11 +200,17 @@ public class AffinageRugged {
                 }
             });
             
+            System.out.format(" **** Initial Residuals  **** %n");
+            
+            LocalisationMetrics initlialResiduals = new LocalisationMetrics(measure.getMapping(),rugged);
+            System.out.format("residuals max :  %3.6e mean %3.6e  %n",initlialResiduals.getMaxResidual(),initlialResiduals.getMeanResidual());
+             
+           
             
             System.out.format(" **** Start optimization  **** %n");
             // perform parameters estimation
             int maxIterations = 15;
-            double convergenceThreshold =  1.0e-9;
+            double convergenceThreshold =  1e-12;
             
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
 
@@ -208,7 +218,7 @@ public class AffinageRugged {
             Optimum optimum = rugged.estimateFreeParameters(Collections.singletonList(measure.getMapping()), maxIterations,convergenceThreshold);
             
    
-            System.out.format(" Optimization performed in %d interation \n",optimum.getEvaluations());
+            System.out.format(" Optimization performed in %d iterations \n",optimum.getEvaluations());
 
             // check estimated values
             double estimatedRoll = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
@@ -231,6 +241,14 @@ public class AffinageRugged {
                     findFirst().get().getValue();
             double factorError = (estimatedFactor - factorValue);
             System.out.format("Estimated factor %3.5f factor error %3.6e  %n ", estimatedFactor, factorError);
+            
+            System.out.format(" **** Compute Statistics **** %n");
+
+            LocalisationMetrics localisationResiduals = new LocalisationMetrics(measure.getMapping(),rugged);
+            System.out.format("residuals max :  %3.6e mean %3.6e  %n",localisationResiduals.getMaxResidual(),localisationResiduals.getMeanResidual());
+            //RealVector residuals =  optimum.getResiduals();
+
+
             
             
 
