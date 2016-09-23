@@ -202,8 +202,8 @@ public class AffinageRugged {
             
             System.out.format(" **** Initial Residuals  **** %n");
             
-            LocalisationMetrics initlialResiduals = new LocalisationMetrics(measure.getMapping(),rugged);
-            System.out.format("residuals max :  %3.6e mean %3.6e  %n",initlialResiduals.getMaxResidual(),initlialResiduals.getMeanResidual());
+            LocalisationMetrics initlialResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
+            System.out.format("residuals max :  %3.4e mean %3.4e meters  %n",initlialResiduals.getMaxResidual(),initlialResiduals.getMeanResidual());
              
            
             
@@ -244,8 +244,8 @@ public class AffinageRugged {
             
             System.out.format(" **** Compute Statistics **** %n");
 
-            LocalisationMetrics localisationResiduals = new LocalisationMetrics(measure.getMapping(),rugged);
-            System.out.format("residuals max :  %3.6e mean %3.6e  %n",localisationResiduals.getMaxResidual(),localisationResiduals.getMeanResidual());
+            LocalisationMetrics localisationResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
+            System.out.format("residuals max :  %3.4e mean %3.4e  meters %n",localisationResiduals.getMaxResidual(),localisationResiduals.getMeanResidual());
             //RealVector residuals =  optimum.getResiduals();
 
 

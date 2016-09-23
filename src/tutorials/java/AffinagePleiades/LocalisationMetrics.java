@@ -27,6 +27,7 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.time.AbsoluteDate;
+import org.s2geolib.utils.S2GeolibConstants;
 
 import java.util.Collections;
 import java.util.Collection;
@@ -56,7 +57,10 @@ public class LocalisationMetrics {
     private PleiadesViewingModel viewingModel;
     
     private int measureCount;
+     
+    private final double EARTH_RADIUS = 637100000d;
     
+    private boolean computeInDeg; 
     
     /* max residual distance */
     private double resMax;
@@ -71,15 +75,15 @@ public class LocalisationMetrics {
      *
      * </p>
      */
-    public LocalisationMetrics(SensorToGroundMapping groundTruthMapping, Rugged rugged) throws RuggedException
+    public LocalisationMetrics(SensorToGroundMapping groundTruthMapping, Rugged rugged, boolean computeInDeg) throws RuggedException
     {
 	
 
     	groundTruthMappings =  groundTruthMapping.getMappings();
     	this.rugged = rugged;
     	this.sensor = rugged.getLineSensor(groundTruthMapping.getSensorName());
+    	this.computeInDeg = computeInDeg;
     	this.computeMetrics();
-    	
     }
     
     
@@ -100,6 +104,47 @@ public class LocalisationMetrics {
     }
     
     
+    /**
+     * Compute distance between point (lonDeg1, latDeg1) and point (lonDeg2, latDeg2) in meters
+     * @param lonDeg1
+     * @param latDeg1
+     * @param lonDeg2
+     * @param latDeg2
+     * @return distance between point (lonDeg1, latDeg1) and point (lonDeg2, latDeg2)
+     */
+    private double computeDistance(double lonDeg1, double latDeg1, double lonDeg2, double latDeg2) {
+        double returned;
+        double xRad1 = FastMath.toRadians(lonDeg1);
+        double xRad2 = FastMath.toRadians(lonDeg2);
+        double yRad1 = FastMath.toRadians(latDeg1);
+        double yRad2 = FastMath.toRadians(latDeg2);
+        returned = computeDistanceRad(xRad1, yRad1, xRad2, yRad2);
+        return returned;
+    }
+
+    /**
+     * distance in meters between point (xRad1, yRad1) and point (xRad2, yRad2)
+     * @param xRad1
+     * @param xRad2
+     * @param yRad1
+     * @param yRad2
+     * @return
+     */
+    private double computeDistanceRad(double xRad1, double yRad1, double xRad2, double yRad2) {
+        double returned;
+        double sinValue = FastMath.sin(xRad1) * FastMath.sin(xRad2);
+        double deltaLambda = FastMath.abs(yRad1 - yRad2);
+        double cosValue = FastMath.cos(xRad1) * FastMath.cos(xRad2) * FastMath.cos(deltaLambda);
+        double deltaPhy = FastMath.acos(sinValue + cosValue);
+        if (Double.isNaN(deltaPhy)) {
+            deltaPhy = 0d;
+        }
+        returned = EARTH_RADIUS / 100 * deltaPhy;
+        return returned;
+    }
+
+    
+    
     
     public void computeMetrics()  throws RuggedException {
     	    	    
@@ -110,7 +155,6 @@ public class LocalisationMetrics {
             double count=0;
             resMax = 0; 
     	  	int k = groundTruthMappings.size();
-    	  	
     	  	Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = groundTruthMappings.iterator();
     	  	
     	  	
@@ -126,14 +170,17 @@ public class LocalisationMetrics {
                 GeodeticPoint esGP = rugged.directLocation(date, sensor.getPosition(),
                         sensor.getLOS(date, (int) gtSP.getPixelNumber()));
                    
+                double distance = 0;
                 
-                double lonDiff = esGP.getLongitude() - gtGP.getLongitude();
-                double latDiff = esGP.getLatitude() - gtGP.getLatitude();		
-                double altDiff = esGP.getAltitude() - gtGP.getAltitude();
-                //longDiffVector.append(lonDiff);
-                //latDiffVector.append(latDiff);
-                //altDiffVector.append(altDiff);
-    	  	    double distance = Math.sqrt( lonDiff * lonDiff + latDiff * latDiff + altDiff * altDiff );
+                if(this.computeInDeg == true)
+                {
+                	double lonDiff = esGP.getLongitude() - gtGP.getLongitude();
+                	double latDiff = esGP.getLatitude() - gtGP.getLatitude();		
+                	double altDiff = esGP.getAltitude() - gtGP.getAltitude();
+                	distance = Math.sqrt( lonDiff * lonDiff + latDiff * latDiff + altDiff * altDiff );
+                }
+                else
+                	distance = computeDistance(esGP.getLongitude(), esGP.getLatitude(),gtGP.getLongitude() , gtGP.getLatitude());
     	  	    count += distance;
     	  	    if (distance > resMax)
     	  	    {
@@ -144,8 +191,8 @@ public class LocalisationMetrics {
     	  	}
     	  	
             //resMax =  distanceVector.getMaxValue();
-            //System.out.format(Locale.US, "max: %3.6e %n ",distanceVector.getMaxValue() );
-          
+            //System.out.format(Locale.US, "max: %3.6e %n ",distanceVector.getMaxValue() )
+    	  	
             resMean = count / k ;
             //System.out.format("number of points %d  %n", k);
         }
