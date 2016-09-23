@@ -49,7 +49,7 @@ public class PleiadesViewingModel {
 	public  double incidence = 15.0; 
 	public  LineSensor lineSensor;	
 	public  int dimension = 40000;
-	public  String date = "2016-01-01T00:00:00.0";
+	public  String date = "2016-01-01T12:00:00.0";
 	
 	private String sensorName;
 	
