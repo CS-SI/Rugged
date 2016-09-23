@@ -119,8 +119,9 @@ public class OrbitModel {
         return new CircularOrbit(694000.0 + Constants.WGS84_EARTH_EQUATORIAL_RADIUS,//ajouter Rayon 
                                  -4.029194321683225E-4, 0.0013530362644647786,
                                  FastMath.toRadians(98.2), //pleiades inclinaison 98.2
-                                 FastMath.toRadians(-86.47),
-                                 FastMath.toRadians(135.9), PositionAngle.TRUE,
+                                 //FastMath.toRadians(-86.47),
+                                 FastMath.toRadians(-86.47+180),
+                                 FastMath.toRadians(135.9+0.3), PositionAngle.TRUE,
                                  eme2000, date, mu);
     }
 
