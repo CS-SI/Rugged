@@ -171,7 +171,8 @@ public class AffinageRugged {
             MeasureGenerator measure = new MeasureGenerator(pleiadesViewingModel,rugged);
             int lineSampling = 1000;
             int pixelSampling = 1000;		
-            measure.CreateMeasure(lineSampling, pixelSampling);
+            //measure.CreateMeasure(lineSampling, pixelSampling); 
+            measure.CreateNoisyMeasure(lineSampling, pixelSampling); // Test with noisy measures
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
 
             System.out.format(" **** Reset Roll/Pitch/Factor **** %n");
