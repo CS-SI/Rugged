@@ -461,7 +461,6 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${rugged.maven-javadoc-plugin.version}</version>
         <configuration>
-          <overview>${basedir}/core/src/main/java/org/orekit/rugged/overview.html</overview>
           <links>
             <link>http://docs.oracle.com/javase/8/docs/api/</link>
             <link>https://hipparchus.org/apidocs/</link>
