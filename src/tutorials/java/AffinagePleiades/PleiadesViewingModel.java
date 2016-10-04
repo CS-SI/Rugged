@@ -44,12 +44,13 @@ import org.orekit.errors.OrekitException;
 
 public class PleiadesViewingModel {
 	
-	public  double fov = 1.6; // 20km - alt 694km
+	public  double fov = 1.65; // 20km - alt 694km
 	public  double angle = 0.0;
-	public  double incidence = 15.0; 
 	public  LineSensor lineSensor;	
 	public  int dimension = 40000;
 	public  String date = "2016-01-01T12:00:00.0";
+	private final double linePeriod =  1e-4;
+	
 	
 	private String sensorName;
 	
@@ -71,6 +72,8 @@ public class PleiadesViewingModel {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
             list.add(new Rotation(normal, alpha, RotationConvention.VECTOR_OPERATOR).applyTo(center));
         }
+        
+        
         return new LOSBuilder(list);
     }	
 	
@@ -88,8 +91,10 @@ public class PleiadesViewingModel {
             RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K), Vector3D.PLUS_I, FastMath.toRadians(fov/2), dimension); 	
 
    
-    losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.0));
-    losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.0));
+	
+	
+	losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.00));
+    losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.00));
     losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
       
     return  losBuilder.build();
@@ -150,12 +155,12 @@ public class PleiadesViewingModel {
         TimeDependentLOS lineOfSight = buildLOS();
         
         
-        double linePeriod =  1.0 / 1.5e-3;
+        final double rate =  1 / linePeriod;
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
 
         
         
-        LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, linePeriod);
+        LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, rate);
         //LineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20);
         lineSensor = new LineSensor(sensorName, lineDatation, msiOffset, lineOfSight);
         
