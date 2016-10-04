@@ -16,8 +16,6 @@
  */
 package AffinagePleiades;
 
-
-
 import org.hipparchus.linear.ArrayRealVector;
 import org.hipparchus.linear.RealVector;
 
@@ -27,7 +25,6 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.time.AbsoluteDate;
-import org.s2geolib.utils.S2GeolibConstants;
 
 import java.util.Collections;
 import java.util.Collection;
@@ -39,166 +36,117 @@ import java.util.Locale;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 
-/** class for measure generation
+/**
+ * class for measure generation
+ * 
  * @author Jonathan Guinet
  */
 public class LocalisationMetrics {
 
+	/** mapping */
+	private Set<Map.Entry<SensorPixel, GeodeticPoint>> groundTruthMappings;
 
-    /** mapping */
-    private Set <Map.Entry<SensorPixel, GeodeticPoint>> groundTruthMappings;
+	private Set<Map.Entry<SensorPixel, GeodeticPoint>> estimationMappings;
 
-    private Set <Map.Entry<SensorPixel, GeodeticPoint>> estimationMappings; 
-    
-    private Rugged rugged;
-    
-    private LineSensor sensor;
+	private Rugged rugged;
 
-    private PleiadesViewingModel viewingModel;
-    
-    private int measureCount;
-     
-    private final double EARTH_RADIUS = 637100000d;
-    
-    private boolean computeInDeg; 
-    
-    /* max residual distance */
-    private double resMax;
-    
-    
-    /* mean residual distance */
-    private double resMean;
-    
-    
-    /** Simple constructor.
-     * <p>
-     *
-     * </p>
-     */
-    public LocalisationMetrics(SensorToGroundMapping groundTruthMapping, Rugged rugged, boolean computeInDeg) throws RuggedException
-    {
-	
+	private LineSensor sensor;
 
-    	groundTruthMappings =  groundTruthMapping.getMappings();
-    	this.rugged = rugged;
-    	this.sensor = rugged.getLineSensor(groundTruthMapping.getSensorName());
-    	this.computeInDeg = computeInDeg;
-    	this.computeMetrics();
-    }
-    
-    
-    /** Get the maximum residual;
-     * @return max residual
-     */
-    public double getMaxResidual() {
-        return resMax;
-    }
-    
+	private PleiadesViewingModel viewingModel;
 
-    
-    /** Get the mean residual;
-     * @return mean residual
-     */
-    public double getMeanResidual() {
-        return resMean;
-    }
-    
-    
-    /**
-     * Compute distance between point (lonDeg1, latDeg1) and point (lonDeg2, latDeg2) in meters
-     * @param lonDeg1
-     * @param latDeg1
-     * @param lonDeg2
-     * @param latDeg2
-     * @return distance between point (lonDeg1, latDeg1) and point (lonDeg2, latDeg2)
-     */
-    private double computeDistance(double lonDeg1, double latDeg1, double lonDeg2, double latDeg2) {
-        double returned;
-        double xRad1 = FastMath.toRadians(lonDeg1);
-        double xRad2 = FastMath.toRadians(lonDeg2);
-        double yRad1 = FastMath.toRadians(latDeg1);
-        double yRad2 = FastMath.toRadians(latDeg2);
-        returned = computeDistanceRad(xRad1, yRad1, xRad2, yRad2);
-        return returned;
-    }
+	private int measureCount;
 
-    /**
-     * distance in meters between point (xRad1, yRad1) and point (xRad2, yRad2)
-     * @param xRad1
-     * @param xRad2
-     * @param yRad1
-     * @param yRad2
-     * @return
-     */
-    private double computeDistanceRad(double xRad1, double yRad1, double xRad2, double yRad2) {
-        double returned;
-        double sinValue = FastMath.sin(xRad1) * FastMath.sin(xRad2);
-        double deltaLambda = FastMath.abs(yRad1 - yRad2);
-        double cosValue = FastMath.cos(xRad1) * FastMath.cos(xRad2) * FastMath.cos(deltaLambda);
-        double deltaPhy = FastMath.acos(sinValue + cosValue);
-        if (Double.isNaN(deltaPhy)) {
-            deltaPhy = 0d;
-        }
-        returned = EARTH_RADIUS / 100 * deltaPhy;
-        return returned;
-    }
+	private boolean computeInDeg;
 
-    
-    
-    
-    public void computeMetrics()  throws RuggedException {
-    	    	    
-            //final RealVector longDiffVector;
-            //final RealVector latDiffVector;
-            //final RealVector altDiffVector;
-            RealVector distanceVector = new ArrayRealVector();
-            double count=0;
-            resMax = 0; 
-    	  	int k = groundTruthMappings.size();
-    	  	Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = groundTruthMappings.iterator();
-    	  	
-    	  	
-    	  	while (gtIt.hasNext()) {
-    	  		Map.Entry<SensorPixel, GeodeticPoint> gtMapping =gtIt.next();
-    	  		
-    	  		
-                final SensorPixel gtSP = gtMapping.getKey();
-                final GeodeticPoint gtGP = gtMapping.getValue();
-                
-                AbsoluteDate date = sensor.getDate(gtSP.getLineNumber());
-                
-                GeodeticPoint esGP = rugged.directLocation(date, sensor.getPosition(),
-                        sensor.getLOS(date, (int) gtSP.getPixelNumber()));
-                   
-                double distance = 0;
-                
-                if(this.computeInDeg == true)
-                {
-                	double lonDiff = esGP.getLongitude() - gtGP.getLongitude();
-                	double latDiff = esGP.getLatitude() - gtGP.getLatitude();		
-                	double altDiff = esGP.getAltitude() - gtGP.getAltitude();
-                	distance = Math.sqrt( lonDiff * lonDiff + latDiff * latDiff + altDiff * altDiff );
-                }
-                else
-                	distance = computeDistance(esGP.getLongitude(), esGP.getLatitude(),gtGP.getLongitude() , gtGP.getLatitude());
-    	  	    count += distance;
-    	  	    if (distance > resMax)
-    	  	    {
-    	  	    		resMax = distance;
-    	  	    }
-                //distanceVector.append(distance);
-    	  		
-    	  	}
-    	  	
-            //resMax =  distanceVector.getMaxValue();
-            //System.out.format(Locale.US, "max: %3.6e %n ",distanceVector.getMaxValue() )
-    	  	
-            resMean = count / k ;
-            //System.out.format("number of points %d  %n", k);
-        }
-    	
-  	
+	/* max residual distance */
+	private double resMax;
 
-    
+	/* mean residual distance */
+	private double resMean;
+
+	/**
+	 * Simple constructor.
+	 * <p>
+	 *
+	 * </p>
+	 */
+	public LocalisationMetrics(SensorToGroundMapping groundTruthMapping, Rugged rugged, boolean computeInDeg)
+			throws RuggedException {
+
+		groundTruthMappings = groundTruthMapping.getMappings();
+		this.rugged = rugged;
+		this.sensor = rugged.getLineSensor(groundTruthMapping.getSensorName());
+		this.computeInDeg = computeInDeg;
+		this.computeMetrics();
+	}
+
+	/**
+	 * Get the maximum residual;
+	 * 
+	 * @return max residual
+	 */
+	public double getMaxResidual() {
+		return resMax;
+	}
+
+	/**
+	 * Get the mean residual;
+	 * 
+	 * @return mean residual
+	 */
+	public double getMeanResidual() {
+		return resMean;
+	}
+
+	public void computeMetrics() throws RuggedException {
+
+		// final RealVector longDiffVector;
+		// final RealVector latDiffVector;
+		// final RealVector altDiffVector;
+
+		double count = 0;
+		resMax = 0;
+		int k = groundTruthMappings.size();
+		Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = groundTruthMappings.iterator();
+
+		while (gtIt.hasNext()) {
+			Map.Entry<SensorPixel, GeodeticPoint> gtMapping = gtIt.next();
+
+			final SensorPixel gtSP = gtMapping.getKey();
+			final GeodeticPoint gtGP = gtMapping.getValue();
+
+			AbsoluteDate date = sensor.getDate(gtSP.getLineNumber());
+
+			GeodeticPoint esGP = rugged.directLocation(date, sensor.getPosition(),
+					sensor.getLOS(date, (int) gtSP.getPixelNumber()));
+
+			double distance = 0;
+
+			if (this.computeInDeg == true) {
+				double lonDiff = esGP.getLongitude() - gtGP.getLongitude();
+				double latDiff = esGP.getLatitude() - gtGP.getLatitude();
+				double altDiff = esGP.getAltitude() - gtGP.getAltitude();
+				distance = Math.sqrt(lonDiff * lonDiff + latDiff * latDiff);
+			} else {
+
+				distance = DistanceTools.computeDistanceRad(esGP.getLongitude(), esGP.getLatitude(),
+						gtGP.getLongitude(), gtGP.getLatitude());
+			}
+			count += distance;
+			if (distance > resMax) {
+				resMax = distance;
+
+			}
+			// distanceVector.append(distance);
+
+		}
+
+		// resMax = distanceVector.getMaxValue();
+		// System.out.format(Locale.US, "max: %3.6e %n
+		// ",distanceVector.getMaxValue() )
+
+		resMean = count / k;
+		// System.out.format("number of points %d %n", k);
+	}
+
 }
-
