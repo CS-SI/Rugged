@@ -41,7 +41,7 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
      * in the multiplications/divisions sequences.
      * </p>
      */
-    private final double SCALE = FastMath.scalb(1.0, -20);
+    private final double SCALE = FastMath.scalb(1.0, 0);
 
     /** Homothety factor. */
     private double factor;
@@ -63,7 +63,7 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
     	this.factor   = factorvalue;
     	this.factorDS = null;
         try {
-            this.factorDriver = new ParameterDriver(name, factorvalue, SCALE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+            this.factorDriver = new ParameterDriver(name, factorvalue, SCALE, 0, Double.POSITIVE_INFINITY);
             factorDriver.addObserver(new ParameterObserver() {
                 @Override
                 public void valueChanged(final double previousValue, final ParameterDriver driver) {
