@@ -63,8 +63,8 @@ public class AffinageRugged {
 
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
-            //File orekitData = new File(home, "workspace/data/orekit-data");
-            File orekitData = new File(home, "COTS/orekit-data");
+            File orekitData = new File(home, "workspace/data/orekit-data");
+            //File orekitData = new File(home, "COTS/orekit-data");
             DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
             
@@ -117,32 +117,43 @@ public class AffinageRugged {
            
             
             Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
-            AbsoluteDate firstLineDate = lineSensor.getDate(pleiadesViewingModel.dimension/2);
-            System.out.format("date %s %n",firstLineDate.toString());
+            AbsoluteDate firstLineDate = lineSensor.getDate(0);
             Vector3D los = lineSensor.getLOS(firstLineDate,0);
             GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
-            System.out.format(Locale.US, "upper left point: φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
-                              FastMath.toDegrees(upLeftPoint.getLatitude()),
-                              FastMath.toDegrees(upLeftPoint.getLongitude()),
-                              upLeftPoint.getAltitude());
+          
             los = lineSensor.getLOS(firstLineDate,pleiadesViewingModel.dimension-1);
-            GeodeticPoint upRightPoint = rugged.directLocation(firstLineDate, position, los);
-            System.out.format(Locale.US, "upper right point: φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
-                              FastMath.toDegrees(upRightPoint.getLatitude()),
-                              FastMath.toDegrees(upRightPoint.getLongitude()),upRightPoint.getAltitude());                   
-            los = lineSensor.getLOS(firstLineDate,pleiadesViewingModel.dimension/2);
-            GeodeticPoint centerPoint = rugged.directLocation(firstLineDate, position, los);
-            System.out.format(Locale.US, "center point: φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
+            //GeodeticPoint upRightPoint = rugged.directLocation(firstLineDate, position, los);               
+            
+            
+            AbsoluteDate lineDate = lineSensor.getDate(pleiadesViewingModel.dimension/2);
+            los = lineSensor.getLOS(lineDate,pleiadesViewingModel.dimension/2);
+            GeodeticPoint centerPoint = rugged.directLocation(lineDate, position, los);
+            System.out.format(Locale.US, "center geodetic position : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                               FastMath.toDegrees(centerPoint.getLatitude()),
                               FastMath.toDegrees(centerPoint.getLongitude()),centerPoint.getAltitude());                   
             
+
+              
+            int pixelPosition = pleiadesViewingModel.dimension-1;
+            los = lineSensor.getLOS(firstLineDate,pixelPosition);
+            GeodeticPoint upperRight = rugged.directLocation(firstLineDate, position, los);
+           
+            AbsoluteDate lineDate_y = lineSensor.getDate(pleiadesViewingModel.dimension-1);
+            los = lineSensor.getLOS(lineDate_y,0);
+            GeodeticPoint lowerLeft = rugged.directLocation(lineDate_y, position, los);
+     
+            
+            double GSD_X = DistanceTools.computeDistanceRad(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),upperRight.getLongitude() , upperRight.getLatitude())/pleiadesViewingModel.dimension;
+            double GSD_Y = DistanceTools.computeDistanceRad(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),lowerLeft.getLongitude() , lowerLeft.getLatitude())/pleiadesViewingModel.dimension;
+            
+            
+            System.out.format(" GSD X %2.2f Y %2.2f **** %n", GSD_X, GSD_Y);    
             
             System.out.format(" **** Add roll and pitch values **** %n");       
             
-            
-            double rollValue =  FastMath.toRadians( 0.1);
-            double pitchValue = FastMath.toRadians(-0.3);
-            double factorValue = 0.5;
+            double rollValue =  FastMath.toRadians(-0.01);
+            double pitchValue = FastMath.toRadians(0.02);
+            double factorValue = 1.05;
                         
             System.out.format("roll : %3.5f pitch : %3.5f factor : %3.5f \n",rollValue,pitchValue,factorValue);
                         
@@ -172,9 +183,29 @@ public class AffinageRugged {
             int lineSampling = 1000;
             int pixelSampling = 1000;		
             //measure.CreateMeasure(lineSampling, pixelSampling); 
-            measure.CreateNoisyMeasure(lineSampling, pixelSampling); // Test with noisy measures
+            
+            //double pixErr = 0.0;
+            //double altErr = 0.0;
+            final double[] pixErr = new double[4];
+            pixErr[0] = 0; // lat mean
+            pixErr[1] = 0.1; // lat std
+            pixErr[2] = 0; // lon mean
+            pixErr[3] = 0.1; // lon std
+            
+            final double[] altErr = new double[2];
+            altErr[0] = 1.0; //mean
+            altErr[1] = 3.0; //std  
+            measure.CreateNoisyMeasure(lineSampling, pixelSampling,pixErr,altErr); // Test with noisy measures
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
 
+            System.out.format(" **** Initial Residuals  **** %n");
+            
+            LocalisationMetrics gtResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
+            System.out.format("gt residuals max :  %3.4f mean %3.4f meters  %n",gtResiduals.getMaxResidual(),gtResiduals.getMeanResidual());
+             
+           
+            
+            
             System.out.format(" **** Reset Roll/Pitch/Factor **** %n");
             rugged.
             getLineSensor(pleiadesViewingModel.getSensorName()).
@@ -204,20 +235,20 @@ public class AffinageRugged {
             System.out.format(" **** Initial Residuals  **** %n");
             
             LocalisationMetrics initlialResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
-            System.out.format("residuals max :  %3.4e mean %3.4e meters  %n",initlialResiduals.getMaxResidual(),initlialResiduals.getMeanResidual());
+            System.out.format("residuals max :  %3.4f mean %3.4f meters  %n",initlialResiduals.getMaxResidual(),initlialResiduals.getMeanResidual());
              
            
             
             System.out.format(" **** Start optimization  **** %n");
             // perform parameters estimation
-            int maxIterations = 15;
-            double convergenceThreshold =  1e-12;
+            int maxIterations = 100;
+            double convergenceThreshold =  1e-10;
             
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
 
             
             Optimum optimum = rugged.estimateFreeParameters(Collections.singletonList(measure.getMapping()), maxIterations,convergenceThreshold);
-            
+            System.out.format("max value  %3.6e %n",optimum.getResiduals().getMaxValue());
    
             System.out.format(" Optimization performed in %d iterations \n",optimum.getEvaluations());
 
@@ -247,12 +278,10 @@ public class AffinageRugged {
 
             LocalisationMetrics localisationResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
             System.out.format("residuals max :  %3.4e mean %3.4e  meters %n",localisationResiduals.getMaxResidual(),localisationResiduals.getMeanResidual());
-            //RealVector residuals =  optimum.getResiduals();
-
-
+            LocalisationMetrics localisationResidualsDeg = new LocalisationMetrics(measure.getMapping(),rugged, true);
+            System.out.format("residuals max  :  %3.4e deg mean %3.4e  deg %n",localisationResidualsDeg.getMaxResidual(),localisationResidualsDeg.getMeanResidual());
             
             
-
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
             System.exit(1);
