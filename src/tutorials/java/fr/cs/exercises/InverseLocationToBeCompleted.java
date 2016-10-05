@@ -194,7 +194,7 @@ public class InverseLocationToBeCompleted {
             // ######################################################################
             // Initialize the RoughVisibilityEstimator
             // ######################################################################
-            RoughVisibilityEstimator roughVisibilityEstimator= null; 
+            RoughVisibilityEstimator roughVisibilityEstimator = null; 
             
             // ######################################################################
             // Compute the approximated line with a rough estimator    
@@ -203,9 +203,13 @@ public class InverseLocationToBeCompleted {
             double roughLine = lineSensor.getLine(roughLineDate);
             
             // Compute the min / max lines interval using a margin around the roughLine
+            int sensorMinLine= 0;
+            int sensorMaxLine = 1000;
+            
             int margin = 100;
-            int minLineRough = (int) FastMath.max(FastMath.floor(roughLine - margin), 0);
-            int maxLineRough = (int) FastMath.floor(roughLine + margin);
+            int minLineRough = (int) FastMath.max(roughLine - margin, sensorMinLine);
+            int maxLineRough = (int) FastMath.min(roughLine + margin, sensorMaxLine);
+
             SensorPixel sensorPixelRoughLine = rugged.inverseLocation(sensorName, gp, minLineRough, maxLineRough);
 
             System.out.format(Locale.US, "Rough line found = %5.1f; InverseLocation gives (margin of %d around rough line): line = %5.3f, pixel = %5.3f %n", roughLine, margin, sensorPixelRoughLine.getLineNumber(), sensorPixel.getPixelNumber());
