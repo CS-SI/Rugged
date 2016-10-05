@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.cs.examples;
+package fr.cs.exercises;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -56,7 +56,8 @@ import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
-public class DirectLocationWithDEM {
+
+public class DirectLocationWithDemToBeCompleted {
 
     public static void main(String[] args) {
 
@@ -89,8 +90,8 @@ public class DirectLocationWithDEM {
             // --------------
             // We use Orekit for handling time and dates, and Rugged for defining the datation model:
             TimeScale gps = TimeScalesFactory.getGPS();
-            AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
-            LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20); 
+            AbsoluteDate referenceDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
+            LinearLineDatation lineDatation = new LinearLineDatation(referenceDate, 1d, 20); 
 
             // Line sensor
             // -----------
@@ -102,9 +103,9 @@ public class DirectLocationWithDEM {
 
             // Reference frames
             // ----------------
-            // In our application, we simply need to know the name of the frames we are working with. Positions and
-            // velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
-            // inertial frame.  
+            // In our application, we simply need to know the name of the frames we are working with. 
+            // Positions and velocities are given in the ITRF terrestrial frame, 
+            // while the quaternions are given in EME2000 inertial frame.  
             Frame eme2000 = FramesFactory.getEME2000();
             boolean simpleEOP = true; // we don't want to compute tiny tidal effects at millimeter level
             Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, simpleEOP);
@@ -140,31 +141,35 @@ public class DirectLocationWithDEM {
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -2369.401d, -3161.764d, -6433.531d);
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -2350.574d, -3010.159d, -6513.056d);
 
+
+            // ####################################################
+            // Construct Rugged here with the above informations:
+            // * using the DEM with 8 cached tiles with the VolcanicConeElevationUpdater (see below) :
+            //     a summit at latitude 37.58 deg and longitude -96.95 deg with an altitude of 2463.m
+            //     a slope of 30 deg, a base of 16m , a size of 1 and 1201 points
+            // * using the WGS84 ellipsoid
+            // * setting the time spam to 60 s from the reference date with a tstep of 0.01 and an overshootTolerance of 1/4 lines
+            // * using 4 points of interpolation for PV and quaternions; using only position and rotation for derivatives
+            // ####################################################
             // Rugged initialization
             // ---------------------
-            Rugged rugged = new RuggedBuilder().
-                    setAlgorithm(AlgorithmId.DUVENHAGE).
-                    setDigitalElevationModel(new VolcanicConeElevationUpdater(new GeodeticPoint(FastMath.toRadians(37.58),
-                                                                                                FastMath.toRadians(-96.95),
-                                                                                                2463.0),
-                                                                              FastMath.toRadians(30.0), 16.0,
-                                                                              FastMath.toRadians(1.0), 1201),
-
-                                             8).
-                    setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                    setTimeSpan(absDate, absDate.shiftedBy(60.0), 0.01, 5 / lineSensor.getRate(0)).
-                    setTrajectory(InertialFrameId.EME2000,
-                                  satellitePVList, 4, CartesianDerivativesFilter.USE_P,
-                                  satelliteQList,  4,  AngularDerivativesFilter.USE_R).
-                                  addLineSensor(lineSensor).
-                                  build();
+            Rugged rugged = null;
 
             // Direct location of a single sensor pixel (first line, first pixel)
             // ------------------------------------------------------------------
-            Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
+            // Pixel position in Spacecraft frame
+            Vector3D pixelPositionInSpacecraftFrame = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
+            // Date of the first line (index 0)
             AbsoluteDate firstLineDate = lineSensor.getDate(0);
-            Vector3D los = lineSensor.getLOS(firstLineDate, 0);
-            GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
+            // Normaliszed line-Of-Sight (LOS) of first pixel (index 0) of the first line sensor
+            Vector3D normalizedLosInSpacecraftFrame = lineSensor.getLOS(firstLineDate, 0);
+            
+            // ######################################################################
+            // Compute the direct location for the first pixel of the first line =
+            // ground position of intersection point between specified LOS and ground
+            // ######################################################################
+            GeodeticPoint upLeftPoint = null;
+            
             System.out.format(Locale.US, "upper left point: φ = %8.3f °, λ = %8.3f °, h = %8.3f m%n",
                               FastMath.toDegrees(upLeftPoint.getLatitude()),
                               FastMath.toDegrees(upLeftPoint.getLongitude()),

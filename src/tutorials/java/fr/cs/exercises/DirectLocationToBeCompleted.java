@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.cs.examples;
+package fr.cs.exercises;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
@@ -40,23 +40,20 @@ import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
-import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.LOSBuilder;
+import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.rugged.raster.TileUpdater;
-import org.orekit.rugged.raster.UpdatableTile;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
-import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
-public class DirectLocationWithDEM {
+public class DirectLocationToBeCompleted {
 
     public static void main(String[] args) {
 
@@ -70,7 +67,7 @@ public class DirectLocationWithDEM {
             // Sensor's definition 
             // ===================
             // Line of sight
-            // -------------            
+            // -------------     
             // The raw viewing direction of pixel i with respect to the instrument is defined by the vector:
             List<Vector3D> rawDirs = new ArrayList<Vector3D>();
             for (int i = 0; i < 2000; i++) {
@@ -89,8 +86,8 @@ public class DirectLocationWithDEM {
             // --------------
             // We use Orekit for handling time and dates, and Rugged for defining the datation model:
             TimeScale gps = TimeScalesFactory.getGPS();
-            AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
-            LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20); 
+            AbsoluteDate referenceDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
+            LinearLineDatation lineDatation = new LinearLineDatation(referenceDate, 1d, 20); 
 
             // Line sensor
             // -----------
@@ -102,9 +99,9 @@ public class DirectLocationWithDEM {
 
             // Reference frames
             // ----------------
-            // In our application, we simply need to know the name of the frames we are working with. Positions and
-            // velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
-            // inertial frame.  
+            // In our application, we simply need to know the name of the frames we are working with. 
+            // Positions and velocities are given in the ITRF terrestrial frame, 
+            // while the quaternions are given in EME2000 inertial frame.  
             Frame eme2000 = FramesFactory.getEME2000();
             boolean simpleEOP = true; // we don't want to compute tiny tidal effects at millimeter level
             Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, simpleEOP);
@@ -140,31 +137,35 @@ public class DirectLocationWithDEM {
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -2369.401d, -3161.764d, -6433.531d);
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -2350.574d, -3010.159d, -6513.056d);
 
+            // ####################################################
+            // Construct Rugged here with the above informations:
+            // * using the WGS84 ellipsoid (no DEM)
+            // * setting the time spam to 60 s from the reference date with a tstep of 0.01 and an overshootTolerance of 1/4 lines
+            // * using 4 points of interpolation for PV and quaternions; using only position and rotation for derivatives
+            // ####################################################
             // Rugged initialization
             // ---------------------
-            Rugged rugged = new RuggedBuilder().
-                    setAlgorithm(AlgorithmId.DUVENHAGE).
-                    setDigitalElevationModel(new VolcanicConeElevationUpdater(new GeodeticPoint(FastMath.toRadians(37.58),
-                                                                                                FastMath.toRadians(-96.95),
-                                                                                                2463.0),
-                                                                              FastMath.toRadians(30.0), 16.0,
-                                                                              FastMath.toRadians(1.0), 1201),
-
-                                             8).
-                    setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                    setTimeSpan(absDate, absDate.shiftedBy(60.0), 0.01, 5 / lineSensor.getRate(0)).
-                    setTrajectory(InertialFrameId.EME2000,
-                                  satellitePVList, 4, CartesianDerivativesFilter.USE_P,
-                                  satelliteQList,  4,  AngularDerivativesFilter.USE_R).
-                                  addLineSensor(lineSensor).
-                                  build();
-
+            Rugged rugged = null;
+            
+            
+            
+            
             // Direct location of a single sensor pixel (first line, first pixel)
             // ------------------------------------------------------------------
-            Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
+            // Pixel position in Spacecraft frame
+            Vector3D pixelPositionInSpacecraftFrame = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
+            // Date of the first line (index 0)
             AbsoluteDate firstLineDate = lineSensor.getDate(0);
-            Vector3D los = lineSensor.getLOS(firstLineDate, 0);
-            GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
+            // Normaliszed line-Of-Sight (LOS) of first pixel (index 0) of the first line sensor
+            Vector3D normalizedLosInSpacecraftFrame = lineSensor.getLOS(firstLineDate, 0);
+
+            // ######################################################################
+            // Compute the direct location for the first pixel of the first line =
+            // ground position of intersection point between specified LOS and ground
+            // ######################################################################
+            GeodeticPoint upLeftPoint = null; 
+            
+            
             System.out.format(Locale.US, "upper left point: φ = %8.3f °, λ = %8.3f °, h = %8.3f m%n",
                               FastMath.toDegrees(upLeftPoint.getLatitude()),
                               FastMath.toDegrees(upLeftPoint.getLongitude()),
@@ -189,10 +190,9 @@ public class DirectLocationWithDEM {
         Vector3D position = new Vector3D(px, py, pz); // in ITRF, unit: m 
         Vector3D velocity = new Vector3D(vx, vy, vz); // in ITRF, unit: m/s
         PVCoordinates pvITRF = new PVCoordinates(position, velocity);
-        Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);        
+        Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
         PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF); 
         satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pvEME2000.getPosition(), pvEME2000.getVelocity(), Vector3D.ZERO));
-
     }
 
     private static void addSatelliteQ(TimeScale gps, ArrayList<TimeStampedAngularCoordinates> satelliteQList, String absDate,
@@ -204,43 +204,4 @@ public class DirectLocationWithDEM {
         satelliteQList.add(pair);
     }
 
-    private static class VolcanicConeElevationUpdater implements TileUpdater {
-
-        private GeodeticPoint summit;
-        private double        slope;
-        private double        base;
-        private double        size;
-        private int           n;
-
-        public VolcanicConeElevationUpdater(GeodeticPoint summit, double slope, double base,
-                                            double size, int n) {
-            this.summit = summit;
-            this.slope  = slope;
-            this.base   = base;
-            this.size   = size;
-            this.n      = n;
-        }
-
-        public void updateTile(double latitude, double longitude, UpdatableTile tile)
-            throws RuggedException {
-            double step         = size / (n - 1);
-            double minLatitude  = size * FastMath.floor(latitude  / size);
-            double minLongitude = size * FastMath.floor(longitude / size);
-            double sinSlope     = FastMath.sin(slope);
-            tile.setGeometry(minLatitude, minLongitude, step, step, n, n);
-            for (int i = 0; i < n; ++i) {
-                double cellLatitude = minLatitude + i * step;
-                for (int j = 0; j < n; ++j) {
-                    double cellLongitude = minLongitude + j * step;
-                    double distance       = Constants.WGS84_EARTH_EQUATORIAL_RADIUS *
-                                            FastMath.hypot(cellLatitude  - summit.getLatitude(),
-                                                           cellLongitude - summit.getLongitude());
-                    double altitude = FastMath.max(summit.getAltitude() - distance * sinSlope,
-                                                   base);
-                    tile.setElevation(i, j, altitude);
-                }
-            }
-        }
-
-    }
 }
