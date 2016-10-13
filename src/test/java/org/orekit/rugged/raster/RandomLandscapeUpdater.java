@@ -35,10 +35,6 @@ public class RandomLandscapeUpdater implements TileUpdater {
         throws MathIllegalArgumentException {
 
         if (!ArithmeticUtils.isPowerOfTwo(n - 1)) {
-        	
-// TODO hipparchus migration : change to the appropriate message 
-//            throw new MathIllegalArgumentException(LocalizedFormats.SIMPLE_MESSAGE,
-//                                                   "tile size must be a power of two plus one");
             throw new MathIllegalArgumentException(LocalizedCoreFormats.SIMPLE_MESSAGE,
                                                    "tile size must be a power of two plus one");
         }
