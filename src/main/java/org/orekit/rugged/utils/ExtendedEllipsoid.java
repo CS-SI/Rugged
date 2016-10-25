@@ -47,7 +47,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     private final double b2;
 
     /** Simple constructor.
-     * @param ae equatorial radius
+     * @param ae equatorial radius (m)
      * @param f the flattening (f = (a-b)/a)
      * @param bodyFrame body frame related to body shape
      * @see org.orekit.frames.FramesFactory#getITRF(org.orekit.utils.IERSConventions, boolean)
@@ -75,13 +75,13 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point at some latitude along a pixel line of sight.
-     * @param position cell position (in body frame)
+     * @param position cell position (in body frame) (m)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
-     * @param latitude latitude with respect to ellipsoid
-     * @param closeReference reference point used to select the closest solution
+     * @param latitude latitude with respect to ellipsoid (rad)
+     * @param closeReference reference point used to select the closest solution 
      * when there are two points at the desired latitude along the line, it should
-     * be close to los surface intersection
-     * @return point at latitude
+     * be close to los surface intersection (m)
+     * @return point at latitude (m)
      * @exception RuggedException if no such point exists
      */
     public Vector3D pointAtLatitude(final Vector3D position, final Vector3D los,
@@ -161,10 +161,10 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point at some longitude along a pixel line of sight.
-     * @param position cell position (in body frame)
+     * @param position cell position (in body frame) (m)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
-     * @param longitude longitude with respect to ellipsoid
-     * @return point at longitude
+     * @param longitude longitude with respect to ellipsoid (rad)
+     * @return point at longitude (m)
      * @exception RuggedException if no such point exists
      */
     public Vector3D pointAtLongitude(final Vector3D position, final Vector3D los, final double longitude)
@@ -186,10 +186,10 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point on ground along a pixel line of sight.
-     * @param position cell position (in body frame)
+     * @param position cell position (in body frame) (m)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param centralLongitude reference longitude lc such that the point longitude will
-     * be normalized between lc-π and lc+π
+     * be normalized between lc-π and lc+π (rad)
      * @return point on ground
      * @exception RuggedException if no such point exists (typically line-of-sight missing body)
      */
@@ -212,10 +212,10 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Get point at some altitude along a pixel line of sight.
-     * @param position cell position (in body frame)
+     * @param position cell position (in body frame) (m)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
-     * @param altitude altitude with respect to ellipsoid
-     * @return point at altitude
+     * @param altitude altitude with respect to ellipsoid (m)
+     * @return point at altitude (m)
      * @exception RuggedException if no such point exists (typically too negative altitude)
      */
     public Vector3D pointAtAltitude(final Vector3D position, final Vector3D los, final double altitude)
@@ -321,11 +321,11 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
     }
 
     /** Transform a cartesian point to a surface-relative point.
-     * @param point cartesian point
+     * @param point cartesian point (m)
      * @param frame frame in which cartesian point is expressed
      * @param date date of the computation (used for frames conversions)
      * @param centralLongitude reference longitude lc such that the point longitude will
-     * be normalized between lc-π and lc+π
+     * be normalized between lc-π and lc+π (rad)
      * @return point at the same location but as a surface-relative point
      * @exception OrekitException if point cannot be converted to body frame
      */

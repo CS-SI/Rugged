@@ -20,14 +20,15 @@ import org.orekit.rugged.errors.RuggedException;
 
 /** Interface representing one tile of a raster Digital Elevation Model.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface UpdatableTile {
 
     /** Set the tile global geometry.
-     * @param minLatitude minimum latitude
-     * @param minLongitude minimum longitude
-     * @param latitudeStep step in latitude (size of one raster element)
-     * @param longitudeStep step in longitude (size of one raster element)
+     * @param minLatitude minimum latitude (rad)
+     * @param minLongitude minimum longitude (rad)
+     * @param latitudeStep step in latitude (size of one raster element) (rad)
+     * @param longitudeStep step in longitude (size of one raster element) (rad)
      * @param latitudeRows number of latitude rows
      * @param longitudeColumns number of longitude columns
      * @exception RuggedException if tile is empty (zero rows or columns)

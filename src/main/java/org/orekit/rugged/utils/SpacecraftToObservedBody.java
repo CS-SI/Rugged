@@ -37,6 +37,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 
 /** Provider for observation transforms.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class SpacecraftToObservedBody implements Serializable {
 
@@ -110,7 +111,7 @@ public class SpacecraftToObservedBody implements Serializable {
             if (minPVDate.durationFrom(minDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
             }
-            if (maxDate.durationFrom(maxDate) > overshootTolerance) {
+            if (maxDate.durationFrom(maxPVDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
             }
 

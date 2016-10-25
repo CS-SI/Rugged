@@ -85,6 +85,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
  * @see <a href="https://en.wikipedia.org/wiki/Builder_pattern">Builder pattern (wikipedia)</a>
  * @see <a href="https://en.wikipedia.org/wiki/Fluent_interface">Fluent interface (wikipedia)</a>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class RuggedBuilder {
 
@@ -97,7 +98,7 @@ public class RuggedBuilder {
     /** Updater used to load Digital Elevation Model tiles. */
     private TileUpdater tileUpdater;
 
-    /** Constant elevation over ellipsoid.
+    /** Constant elevation over ellipsoid (m).
      * used only with {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID. */
     private double constantElevation;
 
@@ -110,10 +111,10 @@ public class RuggedBuilder {
     /** End of search time span. */
     private AbsoluteDate maxDate;
 
-    /** Step to use for inertial frame to body frame transforms cache computations. */
+    /** Step to use for inertial frame to body frame transforms cache computations (s). */
     private double tStep;
 
-    /** OvershootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting. */
+    /** OvershootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting (s). */
     private double overshootTolerance;
 
     /** Inertial frame for position/velocity/attitude. */
@@ -140,7 +141,7 @@ public class RuggedBuilder {
     /** Propagator for position/velocity/attitude. */
     private Propagator pvaPropagator;
 
-    /** Step to use for inertial/Earth/spacraft transforms interpolations. */
+    /** Step to use for inertial/Earth/spacraft transforms interpolations (s). */
     private double iStep;
 
     /** Number of points to use for inertial/Earth/spacraft transforms interpolations. */
@@ -297,7 +298,7 @@ public class RuggedBuilder {
      * AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID CONSTANT_ELEVATION_OVER_ELLIPSOID}.
      * If it is called for another algorithm, the elevation set here will be ignored.
      * </p>
-     * @param constantElevation constant elevation to use
+     * @param constantElevation constant elevation to use (m)
      * @return the builder instance
      * @see #setAlgorithm(AlgorithmId)
      * @see #getConstantElevation()
@@ -337,8 +338,8 @@ public class RuggedBuilder {
      * </p>
      * @param minDate start of search time span
      * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
+     * @param tStep step to use for inertial frame to body frame transforms cache computations (s)
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting (s)
      * @return the builder instance
      * @see #setTrajectoryAndTimeSpan(InputStream)
      * @see #getMinDate()
@@ -476,7 +477,7 @@ public class RuggedBuilder {
      * <em>must</em> be used together with the {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}
      * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
      * </p>
-     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
+     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations (s)
      * @param interpolationNumber number of points to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation

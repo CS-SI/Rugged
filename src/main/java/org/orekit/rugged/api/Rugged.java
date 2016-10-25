@@ -67,6 +67,7 @@ import org.orekit.utils.ParameterDriver;
 /** Main class of Rugged library API.
  * @see RuggedBuilder
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class Rugged {
 
@@ -425,8 +426,8 @@ public class Rugged {
      * are only an example and should be adjusted depending on mission needs.
      * </p>
      * @param sensorName name of the line  sensor
-     * @param latitude ground point latitude
-     * @param longitude ground point longitude
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return date at which ground point is seen by line sensor
@@ -508,8 +509,8 @@ public class Rugged {
      * are only an example and should be adjusted depending on mission needs.
      * </p>
      * @param sensorName name of the line  sensor
-     * @param latitude ground point latitude
-     * @param longitude ground point longitude
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return sensor pixel seeing ground point, or null if ground point cannot
