@@ -78,7 +78,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param position cell position (in body frame) (m)
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param latitude latitude with respect to ellipsoid (rad)
-     * @param closeReference reference point used to select the closest solution 
+     * @param closeReference reference point used to select the closest solution
      * when there are two points at the desired latitude along the line, it should
      * be close to los surface intersection (m)
      * @return point at latitude (m)

@@ -23,20 +23,20 @@ package org.orekit.rugged.api;
 public enum ProjectionTypeId {
 
     /** Constant for WGS 84 projection type. */
-	WGS84,
+    WGS84,
 
     /** Constant for UTM zone 1N projection type. */
     UTM1N,
-    
+
     /** Constant for UTM zone 60N projection type. */
     UTM60N,
-    
+
     /** Constant for UTM zone 1S projection type. */
     UTM1S,
-    
+
     /** Constant for UTM zone 60S projection type. */
     UTM60S,
-    
+
     /** Constant for Lambert-93 projection type. */
     LAMBERT93
 }
