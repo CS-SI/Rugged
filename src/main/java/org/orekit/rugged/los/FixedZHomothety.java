@@ -57,7 +57,7 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
      * The single parameter is the homothety factor.
      * </p>
      * @param name name of the homothety (used for estimated parameters identification)
-     * @param factor homothety factor
+     * @param factorvalue homothety factor
      */
     public FixedZHomothety(final String name, final double factorvalue) {
     	this.factor   = factorvalue;

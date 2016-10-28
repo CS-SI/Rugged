@@ -22,8 +22,10 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.
 import java.io.File;
 import java.util.Locale;
 import java.util.Collections;
-
-
+import java.io.FileWriter;
+import java.io.StringWriter;
+import java.io.PrintWriter;
+import java.io.IOException;
 
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
@@ -51,8 +53,9 @@ import org.orekit.utils.PVCoordinates;
 
 
 /**
- * Parameter estimation context 
+ * Parameter refining context 
  * @author Jonathan Guinet
+ * @author Lucie Labatallee
  *
  */
 public class AffinageRugged {
@@ -80,6 +83,11 @@ public class AffinageRugged {
             AbsoluteDate refDate = pleiadesViewingModel.getDatationReference();
 
             Orbit      orbit                                  = orbitmodel.createOrbit(gravityField.getMu(), refDate);
+            
+            final double [] rollPoly = {0.0,0.0,0.0};
+            double[] pitchPoly = {0.0,0.0};
+            double[] yawPoly = {0.0,0.0,0.0};
+            orbitmodel.setLOFTransform(rollPoly, pitchPoly, yawPoly, minDate);
             
             PVCoordinates PV = orbit.getPVCoordinates(earth.getBodyFrame());
             GeodeticPoint gp = earth.transform(PV.getPosition(), earth.getBodyFrame(), orbit.getDate());
@@ -131,9 +139,31 @@ public class AffinageRugged {
             System.out.format(Locale.US, "center geodetic position : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                               FastMath.toDegrees(centerPoint.getLatitude()),
                               FastMath.toDegrees(centerPoint.getLongitude()),centerPoint.getAltitude());                   
+        	
+            /*try {
+            FileWriter out = new FileWriter("geodetic_position.txt");
             
+            out.write("LATITUDE, LONGITUDE, LINE, PIX \n");
 
-              
+            for (double line = 0; line < pleiadesViewingModel.dimension; line += 1000) {
+            	
+            	AbsoluteDate date = lineSensor.getDate(line);
+            	for (int pixel = 0; pixel < lineSensor.getNbPixels(); pixel += 1000) {
+            		GeodeticPoint gp2 = rugged.directLocation(date, lineSensor.getPosition(),
+            				lineSensor.getLOS(date, pixel));
+            		String result = String.format("%8.10f, %8.10f, %2.1f, %2.1f \n ",FastMath.toDegrees(gp2.getLatitude()),
+            				FastMath.toDegrees(gp2.getLongitude()), line,(double) pixel);
+            			//System.out.println(result);
+                    out.write(result);
+            	}
+        	}
+            out.close();
+            }
+            catch (IOException e) {
+                System.err.println(e.getLocalizedMessage());
+                System.exit(1);
+            }*/
+                
             int pixelPosition = pleiadesViewingModel.dimension-1;
             los = lineSensor.getLOS(firstLineDate,pixelPosition);
             GeodeticPoint upperRight = rugged.directLocation(firstLineDate, position, los);
@@ -188,13 +218,13 @@ public class AffinageRugged {
             //double altErr = 0.0;
             final double[] pixErr = new double[4];
             pixErr[0] = 0; // lat mean
-            pixErr[1] = 0.1; // lat std
+            pixErr[1] = 0.0; // lat std
             pixErr[2] = 0; // lon mean
-            pixErr[3] = 0.1; // lon std
+            pixErr[3] = 0.0; // lon std
             
             final double[] altErr = new double[2];
-            altErr[0] = 1.0; //mean
-            altErr[1] = 3.0; //std  
+            altErr[0] = 0.0; //mean
+            altErr[1] = 0.0; //std  
             measure.CreateNoisyMeasure(lineSampling, pixelSampling,pixErr,altErr); // Test with noisy measures
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
 
@@ -242,7 +272,7 @@ public class AffinageRugged {
             System.out.format(" **** Start optimization  **** %n");
             // perform parameters estimation
             int maxIterations = 100;
-            double convergenceThreshold =  1e-10;
+            double convergenceThreshold =  1e-14;
             
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
 
