@@ -55,6 +55,13 @@
         <role>developer</role>
       </roles>
     </developer>
+    <developer>
+      <name>Guylaine Prat</name>
+      <id>guylaine</id>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
   </developers>
 
   <contributors>
