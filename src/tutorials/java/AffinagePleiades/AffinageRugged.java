@@ -55,8 +55,7 @@ import org.orekit.utils.PVCoordinates;
 /**
  * Parameter refining context 
  * @author Jonathan Guinet
- * @author Lucie Labatallee
- *
+ * @author Lucie LabatAllee
  */
 public class AffinageRugged {
 
