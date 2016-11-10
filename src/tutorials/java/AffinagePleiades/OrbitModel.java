@@ -168,8 +168,8 @@ public class OrbitModel {
         double roll = getPoly(LOFTransformRollPoly, shift);
         double pitch = getPoly(LOFTransformPitchPoly, shift);
         double yaw = getPoly(LOFTransformYawPoly, shift);
-        System.out.format("at shift %f roll %f pitch %f yaw %f \n ", shift,
-                          roll, pitch, yaw);
+        /**System.out.format("at shift %f roll %f pitch %f yaw %f \n ", shift,
+                          roll, pitch, yaw);*/
 
         LofOffset law = new LofOffset(orbit.getFrame(), type, RotationOrder.XYZ,
                                       roll, pitch, yaw);
