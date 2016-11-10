@@ -587,23 +587,23 @@ public class Rugged {
 
     }
     /** Compute distance between two line sensors.
-     * @param sensorNameA name of the line sensor A
+     * @param sensorA line sensor A
      * @param dateA current date for sensor A
      * @param pixelA pixel index for sensor A
-     * @param sensorNameB name of the line sensor B
+     * @param sensorB line sensor B
      * @param dateB current date for sensor B
      * @param pixelB pixel index for sensor B
      * @return distance computing
      * @exception RuggedException if sensor is unknown
      */
-    public double distanceBetweenLOS(final String sensorNameA,  
+    public double distanceBetweenLOS(final LineSensor sensorA,  
                            final AbsoluteDate dateA, final int pixelA,
-                           final String sensorNameB,
+                           final LineSensor sensorB,
                            final AbsoluteDate dateB, final int pixelB)
         throws RuggedException {
 
-        final LineSensor sensorA = getLineSensor(sensorNameA);
-        final LineSensor sensorB = getLineSensor(sensorNameB);
+        //final LineSensor sensorA = getLineSensor(sensorNameA);
+        //final LineSensor sensorB = getLineSensor(sensorNameB);
 
         // Get sensors's position and LOS
         final Vector3D vA     = sensorA.getLOS(dateA, pixelA); // V_a : line of sight's vectorA
@@ -633,10 +633,10 @@ public class Rugged {
         return d;
     }
     /** Compute distance between two line sensors with derivatives.
-     * @param sensorNameA name of the line sensor A
+     * @param sensorA  line sensor A
      * @param dateA current date for sensor A
      * @param pixelA pixel index for sensor A
-     * @param sensorNameB name of the line sensor B
+     * @param sensorB  line sensor B
      * @param dateB current date for sensor B
      * @param pixelB pixel index for sensor B
      * @param generator generator to use for building {@link DerivativeStructure} instances
@@ -644,15 +644,15 @@ public class Rugged {
      * @exception RuggedException if sensor is unknown
      * @see #distanceBetweenLOS(String, AbsoluteDate, int, String, AbsoluteDate, int)
      */
-    private DerivativeStructure[]  distanceBetweenLOSDerivatives(final String sensorNameA,  
+    private DerivativeStructure[]  distanceBetweenLOSDerivatives(final LineSensor sensorA,  
                            final AbsoluteDate dateA, final int pixelA,
-                           final String sensorNameB,
+                           final LineSensor sensorB,
                            final AbsoluteDate dateB, final int pixelB,
                            final DSGenerator generator)
         throws RuggedException {
 
-        final LineSensor sensorA = getLineSensor(sensorNameA);
-        final LineSensor sensorB = getLineSensor(sensorNameB);
+        //final LineSensor sensorA = getLineSensor(sensorNameA);
+        //final LineSensor sensorB = getLineSensor(sensorNameB);
 
         // Get sensors's LOS
         final FieldVector3D<DerivativeStructure> vA     = sensorA.getLOSDerivatives(dateA, pixelA, generator); // V_a : line of sight's vectorA
