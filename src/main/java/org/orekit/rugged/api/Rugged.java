@@ -37,6 +37,7 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.GaussNewtonOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
 import org.hipparchus.util.FastMath;
@@ -1155,8 +1156,8 @@ public class Rugged {
                             build();
 
             // set up the optimizer
-            final LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
-
+            //final LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
+            final LeastSquaresOptimizer optimizer = new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
             // solve the least squares problem
             return optimizer.optimize(problem);
 
