@@ -42,27 +42,53 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.errors.OrekitException;
 
 
+/**
+ * PleiadesViewingModel class definition 
+ * @author Jonathan Guinet, Lucie LabatAllee
+ *
+ */
+
+
 public class PleiadesViewingModel {
 	
+    
+	/** intrinsic Pleiades parameters */
 	public  double fov = 1.65; // 20km - alt 694km
-	public  double angle = 0.0;
+    public  int dimension = 40000;
+    private final double linePeriod =  1e-4;
+    
+	public  double angle;
 	public  LineSensor lineSensor;	
-	public  int dimension = 40000;
-	public  String date = "2016-01-01T12:00:00.0";
-	private final double linePeriod =  1e-4;
+	public  String date;
+
 	
 	
 	private String sensorName;
 	
     /** Simple constructor.
      * <p>
-     *
+     *  initialize PleiadesViewingModel with 
+     *  sensorName="line", incidenceAngle = 0.0, date = "2016-01-01T12:00:00.0"
      * </p>
      */
     public PleiadesViewingModel() throws RuggedException, OrekitException {	
-    	sensorName = "line";
-    	this.createLineSensor();    	
+        this("line",0.0,"2016-01-01T12:00:00.0");	
     }
+    
+    /** PleiadesViewingModel constructor
+     * @param sensorName sensor name
+     * @param incidenceAngle incidence angle
+     * @param referenceDate reference date 
+     * @throws RuggedException
+     * @throws OrekitException
+     */
+    public PleiadesViewingModel(final String sensorName,final double incidenceAngle,final String referenceDate) throws RuggedException, OrekitException { 
+        this.sensorName = sensorName;
+        this.date = referenceDate;
+        this.angle = incidenceAngle;       
+        this.createLineSensor();        
+    }    
+    
 	
 	public   LOSBuilder rawLOS(Vector3D center, Vector3D normal, double halfAperture, int n)
 	{
@@ -77,22 +103,14 @@ public class PleiadesViewingModel {
         return new LOSBuilder(list);
     }	
 	
+
 	
 	public  TimeDependentLOS buildLOS()
-	{
-	
- 
-	
-    // one line sensor
-    // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-    // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+	{	
 	LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
-            FastMath.toRadians(angle),
+            FastMath.toRadians(this.angle),
             RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K), Vector3D.PLUS_I, FastMath.toRadians(fov/2), dimension); 	
 
-   
-	
-	
 	losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.00));
     losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.00));
     losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
