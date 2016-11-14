@@ -606,10 +606,33 @@ public class Rugged {
         //final LineSensor sensorB = getLineSensor(sensorNameB);
 
         // Get sensors's position and LOS
-        final Vector3D vA     = sensorA.getLOS(dateA, pixelA); // V_a : line of sight's vectorA
-        final Vector3D vB     = sensorB.getLOS(dateB, pixelB); // V_b 
-        final Vector3D sA     = sensorA.getPosition(); // S_a : sensorA 's position
-        final Vector3D sB     = sensorB.getPosition(); // S_b 
+        // compute the approximate transform between spacecraft and observed body
+
+        final Transform    scToInertA   = scToBody.getScToInertial(dateA);
+        //final Transform    inertToBodyA = scToBody.getInertialToBody(dateA);
+        //final Transform    approximate = new Transform(dateA, scToInertA, inertToBodyA);
+        
+
+        // compute location of each pixel
+        final Vector3D sA    = scToInertA.transformPosition(sensorA.getPosition());
+        final Vector3D vA = scToInertA.transformVector(sensorA.getLOS(dateA, pixelA));
+        
+        //TODO scToBody should be found from ruggedB instance
+        final Transform    scToInertB   = scToBody.getScToInertial(dateB);
+        //final Transform    inertToBodyB = scToBody.getInertialToBody(dateB);
+        //final Transform    approximate = new Transform(dateA, scToInert, inertToBody);
+        
+        // compute location of each pixel
+        final Vector3D sB    = scToInertB.transformPosition(sensorB.getPosition());
+        final Vector3D vB = scToInertB.transformVector(sensorB.getLOS(dateB, pixelB));
+                
+        
+       
+        
+        //final Vector3D vA     = sensorA.getLOS(dateA, pixelA); // V_a : line of sight's vectorA
+        //final Vector3D vB     = sensorB.getLOS(dateB, pixelB); // V_b 
+        //final Vector3D sA     = sensorA.getPosition(); // S_a : sensorA 's position
+        //final Vector3D sB     = sensorB.getPosition(); // S_b 
         
         final Vector3D vBase= sB.subtract(sA); // S_b - S_a
         final double svA        = Vector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
@@ -627,7 +650,7 @@ public class Rugged {
         final Vector3D mB   = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
   
         final Vector3D vDistance = mB.subtract(mA); // M_b - M_a
-        
+        System.out.format("vDistance %f %f %f ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
         // Get square of the euclidean norm
         final double d = vDistance.getNormSq();
         return d;
@@ -794,10 +817,10 @@ public class Rugged {
                             final int pixelB = (int)spB.getPixelNumber();
                             
                             final DerivativeStructure[] ilResult =
-                                            distanceBetweenLOSDerivatives(reference.getSensorNameA(),
+                                            distanceBetweenLOSDerivatives(lineSensorA,
                                                                           dateA, 
                                                                           pixelA,
-                                                                          reference.getSensorNameB(),
+                                                                          lineSensorB,
                                                                           dateB, 
                                                                           pixelB,
                                                                           generator);
