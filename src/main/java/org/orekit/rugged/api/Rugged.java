@@ -741,8 +741,8 @@ public class Rugged {
             // Verify that createGenerator's construction is ok with the use of two Rugged instance 
             final List<LineSensor> selectedSensors = new ArrayList<>();
             for (final SensorToSensorMapping reference : references) {
-                selectedSensors.add(getLineSensor(reference.getSensorNameA())); // from ruggedA instance
-                selectedSensors.add(getLineSensor(reference.getSensorNameB())); // from current ruggedB instance
+                selectedSensors.add(ruggedA.getLineSensor(reference.getSensorNameA())); // from ruggedA instance
+                selectedSensors.add(this.getLineSensor(reference.getSensorNameB())); // from current ruggedB instance
                 
             }
             final DSGenerator generator = createGenerator(selectedSensors);
@@ -763,6 +763,7 @@ public class Rugged {
             for (final SensorToSensorMapping reference : references) {
                 n += reference.getMappings().size(); 
             }
+            System.out.format("Check nb TiePoints %d %n", n);
             if (n == 0) {
                 throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
             }

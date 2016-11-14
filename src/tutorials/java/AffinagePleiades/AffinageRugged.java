@@ -65,8 +65,8 @@ public class AffinageRugged {
 
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
-            File orekitData = new File(home, "workspace/data/orekit-data");
-            //File orekitData = new File(home, "COTS/orekit-data");
+            //File orekitData = new File(home, "workspace/data/orekit-data");
+            File orekitData = new File(home, "COTS/orekit-data");
             DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
             
@@ -189,19 +189,19 @@ public class AffinageRugged {
             rugged.
             getLineSensor("line").
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("roll")).
+            filter(driver -> driver.getName().equals("line_roll")).
             findFirst().get().setValue(rollValue);
 
             rugged.
             getLineSensor("line").
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("pitch")).
+            filter(driver -> driver.getName().equals("line_pitch")).
             findFirst().get().setValue(pitchValue);
             
             rugged.
             getLineSensor("line").
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("factor")).
+            filter(driver -> driver.getName().equals("line_factor")).
             findFirst().get().setValue(factorValue);
             
 
@@ -239,7 +239,7 @@ public class AffinageRugged {
             rugged.
             getLineSensor(pleiadesViewingModel.getSensorName()).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("roll") || driver.getName().equals("pitch")).
+            filter(driver -> driver.getName().equals("line_roll") || driver.getName().equals("line_pitch")).
             forEach(driver -> {
                 try {
                     driver.setSelected(true);
@@ -251,7 +251,7 @@ public class AffinageRugged {
             rugged.
             getLineSensor(pleiadesViewingModel.getSensorName()).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("factor")).
+            filter(driver -> driver.getName().equals("line_factor")).
             forEach(driver -> {
                 try {
                     driver.setSelected(true);
@@ -280,25 +280,26 @@ public class AffinageRugged {
             System.out.format("max value  %3.6e %n",optimum.getResiduals().getMaxValue());
    
             System.out.format(" Optimization performed in %d iterations \n",optimum.getEvaluations());
+            System.out.format(" RMSE: %f \n",optimum.getRMS());
 
             // check estimated values
             double estimatedRoll = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
                                           getParametersDrivers().
-                                          filter(driver -> driver.getName().equals("roll")).
+                                          filter(driver -> driver.getName().equals("line_roll")).
                                           findFirst().get().getValue();
             double rollError = (estimatedRoll - rollValue);
             System.out.format("Estimated roll %3.5f roll error %3.6e  %n", estimatedRoll, rollError);
 
             double estimatedPitch = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
                                            getParametersDrivers().
-                                           filter(driver -> driver.getName().equals("pitch")).
+                                           filter(driver -> driver.getName().equals("line_pitch")).
                                            findFirst().get().getValue();
             double pitchError = (estimatedPitch - pitchValue);
             System.out.format("Estimated pitch %3.5f pitch error %3.6e  %n ", estimatedPitch, pitchError);
             
             double estimatedFactor = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
                     getParametersDrivers().
-                    filter(driver -> driver.getName().equals("factor")).
+                    filter(driver -> driver.getName().equals("line_factor")).
                     findFirst().get().getValue();
             double factorError = (estimatedFactor - factorValue);
             System.out.format("Estimated factor %3.5f factor error %3.6e  %n ", estimatedFactor, factorError);

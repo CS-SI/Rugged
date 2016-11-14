@@ -21,6 +21,7 @@ import org.hipparchus.util.FastMath;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import java.io.File;
 import java.util.Locale;
+import java.util.Collection;
 import java.util.Collections;
 import java.io.FileWriter;
 import java.io.StringWriter;
@@ -42,6 +43,7 @@ import org.orekit.rugged.api.EllipsoidId;
 import org.orekit.rugged.api.InertialFrameId;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
+import org.orekit.rugged.api.SensorToSensorMapping;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
@@ -68,8 +70,8 @@ public class AffinageRuggedLiaison {
 
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
-            File orekitData = new File(home, "workspace/data/orekit-data");
-            //File orekitData = new File(home, "COTS/orekit-data");
+            //File orekitData = new File(home, "workspace/data/orekit-data");
+            File orekitData = new File(home, "COTS/orekit-data");
             DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
             
@@ -82,6 +84,7 @@ public class AffinageRuggedLiaison {
             final AbsoluteDate minDateA =  pleiadesViewingModelA.getMinDate();
             final AbsoluteDate maxDateA =  pleiadesViewingModelA.getMaxDate();
             final AbsoluteDate refDateA = pleiadesViewingModelA.getDatationReference();
+            System.out.format(Locale.US, "Viewing model A - date min: %s max: %s ref: %s  %n", minDateA, maxDateA, refDateA);        
 
             //CreateOrbitA
             OrbitModel orbitmodelA =  new OrbitModel();
@@ -110,6 +113,7 @@ public class AffinageRuggedLiaison {
             final AbsoluteDate minDateB =  pleiadesViewingModelB.getMinDate();
             final AbsoluteDate maxDateB =  pleiadesViewingModelB.getMaxDate();
             final AbsoluteDate refDateB = pleiadesViewingModelB.getDatationReference();
+            System.out.format(Locale.US, "Viewing model B - date min: %s max: %s ref: %s  %n", minDateB, maxDateB, refDateB);        
 
             //CreateOrbitA
             OrbitModel orbitmodelB =  new OrbitModel();
@@ -216,7 +220,8 @@ public class AffinageRuggedLiaison {
             System.out.format("distance %f meters %n",distance);
             
             
-            double rollValueA =  FastMath.toRadians(0.6);
+            System.out.format(" **** Add roll / pitch / factor values **** %n"); 
+            double rollValueA =  FastMath.toRadians(0.01);//0.6
             double pitchValueA = FastMath.toRadians(0.0);
             double factorValue = 1.00;
                         
@@ -225,19 +230,19 @@ public class AffinageRuggedLiaison {
             ruggedA.
             getLineSensor(SensorNameA).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("roll")).
+            filter(driver -> driver.getName().equals(SensorNameA+"_roll")).
             findFirst().get().setValue(rollValueA);
 
             ruggedA.
             getLineSensor(SensorNameA).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("pitch")).
+            filter(driver -> driver.getName().equals(SensorNameA+"_pitch")).
             findFirst().get().setValue(pitchValueA);
             
             ruggedA.
             getLineSensor(SensorNameA).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("factor")).
+            filter(driver -> driver.getName().equals(SensorNameA+"_factor")).
             findFirst().get().setValue(factorValue);
             
             
@@ -267,7 +272,7 @@ public class AffinageRuggedLiaison {
 
             
             //add mapping
-            
+            System.out.format(" **** Generate Measures **** %n");
             SensorToSensorMeasureGenerator measure = new SensorToSensorMeasureGenerator(pleiadesViewingModelA,ruggedA,pleiadesViewingModelB,ruggedB);
             int lineSampling = 1000;
             int pixelSampling = 1000;       
@@ -275,6 +280,102 @@ public class AffinageRuggedLiaison {
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
             
             
+            
+            
+            // initialize ruggedA without perturbation
+            System.out.format(" **** Reset Roll/Pitch/Factor **** %n");
+            ruggedA.
+            getLineSensor(pleiadesViewingModelA.getSensorName()).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals(SensorNameA+"_roll") || driver.getName().equals(SensorNameA+"_pitch")).
+            forEach(driver -> {
+                try {
+                    driver.setSelected(true);
+                    driver.setValue(0.0);
+                } catch (OrekitException e) {
+                    throw new OrekitExceptionWrapper(e);
+                }
+            });
+            ruggedA.
+            getLineSensor(pleiadesViewingModelA.getSensorName()).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals(SensorNameA+"_factor")).
+            forEach(driver -> {
+                try {
+                    driver.setSelected(true);
+                    driver.setValue(1.0);       // default value: no Z scale factor applied
+                } catch (OrekitException e) {
+                    throw new OrekitExceptionWrapper(e);
+                }
+            });
+            
+            
+            
+            
+            System.out.format(" **** Start optimization  **** %n");
+            // perform parameters estimation
+            int maxIterations = 100;
+            double convergenceThreshold =  1e-14;
+            
+            System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
+            
+            // Note: estimateFreeParams2Models() is supposed to be applying on ruggedB, not on ruggedA (to be compliant with notations)
+            // TODO: apply perturbations on ruggedB, not on ruggedA
+            Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(measure.getMapping()), maxIterations,convergenceThreshold, ruggedA);
+            System.out.format("max value  %3.6e %n",optimum.getResiduals().getMaxValue());
+   
+            System.out.format(" Optimization performed in %d iterations \n",optimum.getEvaluations());
+            System.out.format(" RMSE: %f \n",optimum.getRMS());
+            
+            
+            System.out.format(" **** Check estimated values  **** %n");
+            // check estimated values
+            // Viewing model A
+            double estRollA = ruggedA.getLineSensor(pleiadesViewingModelA.getSensorName()).
+                                          getParametersDrivers().
+                                          filter(driver -> driver.getName().equals(SensorNameA+"_roll")).
+                                          findFirst().get().getValue();
+            double rollErrorA = (estRollA - rollValueA);
+            System.out.format("Estimated roll A %3.5f, roll error %3.6e  %n", estRollA, rollErrorA);
+
+            double estPitchA = ruggedA.getLineSensor(pleiadesViewingModelA.getSensorName()).
+                                           getParametersDrivers().
+                                           filter(driver -> driver.getName().equals(SensorNameA+"_pitch")).
+                                           findFirst().get().getValue();
+            double pitchErrorA = (estPitchA - pitchValueA);
+            System.out.format("Estimated pitch A %3.5f, pitch error %3.6e  %n ", estPitchA, pitchErrorA);
+            
+            double estFactorA = ruggedA.getLineSensor(pleiadesViewingModelA.getSensorName()).
+                    getParametersDrivers().
+                    filter(driver -> driver.getName().equals(SensorNameA+"_factor")).
+                    findFirst().get().getValue();
+            double factorError = (estFactorA - factorValue);
+            System.out.format("Estimated factor A %3.5f, factor error %3.6e  %n ", estFactorA, factorError);
+            
+         // Viewing model B
+            double rollValueB =  FastMath.toRadians(0.0);
+            double pitchValueB = FastMath.toRadians(0.0);
+            double estRollB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
+                                          getParametersDrivers().
+                                          filter(driver -> driver.getName().equals(SensorNameB+"_roll")).
+                                          findFirst().get().getValue();
+            double rollErrorB = (estRollB - rollValueB);
+            System.out.format("Estimated roll B %3.5f, roll error %3.6e  %n", estRollB, rollErrorB);
+
+            double estPitchB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
+                                           getParametersDrivers().
+                                           filter(driver -> driver.getName().equals(SensorNameB+"_pitch")).
+                                           findFirst().get().getValue();
+            double pitchErrorB = (estPitchB - pitchValueB);
+            System.out.format("Estimated pitch B %3.5f, pitch error %3.6e  %n ", estPitchB, pitchErrorB);
+            
+            double estFactorB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
+                    getParametersDrivers().
+                    filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
+                    findFirst().get().getValue();
+            double factorErrorB = (estFactorB - factorValue);
+            System.out.format("Estimated factor %3.5f factor error %3.6e  %n ", estFactorB, factorError);
+
 
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());

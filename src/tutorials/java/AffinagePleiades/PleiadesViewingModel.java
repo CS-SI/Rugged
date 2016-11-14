@@ -111,9 +111,9 @@ public class PleiadesViewingModel {
             FastMath.toRadians(this.angle),
             RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K), Vector3D.PLUS_I, FastMath.toRadians(fov/2), dimension); 	
 
-	losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.00));
-    losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.00));
-    losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
+	losBuilder.addTransform(new FixedRotation(sensorName+"_roll",  Vector3D.MINUS_I, 0.00));
+    losBuilder.addTransform(new FixedRotation(sensorName+"_pitch", Vector3D.MINUS_J, 0.00));
+    losBuilder.addTransform(new FixedZHomothety(sensorName+"_factor", 1.0));
       
     return  losBuilder.build();
 	}

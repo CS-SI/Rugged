@@ -23,6 +23,8 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedExceptionWrapper;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -78,6 +80,10 @@ public class SensorToSensorMeasureGenerator {
     // generate reference mapping
     sensorNameA = viewingModelA.getSensorName();
     sensorNameB = viewingModelB.getSensorName();
+    // check that sensors's name is different
+    if (sensorNameA.contains(sensorNameB)) {
+        throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, sensorNameA));
+    }
     
     mapping = new SensorToSensorMapping(sensorNameA, sensorNameB);
     this.ruggedA = ruggedA;
