@@ -590,6 +590,7 @@ public class Rugged {
      * @param sensorA line sensor A
      * @param dateA current date for sensor A
      * @param pixelA pixel index for sensor A
+     * @param scToBodyA spacecraftToBody transform for sensor A
      * @param sensorB line sensor B
      * @param dateB current date for sensor B
      * @param pixelB pixel index for sensor B
@@ -598,6 +599,7 @@ public class Rugged {
      */
     public double distanceBetweenLOS(final LineSensor sensorA,  
                            final AbsoluteDate dateA, final int pixelA,
+                           final SpacecraftToObservedBody scToBodyA,
                            final LineSensor sensorB,
                            final AbsoluteDate dateB, final int pixelB)
         throws RuggedException {
@@ -605,34 +607,21 @@ public class Rugged {
         //final LineSensor sensorA = getLineSensor(sensorNameA);
         //final LineSensor sensorB = getLineSensor(sensorNameB);
 
-        // Get sensors's position and LOS
-        // compute the approximate transform between spacecraft and observed body
+        // Compute the approximate transforms between spacecraft and observed body
+        final Transform scToInertA   = scToBodyA.getScToInertial(dateA); // from rugged instance A
+        final Transform scToInertB   = scToBody.getScToInertial(dateB); // from (current) rugged instance B
 
-        final Transform    scToInertA   = scToBody.getScToInertial(dateA);
-        //final Transform    inertToBodyA = scToBody.getInertialToBody(dateA);
-        //final Transform    approximate = new Transform(dateA, scToInertA, inertToBodyA);
-        
+        // Get sensors's position and LOS into local frame
+        final Vector3D vALocal     = sensorA.getLOS(dateA, pixelA); // V_a : line of sight's vectorA
+        final Vector3D vBLocal     = sensorB.getLOS(dateB, pixelB); // V_b 
+        final Vector3D sALocal     = sensorA.getPosition(); // S_a : sensorA 's position
+        final Vector3D sBLocal     = sensorB.getPosition(); // S_b 
 
-        // compute location of each pixel
-        final Vector3D sA    = scToInertA.transformPosition(sensorA.getPosition());
-        final Vector3D vA = scToInertA.transformVector(sensorA.getLOS(dateA, pixelA));
-        
-        //TODO scToBody should be found from ruggedB instance
-        final Transform    scToInertB   = scToBody.getScToInertial(dateB);
-        //final Transform    inertToBodyB = scToBody.getInertialToBody(dateB);
-        //final Transform    approximate = new Transform(dateA, scToInert, inertToBody);
-        
-        // compute location of each pixel
-        final Vector3D sB    = scToInertB.transformPosition(sensorB.getPosition());
-        final Vector3D vB = scToInertB.transformVector(sensorB.getLOS(dateB, pixelB));
-                
-        
-       
-        
-        //final Vector3D vA     = sensorA.getLOS(dateA, pixelA); // V_a : line of sight's vectorA
-        //final Vector3D vB     = sensorB.getLOS(dateB, pixelB); // V_b 
-        //final Vector3D sA     = sensorA.getPosition(); // S_a : sensorA 's position
-        //final Vector3D sB     = sensorB.getPosition(); // S_b 
+        // Get sensors's position and LOS into inertial frame
+        final Vector3D sA   = scToInertA.transformPosition(sALocal);
+        final Vector3D vA   = scToInertA.transformVector(vALocal);
+        final Vector3D sB   = scToInertB.transformPosition(sBLocal);
+        final Vector3D vB   = scToInertB.transformVector(vBLocal);
         
         final Vector3D vBase= sB.subtract(sA); // S_b - S_a
         final double svA        = Vector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
@@ -659,6 +648,7 @@ public class Rugged {
      * @param sensorA  line sensor A
      * @param dateA current date for sensor A
      * @param pixelA pixel index for sensor A
+     * @param scToBodyA spacecraftToBody transform for sensor A
      * @param sensorB  line sensor B
      * @param dateB current date for sensor B
      * @param pixelB pixel index for sensor B
@@ -669,6 +659,7 @@ public class Rugged {
      */
     private DerivativeStructure[]  distanceBetweenLOSDerivatives(final LineSensor sensorA,  
                            final AbsoluteDate dateA, final int pixelA,
+                           final SpacecraftToObservedBody scToBodyA,
                            final LineSensor sensorB,
                            final AbsoluteDate dateB, final int pixelB,
                            final DSGenerator generator)
@@ -677,18 +668,31 @@ public class Rugged {
         //final LineSensor sensorA = getLineSensor(sensorNameA);
         //final LineSensor sensorB = getLineSensor(sensorNameB);
 
-        // Get sensors's LOS
-        final FieldVector3D<DerivativeStructure> vA     = sensorA.getLOSDerivatives(dateA, pixelA, generator); // V_a : line of sight's vectorA
-        final FieldVector3D<DerivativeStructure> vB     = sensorB.getLOSDerivatives(dateB, pixelB, generator); // V_b 
+        // Compute the approximate transforms between spacecraft and observed body
+        final Transform scToInertA   = scToBodyA.getScToInertial(dateA); // from rugged instance A
+        final Transform scToInertB   = scToBody.getScToInertial(dateB); // from (current) rugged instance B
 
-     // Get sensors's position. TODO: check if we have to implement getPositionDerivatives() method & CO
+        // Get sensors's LOS into local frame
+        final FieldVector3D<DerivativeStructure> vALocal     = sensorA.getLOSDerivatives(dateA, pixelA, generator); 
+        final FieldVector3D<DerivativeStructure> vBLocal     = sensorB.getLOSDerivatives(dateB, pixelB, generator);
+        
+        // Get sensors's LOS into inertial frame
+        final FieldVector3D<DerivativeStructure> vA     =  scToInertA.transformPosition(vALocal); // V_a : line of sight's vectorA
+        final FieldVector3D<DerivativeStructure> vB     =  scToInertB.transformPosition(vBLocal); // V_b
+
+        // Get sensors's position into local frame TODO: check if we have to implement getPositionDerivatives() method & CO
         final Vector3D sAtmp     = sensorA.getPosition(); // S_a : sensorA 's position
-        final Vector3D sBtmp     = sensorB.getPosition(); // S_b 
+        final Vector3D sBtmp     = sensorB.getPosition(); // S_b : sensorB 's position
         final DerivativeStructure scaleFactor = FieldVector3D.dotProduct(vA.normalize(), vA.normalize()); // V_a.V_a=1
         // Build a vector from position vector and a scale factor (equals to 1). 
-        // The vector built will be scaleFactor * sA for example.
-        final FieldVector3D<DerivativeStructure> sA     = new FieldVector3D<DerivativeStructure>(scaleFactor, sAtmp);
-        final FieldVector3D<DerivativeStructure> sB     = new FieldVector3D<DerivativeStructure>(scaleFactor, sBtmp);
+        // The vector built will be scaleFactor * sAtmp for example.
+        final FieldVector3D<DerivativeStructure> sALocal     = new FieldVector3D<DerivativeStructure>(scaleFactor, sAtmp);
+        final FieldVector3D<DerivativeStructure> sBLocal     = new FieldVector3D<DerivativeStructure>(scaleFactor, sBtmp);
+        
+        // Get sensors's position into inertial frame
+        final FieldVector3D<DerivativeStructure> sA     =  scToInertA.transformPosition(sALocal);
+        final FieldVector3D<DerivativeStructure> sB     =  scToInertB.transformPosition(sBLocal);
+        
         // final FieldVector3D<DerivativeStructure> sA     = sensorA.getPositionDerivatives(); // S_a : sensorA 's position
         // final FieldVector3D<DerivativeStructure> sB     = sensorB.getPositionDerivatives(); // S_b
         
@@ -815,11 +819,13 @@ public class Rugged {
                             final AbsoluteDate dateB = lineSensorB.getDate(spB.getLineNumber());
                             final int pixelA = (int)spA.getPixelNumber(); // Note: Rugged don't deal with half-pixel
                             final int pixelB = (int)spB.getPixelNumber();
+                            final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
                             
                             final DerivativeStructure[] ilResult =
                                             distanceBetweenLOSDerivatives(lineSensorA,
                                                                           dateA, 
                                                                           pixelA,
+                                                                          scToBodyA,
                                                                           lineSensorB,
                                                                           dateB, 
                                                                           pixelB,
@@ -1295,6 +1301,13 @@ public class Rugged {
             throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);
         }
         return sensor;
+    }
+    
+    /** Get converter between spacecraft and body
+     * @return the scToBody
+     */
+    public SpacecraftToObservedBody getScToBody() {
+        return scToBody;
     }
 
 }

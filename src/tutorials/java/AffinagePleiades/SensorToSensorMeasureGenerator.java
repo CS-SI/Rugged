@@ -32,6 +32,7 @@ import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.SpacecraftToObservedBody;
 
 import java.util.Locale;
 
@@ -133,8 +134,12 @@ public class SensorToSensorMeasureGenerator {
                     // TODO test if distance is 0.0 with crossing LOS
                     final AbsoluteDate dateB = sensorB.getDate(sensorPixelB.getLineNumber());
                     double pixelB = sensorPixelB.getPixelNumber();
+                    
+                    // Get spacecraft to body transform of rugged instance A
+                    final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
+                    
                     //TODO work with double pixel values 
-                    double distance = ruggedA.distanceBetweenLOS(sensorA,dateA, pixelA, sensorB ,dateB,(int) pixelB);
+                    double distance = ruggedB.distanceBetweenLOS(sensorA,dateA, pixelA, scToBodyA, sensorB ,dateB,(int) pixelB);
                     
                     System.out.format(Locale.US,"distance %f %n",distance);                
                     mapping.addMapping(new SensorPixel(line, pixelA),
