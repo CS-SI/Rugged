@@ -30,6 +30,8 @@ import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 
+
+
 /** class for measure generation
  * @author Jonathan Guinet
  */
@@ -112,7 +114,8 @@ public class MeasureGenerator {
     	System.out.format(" std : %1.10f %1.10f %1.10f %n",std[0],std[1],std[2]);
     	GaussianRandomGenerator rng = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
     	UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(mean, std, rng);
-        
+
+
     	System.out.format("Add a gaussian noise to measures without biais (null mean) and standard deviation corresponding to the estimated error on ground.%n");
     	for (double line = 0; line < viewingModel.dimension; line += lineSampling) {
         	
@@ -124,7 +127,8 @@ public class MeasureGenerator {
             	
         		GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
                                                       sensor.getLOS(date, pixel));
-            
+        		          		
+        		
         		GeodeticPoint gpNoisy = new GeodeticPoint(gp2.getLatitude()+vecRandom.getX(), 
                         gp2.getLongitude()+vecRandom.getY(),
                         gp2.getAltitude()+vecRandom.getZ()); 
@@ -152,7 +156,7 @@ public class MeasureGenerator {
     	GeodeticPoint gp_pix1 = rugged.directLocation(date1, sensor.getPosition(), sensor.getLOS(date1, pix+1));
     	double latErr=FastMath.abs(gp_pix0.getLatitude()-gp_pix1.getLatitude());
 		double lonErr=FastMath.abs(gp_pix0.getLongitude()-gp_pix1.getLongitude());
-    	double dist = FastMath.sqrt(lonErr*lonErr + latErr*latErr)/FastMath.sqrt(2);
+    	//double dist = FastMath.sqrt(lonErr*lonErr + latErr*latErr)/FastMath.sqrt(2);
     	final double distanceX =  DistanceTools.computeDistanceRad(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix1.getLongitude(), gp_pix0.getLatitude());
     	final double distanceY =  DistanceTools.computeDistanceRad(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix0.getLongitude(), gp_pix1.getLatitude());
     	
