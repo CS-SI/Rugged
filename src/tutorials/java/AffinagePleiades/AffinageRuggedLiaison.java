@@ -221,8 +221,8 @@ public class AffinageRuggedLiaison {
             
             
             System.out.format(" **** Add roll / pitch / factor values **** %n"); 
-            double rollValueA =  FastMath.toRadians(0.01);//0.6
-            double pitchValueA = FastMath.toRadians(0.0);
+            double rollValueA =  FastMath.toRadians(-0.01);//0.6
+            double pitchValueA = FastMath.toRadians(0.00);//0.02
             double factorValue = 1.00;
                         
             System.out.format("roll : %3.5f pitch : %3.5f factor : %3.5f \n",rollValueA,pitchValueA,factorValue);
@@ -244,7 +244,6 @@ public class AffinageRuggedLiaison {
             getParametersDrivers().
             filter(driver -> driver.getName().equals(SensorNameA+"_factor")).
             findFirst().get().setValue(factorValue);
-            
             
             lineDateA = lineSensorA.getDate(pleiadesViewingModelA.dimension/2);
             losA = lineSensorA.getLOS(lineDateA,pleiadesViewingModelA.dimension/2);
@@ -283,7 +282,7 @@ public class AffinageRuggedLiaison {
             
             
             // initialize ruggedA without perturbation
-            System.out.format(" **** Reset Roll/Pitch/Factor **** %n");
+            System.out.format(" **** Reset Roll/Pitch/Factor (ruggedA) **** %n");
             ruggedA.
             getLineSensor(pleiadesViewingModelA.getSensorName()).
             getParametersDrivers().
@@ -309,13 +308,37 @@ public class AffinageRuggedLiaison {
                 }
             });
             
-            
-            
+         // initialize ruggedB with selected flag set to true
+//            System.out.format(" **** Select parameters drivers (ruggedB) **** %n");
+//            ruggedB.
+//            getLineSensor(pleiadesViewingModelB.getSensorName()).
+//            getParametersDrivers().
+//            filter(driver -> driver.getName().equals(SensorNameB+"_roll") || driver.getName().equals(SensorNameB+"_pitch")).
+//            forEach(driver -> {
+//                try {
+//                    driver.setSelected(true);
+//                    driver.setValue(0.0);
+//                } catch (OrekitException e) {
+//                    throw new OrekitExceptionWrapper(e);
+//                }
+//            });
+//            ruggedB.
+//            getLineSensor(pleiadesViewingModelB.getSensorName()).
+//            getParametersDrivers().
+//            filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
+//            forEach(driver -> {
+//                try {
+//                    driver.setSelected(true);
+//                    driver.setValue(1.0); 
+//                } catch (OrekitException e) {
+//                    throw new OrekitExceptionWrapper(e);
+//                }
+//            });
             
             System.out.format(" **** Start optimization  **** %n");
             // perform parameters estimation
             int maxIterations = 100;
-            double convergenceThreshold =  1e-14;
+            double convergenceThreshold =  1e-14;//1e-14;
             
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
             
@@ -353,8 +376,8 @@ public class AffinageRuggedLiaison {
             System.out.format("Estimated factor A %3.5f, factor error %3.6e  %n ", estFactorA, factorError);
             
          // Viewing model B
-            double rollValueB =  FastMath.toRadians(0.0);
-            double pitchValueB = FastMath.toRadians(0.0);
+            double rollValueB =  FastMath.toRadians(-0.00);
+            double pitchValueB = FastMath.toRadians(0.00);
             double estRollB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
                                           getParametersDrivers().
                                           filter(driver -> driver.getName().equals(SensorNameB+"_roll")).
@@ -374,7 +397,7 @@ public class AffinageRuggedLiaison {
                     filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
                     findFirst().get().getValue();
             double factorErrorB = (estFactorB - factorValue);
-            System.out.format("Estimated factor %3.5f factor error %3.6e  %n ", estFactorB, factorError);
+            System.out.format("Estimated factor B %3.5f factor error %3.6e  %n ", estFactorB, factorErrorB);
 
 
         } catch (OrekitException oe) {

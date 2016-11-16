@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -601,7 +602,7 @@ public class Rugged {
                            final AbsoluteDate dateA, final int pixelA,
                            final SpacecraftToObservedBody scToBodyA,
                            final LineSensor sensorB,
-                           final AbsoluteDate dateB, final int pixelB)
+                           final AbsoluteDate dateB, final double pixelB)
         throws RuggedException {
 
         //final LineSensor sensorA = getLineSensor(sensorNameA);
@@ -611,17 +612,24 @@ public class Rugged {
         final Transform scToInertA   = scToBodyA.getScToInertial(dateA); // from rugged instance A
         final Transform scToInertB   = scToBody.getScToInertial(dateB); // from (current) rugged instance B
 
+        // find surrounding pixels of pixelB (in order to interpolate LOS from pixelB (that is not an integer)
+        final int iInf = FastMath.max(0, FastMath.min(sensorB.getNbPixels() - 2, (int) FastMath.floor(pixelB)));
+        final int iSup = iInf + 1;
+
         // Get sensors's position and LOS into local frame
+        // LOS
         final Vector3D vALocal     = sensorA.getLOS(dateA, pixelA); // V_a : line of sight's vectorA
-        final Vector3D vBLocal     = sensorB.getLOS(dateB, pixelB); // V_b 
+        final Vector3D vBLocal     = new Vector3D(iSup - pixelB, sensorB.getLOS(dateB, iInf),
+                                                  pixelB - iInf, sensorB.getLOS(dateB, iSup)); // V_b is interpolated
+        // positions
         final Vector3D sALocal     = sensorA.getPosition(); // S_a : sensorA 's position
         final Vector3D sBLocal     = sensorB.getPosition(); // S_b 
 
         // Get sensors's position and LOS into inertial frame
-        final Vector3D sA   = scToInertA.transformPosition(sALocal);
-        final Vector3D vA   = scToInertA.transformVector(vALocal);
-        final Vector3D sB   = scToInertB.transformPosition(sBLocal);
-        final Vector3D vB   = scToInertB.transformVector(vBLocal);
+        final Vector3D sA   = scToInertA.transformPosition(sALocal).normalize();
+        final Vector3D vA   = scToInertA.transformVector(vALocal).normalize();
+        final Vector3D sB   = scToInertB.transformPosition(sBLocal).normalize();
+        final Vector3D vB   = scToInertB.transformVector(vBLocal).normalize();
         
         final Vector3D vBase= sB.subtract(sA); // S_b - S_a
         final double svA        = Vector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
@@ -639,9 +647,9 @@ public class Rugged {
         final Vector3D mB   = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
   
         final Vector3D vDistance = mB.subtract(mA); // M_b - M_a
-        System.out.format("vDistance %f %f %f ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
+        //System.out.format("vDistance %f %f %f ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
         // Get square of the euclidean norm
-        final double d = vDistance.getNormSq();
+        final double d = vDistance.getNorm();
         return d;
     }
     /** Compute distance between two line sensors with derivatives.
@@ -661,7 +669,7 @@ public class Rugged {
                            final AbsoluteDate dateA, final int pixelA,
                            final SpacecraftToObservedBody scToBodyA,
                            final LineSensor sensorB,
-                           final AbsoluteDate dateB, final int pixelB,
+                           final AbsoluteDate dateB, final double pixelB,
                            final DSGenerator generator)
         throws RuggedException {
 
@@ -672,13 +680,21 @@ public class Rugged {
         final Transform scToInertA   = scToBodyA.getScToInertial(dateA); // from rugged instance A
         final Transform scToInertB   = scToBody.getScToInertial(dateB); // from (current) rugged instance B
 
+        // find surrounding pixels of pixelB (in order to interpolate LOS from pixelB (that is not an integer)
+        final int iInf = FastMath.max(0, FastMath.min(sensorB.getNbPixels() - 2, (int) FastMath.floor(pixelB)));
+        final int iSup = iInf + 1;
+
         // Get sensors's LOS into local frame
         final FieldVector3D<DerivativeStructure> vALocal     = sensorA.getLOSDerivatives(dateA, pixelA, generator); 
-        final FieldVector3D<DerivativeStructure> vBLocal     = sensorB.getLOSDerivatives(dateB, pixelB, generator);
+        final FieldVector3D<DerivativeStructure> vBLocal     = new FieldVector3D<DerivativeStructure> ( // V_b is interpolated
+                                                                    iSup - pixelB, 
+                                                                    sensorB.getLOSDerivatives(dateB, iInf, generator),
+                                                                    pixelB - iInf, 
+                                                                    sensorB.getLOSDerivatives(dateB, iSup, generator)).normalize(); 
         
         // Get sensors's LOS into inertial frame
-        final FieldVector3D<DerivativeStructure> vA     =  scToInertA.transformPosition(vALocal); // V_a : line of sight's vectorA
-        final FieldVector3D<DerivativeStructure> vB     =  scToInertB.transformPosition(vBLocal); // V_b
+        final FieldVector3D<DerivativeStructure> vA     =  scToInertA.transformVector(vALocal).normalize(); // V_a : line of sight's vectorA
+        final FieldVector3D<DerivativeStructure> vB     =  scToInertB.transformVector(vBLocal).normalize(); // V_b
 
         // Get sensors's position into local frame TODO: check if we have to implement getPositionDerivatives() method & CO
         final Vector3D sAtmp     = sensorA.getPosition(); // S_a : sensorA 's position
@@ -690,8 +706,8 @@ public class Rugged {
         final FieldVector3D<DerivativeStructure> sBLocal     = new FieldVector3D<DerivativeStructure>(scaleFactor, sBtmp);
         
         // Get sensors's position into inertial frame
-        final FieldVector3D<DerivativeStructure> sA     =  scToInertA.transformPosition(sALocal);
-        final FieldVector3D<DerivativeStructure> sB     =  scToInertB.transformPosition(sBLocal);
+        final FieldVector3D<DerivativeStructure> sA     =  scToInertA.transformPosition(sALocal).normalize();
+        final FieldVector3D<DerivativeStructure> sB     =  scToInertB.transformPosition(sBLocal).normalize();
         
         // final FieldVector3D<DerivativeStructure> sA     = sensorA.getPositionDerivatives(); // S_a : sensorA 's position
         // final FieldVector3D<DerivativeStructure> sB     = sensorB.getPositionDerivatives(); // S_b
@@ -714,7 +730,7 @@ public class Rugged {
         final FieldVector3D<DerivativeStructure> vDistance = mB.subtract(mA); // M_b - M_a
         
         // Get square of the euclidean norm
-        final DerivativeStructure d = vDistance.getNormSq();
+        final DerivativeStructure d = vDistance.getNorm();
         return new DerivativeStructure[] {d};
     }
     /** Estimate the free parameters from two viewing models (A and B) 
@@ -737,8 +753,6 @@ public class Rugged {
         throws RuggedException {
         try {
 
-            // TODO BEGIN-----------------------
-            // Verify that createGenerator's construction is ok with the use of two Rugged instance 
             final List<LineSensor> selectedSensors = new ArrayList<>();
             for (final SensorToSensorMapping reference : references) {
                 selectedSensors.add(ruggedA.getLineSensor(reference.getSensorNameA())); // from ruggedA instance
@@ -750,8 +764,7 @@ public class Rugged {
             if (selected.isEmpty()) {
                 throw new RuggedException(RuggedMessages.NO_PARAMETERS_SELECTED);
             }
-            // TODO END--------------------------
-
+            
             // get start point (as a normalized value)
             final double[] start = new double[selected.size()];
             for (int i = 0; i < start.length; ++i) {
@@ -763,7 +776,7 @@ public class Rugged {
             for (final SensorToSensorMapping reference : references) {
                 n += reference.getMappings().size(); 
             }
-            System.out.format("Check nb TiePoints %d %n", n);
+            
             if (n == 0) {
                 throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
             }
@@ -819,7 +832,7 @@ public class Rugged {
                             final AbsoluteDate dateA = lineSensorA.getDate(spA.getLineNumber());
                             final AbsoluteDate dateB = lineSensorB.getDate(spB.getLineNumber());
                             final int pixelA = (int)spA.getPixelNumber(); // Note: Rugged don't deal with half-pixel
-                            final int pixelB = (int)spB.getPixelNumber();
+                            final double pixelB = spB.getPixelNumber();
                             final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
                             
                             final DerivativeStructure[] ilResult =
@@ -878,6 +891,7 @@ public class Rugged {
 
             // set up the optimizer
             final LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
+//            final LeastSquaresOptimizer optimizer = new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
 
             // solve the least squares problem
             return optimizer.optimize(problem);
@@ -1232,7 +1246,7 @@ public class Rugged {
                         map.put(driver.getName(), map.size());
                     });
         }
-
+        
         return new DSGenerator() {
 
             /** {@inheritDoc} */

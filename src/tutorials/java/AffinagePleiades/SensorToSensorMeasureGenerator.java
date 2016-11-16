@@ -132,10 +132,10 @@ public class SensorToSensorMeasureGenerator {
                 // we need to test if the sensor pixel is found in the
                 // prescribed lines otherwise the sensor pixel is null
                 if (sensorPixelB != null) {
-                    System.out.format(Locale.US,
-                                      "Sensor Pixel found : line = %5.3f, pixel = %5.3f %n",
-                                      sensorPixelB.getLineNumber(),
-                                      sensorPixelB.getPixelNumber());
+//                    System.out.format(Locale.US,
+//                                      "Sensor Pixel found : line = %5.3f, pixel = %5.3f %n",
+//                                      sensorPixelB.getLineNumber(),
+//                                      sensorPixelB.getPixelNumber());
 
                     // TODO test if distance is 0.0 with crossing LOS
                     final AbsoluteDate dateB = sensorB.getDate(sensorPixelB.getLineNumber());
@@ -144,16 +144,15 @@ public class SensorToSensorMeasureGenerator {
                     // Get spacecraft to body transform of rugged instance A
                     final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
                     
-                    //TODO work with double pixel values 
-                    double distance = ruggedB.distanceBetweenLOS(sensorA,dateA, pixelA, scToBodyA, sensorB ,dateB,(int) pixelB);
+                    double distance = ruggedB.distanceBetweenLOS(sensorA,dateA, pixelA, scToBodyA, sensorB ,dateB, pixelB);
                     
                     System.out.format(Locale.US,"distance %f %n",distance);                
                     mapping.addMapping(new SensorPixel(line, pixelA),
                                        sensorPixelB, 0.0);
                     measureCount++;
                 } else {
-                    System.out
-                        .println("Sensor Pixel is null: point cannot be seen between the prescribed line numbers\n");
+//                    System.out
+//                        .println("Sensor Pixel is null: point cannot be seen between the prescribed line numbers\n");
 
                 }
 
