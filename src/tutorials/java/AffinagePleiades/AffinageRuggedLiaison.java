@@ -309,36 +309,36 @@ public class AffinageRuggedLiaison {
             });
             
          // initialize ruggedB with selected flag set to true
-//            System.out.format(" **** Select parameters drivers (ruggedB) **** %n");
-//            ruggedB.
-//            getLineSensor(pleiadesViewingModelB.getSensorName()).
-//            getParametersDrivers().
-//            filter(driver -> driver.getName().equals(SensorNameB+"_roll") || driver.getName().equals(SensorNameB+"_pitch")).
-//            forEach(driver -> {
-//                try {
-//                    driver.setSelected(true);
-//                    driver.setValue(0.0);
-//                } catch (OrekitException e) {
-//                    throw new OrekitExceptionWrapper(e);
-//                }
-//            });
-//            ruggedB.
-//            getLineSensor(pleiadesViewingModelB.getSensorName()).
-//            getParametersDrivers().
-//            filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
-//            forEach(driver -> {
-//                try {
-//                    driver.setSelected(true);
-//                    driver.setValue(1.0); 
-//                } catch (OrekitException e) {
-//                    throw new OrekitExceptionWrapper(e);
-//                }
-//            });
+            System.out.format(" **** Select parameters drivers (ruggedB) **** %n");
+            ruggedB.
+            getLineSensor(pleiadesViewingModelB.getSensorName()).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals(SensorNameB+"_roll") || driver.getName().equals(SensorNameB+"_pitch")).
+            forEach(driver -> {
+                try {
+                    driver.setSelected(true);
+                    driver.setValue(0.0);
+                } catch (OrekitException e) {
+                    throw new OrekitExceptionWrapper(e);
+                }
+            });
+            ruggedB.
+            getLineSensor(pleiadesViewingModelB.getSensorName()).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
+            forEach(driver -> {
+                try {
+                    driver.setSelected(true);
+                    driver.setValue(1.0); 
+                } catch (OrekitException e) {
+                    throw new OrekitExceptionWrapper(e);
+                }
+            });
             
             System.out.format(" **** Start optimization  **** %n");
             // perform parameters estimation
             int maxIterations = 100;
-            double convergenceThreshold =  1e-14;//1e-14;
+            double convergenceThreshold =  1e-4;//1e-14;
             
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
             
@@ -378,6 +378,7 @@ public class AffinageRuggedLiaison {
          // Viewing model B
             double rollValueB =  FastMath.toRadians(-0.00);
             double pitchValueB = FastMath.toRadians(0.00);
+            double factorValueB = 1.00;
             double estRollB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
                                           getParametersDrivers().
                                           filter(driver -> driver.getName().equals(SensorNameB+"_roll")).
@@ -396,7 +397,7 @@ public class AffinageRuggedLiaison {
                     getParametersDrivers().
                     filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
                     findFirst().get().getValue();
-            double factorErrorB = (estFactorB - factorValue);
+            double factorErrorB = (estFactorB - factorValueB);
             System.out.format("Estimated factor B %3.5f factor error %3.6e  %n ", estFactorB, factorErrorB);
 
 

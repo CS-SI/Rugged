@@ -148,7 +148,7 @@ public class SensorToSensorMeasureGenerator {
                     
                     System.out.format(Locale.US,"distance %f %n",distance);                
                     mapping.addMapping(new SensorPixel(line, pixelA),
-                                       sensorPixelB, 0.0);
+                                       sensorPixelB, distance);
                     measureCount++;
                 } else {
 //                    System.out

@@ -626,10 +626,10 @@ public class Rugged {
         final Vector3D sBLocal     = sensorB.getPosition(); // S_b 
 
         // Get sensors's position and LOS into inertial frame
-        final Vector3D sA   = scToInertA.transformPosition(sALocal).normalize();
-        final Vector3D vA   = scToInertA.transformVector(vALocal).normalize();
-        final Vector3D sB   = scToInertB.transformPosition(sBLocal).normalize();
-        final Vector3D vB   = scToInertB.transformVector(vBLocal).normalize();
+        final Vector3D sA   = scToInertA.transformPosition(sALocal);
+        final Vector3D vA   = scToInertA.transformVector(vALocal);
+        final Vector3D sB   = scToInertB.transformPosition(sBLocal);
+        final Vector3D vB   = scToInertB.transformVector(vBLocal);
         
         final Vector3D vBase= sB.subtract(sA); // S_b - S_a
         final double svA        = Vector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
@@ -637,8 +637,8 @@ public class Rugged {
         
         final double vAvB   = Vector3D.dotProduct(vA, vB); // V_a.V_b
         
-        // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 + (V_a.V_b)²)
-        final double lambdaB = (svA * vAvB - svB) / (1 + FastMath.pow(vAvB,2));
+        // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 - (V_a.V_b)²)
+        final double lambdaB = (svA * vAvB - svB) / (1 - vAvB * vAvB);
         
         // Compute lambda_a = SV_a + lambdaB * V_a.V_b
         final double lambdaA = svA + lambdaB * vAvB; 
@@ -648,7 +648,7 @@ public class Rugged {
   
         final Vector3D vDistance = mB.subtract(mA); // M_b - M_a
         //System.out.format("vDistance %f %f %f ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
-        // Get square of the euclidean norm
+        // Get the euclidean norm
         final double d = vDistance.getNorm();
         return d;
     }
@@ -693,8 +693,8 @@ public class Rugged {
                                                                     sensorB.getLOSDerivatives(dateB, iSup, generator)).normalize(); 
         
         // Get sensors's LOS into inertial frame
-        final FieldVector3D<DerivativeStructure> vA     =  scToInertA.transformVector(vALocal).normalize(); // V_a : line of sight's vectorA
-        final FieldVector3D<DerivativeStructure> vB     =  scToInertB.transformVector(vBLocal).normalize(); // V_b
+        final FieldVector3D<DerivativeStructure> vA     =  scToInertA.transformVector(vALocal); // V_a : line of sight's vectorA
+        final FieldVector3D<DerivativeStructure> vB     =  scToInertB.transformVector(vBLocal); // V_b
 
         // Get sensors's position into local frame TODO: check if we have to implement getPositionDerivatives() method & CO
         final Vector3D sAtmp     = sensorA.getPosition(); // S_a : sensorA 's position
@@ -706,8 +706,8 @@ public class Rugged {
         final FieldVector3D<DerivativeStructure> sBLocal     = new FieldVector3D<DerivativeStructure>(scaleFactor, sBtmp);
         
         // Get sensors's position into inertial frame
-        final FieldVector3D<DerivativeStructure> sA     =  scToInertA.transformPosition(sALocal).normalize();
-        final FieldVector3D<DerivativeStructure> sB     =  scToInertB.transformPosition(sBLocal).normalize();
+        final FieldVector3D<DerivativeStructure> sA     =  scToInertA.transformPosition(sALocal);
+        final FieldVector3D<DerivativeStructure> sB     =  scToInertB.transformPosition(sBLocal);
         
         // final FieldVector3D<DerivativeStructure> sA     = sensorA.getPositionDerivatives(); // S_a : sensorA 's position
         // final FieldVector3D<DerivativeStructure> sB     = sensorB.getPositionDerivatives(); // S_b
@@ -718,8 +718,8 @@ public class Rugged {
         
         final DerivativeStructure vAvB   = FieldVector3D.dotProduct(vA, vB); // V_a.V_b
         
-        // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 + (V_a.V_b)²)
-        final DerivativeStructure lambdaB = (svA.multiply(vAvB).subtract(svB)).divide(vAvB.pow(2).add(1));
+        // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 - (V_a.V_b)²)
+        final DerivativeStructure lambdaB = (svA.multiply(vAvB).subtract(svB)).divide(vAvB.multiply(vAvB).subtract(1).negate());
         
         // Compute lambda_a = SV_a + lambdaB * V_a.V_b
         final DerivativeStructure lambdaA = vAvB.multiply(lambdaB).add(svA); 
@@ -729,7 +729,7 @@ public class Rugged {
   
         final FieldVector3D<DerivativeStructure> vDistance = mB.subtract(mA); // M_b - M_a
         
-        // Get square of the euclidean norm
+        // Get the euclidean norm
         final DerivativeStructure d = vDistance.getNorm();
         return new DerivativeStructure[] {d};
     }
