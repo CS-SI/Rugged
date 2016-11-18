@@ -51,7 +51,7 @@ import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.PVCoordinates;
-
+import org.orekit.utils.ParameterDriver;
 
 
 /**
@@ -70,7 +70,7 @@ public class AffinageRuggedLiaison {
 
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
-            //File orekitData = new File(home, "workspace/data/orekit-data");
+            
             File orekitData = new File(home, "COTS/orekit-data");
             DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
@@ -104,6 +104,25 @@ public class AffinageRuggedLiaison {
                               FastMath.toDegrees(gpA.getLatitude()),
                               FastMath.toDegrees(gpA.getLongitude()));                       
             
+            // Build Rugged A and B
+            RuggedBuilder ruggedBuilderA = new RuggedBuilder();
+    
+            LineSensor lineSensorA =  pleiadesViewingModelA.getLineSensor(); 
+            ruggedBuilderA.addLineSensor(lineSensorA);
+            
+      
+            ruggedBuilderA.setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
+            ruggedBuilderA.setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF);
+            ruggedBuilderA.setTimeSpan(minDateA,maxDateA, 0.001, 5.0).
+                    setTrajectory(InertialFrameId.EME2000,
+                    orbitmodelA.orbitToPV(orbitA, earthA, minDateA.shiftedBy(-0.0), maxDateA.shiftedBy(+0.0), 0.25),
+                    8, CartesianDerivativesFilter.USE_PV,
+                    orbitmodelA.orbitToQ(orbitA, earthA, minDateA.shiftedBy(-0.0), maxDateA.shiftedBy(+0.0), 0.25),
+                    2, AngularDerivativesFilter.USE_R);                  
+            Rugged ruggedA = ruggedBuilderA.build();
+            
+
+            
             
             //create 2 Pleiades Viewing Model
             final String SensorNameB = "SensorB";
@@ -131,22 +150,7 @@ public class AffinageRuggedLiaison {
                               FastMath.toDegrees(gpB.getLatitude()),
                               FastMath.toDegrees(gpB.getLongitude()));                       
             
-            // Build Rugged A and B
-            RuggedBuilder ruggedBuilderA = new RuggedBuilder();
-    
-            LineSensor lineSensorA =  pleiadesViewingModelA.getLineSensor(); 
-            ruggedBuilderA.addLineSensor(lineSensorA);
-            
-      
-            ruggedBuilderA.setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
-            ruggedBuilderA.setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF);
-            ruggedBuilderA.setTimeSpan(minDateA,maxDateA, 0.001, 5.0).
-                    setTrajectory(InertialFrameId.EME2000,
-                    orbitmodelA.orbitToPV(orbitA, earthA, minDateA.shiftedBy(-0.0), maxDateA.shiftedBy(+0.0), 0.25),
-                    8, CartesianDerivativesFilter.USE_PV,
-                    orbitmodelA.orbitToQ(orbitA, earthA, minDateA.shiftedBy(-0.0), maxDateA.shiftedBy(+0.0), 0.25),
-                    2, AngularDerivativesFilter.USE_R);                  
-            Rugged ruggedA = ruggedBuilderA.build();
+
                        
             RuggedBuilder ruggedBuilderB = new RuggedBuilder();
             
@@ -221,10 +225,14 @@ public class AffinageRuggedLiaison {
             
             
             System.out.format(" **** Add roll / pitch / factor values **** %n"); 
-            double rollValueA =  FastMath.toRadians(-0.01);//0.6
+            double rollValueA =  FastMath.toRadians(0.00);//0.6
             double pitchValueA = FastMath.toRadians(0.00);//0.02
-            double factorValue = 1.00;
-                        
+            double factorValue = 1.0;
+            //final String SensorNameAFactor = SensorNameA+"_factor";
+            //final String SensorNameBFactor = SensorNameB+"_factor";
+            final String SensorNameAFactor = "factor";
+            final String SensorNameBFactor = "factor";
+            
             System.out.format("roll : %3.5f pitch : %3.5f factor : %3.5f \n",rollValueA,pitchValueA,factorValue);
                         
             ruggedA.
@@ -242,16 +250,46 @@ public class AffinageRuggedLiaison {
             ruggedA.
             getLineSensor(SensorNameA).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals(SensorNameA+"_factor")).
+            filter(driver -> driver.getName().equals(SensorNameAFactor)).
             findFirst().get().setValue(factorValue);
             
+            
             lineDateA = lineSensorA.getDate(pleiadesViewingModelA.dimension/2);
-            losA = lineSensorA.getLOS(lineDateA,pleiadesViewingModelA.dimension/2);
+            losA = lineSensorA.getLOS(lineDateA,(int) pleiadesViewingModelA.dimension/2);
+            
+            //Vector3D losADouble = lineSensorA.getLOS(lineDateA,(double) pleiadesViewingModelA.dimension/2);
+            //final Vector3D vDistance = losA.subtract(losADouble);
+            //final double d = vDistance.getNorm();
+            //System.out.format("distance double/int %f ",d);
+            double rollValueB =  FastMath.toRadians(0.02);//0.6
+            double pitchValueB = FastMath.toRadians(0.01);//0.02
+            factorValue = 1.00;
+                        
+            System.out.format("roll : %3.5f pitch : %3.5f factor : %3.5f \n",rollValueB,pitchValueB,factorValue);
+                        
+            ruggedB.
+            getLineSensor(SensorNameB).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals(SensorNameB+"_roll")).
+            findFirst().get().setValue(rollValueB);
+
+            ruggedB.
+            getLineSensor(SensorNameB).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals(SensorNameB+"_pitch")).
+            findFirst().get().setValue(pitchValueB);
+            
+            ruggedB.
+            getLineSensor(SensorNameB).
+            getParametersDrivers().
+            filter(driver -> driver.getName().equals(SensorNameBFactor)).
+            findFirst().get().setValue(factorValue);
+            
+            
             centerPointA = ruggedA.directLocation(lineDateA, positionA, losA);
             System.out.format(Locale.US, "center geodetic position : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                               FastMath.toDegrees(centerPointA.getLatitude()),
                               FastMath.toDegrees(centerPointA.getLongitude()),centerPointA.getAltitude());      
-            
             
             distance = DistanceTools.computeDistanceRad(centerPointA.getLongitude(), centerPointA.getLatitude(),
                                                                centerPointB.getLongitude(), centerPointB.getLatitude());
@@ -265,6 +303,13 @@ public class AffinageRuggedLiaison {
             // we need to test if the sensor pixel is found in the prescribed lines otherwise the sensor pixel is null
             if (sensorPixelB != null){
                 System.out.format(Locale.US, "Sensor Pixel found : line = %5.3f, pixel = %5.3f %n", sensorPixelB.getLineNumber(), sensorPixelB.getPixelNumber());
+                AbsoluteDate date = lineSensorB.getDate(sensorPixelB.getLineNumber());
+                losB = lineSensorB.getLOS(date,sensorPixelB.getPixelNumber());
+                GeodeticPoint pointB = ruggedB.directLocation(date, positionB, losB);
+                distance = DistanceTools.computeDistanceRad(centerPointA.getLongitude(), pointB.getLatitude(),
+                                                            pointB.getLongitude(), pointB.getLatitude());
+                System.out.format("distance %f meters %n",distance);
+            
             } else {
                 System.out.println("Sensor Pixel is null: point cannot be seen between the prescribed line numbers\n");
             }
@@ -278,7 +323,11 @@ public class AffinageRuggedLiaison {
             measure.CreateMeasure(lineSampling, pixelSampling); 
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
             
-            
+            SensorToSensorLocalisationMetrics gtResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
+            System.out.format("gt residuals max :  %3.4f mean %3.4f meters  %n",gtResiduals.getMaxResidual(),gtResiduals.getMeanResidual());
+            System.out.format("gt los distance max :  %3.4f mean %3.4f meters  %n",gtResiduals.getLosMaxDistance(),gtResiduals.getLosMeanDistance());
+             
+           
             
             
             // initialize ruggedA without perturbation
@@ -289,7 +338,7 @@ public class AffinageRuggedLiaison {
             filter(driver -> driver.getName().equals(SensorNameA+"_roll") || driver.getName().equals(SensorNameA+"_pitch")).
             forEach(driver -> {
                 try {
-                    driver.setSelected(true);
+                    driver.setSelected(false);
                     driver.setValue(0.0);
                 } catch (OrekitException e) {
                     throw new OrekitExceptionWrapper(e);
@@ -298,10 +347,10 @@ public class AffinageRuggedLiaison {
             ruggedA.
             getLineSensor(pleiadesViewingModelA.getSensorName()).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals(SensorNameA+"_factor")).
+            filter(driver -> driver.getName().equals(SensorNameAFactor)).
             forEach(driver -> {
                 try {
-                    driver.setSelected(true);
+                    driver.setSelected(false);
                     driver.setValue(1.0);       // default value: no Z scale factor applied
                 } catch (OrekitException e) {
                     throw new OrekitExceptionWrapper(e);
@@ -325,20 +374,28 @@ public class AffinageRuggedLiaison {
             ruggedB.
             getLineSensor(pleiadesViewingModelB.getSensorName()).
             getParametersDrivers().
-            filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
+            filter(driver -> driver.getName().equals(SensorNameBFactor)).
             forEach(driver -> {
                 try {
-                    driver.setSelected(true);
+                    driver.setSelected(false);
                     driver.setValue(1.0); 
                 } catch (OrekitException e) {
                     throw new OrekitExceptionWrapper(e);
                 }
             });
             
+            
+            
+            SensorToSensorLocalisationMetrics initialResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
+            System.out.format("initial residuals max :  %3.4f mean %3.4f meters  %n",initialResiduals.getMaxResidual(),initialResiduals.getMeanResidual());
+            System.out.format("initial los distance max :  %3.4f mean %3.4f meters  %n",initialResiduals.getLosMaxDistance(),initialResiduals.getLosMeanDistance());
+             
+           
+            
             System.out.format(" **** Start optimization  **** %n");
             // perform parameters estimation
             int maxIterations = 100;
-            double convergenceThreshold =  1e-4;//1e-14;
+            double convergenceThreshold =  1e-6;//1e-14;
             
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
             
@@ -370,15 +427,13 @@ public class AffinageRuggedLiaison {
             
             double estFactorA = ruggedA.getLineSensor(pleiadesViewingModelA.getSensorName()).
                     getParametersDrivers().
-                    filter(driver -> driver.getName().equals(SensorNameA+"_factor")).
+                    //filter(driver -> driver.getName().equals(SensorNameAFactor)).
+                    filter(driver -> driver.getName().equals(SensorNameAFactor)).
                     findFirst().get().getValue();
-            double factorError = (estFactorA - factorValue);
-            System.out.format("Estimated factor A %3.5f, factor error %3.6e  %n ", estFactorA, factorError);
-            
-         // Viewing model B
-            double rollValueB =  FastMath.toRadians(-0.00);
-            double pitchValueB = FastMath.toRadians(0.00);
-            double factorValueB = 1.00;
+            double factorErrorA = (estFactorA - factorValue);
+            System.out.format("Estimated factor A %3.5f, factor error %3.6e  %n ", estFactorA, factorErrorA);
+
+            // Viewing model B
             double estRollB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
                                           getParametersDrivers().
                                           filter(driver -> driver.getName().equals(SensorNameB+"_roll")).
@@ -395,10 +450,20 @@ public class AffinageRuggedLiaison {
             
             double estFactorB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
                     getParametersDrivers().
-                    filter(driver -> driver.getName().equals(SensorNameB+"_factor")).
+                    filter(driver -> driver.getName().equals(SensorNameBFactor)).
                     findFirst().get().getValue();
-            double factorErrorB = (estFactorB - factorValueB);
-            System.out.format("Estimated factor B %3.5f factor error %3.6e  %n ", estFactorB, factorErrorB);
+            double factorErrorB = (estFactorB - factorValue);
+            System.out.format("Estimated factor B %3.5f, factor error %3.6e  %n ", estFactorB, factorErrorB);
+            
+            
+            
+            
+            SensorToSensorLocalisationMetrics finalResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
+            System.out.format("final residuals max :  %3.4f mean %3.4f meters  %n",finalResiduals.getMaxResidual(),finalResiduals.getMeanResidual());
+            System.out.format("final los distance max :  %3.4f mean %3.4f meters  %n",finalResiduals.getLosMaxDistance(),finalResiduals.getLosMeanDistance());
+             
+           
+           
 
 
         } catch (OrekitException oe) {

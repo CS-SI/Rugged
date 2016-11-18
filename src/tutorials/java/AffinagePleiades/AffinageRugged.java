@@ -201,7 +201,7 @@ public class AffinageRugged {
             rugged.
             getLineSensor("line").
             getParametersDrivers().
-            filter(driver -> driver.getName().equals("line_factor")).
+            filter(driver -> driver.getName().equals("factor")).
             findFirst().get().setValue(factorValue);
             
 
@@ -299,7 +299,7 @@ public class AffinageRugged {
             
             double estimatedFactor = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
                     getParametersDrivers().
-                    filter(driver -> driver.getName().equals("line_factor")).
+                    filter(driver -> driver.getName().equals("factor")).
                     findFirst().get().getValue();
             double factorError = (estimatedFactor - factorValue);
             System.out.format("Estimated factor %3.5f factor error %3.6e  %n ", estimatedFactor, factorError);
