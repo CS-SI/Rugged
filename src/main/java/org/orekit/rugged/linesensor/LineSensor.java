@@ -21,12 +21,14 @@ import java.util.stream.Stream;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
+import org.s2geolib.exception.S2GeolibException;
 
 /** Line sensor model.
  * @author Luc Maisonobe
@@ -97,6 +99,22 @@ public class LineSensor {
         return l;
     }
 
+    /** Get the pixel normalized interpolated line-of-sight at some date.
+     * @param date current date
+     * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
+     * @return pixel normalized line-of-sight
+     * @exception RuggedException if date cannot be handled
+     */
+    public Vector3D getLOS(final AbsoluteDate date, final double i)
+        throws RuggedException {
+
+        final int iInf = FastMath.max(0, FastMath.min(getNbPixels() - 2, (int) FastMath.floor(i)));
+        final int iSup = iInf + 1;
+        final Vector3D interpolatedLos     = new Vector3D(iSup - i,los.getLOS(iInf, date),
+                                                  i - iInf, los.getLOS(iSup, date)); 
+        return interpolatedLos;
+    }
+    
     /** Get the pixel normalized line-of-sight at some date,
      * and their derivatives with respect to estimated parameters.
      * @param date current date
@@ -107,6 +125,29 @@ public class LineSensor {
     public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final int i,
                                                                 final DSGenerator generator) {
         return los.getLOSDerivatives(i, date, generator);
+    }
+    
+    
+    /** Get the pixel normalized line-of-sight at some date,
+     * and their derivatives with respect to estimated parameters.
+     * @param date current date
+     * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
+     * @param generator generator to use for building {@link DerivativeStructure} instances
+     * @return pixel normalized line-of-sight
+     */
+    public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final double i,
+                                                                final DSGenerator generator) {
+        
+        // find surrounding pixels of pixelB (in order to interpolate LOS from pixelB (that is not an integer)
+        final int iInf = FastMath.max(0, FastMath.min(getNbPixels() - 2, (int) FastMath.floor(i)));
+        final int iSup = iInf + 1;
+     
+        FieldVector3D<DerivativeStructure> interpolatedLos     = new FieldVector3D<DerivativeStructure> ( 
+                                                                    iSup - i, 
+                                                                    los.getLOSDerivatives(iInf, date, generator),
+                                                                    i - iInf, 
+                                                                    los.getLOSDerivatives(iSup, date, generator)).normalize();       
+        return interpolatedLos;
     }
 
     /** Get the date.
