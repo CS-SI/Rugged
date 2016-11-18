@@ -1,21 +1,17 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * CS licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Copyright 2013-2016 CS Systèmes d'Information Licensed to CS Systèmes
+ * d'Information (CS) under one or more contributor license agreements. See the
+ * NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. CS licenses this file to You under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 package AffinagePleiades;
-
 
 import org.orekit.rugged.api.SensorToSensorMapping;
 import org.orekit.rugged.api.Rugged;
@@ -38,11 +34,13 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 
 import java.util.Locale;
 
-/** class for measure generation
+/**
+ * class for measure generation
+ * 
  * @author Jonathan Guinet
+ * @author Lucie Labatallee
  */
 public class SensorToSensorMeasureGenerator {
-
 
     /** mapping */
     private SensorToSensorMapping mapping;
@@ -50,69 +48,76 @@ public class SensorToSensorMeasureGenerator {
     private Rugged ruggedA;
 
     private Rugged ruggedB;
-    
+
     private LineSensor sensorA;
-    
+
     private LineSensor sensorB;
-    
+
     private PleiadesViewingModel viewingModelA;
 
-    private PleiadesViewingModel viewingModelB;   
-    
-    private int measureCount;
-    
-    private String sensorNameA;
-    private String sensorNameB;    
-    
-    
-    
+    private PleiadesViewingModel viewingModelB;
 
-    /**  SensorToSensorMeasureGenerator 
+    private int measureCount;
+
+    private String sensorNameA;
+
+    private String sensorNameB;
+
+    /**
+     * SensorToSensorMeasureGenerator
+     * 
      * @param viewingModelA
      * @param ruggedA
      * @param viewingModelB
      * @param ruggedB
      * @throws RuggedException
      */
-    public SensorToSensorMeasureGenerator(PleiadesViewingModel viewingModelA, Rugged ruggedA,PleiadesViewingModel viewingModelB, Rugged ruggedB) throws RuggedException
-    {
-	
-    // generate reference mapping
-    sensorNameA = viewingModelA.getSensorName();
-    sensorNameB = viewingModelB.getSensorName();
-    // check that sensors's name is different
-    if (sensorNameA.contains(sensorNameB)) {
-        throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, sensorNameA));
+    public SensorToSensorMeasureGenerator(PleiadesViewingModel viewingModelA,
+                                          Rugged ruggedA,
+                                          PleiadesViewingModel viewingModelB,
+                                          Rugged ruggedB)
+        throws RuggedException {
+
+        // generate reference mapping
+        sensorNameA = viewingModelA.getSensorName();
+        sensorNameB = viewingModelB.getSensorName();
+        // check that sensors's name is different
+        if (sensorNameA.contains(sensorNameB)) {
+            throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME,
+                                                                 sensorNameA));
+        }
+
+        mapping = new SensorToSensorMapping(sensorNameA, sensorNameB);
+        this.ruggedA = ruggedA;
+        this.ruggedB = ruggedB;
+
+        this.viewingModelA = viewingModelA;
+        this.viewingModelB = viewingModelB;
+
+        sensorA = ruggedA.getLineSensor(sensorNameA);
+        sensorB = ruggedB.getLineSensor(sensorNameB);
+        measureCount = 0;
+
     }
-    
-    mapping = new SensorToSensorMapping(sensorNameA, sensorNameB);
-    this.ruggedA = ruggedA;
-    this.ruggedB = ruggedB;    
-    
-    this.viewingModelA = viewingModelA;
-    this.viewingModelB = viewingModelB;
-    
-    sensorA = ruggedA.getLineSensor(mapping.getSensorNameA());
-    sensorB = ruggedB.getLineSensor(mapping.getSensorNameB());    
-    measureCount = 0;
-    
-    }
-    
+
     public SensorToSensorMapping getMapping() {
-    	return mapping;
+        return mapping;
     }
-    
-    public int  getMeasureCount() {
-    	return measureCount;
-    }    
-    
-    /** tie point creation from directLocation with RuugedA and inverse location with RuggedB
+
+    public int getMeasureCount() {
+        return measureCount;
+    }
+
+    /**
+     * tie point creation from directLocation with RuugedA and inverse location
+     * with RuggedB
+     * 
      * @param lineSampling sampling along lines
      * @param pixelSampling sampling along columns
      * @throws RuggedException
      */
-    public void CreateMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
-    {
+    public void CreateMeasure(final int lineSampling, final int pixelSampling)
+        throws RuggedException {
         // Search the sensor pixel seeing point
         final int minLine = 0;
         final int maxLine = viewingModelB.dimension - 1;
@@ -132,35 +137,29 @@ public class SensorToSensorMeasureGenerator {
                 // we need to test if the sensor pixel is found in the
                 // prescribed lines otherwise the sensor pixel is null
                 if (sensorPixelB != null) {
-//                    System.out.format(Locale.US,
-//                                      "Sensor Pixel found : line = %5.3f, pixel = %5.3f %n",
-//                                      sensorPixelB.getLineNumber(),
-//                                      sensorPixelB.getPixelNumber());
 
-                    // TODO test if distance is 0.0 with crossing LOS
-                    final AbsoluteDate dateB = sensorB.getDate(sensorPixelB.getLineNumber());
-                    double pixelB = sensorPixelB.getPixelNumber();
-                    
+                    /*final AbsoluteDate dateB = sensorB
+                        .getDate(sensorPixelB.getLineNumber());
+                    double pixelB = sensorPixelB.getPixelNumber();*/
+
                     // Get spacecraft to body transform of rugged instance A
-                    final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
-                    
-                    double distance = ruggedB.distanceBetweenLOS(sensorA,dateA, pixelA, scToBodyA, sensorB ,dateB, pixelB);
-                    
-                    System.out.format(Locale.US,"distance %f %n",distance);                
+                    //final SpacecraftToObservedBody scToBodyA = ruggedA
+                    //    .getScToBody();
+                    //final SpacecraftToObservedBody scToBodyB = ruggedB
+                    //    .getScToBody();
+
+                    /*double distanceB = ruggedB
+                        .distanceBetweenLOS(sensorA, dateA, pixelA, scToBodyA,
+                                            sensorB, dateB, pixelB);*/
+
+                    final double distance = 0.0;
                     mapping.addMapping(new SensorPixel(line, pixelA),
                                        sensorPixelB, distance);
                     measureCount++;
-                } else {
-//                    System.out
-//                        .println("Sensor Pixel is null: point cannot be seen between the prescribed line numbers\n");
-
-                }
+                } 
 
             }
         }
     }
 
-
-    
 }
-
