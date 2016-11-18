@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.ParameterDriversList;
 
 /** Generator for {@link DerivativeStructure} instances from {@link ParameterDriver}.
  * <p>
@@ -33,7 +34,7 @@ public interface DSGenerator {
     /** Get the parameters selected for estimation.
      * @return parameters selected for estimation
      */
-    List<ParameterDriver> getSelected();
+    ParameterDriversList getSelected();
 
     /** Generate a constant {@link DerivativeStructure}.
      * @param value value of the constant
