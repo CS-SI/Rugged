@@ -65,14 +65,29 @@ import org.orekit.utils.AngularDerivativesFilter;
  */
 
 public class OrbitModel {
+    
+    
+    /** Flag to change Attitude Law (by default Nadir Pointing Yaw Compensation). */
+    private boolean UserDefinedLOFTransform; 
 
+    /** User defined Roll law. */
     private double[] LOFTransformRollPoly;
 
+    /** User defined Pitch law. */
     private double[] LOFTransformPitchPoly;
 
+    /** User defined Yaw law. */
     private double[] LOFTransformYawPoly;
 
+    /** reference date */
     private AbsoluteDate refDate;
+    
+    /** attitude Provider */
+    AttitudeProvider attitudeProvider;
+    
+    public OrbitModel() {
+        UserDefinedLOFTransform = false;
+    }
 
     public static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
                                       ArrayList<TimeStampedPVCoordinates> satellitePVList,
@@ -148,6 +163,8 @@ public class OrbitModel {
 
     public void setLOFTransform(double[] rollPoly, double[] pitchPoly,
                                 double[] yawPoly, AbsoluteDate refDate) {
+        
+        this.UserDefinedLOFTransform = true;
         LOFTransformRollPoly = rollPoly.clone();
         LOFTransformPitchPoly = pitchPoly.clone();
         LOFTransformYawPoly = yawPoly.clone();
@@ -190,22 +207,26 @@ public class OrbitModel {
 
     public AttitudeProvider createAttitudeProvider(BodyShape earth, Orbit orbit)
         throws OrekitException {
-        LOFType type = LOFType.VVLH;
 
-        ArrayList<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
+        if (this.UserDefinedLOFTransform) {
+            LOFType type = LOFType.VVLH;
 
-        for (double shift = -10.0; shift < +10.0; shift += 1e-2) {
-            list.add(new TimeStampedAngularCoordinates(refDate.shiftedBy(shift),
-                                                       getOffset(earth, orbit,
-                                                                 shift),
-                                                       Vector3D.ZERO,
-                                                       Vector3D.ZERO));
+            ArrayList<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
+
+            for (double shift = -10.0; shift < +10.0; shift += 1e-2) {
+                list.add(new TimeStampedAngularCoordinates(refDate
+                    .shiftedBy(shift), getOffset(earth, orbit, shift),
+                                                           Vector3D.ZERO,
+                                                           Vector3D.ZERO));
+            }
+
+            TabulatedLofOffset tabulated = new TabulatedLofOffset(orbit
+                .getFrame(), type, list, 2, AngularDerivativesFilter.USE_R);
+
+            return tabulated;
+        } else {
+            return new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth));
         }
-
-        TabulatedLofOffset tabulated = new TabulatedLofOffset(orbit
-            .getFrame(), type, list, 2, AngularDerivativesFilter.USE_R);
-
-        return tabulated;
     }
 
     public Propagator createPropagator(BodyShape earth,
@@ -213,10 +234,9 @@ public class OrbitModel {
                                        Orbit orbit)
         throws OrekitException {
 
-        AttitudeProvider attidudeProvider = createAttitudeProvider(earth,
-                                                                   orbit);
+        AttitudeProvider attitudeProvider = createAttitudeProvider(earth,orbit);
 
-        SpacecraftState state = new SpacecraftState(orbit, attidudeProvider
+        SpacecraftState state = new SpacecraftState(orbit, attitudeProvider
             .getAttitude(orbit, orbit.getDate(), orbit.getFrame()), 1180.0);
 
         // numerical model for improving orbit
@@ -243,7 +263,7 @@ public class OrbitModel {
                 .getMoon()));
         numericalPropagator.setOrbitType(type);
         numericalPropagator.setInitialState(state);
-        numericalPropagator.setAttitudeProvider(attidudeProvider);
+        numericalPropagator.setAttitudeProvider(attitudeProvider);
         return numericalPropagator;
 
     }
@@ -253,7 +273,9 @@ public class OrbitModel {
                   AbsoluteDate maxDate, double step)
             throws OrekitException {
         Propagator propagator = new KeplerianPropagator(orbit);
+        
         propagator.setAttitudeProvider(createAttitudeProvider(earth, orbit));
+        
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
