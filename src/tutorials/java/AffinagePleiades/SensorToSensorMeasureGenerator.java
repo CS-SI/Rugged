@@ -14,6 +14,7 @@
 package AffinagePleiades;
 
 import org.orekit.rugged.api.SensorToSensorMapping;
+
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
@@ -22,17 +23,13 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
+
 import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.Well19937a;
-import org.hipparchus.util.FastMath;
-import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.utils.DSGenerator;
-import org.orekit.rugged.utils.SpacecraftToObservedBody;
 
-import java.util.Locale;
+import org.orekit.bodies.GeodeticPoint;
+
 
 /**
  * class for measure generation
@@ -51,7 +48,7 @@ public class SensorToSensorMeasureGenerator {
 
     private LineSensor sensorA;
 
-    private LineSensor sensorB;
+    //private LineSensor sensorB;
 
     private PleiadesViewingModel viewingModelA;
 
@@ -95,7 +92,7 @@ public class SensorToSensorMeasureGenerator {
         this.viewingModelB = viewingModelB;
 
         sensorA = ruggedA.getLineSensor(sensorNameA);
-        sensorB = ruggedB.getLineSensor(sensorNameB);
+        //sensorB = ruggedB.getLineSensor(sensorNameB);
         measureCount = 0;
 
     }
@@ -116,16 +113,32 @@ public class SensorToSensorMeasureGenerator {
      * @param pixelSampling sampling along columns
      * @throws RuggedException
      */
-    public void CreateMeasure(final int lineSampling, final int pixelSampling)
+    public void CreateMeasure(final int lineSampling, final int pixelSampling, double[]err)
         throws RuggedException {
         // Search the sensor pixel seeing point
         final int minLine = 0;
         final int maxLine = viewingModelB.dimension - 1;
 
+        
+        double meanA[] =  {err[0],err[0]};
+        double stdA[] = {err[1],err[1]};
+        double meanB[] =  {err[2],err[2]};
+        double stdB[] = {err[3],err[3]};  
+
+        GaussianRandomGenerator rngA = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
+        UncorrelatedRandomVectorGenerator rvgA = new UncorrelatedRandomVectorGenerator(meanA, stdA, rngA);
+
+        GaussianRandomGenerator rngB = new GaussianRandomGenerator(new Well19937a(0xdf1c03d9be0b34b9l));
+        UncorrelatedRandomVectorGenerator rvgB = new UncorrelatedRandomVectorGenerator(meanB, stdB, rngB);
+
+        
+        
+        
+        
         for (double line = 0; line < viewingModelA.dimension; line += lineSampling) {
 
             AbsoluteDate dateA = sensorA.getDate(line);
-            for (int pixelA = 0; pixelA < sensorA
+            for (double pixelA = 0; pixelA < sensorA
                 .getNbPixels(); pixelA += pixelSampling) {
 
                 GeodeticPoint gpA = ruggedA
@@ -137,24 +150,51 @@ public class SensorToSensorMeasureGenerator {
                 // we need to test if the sensor pixel is found in the
                 // prescribed lines otherwise the sensor pixel is null
                 if (sensorPixelB != null) {
-
+                    //System.out.format("  %n");
                     /*final AbsoluteDate dateB = sensorB
                         .getDate(sensorPixelB.getLineNumber());
                     double pixelB = sensorPixelB.getPixelNumber();*/
 
                     // Get spacecraft to body transform of rugged instance A
-                    //final SpacecraftToObservedBody scToBodyA = ruggedA
-                    //    .getScToBody();
-                    //final SpacecraftToObservedBody scToBodyB = ruggedB
-                    //    .getScToBody();
+                    /*
+                    final SpacecraftToObservedBody scToBodyA = ruggedA
+                        .getScToBody();
+                    final SpacecraftToObservedBody scToBodyB = ruggedB
+                        .getScToBody();
 
-                    /*double distanceB = ruggedB
+                    double distanceLOSB = ruggedB
                         .distanceBetweenLOS(sensorA, dateA, pixelA, scToBodyA,
-                                            sensorB, dateB, pixelB);*/
-
+                                            sensorB, dateB, pixelB);
+                    double distanceLOSA = ruggedA
+                                    .distanceBetweenLOS(sensorB, dateB, pixelB, scToBodyB,
+                                                        sensorA, dateA, pixelA);
+                    */
+                    //System.out.format("distance LOS %1.8e %1.8e %n",distanceLOSB,distanceLOSA);
+                    
+                    
+                    /*
+                    GeodeticPoint gpB = ruggedB
+                                    .directLocation(dateB, sensorB.getPosition(),
+                                                    sensorB.getLOS(dateB, pixelB));
+                    
+                    double GEOdistance = DistanceTools.computeDistanceRad(gpA.getLongitude(), gpA.getLatitude(),
+                                                                gpB.getLongitude(), gpB.getLatitude());
+                    */
+                    //System.out.format("distance %1.8e meters %n",GEOdistance);
                     final double distance = 0.0;
-                    mapping.addMapping(new SensorPixel(line, pixelA),
-                                       sensorPixelB, distance);
+                    
+                    //
+                    final double[] vecRandomA = rvgA.nextVector();
+                    final double[] vecRandomB = rvgB.nextVector();                    
+                    
+                    SensorPixel RealPixelA = new SensorPixel(line + vecRandomA[0], pixelA+ vecRandomA[1]);
+                    SensorPixel RealPixelB = new SensorPixel(sensorPixelB.getLineNumber() + vecRandomB[0], sensorPixelB.getPixelNumber()+ vecRandomB[1]);
+                    //System.out.format("pix A %f  %f Real %f %f %n", line, pixelA, RealPixelA.getLineNumber(), RealPixelA.getPixelNumber());
+                    //System.out.format("pix B %f  %f Real %f %f %n", sensorPixelB.getLineNumber(), sensorPixelB.getPixelNumber(), RealPixelB.getLineNumber(), RealPixelB.getPixelNumber());
+                    
+                    
+                    mapping.addMapping(RealPixelA,
+                                       RealPixelB, distance);
                     measureCount++;
                 } 
 
