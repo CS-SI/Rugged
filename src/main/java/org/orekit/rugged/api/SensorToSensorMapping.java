@@ -22,6 +22,9 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for mapping between sensor A pixels and sensor B pixels 
@@ -40,7 +43,7 @@ public class SensorToSensorMapping {
     private final Map<SensorPixel, SensorPixel> sensorToSensor;
 
     /** Distance between two LOS */
-    private final Collection<Double> mapDistance;
+    private final Map<SensorPixel,Double[]> mapDistance;
     
 
     /** Build a new instance.
@@ -51,7 +54,7 @@ public class SensorToSensorMapping {
         this.sensorNameA     = sensorNameA;
         this.sensorNameB     = sensorNameB;
         this.sensorToSensor = new IdentityHashMap<>();
-        this.mapDistance = new ArrayList<Double>();
+        this.mapDistance = new IdentityHashMap<>();
     }
 
     /** Get the name of the sensor A to which mapping applies.
@@ -72,9 +75,9 @@ public class SensorToSensorMapping {
      * @param pixelA sensor A pixel
      * @param pixelB sensor B pixel corresponding to the sensor A pixel
      */
-    public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB, final double distance) {
+    public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB, final Double[] distance) {
         sensorToSensor.put(pixelA, pixelB);
-        mapDistance.add(distance);
+        mapDistance.put(pixelA,distance);
     }
 
         /** Get all the mapping entries.
@@ -86,7 +89,23 @@ public class SensorToSensorMapping {
     /**
      * @return the mapDistance
      */
-    public Collection<Double> getMapDistance() {
-        return mapDistance;
+    public  Set<Map.Entry<SensorPixel, Double[]>> getMapDistance() {
+        return Collections.unmodifiableSet(mapDistance.entrySet());
     }  
+    
+    
+    /** return a distance associated with PixelA
+     * @param pixel sensor pixelA 
+     * @return the distance
+     */
+    public  Double[] getDistance(SensorPixel pixel) throws RuggedException {
+        Double[] distance = mapDistance.get(pixel);
+        if (distance == null) {
+            throw new RuggedException(RuggedMessages.UNKNOWN_PIXEL, pixel.toString());
+        }
+        return distance;
+    }  
+     
+    
+    
 }

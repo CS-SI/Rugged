@@ -27,9 +27,10 @@ import org.orekit.time.AbsoluteDate;
 import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.Well19937a;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
 import org.orekit.bodies.GeodeticPoint;
-
+import org.orekit.rugged.utils.SpacecraftToObservedBody;
 
 /**
  * class for measure generation
@@ -48,7 +49,7 @@ public class SensorToSensorMeasureGenerator {
 
     private LineSensor sensorA;
 
-    //private LineSensor sensorB;
+    private LineSensor sensorB;
 
     private PleiadesViewingModel viewingModelA;
 
@@ -92,7 +93,7 @@ public class SensorToSensorMeasureGenerator {
         this.viewingModelB = viewingModelB;
 
         sensorA = ruggedA.getLineSensor(sensorNameA);
-        //sensorB = ruggedB.getLineSensor(sensorNameB);
+        sensorB = ruggedB.getLineSensor(sensorNameB);
         measureCount = 0;
 
     }
@@ -111,9 +112,11 @@ public class SensorToSensorMeasureGenerator {
      * 
      * @param lineSampling sampling along lines
      * @param pixelSampling sampling along columns
+     * @param err error tab [meanA,stdA,meanB,stdB]
+     * @param outlier outlier value 
      * @throws RuggedException
      */
-    public void CreateMeasure(final int lineSampling, final int pixelSampling, double[]err)
+    public void CreateMeasure(final int lineSampling, final int pixelSampling, double[]err, double outlier)
         throws RuggedException {
         // Search the sensor pixel seeing point
         final int minLine = 0;
@@ -151,13 +154,17 @@ public class SensorToSensorMeasureGenerator {
                 // prescribed lines otherwise the sensor pixel is null
                 if (sensorPixelB != null) {
                     //System.out.format("  %n");
-                    /*final AbsoluteDate dateB = sensorB
+                    final AbsoluteDate dateB = sensorB
                         .getDate(sensorPixelB.getLineNumber());
-                    double pixelB = sensorPixelB.getPixelNumber();*/
-
-                    // Get spacecraft to body transform of rugged instance A
-                    /*
+                    double pixelB = sensorPixelB.getPixelNumber();
                     final SpacecraftToObservedBody scToBodyA = ruggedA
+                                    .getScToBody();
+                   
+                    
+                    //System.out.format("%n distance %1.8e dist %f %n",distanceLOSB[0],distanceLOSB[1]);
+                    // Get spacecraft to body transform of rugged instance A
+                    
+                    /*final SpacecraftToObservedBody scToBodyA = ruggedA
                         .getScToBody();
                     final SpacecraftToObservedBody scToBodyB = ruggedB
                         .getScToBody();
@@ -167,35 +174,70 @@ public class SensorToSensorMeasureGenerator {
                                             sensorB, dateB, pixelB);
                     double distanceLOSA = ruggedA
                                     .distanceBetweenLOS(sensorB, dateB, pixelB, scToBodyB,
-                                                        sensorA, dateA, pixelA);
-                    */
+                                                        sensorA, dateA, pixelA);*/
+                    
                     //System.out.format("distance LOS %1.8e %1.8e %n",distanceLOSB,distanceLOSA);
                     
                     
-                    /*
+                    
                     GeodeticPoint gpB = ruggedB
                                     .directLocation(dateB, sensorB.getPosition(),
                                                     sensorB.getLOS(dateB, pixelB));
                     
                     double GEOdistance = DistanceTools.computeDistanceRad(gpA.getLongitude(), gpA.getLatitude(),
                                                                 gpB.getLongitude(), gpB.getLatitude());
-                    */
-                    //System.out.format("distance %1.8e meters %n",GEOdistance);
-                    final double distance = 0.0;
-                    
-                    //
-                    final double[] vecRandomA = rvgA.nextVector();
-                    final double[] vecRandomB = rvgB.nextVector();                    
-                    
-                    SensorPixel RealPixelA = new SensorPixel(line + vecRandomA[0], pixelA+ vecRandomA[1]);
-                    SensorPixel RealPixelB = new SensorPixel(sensorPixelB.getLineNumber() + vecRandomB[0], sensorPixelB.getPixelNumber()+ vecRandomB[1]);
-                    //System.out.format("pix A %f  %f Real %f %f %n", line, pixelA, RealPixelA.getLineNumber(), RealPixelA.getPixelNumber());
-                    //System.out.format("pix B %f  %f Real %f %f %n", sensorPixelB.getLineNumber(), sensorPixelB.getPixelNumber(), RealPixelB.getLineNumber(), RealPixelB.getPixelNumber());
-                    
-                    
-                    mapping.addMapping(RealPixelA,
-                                       RealPixelB, distance);
-                    measureCount++;
+
+                    if(GEOdistance < outlier)
+                    {
+                        /*System.out.format("A line %2.3f pixel %2.3f %n", line,
+                                          pixelA);*/
+
+                        Vector3D los = sensorA.getLOS(dateA, pixelA);
+                        /*System.out.format("A los %2.3f %2.3f %2.3f %n",
+                                          los.getX(), los.getY(), los.getZ());
+                        System.out.format("B line %2.3f pixel %2.3f %n",
+                                          sensorPixelB.getLineNumber(),
+                                          sensorPixelB.getPixelNumber());
+
+                        System.out.format("distance %1.8e meters %n",
+                                          GEOdistance);*/
+
+                        // System.out.format("A los %2.3f %2.3f %2.3f
+                        // %n",los.getX(),los.getY(),los.getZ());
+                        
+
+                        //
+                        final double[] vecRandomA = rvgA.nextVector();
+                        final double[] vecRandomB = rvgB.nextVector();
+
+                        SensorPixel RealPixelA = new SensorPixel(line +
+                                                                 vecRandomA[0],
+                                                                 pixelA + vecRandomA[1]);
+                        SensorPixel RealPixelB = new SensorPixel(sensorPixelB
+                            .getLineNumber() + vecRandomB[0], sensorPixelB
+                                .getPixelNumber() + vecRandomB[1]);
+                         /*System.out.format("pix A %f %f Real %f %f %n", line,
+                         pixelA, RealPixelA.getLineNumber(),
+                         RealPixelA.getPixelNumber());
+                         System.out.format("pix B %f %f Real %f %f %n",
+                         sensorPixelB.getLineNumber(),
+                         sensorPixelB.getPixelNumber(),
+                         RealPixelB.getLineNumber(),
+                        RealPixelB.getPixelNumber());*/
+                        AbsoluteDate RealDateA = sensorA.getDate(RealPixelA.getLineNumber());
+                        AbsoluteDate RealDateB = sensorB.getDate(RealPixelB.getLineNumber());
+                        double[] distanceLOSB = ruggedB
+                                        .distanceBetweenLOS(sensorA, RealDateA, RealPixelA.getPixelNumber(), scToBodyA,
+                                                            sensorB, RealDateB, RealPixelB.getPixelNumber());
+                        final Double[] distance = {0.0,distanceLOSB[1]};
+                        mapping.addMapping(RealPixelA, RealPixelB, distance);
+                        measureCount++;
+                    }
+                    else
+                    {
+                        /*System.out.format("A line %2.3f pixel %2.3f %n rejected ", line,
+                                          pixelA);*/
+                    }
                 } 
 
             }
