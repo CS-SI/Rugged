@@ -231,7 +231,7 @@ public class AffinageRuggedLiaison {
             System.out.format(" **** Add roll / pitch / factor values **** %n"); 
             double rollValueA =  FastMath.toRadians(0.004);//0.6
             double pitchValueA = FastMath.toRadians(0.0008);//0.02
-            double factorValue = 1.01;
+            double factorValue = 1.0;
             final String SensorNameAFactor = "factor";
             final String SensorNameBFactor = "factor";
             
@@ -265,7 +265,7 @@ public class AffinageRuggedLiaison {
             //System.out.format("distance double/int %f ",d);
             double rollValueB =  FastMath.toRadians(-0.004);//0.6
             double pitchValueB = FastMath.toRadians(0.0008);//0.02
-
+            //double pitchValueB = FastMath.toRadians(0.0);//0.02
                         
             System.out.format(" Acquisition B roll : %3.5f pitch : %3.5f factor : %3.5f \n",rollValueB,pitchValueB,factorValue);
                         
@@ -300,25 +300,28 @@ public class AffinageRuggedLiaison {
             
             //add mapping
             
-            final double[] pixErr = new double[4];
-            pixErr[0] = 0.0; // SensorA mean
-            pixErr[1] = 0.0; //  SensorA std
-            pixErr[2] = 0; // SensorB mean
-            pixErr[3] = 0.0; //SensorB std
+            double[] pixErr = new double[4];
+            pixErr[0] = 5.0;// SensorA mean
+            pixErr[1] = 0.1; //  SensorA std
+            pixErr[2] = 0.0; // SensorB mean
+            pixErr[3] = 0.1; //SensorB std
             System.out.format(" **** Generate Measures  **** %n");
             System.out.format(" **** Sensor A mean %f std %f   **** %n",pixErr[0],pixErr[1]);
             System.out.format(" **** Sensor B mean %f std %f   **** %n",pixErr[2],pixErr[3]);
             
             SensorToSensorMeasureGenerator measure = new SensorToSensorMeasureGenerator(pleiadesViewingModelA,ruggedA,pleiadesViewingModelB,ruggedB);
-            int lineSampling = 1000;
-            int pixelSampling = 1000;       
-            measure.CreateMeasure(lineSampling, pixelSampling,pixErr); 
+            final int lineSampling = 1000;
+            final int pixelSampling = 1000;       
+            
+            final double outlierValue = 1e+2;
+            measure.CreateMeasure(lineSampling, pixelSampling,pixErr,outlierValue); 
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
             
             SensorToSensorLocalisationMetrics gtResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
-            System.out.format("gt residuals max :  %3.4f mean %3.4f meters  %n",gtResiduals.getMaxResidual(),gtResiduals.getMeanResidual());
+            System.out.format("gt residuals max :  %1.4e mean %1.4e meters  %n",gtResiduals.getMaxResidual(),gtResiduals.getMeanResidual());
             System.out.format("gt los distance max :  %1.4e mean %1.4e meters  %n",gtResiduals.getLosMaxDistance(),gtResiduals.getLosMeanDistance());
-                   
+            System.out.format("gt earth distance max :  %1.4e mean %1.4e meters  %n",gtResiduals.getEarthMaxDistance(),gtResiduals.getEarthMeanDistance());
+                                           
             
             // initialize ruggedA without perturbation
             System.out.format(" **** Reset Roll/Pitch/Factor (ruggedA) **** %n");
@@ -355,7 +358,7 @@ public class AffinageRuggedLiaison {
             filter(driver -> driver.getName().equals(SensorNameAFactor)).
             forEach(driver -> {
                 try {
-                    driver.setSelected(true);
+                    driver.setSelected(false);
                     driver.setValue(1.0);       // default value: no Z scale factor applied
                 } catch (OrekitException e) {
                     throw new OrekitExceptionWrapper(e);
@@ -421,14 +424,14 @@ public class AffinageRuggedLiaison {
             getLineSensor(SensorNameB).
             getParametersDrivers().
             filter(driver -> driver.getName().equals(SensorNameBFactor)).
-            findFirst().get().setSelected(true);            
-            
+            findFirst().get().setSelected(false);            
+           
             
             SensorToSensorLocalisationMetrics initialResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
             System.out.format("initial residuals max :  %3.4f mean %3.4f meters  %n",initialResiduals.getMaxResidual(),initialResiduals.getMeanResidual());
             System.out.format("initial los distance max :  %1.4e mean %1.4e meters  %n",initialResiduals.getLosMaxDistance(),initialResiduals.getLosMeanDistance());
-             
-           
+            System.out.format("initial earth distance max :  %1.4e mean %1.4e meters  %n",initialResiduals.getEarthMaxDistance(),initialResiduals.getEarthMeanDistance());
+               
             
             System.out.format(" **** Start optimization  **** %n");
             // perform parameters estimation
@@ -438,8 +441,8 @@ public class AffinageRuggedLiaison {
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
             
             // Note: estimateFreeParams2Models() is supposed to be applying on ruggedB, not on ruggedA (to be compliant with notations)
-            // TODO: apply perturbations on ruggedB, not on ruggedA
-            Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(measure.getMapping()), maxIterations,convergenceThreshold, ruggedA);
+            
+            Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(measure.getMapping()), maxIterations,convergenceThreshold, ruggedA,0.1);
             System.out.format("max value  %3.6e %n",optimum.getResiduals().getMaxValue());
    
             System.out.format(" Optimization performed in %d iterations \n",optimum.getEvaluations());
@@ -497,9 +500,10 @@ public class AffinageRuggedLiaison {
             
             
             SensorToSensorLocalisationMetrics finalResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
-            System.out.format("final residuals max :  %3.4f mean %3.4f meters  %n",finalResiduals.getMaxResidual(),finalResiduals.getMeanResidual());
+            System.out.format("final residuals max :  %1.4e mean %1.4e meters  %n",finalResiduals.getMaxResidual(),finalResiduals.getMeanResidual());
             System.out.format("final los distance max :  %1.4e mean %1.4e meters %n",finalResiduals.getLosMaxDistance(),finalResiduals.getLosMeanDistance());
-             
+            System.out.format("final earth distance max :  %1.4e mean %1.4e meters  %n",finalResiduals.getEarthMaxDistance(),finalResiduals.getEarthMeanDistance());
+                         
                  
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());

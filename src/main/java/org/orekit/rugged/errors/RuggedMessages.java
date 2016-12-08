@@ -59,6 +59,7 @@ public enum RuggedMessages implements Localizable {
     UNINITIALIZED_CONTEXT("general context has not been initialized (missing call to {0})"),
     EMPTY_TILE("tile is empty: {0} ⨉ {1}"),
     UNKNOWN_SENSOR("unknown sensor {0}"),
+    UNKNOWN_PIXEL("unknown pixel in mapping {0}"),
     LINE_OF_SIGHT_DOES_NOT_REACH_GROUND("line-of-sight does not reach ground"),
     LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE("line-of-sight never crosses latitude {0}"),
     LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE("line-of-sight never crosses longitude {0}"),
