@@ -47,8 +47,11 @@ import org.orekit.bodies.GeodeticPoint;
 public class SensorToSensorLocalisationMetrics {
 
 	/** mapping */
+    private SensorToSensorMapping  mapping;
+    
 	private Set<Map.Entry<SensorPixel, SensorPixel>> groundTruthMappings;
-
+	
+	
 	
 	private Rugged ruggedA;
     private Rugged ruggedB;
@@ -69,7 +72,13 @@ public class SensorToSensorLocalisationMetrics {
     private double losMax;
 
     /* los distance mean*/
-    private double losMean;	
+    private double losMean;
+    
+    /* earth distance max */
+    private double earthDistanceMax;
+
+    /* earth distance mean*/
+    private double earthDistanceMean; 
 	
 	
 	/**
@@ -81,7 +90,9 @@ public class SensorToSensorLocalisationMetrics {
 	public SensorToSensorLocalisationMetrics(SensorToSensorMapping mapping, Rugged ruggedA, Rugged ruggedB , boolean computeInDeg)
 			throws RuggedException {
 
+	    this.mapping = mapping;
 		groundTruthMappings = mapping.getMappings();
+		
 		this.ruggedA = ruggedA;
         this.ruggedB = ruggedB;
         
@@ -111,7 +122,7 @@ public class SensorToSensorLocalisationMetrics {
 	}
 
     /**
-     * Get the maximum residual;
+     * Get the los maximum residual;
      * 
      * @return max residual
      */
@@ -120,14 +131,33 @@ public class SensorToSensorLocalisationMetrics {
     }
 
     /**
-     * Get the mean residual;
+     * Get the los mean residual;
      * 
      * @return mean residual
      */
     public double getLosMeanDistance() {
         return losMean;
     }
-	
+
+    /**
+     * Get the earth distance maximum residual;
+     * 
+     * @return max residual
+     */
+    public double getEarthMaxDistance() {
+        return earthDistanceMax;
+    }
+
+    /**
+     * Get the earth distance mean residual;
+     * 
+     * @return mean residual
+     */
+    public double getEarthMeanDistance() {
+        return earthDistanceMean;
+    }    
+    
+    
 	
 	
 	public void computeMetrics() throws RuggedException {
@@ -138,23 +168,33 @@ public class SensorToSensorLocalisationMetrics {
 
 		double count = 0;
 		double losCount = 0;
-		
+        double earthDistanceCount = 0;
+        
 		resMax = 0;
 		losMax = 0;
+		earthDistanceMax = 0;
+		
 		int k = groundTruthMappings.size();
 		Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = groundTruthMappings.iterator();
-
 		while (gtIt.hasNext()) {
 			Map.Entry<SensorPixel, SensorPixel> gtMapping = gtIt.next();
-
+			
+			
 			final SensorPixel spA = gtMapping.getKey();
 			final SensorPixel spB = gtMapping.getValue();
-
+			
+			Double [] gtDistance = mapping.getDistance(spA)
+			                ; 
 			AbsoluteDate dateA = sensorA.getDate(spA.getLineNumber());
             AbsoluteDate dateB = sensorB.getDate(spB.getLineNumber());
 
             final double pixelA = spA.getPixelNumber();
             final double pixelB = spB.getPixelNumber();
+            /*System.out.format(" %n");
+            System.out.format("pix A %f %f %n", spA.getLineNumber(),
+                              spA.getPixelNumber());
+            System.out.format("pix B %f %f %n", spB.getLineNumber(),
+                              spB.getPixelNumber());*/
             
             Vector3D losA = sensorA.getLOS(dateA, pixelA);
             Vector3D losB = sensorB.getLOS(dateB, pixelB);
@@ -168,14 +208,26 @@ public class SensorToSensorLocalisationMetrics {
             final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
           
             
-			double losDistance = ruggedB.distanceBetweenLOS(sensorA,dateA, pixelA, scToBodyA, sensorB ,dateB, pixelB);
+			double[] losDistance = ruggedB.distanceBetweenLOS(sensorA,dateA, pixelA, scToBodyA, sensorB ,dateB, pixelB);
 			
-			if (losDistance > losMax) {
-                losMax = losDistance;
+			//System.out.format("loc distance %1.8e dist %f %n",losDistance[0],losDistance[1]);
+			//System.out.format("gt dist  %1.8e d %f %n",gtDistance[0],gtDistance[1]);
+			if (losDistance[0] > losMax) {
+                losMax = losDistance[0];
 
             }
-            losCount += losDistance;
-			
+            losCount += losDistance[0];
+            final double earthDistance =  Math.abs(losDistance[1] - gtDistance[1]);
+            //System.out.format( "los Distance %3.6e %3.6e %n",losDistance[1] , gtDistance[1]);
+            if (earthDistance > earthDistanceMax) {
+                earthDistanceMax = earthDistance;
+
+            }
+            earthDistanceCount += earthDistance;
+                        
+            
+            
+            
 			if (this.computeInDeg == true) {
 				double lonDiff = gpB.getLongitude() - gpA.getLongitude();
 				double latDiff = gpB.getLatitude() - gpA.getLatitude();
@@ -201,6 +253,7 @@ public class SensorToSensorLocalisationMetrics {
 
 		resMean = count / k;
 		losMean = losCount / k;
+		earthDistanceMean = earthDistanceCount / k;
 		// System.out.format("number of points %d %n", k);
 	}
 
