@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ import org.hipparchus.linear.Array2DRowRealMatrix;
 import org.hipparchus.linear.ArrayRealVector;
 import org.hipparchus.linear.RealMatrix;
 import org.hipparchus.linear.RealVector;
+import org.hipparchus.linear.DiagonalMatrix;
 import org.hipparchus.optim.ConvergenceChecker;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresBuilder;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
@@ -727,7 +729,7 @@ public class Rugged {
      * @return distance computing
      * @exception RuggedException if sensor is unknown
      */
-    public double
+    public double[]
         distanceBetweenLOS(final LineSensor sensorA, final AbsoluteDate dateA,
                            final double pixelA,
                            final SpacecraftToObservedBody scToBodyA,
@@ -760,9 +762,9 @@ public class Rugged {
         final Vector3D vALocal = sensorA.getLOS(dateA, pixelA); // V_a : line of
                                                                 // sight's
                                                                 // vectorA
-        final Vector3D vBLocal = sensorB.getLOS(dateB, pixelB); // V_a : line of
+        final Vector3D vBLocal = sensorB.getLOS(dateB, pixelB); // V_b : line of
                                                                 // sight's
-                                                                // vectorA
+                                                                // vectorb
 
         // positions
         final Vector3D sALocal = sensorA.getPosition(); // S_a : sensorA 's
@@ -775,6 +777,26 @@ public class Rugged {
         final Vector3D sB = trasnformScToBodyB.transformPosition(sBLocal);
         final Vector3D vB = trasnformScToBodyB.transformVector(vBLocal);
 
+        final GeodeticPoint gpB = algorithm
+                        .refineIntersection(ellipsoid,sB, vB, algorithm
+                            .intersection(ellipsoid, sB, vB));
+        
+        
+        GeodeticPoint gpB2 = directLocation(dateB, sensorB.getPosition(),
+                                           sensorB.getLOS(dateB, pixelB));
+        /*double GEOdistance = DistanceTools.computeDistanceRad(gpB.getLongitude(), gpB.getLatitude(),
+                                                              gpB2.getLongitude(), gpB2.getLatitude());
+        
+        System.out.format("GEO dist %1.6e %n",GEOdistance);
+        System.out.format(Locale.US, "%n geodetic position  B: φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
+                          FastMath.toDegrees(gpB.getLatitude()),
+                          FastMath.toDegrees(gpB.getLongitude()),gpB.getAltitude());      
+        
+        System.out.format(Locale.US, "geodetic position B2 : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n%n",
+                          FastMath.toDegrees(gpB2.getLatitude()),
+                          FastMath.toDegrees(gpB2.getLongitude()),gpB2.getAltitude());  */   
+        
+        
         final Vector3D vBase = sB.subtract(sA); // S_b - S_a
         final double svA = Vector3D.dotProduct(vBase, vA); // SV_a = (S_b -
                                                            // S_a).V_a
@@ -784,11 +806,12 @@ public class Rugged {
         final double vAvB = Vector3D.dotProduct(vA, vB); // V_a.V_b
 
         // Test using |SaSb,Va,Vb |/||Va^Vb||
-        // final Vector3D w = Vector3D.crossProduct(vA, vB);
-        // final Vector3D vect = Vector3D.crossProduct(vBase,vA);
-        // final double k = Vector3D.dotProduct(vect, vB);
-        // final double dist = Math.abs(k) /w.getNorm();
-
+        //final Vector3D w = Vector3D.crossProduct(vA, vB);
+        //final Vector3D vect = Vector3D.crossProduct(vBase,vA);
+        //final double k = Vector3D.dotProduct(vect, vB);
+        //final double dist = Math.abs(k) /w.getNorm();
+        //System.out.format("dist  %f %n",dist);
+        
         // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 - (V_a.V_b)²)
         final double lambdaB = (svA * vAvB - svB) / (1 - vAvB * vAvB);
 
@@ -803,6 +826,12 @@ public class Rugged {
                                                                 // V_b
 
         final Vector3D vDistance = mB.subtract(mA); // M_b - M_a
+        
+        final Vector3D midPoint = (mB.add(mA)).scalarMultiply(0.5);
+        //System.out.format("mid Point x %f y %f z  %f %n",midPoint.getX(),midPoint.getY(),midPoint.getZ());
+        //System.out.format("mid Point Norm %f  %n",midPoint.getNorm());
+        
+        
         // System.out.format("vDistance %f %f %f
         // ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
 
@@ -812,7 +841,7 @@ public class Rugged {
         // final double equB = Vector3D.dotProduct(mAmB, vB);
 
         // Get the euclidean norm
-        final double d = vDistance.getNorm();
+        final double[] d = {vDistance.getNorm(),midPoint.getNorm()};
         return d;
     }
 
@@ -946,10 +975,26 @@ public class Rugged {
                                                                               // M_a
 
         // Get the euclidean norm
+        
+        final FieldVector3D<DerivativeStructure> midPoint = (mB.add(mA)).scalarMultiply(0.5);
+        //System.out.format("mid Point x %f y %f z  %f %n",midPoint.getX(),midPoint.getY(),midPoint.getZ());
+        //System.out.format("mid Point Norm %f  %n",midPoint.getNorm());
+        
+        
+        // System.out.format("vDistance %f %f %f
+        // ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
+
+        // equA and equB should be 0
+        // final Vector3D mAmB= mB.subtract(mA);
+        // final double equA = Vector3D.dotProduct(mAmB, vA);
+        // final double equB = Vector3D.dotProduct(mAmB, vB);
+
+        // Get the euclidean norm
+        final DerivativeStructure dEarth = midPoint.getNorm();
         final DerivativeStructure d = vDistance.getNorm();
-        return new DerivativeStructure[] {
-                                           d
-        };
+        
+        
+        return new DerivativeStructure[] {d, dEarth};
     }
 
     /**
@@ -963,6 +1008,9 @@ public class Rugged {
      * @param parametersConvergenceThreshold convergence threshold on normalized
      *        parameters (dimensionless, related to parameters scales)
      * @param ruggedA rugged instance from viewing model A
+     * @param earthConstraintWeight weight for earthconstraintWeight (between 0 and 1). Weighting is applied as follow :
+     *          (1-earthConstraintWeight) for losDistance weighting
+     *          earthConstraintWeight for earthDistance weighting
      * @return optimum of the least squares problem
      * @exception RuggedException if several parameters with the same name
      *            exist, if no parameters have been selected for estimation, or
@@ -973,7 +1021,7 @@ public class Rugged {
                                              final Collection<SensorToSensorMapping> references,
                                              final int maxEvaluations,
                                              final double parametersConvergenceThreshold,
-                                             Rugged ruggedA)
+                                             Rugged ruggedA,final double earthConstraintWeight)
         throws RuggedException {
         try {
 
@@ -1013,13 +1061,23 @@ public class Rugged {
             if (n == 0) {
                 throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
             }
+            
+                n = 2*n;
+
+                
             final double[] target = new double[n];
+            final double[] weight = new double[n];
             int k = 0;
             for (final SensorToSensorMapping reference : references) {
-                for (final Double distMeas : reference.getMapDistance()) {
-                    target[k++] = distMeas.doubleValue(); // distances
-                                                          // measurements
-                }
+                for (final Map.Entry<SensorPixel, SensorPixel> mapping : reference.getMappings()) {
+                    final SensorPixel spA = mapping.getKey();
+                    Double [] distMeas  = reference.getDistance(spA);
+                    weight[k] = 1.0 - earthConstraintWeight;
+                    target[k++] = distMeas[0].doubleValue(); // LOS distance
+                    weight[k] = earthConstraintWeight;
+                    target[k++] = distMeas[1].doubleValue(); // Earth distance
+                    }                                    
+                
             }
 
             // prevent parameters to exceed their prescribed bounds
@@ -1053,7 +1111,6 @@ public class Rugged {
                     int i = 0;
                     for (final ParameterDriver driver : selected.getDrivers()) {
                         driver.setNormalizedValue(point.getEntry(i++));
-                        // TODO: to be confirmed with the remark done above.
                     }
 
                     // compute distance and its partial derivatives
@@ -1094,7 +1151,7 @@ public class Rugged {
                             } else {
                                 // extract the value
                                 value.setEntry(l, ilResult[0].getValue());
-
+                                value.setEntry(l + 1, ilResult[1].getValue());
                                 // extract the Jacobian
                                 final int[] orders = new int[selected
                                     .getNbParams()];
@@ -1107,12 +1164,17 @@ public class Rugged {
                                                       ilResult[0]
                                                           .getPartialDerivative(orders) *
                                                             scale);
+
+                                    jacobian.setEntry(l + 1, m,
+                                                      ilResult[1]
+                                                          .getPartialDerivative(orders) *
+                                                                scale);
+
                                     orders[m] = 0;
                                     m++;
                                 }
                             }
-
-                            l += 1; // pass to the next evaluation
+                                l += 2; // pass to the next evaluation
 
                         }
                     }
@@ -1130,12 +1192,12 @@ public class Rugged {
             // set up the least squares problem
             final LeastSquaresProblem problem = new LeastSquaresBuilder()
                 .lazyEvaluation(false).maxIterations(maxEvaluations)
-                .maxEvaluations(maxEvaluations).weight(null).start(start)
+                .maxEvaluations(maxEvaluations).weight(new DiagonalMatrix(weight)).start(start)
                 .target(target).parameterValidator(validator).checker(checker)
                 .model(model).build();
 
             // set up the optimizer
-            // final LeastSquaresOptimizer optimizer = new
+            //final LeastSquaresOptimizer optimizer = new
             // LevenbergMarquardtOptimizer();
             final LeastSquaresOptimizer optimizer = new GaussNewtonOptimizer()
                 .withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
