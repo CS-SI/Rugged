@@ -83,7 +83,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         model = new MultiLayerModel(earth, refractionLayers);
         correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
         distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
-        Assert.assertEquals(0.0, distance, 1.0e-20);
+        Assert.assertEquals(0.0, distance, 1.7e-9);
 
     }
 
@@ -220,7 +220,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
                                                                                                           1.5)));
         NormalizedGeodeticPoint correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
         double distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
-        Assert.assertEquals(0.0, distance, 1.0e-20);
+        Assert.assertEquals(0.0, distance, 1.3e-9);
 
     }
 

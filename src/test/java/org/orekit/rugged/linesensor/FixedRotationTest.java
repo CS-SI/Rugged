@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.UnivariateMatrixFunction;
+import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableMatrixFunction;
@@ -159,6 +160,7 @@ public class FixedRotationTest {
             for (final ParameterDriver driver : selected) {
                 driver.setSelected(true);
             }
+            final DSFactory factoryS = new DSFactory(selected.size(), 1);
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
@@ -170,7 +172,7 @@ public class FixedRotationTest {
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure constant(final double value) {
-                    return new DerivativeStructure(selected.size(), 1, value);
+                    return factoryS.constant(value);
                 }
 
                 /** {@inheritDoc} */
@@ -179,7 +181,7 @@ public class FixedRotationTest {
                     int index = 0;
                     for (ParameterDriver d : getSelected()) {
                         if (d == driver) {
-                            return new DerivativeStructure(getSelected().size(), 1, index, driver.getValue());
+                            return factoryS.variable(index, driver.getValue());
                         }
                         ++index;
                     }
@@ -192,6 +194,7 @@ public class FixedRotationTest {
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.001);
             int index = 0;
+            DSFactory factory11 = new DSFactory(1, 1);
             for (final ParameterDriver driver : selected) {
                 int[] orders = new int[selected.size()];
                 orders[index] = 1;
@@ -210,7 +213,7 @@ public class FixedRotationTest {
                                         throw new OrekitExceptionWrapper(oe);
                                     }
                                 });
-                DerivativeStructure[][] mDS = f.value(new DerivativeStructure(1, 1, 0, driver.getValue()));
+                DerivativeStructure[][] mDS = f.value(factory11.variable(0, driver.getValue()));
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, AbsoluteDate.J2000_EPOCH);
                     FieldVector3D<DerivativeStructure> losDS =

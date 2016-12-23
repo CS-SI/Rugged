@@ -86,7 +86,7 @@ public class SpacecraftToObservedBodyTest {
         
         try {
         
-    	SpacecraftToObservedBody sToOb = new SpacecraftToObservedBody(FramesFactory.getEME2000(), earth.getBodyFrame(),
+    	new SpacecraftToObservedBody(FramesFactory.getEME2000(), earth.getBodyFrame(),
                 minSensorDate, maxSensorDate, 0.01,
                 5.0,
                 pvList,

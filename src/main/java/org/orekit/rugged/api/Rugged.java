@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -961,6 +962,8 @@ public class Rugged {
                     });
         }
 
+        final DSFactory factory = new DSFactory(map.size(), 1);
+
         return new DSGenerator() {
 
             /** {@inheritDoc} */
@@ -972,7 +975,7 @@ public class Rugged {
             /** {@inheritDoc} */
             @Override
             public DerivativeStructure constant(final double value) {
-                return new DerivativeStructure(map.size(), 1, value);
+                return factory.constant(value);
             }
 
             /** {@inheritDoc} */
@@ -982,7 +985,7 @@ public class Rugged {
                 if (index == null) {
                     return constant(driver.getValue());
                 } else {
-                    return new DerivativeStructure(map.size(), 1, index.intValue(), driver.getValue());
+                    return factory.variable(index.intValue(), driver.getValue());
                 }
             }
 

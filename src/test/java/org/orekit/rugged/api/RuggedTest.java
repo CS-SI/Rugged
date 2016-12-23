@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableFunction;
@@ -1065,7 +1066,7 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, true,
-                                         3.0e-10, 3.0e-10, 2.0e-12, 7.0e-8);
+                                         4.2e-10, 3.0e-10, 3.4e-12, 7.0e-8);
     }
 
     @Test
@@ -1167,6 +1168,7 @@ public class RuggedTest {
             Assert.assertEquals(1, result[0].getOrder());
 
             // check the partial derivatives
+            DSFactory factory = new DSFactory(1, 1);
             double h = 1.0e-6;
             FiniteDifferencesDifferentiator differentiator = new FiniteDifferencesDifferentiator(8, h);
 
@@ -1182,7 +1184,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dLdR = lineVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dLdR = lineVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdR, result[0].getPartialDerivative(1, 0), dLdR * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction lineVSpitch =
@@ -1197,7 +1199,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dLdP = lineVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dLdP = lineVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdP, result[0].getPartialDerivative(0, 1), dLdP * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSroll =
@@ -1212,7 +1214,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dXdR = pixelVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dXdR = pixelVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdR, result[1].getPartialDerivative(1, 0), dXdR * pixelDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSpitch =
@@ -1227,7 +1229,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dXdP = pixelVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dXdP = pixelVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
 
         } catch (InvocationTargetException | NoSuchMethodException |
