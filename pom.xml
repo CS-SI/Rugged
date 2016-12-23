@@ -38,8 +38,8 @@
     <rugged.maven-resources-plugin.version>3.0.1</rugged.maven-resources-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.10</rugged.jgit.buildnumber.version>
     <rugged.plantuml.version>7999</rugged.plantuml.version>
-    <rugged.orekit.version>8.0</rugged.orekit.version>
-    <rugged.hipparchus.version>1.0</rugged.hipparchus.version>
+    <rugged.orekit.version>9.0-SNAPSHOT</rugged.orekit.version>
+    <rugged.hipparchus.version>1.1-SNAPSHOT</rugged.hipparchus.version>
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
