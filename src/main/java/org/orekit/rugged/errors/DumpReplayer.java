@@ -1010,8 +1010,7 @@ public class DumpReplayer {
          * @param global global parser to store parsed data
          * @exception RuggedException if line cannot be parsed
          */
-        public abstract void parse(final int l, final File file, final String line, final String[] fields,
-                                   final DumpReplayer global)
+        public abstract void parse(int l, File file, String line, String[] fields, DumpReplayer global)
             throws RuggedException;
 
     }
