@@ -20,6 +20,7 @@ import org.hipparchus.util.FastMath;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -164,7 +165,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 }
                 final TimeStampedAngularCoordinates interpolatedQuaternion =
                         TimeStampedAngularCoordinates.interpolate(aInterpolationDate, aFilter,
-                                                                  aCache.getNeighbors(aInterpolationDate));
+                                                                  aCache.getNeighbors(aInterpolationDate).collect(Collectors.toList()));
                 final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 
                 // store transform from spacecraft frame to inertial frame
