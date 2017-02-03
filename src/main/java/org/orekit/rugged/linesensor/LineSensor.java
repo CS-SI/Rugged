@@ -28,7 +28,6 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
-import org.s2geolib.exception.S2GeolibException;
 
 /** Line sensor model.
  * @author Luc Maisonobe
@@ -110,11 +109,11 @@ public class LineSensor {
 
         final int iInf = FastMath.max(0, FastMath.min(getNbPixels() - 2, (int) FastMath.floor(i)));
         final int iSup = iInf + 1;
-        final Vector3D interpolatedLos     = new Vector3D(iSup - i,los.getLOS(iInf, date),
-                                                  i - iInf, los.getLOS(iSup, date)); 
+        final Vector3D interpolatedLos     = new Vector3D(iSup - i, los.getLOS(iInf, date),
+                                                  i - iInf, los.getLOS(iSup, date));
         return interpolatedLos;
     }
-    
+
     /** Get the pixel normalized line-of-sight at some date,
      * and their derivatives with respect to estimated parameters.
      * @param date current date
@@ -126,8 +125,7 @@ public class LineSensor {
                                                                 final DSGenerator generator) {
         return los.getLOSDerivatives(i, date, generator);
     }
-    
-    
+
     /** Get the pixel normalized line-of-sight at some date,
      * and their derivatives with respect to estimated parameters.
      * @param date current date
@@ -137,16 +135,16 @@ public class LineSensor {
      */
     public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final double i,
                                                                 final DSGenerator generator) {
-        
+
         // find surrounding pixels of pixelB (in order to interpolate LOS from pixelB (that is not an integer)
         final int iInf = FastMath.max(0, FastMath.min(getNbPixels() - 2, (int) FastMath.floor(i)));
         final int iSup = iInf + 1;
-     
-        FieldVector3D<DerivativeStructure> interpolatedLos     = new FieldVector3D<DerivativeStructure> ( 
-                                                                    iSup - i, 
+
+        final FieldVector3D<DerivativeStructure> interpolatedLos = new FieldVector3D<DerivativeStructure> (
+                                                                    iSup - i,
                                                                     los.getLOSDerivatives(iInf, date, generator),
-                                                                    i - iInf, 
-                                                                    los.getLOSDerivatives(iSup, date, generator)).normalize();       
+                                                                    i - iInf,
+                                                                    los.getLOSDerivatives(iSup, date, generator)).normalize();
         return interpolatedLos;
     }
 
