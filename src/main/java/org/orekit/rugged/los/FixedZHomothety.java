@@ -93,7 +93,7 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
         	// lazy evaluation of the homothety
             factor = factorDriver.getValue();
         }
-    	return new Vector3D(los.getX(), los.getY(), factor*los.getZ());
+    	return new Vector3D(los.getX(), los.getY(), factor * los.getZ());
     }
 
     /** {@inheritDoc} */

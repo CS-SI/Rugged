@@ -1061,23 +1061,21 @@ public class Rugged {
             if (n == 0) {
                 throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
             }
-            
-                n = 2*n;
 
-                
+                n = 2 * n;
+
             final double[] target = new double[n];
             final double[] weight = new double[n];
             int k = 0;
             for (final SensorToSensorMapping reference : references) {
                 for (final Map.Entry<SensorPixel, SensorPixel> mapping : reference.getMappings()) {
                     final SensorPixel spA = mapping.getKey();
-                    Double [] distMeas  = reference.getDistance(spA);
+                    Double[] distMeas  = reference.getDistance(spA);
                     weight[k] = 1.0 - earthConstraintWeight;
                     target[k++] = distMeas[0].doubleValue(); // LOS distance
                     weight[k] = earthConstraintWeight;
                     target[k++] = distMeas[1].doubleValue(); // Earth distance
-                    }                                    
-                
+                    }
             }
 
             // prevent parameters to exceed their prescribed bounds

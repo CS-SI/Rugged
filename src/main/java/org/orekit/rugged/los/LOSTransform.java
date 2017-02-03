@@ -25,7 +25,7 @@ import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
-/** Interface for lines-of-sight tranforms.
+/** Interface for lines-of-sight transforms.
  * @author Luc Maisonobe
  * @see LOSBuilder
  */
