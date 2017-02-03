@@ -230,6 +230,8 @@ public class SensorToSensorMeasureGenerator {
                                         .distanceBetweenLOS(sensorA, RealDateA, RealPixelA.getPixelNumber(), scToBodyA,
                                                             sensorB, RealDateB, RealPixelB.getPixelNumber());
                         final Double[] distance = {0.0,distanceLOSB[1]};
+                        //final Double[] distance = {0.0, 6.36807530e+06};
+                        //final Double[] distance = {0.0, 6.36807532e+06};
                         mapping.addMapping(RealPixelA, RealPixelB, distance);
                         measureCount++;
                     }
