@@ -18,7 +18,9 @@ package org.orekit.rugged.linesensor;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.UnivariateMatrixFunction;
@@ -45,6 +47,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.ParameterDriversList;
 
 public class FixedRotationTest {
 
@@ -155,45 +158,50 @@ public class FixedRotationTest {
                                                    new Vector3D(rvg.nextVector()),
                                                    2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
             TimeDependentLOS tdl = builder.build();
-            final List<ParameterDriver> selected = tdl.getParametersDrivers().collect(Collectors.toList());
-            for (final ParameterDriver driver : selected) {
+            final ParameterDriversList selected = new ParameterDriversList();
+            final List<ParameterDriver> list = tdl.getParametersDrivers().collect(Collectors.toList());
+            for (final ParameterDriver driver : list) {
                 driver.setSelected(true);
+                selected.add(driver);
             }
+            
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
                 @Override
-                public List<ParameterDriver> getSelected() {
-                    return selected;
+               public ParameterDriversList getSelected() {
+                      return selected;
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure constant(final double value) {
-                    return new DerivativeStructure(selected.size(), 1, value);
+                    return new DerivativeStructure(selected.getNbParams(), 1, value);
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure variable(final ParameterDriver driver) {
                     int index = 0;
-                    for (ParameterDriver d : getSelected()) {
-                        if (d == driver) {
-                            return new DerivativeStructure(getSelected().size(), 1, index, driver.getValue());
+                    for (ParameterDriver d : getSelected().getDrivers()) {
+                        if (d.getName().equals(driver.getName())) {
+                            return new DerivativeStructure(getSelected().getNbParams(), 1, index, driver.getValue());
                         }
                         ++index;
                     }
                     return constant(driver.getValue());
+                    
                 }
 
             };
-            Assert.assertEquals(3, generator.getSelected().size());
+            Assert.assertEquals(3, generator.getSelected().getNbParams());
+           
 
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.001);
             int index = 0;
-            for (final ParameterDriver driver : selected) {
-                int[] orders = new int[selected.size()];
+            for (final ParameterDriver driver : selected.getDrivers()) {
+                int[] orders = new int[selected.getNbParams()];
                 orders[index] = 1;
                 UnivariateDifferentiableMatrixFunction f =
                                 differentiator.differentiate((UnivariateMatrixFunction) x -> {
@@ -218,6 +226,7 @@ public class FixedRotationTest {
                     Assert.assertEquals(los.getX(), losDS.getX().getValue(), 2.0e-15);
                     Assert.assertEquals(los.getY(), losDS.getY().getValue(), 2.0e-15);
                     Assert.assertEquals(los.getZ(), losDS.getZ().getValue(), 2.0e-15);
+                    //System.out.format("derivate %f", losDS.getX().getPartialDerivative(orders));
                     Assert.assertEquals(mDS[i][0].getPartialDerivative(1), losDS.getX().getPartialDerivative(orders), 2.0e-12);
                     Assert.assertEquals(mDS[i][1].getPartialDerivative(1), losDS.getY().getPartialDerivative(orders), 2.0e-12);
                     Assert.assertEquals(mDS[i][2].getPartialDerivative(1), losDS.getZ().getPartialDerivative(orders), 2.0e-12);

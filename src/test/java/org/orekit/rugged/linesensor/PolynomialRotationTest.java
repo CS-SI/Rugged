@@ -46,6 +46,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.ParameterDriversList;
 
 public class PolynomialRotationTest {
 
@@ -171,46 +172,50 @@ public class PolynomialRotationTest {
                                                    2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
                                                    1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
             TimeDependentLOS tdl = builder.build();
-            final List<ParameterDriver> selected = tdl.getParametersDrivers().collect(Collectors.toList());
-            for (final ParameterDriver driver : selected) {
+            final ParameterDriversList selected = new ParameterDriversList();
+            final List<ParameterDriver> list = tdl.getParametersDrivers().collect(Collectors.toList());
+            for (final ParameterDriver driver : list) {
                 driver.setSelected(true);
+                selected.add(driver);
             }
+            
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
                 @Override
-                public List<ParameterDriver> getSelected() {
+                public ParameterDriversList getSelected() {
                     return selected;
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure constant(final double value) {
-                    return new DerivativeStructure(selected.size(), 1, value);
+                    return new DerivativeStructure(selected.getNbParams(), 1, value);
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure variable(final ParameterDriver driver) {
                     int index = 0;
-                    for (ParameterDriver d : getSelected()) {
-                        if (d == driver) {
-                            return new DerivativeStructure(getSelected().size(), 1, index, driver.getValue());
+                    for (ParameterDriver d : getSelected().getDrivers()) {
+                        if (d.getName().equals(driver.getName())) {
+                            return new DerivativeStructure(getSelected().getNbParams(), 1, index, driver.getValue());
                         }
                         ++index;
                     }
                     return constant(driver.getValue());
+                    
                 }
 
             };
-            Assert.assertEquals(7, generator.getSelected().size());
+            Assert.assertEquals(7, generator.getSelected().getNbParams());
 
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.0001);
             int index = 0;
             final AbsoluteDate date = AbsoluteDate.J2000_EPOCH.shiftedBy(7.0);
-            for (final ParameterDriver driver : selected) {
-                int[] orders = new int[selected.size()];
+            for (final ParameterDriver driver : selected.getDrivers()) {
+                int[] orders = new int[selected.getNbParams()];
                 orders[index] = 1;
                 UnivariateDifferentiableMatrixFunction f =
                                 differentiator.differentiate((UnivariateMatrixFunction) x -> {
