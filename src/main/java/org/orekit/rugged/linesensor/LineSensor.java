@@ -28,7 +28,6 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
-import org.s2geolib.exception.S2GeolibException;
 
 /** Line sensor model.
  * @author Luc Maisonobe

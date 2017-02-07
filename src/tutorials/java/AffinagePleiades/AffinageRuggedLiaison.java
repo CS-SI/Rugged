@@ -43,7 +43,11 @@ import org.orekit.rugged.api.RuggedBuilder;
 
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
-
+import org.orekit.rugged.refining.generators.InterMeasureGenerator;
+import org.orekit.rugged.refining.measures.Noise;
+import org.orekit.rugged.refining.metrics.SensorToSensorLocalisationMetrics;
+import org.orekit.rugged.refining.models.OrbitModel;
+import org.orekit.rugged.refining.models.PleiadesViewingModel;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
@@ -299,25 +303,31 @@ public class AffinageRuggedLiaison {
             */
             
             //add mapping
-            
-            double[] pixErr = new double[4];
-            pixErr[0] = 5.0;// SensorA mean
-            pixErr[1] = 0.1; //  SensorA std
-            pixErr[2] = 0.0; // SensorB mean
-            pixErr[3] = 0.1; //SensorB std
+            final Noise noise = new Noise(0,2); /* distribution: gaussian(0), vector dimension:3 */
+            final double[] mean = {5.0,0.0}; // {pixelA mean, pixelB mean}
+            final double[] standardDeviation = {0.1,0.1};  // {pixelB std, pixelB std}
+            noise.setMean(mean);
+            noise.setStandardDeviation(standardDeviation);
+
             System.out.format(" **** Generate Measures  **** %n");
-            System.out.format(" **** Sensor A mean %f std %f   **** %n",pixErr[0],pixErr[1]);
-            System.out.format(" **** Sensor B mean %f std %f   **** %n",pixErr[2],pixErr[3]);
-            
-            SensorToSensorMeasureGenerator measure = new SensorToSensorMeasureGenerator(pleiadesViewingModelA,ruggedA,pleiadesViewingModelB,ruggedB);
-            final int lineSampling = 1000;
-            final int pixelSampling = 1000;       
+            System.out.format(" **** Sensor A mean %f std %f   **** %n",mean[0],standardDeviation[0]);
+            System.out.format(" **** Sensor B mean %f std %f   **** %n",mean[1],standardDeviation[1]);
             
             final double outlierValue = 1e+2;
-            measure.CreateMeasure(lineSampling, pixelSampling,pixErr,outlierValue); 
+            final double earthConstraintWeight = 0.1;
+
+            InterMeasureGenerator measure = new InterMeasureGenerator(pleiadesViewingModelA,ruggedA,
+                                                                      pleiadesViewingModelB,ruggedB,
+                                                                      outlierValue,
+                                                                      earthConstraintWeight);
+            final int lineSampling = 1000;
+            final int pixelSampling = 1000;  
+
+            
+            measure.createNoisyMeasure(lineSampling, pixelSampling,noise); 
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
             
-            SensorToSensorLocalisationMetrics gtResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
+            SensorToSensorLocalisationMetrics gtResiduals = new SensorToSensorLocalisationMetrics(measure.getInterMapping(),ruggedA,ruggedB, false);
             System.out.format("gt residuals max :  %1.4e mean %1.4e meters  %n",gtResiduals.getMaxResidual(),gtResiduals.getMeanResidual());
             System.out.format("gt los distance max :  %1.4e mean %1.4e meters  %n",gtResiduals.getLosMaxDistance(),gtResiduals.getLosMeanDistance());
             System.out.format("gt earth distance max :  %1.4e mean %1.4e meters  %n",gtResiduals.getEarthMaxDistance(),gtResiduals.getEarthMeanDistance());
@@ -427,7 +437,7 @@ public class AffinageRuggedLiaison {
             findFirst().get().setSelected(false);            
            
             
-            SensorToSensorLocalisationMetrics initialResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
+            SensorToSensorLocalisationMetrics initialResiduals = new SensorToSensorLocalisationMetrics(measure.getInterMapping(),ruggedA,ruggedB, false);
             System.out.format("initial residuals max :  %3.4f mean %3.4f meters  %n",initialResiduals.getMaxResidual(),initialResiduals.getMeanResidual());
             System.out.format("initial los distance max :  %1.4e mean %1.4e meters  %n",initialResiduals.getLosMaxDistance(),initialResiduals.getLosMeanDistance());
             System.out.format("initial earth distance max :  %1.4e mean %1.4e meters  %n",initialResiduals.getEarthMaxDistance(),initialResiduals.getEarthMeanDistance());
@@ -442,7 +452,7 @@ public class AffinageRuggedLiaison {
             
             // Note: estimateFreeParams2Models() is supposed to be applying on ruggedB, not on ruggedA (to be compliant with notations)
             
-            Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(measure.getMapping()), maxIterations,convergenceThreshold, ruggedA,0.1);
+            Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(measure.getInterMapping()), maxIterations,convergenceThreshold, ruggedA);
             System.out.format("max value  %3.6e %n",optimum.getResiduals().getMaxValue());
    
             System.out.format(" Optimization performed in %d iterations \n",optimum.getEvaluations());
@@ -499,7 +509,7 @@ public class AffinageRuggedLiaison {
             
             
             
-            SensorToSensorLocalisationMetrics finalResiduals = new SensorToSensorLocalisationMetrics(measure.getMapping(),ruggedA,ruggedB, false);
+            SensorToSensorLocalisationMetrics finalResiduals = new SensorToSensorLocalisationMetrics(measure.getInterMapping(),ruggedA,ruggedB, false);
             System.out.format("final residuals max :  %1.4e mean %1.4e meters  %n",finalResiduals.getMaxResidual(),finalResiduals.getMeanResidual());
             System.out.format("final los distance max :  %1.4e mean %1.4e meters %n",finalResiduals.getLosMaxDistance(),finalResiduals.getLosMeanDistance());
             System.out.format("final earth distance max :  %1.4e mean %1.4e meters  %n",finalResiduals.getEarthMaxDistance(),finalResiduals.getEarthMeanDistance());

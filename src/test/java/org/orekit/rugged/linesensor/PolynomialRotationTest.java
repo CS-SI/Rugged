@@ -18,7 +18,9 @@ package org.orekit.rugged.linesensor;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.UnivariateMatrixFunction;
@@ -46,6 +48,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.ParameterDriversList;
 
 public class PolynomialRotationTest {
 
@@ -171,39 +174,59 @@ public class PolynomialRotationTest {
                                                    2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
                                                    1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
             TimeDependentLOS tdl = builder.build();
+            final ParameterDriversList list = new ParameterDriversList();//TBC
             final List<ParameterDriver> selected = tdl.getParametersDrivers().collect(Collectors.toList());
+            final Map<String, Integer> map = new HashMap<>();//TBC
             for (final ParameterDriver driver : selected) {
                 driver.setSelected(true);
+                if (map.get(driver.getName()) == null) {//TBC
+                    map.put(driver.getName(), map.size());//TBC
+                }//TBC
+                list.add(driver);//TBC
             }
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
                 @Override
-                public List<ParameterDriver> getSelected() {
-                    return selected;
-                }
+//              public List<ParameterDriver> getSelected() { 
+             public ParameterDriversList getSelected() {
+                    return list;//TBC
+//                  return selected;
+              }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure constant(final double value) {
-                    return new DerivativeStructure(selected.size(), 1, value);
+//                  return new DerivativeStructure(selected.size(), 1, value);
+                  return new DerivativeStructure(map.size(), 1, value);//TBC
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure variable(final ParameterDriver driver) {
-                    int index = 0;
-                    for (ParameterDriver d : getSelected()) {
-                        if (d == driver) {
-                            return new DerivativeStructure(getSelected().size(), 1, index, driver.getValue());
-                        }
-                        ++index;
+//                    int index = 0;
+//                    for (ParameterDriver d : getSelected()) {
+//                        if (d == driver) {
+//                            return new DerivativeStructure(getSelected().size(), 1, index, driver.getValue());
+//                        }
+//                        ++index;
+//                    }
+//                    return constant(driver.getValue());
+                    final Integer index = map.get(driver.getName());
+                    if (index == null) {
+                        return constant(driver.getValue());
+                    } else {
+                        return new DerivativeStructure(map.size(), 1,
+                                                       index.intValue(),
+                                                       driver.getValue());
                     }
-                    return constant(driver.getValue());
+
                 }
 
             };
-            Assert.assertEquals(7, generator.getSelected().size());
+//            Assert.assertEquals(7, generator.getSelected().size());
+            Assert.assertEquals(7, map.size());//TBC
+
 
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.0001);

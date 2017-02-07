@@ -14,32 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package AffinagePleiades;
+package org.orekit.rugged.refining.generators;
 
-
-import org.orekit.rugged.api.SensorToGroundMapping;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.Rugged;
+import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.refining.measures.Noise;
+import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.refining.metrics.DistanceTools;
+import org.orekit.rugged.refining.models.PleiadesViewingModel;
+
 import org.orekit.time.AbsoluteDate;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
-import org.orekit.bodies.GeodeticPoint;
 
 
 
-/** class for measure generation
+/** Ground measures generator (sensor to ground mapping)
  * @author Jonathan Guinet
+ * @autor Lucie Labat-Allee
  */
-public class MeasureGenerator {
+public class GroundMeasureGenerator implements Measurable {
 
 
     /** mapping */
-    private SensorToGroundMapping mapping;
+    private SensorToGroundMapping groundMapping;
 
     private Rugged rugged;
     
@@ -56,28 +61,28 @@ public class MeasureGenerator {
      *
      * </p>
      */
-    public MeasureGenerator(PleiadesViewingModel viewingModel, Rugged rugged) throws RuggedException
+    public GroundMeasureGenerator(PleiadesViewingModel viewingModel, Rugged rugged) throws RuggedException
     {
 	
     // generate reference mapping
     String sensorName = viewingModel.getSensorName();	
-    mapping = new SensorToGroundMapping(sensorName);
+    groundMapping = new SensorToGroundMapping(sensorName);
     this.rugged = rugged;
     this.viewingModel = viewingModel;
-    sensor = rugged.getLineSensor(mapping.getSensorName());
+    sensor = rugged.getLineSensor(groundMapping.getSensorName());
     measureCount = 0;
     
     }
     
-    public SensorToGroundMapping getMapping() {
-    	return mapping;
+    public SensorToGroundMapping getGroundMapping() {
+    	return groundMapping;
     }
     
     public int  getMeasureCount() {
     	return measureCount;
     }    
     
-    public void CreateMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
+    public void createMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
     {
     	for (double line = 0; line < viewingModel.dimension; line += lineSampling) {
         	
@@ -87,33 +92,38 @@ public class MeasureGenerator {
         		GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
                                                       sensor.getLOS(date, pixel));
             
-        		mapping.addMapping(new SensorPixel(line, pixel), gp2);
+        		groundMapping.addMapping(new SensorPixel(line, pixel), gp2);
         		measureCount++;
         	}
         }
     }
-    public void CreateNoisyMeasure(final int lineSampling,final int pixelSampling, double [] pixErr,double [] altErr)  throws RuggedException
+    public void createNoisyMeasure(final int lineSampling,final int pixelSampling, Noise noise)  throws RuggedException
     {
+        /* Estimate latitude and longitude errors estimation */
     	Vector3D latLongError = estimateLatLongError();
     	
-    	double latErrorMean = pixErr[0]*latLongError.getX(); // in line: -0.000002 deg
-    	double lonErrorMean = pixErr[2]*latLongError.getY(); // in line: 0.000012 deg
-    	double latErrorStd = pixErr[1]*latLongError.getX(); // in line: -0.000002 deg
-    	double lonErrorStd = pixErr[3]*latLongError.getY(); // in line: 0.000012 deg
+    	/* Get noise features */
+    	final double[] mean = noise.getMean(); /* [latitude, longitude, altitude] mean */
+    	final double[] std = noise.getStandardDeviation(); /* [latitude, longitude, altitude] standard deviation */
+    	
+    	double latErrorMean = mean[0]*latLongError.getX(); // in line: -0.000002 deg
+    	double lonErrorMean = mean[1]*latLongError.getY(); // in line: 0.000012 deg
+    	double latErrorStd = std[0]*latLongError.getX(); // in line: -0.000002 deg
+    	double lonErrorStd = std[1]*latLongError.getY(); // in line: 0.000012 deg
     	
     	System.out.format("Corresponding error estimation on ground: {lat mean: %1.10f rad , lat stddev: %1.10f rad} %n",latErrorMean,latErrorStd);
     	System.out.format("Corresponding error estimation on ground: {lon mean: %1.10f rad, lat stddev: %1.10f rad } %n",lonErrorMean,lonErrorStd);
-    	System.out.format("Corresponding error estimation on ground: {alt mean: %1.3f m, alt stddev: %1.3f m } %n",altErr[0], altErr[0]);
+    	System.out.format("Corresponding error estimation on ground: {alt mean: %1.3f m, alt stddev: %1.3f m } %n",mean[2], std[2]);
     	
   
     	// Gaussian random generator
     	// Build a null mean random uncorrelated vector generator with standard deviation corresponding to the estimated error on ground
-    	double mean[] =  {latErrorMean,lonErrorMean,altErr[0]};
-    	double std[] = {latErrorStd,lonErrorStd,altErr[1]};
-    	System.out.format(" mean : %1.10f %1.10f %1.10f %n",mean[0],mean[1],mean[2]);
-    	System.out.format(" std : %1.10f %1.10f %1.10f %n",std[0],std[1],std[2]);
+    	double meanGenerator[] =  {latErrorMean, lonErrorMean, mean[0]};
+    	double stdGenerator[] = {latErrorStd, lonErrorStd, mean[1]};
+    	System.out.format(" mean : %1.10f %1.10f %1.10f %n",meanGenerator[0],meanGenerator[1],meanGenerator[2]);
+    	System.out.format(" std : %1.10f %1.10f %1.10f %n",stdGenerator[0],stdGenerator[1],stdGenerator[2]);
     	GaussianRandomGenerator rng = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
-    	UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(mean, std, rng);
+    	UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(meanGenerator, stdGenerator, rng);
 
 
     	System.out.format("Add a gaussian noise to measures without biais (null mean) and standard deviation corresponding to the estimated error on ground.%n");
@@ -139,7 +149,7 @@ public class MeasureGenerator {
         		//	System.out.format("Final gp: (%f,%d): %s %n",line,pixel,gpNoisy.toString());
         		//}
    
-        		mapping.addMapping(new SensorPixel(line, pixel), gpNoisy);
+        		groundMapping.addMapping(new SensorPixel(line, pixel), gpNoisy);
         		measureCount++;
         	}
         }

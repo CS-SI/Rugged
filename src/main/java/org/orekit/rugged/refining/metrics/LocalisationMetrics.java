@@ -14,26 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package AffinagePleiades;
+package org.orekit.rugged.refining.metrics;
 
-import org.hipparchus.linear.ArrayRealVector;
-import org.hipparchus.linear.RealVector;
-
-import org.orekit.rugged.api.SensorToGroundMapping;
+import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.refining.models.PleiadesViewingModel;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.time.AbsoluteDate;
 
-import java.util.Collections;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
-import java.util.Locale;
 
-import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 
 /**
@@ -73,7 +67,7 @@ public class LocalisationMetrics {
 	public LocalisationMetrics(SensorToGroundMapping groundTruthMapping, Rugged rugged, boolean computeInDeg)
 			throws RuggedException {
 
-		groundTruthMappings = groundTruthMapping.getMappings();
+		groundTruthMappings = groundTruthMapping.getMapping();
 		this.rugged = rugged;
 		this.sensor = rugged.getLineSensor(groundTruthMapping.getSensorName());
 		this.computeInDeg = computeInDeg;

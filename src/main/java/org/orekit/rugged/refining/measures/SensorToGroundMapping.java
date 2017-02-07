@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.api;
+package org.orekit.rugged.refining.measures;
 
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +25,8 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for mapping between sensor pixels and ground points.
  * @author Luc Maisonobe
+ * @author Lucie Labat-Allee
+ * @see SensorMapping
  * @since 2.0
  */
 public class SensorToGroundMapping {
@@ -34,18 +35,14 @@ public class SensorToGroundMapping {
     private final String sensorName;
 
     /** Mapping from sensor to ground. */
-    private final Map<SensorPixel, GeodeticPoint> sensorToGround;
-
-    /** Mapping from ground to sensor. */
-    private final Map<GeodeticPoint, SensorPixel> groundToSensor;
+    private final SensorMapping<GeodeticPoint> groundMapping;
 
     /** Build a new instance.
      * @param sensorName name of the sensor to which mapping applies
      */
     public SensorToGroundMapping(final String sensorName) {
         this.sensorName     = sensorName;
-        this.sensorToGround = new IdentityHashMap<>();
-        this.groundToSensor = new IdentityHashMap<>();
+        this.groundMapping = new SensorMapping<GeodeticPoint>(sensorName);
     }
 
     /** Get the name of the sensor to which mapping applies.
@@ -60,37 +57,14 @@ public class SensorToGroundMapping {
      * @param groundPoint ground point corresponding to the sensor pixel
      */
     public void addMapping(final SensorPixel pixel, final GeodeticPoint groundPoint) {
-        sensorToGround.put(pixel, groundPoint);
-        groundToSensor.put(groundPoint, pixel);
-    }
-
-    /** Get the ground point corresponding to a pixel.
-     * @param pixel sensor pixel (it must one of the instances
-     * passed to {@link #addMapping(SensorPixel, GeodeticPoint)},
-     * not a pixel at the same location)
-     * @return corresponding ground point, or null if the pixel was
-     * not passed to {@link #addMapping(SensorPixel, GeodeticPoint)}
-     */
-    public GeodeticPoint getGroundPoint(final SensorPixel pixel) {
-        return sensorToGround.get(pixel);
-    }
-
-    /** Get the sensor pixel corresponding to a ground point.
-     * @param groundPoint ground point (it must one of the instances
-     * passed to {@link #addMapping(SensorPixel, GeodeticPoint)},
-     * not a ground point at the same location)
-     * @return corresponding sensor pixel, or null if the ground point
-     * was not passed to {@link #addMapping(SensorPixel, GeodeticPoint)}
-     */
-    public SensorPixel getPixel(final GeodeticPoint groundPoint) {
-        return groundToSensor.get(groundPoint);
+        groundMapping.addMapping(pixel, groundPoint);
     }
 
     /** Get all the mapping entries.
      * @return an unmodifiable view of all mapping entries
      */
-    public Set<Map.Entry<SensorPixel, GeodeticPoint>> getMappings() {
-        return Collections.unmodifiableSet(sensorToGround.entrySet());
+    public Set<Map.Entry<SensorPixel, GeodeticPoint>> getMapping() {
+        return Collections.unmodifiableSet(groundMapping.getMapping());
     }
 
 }
