@@ -1,4 +1,4 @@
-package AffinagePleiades;
+package org.orekit.rugged.refining.metrics;
 
 import org.hipparchus.util.FastMath;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;

@@ -14,29 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package AffinagePleiades;
+package org.orekit.rugged.refining.metrics;
 
-import org.hipparchus.linear.ArrayRealVector;
-import org.hipparchus.linear.RealVector;
-
-import org.orekit.rugged.api.SensorToSensorMapping;
+import org.orekit.rugged.refining.measures.SensorToSensorMapping;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.time.AbsoluteDate;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import java.util.Collections;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
-import java.util.Locale;
 
-import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 
 /**
@@ -91,7 +83,7 @@ public class SensorToSensorLocalisationMetrics {
 			throws RuggedException {
 
 	    this.mapping = mapping;
-		groundTruthMappings = mapping.getMappings();
+		groundTruthMappings = mapping.getMapping();
 		
 		this.ruggedA = ruggedA;
         this.ruggedB = ruggedB;
@@ -175,15 +167,21 @@ public class SensorToSensorLocalisationMetrics {
 		earthDistanceMax = 0;
 		
 		int k = groundTruthMappings.size();
-		Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = groundTruthMappings.iterator();
-		while (gtIt.hasNext()) {
-			Map.Entry<SensorPixel, SensorPixel> gtMapping = gtIt.next();
-			
-			
+		
+//        Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = groundTruthMappings.iterator(); 
+//        while (gtIt.hasNext()) { 
+        int i=0;
+        for(Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = groundTruthMappings.iterator();
+            gtIt.hasNext();i++){ 
+            if(i==groundTruthMappings.size()) break;
+
+            Map.Entry<SensorPixel, SensorPixel> gtMapping = gtIt.next();
+            			
 			final SensorPixel spA = gtMapping.getKey();
 			final SensorPixel spB = gtMapping.getValue();
 			
-			Double [] gtDistance = mapping.getDistance(spA)
+//            Double gtDistance = mapping.getEarthDistance(spA).doubleValue();
+            double gtDistance = mapping.getEarthDistance(i).doubleValue();
 			                ; 
 			AbsoluteDate dateA = sensorA.getDate(spA.getLineNumber());
             AbsoluteDate dateB = sensorB.getDate(spB.getLineNumber());
@@ -217,7 +215,7 @@ public class SensorToSensorLocalisationMetrics {
 
             }
             losCount += losDistance[0];
-            final double earthDistance =  Math.abs(losDistance[1] - gtDistance[1]);
+            final double earthDistance =  Math.abs(losDistance[1] - gtDistance);
             //System.out.format( "los Distance %3.6e %3.6e %n",losDistance[1] , gtDistance[1]);
             if (earthDistance > earthDistanceMax) {
                 earthDistanceMax = earthDistance;
@@ -231,7 +229,6 @@ public class SensorToSensorLocalisationMetrics {
 			if (this.computeInDeg == true) {
 				double lonDiff = gpB.getLongitude() - gpA.getLongitude();
 				double latDiff = gpB.getLatitude() - gpA.getLatitude();
-				double altDiff = gpB.getAltitude() - gpA.getAltitude();
 				distance = Math.sqrt(lonDiff * lonDiff + latDiff * latDiff);
 			} else {
 

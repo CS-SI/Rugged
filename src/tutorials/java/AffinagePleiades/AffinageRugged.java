@@ -17,15 +17,12 @@
 package AffinagePleiades;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.hipparchus.util.FastMath;
+
 import java.io.File;
 import java.util.Locale;
 import java.util.Collections;
-import java.io.FileWriter;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.io.IOException;
 
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
@@ -34,7 +31,6 @@ import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
-
 import org.orekit.orbits.Orbit;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.api.BodyRotatingFrameId;
@@ -44,7 +40,12 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
-
+import org.orekit.rugged.refining.generators.GroundMeasureGenerator;
+import org.orekit.rugged.refining.measures.Noise;
+import org.orekit.rugged.refining.metrics.DistanceTools;
+import org.orekit.rugged.refining.metrics.LocalisationMetrics;
+import org.orekit.rugged.refining.models.OrbitModel;
+import org.orekit.rugged.refining.models.PleiadesViewingModel;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
@@ -208,28 +209,23 @@ public class AffinageRugged {
             
             System.out.format(" **** Generate Measures **** %n");
             
-            MeasureGenerator measure = new MeasureGenerator(pleiadesViewingModel,rugged);
+            GroundMeasureGenerator measure = new GroundMeasureGenerator(pleiadesViewingModel,rugged);
             int lineSampling = 1000;
             int pixelSampling = 1000;		
             //measure.CreateMeasure(lineSampling, pixelSampling); 
             
-            //double pixErr = 0.0;
-            //double altErr = 0.0;
-            final double[] pixErr = new double[4];
-            pixErr[0] = 0; // lat mean
-            pixErr[1] = 0.0; // lat std
-            pixErr[2] = 0; // lon mean
-            pixErr[3] = 0.0; // lon std
-            
-            final double[] altErr = new double[2];
-            altErr[0] = 0.0; //mean
-            altErr[1] = 0.0; //std  
-            measure.CreateNoisyMeasure(lineSampling, pixelSampling,pixErr,altErr); // Test with noisy measures
+            final Noise noise = new Noise(0,3); /* distribution: gaussian(0), vector dimension:3 */
+            final double[] mean = {0.0,0.0,0.0}; // {lat mean, long mean, alt mean}
+            final double[] standardDeviation = {0.0,0.0,0.0};  // {lat std, long std, alt std}
+            noise.setMean(mean);
+            noise.setStandardDeviation(standardDeviation);
+
+            measure.createNoisyMeasure(lineSampling, pixelSampling, noise); // Test with noisy measures
             System.out.format("nb TiePoints %d %n", measure.getMeasureCount());
 
             System.out.format(" **** Initial Residuals  **** %n");
             
-            LocalisationMetrics gtResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
+            LocalisationMetrics gtResiduals = new LocalisationMetrics(measure.getGroundMapping(),rugged, false);
             System.out.format("gt residuals max :  %3.4f mean %3.4f meters  %n",gtResiduals.getMaxResidual(),gtResiduals.getMeanResidual());
              
            
@@ -263,7 +259,7 @@ public class AffinageRugged {
             
             System.out.format(" **** Initial Residuals  **** %n");
             
-            LocalisationMetrics initlialResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
+            LocalisationMetrics initlialResiduals = new LocalisationMetrics(measure.getGroundMapping(),rugged, false);
             System.out.format("residuals max :  %3.4f mean %3.4f meters  %n",initlialResiduals.getMaxResidual(),initlialResiduals.getMeanResidual());
              
            
@@ -276,7 +272,7 @@ public class AffinageRugged {
             System.out.format("iterations max %d convergence threshold  %3.6e \n",maxIterations, convergenceThreshold);
 
             
-            Optimum optimum = rugged.estimateFreeParameters(Collections.singletonList(measure.getMapping()), maxIterations,convergenceThreshold);
+            Optimum optimum = rugged.estimateFreeParameters(Collections.singletonList(measure.getGroundMapping()), maxIterations,convergenceThreshold);
             System.out.format("max value  %3.6e %n",optimum.getResiduals().getMaxValue());
    
             System.out.format(" Optimization performed in %d iterations \n",optimum.getEvaluations());
@@ -306,9 +302,9 @@ public class AffinageRugged {
             
             System.out.format(" **** Compute Statistics **** %n");
 
-            LocalisationMetrics localisationResiduals = new LocalisationMetrics(measure.getMapping(),rugged, false);
+            LocalisationMetrics localisationResiduals = new LocalisationMetrics(measure.getGroundMapping(),rugged, false);
             System.out.format("residuals max :  %3.4e mean %3.4e  meters %n",localisationResiduals.getMaxResidual(),localisationResiduals.getMeanResidual());
-            LocalisationMetrics localisationResidualsDeg = new LocalisationMetrics(measure.getMapping(),rugged, true);
+            LocalisationMetrics localisationResidualsDeg = new LocalisationMetrics(measure.getGroundMapping(),rugged, true);
             System.out.format("residuals max  :  %3.4e deg mean %3.4e  deg %n",localisationResidualsDeg.getMaxResidual(),localisationResidualsDeg.getMeanResidual());
             
             

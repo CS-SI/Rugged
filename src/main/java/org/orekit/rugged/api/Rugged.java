@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,7 +35,6 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresBuilder;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.GaussNewtonOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
@@ -64,6 +62,8 @@ import org.orekit.utils.Constants;
 import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterDriversList;
+import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.refining.measures.SensorToSensorMapping;
 
 /**
  * Main class of Rugged library API.
@@ -1008,9 +1008,6 @@ public class Rugged {
      * @param parametersConvergenceThreshold convergence threshold on normalized
      *        parameters (dimensionless, related to parameters scales)
      * @param ruggedA rugged instance from viewing model A
-     * @param earthConstraintWeight weight for earthconstraintWeight (between 0 and 1). Weighting is applied as follow :
-     *          (1-earthConstraintWeight) for losDistance weighting
-     *          earthConstraintWeight for earthDistance weighting
      * @return optimum of the least squares problem
      * @exception RuggedException if several parameters with the same name
      *            exist, if no parameters have been selected for estimation, or
@@ -1021,7 +1018,7 @@ public class Rugged {
                                              final Collection<SensorToSensorMapping> references,
                                              final int maxEvaluations,
                                              final double parametersConvergenceThreshold,
-                                             Rugged ruggedA,final double earthConstraintWeight)
+                                             Rugged ruggedA)
         throws RuggedException {
         try {
 
@@ -1055,7 +1052,7 @@ public class Rugged {
             // (A and B)
             int n = 0;
             for (final SensorToSensorMapping reference : references) {
-                n += reference.getMappings().size();
+                n += reference.getMapping().size();
             }
 
             if (n == 0) {
@@ -1067,15 +1064,26 @@ public class Rugged {
             final double[] target = new double[n];
             final double[] weight = new double[n];
             int k = 0;
-            for (final SensorToSensorMapping reference : references) {
-                for (final Map.Entry<SensorPixel, SensorPixel> mapping : reference.getMappings()) {
-                    final SensorPixel spA = mapping.getKey();
-                    Double[] distMeas  = reference.getDistance(spA);
+            for (final SensorToSensorMapping reference : references) {              
+                // Get Earth constraint weight
+                double earthConstraintWeight = reference.getEarthConstraintWeight(); 
+                
+                int i=0;
+                for(Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator();
+                    gtIt.hasNext();i++){ 
+
+                    if(i==reference.getMapping().size()) break;
+
+                    // Get LOS distance
+                    Double losDistance  = reference.getLosDistance(i);
                     weight[k] = 1.0 - earthConstraintWeight;
-                    target[k++] = distMeas[0].doubleValue(); // LOS distance
+                    target[k++] = losDistance.doubleValue(); 
+
+                    // Get Earth distance (constraint)
+                    Double earthDistance  = reference.getEarthDistance(i);
                     weight[k] = earthConstraintWeight;
-                    target[k++] = distMeas[1].doubleValue(); // Earth distance
-                    }
+                    target[k++] = earthDistance.doubleValue();
+               }
             }
 
             // prevent parameters to exceed their prescribed bounds
@@ -1119,7 +1127,7 @@ public class Rugged {
                     int l = 0;
                     for (final SensorToSensorMapping reference : references) {
                         for (final Map.Entry<SensorPixel, SensorPixel> mapping : reference
-                            .getMappings()) {
+                            .getMapping()) {
                             final SensorPixel spA = mapping.getKey();
                             final SensorPixel spB = mapping.getValue();
                             LineSensor lineSensorB = this
@@ -1446,7 +1454,7 @@ public class Rugged {
             // set up target in sensor domain
             int n = 0;
             for (final SensorToGroundMapping reference : references) {
-                n += reference.getMappings().size();
+                n += reference.getMapping().size();
             }
             if (n == 0) {
                 throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
@@ -1457,7 +1465,7 @@ public class Rugged {
             int k = 0;
             for (final SensorToGroundMapping reference : references) {
                 for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference
-                    .getMappings()) {
+                    .getMapping()) {
                     final SensorPixel sp = mapping.getKey();
                     target[k++] = sp.getLineNumber();
                     target[k++] = sp.getPixelNumber();
@@ -1511,7 +1519,7 @@ public class Rugged {
                     int l = 0;
                     for (final SensorToGroundMapping reference : references) {
                         for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference
-                            .getMappings()) {
+                            .getMapping()) {
                             final GeodeticPoint gp = mapping.getValue();
                             final DerivativeStructure[] ilResult = inverseLocationDerivatives(reference
                                 .getSensorName(), gp, minLine, maxLine, generator);

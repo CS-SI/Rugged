@@ -82,6 +82,7 @@ import org.orekit.utils.IERSConventions;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
+import org.orekit.rugged.refining.measures.SensorToGroundMapping;
 
 public class RuggedTest {
 
