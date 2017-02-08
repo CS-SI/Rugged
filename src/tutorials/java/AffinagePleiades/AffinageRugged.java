@@ -173,8 +173,8 @@ public class AffinageRugged {
             GeodeticPoint lowerLeft = rugged.directLocation(lineDate_y, position, los);
      
             
-            double GSD_X = DistanceTools.computeDistanceRad(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),upperRight.getLongitude() , upperRight.getLatitude())/pleiadesViewingModel.dimension;
-            double GSD_Y = DistanceTools.computeDistanceRad(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),lowerLeft.getLongitude() , lowerLeft.getLatitude())/pleiadesViewingModel.dimension;
+            double GSD_X = DistanceTools.computeDistanceInMeter(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),upperRight.getLongitude() , upperRight.getLatitude())/pleiadesViewingModel.dimension;
+            double GSD_Y = DistanceTools.computeDistanceInMeter(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),lowerLeft.getLongitude() , lowerLeft.getLatitude())/pleiadesViewingModel.dimension;
             
             
             System.out.format(" GSD X %2.2f Y %2.2f **** %n", GSD_X, GSD_Y);    

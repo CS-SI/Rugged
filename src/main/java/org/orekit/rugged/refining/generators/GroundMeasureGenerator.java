@@ -167,8 +167,8 @@ public class GroundMeasureGenerator implements Measurable {
     	double latErr=FastMath.abs(gp_pix0.getLatitude()-gp_pix1.getLatitude());
 		double lonErr=FastMath.abs(gp_pix0.getLongitude()-gp_pix1.getLongitude());
     	//double dist = FastMath.sqrt(lonErr*lonErr + latErr*latErr)/FastMath.sqrt(2);
-    	final double distanceX =  DistanceTools.computeDistanceRad(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix1.getLongitude(), gp_pix0.getLatitude());
-    	final double distanceY =  DistanceTools.computeDistanceRad(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix0.getLongitude(), gp_pix1.getLatitude());
+    	final double distanceX =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix1.getLongitude(), gp_pix0.getLatitude());
+    	final double distanceY =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix0.getLongitude(), gp_pix1.getLatitude());
     	
     	System.out.format(" estimated distance %3.3f %3.3f %n",distanceX, distanceY);
     	
