@@ -34,7 +34,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
 /**
  * class for testing geometric performances in absolute location.
- * Metrics are computed for two scenarii: fulcrum points and liaison points * 
+ * Metrics are computed for two scenarios: fulcrum points and liaison points 
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
  * @see SensorToSensorMapping

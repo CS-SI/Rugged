@@ -84,7 +84,7 @@ public class GroundMeasureGenerator implements Measurable {
     
     public void createMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
     {
-    	for (double line = 0; line < viewingModel.dimension; line += lineSampling) {
+        for (double line = 0; line < viewingModel.dimension; line += lineSampling) {
         	
         	AbsoluteDate date = sensor.getDate(line);
         	for (int pixel = 0; pixel < sensor.getNbPixels(); pixel += pixelSampling) {
@@ -111,22 +111,18 @@ public class GroundMeasureGenerator implements Measurable {
     	double latErrorStd = std[0]*latLongError.getX(); // in line: -0.000002 deg
     	double lonErrorStd = std[1]*latLongError.getY(); // in line: 0.000012 deg
     	
-    	System.out.format("Corresponding error estimation on ground: {lat mean: %1.10f rad , lat stddev: %1.10f rad} %n",latErrorMean,latErrorStd);
-    	System.out.format("Corresponding error estimation on ground: {lon mean: %1.10f rad, lat stddev: %1.10f rad } %n",lonErrorMean,lonErrorStd);
-    	System.out.format("Corresponding error estimation on ground: {alt mean: %1.3f m, alt stddev: %1.3f m } %n",mean[2], std[2]);
-    	
-  
     	// Gaussian random generator
     	// Build a null mean random uncorrelated vector generator with standard deviation corresponding to the estimated error on ground
-    	double meanGenerator[] =  {latErrorMean, lonErrorMean, mean[0]};
-    	double stdGenerator[] = {latErrorStd, lonErrorStd, mean[1]};
-    	System.out.format(" mean : %1.10f %1.10f %1.10f %n",meanGenerator[0],meanGenerator[1],meanGenerator[2]);
-    	System.out.format(" std : %1.10f %1.10f %1.10f %n",stdGenerator[0],stdGenerator[1],stdGenerator[2]);
+    	double meanGenerator[] =  {latErrorMean, lonErrorMean, mean[2]};
+    	double stdGenerator[] = {latErrorStd, lonErrorStd, std[2]};
+    	System.out.format("Corresponding error estimation on ground {Latitude, Longitude, Altitude}:%n");
+        System.out.format("\tMean: {%1.10f rad, %1.10f rad, %1.10f m} %n",meanGenerator[0],meanGenerator[1],meanGenerator[2]);
+        System.out.format("\tStd : {%1.10f rad, %1.10f rad, %1.10f m} %n",stdGenerator[0],stdGenerator[1],stdGenerator[2]);
+
     	GaussianRandomGenerator rng = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
     	UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(meanGenerator, stdGenerator, rng);
-
-
-    	System.out.format("Add a gaussian noise to measures without biais (null mean) and standard deviation corresponding to the estimated error on ground.%n");
+        
+    	System.out.format("Add a gaussian noise to measures without biais (null mean) and standard deviation%n corresponding to the estimated error on ground.%n");
     	for (double line = 0; line < viewingModel.dimension; line += lineSampling) {
         	
         	AbsoluteDate date = sensor.getDate(line);
@@ -159,7 +155,7 @@ public class GroundMeasureGenerator implements Measurable {
     	System.out.format("Uncertainty in pixel (in line) for a real geometric refining: 1 pixel (assumption)%n");
     	final int pix =sensor.getNbPixels()/2;
     	final int line= (int) FastMath.floor(pix); // assumption : same number of line and pixels;
-    	System.out.format(" pixel size estimated at position  pix : %d line : %d %n", pix, line);
+    	System.out.format("Pixel size estimated at position  pix: %d line: %d %n", pix, line);
     	final AbsoluteDate date = sensor.getDate(line);
     	GeodeticPoint gp_pix0 = rugged.directLocation(date, sensor.getPosition(), sensor.getLOS(date, pix));
     	final AbsoluteDate date1 = sensor.getDate(line+1);
@@ -170,7 +166,7 @@ public class GroundMeasureGenerator implements Measurable {
     	final double distanceX =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix1.getLongitude(), gp_pix0.getLatitude());
     	final double distanceY =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix0.getLongitude(), gp_pix1.getLatitude());
     	
-    	System.out.format(" estimated distance %3.3f %3.3f %n",distanceX, distanceY);
+    	System.out.format("Estimated distance: X %3.3f Y %3.3f %n",distanceX, distanceY);
     	
     	//System.out.format(" lat  : %1.10f %1.10f %n",  latErr, lonErr);
     	return new Vector3D(latErr,lonErr,0.0);
