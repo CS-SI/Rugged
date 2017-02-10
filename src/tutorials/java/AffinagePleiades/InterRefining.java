@@ -19,11 +19,8 @@ package AffinagePleiades;
 
 import org.hipparchus.util.FastMath;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import java.io.File;
 import java.util.Locale;
-
-import java.util.Collections;
 import java.util.List;
 
 import org.orekit.bodies.BodyShape;
@@ -31,7 +28,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 
 import org.orekit.orbits.Orbit;
@@ -48,9 +44,7 @@ import org.orekit.rugged.refining.generators.GroundMeasureGenerator;
 import org.orekit.rugged.refining.generators.InterMeasureGenerator;
 import org.orekit.rugged.refining.measures.Noise;
 import org.orekit.rugged.refining.measures.SensorToGroundMapping;
-import org.orekit.rugged.refining.measures.SensorToSensorMapping;
 import org.orekit.rugged.refining.metrics.DistanceTools;
-import org.orekit.rugged.refining.metrics.LocalisationMetrics;
 import org.orekit.rugged.refining.models.OrbitModel;
 import org.orekit.rugged.refining.models.PleiadesViewingModel;
 import org.orekit.time.AbsoluteDate;
@@ -70,7 +64,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
  * @see SensorToGroundMapping
  * @see GroundMeasureGenerator
  */
-public class InterRefining {
+public class InterRefining extends Refining {
 
     /** Pleiades viewing model A */
     PleiadesViewingModel pleiadesViewingModelA;
@@ -90,7 +84,6 @@ public class InterRefining {
     /** Sensor name A corresponding to viewing model B */
     String sensorNameB;
     
-
     /** RuggedA 's instance */
     Rugged ruggedA;
     
@@ -99,6 +92,7 @@ public class InterRefining {
 
     /** Inter-measurements (between both viewing models) */
     InterMeasureGenerator measures;
+ 
     
     /**
      * Constructor
@@ -318,8 +312,8 @@ public class InterRefining {
             // Initialize physical models without disruptions
             // -----------------------------------------------
             System.out.format("\n**** Initialize physical models (A,B) without disruptions: reset Roll/Pitch/Factor **** %n");
-            refining.resetModel(refining.getRuggedA(), refining.getSensorNameA());
-            refining.resetModel(refining.getRuggedB(), refining.getSensorNameB());
+            refining.resetModel(refining.getRuggedA(), refining.getSensorNameA(), false);
+            refining.resetModel(refining.getRuggedB(), refining.getSensorNameB(), false);
             
             
             // Compute initial residues
@@ -510,7 +504,7 @@ public class InterRefining {
      * @param lineSensorB line sensor B
      * @return GSD
      */
-    public double computeDistance(LineSensor lineSensorA, LineSensor lineSensorB) throws RuggedException {
+    private double computeDistance(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
         
         Vector3D positionA = lineSensorA.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
         
@@ -553,230 +547,6 @@ public class InterRefining {
     }
  
 
-    /** Apply disruptions on acquisition A or B
-     * @param rugged Rugged instance
-     * @param sensorName line sensor name
-     * @param rollValue rotation on roll value
-     * @param pitchValue rotation on pitch value
-     * @param factorValue scale factor
-     * @throws OrekitException 
-     * @throws RuggedException 
-     */
-    public void applyDisruptions(Rugged rugged, String sensorName, double rollValue, double pitchValue, double factorValue) throws OrekitException, RuggedException {
-    
-        final String commonFactorName = "factor";
 
-        rugged.
-        getLineSensor(sensorName).
-        getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_roll")).
-        findFirst().get().setValue(rollValue);
-
-        rugged.
-        getLineSensor(sensorName).
-        getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_pitch")).
-        findFirst().get().setValue(pitchValue);
-        
-        rugged.
-        getLineSensor(sensorName).
-        getParametersDrivers().
-        filter(driver -> driver.getName().equals(commonFactorName)).
-        findFirst().get().setValue(factorValue);
- 
-    }
-    
-    
-    /** Generate measurements without noise
-     * @param ruggedA Rugged instance of acquisition A
-     * @param sensorNameA line sensor name A
-     * @param ruggedA Rugged instance of acquisition B
-     * @param sensorNameB line sensor name B
-     * @throws OrekitException 
-     * @throws RuggedException 
-     */
-    public InterMeasureGenerator generatePoints(int lineSampling, int pixelSampling, 
-                                                Rugged ruggedA, String sensorNameA, int dimensionA, 
-                                                Rugged ruggedB, String sensorNameB, int dimensionB) throws OrekitException, RuggedException {
-        
-        final double outlierValue = 1e+2;           // outliers control
-        final double earthConstraintWeight = 0.1;   // earth constraint weight
-
-        /* Generate measures with constraints on Earth distance and outliers control */
-        InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
-                                                                   ruggedB, sensorNameB, dimensionB,
-                                                                   outlierValue,
-                                                                   earthConstraintWeight);
-      
-        System.out.format("\n**** Generate measures (without noise) **** %n");
-        
-        // Generation measures without noise
-        measures.createMeasure(lineSampling, pixelSampling);
-        
-        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
-
-        return measures;
-           
-    }
-    
-
-    /** Generate noisy measurements
-     * @param ruggedA Rugged instance of acquisition A
-     * @param sensorNameA line sensor name A
-     * @param ruggedA Rugged instance of acquisition B
-     * @param sensorNameB line sensor name B
-     * @param noise Noise structure to generate noisy measures
-     * @throws OrekitException 
-     * @throws RuggedException 
-     */
-    public InterMeasureGenerator generateNoisyPoints(int lineSampling, int pixelSampling, 
-                                                     Rugged ruggedA, String sensorNameA, int dimensionA, 
-                                                     Rugged ruggedB, String sensorNameB, int dimensionB,
-                                                     Noise noise) throws OrekitException, RuggedException {
-        
-        final double outlierValue = 1e+2;           // outliers control
-        final double earthConstraintWeight = 0.1;   // earth constraint weight
-
-        /* Generate measures with constraints on Earth distance and outliers control */
-        InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
-                                                                   ruggedB, sensorNameB, dimensionB,
-                                                                   outlierValue,
-                                                                   earthConstraintWeight);
-        System.out.format("\n**** Generate noisy measures **** %n");
-            
-        // Generation noisy measures
-        measures.createNoisyMeasure(lineSampling, pixelSampling, noise); 
-            
-        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
-
-        return measures;
-           
-    }
-
-    /** Compute metrics
-     * @param unit 
-     * @throws OrekitException 
-     * @throws RuggedException 
-     */
-    public void computeMetrics(SensorToSensorMapping interMapping,
-                               Rugged ruggedA, Rugged ruggedB, 
-                               boolean unit) throws RuggedException {
-        
-        String stUnit = null;
-        if(unit) stUnit="degrees";
-        else stUnit="meters";
-        
-        LocalisationMetrics residues = new LocalisationMetrics(interMapping, ruggedA, ruggedB, unit);
-        System.out.format("Max: %1.4e Mean: %1.4e %s%n",residues.getMaxResidual(),residues.getMeanResidual(), stUnit);
-        System.out.format("LOS distance Max: %1.4e Mean: %1.4e %s%n",residues.getLosMaxDistance(),residues.getLosMeanDistance(), stUnit);
-        System.out.format("Earth distance Max: %1.4e Mean: %1.4e %s%n",residues.getEarthMaxDistance(),residues.getEarthMeanDistance(), stUnit);
-        
-        
-    }
-
-
-    /** Reset a model
-     * @param rugged Rugged instance
-     * @param sensorName line sensor name
-     * @throws OrekitException 
-     * @throws RuggedException 
-     */
-    public void resetModel(Rugged rugged, String sensorName) throws OrekitException, RuggedException {
-    
-        final String commonFactorName = "factor";
-        
-        rugged.
-        getLineSensor(sensorName).
-        getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_roll") 
-               || driver.getName().equals(sensorName+"_pitch")).
-        forEach(driver -> {
-            try {
-                driver.setSelected(true);
-                driver.setValue(0.0);
-            } catch (OrekitException e) {
-                throw new OrekitExceptionWrapper(e);
-            }
-        });
-        rugged.
-        getLineSensor(sensorName).
-        getParametersDrivers().
-        filter(driver -> driver.getName().equals(commonFactorName)).
-        forEach(driver -> {
-            try {
-                driver.setSelected(false);
-                driver.setValue(1.0);       // default value: no Z scale factor applied
-            } catch (OrekitException e) {
-                throw new OrekitExceptionWrapper(e);
-            }
-        });
-     }
-    
-    
-    /** Start optimization
-     * @throws OrekitException 
-     * @throws RuggedException 
-     */
-    public void optimization(int maxIterations, double convergenceThreshold,
-                             SensorToSensorMapping interMapping, 
-                             Rugged ruggedA, Rugged ruggedB) throws OrekitException, RuggedException {
-    
-        
-        System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n",maxIterations, convergenceThreshold);
-
-        // Note: estimateFreeParams2Models() is supposed to be applying on ruggedB, not on ruggedA (to be compliant with notations)
-        
-        // Adapt parameters
-        Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(interMapping), 
-                                                            maxIterations,convergenceThreshold, ruggedA);
-        
-        // Print statistics 
-        System.out.format("Max value: %3.6e %n",optimum.getResiduals().getMaxValue());
-        System.out.format("Optimization performed in %d iterations \n",optimum.getEvaluations());
-        System.out.format("RMSE: %f \n",optimum.getRMS());
-    }
-    
-    
-    /** Check parameters estimation
-     * @param rugged Rugged instance
-     * @param sensorName line sensor name
-     * @param rollValue rotation on roll value
-     * @param pitchValue rotation on pitch value
-     * @param factorValue scale factor
-     * @throws OrekitException 
-     * @throws RuggedException 
-     */
-    public void paramsEstimation(Rugged rugged, String sensorName,
-                                 double rollValue, double pitchValue, double factorValue) throws OrekitException, RuggedException {
-        
-        final String commonFactorName = "factor";
-        
-        // Estimate Roll
-        double estimatedRoll = rugged.getLineSensor(sensorName).
-                                      getParametersDrivers().
-                                      filter(driver -> driver.getName().equals(sensorName+"_roll")).
-                                      findFirst().get().getValue();
-        
-        double rollError = (estimatedRoll - rollValue);
-        System.out.format("Estimated roll: %3.5f\troll error: %3.6e %n", estimatedRoll, rollError);
-
-        // Estimate pitch
-        double estimatedPitch = rugged.getLineSensor(sensorName).
-                                       getParametersDrivers().
-                                       filter(driver -> driver.getName().equals(sensorName+"_pitch")).
-                                       findFirst().get().getValue();
-        
-        double pitchError = (estimatedPitch - pitchValue);
-        System.out.format("Estimated pitch: %3.5f\tpitch error: %3.6e %n", estimatedPitch, pitchError);
-
-        // Estimate factor
-        double estimatedFactor = rugged.getLineSensor(sensorName).
-                                        getParametersDrivers().
-                                        filter(driver -> driver.getName().equals(commonFactorName)).
-                                        findFirst().get().getValue();
-        
-        double factorError = (estimatedFactor - factorValue);
-        System.out.format("Estimated factor: %3.5f\tfactor error: %3.6e %n", estimatedFactor, factorError);
-    }
 
 }
