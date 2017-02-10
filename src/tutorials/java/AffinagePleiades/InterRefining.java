@@ -84,10 +84,10 @@ public class InterRefining {
     OrbitModel orbitmodelB;
     
     /** Sensor name A corresponding to viewing model A */
-    String SensorNameA;
+    String sensorNameA;
     
     /** Sensor name A corresponding to viewing model B */
-    String SensorNameB;
+    String sensorNameB;
     
 
     /** RuggedA 's instance */
@@ -96,7 +96,7 @@ public class InterRefining {
     /** RuggedB 's instance */
     Rugged ruggedB;
 
-    /** Measurements */
+    /** Inter-measurements (between both viewing models) */
     InterMeasureGenerator measures;
     
     /**
@@ -104,17 +104,17 @@ public class InterRefining {
      */
     public InterRefining() throws RuggedException, OrekitException {
     
-        SensorNameA = "SensorA";
+        sensorNameA = "SensorA";
         final double incidenceAngleA = -5.0;
         final String dateA = "2016-01-01T11:59:50.0";
         
-        pleiadesViewingModelA = new PleiadesViewingModel(SensorNameA, incidenceAngleA, dateA);
+        pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
        
-        SensorNameB = "SensorB";
+        sensorNameB = "SensorB";
         final double incidenceAngleB = 0.0;
         final String dateB = "2016-01-01T12:02:50.0";
 
-        pleiadesViewingModelB = new PleiadesViewingModel(SensorNameB, incidenceAngleB, dateB);
+        pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
         
         orbitmodelA =  new OrbitModel();
         orbitmodelB =  new OrbitModel();
@@ -308,7 +308,14 @@ public class InterRefining {
             
             // Check estimated values
             // ----------------------
-            refining.paramsEstimation(rollValueA, pitchValueA, factorValue, rollValueB, pitchValueB);
+            System.out.format("\n**** Check parameters ajustement **** %n");
+            System.out.format("Acquisition A:%n");
+            refining.paramsEstimation(refining.getRuggedA(), refining.getSensorNameA(),
+                                      rollValueA, pitchValueA, factorValue);
+            System.out.format("Acquisition B:%n");
+            refining.paramsEstimation(refining.getRuggedB(), refining.getSensorNameB(),
+                                      rollValueB, pitchValueB, factorValue);
+            //refining.paramsEstimation(rollValueA, pitchValueA, factorValue, rollValueB, pitchValueB);
              
             
             // Compute statistics
@@ -409,7 +416,7 @@ public class InterRefining {
      * @return the sensorNameA
      */
     public String getSensorNameA() {
-        return SensorNameA;
+        return sensorNameA;
     }
 
 
@@ -418,7 +425,7 @@ public class InterRefining {
      * @return the sensorNameB
      */
     public String getSensorNameB() {
-        return SensorNameB;
+        return sensorNameB;
     }
 
 
@@ -513,9 +520,11 @@ public class InterRefining {
  
 
     /** Apply disruptions on acquisition A or B
-     * @param  rollValue rotation on roll value
-     * @param  pitchValue rotation on pitch value
-     * @param  factorValue scale factor
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @param rollValue rotation on roll value
+     * @param pitchValue rotation on pitch value
+     * @param factorValue scale factor
      * @throws OrekitException 
      * @throws RuggedException 
      */
@@ -557,6 +566,7 @@ public class InterRefining {
         final double earthConstraintWeight = 0.1;   // earth constraint weight
         // TODO: faire le cas sans contraintes
 
+        /* Generate measures with constraints on Earth distance */
         InterMeasureGenerator measures = new InterMeasureGenerator(pleiadesViewingModelA,ruggedA,
                                                                   pleiadesViewingModelB,ruggedB,
                                                                   outlierValue,
@@ -613,7 +623,9 @@ public class InterRefining {
     }
 
 
-    /** Reset models
+    /** Reset a model
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
      * @throws OrekitException 
      * @throws RuggedException 
      */
@@ -674,70 +686,45 @@ public class InterRefining {
     
     
     /** Check parameters estimation
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @param rollValue rotation on roll value
+     * @param pitchValue rotation on pitch value
+     * @param factorValue scale factor
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void paramsEstimation(double rollValueA, double pitchValueA, double factorValue,
-                                 double rollValueB, double pitchValueB) throws OrekitException, RuggedException {
+    public void paramsEstimation(Rugged rugged, String sensorName,
+                                 double rollValue, double pitchValue, double factorValue) throws OrekitException, RuggedException {
         
         final String commonFactorName = "factor";
         
-        System.out.format("\n**** Check parameters ajustement **** %n");
-        
-        // Acquisition A
-        // -------------
-        // Estimate roll 
-        double estRollA = ruggedA.getLineSensor(pleiadesViewingModelA.getSensorName()).
+        // Estimate Roll
+        double estimatedRoll = rugged.getLineSensor(sensorName).
                                       getParametersDrivers().
-                                      filter(driver -> driver.getName().equals(SensorNameA+"_roll")).
+                                      filter(driver -> driver.getName().equals(sensorName+"_roll")).
                                       findFirst().get().getValue();
-        double rollErrorA = (estRollA - rollValueA);
-        System.out.format("Estimated roll A: %3.5f\troll error: %3.6e%n", estRollA, rollErrorA);
-
-        // Estimate pitch 
-        double estPitchA = ruggedA.getLineSensor(pleiadesViewingModelA.getSensorName()).
-                                       getParametersDrivers().
-                                       filter(driver -> driver.getName().equals(SensorNameA+"_pitch")).
-                                       findFirst().get().getValue();
-        double pitchErrorA = (estPitchA - pitchValueA);
-        System.out.format("Estimated pitch A: %3.5f\tpitch error: %3.6e%n", estPitchA, pitchErrorA);
         
-        // Estimate scale factor
-        double estFactorA = ruggedA.getLineSensor(pleiadesViewingModelA.getSensorName()).
-                getParametersDrivers().
-                filter(driver -> driver.getName().equals(commonFactorName)).
-                findFirst().get().getValue();
-        double factorErrorA = (estFactorA - factorValue);
-        System.out.format("Estimated factor A: %3.5f\tfactor error: %3.6e%n", estFactorA, factorErrorA);
-
-        
-        // Acquisition B
-        // -------------
-        // Estimate roll
-        double estRollB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
-                                      getParametersDrivers().
-                                      filter(driver -> driver.getName().equals(SensorNameB+"_roll")).
-                                      findFirst().get().getValue();
-        double rollErrorB = (estRollB - rollValueB);
-        System.out.format("Estimated roll B: %3.5f\troll error: %3.6e%n", estRollB, rollErrorB);
+        double rollError = (estimatedRoll - rollValue);
+        System.out.format("Estimated roll: %3.5f\troll error: %3.6e %n", estimatedRoll, rollError);
 
         // Estimate pitch
-        double estPitchB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
+        double estimatedPitch = rugged.getLineSensor(sensorName).
                                        getParametersDrivers().
-                                       filter(driver -> driver.getName().equals(SensorNameB+"_pitch")).
+                                       filter(driver -> driver.getName().equals(sensorName+"_pitch")).
                                        findFirst().get().getValue();
-        double pitchErrorB = (estPitchB - pitchValueB);
-        System.out.format("Estimated pitch B: %3.5f\tpitch error: %3.6e%n", estPitchB, pitchErrorB);
         
-     // Estimate scale factor
-        double estFactorB = ruggedB.getLineSensor(pleiadesViewingModelB.getSensorName()).
-                getParametersDrivers().
-                filter(driver -> driver.getName().equals(commonFactorName)).
-                findFirst().get().getValue();
-        double factorErrorB = (estFactorB - factorValue);
-        System.out.format("Estimated factor B: %3.5f\tfactor error: %3.6e%n", estFactorB, factorErrorB);
+        double pitchError = (estimatedPitch - pitchValue);
+        System.out.format("Estimated pitch: %3.5f\tpitch error: %3.6e %n", estimatedPitch, pitchError);
 
+        // Estimate factor
+        double estimatedFactor = rugged.getLineSensor(sensorName).
+                                        getParametersDrivers().
+                                        filter(driver -> driver.getName().equals(commonFactorName)).
+                                        findFirst().get().getValue();
+        
+        double factorError = (estimatedFactor - factorValue);
+        System.out.format("Estimated factor: %3.5f\tfactor error: %3.6e %n", estimatedFactor, factorError);
     }
-
 
 }

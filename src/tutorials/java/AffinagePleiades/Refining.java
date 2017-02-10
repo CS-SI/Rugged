@@ -73,10 +73,13 @@ public class Refining {
     /** Orbit model */
     OrbitModel orbitmodel;
     
+    /** Sensor name */
+    String sensorName;
+    
     /** Rugged instance */
     Rugged rugged;
     
-    /** Measurements */
+    /** Ground measurements */
     GroundMeasureGenerator measures;
         
     
@@ -85,7 +88,8 @@ public class Refining {
      */
     public Refining() throws RuggedException, OrekitException {
     
-        pleiadesViewingModel = new PleiadesViewingModel();
+        sensorName = "line";
+        pleiadesViewingModel = new PleiadesViewingModel(sensorName);
         orbitmodel =  new OrbitModel();
     }
     
@@ -182,7 +186,8 @@ public class Refining {
             System.out.format("roll: %3.5f \tpitch: %3.5f \tfactor: %3.5f \n",rollValue, pitchValue, factorValue);
                         
             // Apply disruptions on physical model
-            refining.applyDisruptions(rollValue, pitchValue, factorValue);
+            refining.applyDisruptions(refining.getRugged(), refining.getSensorName(),
+                                      rollValue, pitchValue, factorValue);
                         
 
             // Generate measures (observations) from physical model disrupted
@@ -200,7 +205,7 @@ public class Refining {
             // Initialize physical model without disruptions
             // ---------------------------------------------
             System.out.format("\n**** Initialize physical model without disruptions: reset Roll/Pitch/Factor **** %n");
-            refining.resetModel();
+            refining.resetModel(refining.getRugged(), refining.getSensorName());
             
             
             // Compute initial residues
@@ -217,7 +222,9 @@ public class Refining {
             
             // Check estimated values
             // ----------------------
-            refining.paramsEstimation(rollValue, pitchValue, factorValue);
+            System.out.format("\n**** Check parameters ajustement **** %n");
+            refining.paramsEstimation(refining.getRugged(), refining.getSensorName(),
+                                      rollValue, pitchValue, factorValue);
                         
             
             // Compute statistics
@@ -272,6 +279,15 @@ public class Refining {
         this.orbitmodel = orbitmodel;
     }
 
+    
+    /**
+     * @return the sensorName
+     */
+    public String getSensorName() {
+        return sensorName;
+    }
+
+    
     /**
      * @return the rugged
      */
@@ -338,31 +354,36 @@ public class Refining {
     
     
     /** Apply disruptions
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
      * @param  rollValue rotation on roll value
      * @param  pitchValue rotation on pitch value
      * @param  factorValue scale factor
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void applyDisruptions(double rollValue, double pitchValue, double factorValue) throws OrekitException, RuggedException {
-    
+    public void applyDisruptions(Rugged rugged, String sensorName, double rollValue, double pitchValue, double factorValue) throws OrekitException, RuggedException {
+        
+        final String commonFactorName = "factor";
+
         rugged.
-        getLineSensor("line").
+        getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals("line_roll")).
+        filter(driver -> driver.getName().equals(sensorName+"_roll")).
         findFirst().get().setValue(rollValue);
 
         rugged.
-        getLineSensor("line").
+        getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals("line_pitch")).
+        filter(driver -> driver.getName().equals(sensorName+"_pitch")).
         findFirst().get().setValue(pitchValue);
         
         rugged.
-        getLineSensor("line").
+        getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals("factor")).
+        filter(driver -> driver.getName().equals(commonFactorName)).
         findFirst().get().setValue(factorValue);
+ 
     }
     
     
@@ -426,16 +447,21 @@ public class Refining {
     }
     
     
-    /** Reset models
+    /** Reset a model
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void resetModel() throws OrekitException, RuggedException {
+    public void resetModel(Rugged rugged, String sensorName) throws OrekitException, RuggedException {
     
+        final String commonFactorName = "factor";
+        
         rugged.
-        getLineSensor(pleiadesViewingModel.getSensorName()).
+        getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals("line_roll") || driver.getName().equals("line_pitch")).
+        filter(driver -> driver.getName().equals(sensorName+"_roll") 
+               || driver.getName().equals(sensorName+"_pitch")).
         forEach(driver -> {
             try {
                 driver.setSelected(true);
@@ -445,9 +471,9 @@ public class Refining {
             }
         });
         rugged.
-        getLineSensor(pleiadesViewingModel.getSensorName()).
+        getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals("factor")).
+        filter(driver -> driver.getName().equals(commonFactorName)).
         forEach(driver -> {
             try {
                 driver.setSelected(true);
@@ -484,34 +510,41 @@ public class Refining {
 
     
     /** Check parameters estimation
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @param  rollValue rotation on roll value
+     * @param  pitchValue rotation on pitch value
+     * @param  factorValue scale factor
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void paramsEstimation(double rollValue, double pitchValue, double factorValue) throws OrekitException, RuggedException {
+    public void paramsEstimation(Rugged rugged, String sensorName,
+                                 double rollValue, double pitchValue, double factorValue) throws OrekitException, RuggedException {
         
-        System.out.format("\n**** Check parameters ajustement **** %n");
+        final String commonFactorName = "factor";
+        
         // Estimate Roll
-        double estimatedRoll = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
+        double estimatedRoll = rugged.getLineSensor(sensorName).
                                       getParametersDrivers().
-                                      filter(driver -> driver.getName().equals("line_roll")).
+                                      filter(driver -> driver.getName().equals(sensorName+"_roll")).
                                       findFirst().get().getValue();
         
         double rollError = (estimatedRoll - rollValue);
         System.out.format("Estimated roll: %3.5f\troll error: %3.6e %n", estimatedRoll, rollError);
 
         // Estimate pitch
-        double estimatedPitch = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
+        double estimatedPitch = rugged.getLineSensor(sensorName).
                                        getParametersDrivers().
-                                       filter(driver -> driver.getName().equals("line_pitch")).
+                                       filter(driver -> driver.getName().equals(sensorName+"_pitch")).
                                        findFirst().get().getValue();
         
         double pitchError = (estimatedPitch - pitchValue);
         System.out.format("Estimated pitch: %3.5f\tpitch error: %3.6e %n", estimatedPitch, pitchError);
 
         // Estimate factor
-        double estimatedFactor = rugged.getLineSensor(pleiadesViewingModel.getSensorName()).
+        double estimatedFactor = rugged.getLineSensor(sensorName).
                                         getParametersDrivers().
-                                        filter(driver -> driver.getName().equals("factor")).
+                                        filter(driver -> driver.getName().equals(commonFactorName)).
                                         findFirst().get().getValue();
         
         double factorError = (estimatedFactor - factorValue);

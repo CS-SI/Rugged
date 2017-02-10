@@ -70,8 +70,8 @@ public class PleiadesViewingModel {
      *  sensorName="line", incidenceAngle = 0.0, date = "2016-01-01T12:00:00.0"
      * </p>
      */
-    public PleiadesViewingModel() throws RuggedException, OrekitException {	
-        this("line",0.0,"2016-01-01T12:00:00.0");	
+    public PleiadesViewingModel(final String sensorName) throws RuggedException, OrekitException {	
+        this(sensorName,0.0,"2016-01-01T12:00:00.0");	
     }
     
     /** PleiadesViewingModel constructor
