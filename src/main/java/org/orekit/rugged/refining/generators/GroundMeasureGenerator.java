@@ -24,7 +24,6 @@ import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.refining.measures.Noise;
 import org.orekit.rugged.refining.measures.SensorToGroundMapping;
 import org.orekit.rugged.refining.metrics.DistanceTools;
-import org.orekit.rugged.refining.models.PleiadesViewingModel;
 
 import org.orekit.time.AbsoluteDate;
 
@@ -50,27 +49,24 @@ public class GroundMeasureGenerator implements Measurable {
     
     private LineSensor sensor;
 
-    private PleiadesViewingModel viewingModel;
-    
     private int measureCount;
     
-    
+    private int dimension;
     
     /** Simple constructor.
      * <p>
      *
      * </p>
      */
-    public GroundMeasureGenerator(PleiadesViewingModel viewingModel, Rugged rugged) throws RuggedException
+    public GroundMeasureGenerator(Rugged rugged, String sensorName, int dimension) throws RuggedException
     {
 	
     // generate reference mapping
-    String sensorName = viewingModel.getSensorName();	
     groundMapping = new SensorToGroundMapping(sensorName);
     this.rugged = rugged;
-    this.viewingModel = viewingModel;
     sensor = rugged.getLineSensor(groundMapping.getSensorName());
     measureCount = 0;
+    this.dimension = dimension;
     
     }
     
@@ -84,7 +80,7 @@ public class GroundMeasureGenerator implements Measurable {
     
     public void createMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
     {
-        for (double line = 0; line < viewingModel.dimension; line += lineSampling) {
+        for (double line = 0; line < dimension; line += lineSampling) {
         	
         	AbsoluteDate date = sensor.getDate(line);
         	for (int pixel = 0; pixel < sensor.getNbPixels(); pixel += pixelSampling) {
@@ -123,7 +119,7 @@ public class GroundMeasureGenerator implements Measurable {
     	UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(meanGenerator, stdGenerator, rng);
         
     	System.out.format("Add a gaussian noise to measures without biais (null mean) and standard deviation%n corresponding to the estimated error on ground.%n");
-    	for (double line = 0; line < viewingModel.dimension; line += lineSampling) {
+    	for (double line = 0; line < dimension; line += lineSampling) {
         	
         	AbsoluteDate date = sensor.getDate(line);
         	for (int pixel = 0; pixel < sensor.getNbPixels(); pixel += pixelSampling) {

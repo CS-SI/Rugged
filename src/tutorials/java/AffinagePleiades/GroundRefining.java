@@ -65,7 +65,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
  * @see SensorToGroundMapping
  * @see GroundMeasureGenerator
  */
-public class Refining {
+public class GroundRefining {
     
     /** Pleiades viewing model */
     PleiadesViewingModel pleiadesViewingModel;
@@ -86,7 +86,7 @@ public class Refining {
     /**
      * Constructor
      */
-    public Refining() throws RuggedException, OrekitException {
+    public GroundRefining() throws RuggedException, OrekitException {
     
         sensorName = "line";
         pleiadesViewingModel = new PleiadesViewingModel(sensorName);
@@ -109,7 +109,7 @@ public class Refining {
             
             // Initialize refining context
             // ---------------------------
-            Refining refining = new Refining();
+            GroundRefining refining = new GroundRefining();
             
             
             // Sensor's definition: create Pleiades viewing model
@@ -192,14 +192,35 @@ public class Refining {
 
             // Generate measures (observations) from physical model disrupted
             // --------------------------------------------------------------
-            GroundMeasureGenerator measures = refining.generatePoints(true);
+            
+            int lineSampling = 1000;
+            int pixelSampling = 1000;       
+ 
+            // Noise definition
+            final Noise noise = new Noise(0,3); /* distribution: gaussian(0), vector dimension:3 */
+            final double[] mean = {0.0,0.0,0.0};                /* {lat mean, long mean, alt mean} */
+            final double[] standardDeviation = {0.0,0.0,0.0};   /* {lat std, long std, alt std} */
+            noise.setMean(mean);
+            noise.setStandardDeviation(standardDeviation);
+
+            
+            GroundMeasureGenerator measures = refining.generateNoisyPoints(lineSampling, pixelSampling, 
+                                                                           refining.getRugged(), refining.getSensorName(), 
+                                                                           refining.getPleiadesViewingModel().getDimension(),
+                                                                           noise);
+            
+//            // To test with measures without noise
+//            GroundMeasureGenerator measures = refining.generatePoints(lineSampling, pixelSampling, 
+//                                                                      refining.getRugged(), refining.getSensorName(),   
+//                                                                      refining.getPleiadesViewingModel().getDimension());
+          
             refining.setMeasures(measures);
             
             
             // Compute ground truth residues
             // -----------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
-            refining.computeMetrics(false);
+            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), false);
             
              
             // Initialize physical model without disruptions
@@ -211,13 +232,17 @@ public class Refining {
             // Compute initial residues
             // ------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
-            refining.computeMetrics(false);
+            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), false);
             
              
             // Start optimization
             // ------------------
             System.out.format("\n**** Start optimization  **** %n");
-            refining.optimization();
+
+            int maxIterations = 100;
+            double convergenceThreshold =  1e-14;
+
+            refining.optimization(maxIterations, convergenceThreshold, measures.getGroundMapping(), refining.getRugged());
             
             
             // Check estimated values
@@ -232,10 +257,10 @@ public class Refining {
             System.out.format("\n**** Compute Statistics **** %n");
             
             // Residues computed in meters
-            refining.computeMetrics(false);
+            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), false);
             
             // Residues computed in degrees
-            refining.computeMetrics(true);
+            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), true);
             
             
         } catch (OrekitException oe) {
@@ -388,57 +413,67 @@ public class Refining {
     
     
     /** Generate points of measures
-     * @param  isNoise flag to known if measures are noisy or not
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @param isNoise flag to known if measures are noisy or not
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public GroundMeasureGenerator generatePoints(boolean isNoise) throws OrekitException, RuggedException {
+    public GroundMeasureGenerator generateNoisyPoints(int lineSampling, int pixelSampling ,
+                                                      Rugged rugged, String sensorName, int dimension, 
+                                                      Noise noise) throws OrekitException, RuggedException {
         
-        int lineSampling = 1000;
-        int pixelSampling = 1000;       
+        GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
         
-        GroundMeasureGenerator measures = new GroundMeasureGenerator(pleiadesViewingModel,rugged);
-        
-        if(isNoise) {
-        
-            System.out.format("\n**** Generate noisy measures **** %n");
+        System.out.format("\n**** Generate noisy measures **** %n");
             
-            // Noise definition
-            final Noise noise = new Noise(0,3); /* distribution: gaussian(0), vector dimension:3 */
-            final double[] mean = {0.0,0.0,0.0};                /* {lat mean, long mean, alt mean} */
-            final double[] standardDeviation = {0.0,0.0,0.0};   /* {lat std, long std, alt std} */
-            noise.setMean(mean);
-            noise.setStandardDeviation(standardDeviation);
-
-            // Generation noisy measures
-            measures.createNoisyMeasure(lineSampling, pixelSampling, noise); 
+        // Generation noisy measures
+        measures.createNoisyMeasure(lineSampling, pixelSampling, noise); 
     
-        } else {
-            
-            System.out.format("\n**** Generate measures (without noise) **** %n");
-            // Generation measures without noise
-            measures.createMeasure(lineSampling, pixelSampling);
-        }
- 
         System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
 
         return measures;
         
     }
     
-    
+
+    /** Generate points of measures
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @param isNoise flag to known if measures are noisy or not
+     * @throws OrekitException 
+     * @throws RuggedException 
+     */
+    public GroundMeasureGenerator generatePoints(int lineSampling, int pixelSampling,
+                                                 Rugged rugged, String sensorName, 
+                                                 int dimension) throws OrekitException, RuggedException {
+        
+        GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
+        
+        System.out.format("\n**** Generate measures (without noise) **** %n");
+        
+        // Generation measures without noise
+        measures.createMeasure(lineSampling, pixelSampling);
+        
+        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
+
+        return measures;
+        
+    }
+
     /** Compute metrics
      * @param unit 
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void computeMetrics(boolean unit) throws RuggedException {
+    public void computeMetrics(SensorToGroundMapping groundMapping,
+                               Rugged rugged, boolean unit) throws RuggedException {
         
         String stUnit = null;
         if(unit) stUnit="degrees";
         else stUnit="meters";
         
-        LocalisationMetrics residues = new LocalisationMetrics(measures.getGroundMapping(),rugged, unit);
+        LocalisationMetrics residues = new LocalisationMetrics(groundMapping, rugged, unit);
         System.out.format("Max: %3.4e Mean: %3.4e %s%n",residues.getMaxResidual(),residues.getMeanResidual(), stUnit);
         
         
@@ -490,16 +525,16 @@ public class Refining {
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void optimization() throws OrekitException, RuggedException {
+    public void optimization(int maxIterations, double convergenceThreshold,
+                             SensorToGroundMapping groundMapping, 
+                             Rugged rugged) throws OrekitException, RuggedException {
     
-        // perform estimation parameters 
-        int maxIterations = 100;
-        double convergenceThreshold =  1e-14;
         
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n",maxIterations, convergenceThreshold);
 
         // Adapt parameters
-        Optimum optimum = rugged.estimateFreeParameters(Collections.singletonList(measures.getGroundMapping()), maxIterations,convergenceThreshold);
+        Optimum optimum = rugged.estimateFreeParameters(Collections.singletonList(groundMapping), 
+                                                        maxIterations, convergenceThreshold);
         
         // Print statistics 
         System.out.format("Max value: %3.6e %n",optimum.getResiduals().getMaxValue());

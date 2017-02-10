@@ -48,6 +48,7 @@ import org.orekit.rugged.refining.generators.GroundMeasureGenerator;
 import org.orekit.rugged.refining.generators.InterMeasureGenerator;
 import org.orekit.rugged.refining.measures.Noise;
 import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.refining.measures.SensorToSensorMapping;
 import org.orekit.rugged.refining.metrics.DistanceTools;
 import org.orekit.rugged.refining.metrics.LocalisationMetrics;
 import org.orekit.rugged.refining.models.OrbitModel;
@@ -277,16 +278,43 @@ public class InterRefining {
             
             // Generate measures (observations) from physical model disrupted
             // --------------------------------------------------------------
-            InterMeasureGenerator measures = refining.generatePoints(true);
+            
+            int lineSampling = 1000;
+            int pixelSampling = 1000;       
+ 
+            // Noise definition
+            final Noise noise = new Noise(0,2); /* distribution: gaussian(0), vector dimension:3 */
+            final double[] mean = {5.0,0.0};    /* {pixelA mean, pixelB mean} */
+            final double[] standardDeviation = {0.1,0.1};  /* {pixelB std, pixelB std} */
+            noise.setMean(mean);
+            noise.setStandardDeviation(standardDeviation);
+
+            System.out.format("\tSensor A mean: %f std %f %n",mean[0],standardDeviation[0]);
+            System.out.format("\tSensor B mean: %f std %f %n",mean[1],standardDeviation[1]);
+
+            InterMeasureGenerator measures = refining.generateNoisyPoints(lineSampling, pixelSampling, 
+                                                                          refining.getRuggedA(), refining.getSensorNameA(),
+                                                                          refining.getPleiadesViewingModelA().getDimension(),
+                                                                          refining.getRuggedB(), refining.getSensorNameB(),
+                                                                          refining.getPleiadesViewingModelB().getDimension(),
+                                                                          noise);
+            
+//            // To test with measures without noise
+//            InterMeasureGenerator measures = refining.generatePoints(lineSampling, pixelSampling, 
+//                                                                     refining.getRuggedA(), refining.getSensorNameA(),
+//                                                                     refining.getPleiadesViewingModelA().getDimension(),
+//                                                                     refining.getRuggedB(), refining.getSensorNameB(),
+//                                                                     refining.getPleiadesViewingModelB().getDimension());
+            
             refining.setMeasures(measures);
             
             
             // Compute ground truth residues
             // -----------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
-            refining.computeMetrics(false);
+            refining.computeMetrics(measures.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
             
-         
+
             // Initialize physical models without disruptions
             // -----------------------------------------------
             System.out.format("\n**** Initialize physical models (A,B) without disruptions: reset Roll/Pitch/Factor **** %n");
@@ -297,13 +325,19 @@ public class InterRefining {
             // Compute initial residues
             // ------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
-            refining.computeMetrics(false);
+            refining.computeMetrics(measures.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
             
                
             // Start optimization
             // ------------------
             System.out.format("\n**** Start optimization  **** %n");
-            refining.optimization();
+            
+            int maxIterations = 100;
+            double convergenceThreshold =  1e-10;
+            
+            refining.optimization(maxIterations, convergenceThreshold, 
+                                  measures.getInterMapping(), 
+                                  refining.getRuggedA(), refining.getRuggedB());
             
             
             // Check estimated values
@@ -321,7 +355,7 @@ public class InterRefining {
             // Compute statistics
             // ------------------
             System.out.format("\n**** Compute Statistics **** %n");
-            refining.computeMetrics(false);
+            refining.computeMetrics(measures.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
             
                          
                  
@@ -553,68 +587,86 @@ public class InterRefining {
     }
     
     
-    /** Generate points of measures
-     * @param  isNoise flag to known if measures are noisy or not
+    /** Generate measurements without noise
+     * @param ruggedA Rugged instance of acquisition A
+     * @param sensorNameA line sensor name A
+     * @param ruggedA Rugged instance of acquisition B
+     * @param sensorNameB line sensor name B
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public InterMeasureGenerator generatePoints(boolean isNoise) throws OrekitException, RuggedException {
+    public InterMeasureGenerator generatePoints(int lineSampling, int pixelSampling, 
+                                                Rugged ruggedA, String sensorNameA, int dimensionA, 
+                                                Rugged ruggedB, String sensorNameB, int dimensionB) throws OrekitException, RuggedException {
         
-        int lineSampling = 1000;
-        int pixelSampling = 1000;       
         final double outlierValue = 1e+2;           // outliers control
         final double earthConstraintWeight = 0.1;   // earth constraint weight
-        // TODO: faire le cas sans contraintes
 
-        /* Generate measures with constraints on Earth distance */
-        InterMeasureGenerator measures = new InterMeasureGenerator(pleiadesViewingModelA,ruggedA,
-                                                                  pleiadesViewingModelB,ruggedB,
-                                                                  outlierValue,
-                                                                  earthConstraintWeight);
-        if(isNoise) {
+        /* Generate measures with constraints on Earth distance and outliers control */
+        InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
+                                                                   ruggedB, sensorNameB, dimensionB,
+                                                                   outlierValue,
+                                                                   earthConstraintWeight);
+      
+        System.out.format("\n**** Generate measures (without noise) **** %n");
         
-            System.out.format("\n**** Generate noisy measures **** %n");
-            
-            // Noise definition
-            final Noise noise = new Noise(0,2); /* distribution: gaussian(0), vector dimension:3 */
-            final double[] mean = {5.0,0.0}; // {pixelA mean, pixelB mean}
-            final double[] standardDeviation = {0.1,0.1};  // {pixelB std, pixelB std}
-            noise.setMean(mean);
-            noise.setStandardDeviation(standardDeviation);
-
-            System.out.format("\tSensor A mean: %f std %f %n",mean[0],standardDeviation[0]);
-            System.out.format("\tSensor B mean: %f std %f %n",mean[1],standardDeviation[1]);
-
-            // Generation noisy measures
-            measures.createNoisyMeasure(lineSampling, pixelSampling, noise); 
-            
-            
-        } else {
-            
-            System.out.format("\n**** Generate measures (without noise) **** %n");
-            // Generation measures without noise
-            measures.createMeasure(lineSampling, pixelSampling);
-        }
- 
+        // Generation measures without noise
+        measures.createMeasure(lineSampling, pixelSampling);
+        
         System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
 
         return measures;
            
     }
     
-    
+
+    /** Generate noisy measurements
+     * @param ruggedA Rugged instance of acquisition A
+     * @param sensorNameA line sensor name A
+     * @param ruggedA Rugged instance of acquisition B
+     * @param sensorNameB line sensor name B
+     * @param noise Noise structure to generate noisy measures
+     * @throws OrekitException 
+     * @throws RuggedException 
+     */
+    public InterMeasureGenerator generateNoisyPoints(int lineSampling, int pixelSampling, 
+                                                     Rugged ruggedA, String sensorNameA, int dimensionA, 
+                                                     Rugged ruggedB, String sensorNameB, int dimensionB,
+                                                     Noise noise) throws OrekitException, RuggedException {
+        
+        final double outlierValue = 1e+2;           // outliers control
+        final double earthConstraintWeight = 0.1;   // earth constraint weight
+
+        /* Generate measures with constraints on Earth distance and outliers control */
+        InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
+                                                                   ruggedB, sensorNameB, dimensionB,
+                                                                   outlierValue,
+                                                                   earthConstraintWeight);
+        System.out.format("\n**** Generate noisy measures **** %n");
+            
+        // Generation noisy measures
+        measures.createNoisyMeasure(lineSampling, pixelSampling, noise); 
+            
+        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
+
+        return measures;
+           
+    }
+
     /** Compute metrics
      * @param unit 
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void computeMetrics(boolean unit) throws RuggedException {
+    public void computeMetrics(SensorToSensorMapping interMapping,
+                               Rugged ruggedA, Rugged ruggedB, 
+                               boolean unit) throws RuggedException {
         
         String stUnit = null;
         if(unit) stUnit="degrees";
         else stUnit="meters";
         
-        LocalisationMetrics residues = new LocalisationMetrics(measures.getInterMapping(),ruggedA,ruggedB, unit);
+        LocalisationMetrics residues = new LocalisationMetrics(interMapping, ruggedA, ruggedB, unit);
         System.out.format("Max: %1.4e Mean: %1.4e %s%n",residues.getMaxResidual(),residues.getMeanResidual(), stUnit);
         System.out.format("LOS distance Max: %1.4e Mean: %1.4e %s%n",residues.getLosMaxDistance(),residues.getLosMeanDistance(), stUnit);
         System.out.format("Earth distance Max: %1.4e Mean: %1.4e %s%n",residues.getEarthMaxDistance(),residues.getEarthMeanDistance(), stUnit);
@@ -665,18 +717,18 @@ public class InterRefining {
      * @throws OrekitException 
      * @throws RuggedException 
      */
-    public void optimization() throws OrekitException, RuggedException {
+    public void optimization(int maxIterations, double convergenceThreshold,
+                             SensorToSensorMapping interMapping, 
+                             Rugged ruggedA, Rugged ruggedB) throws OrekitException, RuggedException {
     
-        // perform estimation parameters 
-        int maxIterations = 100;
-        double convergenceThreshold =  1e-10;
         
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n",maxIterations, convergenceThreshold);
 
         // Note: estimateFreeParams2Models() is supposed to be applying on ruggedB, not on ruggedA (to be compliant with notations)
         
         // Adapt parameters
-        Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(measures.getInterMapping()), maxIterations,convergenceThreshold, ruggedA);
+        Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(interMapping), 
+                                                            maxIterations,convergenceThreshold, ruggedA);
         
         // Print statistics 
         System.out.format("Max value: %3.6e %n",optimum.getResiduals().getMaxValue());

@@ -23,7 +23,6 @@ import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.refining.measures.Noise;
 import org.orekit.rugged.refining.measures.SensorToSensorMapping;
 import org.orekit.rugged.refining.metrics.DistanceTools;
-import org.orekit.rugged.refining.models.PleiadesViewingModel;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 
 import org.orekit.time.AbsoluteDate;
@@ -50,17 +49,18 @@ public class InterMeasureGenerator implements Measurable {
 
     private LineSensor sensorB;
 
-    private PleiadesViewingModel viewingModelA;
-
-    private PleiadesViewingModel viewingModelB;
-
     private int measureCount;
 
     private String sensorNameA;
 
     private String sensorNameB;
     
+    private int dimensionA;
+    
+    private int dimensionB;
+    
     private double outlier=0.0;
+    
 
     /** Default constructor: measures generation without outlier points control 
      * and without Earth distance constraint.
@@ -70,14 +70,12 @@ public class InterMeasureGenerator implements Measurable {
      * @param ruggedB
      * @throws RuggedException
      */
-    public InterMeasureGenerator(PleiadesViewingModel viewingModelA,
-                                          Rugged ruggedA,
-                                          PleiadesViewingModel viewingModelB,
-                                          Rugged ruggedB)
+    public InterMeasureGenerator(Rugged ruggedA, String sensorNameA, int dimensionA, 
+                                 Rugged ruggedB, String sensorNameB, int dimensionB)
         throws RuggedException {
 
         // Initialize parameters
-        this.initParams(viewingModelA, ruggedA, viewingModelB, ruggedB);
+        this.initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
 
         // generate reference mapping, without Earth distance constraint
         interMapping = new SensorToSensorMapping(sensorNameA, sensorNameB);
@@ -94,13 +92,11 @@ public class InterMeasureGenerator implements Measurable {
      * @param outlier limit value of outlier points
      * @throws RuggedException
      */
-    public InterMeasureGenerator(PleiadesViewingModel viewingModelA,
-                                          Rugged ruggedA,
-                                          PleiadesViewingModel viewingModelB,
-                                          Rugged ruggedB, double outlier)
+    public InterMeasureGenerator(Rugged ruggedA, String sensorNameA, int dimensionA, 
+                                 Rugged ruggedB, String sensorNameB, int dimensionB, double outlier)
         throws RuggedException {
 
-        this(viewingModelA, ruggedA, viewingModelB, ruggedB);
+        this(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
         this.outlier = outlier;
 
     }
@@ -118,15 +114,13 @@ public class InterMeasureGenerator implements Measurable {
      * @throws RuggedException
      * @see Rugged#estimateFreeParams2Models
      */
-    public InterMeasureGenerator(PleiadesViewingModel viewingModelA,
-                                 Rugged ruggedA,
-                                 PleiadesViewingModel viewingModelB,
-                                 Rugged ruggedB, double outlier, 
-                                 final double earthConstraintWeight)
+    public InterMeasureGenerator(Rugged ruggedA, String sensorNameA, int dimensionA, 
+                                 Rugged ruggedB, String sensorNameB, int dimensionB, 
+                                 double outlier, final double earthConstraintWeight)
         throws RuggedException {
 
      // Initialize parameters
-        this.initParams(viewingModelA, ruggedA, viewingModelB, ruggedB);
+        this.initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
 
         // generate reference mapping, with Earth distance constraints
         // Weighting will be applied as follow :
@@ -153,9 +147,9 @@ public class InterMeasureGenerator implements Measurable {
                     
         // Search the sensor pixel seeing point
         final int minLine = 0;
-        final int maxLine = viewingModelB.dimension - 1;
+        final int maxLine = dimensionB - 1;
                     
-        for (double line = 0; line < viewingModelA.dimension; line += lineSampling) {
+        for (double line = 0; line < dimensionA; line += lineSampling) {
 
             AbsoluteDate dateA = sensorA.getDate(line);
             
@@ -229,7 +223,7 @@ public class InterMeasureGenerator implements Measurable {
         
         // Search the sensor pixel seeing point
         final int minLine = 0;
-        final int maxLine = viewingModelB.dimension - 1;
+        final int maxLine = dimensionB - 1;
         
         double meanA[] =  {mean[0],mean[0]};
         double stdA[] = {std[0],std[0]};
@@ -246,7 +240,7 @@ public class InterMeasureGenerator implements Measurable {
         
         
         
-        for (double line = 0; line < viewingModelA.dimension; line += lineSampling) {
+        for (double line = 0; line < dimensionA; line += lineSampling) {
 
             AbsoluteDate dateA = sensorA.getDate(line);
             for (double pixelA = 0; pixelA < sensorA
@@ -348,14 +342,12 @@ public class InterMeasureGenerator implements Measurable {
      * @param ruggedB
      * @throws RuggedException
      */
-    private void initParams(PleiadesViewingModel viewingModelA,
-                            Rugged ruggedA,
-                            PleiadesViewingModel viewingModelB,
-                            Rugged ruggedB) throws RuggedException {
+    private void initParams(Rugged ruggedA, String sensorNameA, int dimensionA,
+                            Rugged ruggedB, String sensorNameB, int dimensionB) throws RuggedException {
         
         // generate reference mapping
-        sensorNameA = viewingModelA.getSensorName();
-        sensorNameB = viewingModelB.getSensorName();
+        this.sensorNameA = sensorNameA;
+        this.sensorNameB = sensorNameB;
         // check that sensors's name is different
         if (sensorNameA.contains(sensorNameB)) {
             throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME,
@@ -365,11 +357,12 @@ public class InterMeasureGenerator implements Measurable {
         this.ruggedA = ruggedA;
         this.ruggedB = ruggedB;
 
-        this.viewingModelA = viewingModelA;
-        this.viewingModelB = viewingModelB;
-
         sensorA = ruggedA.getLineSensor(sensorNameA);
         sensorB = ruggedB.getLineSensor(sensorNameB);
+        
+        this.dimensionA = dimensionA;
+        this.dimensionB = dimensionB;
+        
         measureCount = 0;
 
     }

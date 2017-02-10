@@ -141,7 +141,14 @@ public class PleiadesViewingModel {
 			return sensorName;
 	}
 	
-	private  void  createLineSensor()
+	/**
+     * @return the dimension
+     */
+    public int getDimension() {
+        return dimension;
+    }
+
+    private  void  createLineSensor()
 			throws RuggedException, OrekitException {
 
 	      
