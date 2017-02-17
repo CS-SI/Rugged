@@ -16,28 +16,22 @@
  */
 package org.orekit.rugged.adjustment;
 
-import org.orekit.rugged.refining.measures.Observables;
-import org.orekit.rugged.api.Rugged;
-import org.orekit.rugged.errors.RuggedException;
 
-import org.hipparchus.optim.ConvergenceChecker;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.GaussNewtonOptimizer;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresBuilder;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
-import org.orekit.rugged.adjustment.OptimizerId;
-
-import org.hipparchus.linear.DiagonalMatrix;
-import org.hipparchus.optim.ConvergenceChecker;
-
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.orekit.errors.OrekitException;
+import org.orekit.errors.OrekitExceptionWrapper;
+import org.orekit.rugged.api.Rugged;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedExceptionWrapper;
+import org.orekit.rugged.errors.RuggedMessages;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.refining.measures.Observables;
+import org.orekit.utils.ParameterDriver;
 
 /**
  * Create adjustment context for viewing model refining refining
@@ -53,6 +47,10 @@ public class AdjustmentContext {
     /** set of measures. */
     private final Observables measures;
 
+    /** least square optimizer choice.*/
+    private OptimizerId optimizerID;
+
+
     /** Build a new instance.
      * @param viewingModel viewingModel
      * @param measures control and tie points
@@ -64,62 +62,102 @@ public class AdjustmentContext {
             this.viewingModel.put("Rugged", r);
         }
         this.measures = measures;
+        this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;
     }
 
-    
-    public Optimum estimateFreeParameters(String RuggedName) {
-        Optimum optimum;
-        return optimum;
-    }
-    
-    public Optimum estimateFreeParameters2Viewing(String RuggedNameA, String RuggedNameB) {
-        Optimum optimum;
-        return optimum;
-    }
-    
-    /** Create the LeastSquareProblem.
-     * @param maxEvaluations maximum iterations and evaluations in optimization problem
-     * @param weight Measures weight matrix
-     * @param start
-     * @param target
-     * @param validator
-     * @param checker
-     * @param model
-     * @return the least square problem
+
+    /** setter for optimizer algorithm.
+     * @param optimizerId the algorithm
      */
-    public LeastSquaresProblem LeastSquaresProblemBuilder(final int maxEvaluations, final double[] weight,
-                                                          final double[] start, final double[] target,
-                                                          final ParameterValidator validator, 
-                                                          final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker,
-                                                          final MultivariateJacobianFunction model) {
-        final LeastSquaresProblem problem = new LeastSquaresBuilder()
-                        .lazyEvaluation(false).maxIterations(maxEvaluations)
-                        .maxEvaluations(maxEvaluations).weight(new DiagonalMatrix(weight)).start(start)
-                        .target(target).parameterValidator(validator).checker(checker)
-                        .model(model).build();
-        return problem;
+    public void setOptimizer(final OptimizerId optimizerId)
+    {
+        this.optimizerID = optimizerId;
     }
 
-    /** Create the optimizer.
-     * @param optimizerID reference optimizer identifier
-     * @return optimizer
+    /**
+     * Estimate the free parameters in viewing model to match specified sensor
+     * to ground mappings.
+     * <p>
+     * This method is typically used for calibration of on-board sensor
+     * parameters, like rotation angles polynomial coefficients.
+     * </p>
+     * <p>
+     * Before using this method, the {@link ParameterDriver viewing model
+     * parameters} retrieved by calling the
+     * {@link LineSensor#getParametersDrivers() getParametersDrivers()} method
+     * on the desired sensors must be configured. The parameters that should be
+     * estimated must have their {@link ParameterDriver#setSelected(boolean)
+     * selection status} set to {@link true} whereas the parameters that should
+     * retain their current value must have their
+     * {@link ParameterDriver#setSelected(boolean) selection status} set to
+     * {@link false}. If needed, the {@link ParameterDriver#setValue(double)
+     * value} of the estimated/selected parameters can also be changed before
+     * calling the method, as this value will serve as the initial value in the
+     * estimation process.
+     * </p>
+     * <p>
+     * The method solves a least-squares problem to minimize the residuals
+     * between test locations and the reference mappings by adjusting the
+     * selected viewing models parameters.
+     * </p>
+     * <p>
+     * The estimated parameters can be retrieved after the method completes by
+     * calling again the {@link LineSensor#getParametersDrivers()
+     * getParametersDrivers()} method on the desired sensors and checking the
+     * updated values of the parameters. In fact, as the values of the
+     * parameters are already updated by this method, if users want to use the
+     * updated values immediately to perform new direct/inverse locations, they
+     * can do so without looking at the parameters: the viewing models are
+     * already aware of the updated parameters.
+     * </p>
+     *
+     * @param references reference mappings between sensors pixels and ground
+     *        point that should ultimately be reached by adjusting selected
+     *        viewing models parameters
+     * @param maxEvaluations maximum number of evaluations
+     * @param parametersConvergenceThreshold convergence threshold on normalized
+     *        parameters (dimensionless, related to parameters scales)
+     * @return optimum of the least squares problem
+     * @exception RuggedException if several parameters with the same name
+     *            exist, if no parameters have been selected for estimation, or
+     *            if parameters cannot be estimated (too few measurements,
+     *            ill-conditioned problem ...)
      */
-    private LeastSquaresOptimizer selectOptimizer(final OptimizerId optimizerID) {
-        // set up the optimizer
-        switch (optimizerID) {
-        case LEVENBERG_MARQUADT:
-            return new LevenbergMarquardtOptimizer();
-        case GAUSS_NEWTON_LU :
-            return new GaussNewtonOptimizer()
-                            .withDecomposition(GaussNewtonOptimizer.Decomposition.LU);
-        case GAUSS_NEWTON_QR :
-            return new GaussNewtonOptimizer()
-            .withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
+    public Optimum estimateFreeParameters(final String RuggedName, final int maxEvaluations, final double parametersConvergenceThreshold)
+                    throws RuggedException {
+        try {
+
+            final Rugged rugged = this.viewingModel.get(RuggedName);
+            if (rugged == null) {
+                throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
+            }
+
+
+            final String sensorName = measures.getGroundMapping().getSensorName();
+
+            final List<LineSensor> selectedSensors = new ArrayList<>();
+            //TODO loop over all sensors
+            //for (final SensorToGroundMapping reference : references) {
+            selectedSensors.add(rugged.getLineSensor(sensorName));
+            //}
+
+            /** builder */
+            final GroundOptimizationProblemBuilder optimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measures, rugged);
+
+
+            final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(this.optimizerID);
+
+            return adjuster.optimize(optimizationProblem.build(maxEvaluations, parametersConvergenceThreshold));
+
+
+        } catch (RuggedExceptionWrapper rew) {
+            throw rew.getException();
+        } catch (OrekitExceptionWrapper oew) {
+            final OrekitException oe = oew.getException();
+            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
-
     }
+
+    /*public Optimum estimateFreeParameters(final String RuggedNameA, final String RuggedNameB, final int maxEvaluations, final float parametersConvergenceThreshold)*/
 
 }

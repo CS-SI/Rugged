@@ -17,8 +17,64 @@
 
 package org.orekit.rugged.adjustment;
 
-
+import org.hipparchus.optim.nonlinear.vector.leastsquares.GaussNewtonOptimizer;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
+import org.orekit.rugged.errors.RuggedException;
 
 public class LeastSquareAdjuster {
+
+    /** least square optimzaer.*/
+    private final LeastSquaresOptimizer adjuster;
+
+    /** least square optimizer choice.*/
+    private final OptimizerId optimizerID;
+
+    /** constructor.
+     * @param optimizerID optimizer choice
+     */
+    LeastSquareAdjuster(final OptimizerId optimizerID)
+    {
+        this.optimizerID = optimizerID;
+        this.adjuster = this.selectOptimizer();
+    }
+
+    /** default constructor assuming Gauss Newton QR algorithm.*/
+    LeastSquareAdjuster()
+    {
+        this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;
+        this.adjuster = this.selectOptimizer();
+    }
+
+    /** solve the least square problem.
+     * @param problem the least square problem
+     * @return the solution
+     */
+    public Optimum optimize(final LeastSquaresProblem problem) {
+        return this.adjuster.optimize(problem);
+    }
+
+    /** Create the optimizer.
+     * @return optimizer
+     */
+    private LeastSquaresOptimizer selectOptimizer() {
+        // set up the optimizer
+        switch (this.optimizerID) {
+            case LEVENBERG_MARQUADT:
+                return new LevenbergMarquardtOptimizer();
+            case GAUSS_NEWTON_LU :
+                return new GaussNewtonOptimizer()
+                                .withDecomposition(GaussNewtonOptimizer.Decomposition.LU);
+            case GAUSS_NEWTON_QR :
+                return new GaussNewtonOptimizer()
+                                .withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
+        }
+
+    }
 
 }
