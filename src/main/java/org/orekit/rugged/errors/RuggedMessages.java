@@ -16,7 +16,6 @@
  */
 package org.orekit.rugged.errors;
 
-import org.hipparchus.exception.Localizable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,6 +25,8 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+
+import org.hipparchus.exception.Localizable;
 
 
 /**
@@ -78,7 +79,8 @@ public enum RuggedMessages implements Localizable {
     UNKNOWN_TILE("unknown tile {0}, line {1}, file {2}: {3}"),
     NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),
     NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),
-    DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists");
+    DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
+    INVALID_RUGGED_NAME("invalid rugged name.");
 
     // CHECKSTYLE: resume JavadocVariable check
 
@@ -97,20 +99,22 @@ public enum RuggedMessages implements Localizable {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getSourceString() {
         return sourceFormat;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getLocalizedString(final Locale locale) {
         try {
             final ResourceBundle bundle =
-                    ResourceBundle.getBundle(RESOURCE_BASE_NAME, locale, new UTF8Control());
+                            ResourceBundle.getBundle(RESOURCE_BASE_NAME, locale, new UTF8Control());
             if (bundle.getLocale().getLanguage().equals(locale.getLanguage())) {
                 final String translated = bundle.getString(name());
                 if ((translated != null) &&
-                    (translated.length() > 0) &&
-                    (!translated.toLowerCase().contains("missing translation"))) {
+                                (translated.length() > 0) &&
+                                (!translated.toLowerCase().contains("missing translation"))) {
                     // the value of the resource is the translated format
                     return translated;
                 }
@@ -139,7 +143,7 @@ public enum RuggedMessages implements Localizable {
         @Override
         public ResourceBundle newBundle(final String baseName, final Locale locale, final String format,
                                         final ClassLoader loader, final boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException {
+                                                        throws IllegalAccessException, InstantiationException, IOException {
             // The below is a copy of the default implementation.
             final String bundleName = toBundleName(baseName, locale);
             final String resourceName = toResourceName(bundleName, "utf8");
