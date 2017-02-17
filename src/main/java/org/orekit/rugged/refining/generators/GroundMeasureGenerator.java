@@ -35,7 +35,7 @@ import org.hipparchus.util.FastMath;
 
 
 
-/** Ground measures generator (sensor to ground mapping)
+/** Ground measures generator (sensor to ground mapping).
  * @author Jonathan Guinet
  * @autor Lucie Labat-Allee
  */
@@ -58,7 +58,7 @@ public class GroundMeasureGenerator implements Measurable {
      *
      * </p>
      */
-    public GroundMeasureGenerator(Rugged rugged, String sensorName, int dimension) throws RuggedException
+    public GroundMeasureGenerator(final Rugged rugged, final String sensorName, final int dimension) throws RuggedException
     {
 	
     // generate reference mapping
@@ -69,69 +69,69 @@ public class GroundMeasureGenerator implements Measurable {
     this.dimension = dimension;
     
     }
-    
+
     public SensorToGroundMapping getGroundMapping() {
     	return groundMapping;
     }
-    
+
     public int  getMeasureCount() {
     	return measureCount;
     }    
-    
+
     public void createMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
     {
         for (double line = 0; line < dimension; line += lineSampling) {
-        	
-        	AbsoluteDate date = sensor.getDate(line);
+
+        	final AbsoluteDate date = sensor.getDate(line);
         	for (int pixel = 0; pixel < sensor.getNbPixels(); pixel += pixelSampling) {
 
-        		GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
+        		final GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
                                                       sensor.getLOS(date, pixel));
-            
+
         		groundMapping.addMapping(new SensorPixel(line, pixel), gp2);
         		measureCount++;
         	}
         }
     }
-    public void createNoisyMeasure(final int lineSampling,final int pixelSampling, Noise noise)  throws RuggedException
+    public void createNoisyMeasure(final int lineSampling,final int pixelSampling, final Noise noise)  throws RuggedException
     {
         /* Estimate latitude and longitude errors estimation */
-    	Vector3D latLongError = estimateLatLongError();
-    	
+    	final Vector3D latLongError = estimateLatLongError();
+
     	/* Get noise features */
     	final double[] mean = noise.getMean(); /* [latitude, longitude, altitude] mean */
     	final double[] std = noise.getStandardDeviation(); /* [latitude, longitude, altitude] standard deviation */
-    	
-    	double latErrorMean = mean[0]*latLongError.getX(); // in line: -0.000002 deg
-    	double lonErrorMean = mean[1]*latLongError.getY(); // in line: 0.000012 deg
-    	double latErrorStd = std[0]*latLongError.getX(); // in line: -0.000002 deg
-    	double lonErrorStd = std[1]*latLongError.getY(); // in line: 0.000012 deg
-    	
+
+    	final double latErrorMean = mean[0] * latLongError.getX(); // in line: -0.000002 deg
+    	final double lonErrorMean = mean[1] * latLongError.getY(); // in line: 0.000012 deg
+    	final double latErrorStd = std[0] * latLongError.getX(); // in line: -0.000002 deg
+    	final double lonErrorStd = std[1] * latLongError.getY(); // in line: 0.000012 deg
+
     	// Gaussian random generator
     	// Build a null mean random uncorrelated vector generator with standard deviation corresponding to the estimated error on ground
-    	double meanGenerator[] =  {latErrorMean, lonErrorMean, mean[2]};
-    	double stdGenerator[] = {latErrorStd, lonErrorStd, std[2]};
+    	final double meanGenerator[] =  {latErrorMean, lonErrorMean, mean[2]};
+    	final double stdGenerator[] = {latErrorStd, lonErrorStd, std[2]};
     	System.out.format("Corresponding error estimation on ground {Latitude, Longitude, Altitude}:%n");
-        System.out.format("\tMean: {%1.10f rad, %1.10f rad, %1.10f m} %n",meanGenerator[0],meanGenerator[1],meanGenerator[2]);
-        System.out.format("\tStd : {%1.10f rad, %1.10f rad, %1.10f m} %n",stdGenerator[0],stdGenerator[1],stdGenerator[2]);
+        System.out.format("\tMean: {%1.10f rad, %1.10f rad, %1.10f m} %n", meanGenerator[0], meanGenerator[1], meanGenerator[2]);
+        System.out.format("\tStd : {%1.10f rad, %1.10f rad, %1.10f m} %n", stdGenerator[0], stdGenerator[1], stdGenerator[2]);
 
-    	GaussianRandomGenerator rng = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
-    	UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(meanGenerator, stdGenerator, rng);
+    	final GaussianRandomGenerator rng = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
+    	final UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(meanGenerator, stdGenerator, rng);
         
     	System.out.format("Add a gaussian noise to measures without biais (null mean) and standard deviation%n corresponding to the estimated error on ground.%n");
     	for (double line = 0; line < dimension; line += lineSampling) {
         	
-        	AbsoluteDate date = sensor.getDate(line);
+        	final AbsoluteDate date = sensor.getDate(line);
         	for (int pixel = 0; pixel < sensor.getNbPixels(); pixel += pixelSampling) {
 
         		// Components of generated vector follow (independent) Gaussian distribution
-            	Vector3D vecRandom = new Vector3D(rvg.nextVector());
+            	final Vector3D vecRandom = new Vector3D(rvg.nextVector());
             	
-        		GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
+        		final GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
                                                       sensor.getLOS(date, pixel));
         		          		
         		
-        		GeodeticPoint gpNoisy = new GeodeticPoint(gp2.getLatitude()+vecRandom.getX(), 
+        		final GeodeticPoint gpNoisy = new GeodeticPoint(gp2.getLatitude()+vecRandom.getX(), 
                         gp2.getLongitude()+vecRandom.getY(),
                         gp2.getAltitude()+vecRandom.getZ()); 
 
@@ -153,11 +153,11 @@ public class GroundMeasureGenerator implements Measurable {
     	final int line= (int) FastMath.floor(pix); // assumption : same number of line and pixels;
     	System.out.format("Pixel size estimated at position  pix: %d line: %d %n", pix, line);
     	final AbsoluteDate date = sensor.getDate(line);
-    	GeodeticPoint gp_pix0 = rugged.directLocation(date, sensor.getPosition(), sensor.getLOS(date, pix));
+    	final GeodeticPoint gp_pix0 = rugged.directLocation(date, sensor.getPosition(), sensor.getLOS(date, pix));
     	final AbsoluteDate date1 = sensor.getDate(line+1);
-    	GeodeticPoint gp_pix1 = rugged.directLocation(date1, sensor.getPosition(), sensor.getLOS(date1, pix+1));
-    	double latErr=FastMath.abs(gp_pix0.getLatitude()-gp_pix1.getLatitude());
-		double lonErr=FastMath.abs(gp_pix0.getLongitude()-gp_pix1.getLongitude());
+    	final GeodeticPoint gp_pix1 = rugged.directLocation(date1, sensor.getPosition(), sensor.getLOS(date1, pix+1));
+    	final double latErr = FastMath.abs(gp_pix0.getLatitude() - gp_pix1.getLatitude());
+    	final double lonErr = FastMath.abs(gp_pix0.getLongitude() - gp_pix1.getLongitude());
     	//double dist = FastMath.sqrt(lonErr*lonErr + latErr*latErr)/FastMath.sqrt(2);
     	final double distanceX =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix1.getLongitude(), gp_pix0.getLatitude());
     	final double distanceY =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix0.getLongitude(), gp_pix1.getLatitude());
@@ -165,9 +165,7 @@ public class GroundMeasureGenerator implements Measurable {
     	System.out.format("Estimated distance: X %3.3f Y %3.3f %n",distanceX, distanceY);
     	
     	//System.out.format(" lat  : %1.10f %1.10f %n",  latErr, lonErr);
-    	return new Vector3D(latErr,lonErr,0.0);
+    	return new Vector3D(latErr, lonErr, 0.0);
     }
-
-    
 }
 

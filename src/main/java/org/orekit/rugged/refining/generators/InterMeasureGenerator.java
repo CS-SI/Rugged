@@ -32,13 +32,13 @@ import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.Well19937a;
 
 /**
- * Inter-measures generator (sensor to sensor mapping)
+ * Inter-measures generator (sensor to sensor mapping).
  * @author Jonathan Guinet
  * @author Lucie Labatallee
  */
 public class InterMeasureGenerator implements Measurable {
 
-    /** mapping */
+    /** mapping. */
     private SensorToSensorMapping interMapping;
 
     private Rugged ruggedA;
