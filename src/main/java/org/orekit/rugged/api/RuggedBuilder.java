@@ -16,9 +16,6 @@
  */
 package org.orekit.rugged.api;
 
-import org.hipparchus.exception.LocalizedCoreFormats;
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -28,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hipparchus.exception.LocalizedCoreFormats;
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -157,6 +157,9 @@ public class RuggedBuilder {
     /** Sensors. */
     private final List<LineSensor> sensors;
 
+    /** Rugged Name. */
+    private String name;
+
     /** Create a non-configured builder.
      * <p>
      * The builder <em>must</em> be configured before calling the
@@ -169,6 +172,7 @@ public class RuggedBuilder {
         constantElevation           = Double.NaN;
         lightTimeCorrection         = true;
         aberrationOfLightCorrection = true;
+        name                        = "Rugged";
     }
 
     /** Set the reference ellipsoid.
@@ -182,7 +186,7 @@ public class RuggedBuilder {
      * @see #getEllipsoid()
      */
     public RuggedBuilder setEllipsoid(final EllipsoidId ellipsoidID, final BodyRotatingFrameId bodyRotatingFrameID)
-        throws RuggedException {
+                    throws RuggedException {
         return setEllipsoid(selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)));
     }
 
@@ -196,7 +200,7 @@ public class RuggedBuilder {
      */
     // CHECKSTYLE: stop HiddenField check
     public RuggedBuilder setEllipsoid(final OneAxisEllipsoid ellipsoid)
-        throws RuggedException {
+                    throws RuggedException {
         // CHECKSTYLE: resume HiddenField check
         this.ellipsoid = new ExtendedEllipsoid(ellipsoid.getEquatorialRadius(),
                                                ellipsoid.getFlattening(),
@@ -213,6 +217,22 @@ public class RuggedBuilder {
     public ExtendedEllipsoid getEllipsoid() {
         return ellipsoid;
     }
+
+    /** Get the rugged name.
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+
+    /** Set the rugged name.
+     * @param name the Rugged name
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
 
     /** Set the algorithm to use for Digital Elevation Model intersection.
      * <p>
@@ -417,7 +437,7 @@ public class RuggedBuilder {
                                        final CartesianDerivativesFilter pvFilter,
                                        final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
                                        final AngularDerivativesFilter aFilter)
-        throws RuggedException {
+                                                       throws RuggedException {
         return setTrajectory(selectInertialFrame(inertialFrame),
                              positionsVelocities, pvInterpolationNumber, pvFilter,
                              quaternions, aInterpolationNumber, aFilter);
@@ -574,7 +594,7 @@ public class RuggedBuilder {
      * @see #storeInterpolator(OutputStream)
      */
     public RuggedBuilder setTrajectoryAndTimeSpan(final InputStream storageStream)
-        throws RuggedException {
+                    throws RuggedException {
         try {
             this.inertial           = null;
             this.pvSample           = null;
@@ -638,7 +658,7 @@ public class RuggedBuilder {
      */
     private void checkFramesConsistency() throws RuggedException {
         if (ellipsoid != null && scToBody != null &&
-            !ellipsoid.getBodyFrame().getName().equals(scToBody.getBodyFrame().getName())) {
+                        !ellipsoid.getBodyFrame().getName().equals(scToBody.getBodyFrame().getName())) {
             throw new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
                                       ellipsoid.getBodyFrame().getName(), scToBody.getBodyFrame().getName());
         }
@@ -698,7 +718,7 @@ public class RuggedBuilder {
                                                                final List<TimeStampedAngularCoordinates> quaternions,
                                                                final int aInterpolationNumber,
                                                                final AngularDerivativesFilter aFilter)
-        throws RuggedException {
+                                                                               throws RuggedException {
         return new SpacecraftToObservedBody(inertialFrame, bodyFrame,
                                             minDate, maxDate, tStep, overshootTolerance,
                                             positionsVelocities, pvInterpolationNumber,
@@ -728,14 +748,14 @@ public class RuggedBuilder {
                                                                final CartesianDerivativesFilter pvFilter,
                                                                final AngularDerivativesFilter aFilter,
                                                                final Propagator propagator)
-        throws RuggedException {
+                                                                               throws RuggedException {
         try {
 
             // extract position/attitude samples from propagator
             final List<TimeStampedPVCoordinates> positionsVelocities =
-                    new ArrayList<TimeStampedPVCoordinates>();
+                            new ArrayList<TimeStampedPVCoordinates>();
             final List<TimeStampedAngularCoordinates> quaternions =
-                    new ArrayList<TimeStampedAngularCoordinates>();
+                            new ArrayList<TimeStampedAngularCoordinates>();
             propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
 
                 /** {@inheritDoc} */
@@ -746,7 +766,7 @@ public class RuggedBuilder {
                 /** {@inheritDoc} */
                 @Override
                 public void handleStep(final SpacecraftState currentState, final boolean isLast)
-                    throws OrekitException {
+                                throws OrekitException {
                     final AbsoluteDate  date = currentState.getDate();
                     final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
                     final Rotation      q    = currentState.getAttitude().getRotation();
@@ -863,24 +883,24 @@ public class RuggedBuilder {
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     private static Frame selectInertialFrame(final InertialFrameId inertialFrameId)
-        throws RuggedException {
+                    throws RuggedException {
 
         try {
             // set up the inertial frame
             switch (inertialFrameId) {
-            case GCRF :
-                return FramesFactory.getGCRF();
-            case EME2000 :
-                return FramesFactory.getEME2000();
-            case MOD :
-                return FramesFactory.getMOD(IERSConventions.IERS_1996);
-            case TOD :
-                return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
-            case VEIS1950 :
-                return FramesFactory.getVeis1950();
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+                case GCRF :
+                    return FramesFactory.getGCRF();
+                case EME2000 :
+                    return FramesFactory.getEME2000();
+                case MOD :
+                    return FramesFactory.getMOD(IERSConventions.IERS_1996);
+                case TOD :
+                    return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
+                case VEIS1950 :
+                    return FramesFactory.getVeis1950();
+                default :
+                    // this should never happen
+                    throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -894,20 +914,20 @@ public class RuggedBuilder {
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     private static Frame selectBodyRotatingFrame(final BodyRotatingFrameId bodyRotatingFrame)
-        throws RuggedException {
+                    throws RuggedException {
 
         try {
             // set up the rotating frame
             switch (bodyRotatingFrame) {
-            case ITRF :
-                return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-            case ITRF_EQUINOX :
-                return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
-            case GTOD :
-                return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+                case ITRF :
+                    return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+                case ITRF_EQUINOX :
+                    return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
+                case GTOD :
+                    return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
+                default :
+                    // this should never happen
+                    throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -924,19 +944,19 @@ public class RuggedBuilder {
 
         // set up the ellipsoid
         switch (ellipsoidID) {
-        case GRS80 :
-            return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
-        case WGS84 :
-            return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                        Constants.WGS84_EARTH_FLATTENING,
-                                        bodyFrame);
-        case IERS96 :
-            return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
-        case IERS2003 :
-            return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
+            case GRS80 :
+                return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
+            case WGS84 :
+                return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.WGS84_EARTH_FLATTENING,
+                                            bodyFrame);
+            case IERS96 :
+                return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
+            case IERS2003 :
+                return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
         }
 
     }
@@ -954,19 +974,19 @@ public class RuggedBuilder {
 
         // set up the algorithm
         switch (algorithmID) {
-        case DUVENHAGE :
-            return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
-        case DUVENHAGE_FLAT_BODY :
-            return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
-        case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-            return new BasicScanAlgorithm(updater, maxCachedTiles);
-        case CONSTANT_ELEVATION_OVER_ELLIPSOID :
-            return new ConstantElevationAlgorithm(constantElevation);
-        case IGNORE_DEM_USE_ELLIPSOID :
-            return new IgnoreDEMAlgorithm();
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
+            case DUVENHAGE :
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+            case DUVENHAGE_FLAT_BODY :
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
+            case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
+                return new BasicScanAlgorithm(updater, maxCachedTiles);
+            case CONSTANT_ELEVATION_OVER_ELLIPSOID :
+                return new ConstantElevationAlgorithm(constantElevation);
+            case IGNORE_DEM_USE_ELLIPSOID :
+                return new IgnoreDEMAlgorithm();
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
         }
 
     }
@@ -991,7 +1011,7 @@ public class RuggedBuilder {
         }
         createInterpolatorIfNeeded();
         return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation), ellipsoid,
-                          lightTimeCorrection, aberrationOfLightCorrection, scToBody, sensors);
+                          lightTimeCorrection, aberrationOfLightCorrection, scToBody, sensors, name);
     }
 
 }

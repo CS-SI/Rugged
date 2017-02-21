@@ -58,8 +58,7 @@ public class AdjustmentContext {
     public AdjustmentContext(final List<Rugged> viewingModel, final Observables measures) {
         this.viewingModel = new HashMap<String, Rugged>();
         for (final Rugged r : viewingModel) {
-            /** TODO this.viewingModel.put(r.getName(), r); */
-            this.viewingModel.put("Rugged", r);
+            this.viewingModel.put(r.getName(), r);
         }
         this.measures = measures;
         this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;

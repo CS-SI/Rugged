@@ -13,45 +13,24 @@
  */
 package org.orekit.rugged.api;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.linear.Array2DRowRealMatrix;
-import org.hipparchus.linear.ArrayRealVector;
-import org.hipparchus.linear.DiagonalMatrix;
-import org.hipparchus.linear.RealMatrix;
-import org.hipparchus.linear.RealVector;
-import org.hipparchus.optim.ConvergenceChecker;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.GaussNewtonOptimizer;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresBuilder;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
-import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
 import org.hipparchus.util.FastMath;
-import org.hipparchus.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
-import org.orekit.rugged.refining.measures.SensorToSensorMapping;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
@@ -59,8 +38,6 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.PVCoordinates;
-import org.orekit.utils.ParameterDriver;
-import org.orekit.utils.ParameterDriversList;
 
 /**
  * Main class of Rugged library API.
@@ -105,6 +82,9 @@ public class Rugged {
     /** Flag for aberration of light correction. */
     private boolean aberrationOfLightCorrection;
 
+    /** Rugged name. */
+    private final String name;
+
     /**
      * Build a configured instance.
      * <p>
@@ -127,12 +107,14 @@ public class Rugged {
      *        for more accurate location
      * @param scToBody transforms interpolator
      * @param sensors sensors
+     * @param name RuggedName
      */
     Rugged(final IntersectionAlgorithm algorithm,
            final ExtendedEllipsoid ellipsoid, final boolean lightTimeCorrection,
            final boolean aberrationOfLightCorrection,
            final SpacecraftToObservedBody scToBody,
-           final Collection<LineSensor> sensors) {
+           final Collection<LineSensor> sensors,
+           final String name) {
 
         // space reference
         this.ellipsoid = ellipsoid;
@@ -142,6 +124,9 @@ public class Rugged {
 
         // intersection algorithm
         this.algorithm = algorithm;
+
+        // rugged name
+        this.name = name;
 
         this.sensors = new HashMap<String, LineSensor>();
         for (final LineSensor s : sensors) {
@@ -153,6 +138,17 @@ public class Rugged {
         this.aberrationOfLightCorrection = aberrationOfLightCorrection;
 
     }
+
+    /**
+     * Get the ruggd name.
+     *
+     * @return rugged name
+     */
+    public String getName() {
+        return name;
+    }
+
+
 
     /**
      * Get the DEM intersection algorithm.
@@ -988,227 +984,6 @@ public class Rugged {
         return new DerivativeStructure[] {d, dEarth};
     }
 
-    /**
-     * Estimate the free parameters from two viewing models (A and B)
-     *
-     * @param references reference mappings between two sensors pixels from two
-     *        models and the corresponding computed distance between LOS that
-     *        should ultimately be reached by adjusting selected viewing models
-     *        parameters
-     * @param maxEvaluations maximum number of evaluations
-     * @param parametersConvergenceThreshold convergence threshold on normalized
-     *        parameters (dimensionless, related to parameters scales)
-     * @param ruggedA rugged instance from viewing model A
-     * @return optimum of the least squares problem
-     * @exception RuggedException if several parameters with the same name
-     *            exist, if no parameters have been selected for estimation, or
-     *            if parameters cannot be estimated (too few measurements,
-     *            ill-conditioned problem ...)
-     */
-    public Optimum estimateFreeParams2Models(
-                                             final Collection<SensorToSensorMapping> references,
-                                             final int maxEvaluations,
-                                             final double parametersConvergenceThreshold,
-                                             Rugged ruggedA)
-                                                             throws RuggedException {
-        try {
-
-            final List<LineSensor> selectedSensors = new ArrayList<>();
-            for (final SensorToSensorMapping reference : references) {
-                selectedSensors
-                .add(ruggedA.getLineSensor(reference.getSensorNameA())); // from
-                // ruggedA
-                // instance
-                selectedSensors
-                .add(this.getLineSensor(reference.getSensorNameB())); // from
-                // current
-                // ruggedB
-                // instance
-
-            }
-            final DSGenerator generator = createGenerator(selectedSensors);
-            final ParameterDriversList selected = generator.getSelected();
-            if (selected.getNbParams() == 0) {
-                throw new RuggedException(RuggedMessages.NO_PARAMETERS_SELECTED);
-            }
-
-            int iStart = 0;
-            // get start point (as a normalized value)
-            final double[] start = new double[selected.getNbParams()];
-            for (final ParameterDriver driver : selected.getDrivers()) {
-                start[iStart++] = driver.getNormalizedValue();
-            }
-
-            // set up target : distance between two LOS from both viewing models
-            // (A and B)
-            int n = 0;
-            for (final SensorToSensorMapping reference : references) {
-                n += reference.getMapping().size();
-            }
-
-            if (n == 0) {
-                throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
-            }
-
-            n = 2 * n;
-
-            final double[] target = new double[n];
-            final double[] weight = new double[n];
-            int k = 0;
-            for (final SensorToSensorMapping reference : references) {
-                // Get Earth constraint weight
-                double earthConstraintWeight = reference.getEarthConstraintWeight();
-
-                int i=0;
-                for(Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator();
-                                gtIt.hasNext();i++){
-
-                    if(i==reference.getMapping().size()) break;
-
-                    // Get LOS distance
-                    Double losDistance  = reference.getLosDistance(i);
-                    weight[k] = 1.0 - earthConstraintWeight;
-                    target[k++] = losDistance.doubleValue();
-
-                    // Get Earth distance (constraint)
-                    Double earthDistance  = reference.getEarthDistance(i);
-                    weight[k] = earthConstraintWeight;
-                    target[k++] = earthDistance.doubleValue();
-                }
-            }
-
-            // prevent parameters to exceed their prescribed bounds
-            final ParameterValidator validator = params -> {
-                try {
-                    int i = 0;
-                    for (final ParameterDriver driver : selected.getDrivers()) {
-                        // let the parameter handle min/max clipping
-                        driver.setNormalizedValue(params.getEntry(i));
-                        params.setEntry(i++, driver.getNormalizedValue());
-                    }
-                    return params;
-                } catch (OrekitException oe) {
-                    throw new OrekitExceptionWrapper(oe);
-                }
-            };
-
-            // convergence checker
-            final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = (iteration,
-                            previous,
-                            current) -> current
-                            .getPoint()
-                            .getLInfDistance(previous
-                                             .getPoint()) <= parametersConvergenceThreshold;
-
-                            // model function
-                            final MultivariateJacobianFunction model = point -> {
-                                try {
-
-                                    // set the current parameters values
-                                    int i = 0;
-                                    for (final ParameterDriver driver : selected.getDrivers()) {
-                                        driver.setNormalizedValue(point.getEntry(i++));
-                                    }
-
-                                    // compute distance and its partial derivatives
-                                    final RealVector value = new ArrayRealVector(target.length);
-                                    final RealMatrix jacobian = new Array2DRowRealMatrix(target.length,
-                                                                                         selected
-                                                                                         .getNbParams());
-                                    int l = 0;
-                                    for (final SensorToSensorMapping reference : references) {
-                                        for (final Map.Entry<SensorPixel, SensorPixel> mapping : reference
-                                                        .getMapping()) {
-                                            final SensorPixel spA = mapping.getKey();
-                                            final SensorPixel spB = mapping.getValue();
-                                            LineSensor lineSensorB = this
-                                                            .getLineSensor(reference.getSensorNameB());
-                                            LineSensor lineSensorA = ruggedA
-                                                            .getLineSensor(reference.getSensorNameA());
-                                            final AbsoluteDate dateA = lineSensorA
-                                                            .getDate(spA.getLineNumber());
-                                            final AbsoluteDate dateB = lineSensorB
-                                                            .getDate(spB.getLineNumber());
-                                            final double pixelA = spA.getPixelNumber();
-                                            final double pixelB = spB.getPixelNumber();
-                                            final SpacecraftToObservedBody scToBodyA = ruggedA
-                                                            .getScToBody();
-
-                                            final DerivativeStructure[] ilResult = distanceBetweenLOSDerivatives(lineSensorA,
-                                                                                                                 dateA,
-                                                                                                                 pixelA,
-                                                                                                                 scToBodyA,
-                                                                                                                 lineSensorB,
-                                                                                                                 dateB,
-                                                                                                                 pixelB,
-                                                                                                                 generator);
-
-                                            if (ilResult == null) {
-                                                // TODO
-                                            } else {
-                                                // extract the value
-                                                value.setEntry(l, ilResult[0].getValue());
-                                                value.setEntry(l + 1, ilResult[1].getValue());
-                                                // extract the Jacobian
-                                                final int[] orders = new int[selected
-                                                                             .getNbParams()];
-                                                int m = 0;
-                                                for (final ParameterDriver driver : selected
-                                                                .getDrivers()) {
-                                                    final double scale = driver.getScale();
-                                                    orders[m] = 1;
-                                                    jacobian.setEntry(l, m,
-                                                                      ilResult[0]
-                                                                                      .getPartialDerivative(orders) *
-                                                                                      scale);
-
-                                                    jacobian.setEntry(l + 1, m,
-                                                                      ilResult[1]
-                                                                                      .getPartialDerivative(orders) *
-                                                                                      scale);
-
-                                                    orders[m] = 0;
-                                                    m++;
-                                                }
-                                            }
-                                            l += 2; // pass to the next evaluation
-
-                                        }
-                                    }
-
-                                    // distance result with Jacobian for all reference points
-                                    return new Pair<RealVector, RealMatrix>(value, jacobian);
-
-                                } catch (RuggedException re) {
-                                    throw new RuggedExceptionWrapper(re);
-                                } catch (OrekitException oe) {
-                                    throw new OrekitExceptionWrapper(oe);
-                                }
-                            };
-
-                            // set up the least squares problem
-                            final LeastSquaresProblem problem = new LeastSquaresBuilder()
-                                            .lazyEvaluation(false).maxIterations(maxEvaluations)
-                                            .maxEvaluations(maxEvaluations).weight(new DiagonalMatrix(weight)).start(start)
-                                            .target(target).parameterValidator(validator).checker(checker)
-                                            .model(model).build();
-
-                            // set up the optimizer
-                            //final LeastSquaresOptimizer optimizer = new
-                            // LevenbergMarquardtOptimizer();
-                            final LeastSquaresOptimizer optimizer = new GaussNewtonOptimizer()
-                                            .withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
-
-                            // solve the least squares problem
-                            return optimizer.optimize(problem);
-
-        } catch (RuggedExceptionWrapper rew) {
-            throw rew.getException();
-        } catch (OrekitExceptionWrapper oew) {
-            final OrekitException oe = oew.getException();
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
-    }
 
     /**
      * Get the mean plane crossing finder for a sensor.
@@ -1273,6 +1048,7 @@ public class Rugged {
      *            unknown
      * @see #inverseLocation(String, GeodeticPoint, int, int)
      */
+
     public DerivativeStructure[]
                     inverseLocationDerivatives(final String sensorName,
                                                final GeodeticPoint point, final int minLine,
@@ -1368,8 +1144,6 @@ public class Rugged {
         };
 
     }
-
-
 
     /**
      * Get transform from spacecraft to inertial frame.

@@ -328,7 +328,7 @@ public class Refining {
         observables.addGroundMapping(measures);
 
         AdjustmentContext adjustmentContext = new AdjustmentContext(viewingModel, observables);
-        Optimum optimum = adjustmentContext.estimateFreeParameters("Rugged",maxIterations,convergenceThreshold);
+        Optimum optimum = adjustmentContext.estimateFreeParameters("Rugged_refining",maxIterations,convergenceThreshold);
 
         // Print statistics
         System.out.format("Max value: %3.6e %n",optimum.getResiduals().getMaxValue());
