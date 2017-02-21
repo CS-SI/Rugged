@@ -1,5 +1,6 @@
 package org.orekit.rugged.adjustment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ extends OptimizationProblemBuilder {
     private final Rugged rugged;
 
     /** sensorToGround mapping to generate target tab for optimization.*/
-    private final SensorToGroundMapping sensorToGroundMapping;
+    private List<SensorToGroundMapping> sensorToGroundMappings;
 
     /** minimum line for inverse location estimation.*/
     private int minLine;
@@ -59,7 +60,11 @@ extends OptimizationProblemBuilder {
                                                             throws RuggedException {
         super(sensors, measures);
         this.rugged = rugged;
-        this.sensorToGroundMapping = this.measures.getGroundMapping();
+        this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
+        for (Map.Entry<String, SensorToGroundMapping> entry : this.measures.getGroundMappings()) {
+            this.sensorToGroundMappings.add(entry.getValue());
+        }
+
     }
 
 
@@ -67,7 +72,11 @@ extends OptimizationProblemBuilder {
     protected void createTargetAndWeight()
                     throws RuggedException {
         try {
-            final int n = this.sensorToGroundMapping.getMapping().size();
+            int n = 0;
+            for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
+                n += reference.getMapping().size();
+            }
+
             if (n == 0) {
                 throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
             }
@@ -78,14 +87,16 @@ extends OptimizationProblemBuilder {
             double max = Double.NEGATIVE_INFINITY;
             int k = 0;
 
-            for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : this.sensorToGroundMapping.getMapping()) {
-                final SensorPixel sp = mapping.getKey();
-                weight[k] = 1.0;
-                target[k++] = sp.getLineNumber();
-                weight[k] = 1.0;
-                target[k++] = sp.getPixelNumber();
-                min = FastMath.min(min, sp.getLineNumber());
-                max = FastMath.max(max, sp.getLineNumber());
+            for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
+                for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMapping()) {
+                    final SensorPixel sp = mapping.getKey();
+                    weight[k] = 1.0;
+                    target[k++] = sp.getLineNumber();
+                    weight[k] = 1.0;
+                    target[k++] = sp.getPixelNumber();
+                    min = FastMath.min(min, sp.getLineNumber());
+                    max = FastMath.max(max, sp.getLineNumber());
+                }
             }
 
             this.minLine = (int) FastMath
@@ -120,42 +131,44 @@ extends OptimizationProblemBuilder {
                 final RealVector value = new ArrayRealVector(target.length);
                 final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, this.nbParams);
                 int l = 0;
-                for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : this.sensorToGroundMapping.getMapping()) {
-                    final GeodeticPoint gp = mapping.getValue();
-                    final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(this.sensorToGroundMapping.getSensorName(), gp, minLine, maxLine, generator);
+                for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
+                    for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMapping()) {
+                        final GeodeticPoint gp = mapping.getValue();
+                        final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, generator);
 
-                    if (ilResult == null) {
-                        value.setEntry(l, minLine - 100.0); // arbitrary
-                        // line far
-                        // away
-                        value.setEntry(l + 1, -100.0); // arbitrary
-                        // pixel far away
-                    } else {
-                        // extract the value
-                        value.setEntry(l, ilResult[0].getValue());
-                        value.setEntry(l + 1, ilResult[1].getValue());
+                        if (ilResult == null) {
+                            value.setEntry(l, minLine - 100.0); // arbitrary
+                            // line far
+                            // away
+                            value.setEntry(l + 1, -100.0); // arbitrary
+                            // pixel far away
+                        } else {
+                            // extract the value
+                            value.setEntry(l, ilResult[0].getValue());
+                            value.setEntry(l + 1, ilResult[1].getValue());
 
-                        // extract the Jacobian
-                        final int[] orders = new int[this.nbParams];
-                        int m = 0;
-                        for (final ParameterDriver driver : this.drivers.getDrivers()) {
-                            final double scale = driver.getScale();
-                            orders[m] = 1;
-                            jacobian.setEntry(l, m,
-                                              ilResult[0]
-                                                              .getPartialDerivative(orders) *
-                                                              scale);
-                            jacobian.setEntry(l + 1, m,
-                                              ilResult[1]
-                                                              .getPartialDerivative(orders) *
-                                                              scale);
-                            orders[m] = 0;
-                            m++;
+                            // extract the Jacobian
+                            final int[] orders = new int[this.nbParams];
+                            int m = 0;
+                            for (final ParameterDriver driver : this.drivers.getDrivers()) {
+                                final double scale = driver.getScale();
+                                orders[m] = 1;
+                                jacobian.setEntry(l, m,
+                                                  ilResult[0]
+                                                                  .getPartialDerivative(orders) *
+                                                                  scale);
+                                jacobian.setEntry(l + 1, m,
+                                                  ilResult[1]
+                                                                  .getPartialDerivative(orders) *
+                                                                  scale);
+                                orders[m] = 0;
+                                m++;
+                            }
                         }
+
+                        l += 2;
+
                     }
-
-                    l += 2;
-
                 }
 
 
@@ -174,7 +187,7 @@ extends OptimizationProblemBuilder {
 
     /** leastsquare problem builder.
      * @param maxEvaluations maxIterations and evaluations
-     * @param convergenceThreshold parameter convergence treshold
+     * @param convergenceThreshold parameter convergence threshold
      * @throws RuggedException if sensor is not found
      * @return
      */

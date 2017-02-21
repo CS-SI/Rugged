@@ -123,27 +123,19 @@ public class AdjustmentContext {
      *            if parameters cannot be estimated (too few measurements,
      *            ill-conditioned problem ...)
      */
-    public Optimum estimateFreeParameters(final String RuggedName, final int maxEvaluations, final double parametersConvergenceThreshold)
+    public Optimum estimateFreeParameters(final String ruggedName, final int maxEvaluations, final double parametersConvergenceThreshold)
                     throws RuggedException {
         try {
 
-            final Rugged rugged = this.viewingModel.get(RuggedName);
+            final Rugged rugged = this.viewingModel.get(ruggedName);
             if (rugged == null) {
                 throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
             }
 
-
-            final String sensorName = measures.getGroundMapping().getSensorName();
-
-            final List<LineSensor> selectedSensors = new ArrayList<>();
-            //TODO loop over all sensors
-            //for (final SensorToGroundMapping reference : references) {
-            selectedSensors.add(rugged.getLineSensor(sensorName));
-            //}
+            final List<LineSensor> selectedSensors = new ArrayList<LineSensor>(rugged.getLineSensors());
 
             /** builder */
             final GroundOptimizationProblemBuilder optimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measures, rugged);
-
 
             final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(this.optimizerID);
 

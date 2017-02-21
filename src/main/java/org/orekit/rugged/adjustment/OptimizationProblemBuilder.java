@@ -106,7 +106,7 @@ abstract class OptimizationProblemBuilder {
      * @return the problem
      */
 
-    public abstract LeastSquaresProblem build(final int maxEvaluations, final float convergenceThreshold) throws RuggedException;
+    public abstract LeastSquaresProblem build(final int maxEvaluations, final double convergenceThreshold) throws RuggedException;
 
 
     /**
@@ -120,7 +120,7 @@ abstract class OptimizationProblemBuilder {
      * @return the checker
      */
     final ConvergenceChecker<LeastSquaresProblem.Evaluation>
-    createChecker(final float parametersConvergenceThreshold) {
+    createChecker(final double parametersConvergenceThreshold) {
         final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = (iteration,
                         previous,
                         current) -> current

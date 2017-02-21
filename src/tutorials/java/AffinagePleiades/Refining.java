@@ -305,16 +305,18 @@ public class Refining {
     }
 
 
+
+
     /** Start optimization to  adjust parameters (fulcrum points study).
      * @param maxIterations iterations max
      * @param convergenceThreshold threshold of convergence
-     * @param measures observables
+     * @param measures ground measures
      * @param rugged Rugged instance
      * @throws OrekitException
      * @throws RuggedException
      */
     public void optimization(int maxIterations, double convergenceThreshold,
-                             Observables measures,
+                             SensorToGroundMapping measures,
                              Rugged rugged) throws OrekitException, RuggedException {
 
 
@@ -322,7 +324,10 @@ public class Refining {
         List<Rugged> viewingModel = new ArrayList<Rugged>();
         viewingModel.add(rugged);
 
-        AdjustmentContext adjustmentContext = new AdjustmentContext(viewingModel,measures);
+        Observables observables =  new  Observables(1);
+        observables.addGroundMapping(measures);
+
+        AdjustmentContext adjustmentContext = new AdjustmentContext(viewingModel, observables);
         Optimum optimum = adjustmentContext.estimateFreeParameters("Rugged",maxIterations,convergenceThreshold);
 
         // Print statistics

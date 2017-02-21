@@ -17,7 +17,14 @@
 package org.orekit.rugged.refining.measures;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 
 /** Class for measures generation.
  * @author Lucie Labat-Allee
@@ -28,7 +35,7 @@ import java.util.List;
 public class Observables {
 
     /** Sensor to ground mapping structure (example: for GCP points) */
-    private final SensorToGroundMapping groundMapping;
+    private final Map<String, SensorToGroundMapping> groundMappings;
 
     /** Sensor to sensor mappings structure (liaison points). */
     private final List<SensorToSensorMapping> interMappings;
@@ -41,8 +48,8 @@ public class Observables {
      * @param sensorName name of the sensor to which mapping applies
      * @param nbMeasures number of viewing models
      */
-    public Observables(final String sensorName, final int nbModels) {
-        this.groundMapping = new SensorToGroundMapping(sensorName);
+    public Observables(final int nbModels) {
+        this.groundMappings = new LinkedHashMap<String, SensorToGroundMapping>();
         this.interMappings = new ArrayList<SensorToSensorMapping>();
         this.nbModels = nbModels;
     }
@@ -54,15 +61,39 @@ public class Observables {
         interMappings.add(interMapping);
     }
 
-    
-    /**
-     * @return the groundMapping
+    /** Add a  ground mapping between
+     * @param SensorToGroundMapping sensor to ground mapping
      */
-    public SensorToGroundMapping getGroundMapping() {
-        return groundMapping;
+    public void addGroundMapping(final SensorToGroundMapping groundMapping) {
+        groundMappings.put(groundMapping.getSensorName(), groundMapping);
     }
 
-    
+
+    /** Get all the ground mapping entries.
+     * @return an unmodifiable view of all mapping entries
+     */
+    public Set<Map.Entry<String, SensorToGroundMapping>> getGroundMappings() {
+        return  Collections.unmodifiableSet(groundMappings.entrySet());
+    }
+
+
+    /**
+     * Get a ground Mapping for a sensor.
+     *
+     * @param sensorName sensor name
+     * @return selected ground mapping
+     * @exception RuggedException if sensor is not known
+     */
+    public SensorToGroundMapping getGroundMapping(final String sensorName)
+                    throws RuggedException {
+        final SensorToGroundMapping mapping = this.groundMappings.get(sensorName);
+        if (mapping == null) {
+            throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR,
+                                      sensorName);
+        }
+        return mapping;
+    }
+
     /**
      * @return the interMappings
      */
@@ -70,12 +101,11 @@ public class Observables {
         return interMappings;
     }
 
-    
     /**
      * @return the nbModels
      */
     public int getNbModels() {
         return nbModels;
     }
-    
+
 }
