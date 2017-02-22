@@ -35,8 +35,8 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.refining.measures.Observables;
 import org.orekit.utils.ParameterDriver;
 
-/**
- * Create adjustment context for viewing model refining refining
+/**  Create adjustment context for viewing model refining refining.
+ *
  *
  * @author Lucie LabatAllee
  * @author Jonathan Guinet
@@ -112,9 +112,11 @@ public class AdjustmentContext {
      * already aware of the updated parameters.
      * </p>
      *
+     * @param ruggedNameList list of rugged to refine
      * @param maxEvaluations maximum number of evaluations
      * @param parametersConvergenceThreshold convergence threshold on normalized
      *        parameters (dimensionless, related to parameters scales)
+     *
      * @return optimum of the least squares problem
      * @exception RuggedException if several parameters with the same name
      *            exist, if no parameters have been selected for estimation, or
@@ -125,9 +127,9 @@ public class AdjustmentContext {
                     throws RuggedException {
         try {
 
-            List<Rugged> ruggedList = new ArrayList<Rugged>();
-            List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
-            for (String ruggedName : ruggedNameList){
+            final List<Rugged> ruggedList = new ArrayList<Rugged>();
+            final List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
+            for (String ruggedName : ruggedNameList) {
                 final Rugged rugged = this.viewingModel.get(ruggedName);
                 if (rugged == null) {
                     throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
