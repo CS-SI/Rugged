@@ -1,3 +1,19 @@
+/* Copyright 2013-2016 CS Systèmes d'Information
+ * Licensed to CS Systèmes d'Information (CS) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * CS licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.orekit.rugged.adjustment;
 
 import java.util.ArrayList;
@@ -45,12 +61,13 @@ extends OptimizationProblemBuilder {
     private List<SensorToSensorMapping> sensorToSensorMappings;
 
 
+    /** targets and weights of optimization problem. */
     private HashMap<String, double[] > targetAndWeight;
 
     /**
      * @param sensors list of sensors to refine
      * @param measures set of observables
-     * @param rugged name of rugged to refine
+     * @param ruggedList names of rugged to refine
      * @throws RuggedException an exception is generated if no parameters has been selected for refining
      */
     public InterSensorsOptimizationProblemBuilder(final List<LineSensor> sensors,
@@ -60,9 +77,9 @@ extends OptimizationProblemBuilder {
 
         this.ruggedMap = new LinkedHashMap<String, Rugged>();
 
-        for(final Rugged rugged : ruggedList)
+        for (final Rugged rugged : ruggedList)
         {
-            this.ruggedMap.put(rugged.getName(),rugged);
+            this.ruggedMap.put(rugged.getName(), rugged);
         }
         this.initMapping();
     }
@@ -74,10 +91,10 @@ extends OptimizationProblemBuilder {
     protected void initMapping()
     {
         this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
-        for (final String ruggedNameA : this.ruggedMap.keySet()){
-            for (final String ruggedNameB : this.ruggedMap.keySet()){
-                for (final LineSensor sensorA : this.sensors){
-                    for (final LineSensor sensorB : this.sensors){
+        for (final String ruggedNameA : this.ruggedMap.keySet()) {
+            for (final String ruggedNameB : this.ruggedMap.keySet()) {
+                for (final LineSensor sensorA : this.sensors) {
+                    for (final LineSensor sensorB : this.sensors) {
                         final String sensorNameA = sensorA.getName();
                         final String sensorNameB = sensorB.getName();
                         final SensorToSensorMapping mapping = this.measures.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
@@ -108,7 +125,7 @@ extends OptimizationProblemBuilder {
                 throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
             }
 
-            n = 2*n ;
+            n = 2 * n;
 
             final double[] target = new double[n];
             final double[] weight = new double[n];
@@ -119,18 +136,18 @@ extends OptimizationProblemBuilder {
 
                 // Get Earth constraint weight
                 final double earthConstraintWeight = reference.getEarthConstraintWeight();
-                int i=0;
-                for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator();gtIt.hasNext();i++){
-                    if(i==reference.getMapping().size()) break;
+                int i = 0;
+                for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
+                    if (i == reference.getMapping().size()) break;
 
                     // Get LOS distance
-                    Double losDistance  = reference.getLosDistance(i);
+                    final Double losDistance  = reference.getLosDistance(i);
 
                     weight[k] = 1.0 - earthConstraintWeight;
                     target[k++] = losDistance.doubleValue();
 
                     // Get Earth distance (constraint)
-                    Double earthDistance  = reference.getEarthDistance(i);
+                    final Double earthDistance  = reference.getEarthDistance(i);
                     weight[k] = earthConstraintWeight;
                     target[k++] = earthDistance.doubleValue();
                 }
