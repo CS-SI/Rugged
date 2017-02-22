@@ -764,26 +764,6 @@ public class Rugged {
         final Vector3D sB = trasnformScToBodyB.transformPosition(sBLocal);
         final Vector3D vB = trasnformScToBodyB.transformVector(vBLocal);
 
-        final GeodeticPoint gpB = algorithm
-                        .refineIntersection(ellipsoid,sB, vB, algorithm
-                                            .intersection(ellipsoid, sB, vB));
-
-
-        GeodeticPoint gpB2 = directLocation(dateB, sensorB.getPosition(),
-                                            sensorB.getLOS(dateB, pixelB));
-        /*double GEOdistance = DistanceTools.computeDistanceRad(gpB.getLongitude(), gpB.getLatitude(),
-                                                              gpB2.getLongitude(), gpB2.getLatitude());
-
-        System.out.format("GEO dist %1.6e %n",GEOdistance);
-        System.out.format(Locale.US, "%n geodetic position  B: φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
-                          FastMath.toDegrees(gpB.getLatitude()),
-                          FastMath.toDegrees(gpB.getLongitude()),gpB.getAltitude());
-
-        System.out.format(Locale.US, "geodetic position B2 : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n%n",
-                          FastMath.toDegrees(gpB2.getLatitude()),
-                          FastMath.toDegrees(gpB2.getLongitude()),gpB2.getAltitude());  */
-
-
         final Vector3D vBase = sB.subtract(sA); // S_b - S_a
         final double svA = Vector3D.dotProduct(vBase, vA); // SV_a = (S_b -
         // S_a).V_a
@@ -815,20 +795,9 @@ public class Rugged {
         final Vector3D vDistance = mB.subtract(mA); // M_b - M_a
 
         final Vector3D midPoint = (mB.add(mA)).scalarMultiply(0.5);
-        //System.out.format("mid Point x %f y %f z  %f %n",midPoint.getX(),midPoint.getY(),midPoint.getZ());
-        //System.out.format("mid Point Norm %f  %n",midPoint.getNorm());
-
-
-        // System.out.format("vDistance %f %f %f
-        // ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
-
-        // equA and equB should be 0
-        // final Vector3D mAmB= mB.subtract(mA);
-        // final double equA = Vector3D.dotProduct(mAmB, vA);
-        // final double equB = Vector3D.dotProduct(mAmB, vB);
 
         // Get the euclidean norm
-        final double[] d = {vDistance.getNorm(),midPoint.getNorm()};
+        final double[] d = {vDistance.getNorm(), midPoint.getNorm()};
         return d;
     }
 
@@ -895,8 +864,6 @@ public class Rugged {
         final FieldVector3D<DerivativeStructure> vB = trasnformScToBodyB
                         .transformVector(vBLocal); // V_b
 
-        // Get sensors's position into local frame TODO: check if we have to
-        // implement getPositionDerivatives() method & CO
         final Vector3D sAtmp = sensorA.getPosition(); // S_a : sensorA 's
         // position
         final Vector3D sBtmp = sensorB.getPosition(); // S_b : sensorB 's
@@ -916,10 +883,6 @@ public class Rugged {
         final FieldVector3D<DerivativeStructure> sB = trasnformScToBodyB
                         .transformPosition(sBLocal);
 
-        // final FieldVector3D<DerivativeStructure> sA =
-        // sensorA.getPositionDerivatives(); // S_a : sensorA 's position
-        // final FieldVector3D<DerivativeStructure> sB =
-        // sensorB.getPositionDerivatives(); // S_b
 
         final FieldVector3D<DerivativeStructure> vBase = sB.subtract(sA); // S_b
         // -
@@ -936,14 +899,6 @@ public class Rugged {
         // S_a).V_b
 
         final DerivativeStructure vAvB = FieldVector3D.dotProduct(vA, vB); // V_a.V_b
-
-        // Test using |SaSb,Va,Vb |/||Va^Vb||
-        // final FieldVector3D<DerivativeStructure> w =
-        // FieldVector3D.crossProduct(vA, vB);
-        // final FieldVector3D<DerivativeStructure> vect =
-        // FieldVector3D.crossProduct(vBase,vA);
-        // final DerivativeStructure k = FieldVector3D.dotProduct(vect, vB);
-        // final DerivativeStructure dist = k.abs().divide(w.getNorm());
 
         // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 - (V_a.V_b)²)
         final DerivativeStructure lambdaB = (svA.multiply(vAvB).subtract(svB))
@@ -964,17 +919,7 @@ public class Rugged {
         // Get the euclidean norm
 
         final FieldVector3D<DerivativeStructure> midPoint = (mB.add(mA)).scalarMultiply(0.5);
-        //System.out.format("mid Point x %f y %f z  %f %n",midPoint.getX(),midPoint.getY(),midPoint.getZ());
-        //System.out.format("mid Point Norm %f  %n",midPoint.getNorm());
 
-
-        // System.out.format("vDistance %f %f %f
-        // ",vDistance.getX(),vDistance.getY(),vDistance.getZ());
-
-        // equA and equB should be 0
-        // final Vector3D mAmB= mB.subtract(mA);
-        // final double equA = Vector3D.dotProduct(mAmB, vA);
-        // final double equB = Vector3D.dotProduct(mAmB, vB);
 
         // Get the euclidean norm
         final DerivativeStructure dEarth = midPoint.getNorm();
@@ -1200,7 +1145,7 @@ public class Rugged {
     }
 
     /**
-     * Get converter between spacecraft and body
+     * Get converter between spacecraft and body.
      *
      * @return the scToBody
      */

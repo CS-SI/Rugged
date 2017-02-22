@@ -43,17 +43,17 @@ public class SensorToSensorMapping {
     /** Mapping from sensor A to sensor B. */
     private final SensorMapping<SensorPixel> interMapping;
 
-    /** Distance between two LOS */
+    /** Distance between two LOS. */
     private final List<Double> losDistances;
 
-    /** Earth distance associated with pixel A */
+    /** Earth distance associated with pixel A. */
     private final List<Double> earthDistances;
 
-    /** Earth constraint weight */
+    /** Earth constraint weight. */
     private double earthConstraintWeight;
 
 
-    /** Build a new instance without Earth constraints
+    /** Build a new instance without Earth constraints.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
      */

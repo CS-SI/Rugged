@@ -28,19 +28,18 @@ import java.util.Map;
  */
 public class Observables {
 
-    /** Sensor to ground mapping structure (example: for GCP points) */
+    /** Sensor to ground mapping structure (example: for GCP points).*/
     private final Map<String, SensorToGroundMapping> groundMappings;
 
     /** Sensor to sensor mappings structure (liaison points). */
     private final Map<String, SensorToSensorMapping> interMappings;
 
-    /** Number of viewing models to map */
+    /** Number of viewing models to map.*/
     private final int nbModels;
 
 
     /** Build a new instance.
-     * @param sensorName name of the sensor to which mapping applies
-     * @param nbMeasures number of viewing models
+     * @param nbModels number of viewing models
      */
     public Observables(final int nbModels) {
         this.groundMappings = new LinkedHashMap<String, SensorToGroundMapping>();
@@ -48,16 +47,15 @@ public class Observables {
         this.nbModels = nbModels;
     }
 
-    /** Add a mapping between two viewing models
-     * @param SensorToSensorMapping sensor to sensor mapping
+    /** Add a mapping between two viewing models.
+     * @param interMapping sensor to sensor mapping
      */
     public void addInterMapping(final SensorToSensorMapping interMapping) {
-        final String key = this.createKey(interMapping);
-        interMappings.put(this.createKey(interMapping),interMapping);
+        interMappings.put(this.createKey(interMapping), interMapping);
     }
 
-    /** Add a  ground mapping between
-     * @param SensorToGroundMapping sensor to ground mapping
+    /** Add a  ground mapping between.
+     * @param groundMapping sensor to ground mapping
      */
     public void addGroundMapping(final SensorToGroundMapping groundMapping) {
         groundMappings.put(this.createKey(groundMapping), groundMapping);
@@ -75,6 +73,7 @@ public class Observables {
     /**
      * Get a ground Mapping for a sensor.
      *
+     * @param ruggedName rugged name
      * @param sensorName sensor name
      * @return selected ground mapping or null of sensorName is not found
      */
@@ -127,7 +126,7 @@ public class Observables {
     }
 
     /** create key for SensorToSensorMapping map.
-     * @param groundMapping the groundMapping
+     * @param sensorMapping the interMapping
      * @return the key
      */
     private String createKey(final SensorToSensorMapping sensorMapping)
