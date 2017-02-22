@@ -23,25 +23,27 @@ package org.orekit.rugged.refining.measures;
  */
 public class Noise {
 
-    /** Mean */
+    /** Type of distribution. */
+    private static final int GAUSSIAN = 0;
+
+    /** Dimension. */
+    private static int dimension;
+
+    /** Mean. */
     private double[] mean;
 
-    /** Standard deviation */
+    /** Standard deviation. */
     private double[] standardDeviation;
 
-    /** Type of distribution */
-    private static final int GAUSSIAN=0;
 
-    /** Distribution */
-    private int distribution=GAUSSIAN;
-    
-    /** Dimension */
-    private static int dimension;
-    
+
+    /** Distribution. */
+    private int distribution = GAUSSIAN;
+
 
     /** Build a new instance.
-     * @param 
-     * @param 
+     * @param distribution noise type
+     * @param dimension noise dimension
      */
     public Noise(final int distribution, final int dimension) {
         this.mean = new double[dimension];
@@ -51,7 +53,7 @@ public class Noise {
     }
 
 
-    
+
     /**
      * @return the mean
      */
@@ -60,16 +62,16 @@ public class Noise {
     }
 
 
-    
+
     /**
      * @param mean the mean to set
      */
-    public void setMean(double[] mean) {
+    public void setMean(final double[] mean) {
         this.mean = mean;
     }
 
 
-    
+
     /**
      * @return the standardDeviation
      */
@@ -78,16 +80,14 @@ public class Noise {
     }
 
 
-    
+
     /**
      * @param standardDeviation the standardDeviation to set
      */
-    public void setStandardDeviation(double[] standardDeviation) {
+    public void setStandardDeviation(final double[] standardDeviation) {
         this.standardDeviation = standardDeviation;
     }
 
-
-    
     /**
      * @return the distribution
      */
@@ -95,8 +95,6 @@ public class Noise {
         return distribution;
     }
 
-
-    
     /**
      * @return the dimension
      */
@@ -104,7 +102,6 @@ public class Noise {
         return dimension;
     }
 
-    
+
 }
 
- 
