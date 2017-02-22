@@ -18,11 +18,13 @@ package org.orekit.rugged.adjustment;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.orekit.errors.OrekitException;
 import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.api.Rugged;
@@ -55,7 +57,7 @@ public class AdjustmentContext {
      * @param viewingModel viewingModel
      * @param measures control and tie points
      */
-    public AdjustmentContext(final List<Rugged> viewingModel, final Observables measures) {
+    public AdjustmentContext(final Collection<Rugged> viewingModel, final Observables measures) {
         this.viewingModel = new HashMap<String, Rugged>();
         for (final Rugged r : viewingModel) {
             this.viewingModel.put(r.getName(), r);
@@ -110,9 +112,6 @@ public class AdjustmentContext {
      * already aware of the updated parameters.
      * </p>
      *
-     * @param references reference mappings between sensors pixels and ground
-     *        point that should ultimately be reached by adjusting selected
-     *        viewing models parameters
      * @param maxEvaluations maximum number of evaluations
      * @param parametersConvergenceThreshold convergence threshold on normalized
      *        parameters (dimensionless, related to parameters scales)
@@ -122,24 +121,40 @@ public class AdjustmentContext {
      *            if parameters cannot be estimated (too few measurements,
      *            ill-conditioned problem ...)
      */
-    public Optimum estimateFreeParameters(final String ruggedName, final int maxEvaluations, final double parametersConvergenceThreshold)
+    public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations, final double parametersConvergenceThreshold)
                     throws RuggedException {
         try {
 
-            final Rugged rugged = this.viewingModel.get(ruggedName);
-            if (rugged == null) {
-                throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
+            List<Rugged> ruggedList = new ArrayList<Rugged>();
+            List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
+            for (String ruggedName : ruggedNameList){
+                final Rugged rugged = this.viewingModel.get(ruggedName);
+                if (rugged == null) {
+                    throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
+                }
+
+                ruggedList.add(rugged);
+                selectedSensors.addAll(rugged.getLineSensors());
             }
 
-            final List<LineSensor> selectedSensors = new ArrayList<LineSensor>(rugged.getLineSensors());
-
-            /** builder */
-            final GroundOptimizationProblemBuilder optimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measures, rugged);
-
             final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(this.optimizerID);
+            LeastSquaresProblem theProblem = null;
+            /** builder */
+            switch (ruggedList.size()) {
+                case 1:
+                    final Rugged rugged = ruggedList.get(0);
+                    final GroundOptimizationProblemBuilder groundOptimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measures, rugged);
+                    theProblem = groundOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
+                    break;
+                case 2:
+                    final InterSensorsOptimizationProblemBuilder interSensorsOptimizationProblem = new InterSensorsOptimizationProblemBuilder(selectedSensors, measures, ruggedList);
+                    theProblem = interSensorsOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
+                    break;
+                default :
+                    throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,ruggedList.size());
+            }
 
-            return adjuster.optimize(optimizationProblem.build(maxEvaluations, parametersConvergenceThreshold));
-
+            return adjuster.optimize(theProblem);
 
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
@@ -148,7 +163,5 @@ public class AdjustmentContext {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
     }
-
-    /*public Optimum estimateFreeParameters(final String RuggedNameA, final String RuggedNameB, final int maxEvaluations, final float parametersConvergenceThreshold)*/
 
 }

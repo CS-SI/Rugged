@@ -47,6 +47,7 @@ extends OptimizationProblemBuilder {
     /** maximum line for inverse location estimation.*/
     private int maxLine;
 
+    /** target and weight (the solution of the optimization problem) */
     private HashMap<String, double[] > targetAndWeight;
 
     /**
@@ -60,13 +61,24 @@ extends OptimizationProblemBuilder {
                                                             throws RuggedException {
         super(sensors, measures);
         this.rugged = rugged;
-        this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
-        for (Map.Entry<String, SensorToGroundMapping> entry : this.measures.getGroundMappings()) {
-            this.sensorToGroundMappings.add(entry.getValue());
-        }
-
+        this.initMapping();
     }
 
+    /* (non-Javadoc)
+     * @see org.orekit.rugged.adjustment.OptimizationProblemBuilder#initMapping()
+     */
+    @Override
+    protected void initMapping()
+    {
+        final String ruggedName = rugged.getName();
+        this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
+        for (final LineSensor lineSensor : sensors)
+        {
+            final SensorToGroundMapping mapping = this.measures.getGroundMapping(ruggedName, lineSensor.getName());
+            if(mapping != null)
+                this.sensorToGroundMappings.add(mapping);
+        }
+    }
 
     @Override
     protected void createTargetAndWeight()

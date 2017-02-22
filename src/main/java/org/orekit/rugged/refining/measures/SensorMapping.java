@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
 import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for mapping sensor pixels with sensor pixels or ground points.
@@ -31,6 +32,10 @@ public class SensorMapping<T> {
     /** Name of the sensor to which mapping applies. */
     private final String sensorName;
 
+    /** Name of the rugged to which mapping applies. */
+    private final String ruggedName;
+
+
     /** Mapping from sensor to other (sensor or ground). */
     private final Map<SensorPixel, T> mapping;
 
@@ -39,9 +44,19 @@ public class SensorMapping<T> {
      * @param sensorName name of the sensor to which mapping applies
      */
     public SensorMapping(final String sensorName) {
-        this.sensorName     = sensorName;
-        this.mapping = new LinkedHashMap<SensorPixel,T>();
+        this(sensorName, "Rugged");
     }
+
+    /** Build a new instance.
+     * @param sensorName name of the sensor to which mapping applies
+     * @param ruggedName name of the rugged to which mapping applies
+     */
+    public SensorMapping(final String sensorName, final String ruggedName) {
+        this.sensorName     = sensorName;
+        this.ruggedName     = ruggedName;
+        this.mapping = new LinkedHashMap<SensorPixel, T>();
+    }
+
 
     /** Get the name of the sensor to which mapping applies.
      * @return name of the sensor to which mapping applies
@@ -49,6 +64,14 @@ public class SensorMapping<T> {
     public String getSensorName() {
         return sensorName;
     }
+
+    /** Get the name of the rugged to which mapping applies.
+     * @return name of the rugged to which mapping applies
+     */
+    public String getRuggedName() {
+        return ruggedName;
+    }
+
 
     /** Add a mapping between a sensor pixel and another point (sensor pixel or ground point).
      * @param pixel sensor pixel

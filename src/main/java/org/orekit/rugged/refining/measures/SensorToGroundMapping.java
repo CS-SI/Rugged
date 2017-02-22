@@ -38,11 +38,20 @@ public class SensorToGroundMapping {
     private final SensorMapping<GeodeticPoint> groundMapping;
 
     /** Build a new instance.
+     * @param ruggedName name of the rugged to which mapping applies
+     * @param sensorName name of the sensor to which mapping applies
+     */
+    public SensorToGroundMapping(final String ruggedName, final String sensorName) {
+        this.sensorName     = sensorName;
+        this.groundMapping = new SensorMapping<GeodeticPoint>(sensorName, ruggedName);
+    }
+
+
+    /** Build a new instance.
      * @param sensorName name of the sensor to which mapping applies
      */
     public SensorToGroundMapping(final String sensorName) {
-        this.sensorName     = sensorName;
-        this.groundMapping = new SensorMapping<GeodeticPoint>(sensorName);
+        this(sensorName, "Rugged");
     }
 
     /** Get the name of the sensor to which mapping applies.
@@ -50,6 +59,13 @@ public class SensorToGroundMapping {
      */
     public String getSensorName() {
         return sensorName;
+    }
+
+    /** Get the name of the rugged to which mapping applies.
+     * @return name of the rugged to which mapping applies
+     */
+    public String getRuggedName() {
+        return this.groundMapping.getRuggedName();
     }
 
     /** Add a mapping between one sensor pixel and one ground point.
@@ -66,5 +82,8 @@ public class SensorToGroundMapping {
     public Set<Map.Entry<SensorPixel, GeodeticPoint>> getMapping() {
         return Collections.unmodifiableSet(groundMapping.getMapping());
     }
+
+
+    //public Boolean Match(final String SensorName,final String )
 
 }

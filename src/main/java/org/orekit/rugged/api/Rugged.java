@@ -849,7 +849,7 @@ public class Rugged {
      * @see #distanceBetweenLOS(String, AbsoluteDate, int, String, AbsoluteDate,
      *      int)
      */
-    private DerivativeStructure[]
+    public DerivativeStructure[]
                     distanceBetweenLOSDerivatives(final LineSensor sensorA,
                                                   final AbsoluteDate dateA,
                                                   final double pixelA,

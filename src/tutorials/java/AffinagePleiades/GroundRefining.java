@@ -238,7 +238,7 @@ public class GroundRefining extends Refining {
             int maxIterations = 100;
             double convergenceThreshold =  1e-14;
 
-            refining.optimization(maxIterations, convergenceThreshold, measures.getGroundMapping(), refining.getRugged());
+            refining.optimization(maxIterations, convergenceThreshold, measures.getObservables(), refining.getRugged());
 
 
             // Check estimated values

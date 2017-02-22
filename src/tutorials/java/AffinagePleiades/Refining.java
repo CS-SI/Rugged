@@ -17,6 +17,7 @@
 package AffinagePleiades;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.adjustment.AdjustmentContext;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.refining.generators.GroundMeasureGenerator;
 import org.orekit.rugged.refining.generators.InterMeasureGenerator;
 import org.orekit.rugged.refining.measures.Noise;
@@ -316,24 +318,19 @@ public class Refining {
      * @throws RuggedException
      */
     public void optimization(int maxIterations, double convergenceThreshold,
-                             SensorToGroundMapping measures,
+                             Observables measures,
                              Rugged rugged) throws OrekitException, RuggedException {
 
 
-        System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n",maxIterations, convergenceThreshold);
-        List<Rugged> viewingModel = new ArrayList<Rugged>();
-        viewingModel.add(rugged);
+        System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
 
-        Observables observables =  new  Observables(1);
-        observables.addGroundMapping(measures);
-
-        AdjustmentContext adjustmentContext = new AdjustmentContext(viewingModel, observables);
-        Optimum optimum = adjustmentContext.estimateFreeParameters("Rugged_refining",maxIterations,convergenceThreshold);
+        AdjustmentContext adjustmentContext = new AdjustmentContext(Collections.singletonList(rugged), measures);
+        Optimum optimum = adjustmentContext.estimateFreeParameters(Collections.singletonList(rugged.getName()), maxIterations, convergenceThreshold);
 
         // Print statistics
-        System.out.format("Max value: %3.6e %n",optimum.getResiduals().getMaxValue());
-        System.out.format("Optimization performed in %d iterations \n",optimum.getEvaluations());
-        System.out.format("RMSE: %f \n",optimum.getRMS());
+        System.out.format("Max value: %3.6e %n", optimum.getResiduals().getMaxValue());
+        System.out.format("Optimization performed in %d iterations \n", optimum.getEvaluations());
+        System.out.format("RMSE: %f \n", optimum.getRMS());
     }
 
 
@@ -347,22 +344,30 @@ public class Refining {
      * @throws RuggedException
      */
     public void optimization(int maxIterations, double convergenceThreshold,
-                             SensorToSensorMapping interMapping,
-                             Rugged ruggedA, Rugged ruggedB) throws OrekitException, RuggedException {
+                             Observables measures,
+                             Collection<Rugged> ruggeds) throws OrekitException, RuggedException {
 
 
-        System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n",maxIterations, convergenceThreshold);
+        System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
+        if(ruggeds.size()!= 2 )
+        {
+            throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,ruggeds.size());
+        }
 
-        // Note: estimateFreeParams2Models() is supposed to be applying on ruggedB, not on ruggedA (to be compliant with notations)
+        AdjustmentContext adjustmentContext = new AdjustmentContext(ruggeds, measures);
 
-        // Adapt parameters
-        Optimum optimum = ruggedB.estimateFreeParams2Models(Collections.singletonList(interMapping),
-                                                            maxIterations,convergenceThreshold, ruggedA);
+        List<String> ruggedNameList = new ArrayList<String>();
+        for(Rugged rugged : ruggeds) {
+            ruggedNameList.add(rugged.getName());
+        }
+
+
+        Optimum optimum = adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
 
         // Print statistics
-        System.out.format("Max value: %3.6e %n",optimum.getResiduals().getMaxValue());
-        System.out.format("Optimization performed in %d iterations \n",optimum.getEvaluations());
-        System.out.format("RMSE: %f \n",optimum.getRMS());
+        System.out.format("Max value: %3.6e %n", optimum.getResiduals().getMaxValue());
+        System.out.format("Optimization performed in %d iterations \n", optimum.getEvaluations());
+        System.out.format("RMSE: %f \n", optimum.getRMS());
     }
 
 

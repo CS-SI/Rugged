@@ -57,6 +57,7 @@ abstract class OptimizationProblemBuilder {
     /** measures .*/
     protected Observables measures;
 
+    protected final List<LineSensor> sensors;
 
     /**  OptimizationProblemBuilder constructor
      * @param sensors
@@ -78,6 +79,7 @@ abstract class OptimizationProblemBuilder {
         }
 
         this.measures = measures;
+        this.sensors = sensors;
     }
 
     /**  nbParams getter.
@@ -151,7 +153,8 @@ abstract class OptimizationProblemBuilder {
 
     protected abstract MultivariateJacobianFunction createFunction();
 
-
+    /** parse the observables to select mapping .*/
+    protected abstract void initMapping();
 
     /**
      * create parameter validator.
