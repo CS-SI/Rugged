@@ -21,6 +21,9 @@
   </properties>
   <body>
     <release version="2.0" date="TBD" description="TTBD">
+      <action dev="luc" type="update">
+        Updated dependency to Hipparchus 1.1, released on 2017, March 16th.
+      </action>
       <action dev="luc" type="add" due-to="Sergio Esteves">
         Added atmospheric refraction.
         This work was done under the frame of ESA SOCIS 2016 program.
