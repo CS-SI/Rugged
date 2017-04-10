@@ -16,8 +16,6 @@
  */
 package org.orekit.rugged.utils;
 
-import java.util.List;
-
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterDriversList;

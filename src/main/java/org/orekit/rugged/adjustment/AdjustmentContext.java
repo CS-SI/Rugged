@@ -143,17 +143,17 @@ public class AdjustmentContext {
             LeastSquaresProblem theProblem = null;
             /** builder */
             switch (ruggedList.size()) {
-                case 1:
-                    final Rugged rugged = ruggedList.get(0);
-                    final GroundOptimizationProblemBuilder groundOptimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measures, rugged);
-                    theProblem = groundOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
-                    break;
-                case 2:
-                    final InterSensorsOptimizationProblemBuilder interSensorsOptimizationProblem = new InterSensorsOptimizationProblemBuilder(selectedSensors, measures, ruggedList);
-                    theProblem = interSensorsOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
-                    break;
-                default :
-                    throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,ruggedList.size());
+            case 1:
+                final Rugged rugged = ruggedList.get(0);
+                final GroundOptimizationProblemBuilder groundOptimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measures, rugged);
+                theProblem = groundOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
+                break;
+            case 2:
+                final InterSensorsOptimizationProblemBuilder interSensorsOptimizationProblem = new InterSensorsOptimizationProblemBuilder(selectedSensors, measures, ruggedList);
+                theProblem = interSensorsOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
+                break;
+            default :
+                throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT, ruggedList.size());
             }
 
             return adjuster.optimize(theProblem);

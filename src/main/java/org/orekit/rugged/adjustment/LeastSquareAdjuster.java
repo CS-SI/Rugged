@@ -62,17 +62,15 @@ public class LeastSquareAdjuster {
     private LeastSquaresOptimizer selectOptimizer() {
         // set up the optimizer
         switch (this.optimizerID) {
-            case LEVENBERG_MARQUADT:
-                return new LevenbergMarquardtOptimizer();
-            case GAUSS_NEWTON_LU :
-                return new GaussNewtonOptimizer()
-                                .withDecomposition(GaussNewtonOptimizer.Decomposition.LU);
-            case GAUSS_NEWTON_QR :
-                return new GaussNewtonOptimizer()
-                                .withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+        case LEVENBERG_MARQUADT:
+            return new LevenbergMarquardtOptimizer();
+        case GAUSS_NEWTON_LU :
+            return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.LU);
+        case GAUSS_NEWTON_QR :
+            return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
+        default :
+            // this should never happen
+            throw RuggedException.createInternalError(null);
         }
 
     }

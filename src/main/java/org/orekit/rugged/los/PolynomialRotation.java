@@ -81,7 +81,7 @@ public class PolynomialRotation implements LOSTransform {
     public PolynomialRotation(final String name,
                               final Vector3D axis,
                               final AbsoluteDate referenceDate,
-                              final double ... angleCoeffs) {
+                              final double... angleCoeffs) {
         this.axis                = axis;
         this.referenceDate       = referenceDate;
         this.coefficientsDrivers = new ParameterDriver[angleCoeffs.length];

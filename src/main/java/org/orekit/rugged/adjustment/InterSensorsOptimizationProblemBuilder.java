@@ -52,7 +52,13 @@ import org.orekit.utils.ParameterDriver;
 
 
 public class InterSensorsOptimizationProblemBuilder
-extends OptimizationProblemBuilder {
+    extends OptimizationProblemBuilder {
+
+    /** Key for target. */
+    private static final String TARGET = "Target";
+
+    /** Key for weight. */
+    private static final String WEIGHT = "Weight";
 
     /** list of rugged instance to refine.*/
     private Map<String, Rugged> ruggedMap;
@@ -154,8 +160,8 @@ extends OptimizationProblemBuilder {
             }
 
             this.targetAndWeight = new HashMap<String, double[]>();
-            this.targetAndWeight.put("Target", target);
-            this.targetAndWeight.put("Weight", weight);
+            this.targetAndWeight.put(TARGET, target);
+            this.targetAndWeight.put(WEIGHT, weight);
 
         } catch  (RuggedExceptionWrapper rew) {
             throw rew.getException();
@@ -177,7 +183,7 @@ extends OptimizationProblemBuilder {
 
                 }
 
-                final double[] target = this.targetAndWeight.get("Target");
+                final double[] target = this.targetAndWeight.get(TARGET);
 
                 // compute distance and its partial derivatives
                 final RealVector value = new ArrayRealVector(target.length);
@@ -205,8 +211,8 @@ extends OptimizationProblemBuilder {
                         final SensorPixel spA = mapping.getKey();
                         final SensorPixel spB = mapping.getValue();
 
-                        LineSensor lineSensorB = ruggedB.getLineSensor(reference.getSensorNameB());
-                        LineSensor lineSensorA = ruggedA.getLineSensor(reference.getSensorNameA());
+                        final LineSensor lineSensorB = ruggedB.getLineSensor(reference.getSensorNameB());
+                        final LineSensor lineSensorA = ruggedA.getLineSensor(reference.getSensorNameA());
 
                         final AbsoluteDate dateA = lineSensorA.getDate(spA.getLineNumber());
                         final AbsoluteDate dateB = lineSensorB.getDate(spB.getLineNumber());
@@ -275,7 +281,7 @@ extends OptimizationProblemBuilder {
     public final LeastSquaresProblem build(final int maxEvaluations, final double convergenceThreshold) throws RuggedException {
 
         this.createTargetAndWeight();
-        final double[] target = this.targetAndWeight.get("Target");
+        final double[] target = this.targetAndWeight.get(TARGET);
         final double[] start = this.createStartTab();
         final ParameterValidator validator = this.createParameterValidator();
         final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = this.createChecker(convergenceThreshold);

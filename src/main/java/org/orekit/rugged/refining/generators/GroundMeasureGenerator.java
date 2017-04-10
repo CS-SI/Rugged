@@ -41,10 +41,10 @@ import org.orekit.time.AbsoluteDate;
 public class GroundMeasureGenerator implements Measurable {
 
 
-    /** mapping */
+    /** mapping. */
     private SensorToGroundMapping groundMapping;
 
-    /** observables which contains ground mapping.*/
+    /** observables which contains ground mapping. */
     private Observables observables;
 
     private Rugged rugged;
@@ -94,8 +94,8 @@ public class GroundMeasureGenerator implements Measurable {
     }
 
     @Override
-    public void createMeasure(final int lineSampling,final int pixelSampling)  throws RuggedException
-    {
+    public void createMeasure(final int lineSampling, final int pixelSampling)
+        throws RuggedException {
         for (double line = 0; line < dimension; line += lineSampling) {
 
             final AbsoluteDate date = sensor.getDate(line);
@@ -108,11 +108,12 @@ public class GroundMeasureGenerator implements Measurable {
                 measureCount++;
             }
         }
-        this.observables.addGroundMapping(groundMapping);
+        observables.addGroundMapping(groundMapping);
     }
+
     @Override
-    public void createNoisyMeasure(final int lineSampling,final int pixelSampling, final Noise noise)  throws RuggedException
-    {
+    public void createNoisyMeasure(final int lineSampling, final int pixelSampling, final Noise noise)
+        throws RuggedException {
         /* Estimate latitude and longitude errors estimation */
         final Vector3D latLongError = estimateLatLongError();
 
@@ -149,14 +150,14 @@ public class GroundMeasureGenerator implements Measurable {
                                                                 sensor.getLOS(date, pixel));
 
 
-                final GeodeticPoint gpNoisy = new GeodeticPoint(gp2.getLatitude()+vecRandom.getX(),
-                                                                gp2.getLongitude()+vecRandom.getY(),
-                                                                gp2.getAltitude()+vecRandom.getZ());
+                final GeodeticPoint gpNoisy = new GeodeticPoint(gp2.getLatitude() + vecRandom.getX(),
+                                                                gp2.getLongitude() + vecRandom.getY(),
+                                                                gp2.getAltitude() + vecRandom.getZ());
 
                 //if(line == 0) {
-                //	System.out.format("Init  gp: (%f,%d): %s %n",line,pixel,gp2.toString());
-                //	System.out.format("Random:   (%f,%d): %s %n",line,pixel,vecRandom.toString());
-                //	System.out.format("Final gp: (%f,%d): %s %n",line,pixel,gpNoisy.toString());
+                //    System.out.format("Init  gp: (%f,%d): %s %n",line,pixel,gp2.toString());
+                //    System.out.format("Random:   (%f,%d): %s %n",line,pixel,vecRandom.toString());
+                //    System.out.format("Final gp: (%f,%d): %s %n",line,pixel,gpNoisy.toString());
                 //}
 
                 groundMapping.addMapping(new SensorPixel(line, pixel), gpNoisy);
@@ -165,23 +166,24 @@ public class GroundMeasureGenerator implements Measurable {
         }
         this.observables.addGroundMapping(groundMapping);
     }
+
     private Vector3D estimateLatLongError() throws RuggedException {
 
         System.out.format("Uncertainty in pixel (in line) for a real geometric refining: 1 pixel (assumption)%n");
-        final int pix =sensor.getNbPixels()/2;
-        final int line= (int) FastMath.floor(pix); // assumption : same number of line and pixels;
+        final int pix = sensor.getNbPixels() / 2;
+        final int line = (int) FastMath.floor(pix); // assumption : same number of line and pixels;
         System.out.format("Pixel size estimated at position  pix: %d line: %d %n", pix, line);
         final AbsoluteDate date = sensor.getDate(line);
         final GeodeticPoint gp_pix0 = rugged.directLocation(date, sensor.getPosition(), sensor.getLOS(date, pix));
-        final AbsoluteDate date1 = sensor.getDate(line+1);
-        final GeodeticPoint gp_pix1 = rugged.directLocation(date1, sensor.getPosition(), sensor.getLOS(date1, pix+1));
+        final AbsoluteDate date1 = sensor.getDate(line + 1);
+        final GeodeticPoint gp_pix1 = rugged.directLocation(date1, sensor.getPosition(), sensor.getLOS(date1, pix + 1));
         final double latErr = FastMath.abs(gp_pix0.getLatitude() - gp_pix1.getLatitude());
         final double lonErr = FastMath.abs(gp_pix0.getLongitude() - gp_pix1.getLongitude());
         //double dist = FastMath.sqrt(lonErr*lonErr + latErr*latErr)/FastMath.sqrt(2);
-        final double distanceX =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix1.getLongitude(), gp_pix0.getLatitude());
-        final double distanceY =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(),gp_pix0.getLongitude(), gp_pix1.getLatitude());
+        final double distanceX =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(), gp_pix1.getLongitude(), gp_pix0.getLatitude());
+        final double distanceY =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(), gp_pix0.getLongitude(), gp_pix1.getLatitude());
 
-        System.out.format("Estimated distance: X %3.3f Y %3.3f %n",distanceX, distanceY);
+        System.out.format("Estimated distance: X %3.3f Y %3.3f %n", distanceX, distanceY);
 
         //System.out.format(" lat  : %1.10f %1.10f %n",  latErr, lonErr);
         return new Vector3D(latErr, lonErr, 0.0);

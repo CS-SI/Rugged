@@ -1,15 +1,18 @@
-/*
- * Copyright 2013-2016 CS Systèmes d'Information Licensed to CS Systèmes
- * d'Information (CS) under one or more contributor license agreements. See the
- * NOTICE file distributed with this work for additional information regarding
- * copyright ownership. CS licenses this file to You under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
- * or agreed to in writing, software distributed under the License is
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+/* Copyright 2013-2017 CS Systèmes d'Information
+ * Licensed to CS Systèmes d'Information (CS) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * CS licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.orekit.rugged.refining.generators;
 
@@ -61,7 +64,7 @@ public class InterMeasureGenerator implements Measurable {
 
     private int dimensionB;
 
-    private double outlier=0.0;
+    private double outlier;
 
 
     /** Default constructor: measures generation without outlier points control
@@ -72,33 +75,32 @@ public class InterMeasureGenerator implements Measurable {
      * @param ruggedB
      * @throws RuggedException
      */
-    public InterMeasureGenerator(Rugged ruggedA, String sensorNameA, int dimensionA,
-                                 Rugged ruggedB, String sensorNameB, int dimensionB)
-                                                 throws RuggedException {
+    public InterMeasureGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB)
+        throws RuggedException {
 
         // Initialize parameters
-        this.initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
+        initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
 
         // generate reference mapping, without Earth distance constraint
         interMapping = new SensorToSensorMapping(sensorNameA, sensorNameB);
 
         //create observables for two models
-        this.observables = new Observables(2);
+        observables = new Observables(2);
     }
 
 
     /** Constructor for measures generation taking into account outlier points control,
      * without Earth distance constraint.
-     * @param viewingModelA viewing model A
      * @param ruggedA Rugged instance corresponding to the viewing model A
-     * @param viewingModelB viewing model B
      * @param ruggedB Rugged instance corresponding to the viewing model B
      * @param outlier limit value of outlier points
      * @throws RuggedException
      */
-    public InterMeasureGenerator(Rugged ruggedA, String sensorNameA, int dimensionA,
-                                 Rugged ruggedB, String sensorNameB, int dimensionB, double outlier)
-                                                 throws RuggedException {
+    public InterMeasureGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB,
+                                 final double outlier)
+        throws RuggedException {
 
         this(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
         this.outlier = outlier;
@@ -108,9 +110,7 @@ public class InterMeasureGenerator implements Measurable {
 
     /** Constructor for measures generation taking into account outlier points control,
      * and Earth distance constraint.
-     * @param viewingModelA viewing model A
      * @param ruggedA Rugged instance corresponding to the viewing model A
-     * @param viewingModelB viewing model B
      * @param ruggedB Rugged instance corresponding to the viewing model B
      * @param outlier limit value of outlier points
      * @param earthConstraintWeight weight given to the Earth distance constraint
@@ -118,13 +118,13 @@ public class InterMeasureGenerator implements Measurable {
      * @throws RuggedException
      * @see Rugged#estimateFreeParams2Models
      */
-    public InterMeasureGenerator(Rugged ruggedA, String sensorNameA, int dimensionA,
-                                 Rugged ruggedB, String sensorNameB, int dimensionB,
-                                 double outlier, final double earthConstraintWeight)
-                                                 throws RuggedException {
+    public InterMeasureGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB,
+                                 final double outlier, final double earthConstraintWeight)
+        throws RuggedException {
 
         // Initialize parameters
-        this.initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
+        initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
 
         // generate reference mapping, with Earth distance constraints
         // Weighting will be applied as follow :
@@ -142,7 +142,6 @@ public class InterMeasureGenerator implements Measurable {
     public SensorToSensorMapping getInterMapping() {
         return interMapping;
     }
-
 
     /**  getter for observables.
      * @return the observables
@@ -227,12 +226,9 @@ public class InterMeasureGenerator implements Measurable {
      */
     @Override
     public void createNoisyMeasure(final int lineSampling, final int pixelSampling, final Noise noise)
-                    throws RuggedException {
+        throws RuggedException {
 
-        // Get outlier
-        double outlier = this.outlier;
-
-        /* Get noise features (errors) */
+       /* Get noise features (errors) */
         final double[] mean = noise.getMean(); /* [pixelA, pixelB] mean */
         final double[] std = noise.getStandardDeviation(); /* [pixelA, pixelB] standard deviation */
 
@@ -240,38 +236,41 @@ public class InterMeasureGenerator implements Measurable {
         final int minLine = 0;
         final int maxLine = dimensionB - 1;
 
-        double meanA[] =  {mean[0],mean[0]};
-        double stdA[] = {std[0],std[0]};
-        double meanB[] =  {mean[1],mean[1]};
-        double stdB[] = {std[1],std[1]};
+        final double meanA[] =  {
+            mean[0], mean[0]
+        };
+        final double stdA[] = {
+            std[0], std[0]
+        };
+        final double meanB[] =  {
+            mean[1], mean[1]
+        };
+        final double stdB[] = {
+            std[1], std[1]
+        };
 
-        GaussianRandomGenerator rngA = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
-        UncorrelatedRandomVectorGenerator rvgA = new UncorrelatedRandomVectorGenerator(meanA, stdA, rngA);
+        final GaussianRandomGenerator rngA = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
+        final UncorrelatedRandomVectorGenerator rvgA = new UncorrelatedRandomVectorGenerator(meanA, stdA, rngA);
 
-        GaussianRandomGenerator rngB = new GaussianRandomGenerator(new Well19937a(0xdf1c03d9be0b34b9l));
-        UncorrelatedRandomVectorGenerator rvgB = new UncorrelatedRandomVectorGenerator(meanB, stdB, rngB);
+        final GaussianRandomGenerator rngB = new GaussianRandomGenerator(new Well19937a(0xdf1c03d9be0b34b9l));
+        final UncorrelatedRandomVectorGenerator rvgB = new UncorrelatedRandomVectorGenerator(meanB, stdB, rngB);
 
         for (double line = 0; line < dimensionA; line += lineSampling) {
 
-            AbsoluteDate dateA = sensorA.getDate(line);
-            for (double pixelA = 0; pixelA < sensorA
-                            .getNbPixels(); pixelA += pixelSampling) {
+            final AbsoluteDate dateA = sensorA.getDate(line);
+            for (double pixelA = 0; pixelA < sensorA.getNbPixels(); pixelA += pixelSampling) {
 
-                GeodeticPoint gpA = ruggedA
-                                .directLocation(dateA, sensorA.getPosition(),
-                                                sensorA.getLOS(dateA, pixelA));
+                final GeodeticPoint gpA = ruggedA.directLocation(dateA, sensorA.getPosition(),
+                                                                 sensorA.getLOS(dateA, pixelA));
 
-                SensorPixel sensorPixelB = ruggedB
-                                .inverseLocation(sensorNameB, gpA, minLine, maxLine);
+                final SensorPixel sensorPixelB = ruggedB.inverseLocation(sensorNameB, gpA, minLine, maxLine);
                 // we need to test if the sensor pixel is found in the
                 // prescribed lines otherwise the sensor pixel is null
                 if (sensorPixelB != null) {
                     //System.out.format("  %n");
-                    final AbsoluteDate dateB = sensorB
-                                    .getDate(sensorPixelB.getLineNumber());
-                    double pixelB = sensorPixelB.getPixelNumber();
-                    final SpacecraftToObservedBody scToBodyA = ruggedA
-                                    .getScToBody();
+                    final AbsoluteDate dateB = sensorB.getDate(sensorPixelB.getLineNumber());
+                    final double pixelB = sensorPixelB.getPixelNumber();
+                    final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
                     //System.out.format("%n distance %1.8e dist %f %n",distanceLOSB[0],distanceLOSB[1]);
                     // Get spacecraft to body transform of rugged instance A
 
@@ -291,27 +290,23 @@ public class InterMeasureGenerator implements Measurable {
 
 
 
-                    GeodeticPoint gpB = ruggedB
-                                    .directLocation(dateB, sensorB.getPosition(),
-                                                    sensorB.getLOS(dateB, pixelB));
+                    final GeodeticPoint gpB = ruggedB.directLocation(dateB, sensorB.getPosition(),
+                                                                     sensorB.getLOS(dateB, pixelB));
 
-                    double GEOdistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
-                                                                              gpB.getLongitude(), gpB.getLatitude());
+                    final double GEOdistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
+                                                                                    gpB.getLongitude(), gpB.getLatitude());
 
-                    if(GEOdistance < outlier)
-                    {
+                    if (GEOdistance < outlier) {
                         /*System.out.format("A line %2.3f pixel %2.3f %n", line,
                                           pixelA);*/
 
                         final double[] vecRandomA = rvgA.nextVector();
                         final double[] vecRandomB = rvgB.nextVector();
 
-                        SensorPixel RealPixelA = new SensorPixel(line +
-                                                                 vecRandomA[0],
-                                                                 pixelA + vecRandomA[1]);
-                        SensorPixel RealPixelB = new SensorPixel(sensorPixelB
-                                                                 .getLineNumber() + vecRandomB[0], sensorPixelB
-                                                                 .getPixelNumber() + vecRandomB[1]);
+                        final SensorPixel RealPixelA = new SensorPixel(line + vecRandomA[0],
+                                                                       pixelA + vecRandomA[1]);
+                        final SensorPixel RealPixelB = new SensorPixel(sensorPixelB.getLineNumber() + vecRandomB[0],
+                                                                       sensorPixelB.getPixelNumber() + vecRandomB[1]);
                         /*System.out.format("pix A %f %f Real %f %f %n", line,
                          pixelA, RealPixelA.getLineNumber(),
                          RealPixelA.getPixelNumber());
@@ -320,11 +315,10 @@ public class InterMeasureGenerator implements Measurable {
                          sensorPixelB.getPixelNumber(),
                          RealPixelB.getLineNumber(),
                         RealPixelB.getPixelNumber());*/
-                        AbsoluteDate RealDateA = sensorA.getDate(RealPixelA.getLineNumber());
-                        AbsoluteDate RealDateB = sensorB.getDate(RealPixelB.getLineNumber());
-                        double[] distanceLOSB = ruggedB
-                                        .distanceBetweenLOS(sensorA, RealDateA, RealPixelA.getPixelNumber(), scToBodyA,
-                                                            sensorB, RealDateB, RealPixelB.getPixelNumber());
+                        final AbsoluteDate RealDateA = sensorA.getDate(RealPixelA.getLineNumber());
+                        final AbsoluteDate RealDateB = sensorB.getDate(RealPixelB.getLineNumber());
+                        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(sensorA, RealDateA, RealPixelA.getPixelNumber(), scToBodyA,
+                                                                                 sensorB, RealDateB, RealPixelB.getPixelNumber());
                         final Double losDistance = 0.0;
                         final Double earthDistance = distanceLOSB[1];
 
@@ -346,31 +340,32 @@ public class InterMeasureGenerator implements Measurable {
     /** Default constructor: measures generation without outlier points control
      * and Earth distances constraint.
      * @param viewingModelA
-     * @param ruggedA
+     * @param rA
      * @param viewingModelB
-     * @param ruggedB
+     * @param rB
      * @throws RuggedException
      */
-    private void initParams(Rugged ruggedA, String sensorNameA, int dimensionA,
-                            Rugged ruggedB, String sensorNameB, int dimensionB) throws RuggedException {
+    private void initParams(final Rugged rA, final String sNameA, final int dimA,
+                            final Rugged rB, final String sNameB, final int dimB)
+        throws RuggedException {
 
         // generate reference mapping
-        this.sensorNameA = sensorNameA;
-        this.sensorNameB = sensorNameB;
+        this.sensorNameA = sNameA;
+        this.sensorNameB = sNameB;
         // check that sensors's name is different
-        if (sensorNameA.contains(sensorNameB)) {
+        if (sNameA.contains(sNameB)) {
             throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME,
-                                                                 sensorNameA));
+                                                                 sNameA));
         }
 
-        this.ruggedA = ruggedA;
-        this.ruggedB = ruggedB;
+        this.ruggedA = rA;
+        this.ruggedB = rB;
 
-        sensorA = ruggedA.getLineSensor(sensorNameA);
-        sensorB = ruggedB.getLineSensor(sensorNameB);
+        sensorA = rA.getLineSensor(sNameA);
+        sensorB = rB.getLineSensor(sNameB);
 
-        this.dimensionA = dimensionA;
-        this.dimensionB = dimensionB;
+        this.dimensionA = dimA;
+        this.dimensionB = dimB;
 
         measureCount = 0;
 

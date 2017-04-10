@@ -43,105 +43,104 @@ import org.orekit.errors.OrekitException;
 
 
 /**
- * PleiadesViewingModel class definition 
+ * PleiadesViewingModel class definition.
  * @author Jonathan Guinet, Lucie LabatAllee
  *
  */
 
 
 public class PleiadesViewingModel {
-	
-    
-	/** intrinsic Pleiades parameters */
-	public  double fov = 1.65; // 20km - alt 694km
+
+
+    /** intrinsic Pleiades parameters. */
+    public  double fov = 1.65; // 20km - alt 694km
     public  int dimension = 40000;
+
+    public  double angle;
+    public  LineSensor lineSensor;
+    public  String date;
+
+    private String sensorName;
+
     private final double linePeriod =  1e-4;
-    
-	public  double angle;
-	public  LineSensor lineSensor;	
-	public  String date;
-	
-	
-	private String sensorName;
-	
+
+
     /** Simple constructor.
      * <p>
-     *  initialize PleiadesViewingModel with 
+     *  initialize PleiadesViewingModel with
      *  sensorName="line", incidenceAngle = 0.0, date = "2016-01-01T12:00:00.0"
      * </p>
      */
-    public PleiadesViewingModel(final String sensorName) throws RuggedException, OrekitException {	
-        this(sensorName,0.0,"2016-01-01T12:00:00.0");	
+    public PleiadesViewingModel(final String sensorName)
+        throws RuggedException, OrekitException {
+        this(sensorName, 0.0, "2016-01-01T12:00:00.0");
     }
-    
-    /** PleiadesViewingModel constructor
+
+    /** PleiadesViewingModel constructor.
      * @param sensorName sensor name
      * @param incidenceAngle incidence angle
-     * @param referenceDate reference date 
+     * @param referenceDate reference date
      * @throws RuggedException
      * @throws OrekitException
      */
-    public PleiadesViewingModel(final String sensorName,final double incidenceAngle,final String referenceDate) throws RuggedException, OrekitException { 
+    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate)
+        throws RuggedException, OrekitException {
         this.sensorName = sensorName;
         this.date = referenceDate;
-        this.angle = incidenceAngle; 
-        this.createLineSensor();        
-    }    
-    
+        this.angle = incidenceAngle;
+        this.createLineSensor();
+    }
 
-	public   LOSBuilder rawLOS(Vector3D center, Vector3D normal, double halfAperture, int n)
-	{
-	
-        List<Vector3D> list = new ArrayList<Vector3D>(n);
+
+    public LOSBuilder rawLOS(final Vector3D center, final Vector3D normal, final double halfAperture, final int n) {
+
+        final List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
-            double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
+            final double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
             list.add(new Rotation(normal, alpha, RotationConvention.VECTOR_OPERATOR).applyTo(center));
         }
-         
+
         return new LOSBuilder(list);
-    }	
-		
-	public  TimeDependentLOS buildLOS()
-	{	
-	LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
-            FastMath.toRadians(this.angle),
-            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K), Vector3D.PLUS_I, FastMath.toRadians(fov/2), dimension); 	
+    }
 
-	losBuilder.addTransform(new FixedRotation(sensorName+"_roll",  Vector3D.MINUS_I, 0.00));
-    losBuilder.addTransform(new FixedRotation(sensorName+"_pitch", Vector3D.MINUS_J, 0.00));
-    
-    //factor is a common parameters shared between all Pleiades models
-    losBuilder.addTransform(new FixedZHomothety("factor", 1.0));  
-    return  losBuilder.build();
-	}
-    
-	
-	public  AbsoluteDate getDatationReference() throws OrekitException
-	{
-	    // We use Orekit for handling time and dates, and Rugged for defining the datation model:
-	    TimeScale utc = TimeScalesFactory.getUTC();
-	    return new AbsoluteDate(date, utc);
-	}
-	
-	public  AbsoluteDate getMinDate() throws RuggedException
-	{
-		return lineSensor.getDate(0);
-	}
-	
-	public  AbsoluteDate  getMaxDate() throws RuggedException
-	{
-		return lineSensor.getDate(dimension);
-	}
+    public  TimeDependentLOS buildLOS() {
+        final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
+                                                          FastMath.toRadians(this.angle),
+                                                          RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+                                             Vector3D.PLUS_I, FastMath.toRadians(fov / 2), dimension);
 
-	public  LineSensor  getLineSensor() {
-			return lineSensor;
-	}
+        losBuilder.addTransform(new FixedRotation(sensorName + "_roll",  Vector3D.MINUS_I, 0.00));
+        losBuilder.addTransform(new FixedRotation(sensorName + "_pitch", Vector3D.MINUS_J, 0.00));
 
-	public  String getSensorName() {
-			return sensorName;
-	}
-	
-	/**
+        //factor is a common parameters shared between all Pleiades models
+        losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
+        return  losBuilder.build();
+    }
+
+
+    public  AbsoluteDate getDatationReference() throws OrekitException {
+        // We use Orekit for handling time and dates, and Rugged for defining the datation model:
+        final TimeScale utc = TimeScalesFactory.getUTC();
+        return new AbsoluteDate(date, utc);
+    }
+
+    public  AbsoluteDate getMinDate() throws RuggedException {
+        return lineSensor.getDate(0);
+    }
+
+    public  AbsoluteDate  getMaxDate() throws RuggedException {
+        return lineSensor.getDate(dimension);
+    }
+
+    public  LineSensor  getLineSensor() {
+        return lineSensor;
+    }
+
+    public  String getSensorName() {
+        return sensorName;
+    }
+
+    /**
      * @return the dimension
      */
     public int getDimension() {
@@ -149,28 +148,28 @@ public class PleiadesViewingModel {
     }
 
     private  void  createLineSensor()
-			throws RuggedException, OrekitException {
+        throws RuggedException, OrekitException {
 
-	      
+
 
         // Offset of the MSI from center of mass of satellite
-		//System.out.println("MSI offset from center of mass of satellite");
+        //System.out.println("MSI offset from center of mass of satellite");
         // one line sensor
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         //Vector3D msiOffset = new Vector3D(1.5, 0, -0.2);
-		Vector3D msiOffset = new Vector3D(0, 0, 0);
-            
-        // to do build complex los 
-        TimeDependentLOS lineOfSight = buildLOS();
-        
+        final Vector3D msiOffset = new Vector3D(0, 0, 0);
+
+        // to do build complex los
+        final TimeDependentLOS lineOfSight = buildLOS();
+
         final double rate =  1 / linePeriod;
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
 
-        LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, rate);
+        final LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, rate);
         //LineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20);
         lineSensor = new LineSensor(sensorName, lineDatation, msiOffset, lineOfSight);
-        
-	}
+
+    }
 
 }
 

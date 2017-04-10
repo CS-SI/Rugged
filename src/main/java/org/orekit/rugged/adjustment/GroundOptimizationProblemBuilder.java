@@ -48,8 +48,13 @@ import org.orekit.utils.ParameterDriver;
 
 
 
-public class GroundOptimizationProblemBuilder
-extends OptimizationProblemBuilder {
+public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder {
+
+    /** Key for target. */
+    private static final String TARGET = "Target";
+
+    /** Key for weight. */
+    private static final String WEIGHT = "Weight";
 
     /** rugged instance to refine.*/
     private final Rugged rugged;
@@ -74,7 +79,7 @@ extends OptimizationProblemBuilder {
      */
     public GroundOptimizationProblemBuilder(final List<LineSensor> sensors,
                                             final Observables measures, final Rugged rugged)
-                                                            throws RuggedException {
+        throws RuggedException {
         super(sensors, measures);
         this.rugged = rugged;
         this.initMapping();
@@ -84,14 +89,12 @@ extends OptimizationProblemBuilder {
      * @see org.orekit.rugged.adjustment.OptimizationProblemBuilder#initMapping()
      */
     @Override
-    protected void initMapping()
-    {
+    protected void initMapping() {
         final String ruggedName = rugged.getName();
         this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
-        for (final LineSensor lineSensor : sensors)
-        {
+        for (final LineSensor lineSensor : sensors) {
             final SensorToGroundMapping mapping = this.measures.getGroundMapping(ruggedName, lineSensor.getName());
-            if(mapping != null)
+            if (mapping != null)
                 this.sensorToGroundMappings.add(mapping);
         }
     }
@@ -127,13 +130,11 @@ extends OptimizationProblemBuilder {
                 }
             }
 
-            this.minLine = (int) FastMath
-                            .floor(min - ESTIMATION_LINE_RANGE_MARGIN);
-            this.maxLine = (int) FastMath
-                            .ceil(max - ESTIMATION_LINE_RANGE_MARGIN);
+            this.minLine = (int) FastMath.floor(min - ESTIMATION_LINE_RANGE_MARGIN);
+            this.maxLine = (int) FastMath.ceil(max - ESTIMATION_LINE_RANGE_MARGIN);
             this.targetAndWeight = new HashMap<String, double[]>();
-            this.targetAndWeight.put("Target", target);
-            this.targetAndWeight.put("Weight", weight);
+            this.targetAndWeight.put(TARGET, target);
+            this.targetAndWeight.put(WEIGHT, weight);
 
         } catch  (RuggedExceptionWrapper rew) {
             throw rew.getException();
@@ -153,7 +154,7 @@ extends OptimizationProblemBuilder {
                     driver.setNormalizedValue(point.getEntry(i++));
                 }
 
-                final double[] target = this.targetAndWeight.get("Target");
+                final double[] target = this.targetAndWeight.get(TARGET);
 
                 // compute inverse loc and its partial derivatives
                 final RealVector value = new ArrayRealVector(target.length);
@@ -223,7 +224,7 @@ extends OptimizationProblemBuilder {
     public final LeastSquaresProblem build(final int maxEvaluations, final double convergenceThreshold) throws RuggedException {
 
         this.createTargetAndWeight();
-        final double[] target = this.targetAndWeight.get("Target");
+        final double[] target = this.targetAndWeight.get(TARGET);
         final double[] start = this.createStartTab();
         final ParameterValidator validator = this.createParameterValidator();
         final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = this.createChecker(convergenceThreshold);

@@ -888,19 +888,19 @@ public class RuggedBuilder {
         try {
             // set up the inertial frame
             switch (inertialFrameId) {
-                case GCRF :
-                    return FramesFactory.getGCRF();
-                case EME2000 :
-                    return FramesFactory.getEME2000();
-                case MOD :
-                    return FramesFactory.getMOD(IERSConventions.IERS_1996);
-                case TOD :
-                    return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
-                case VEIS1950 :
-                    return FramesFactory.getVeis1950();
-                default :
-                    // this should never happen
-                    throw RuggedException.createInternalError(null);
+            case GCRF :
+                return FramesFactory.getGCRF();
+            case EME2000 :
+                return FramesFactory.getEME2000();
+            case MOD :
+                return FramesFactory.getMOD(IERSConventions.IERS_1996);
+            case TOD :
+                return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
+            case VEIS1950 :
+                return FramesFactory.getVeis1950();
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -919,15 +919,15 @@ public class RuggedBuilder {
         try {
             // set up the rotating frame
             switch (bodyRotatingFrame) {
-                case ITRF :
-                    return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-                case ITRF_EQUINOX :
-                    return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
-                case GTOD :
-                    return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
-                default :
-                    // this should never happen
-                    throw RuggedException.createInternalError(null);
+            case ITRF :
+                return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+            case ITRF_EQUINOX :
+                return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
+            case GTOD :
+                return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -944,19 +944,19 @@ public class RuggedBuilder {
 
         // set up the ellipsoid
         switch (ellipsoidID) {
-            case GRS80 :
-                return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
-            case WGS84 :
-                return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                            Constants.WGS84_EARTH_FLATTENING,
-                                            bodyFrame);
-            case IERS96 :
-                return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
-            case IERS2003 :
-                return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+        case GRS80 :
+            return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
+        case WGS84 :
+            return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                        Constants.WGS84_EARTH_FLATTENING,
+                                        bodyFrame);
+        case IERS96 :
+            return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
+        case IERS2003 :
+            return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
+        default :
+            // this should never happen
+            throw RuggedException.createInternalError(null);
         }
 
     }
@@ -974,19 +974,19 @@ public class RuggedBuilder {
 
         // set up the algorithm
         switch (algorithmID) {
-            case DUVENHAGE :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
-            case DUVENHAGE_FLAT_BODY :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
-            case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-                return new BasicScanAlgorithm(updater, maxCachedTiles);
-            case CONSTANT_ELEVATION_OVER_ELLIPSOID :
-                return new ConstantElevationAlgorithm(constantElevation);
-            case IGNORE_DEM_USE_ELLIPSOID :
-                return new IgnoreDEMAlgorithm();
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+        case DUVENHAGE :
+            return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+        case DUVENHAGE_FLAT_BODY :
+            return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
+        case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
+            return new BasicScanAlgorithm(updater, maxCachedTiles);
+        case CONSTANT_ELEVATION_OVER_ELLIPSOID :
+            return new ConstantElevationAlgorithm(constantElevation);
+        case IGNORE_DEM_USE_ELLIPSOID :
+            return new IgnoreDEMAlgorithm();
+        default :
+            // this should never happen
+            throw RuggedException.createInternalError(null);
         }
 
     }

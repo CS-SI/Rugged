@@ -28,6 +28,12 @@ import java.util.Map;
  */
 public class Observables {
 
+    /** Separator between Rugged name and sensor name. */
+    private static final String RUGGED_SENSOR_SEPARATOR = "_";
+
+    /** Separator between sensors. */
+    private static final String SENSORS_SEPARATOR = "__";
+
     /** Sensor to ground mapping structure (example: for GCP points).*/
     private final Map<String, SensorToGroundMapping> groundMappings;
 
@@ -78,7 +84,7 @@ public class Observables {
      * @return selected ground mapping or null of sensorName is not found
      */
     public SensorToGroundMapping getGroundMapping(final String ruggedName, final String sensorName) {
-        final SensorToGroundMapping mapping = this.groundMappings.get(ruggedName + "_" + sensorName);
+        final SensorToGroundMapping mapping = this.groundMappings.get(ruggedName + RUGGED_SENSOR_SEPARATOR + sensorName);
         return mapping;
     }
 
@@ -100,9 +106,9 @@ public class Observables {
      */
     public SensorToSensorMapping getInterMapping(final String ruggedNameA, final String sensorNameA, final String ruggedNameB, final String sensorNameB) {
 
-        final String keyA = ruggedNameA + "_" + sensorNameA;
-        final String keyB = ruggedNameB + "_" + sensorNameB;
-        final SensorToSensorMapping mapping = this.interMappings.get(keyA + "__" + keyB);
+        final String keyA = ruggedNameA + RUGGED_SENSOR_SEPARATOR + sensorNameA;
+        final String keyB = ruggedNameB + RUGGED_SENSOR_SEPARATOR + sensorNameB;
+        final SensorToSensorMapping mapping = interMappings.get(keyA + SENSORS_SEPARATOR + keyB);
         return mapping;
     }
 
@@ -121,7 +127,7 @@ public class Observables {
      */
     private String createKey(final SensorToGroundMapping groundMapping)
     {
-        final String key = groundMapping.getRuggedName() + "_" + groundMapping.getSensorName();
+        final String key = groundMapping.getRuggedName() + RUGGED_SENSOR_SEPARATOR + groundMapping.getSensorName();
         return key;
     }
 
@@ -131,9 +137,9 @@ public class Observables {
      */
     private String createKey(final SensorToSensorMapping sensorMapping)
     {
-        final String keyA = sensorMapping.getRuggedNameA() + "_" + sensorMapping.getSensorNameA();
-        final String keyB = sensorMapping.getRuggedNameB() + "_" + sensorMapping.getSensorNameB();
-        return keyA + "__" + keyB;
+        final String keyA = sensorMapping.getRuggedNameA() + RUGGED_SENSOR_SEPARATOR + sensorMapping.getSensorNameA();
+        final String keyB = sensorMapping.getRuggedNameB() + RUGGED_SENSOR_SEPARATOR + sensorMapping.getSensorNameB();
+        return keyA + SENSORS_SEPARATOR + keyB;
     }
 
 

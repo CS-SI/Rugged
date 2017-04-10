@@ -60,17 +60,17 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
      * @param factorvalue homothety factor
      */
     public FixedZHomothety(final String name, final double factorvalue) {
-    	this.factor   = factorvalue;
-    	this.factorDS = null;
+        this.factor   = factorvalue;
+        this.factorDS = null;
         try {
             this.factorDriver = new ParameterDriver(name, factorvalue, SCALE, 0, Double.POSITIVE_INFINITY);
             factorDriver.addObserver(new ParameterObserver() {
                 @Override
                 public void valueChanged(final double previousValue, final ParameterDriver driver) {
                     // reset factor to zero, they will be evaluated lazily if needed
-                	factor = 0.0;
-//                	System.out.format("Value changed: %f %n", factorDriver.getValue());
-                	factorDS = null;
+                    factor = 0.0;
+//                    System.out.format("Value changed: %f %n", factorDriver.getValue());
+                    factorDS = null;
                 }
             });
         } catch (OrekitException oe) {
@@ -88,21 +88,21 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
     /** {@inheritDoc} */
     @Override
     public Vector3D transformLOS(final int i, final Vector3D los) {
-    	
-    	if (factor == 0.0) {
-        	// lazy evaluation of the homothety
+
+        if (factor == 0.0) {
+            // lazy evaluation of the homothety
             factor = factorDriver.getValue();
         }
-    	return new Vector3D(los.getX(), los.getY(), factor * los.getZ());
+        return new Vector3D(los.getX(), los.getY(), factor * los.getZ());
     }
 
     /** {@inheritDoc} */
     @Override
     public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
                                                            final DSGenerator generator) {
-    	if (factorDS == null) {
+        if (factorDS == null) {
             // lazy evaluation of the homothety
-        	factorDS = generator.variable(factorDriver);
+            factorDS = generator.variable(factorDriver);
         }
         return new FieldVector3D<DerivativeStructure>(los.getX(), los.getY(), factorDS.multiply(los.getZ()));
     }

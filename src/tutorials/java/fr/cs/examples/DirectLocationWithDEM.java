@@ -84,14 +84,14 @@ public class DirectLocationWithDEM {
             // We use Orekit for handling time and dates, and Rugged for defining the datation model:
             TimeScale gps = TimeScalesFactory.getGPS();
             AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
-            LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20); 
+            LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20);
 
             // With the LOS and the datation now defined , we can initialize a line sensor object in Rugged:
             LineSensor lineSensor = new LineSensor("mySensor", lineDatation, Vector3D.ZERO, lineOfSight);
 
             // In our application, we simply need to know the name of the frames we are working with. Positions and
             // velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
-            // inertial frame.  
+            // inertial frame.
             Frame eme2000 = FramesFactory.getEME2000();
             boolean simpleEOP = true; // we don't want to compute tiny tidal effects at millimeter level
             Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, simpleEOP);
@@ -109,7 +109,7 @@ public class DirectLocationWithDEM {
             addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:30.592937", -0.439505d, 0.299722d, -0.795442d, -0.290301d);
             addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:54.592937", -0.452976d, 0.294556d, -0.787571d, -0.296279d);
             addSatelliteQ(gps, satelliteQList, "2009-12-11T17:02:18.592937", -0.466207d, 0.28935d, -0.779516d, -0.302131d);
- 
+
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:58:42.592937", -726361.466d, -5411878.485d, 4637549.599d, -2463.635d, -4447.634d, -5576.736d);
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:04.192937", -779538.267d, -5506500.533d, 4515934.894d, -2459.848d, -4312.676d, -5683.906d);
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:25.792937", -832615.368d, -5598184.195d, 4392036.13d, -2454.395d, -4175.564d, -5788.201d);
@@ -167,8 +167,8 @@ public class DirectLocationWithDEM {
         Vector3D position = new Vector3D(px, py, pz);
         Vector3D velocity = new Vector3D(vx, vy, vz);
         PVCoordinates pvITRF = new PVCoordinates(position, velocity);
-        Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);        
-        PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF); 
+        Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
+        PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF);
         satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pvEME2000.getPosition(), pvEME2000.getVelocity(), Vector3D.ZERO));
 
     }

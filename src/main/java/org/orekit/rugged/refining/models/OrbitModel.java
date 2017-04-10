@@ -1,15 +1,18 @@
-/*
- * Copyright 2013-2016 CS Systèmes d'Information Licensed to CS Systèmes
- * d'Information (CS) under one or more contributor license agreements. See the
- * NOTICE file distributed with this work for additional information regarding
- * copyright ownership. CS licenses this file to You under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
- * or agreed to in writing, software distributed under the License is
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+/* Copyright 2013-2017 CS Systèmes d'Information
+ * Licensed to CS Systèmes d'Information (CS) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * CS licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.orekit.rugged.refining.models;
 
@@ -46,7 +49,6 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.time.AbsoluteDate;
 
 import org.orekit.time.TimeScale;
@@ -58,64 +60,62 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 import org.orekit.utils.AngularDerivativesFilter;
 
 /**
- * Orbit Model class to generate PV and Q
- * 
+ * Orbit Model class to generate PV and Q.
+ *
  * @author jguinet
  */
 
 public class OrbitModel {
-    
-    
+
+
     /** Flag to change Attitude Law (by default Nadir Pointing Yaw Compensation). */
-    private boolean UserDefinedLOFTransform; 
+    private boolean userDefinedLOFTransform;
 
     /** User defined Roll law. */
-    private double[] LOFTransformRollPoly;
+    private double[] lofTransformRollPoly;
 
     /** User defined Pitch law. */
-    private double[] LOFTransformPitchPoly;
+    private double[] lofTransformPitchPoly;
 
     /** User defined Yaw law. */
-    private double[] LOFTransformYawPoly;
+    private double[] lofTransformYawPoly;
 
-    /** reference date */
+    /** Reference date. */
     private AbsoluteDate refDate;
-    
-    /** attitude Provider */
-    AttitudeProvider attitudeProvider;
-    
+
+    /** Simple constructor.
+     */
     public OrbitModel() {
-        UserDefinedLOFTransform = false;
+        userDefinedLOFTransform = false;
     }
 
-    public static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
-                                      ArrayList<TimeStampedPVCoordinates> satellitePVList,
-                                      String absDate, double px, double py,
-                                      double pz, double vx, double vy,
-                                      double vz)
+    public static void addSatellitePV(final TimeScale gps, final Frame eme2000, final Frame itrf,
+                                      final List<TimeStampedPVCoordinates> satellitePVList,
+                                      final String absDate,
+                                      final double px, final double py, final double pz,
+                                      final double vx, final double vy, final double vz)
         throws OrekitException {
-        AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
-        Vector3D position = new Vector3D(px, py, pz);
-        Vector3D velocity = new Vector3D(vx, vy, vz);
-        PVCoordinates pvITRF = new PVCoordinates(position, velocity);
-        Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
-        Vector3D pEME2000 = transform.transformPosition(pvITRF.getPosition());
-        Vector3D vEME2000 = transform.transformVector(pvITRF.getVelocity());
-        satellitePVList
-            .add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000,
-                                              Vector3D.ZERO));
+        final AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
+        final Vector3D position = new Vector3D(px, py, pz);
+        final Vector3D velocity = new Vector3D(vx, vy, vz);
+        final PVCoordinates pvITRF = new PVCoordinates(position, velocity);
+        final Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
+        final Vector3D pEME2000 = transform.transformPosition(pvITRF.getPosition());
+        final Vector3D vEME2000 = transform.transformVector(pvITRF.getVelocity());
+        satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000,
+                                                         Vector3D.ZERO));
     }
 
-    public void addSatelliteQ(TimeScale gps,
-                              ArrayList<TimeStampedAngularCoordinates> satelliteQList,
-                              String absDate, double q0, double q1, double q2,
-                              double q3) {
-        AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
-        Rotation rotation = new Rotation(q0, q1, q2, q3, true);
-        TimeStampedAngularCoordinates pair = new TimeStampedAngularCoordinates(attitudeDate,
-                                                                               rotation,
-                                                                               Vector3D.ZERO,
-                                                                               Vector3D.ZERO);
+    public void addSatelliteQ(final TimeScale gps,
+                              final List<TimeStampedAngularCoordinates> satelliteQList,
+                              final String absDate,
+                              final double q0, final double q1, final double q2, final double q3) {
+        final AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
+        final Rotation rotation = new Rotation(q0, q1, q2, q3, true);
+        final TimeStampedAngularCoordinates pair = new TimeStampedAngularCoordinates(attitudeDate,
+                                                                                     rotation,
+                                                                                     Vector3D.ZERO,
+                                                                                     Vector3D.ZERO);
         satelliteQList.add(pair);
     }
 
@@ -132,7 +132,7 @@ public class OrbitModel {
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
 
-    public Orbit createOrbit(double mu, AbsoluteDate date)
+    public Orbit createOrbit(final double mu, final AbsoluteDate date)
         throws OrekitException {
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
@@ -146,7 +146,7 @@ public class OrbitModel {
         // gravity.field.degree = 12
         // gravity.field.order = 12
 
-        Frame eme2000 = FramesFactory.getEME2000();
+        final Frame eme2000 = FramesFactory.getEME2000();
         // return new CircularOrbit(7173352.811913891,
         return new CircularOrbit(694000.0 +
                                  Constants.WGS84_EARTH_EQUATORIAL_RADIUS, // ajouter
@@ -160,57 +160,53 @@ public class OrbitModel {
                                  PositionAngle.TRUE, eme2000, date, mu);
     }
 
-    public void setLOFTransform(double[] rollPoly, double[] pitchPoly,
-                                double[] yawPoly, AbsoluteDate refDate) {
-        
-        this.UserDefinedLOFTransform = true;
-        LOFTransformRollPoly = rollPoly.clone();
-        LOFTransformPitchPoly = pitchPoly.clone();
-        LOFTransformYawPoly = yawPoly.clone();
-        this.refDate = refDate;
+    public void setLOFTransform(final double[] rollPoly, final double[] pitchPoly,
+                                final double[] yawPoly, final AbsoluteDate date) {
+
+        this.userDefinedLOFTransform = true;
+        lofTransformRollPoly = rollPoly.clone();
+        lofTransformPitchPoly = pitchPoly.clone();
+        lofTransformYawPoly = yawPoly.clone();
+        this.refDate = date;
     }
 
-    private double getPoly(double[] poly, double shift) {
+    private double getPoly(final double[] poly, final double shift) {
         double val = 0.0;
         for (int coef = 0; coef < poly.length; coef++) {
-            val = val + poly[coef] * Math.pow(shift, coef);
+            val = val + poly[coef] * FastMath.pow(shift, coef);
         }
         return val;
     }
 
-    private Rotation getOffset(BodyShape earth, Orbit orbit, double shift)
+    private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift)
         throws OrekitException {
-        LOFType type = LOFType.VVLH;
-        double roll = getPoly(LOFTransformRollPoly, shift);
-        double pitch = getPoly(LOFTransformPitchPoly, shift);
-        double yaw = getPoly(LOFTransformYawPoly, shift);
+        final LOFType type = LOFType.VVLH;
+        final double roll = getPoly(lofTransformRollPoly, shift);
+        final double pitch = getPoly(lofTransformPitchPoly, shift);
+        final double yaw = getPoly(lofTransformYawPoly, shift);
         /**System.out.format("at shift %f roll %f pitch %f yaw %f \n ", shift,
                           roll, pitch, yaw);*/
 
-        LofOffset law = new LofOffset(orbit.getFrame(), type, RotationOrder.XYZ,
+        final LofOffset law = new LofOffset(orbit.getFrame(), type, RotationOrder.XYZ,
                                       roll, pitch, yaw);
-        Rotation offsetAtt = law
-            .getAttitude(orbit, orbit.getDate().shiftedBy(shift),
-                         orbit.getFrame())
-            .getRotation();
-        NadirPointing nadirPointing = new NadirPointing(orbit.getFrame(),
-                                                        earth);
-        Rotation nadirAtt = nadirPointing
-            .getAttitude(orbit, orbit.getDate().getDate().shiftedBy(shift),
-                         orbit.getFrame())
-            .getRotation();
-        Rotation offsetProper = offsetAtt
-            .compose(nadirAtt.revert(), RotationConvention.VECTOR_OPERATOR);
+        final Rotation offsetAtt = law.
+                                   getAttitude(orbit, orbit.getDate().shiftedBy(shift), orbit.getFrame()).
+                                   getRotation();
+        final NadirPointing nadirPointing = new NadirPointing(orbit.getFrame(), earth);
+        final Rotation nadirAtt = nadirPointing.
+                                  getAttitude(orbit, orbit.getDate().getDate().shiftedBy(shift), orbit.getFrame()).
+                                  getRotation();
+        final Rotation offsetProper = offsetAtt.compose(nadirAtt.revert(), RotationConvention.VECTOR_OPERATOR);
         return offsetProper;
     }
 
-    public AttitudeProvider createAttitudeProvider(BodyShape earth, Orbit orbit)
+    public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit)
         throws OrekitException {
 
-        if (this.UserDefinedLOFTransform) {
-            LOFType type = LOFType.VVLH;
+        if (userDefinedLOFTransform) {
+            final LOFType type = LOFType.VVLH;
 
-            ArrayList<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
+            final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
 
             for (double shift = -10.0; shift < +10.0; shift += 1e-2) {
                 list.add(new TimeStampedAngularCoordinates(refDate
@@ -219,8 +215,8 @@ public class OrbitModel {
                                                            Vector3D.ZERO));
             }
 
-            TabulatedLofOffset tabulated = new TabulatedLofOffset(orbit
-                .getFrame(), type, list, 2, AngularDerivativesFilter.USE_R);
+            final TabulatedLofOffset tabulated = new TabulatedLofOffset(orbit.getFrame(), type, list,
+                                                                        2, AngularDerivativesFilter.USE_R);
 
             return tabulated;
         } else {
@@ -228,21 +224,21 @@ public class OrbitModel {
         }
     }
 
-    public Propagator createPropagator(BodyShape earth,
-                                       NormalizedSphericalHarmonicsProvider gravityField,
-                                       Orbit orbit)
+    public Propagator createPropagator(final BodyShape earth,
+                                       final NormalizedSphericalHarmonicsProvider gravityField,
+                                       final Orbit orbit)
         throws OrekitException {
 
-        AttitudeProvider attitudeProvider = createAttitudeProvider(earth,orbit);
+        final AttitudeProvider attitudeProvider = createAttitudeProvider(earth, orbit);
 
-        SpacecraftState state = new SpacecraftState(orbit, attitudeProvider
+        final SpacecraftState state = new SpacecraftState(orbit, attitudeProvider
             .getAttitude(orbit, orbit.getDate(), orbit.getFrame()), 1180.0);
 
         // numerical model for improving orbit
-        OrbitType type = OrbitType.CIRCULAR;
-        double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit,
+        final OrbitType type = OrbitType.CIRCULAR;
+        final double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit,
                                                                type);
-        DormandPrince853Integrator integrator = new DormandPrince853Integrator(1.0e-4 *
+        final DormandPrince853Integrator integrator = new DormandPrince853Integrator(1.0e-4 *
                                                                                orbit
                                                                                    .getKeplerianPeriod(),
                                                                                1.0e-1 * orbit
@@ -250,7 +246,7 @@ public class OrbitModel {
                                                                                tolerances[0],
                                                                                tolerances[1]);
         integrator.setInitialStepSize(1.0e-2 * orbit.getKeplerianPeriod());
-        NumericalPropagator numericalPropagator = new NumericalPropagator(integrator);
+        final NumericalPropagator numericalPropagator = new NumericalPropagator(integrator);
         numericalPropagator
             .addForceModel(new HolmesFeatherstoneAttractionModel(earth
                 .getBodyFrame(), gravityField));
@@ -268,55 +264,39 @@ public class OrbitModel {
     }
 
     public List<TimeStampedPVCoordinates>
-        orbitToPV(Orbit orbit, BodyShape earth, AbsoluteDate minDate,
-                  AbsoluteDate maxDate, double step)
+        orbitToPV(final Orbit orbit, final BodyShape earth, final AbsoluteDate minDate,
+                  final AbsoluteDate maxDate, final double step)
             throws OrekitException {
-        Propagator propagator = new KeplerianPropagator(orbit);
-        
+        final Propagator propagator = new KeplerianPropagator(orbit);
+
         propagator.setAttitudeProvider(createAttitudeProvider(earth, orbit));
-        
+
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }
-
-            public void handleStep(SpacecraftState currentState,
-                                   boolean isLast) {
-                list.add(new TimeStampedPVCoordinates(currentState
-                    .getDate(), currentState.getPVCoordinates().getPosition(),
-                                                      currentState
-                                                          .getPVCoordinates()
-                                                          .getVelocity(),
-                                                      Vector3D.ZERO));
-            }
-        });
+        propagator.setMasterMode(step,
+            (currentState, isLast) ->
+                list.add(new TimeStampedPVCoordinates(currentState.getDate(),
+                                                      currentState.getPVCoordinates().getPosition(),
+                                                      currentState.getPVCoordinates().getVelocity(),
+                                                      Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }
 
     public List<TimeStampedAngularCoordinates>
-        orbitToQ(Orbit orbit, BodyShape earth, AbsoluteDate minDate,
-                 AbsoluteDate maxDate, double step)
+        orbitToQ(final Orbit orbit, final BodyShape earth, final AbsoluteDate minDate,
+                 final AbsoluteDate maxDate, final double step)
             throws OrekitException {
-        Propagator propagator = new KeplerianPropagator(orbit);
+        final Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(createAttitudeProvider(earth, orbit));
         propagator.propagate(minDate);
-        final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }
-
-            public void handleStep(SpacecraftState currentState,
-                                   boolean isLast) {
-                list.add(new TimeStampedAngularCoordinates(currentState
-                    .getDate(), currentState.getAttitude().getRotation(),
-                                                           Vector3D.ZERO,
-                                                           Vector3D.ZERO));
-            }
-        });
+        final List<TimeStampedAngularCoordinates> list = new ArrayList<>();
+        propagator.setMasterMode(step,
+            (currentState, isLast) ->
+            list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
+                                                       currentState.getAttitude().getRotation(),
+                                                       Vector3D.ZERO,
+                                                       Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }

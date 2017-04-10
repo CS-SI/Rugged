@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for mapping sensors pixels of two viewing models.
@@ -33,6 +32,9 @@ import org.orekit.rugged.linesensor.SensorPixel;
  * @since 2.0
  */
 public class SensorToSensorMapping {
+
+    /** Name for Rugged. */
+    private static final String RUGGED = "Rugged";
 
     /** Name of the sensor B to which mapping applies. */
     private final String sensorNameB;
@@ -52,20 +54,19 @@ public class SensorToSensorMapping {
     /** Earth constraint weight. */
     private double earthConstraintWeight;
 
-
     /** Build a new instance without Earth constraints.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
      */
     public SensorToSensorMapping(final String sensorNameA, final String sensorNameB) {
-        this(sensorNameA, "Rugged", sensorNameB, "Rugged", 0.0);
+        this(sensorNameA, RUGGED, sensorNameB, RUGGED, 0.0);
     }
 
-    /** Build a new instance without Earth constraints
+    /** Build a new instance without Earth constraints.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
      */
-    public SensorToSensorMapping(final String sensorNameA, final String ruggedNameA , final String sensorNameB, final String ruggedNameB, final double constraintWeight) {
+    public SensorToSensorMapping(final String sensorNameA, final String ruggedNameA, final String sensorNameB, final String ruggedNameB, final double constraintWeight) {
         this.interMapping = new SensorMapping<SensorPixel>(sensorNameA, ruggedNameA);
         this.sensorNameB = sensorNameB;
         this.ruggedNameB = ruggedNameB;
@@ -75,17 +76,15 @@ public class SensorToSensorMapping {
 
     }
 
-    /** Build a new instance without Earth constraints
+    /** Build a new instance without Earth constraints.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
      */
-    public SensorToSensorMapping(final String sensorNameA, final String ruggedNameA , final String sensorNameB, final String ruggedNameB) {
+    public SensorToSensorMapping(final String sensorNameA, final String ruggedNameA, final String sensorNameB, final String ruggedNameB) {
         this(sensorNameA, ruggedNameA, sensorNameB, ruggedNameB, 0.0);
     }
 
-
-
-    /** Build a new instance with Earth constraints: we want to minimize the distance between pixelA and Earth
+    /** Build a new instance with Earth constraints: we want to minimize the distance between pixelA and Earth.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
      * @param constraintWeight weight given to the Earth distance constraint
@@ -95,9 +94,8 @@ public class SensorToSensorMapping {
      */
     public SensorToSensorMapping(final String sensorNameA, final String sensorNameB,
                                  final double constraintWeight) {
-        this(sensorNameA, "Rugged", sensorNameB, "Rugged", constraintWeight);
+        this(sensorNameA, RUGGED, sensorNameB, RUGGED, constraintWeight);
     }
-
 
     /** Get the name of the sensor B to which mapping applies.
      * @return name of the sensor B to which mapping applies
@@ -113,7 +111,6 @@ public class SensorToSensorMapping {
         return interMapping.getSensorName();
     }
 
-
     /** Get the name of the rugged B to which mapping applies.
      * @return name of the rugged B to which mapping applies
      */
@@ -128,9 +125,6 @@ public class SensorToSensorMapping {
         return interMapping.getRuggedName();
     }
 
-
-
-
     /** Get all the inter-mapping entries.
      * @return an unmodifiable view of all mapping entries
      */
@@ -138,32 +132,28 @@ public class SensorToSensorMapping {
         return interMapping.getMapping();
     }
 
-
-    /** Get distances between lines of sight (from both view)
+    /** Get distances between lines of sight (from both view).
      * @return the losDistances
      */
     public  List<Double> getLosDistances() {
         return losDistances;
     }
 
-
-    /** Get distances between Earth and pixel A (mapping with constraints)
+    /** Get distances between Earth and pixel A (mapping with constraints).
      * @return the earthDistances
      */
     public List<Double> getEarthDistances() {
         return earthDistances;
     }
 
-
-    /** Get the weight given to the Earth distance constraint with respect to the LOS distance
+    /** Get the weight given to the Earth distance constraint with respect to the LOS distance.
      * @return the earthConstraintWeight
      */
     public double getEarthConstraintWeight() {
         return earthConstraintWeight;
     }
 
-
-    /** Get distance between Earth and pixel A, corresponding to the inter mapping index
+    /** Get distance between Earth and pixel A, corresponding to the inter mapping index.
      * @param idx inter mapping index
      * @return the earthDistances
      */
@@ -171,8 +161,7 @@ public class SensorToSensorMapping {
         return getEarthDistances().get(idx);
     }
 
-
-    /** Get distance between LOS, corresponding to the inter mapping index
+    /** Get distance between LOS, corresponding to the inter mapping index.
      * @param idx inter mapping index
      * @return the losDistance
      */
@@ -180,8 +169,7 @@ public class SensorToSensorMapping {
         return getLosDistances().get(idx);
     }
 
-
-    /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS
+    /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS.
      * @param pixelA sensor pixel A
      * @param pixelB sensor pixel B corresponding to the sensor pixel A (by direct then inverse location)
      * @param losDistance distance between both line of sight
@@ -191,7 +179,7 @@ public class SensorToSensorMapping {
         losDistances.add(losDistance);
     }
 
-    /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS
+    /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS.
      *  and the earth distance constraint associated with pixel A
      * @param pixelA sensor pixel A
      * @param pixelB sensor pixel B corresponding to the sensor pixel A
@@ -205,10 +193,10 @@ public class SensorToSensorMapping {
         earthDistances.add(earthDistance);
     }
 
-    /** Set the Earth constraint weight
+    /** Set the Earth constraint weight.
      * @param earthConstraintWeight the Earth constraint weight to set
      */
-    public void setEarthConstraintWeight(double earthConstraintWeight) {
+    public void setEarthConstraintWeight(final double earthConstraintWeight) {
         this.earthConstraintWeight = earthConstraintWeight;
     }
 

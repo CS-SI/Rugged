@@ -80,9 +80,9 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
 
   * set the source folders to
     * src/main/java
-	* src/test/java
-	* src/main/resources
-	* src/test/resources
+    * src/test/java
+    * src/main/resources
+    * src/test/resources
 
     in the source tab of the Configure Build Path dialog
 

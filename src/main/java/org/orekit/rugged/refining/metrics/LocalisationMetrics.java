@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
@@ -68,7 +69,7 @@ public class LocalisationMetrics {
      * </p>
      */
     public LocalisationMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
-    {
+        throws RuggedException {
 
         // Initialization
         this.resMax = 0.0;
@@ -88,8 +89,9 @@ public class LocalisationMetrics {
      * @param computeAngular Flag to known if distance is computed in meters (false) or with angular (true)
      * </p>
      */
-    public LocalisationMetrics(SensorToSensorMapping measMapping, Rugged ruggedA, Rugged ruggedB , boolean computeAngular)
-                    throws RuggedException {
+    public LocalisationMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
+                               final boolean computeAngular)
+        throws RuggedException {
 
         // Initialization
         this.resMax = 0.0;
@@ -112,7 +114,8 @@ public class LocalisationMetrics {
      * @param computeAngular Flag to known if distance is computed in meters (false) or with angular (true)
      * </p>
      */
-    public void computeMetrics(SensorToGroundMapping measMapping, Rugged rugged, boolean computeAngular) throws RuggedException {
+    public void computeMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
+        throws RuggedException {
 
         /* Mapping of observations/measures = the ground truth */
         final Set<Map.Entry<SensorPixel, GeodeticPoint>> measuresMapping;
@@ -125,23 +128,23 @@ public class LocalisationMetrics {
         measuresMapping = measMapping.getMapping();
         lineSensor = rugged.getLineSensor(measMapping.getSensorName());
         nbMeas = measuresMapping.size();
-        Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = measuresMapping.iterator();
+        final Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = measuresMapping.iterator();
 
         /* Browse map of measures */
         while (gtIt.hasNext()) {
 
             distance = 0;
 
-            Map.Entry<SensorPixel, GeodeticPoint> gtMeas = gtIt.next();
+            final Map.Entry<SensorPixel, GeodeticPoint> gtMeas = gtIt.next();
 
             final SensorPixel gtSP = gtMeas.getKey();
             final GeodeticPoint gtGP = gtMeas.getValue();
 
-            AbsoluteDate date = lineSensor.getDate(gtSP.getLineNumber());
+            final AbsoluteDate date = lineSensor.getDate(gtSP.getLineNumber());
 
-            GeodeticPoint esGP = rugged.directLocation(date, lineSensor.getPosition(),
-                                                       lineSensor.getLOS(date,
-                                                                         (int) gtSP.getPixelNumber()));
+            final GeodeticPoint esGP = rugged.directLocation(date, lineSensor.getPosition(),
+                                                             lineSensor.getLOS(date,
+                                                                               (int) gtSP.getPixelNumber()));
             // Compute distance
             distance = DistanceTools.computeDistance(esGP.getLongitude(), esGP.getLatitude(),
                                                      gtGP.getLongitude(), gtGP.getLatitude(),
@@ -167,7 +170,9 @@ public class LocalisationMetrics {
      * @param computeAngular Flag to known if distance is computed in meters (false) or with angular (true)
      * </p>
      */
-    public void computeLiaisonMetrics(SensorToSensorMapping measMapping, Rugged ruggedA, Rugged ruggedB , boolean computeAngular) throws RuggedException {
+    public void computeLiaisonMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
+                                      final boolean computeAngular)
+        throws RuggedException {
 
         /* Mapping of observations/measures = the ground truth */
         final Set<Map.Entry<SensorPixel, SensorPixel>> measuresMapping;
@@ -179,7 +184,7 @@ public class LocalisationMetrics {
         double earthDistanceCount = 0;  /* counter for computing Earth distance mean */
         int nbMeas = 0;                 /* number of measures */
         double distance = 0;            /* remaining distance */
-        int i=0;                        /* increment of measures */
+        int i = 0;                      /* increment of measures */
 
         /* Initialization */
         measuresMapping = measMapping.getMapping();
@@ -188,35 +193,38 @@ public class LocalisationMetrics {
         nbMeas = measuresMapping.size();
 
         /* Browse map of measures */
-        for(Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = measuresMapping.iterator();
-                        gtIt.hasNext();i++){
+        for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = measuresMapping.iterator();
+             gtIt.hasNext();
+                        i++) {
 
-            if(i==measuresMapping.size()) break;
+            if (i == measuresMapping.size()) {
+                break;
+            }
 
             distance = 0;
 
-            Map.Entry<SensorPixel, SensorPixel> gtMapping = gtIt.next();
+            final Map.Entry<SensorPixel, SensorPixel> gtMapping = gtIt.next();
 
             final SensorPixel spA = gtMapping.getKey();
             final SensorPixel spB = gtMapping.getValue();
 
-            AbsoluteDate dateA = lineSensorA.getDate(spA.getLineNumber());
-            AbsoluteDate dateB = lineSensorB.getDate(spB.getLineNumber());
+            final AbsoluteDate dateA = lineSensorA.getDate(spA.getLineNumber());
+            final AbsoluteDate dateB = lineSensorB.getDate(spB.getLineNumber());
 
             final double pixelA = spA.getPixelNumber();
             final double pixelB = spB.getPixelNumber();
 
-            Vector3D losA = lineSensorA.getLOS(dateA, pixelA);
-            Vector3D losB = lineSensorB.getLOS(dateB, pixelB);
+            final Vector3D losA = lineSensorA.getLOS(dateA, pixelA);
+            final Vector3D losB = lineSensorB.getLOS(dateB, pixelB);
 
 
-            GeodeticPoint gpA = ruggedA.directLocation(dateA, lineSensorA.getPosition(),losA);
-            GeodeticPoint gpB = ruggedB.directLocation(dateB, lineSensorB.getPosition(),losB);
+            final GeodeticPoint gpA = ruggedA.directLocation(dateA, lineSensorA.getPosition(), losA);
+            final GeodeticPoint gpB = ruggedB.directLocation(dateB, lineSensorB.getPosition(), losB);
 
             final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
             // Estimated distances (LOS / Earth)
-            final double[] distances = ruggedB.distanceBetweenLOS(lineSensorA,dateA, pixelA, scToBodyA, lineSensorB ,dateB, pixelB);
+            final double[] distances = ruggedB.distanceBetweenLOS(lineSensorA, dateA, pixelA, scToBodyA, lineSensorB, dateB, pixelB);
 
             // LOS distance control
             final double estLosDistance =  distances[0]; // LOS distance estimation
@@ -228,7 +236,7 @@ public class LocalisationMetrics {
             // Earth distance control
             final double estEarthDistance = distances[1]; // Earth distance estimation
             final double measEarthDistance = measMapping.getEarthDistance(i).doubleValue(); // Earth measured distance
-            final double earthDistance =  Math.abs(estEarthDistance - measEarthDistance);
+            final double earthDistance =  FastMath.abs(estEarthDistance - measEarthDistance);
 
             if (earthDistance > earthDistanceMax) {
                 earthDistanceMax = earthDistance;
@@ -252,7 +260,7 @@ public class LocalisationMetrics {
     }
 
 
-    /** Get the residue Max
+    /** Get the Max residue.
      * @return maximum of residues
      */
     public double getMaxResidual() {
@@ -260,7 +268,7 @@ public class LocalisationMetrics {
     }
 
 
-    /** Get the mean of residues
+    /** Get the mean of residues.
      * @return mean of residues
      */
     public double getMeanResidual() {
@@ -268,7 +276,7 @@ public class LocalisationMetrics {
     }
 
 
-    /** Get the LOS maximum residue
+    /** Get the LOS maximum residue.
      * @return max residue
      */
     public double getLosMaxDistance() {
@@ -276,7 +284,7 @@ public class LocalisationMetrics {
     }
 
 
-    /** Get the LOS mean residue;
+    /** Get the LOS mean residue.
      * @return mean residue
      */
     public double getLosMeanDistance() {
@@ -284,7 +292,7 @@ public class LocalisationMetrics {
     }
 
 
-    /** Get the earth distance maximum residue;
+    /** Get the Earth distance maximum residue.
      * @return max residue
      */
     public double getEarthMaxDistance() {
@@ -292,7 +300,7 @@ public class LocalisationMetrics {
     }
 
 
-    /** Get the earth distance mean residue;
+    /** Get the earth distance mean residue.
      * @return mean residue
      */
     public double getEarthMeanDistance() {

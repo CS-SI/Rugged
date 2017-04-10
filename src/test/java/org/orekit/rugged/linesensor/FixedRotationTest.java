@@ -18,9 +18,7 @@ package org.orekit.rugged.linesensor;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.UnivariateMatrixFunction;
@@ -164,7 +162,7 @@ public class FixedRotationTest {
                 driver.setSelected(true);
                 selected.add(driver);
             }
-            
+
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
@@ -190,12 +188,12 @@ public class FixedRotationTest {
                         ++index;
                     }
                     return constant(driver.getValue());
-                    
+
                 }
 
             };
             Assert.assertEquals(3, generator.getSelected().getNbParams());
-           
+
 
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.001);

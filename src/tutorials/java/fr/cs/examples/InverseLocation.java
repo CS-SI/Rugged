@@ -82,17 +82,17 @@ public class InverseLocation {
             // We use Orekit for handling time and dates, and Rugged for defining the datation model:
             TimeScale gps = TimeScalesFactory.getGPS();
             AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
-            LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20); 
+            LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20);
 
             // With the LOS and the datation now defined , we can initialize a line sensor object in Rugged:
             String sensorName = "mySensor";
             LineSensor lineSensor = new LineSensor(sensorName, lineDatation, Vector3D.ZERO, lineOfSight);
 
-            
-            
+
+
             // In our application, we simply need to know the name of the frames we are working with. Positions and
             // velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
-            // inertial frame.  
+            // inertial frame.
             Frame eme2000 = FramesFactory.getEME2000();
             boolean simpleEOP = true; // we don't want to compute tiny tidal effects at millimeter level
             Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, simpleEOP);
@@ -124,9 +124,9 @@ public class InverseLocation {
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -2350.574d, -3010.159d, -6513.056d);
 
             Rugged rugged = new RuggedBuilder().
-                    setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID). 
+                    setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                     setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                    setTimeSpan(absDate, absDate.shiftedBy(60.0), 0.01, 5 / lineSensor.getRate(0)). 
+                    setTimeSpan(absDate, absDate.shiftedBy(60.0), 0.01, 5 / lineSensor.getRate(0)).
                     setTrajectory(InertialFrameId.EME2000,
                                   satellitePVList, 4, CartesianDerivativesFilter.USE_P,
                                   satelliteQList,  4,  AngularDerivativesFilter.USE_R).
@@ -149,11 +149,11 @@ public class InverseLocation {
             } else {
                 System.out.println("Sensor Pixel is null: point cannot be seen between the prescribed line numbers\n");
             }
-            
+
             // Find the date at which the sensor sees the ground point
             AbsoluteDate dateLine = rugged.dateLocation(sensorName, gp, minLine, maxLine);
             System.out.println("Date at which the sensor sees the ground point : " + dateLine);
-            
+
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
             System.exit(1);
@@ -174,7 +174,7 @@ public class InverseLocation {
         Vector3D velocity = new Vector3D(vx, vy, vz);
         PVCoordinates pvITRF = new PVCoordinates(position, velocity);
         Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
-        PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF); 
+        PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF);
         satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pvEME2000.getPosition(), pvEME2000.getVelocity(), Vector3D.ZERO));
     }
 

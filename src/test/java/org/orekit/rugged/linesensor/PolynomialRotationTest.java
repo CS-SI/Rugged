@@ -178,7 +178,7 @@ public class PolynomialRotationTest {
                 driver.setSelected(true);
                 selected.add(driver);
             }
-            
+
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
@@ -204,7 +204,7 @@ public class PolynomialRotationTest {
                         ++index;
                     }
                     return constant(driver.getValue());
-                    
+
                 }
 
             };

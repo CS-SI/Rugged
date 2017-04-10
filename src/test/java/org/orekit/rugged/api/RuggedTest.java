@@ -289,7 +289,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         RuggedBuilder builder = new RuggedBuilder().
-                
+
                 setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                 setTimeSpan(minDate, maxDate, 0.001, 5.0).
@@ -549,7 +549,7 @@ public class RuggedTest {
         GeodeticPoint[] gpBasicScan =
                 builder.setAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY).build().directLocation("line", 100);
 
-        double[] data = new double[gpDuvenhage.length]; 
+        double[] data = new double[gpDuvenhage.length];
         for (int i = 0; i < gpDuvenhage.length; ++i) {
             Vector3D pDuvenhage = earth.transform(gpDuvenhage[i]);
             Vector3D pBasicScan = earth.transform(gpBasicScan[i]);
@@ -1150,7 +1150,7 @@ public class RuggedTest {
                                                                DSGenerator.class);
             inverseLoc.setAccessible(true);
             int referencePixel = (3 * dimension) / 4;
-            DerivativeStructure[] result = 
+            DerivativeStructure[] result =
                             (DerivativeStructure[]) inverseLoc.invoke(rugged,
                                                                       "line", gp[referencePixel], 0, dimension,
                                                                       generator);
@@ -1406,7 +1406,7 @@ public class RuggedTest {
                                                            boolean lightTimeCorrection,
                                                            boolean aberrationOfLightCorrection)
         throws OrekitException, RuggedException {
-        
+
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();

@@ -217,7 +217,7 @@ public class SensorMeanPlaneCrossingTest {
         Assert.assertEquals(0.0,
                             Vector3D.distance(result.getTargetDirectionDerivative(), dirDer),
                             tol * dirDer.getNorm());
-        
+
     }
 
     @Test
@@ -319,7 +319,7 @@ public class SensorMeanPlaneCrossingTest {
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
             public void init(SpacecraftState s0, AbsoluteDate t) {
-            }   
+            }
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 list.add(new TimeStampedPVCoordinates(currentState.getDate(),
                                                       currentState.getPVCoordinates().getPosition(),
@@ -341,7 +341,7 @@ public class SensorMeanPlaneCrossingTest {
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
             public void init(SpacecraftState s0, AbsoluteDate t) {
-            }   
+            }
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
                                                            currentState.getAttitude().getRotation(),

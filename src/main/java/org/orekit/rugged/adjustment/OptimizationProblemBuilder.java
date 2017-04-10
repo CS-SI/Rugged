@@ -55,7 +55,7 @@ abstract class OptimizationProblemBuilder {
     protected static final int ESTIMATION_LINE_RANGE_MARGIN = 100;
 
     /** Derivative structure generator.*/
-    final DSGenerator generator;
+    protected final DSGenerator generator;
 
     /** parameterDriversList. */
     protected final ParameterDriversList drivers;
@@ -69,14 +69,14 @@ abstract class OptimizationProblemBuilder {
 
     protected final List<LineSensor> sensors;
 
-    /**  OptimizationProblemBuilder constructor
+    /**  OptimizationProblemBuilder constructor.
      * @param sensors
      * @param measures
      * @throws RuggedException
      */
     OptimizationProblemBuilder(final List<LineSensor> sensors,
-                               Observables measures)
-                                               throws RuggedException {
+                               final Observables measures)
+        throws RuggedException {
         try {
             this.generator = this.createGenerator(sensors);
             this.drivers = this.generator.getSelected();
@@ -95,8 +95,7 @@ abstract class OptimizationProblemBuilder {
     /**  nbParams getter.
      * @return returns the number of variable parameters
      */
-    public final int getNbParams()
-    {
+    public final int getNbParams() {
         return this.getNbParams();
     }
 
@@ -118,8 +117,7 @@ abstract class OptimizationProblemBuilder {
      * @return the problem
      */
 
-    public abstract LeastSquaresProblem build(final int maxEvaluations, final double convergenceThreshold) throws RuggedException;
-
+    public abstract LeastSquaresProblem build(int maxEvaluations, double convergenceThreshold) throws RuggedException;
 
     /**
      * Create the convergence check.
@@ -132,14 +130,14 @@ abstract class OptimizationProblemBuilder {
      * @return the checker
      */
     final ConvergenceChecker<LeastSquaresProblem.Evaluation>
-    createChecker(final double parametersConvergenceThreshold) {
+        createChecker(final double parametersConvergenceThreshold) {
         final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = (iteration,
                         previous,
                         current) -> current
                         .getPoint()
                         .getLInfDistance(previous
                                          .getPoint()) <= parametersConvergenceThreshold;
-                        return checker;
+        return checker;
     }
 
     /**
@@ -195,8 +193,7 @@ abstract class OptimizationProblemBuilder {
      * @param selectedSensors sensors referencing the parameters drivers
      * @return a new generator
      */
-    private DSGenerator
-    createGenerator(final List<LineSensor> selectedSensors) {
+    private DSGenerator createGenerator(final List<LineSensor> selectedSensors) {
 
         final Set<String> names = new HashSet<>();
         for (final LineSensor sensor : selectedSensors) {
@@ -211,8 +208,7 @@ abstract class OptimizationProblemBuilder {
         final ParameterDriversList selected = new ParameterDriversList();
         final Map<String, Integer> map = new HashMap<>();
         for (final LineSensor sensor : selectedSensors) {
-            sensor.getParametersDrivers().filter(driver -> driver.isSelected())
-            .forEach(driver -> {
+            sensor.getParametersDrivers().filter(driver -> driver.isSelected()).forEach(driver -> {
                 if (map.get(driver.getName()) == null) {
                     map.put(driver.getName(), map.size());
                 }
