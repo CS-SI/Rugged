@@ -72,20 +72,14 @@ Features
 
   * Localized in several languages
 
+    * Danish
     * English
-
     * French
-
     * Galician
-
     * German
-
     * Italian
-
     * Norwegian
-
     * Romanian
-
     * Spanish
 
 Free software
