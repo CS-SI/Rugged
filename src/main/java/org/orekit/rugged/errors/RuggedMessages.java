@@ -81,7 +81,7 @@ public enum RuggedMessages implements Localizable {
     NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),
     DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
     INVALID_RUGGED_NAME("invalid rugged name."),
-    UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled.");
+    UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled."),
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})");
 
     // CHECKSTYLE: resume JavadocVariable check
