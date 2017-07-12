@@ -69,8 +69,7 @@ public class LocalisationMetrics {
      * </p>
      */
     public LocalisationMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
-        throws RuggedException {
-
+                    throws RuggedException {
         // Initialization
         this.resMax = 0.0;
         this.resMean = 0.0;
@@ -91,7 +90,7 @@ public class LocalisationMetrics {
      */
     public LocalisationMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
                                final boolean computeAngular)
-        throws RuggedException {
+                                               throws RuggedException {
 
         // Initialization
         this.resMax = 0.0;
@@ -112,10 +111,11 @@ public class LocalisationMetrics {
      * @param measMapping Mapping of observations/measures = the ground truth
      * @param rugged Rugged instance
      * @param computeAngular Flag to known if distance is computed in meters (false) or with angular (true)
+     * @exception RuggedException if directLocation fails
      * </p>
      */
     public void computeMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
-        throws RuggedException {
+                    throws RuggedException {
 
         /* Mapping of observations/measures = the ground truth */
         final Set<Map.Entry<SensorPixel, GeodeticPoint>> measuresMapping;
@@ -168,11 +168,12 @@ public class LocalisationMetrics {
      * @param ruggedA Rugged instance corresponding to viewing model A
      * @param ruggedB Rugged instance corresponding to viewing model B
      * @param computeAngular Flag to known if distance is computed in meters (false) or with angular (true)
+     * @exception RuggedException if directLocation fails
      * </p>
      */
     public void computeLiaisonMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
                                       final boolean computeAngular)
-        throws RuggedException {
+                                                      throws RuggedException {
 
         /* Mapping of observations/measures = the ground truth */
         final Set<Map.Entry<SensorPixel, SensorPixel>> measuresMapping;
@@ -186,6 +187,7 @@ public class LocalisationMetrics {
         double distance = 0;            /* remaining distance */
         int i = 0;                      /* increment of measures */
 
+
         /* Initialization */
         measuresMapping = measMapping.getMapping();
         lineSensorA = ruggedA.getLineSensor(measMapping.getSensorNameA());
@@ -194,7 +196,7 @@ public class LocalisationMetrics {
 
         /* Browse map of measures */
         for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = measuresMapping.iterator();
-             gtIt.hasNext();
+                        gtIt.hasNext();
                         i++) {
 
             if (i == measuresMapping.size()) {

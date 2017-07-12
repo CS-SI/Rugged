@@ -64,7 +64,6 @@ public class DistanceTools {
      */
     public static double computeDistanceInMeter(final double xRad1, final double yRad1,
                                                 final double xRad2, final double yRad2) {
-
         // get vectors on unit sphere from angular coordinates
         final Vector3D p1 = new Vector3D(yRad1, xRad1); //
         final Vector3D p2 = new Vector3D(yRad2, xRad2);
