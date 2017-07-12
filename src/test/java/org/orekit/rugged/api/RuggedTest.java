@@ -1310,7 +1310,7 @@ public class RuggedTest {
         throws OrekitException, RuggedException {
         doTestViewingModelParametersEstimation(2000, true, false,
                                                FastMath.toRadians( 0.01), 1.0e-8,
-                                               FastMath.toRadians(-0.03), 2.0e-9,
+                                               FastMath.toRadians(-0.03), 2.1e-9,
                                                6);
     }
 
