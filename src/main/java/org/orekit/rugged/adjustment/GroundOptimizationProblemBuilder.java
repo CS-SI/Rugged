@@ -79,7 +79,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     public GroundOptimizationProblemBuilder(final List<LineSensor> sensors,
                                             final Observables measures, final Rugged rugged)
-        throws RuggedException {
+                                                            throws RuggedException {
         super(sensors, measures);
         this.rugged = rugged;
         this.initMapping();
@@ -150,7 +150,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
 
                 // set the current parameters values
                 int i = 0;
-                for (final ParameterDriver driver : this.drivers.getDrivers()) {
+                for (final ParameterDriver driver : this.drivers) {
                     driver.setNormalizedValue(point.getEntry(i++));
                 }
 
@@ -179,7 +179,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
                             // extract the Jacobian
                             final int[] orders = new int[this.nbParams];
                             int m = 0;
-                            for (final ParameterDriver driver : this.drivers.getDrivers()) {
+                            for (final ParameterDriver driver : this.drivers) {
                                 final double scale = driver.getScale();
                                 orders[m] = 1;
                                 jacobian.setEntry(l, m,

@@ -52,7 +52,7 @@ import org.orekit.utils.ParameterDriver;
 
 
 public class InterSensorsOptimizationProblemBuilder
-    extends OptimizationProblemBuilder {
+extends OptimizationProblemBuilder {
 
     /** Key for target. */
     private static final String TARGET = "Target";
@@ -178,7 +178,7 @@ public class InterSensorsOptimizationProblemBuilder
 
                 // set the current parameters values
                 int i = 0;
-                for (final ParameterDriver driver : this.drivers.getDrivers()) {
+                for (final ParameterDriver driver : this.drivers) {
                     driver.setNormalizedValue(point.getEntry(i++));
 
                 }
@@ -243,7 +243,7 @@ public class InterSensorsOptimizationProblemBuilder
                             final int[] orders = new int[this.nbParams];
                             int m = 0;
 
-                            for (final ParameterDriver driver : this.drivers.getDrivers()) {
+                            for (final ParameterDriver driver : this.drivers) {
                                 final double scale = driver.getScale();
                                 orders[m] = 1;
                                 jacobian.setEntry(l, m, ilResult[0].getPartialDerivative(orders) * scale);
