@@ -17,12 +17,14 @@
 
 package org.orekit.rugged.adjustment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.optim.ConvergenceChecker;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
@@ -37,7 +39,6 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.refining.measures.Observables;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.utils.ParameterDriver;
-import org.orekit.utils.ParameterDriversList;
 
 /**
  * Builder for optimization problem.
@@ -58,7 +59,7 @@ abstract class OptimizationProblemBuilder {
     protected final DSGenerator generator;
 
     /** parameterDriversList. */
-    protected final ParameterDriversList drivers;
+    protected final List<ParameterDriver> drivers;
 
     /** number of params to refine. */
     protected final int nbParams;
@@ -76,11 +77,11 @@ abstract class OptimizationProblemBuilder {
      */
     OptimizationProblemBuilder(final List<LineSensor> sensors,
                                final Observables measures)
-        throws RuggedException {
+                                               throws RuggedException {
         try {
             this.generator = this.createGenerator(sensors);
             this.drivers = this.generator.getSelected();
-            this.nbParams = this.drivers.getNbParams();
+            this.nbParams = this.drivers.size();
             if (this.nbParams == 0) {
                 throw new RuggedException(RuggedMessages.NO_PARAMETERS_SELECTED);
             }
@@ -102,9 +103,9 @@ abstract class OptimizationProblemBuilder {
     /**
      * parameters drivers list getter.
      *
-     * @return selected parameters driver list
+     * @return selected list of parameters driver
      */
-    public final ParameterDriversList getSelectedParametersDriver() {
+    public final List<ParameterDriver> getSelectedParametersDriver() {
         return this.drivers;
     }
 
@@ -130,14 +131,14 @@ abstract class OptimizationProblemBuilder {
      * @return the checker
      */
     final ConvergenceChecker<LeastSquaresProblem.Evaluation>
-        createChecker(final double parametersConvergenceThreshold) {
+    createChecker(final double parametersConvergenceThreshold) {
         final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = (iteration,
                         previous,
                         current) -> current
                         .getPoint()
                         .getLInfDistance(previous
                                          .getPoint()) <= parametersConvergenceThreshold;
-        return checker;
+                        return checker;
     }
 
     /**
@@ -148,8 +149,8 @@ abstract class OptimizationProblemBuilder {
     final double[] createStartTab() {
         int iStart = 0;
         // get start point (as a normalized value)
-        final double[] start = new double[this.drivers.getNbParams()];
-        for (final ParameterDriver driver : this.drivers.getDrivers()) {
+        final double[] start = new double[this.nbParams];
+        for (final ParameterDriver driver : this.drivers) {
             start[iStart++] = driver.getNormalizedValue();
         }
         return start;
@@ -174,7 +175,7 @@ abstract class OptimizationProblemBuilder {
         final ParameterValidator validator = params -> {
             try {
                 int i = 0;
-                for (final ParameterDriver driver : this.drivers.getDrivers()) {
+                for (final ParameterDriver driver : this.drivers) {
                     // let the parameter handle min/max clipping
                     driver.setNormalizedValue(params.getEntry(i));
                     params.setEntry(i++, driver.getNormalizedValue());
@@ -205,35 +206,34 @@ abstract class OptimizationProblemBuilder {
         }
 
         // set up generator list and map
-        final ParameterDriversList selected = new ParameterDriversList();
+        final List<ParameterDriver> selected = new ArrayList<>();
         final Map<String, Integer> map = new HashMap<>();
         for (final LineSensor sensor : selectedSensors) {
             sensor.getParametersDrivers().filter(driver -> driver.isSelected()).forEach(driver -> {
                 if (map.get(driver.getName()) == null) {
                     map.put(driver.getName(), map.size());
-                }
-
-                try {
                     selected.add(driver);
-                } catch (OrekitException e) {
-                    e.printStackTrace();
                 }
 
             });
         }
 
+        final DSFactory factory = new DSFactory(map.size(), 1);
+
         return new DSGenerator() {
 
             /** {@inheritDoc} */
             @Override
-            public ParameterDriversList getSelected() {
+            public List<ParameterDriver> getSelected() {
                 return selected;
             }
 
             /** {@inheritDoc} */
             @Override
             public DerivativeStructure constant(final double value) {
-                return new DerivativeStructure(map.size(), 1, value);
+
+                return factory.constant(value);
+
             }
 
             /** {@inheritDoc} */
@@ -243,9 +243,7 @@ abstract class OptimizationProblemBuilder {
                 if (index == null) {
                     return constant(driver.getValue());
                 } else {
-                    return new DerivativeStructure(map.size(), 1,
-                                                   index.intValue(),
-                                                   driver.getValue());
+                    return factory.variable(index.intValue(), driver.getValue());
                 }
             }
 
