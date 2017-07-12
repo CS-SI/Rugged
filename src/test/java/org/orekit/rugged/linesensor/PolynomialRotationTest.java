@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.UnivariateMatrixFunction;
+import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableMatrixFunction;
@@ -40,8 +41,8 @@ import org.junit.Test;
 import org.orekit.errors.OrekitException;
 import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.los.PolynomialRotation;
 import org.orekit.rugged.los.LOSBuilder;
+import org.orekit.rugged.los.PolynomialRotation;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
@@ -59,8 +60,8 @@ public class PolynomialRotationTest {
         for (int k = 0; k < 20; ++k) {
             LOSBuilder builder = new LOSBuilder(raw);
             builder.addTransform(new PolynomialRotation("identity",
-                                                   new Vector3D(rvg.nextVector()),
-                                                   AbsoluteDate.J2000_EPOCH, 0.0));
+                                                        new Vector3D(rvg.nextVector()),
+                                                        AbsoluteDate.J2000_EPOCH, 0.0));
             TimeDependentLOS tdl = builder.build();
             for (int i = 0; i < raw.size(); ++i) {
                 Assert.assertEquals(0.0,
@@ -154,23 +155,23 @@ public class PolynomialRotationTest {
             LOSBuilder builder = new LOSBuilder(raw);
 
             builder.addTransform(new PolynomialRotation("r1",
-                                                   new Vector3D(rvg.nextVector()),
-                                                   AbsoluteDate.J2000_EPOCH,
-                                                   2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
-                                                   1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
+                                                        new Vector3D(rvg.nextVector()),
+                                                        AbsoluteDate.J2000_EPOCH,
+                                                        2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
+                                                        1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
             builder.addTransform(new PolynomialRotation("r2",
-                                                   new Vector3D(rvg.nextVector()),
-                                                   AbsoluteDate.J2000_EPOCH,
-                                                   new PolynomialFunction(new double[] {
-                                                       2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
-                                                       1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
-                                                       1.0e-8 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)
-                                                   })));
+                                                        new Vector3D(rvg.nextVector()),
+                                                        AbsoluteDate.J2000_EPOCH,
+                                                        new PolynomialFunction(new double[] {
+                                                                                             2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
+                                                                                             1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
+                                                                                             1.0e-8 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)
+                                                        })));
             builder.addTransform(new PolynomialRotation("r3",
-                                                   new Vector3D(rvg.nextVector()),
-                                                   AbsoluteDate.J2000_EPOCH,
-                                                   2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
-                                                   1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
+                                                        new Vector3D(rvg.nextVector()),
+                                                        AbsoluteDate.J2000_EPOCH,
+                                                        2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
+                                                        1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
             TimeDependentLOS tdl = builder.build();
             final ParameterDriversList selected = new ParameterDriversList();
             final List<ParameterDriver> list = tdl.getParametersDrivers().collect(Collectors.toList());
@@ -179,6 +180,7 @@ public class PolynomialRotationTest {
                 selected.add(driver);
             }
 
+            final DSFactory factoryS = new DSFactory(selected.size(), 1);
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
@@ -190,16 +192,16 @@ public class PolynomialRotationTest {
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure constant(final double value) {
-                    return new DerivativeStructure(selected.getNbParams(), 1, value);
+                    return factoryS.constant(value);
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure variable(final ParameterDriver driver) {
                     int index = 0;
-                    for (ParameterDriver d : getSelected().getDrivers()) {
-                        if (d.getName().equals(driver.getName())) {
-                            return new DerivativeStructure(getSelected().getNbParams(), 1, index, driver.getValue());
+                    for (ParameterDriver d : getSelected()) {
+                        if (d == driver) {
+                            return factoryS.variable(index, driver.getValue());
                         }
                         ++index;
                     }
@@ -213,6 +215,7 @@ public class PolynomialRotationTest {
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.0001);
             int index = 0;
+            DSFactory factory11 = new DSFactory(1, 1);
             final AbsoluteDate date = AbsoluteDate.J2000_EPOCH.shiftedBy(7.0);
             for (final ParameterDriver driver : selected.getDrivers()) {
                 int[] orders = new int[selected.getNbParams()];
@@ -232,7 +235,7 @@ public class PolynomialRotationTest {
                                         throw new OrekitExceptionWrapper(oe);
                                     }
                                 });
-                DerivativeStructure[][] mDS = f.value(new DerivativeStructure(1, 1, 0, driver.getValue()));
+                DerivativeStructure[][] mDS = f.value(factory11.variable(0, driver.getValue()));
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, date);
                     FieldVector3D<DerivativeStructure> losDS = tdl.getLOSDerivatives(i, date, generator);

@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -132,7 +132,7 @@ public class ExtendedEllipsoidTest {
 
         Vector3D pPlus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, +2.0e7, d));
         GeodeticPoint gpPlus = ellipsoid.transform(pPlus, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(latitude, gpPlus.getLatitude(), 3.0e-16);
+        Assert.assertEquals(latitude, gpPlus.getLatitude(), 4.0e-16);
         Assert.assertEquals(20646364.047, Vector3D.dotProduct(d, pPlus.subtract(p)), 0.001);
 
         Vector3D pMinus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, -3.0e7, d));

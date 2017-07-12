@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -28,14 +28,15 @@ import org.orekit.rugged.errors.RuggedMessages;
 
 public class RuggedMessagesTest {
 
+    private final String[] LANGUAGES_LIST = { "da", "de", "en", "es", "fr", "gl", "it", "no", "ro" } ;
     @Test
     public void testMessageNumber() {
-        Assert.assertEquals(28, RuggedMessages.values().length);
+        Assert.assertEquals(29, RuggedMessages.values().length);
     }
 
     @Test
     public void testAllKeysPresentInPropertiesFiles() {
-        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "no", "ro" } ) {
+        for (final String language : LANGUAGES_LIST) {
             ResourceBundle bundle =
                 ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
                                          new Locale(language), new RuggedMessages.UTF8Control());
@@ -55,7 +56,7 @@ public class RuggedMessagesTest {
 
     @Test
     public void testAllPropertiesCorrespondToKeys() {
-        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "no", "ro" } ) {
+        for (final String language : LANGUAGES_LIST) {
             ResourceBundle bundle =
                 ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
                                          new Locale(language), new RuggedMessages.UTF8Control());
@@ -98,7 +99,7 @@ public class RuggedMessagesTest {
 
     @Test
     public void testVariablePartsConsistency() {
-        for (final String language : new String[] { "de", "en", "es", "fr", "gl", "it", "no", "ro" } ) {
+        for (final String language : LANGUAGES_LIST) {
             Locale locale = new Locale(language);
             for (RuggedMessages message : RuggedMessages.values()) {
                 MessageFormat source     = new MessageFormat(message.getSourceString());

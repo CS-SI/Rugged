@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -32,15 +32,11 @@ public class RandomLandscapeUpdater implements TileUpdater {
 
     public RandomLandscapeUpdater(double baseH, double initialScale, double reductionFactor,
                                   long seed, double size, int n)
-        throws MathIllegalArgumentException {
+                                                  throws MathIllegalArgumentException {
 
         if (!ArithmeticUtils.isPowerOfTwo(n - 1)) {
-
-// TODO hipparchus migration : change to the appropriate message
-//            throw new MathIllegalArgumentException(LocalizedFormats.SIMPLE_MESSAGE,
-//                                                   "tile size must be a power of two plus one");
             throw new MathIllegalArgumentException(LocalizedCoreFormats.SIMPLE_MESSAGE,
-                                                   "tile size must be a power of two plus one");
+                            "tile size must be a power of two plus one");
         }
 
         this.size = size;
@@ -69,7 +65,7 @@ public class RandomLandscapeUpdater implements TileUpdater {
                                           i - span / 2, j + span / 2,
                                           i + span / 2, j - span / 2,
                                           i + span / 2, j + span / 2) +
-                                     scale * (random.nextDouble() - 0.5);
+                                    scale * (random.nextDouble() - 0.5);
                     heightMap[i][j] = middleH;
                 }
             }
@@ -82,7 +78,7 @@ public class RandomLandscapeUpdater implements TileUpdater {
                                           i + span / 2, j,
                                           i,            j - span / 2,
                                           i,            j + span / 2) +
-                                     scale * (random.nextDouble() - 0.5);
+                                    scale * (random.nextDouble() - 0.5);
                     heightMap[i][j] = middleH;
                     if (i == 0) {
                         heightMap[n - 1][j] = middleH;
@@ -101,8 +97,9 @@ public class RandomLandscapeUpdater implements TileUpdater {
 
     }
 
+    @Override
     public void updateTile(double latitude, double longitude, UpdatableTile tile)
-        throws RuggedException {
+                    throws RuggedException {
 
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
@@ -118,9 +115,9 @@ public class RandomLandscapeUpdater implements TileUpdater {
 
     private double mean(int i1, int j1, int i2, int j2, int i3, int j3, int i4, int j4) {
         return (heightMap[(i1 + n) % n][(j1 + n) % n] +
-                heightMap[(i2 + n) % n][(j2 + n) % n] +
-                heightMap[(i3 + n) % n][(j3 + n) % n] +
-                heightMap[(i4 + n) % n][(j4 + n) % n]) / 4;
+                        heightMap[(i2 + n) % n][(j2 + n) % n] +
+                        heightMap[(i3 + n) % n][(j3 + n) % n] +
+                        heightMap[(i4 + n) % n][(j4 + n) % n]) / 4;
     }
 
 }

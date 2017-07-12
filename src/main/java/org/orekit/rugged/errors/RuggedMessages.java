@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -82,6 +82,7 @@ public enum RuggedMessages implements Localizable {
     DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
     INVALID_RUGGED_NAME("invalid rugged name."),
     UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled.");
+    NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})");
 
     // CHECKSTYLE: resume JavadocVariable check
 

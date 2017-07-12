@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -34,6 +34,7 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
@@ -49,6 +50,7 @@ import org.orekit.utils.PVCoordinates;
  * @author Luc Maisonobe
  * @author Lucie LabatAllee
  * @author Jonathan Guinet
+ * @author Guylaine Prat
  */
 public class Rugged {
 
@@ -88,8 +90,10 @@ public class Rugged {
     /** Rugged name. */
     private final String name;
 
-    /**
-     * Build a configured instance.
+    /** Atmospheric refraction for line of sight correction. */
+    private AtmosphericRefraction atmosphericRefraction;
+
+    /** Build a configured instance.
      * <p>
      * By default, the instance performs both light time correction (which
      * refers to ground point motion with respect to inertial frame) and
@@ -105,19 +109,18 @@ public class Rugged {
      *        intersection
      * @param ellipsoid f reference ellipsoid
      * @param lightTimeCorrection if true, the light travel time between ground
-     * @param aberrationOfLightCorrection if true, the aberration of light is
-     *        corrected for more accurate location and spacecraft is compensated
-     *        for more accurate location
+     * @param aberrationOfLightCorrection if true, the aberration of light
+     * is corrected for more accurate location
+     * and spacecraft is compensated for more accurate location
+     * @param atmosphericRefraction the atmospheric refraction model to be used for more accurate location
      * @param scToBody transforms interpolator
      * @param sensors sensors
      * @param name RuggedName
      */
-    Rugged(final IntersectionAlgorithm algorithm,
-           final ExtendedEllipsoid ellipsoid, final boolean lightTimeCorrection,
-           final boolean aberrationOfLightCorrection,
-           final SpacecraftToObservedBody scToBody,
-           final Collection<LineSensor> sensors,
-           final String name) {
+    Rugged(final IntersectionAlgorithm algorithm, final ExtendedEllipsoid ellipsoid, final boolean lightTimeCorrection,
+           final boolean aberrationOfLightCorrection, final AtmosphericRefraction atmosphericRefraction,
+           final SpacecraftToObservedBody scToBody, final Collection<LineSensor> sensors, final String name) {
+
 
         // space reference
         this.ellipsoid = ellipsoid;
@@ -139,7 +142,7 @@ public class Rugged {
 
         this.lightTimeCorrection = lightTimeCorrection;
         this.aberrationOfLightCorrection = aberrationOfLightCorrection;
-
+        this.atmosphericRefraction       = atmosphericRefraction;
     }
 
     /**
@@ -182,9 +185,14 @@ public class Rugged {
         return aberrationOfLightCorrection;
     }
 
-    /**
-     * Get the line sensors.
-     *
+    /** Get the atmospheric refraction model.
+     * @return atmospheric refraction model
+     */
+    public AtmosphericRefraction getRefractionCorrection() {
+        return atmosphericRefraction;
+    }
+
+    /** Get the line sensors.
      * @return line sensors
      */
     public Collection<LineSensor> getLineSensors() {
@@ -267,10 +275,8 @@ public class Rugged {
         final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
 
-            DumpManager.dumpDirectLocation(date, sensor.getPosition(),
-                                           sensor.getLOS(date, i),
-                                           lightTimeCorrection,
-                                           aberrationOfLightCorrection);
+            DumpManager.dumpDirectLocation(date, sensor.getPosition(), sensor.getLOS(date, i), lightTimeCorrection,
+                                           aberrationOfLightCorrection, atmosphericRefraction != null);
 
             final Vector3D obsLInert = scToInert
                             .transformVector(sensor.getLOS(date, i));
@@ -333,6 +339,13 @@ public class Rugged {
                                                     .intersection(ellipsoid, pBody, lBody));
             }
 
+            if (atmosphericRefraction != null) {
+                // apply atmospheric refraction correction
+                final Vector3D pBody = inertToBody.transformPosition(pInert);
+                final Vector3D lBody = inertToBody.transformVector(lInert);
+                gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
+            }
+
             DumpManager.dumpDirectLocationResult(gp[i]);
 
         }
@@ -357,8 +370,8 @@ public class Rugged {
                                         final Vector3D los)
                                                         throws RuggedException {
 
-        DumpManager.dumpDirectLocation(date, position, los, lightTimeCorrection,
-                                       aberrationOfLightCorrection);
+        DumpManager.dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection,
+                                       atmosphericRefraction != null);
 
         // compute the approximate transform between spacecraft and observed
         // body
@@ -400,7 +413,7 @@ public class Rugged {
             lInert = obsLInert;
         }
 
-        final NormalizedGeodeticPoint result;
+        final NormalizedGeodeticPoint gp;
         if (lightTimeCorrection) {
             // compute DEM intersection with light time correction
             final Vector3D sP = approximate.transformPosition(position);
@@ -416,18 +429,28 @@ public class Rugged {
             final Vector3D eP2 = ellipsoid.transform(gp1);
             final double deltaT2 = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
             final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
-            result = algorithm
-                            .refineIntersection(ellipsoid,
-                                                shifted2.transformPosition(pInert),
-                                                shifted2.transformVector(lInert), gp1);
+            gp = algorithm.refineIntersection(ellipsoid,
+                                              shifted2.transformPosition(pInert),
+                                              shifted2.transformVector(lInert),
+                                              gp1);
 
         } else {
             // compute DEM intersection without light time correction
             final Vector3D pBody = inertToBody.transformPosition(pInert);
             final Vector3D lBody = inertToBody.transformVector(lInert);
-            result = algorithm
-                            .refineIntersection(ellipsoid, pBody, lBody, algorithm
-                                                .intersection(ellipsoid, pBody, lBody));
+            gp = algorithm.refineIntersection(ellipsoid, pBody, lBody,
+                                              algorithm.intersection(ellipsoid, pBody, lBody));
+        }
+
+        final NormalizedGeodeticPoint result;
+        if (atmosphericRefraction != null) {
+            // apply atmospheric refraction correction
+            final Vector3D pBody = inertToBody.transformPosition(pInert);
+            final Vector3D lBody = inertToBody.transformVector(lInert);
+            result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
+        } else {
+            // don't apply atmospheric refraction correction
+            result = gp;
         }
 
         DumpManager.dumpDirectLocationResult(result);
@@ -461,10 +484,9 @@ public class Rugged {
      * occur after 55750. Of course, these values are only an example and should
      * be adjusted depending on mission needs.
      * </p>
-     *
-     * @param sensorName name of the line sensor
-     * @param latitude ground point latitude
-     * @param longitude ground point longitude
+     * @param sensorName name of the line  sensor
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return date at which ground point is seen by line sensor
@@ -563,10 +585,9 @@ public class Rugged {
      * occur after 55750. Of course, these values are only an example and should
      * be adjusted depending on mission needs.
      * </p>
-     *
-     * @param sensorName name of the line sensor
-     * @param latitude ground point latitude
-     * @param longitude ground point longitude
+     * @param sensorName name of the line  sensor
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return sensor pixel seeing ground point, or null if ground point cannot
@@ -1088,7 +1109,7 @@ public class Rugged {
                         .add(lowIndex);
 
         return new DerivativeStructure[] {
-            fixedLine, fixedPixel
+                                          fixedLine, fixedPixel
         };
 
     }

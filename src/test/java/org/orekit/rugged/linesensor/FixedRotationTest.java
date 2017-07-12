@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hipparchus.analysis.UnivariateMatrixFunction;
+import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableMatrixFunction;
@@ -163,27 +164,29 @@ public class FixedRotationTest {
                 selected.add(driver);
             }
 
+            final DSFactory factoryS = new DSFactory(selected.size(), 1);
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
                 @Override
-               public ParameterDriversList getSelected() {
-                      return selected;
+                public ParameterDriversList getSelected() {
+                    return selected;
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure constant(final double value) {
-                    return new DerivativeStructure(selected.getNbParams(), 1, value);
+                    return factoryS.constant(value);
                 }
 
                 /** {@inheritDoc} */
                 @Override
                 public DerivativeStructure variable(final ParameterDriver driver) {
                     int index = 0;
-                    for (ParameterDriver d : getSelected().getDrivers()) {
-                        if (d.getName().equals(driver.getName())) {
-                            return new DerivativeStructure(getSelected().getNbParams(), 1, index, driver.getValue());
+                    for (ParameterDriver d : getSelected()) {
+                        if (d == driver) {
+                            return factoryS.variable(index, driver.getValue());
+
                         }
                         ++index;
                     }
@@ -198,8 +201,9 @@ public class FixedRotationTest {
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.001);
             int index = 0;
-            for (final ParameterDriver driver : selected.getDrivers()) {
-                int[] orders = new int[selected.getNbParams()];
+            DSFactory factory11 = new DSFactory(1, 1);
+            for (final ParameterDriver driver : selected) {
+                int[] orders = new int[selected.size()];
                 orders[index] = 1;
                 UnivariateDifferentiableMatrixFunction f =
                                 differentiator.differentiate((UnivariateMatrixFunction) x -> {
@@ -216,7 +220,7 @@ public class FixedRotationTest {
                                         throw new OrekitExceptionWrapper(oe);
                                     }
                                 });
-                DerivativeStructure[][] mDS = f.value(new DerivativeStructure(1, 1, 0, driver.getValue()));
+                DerivativeStructure[][] mDS = f.value(factory11.variable(0, driver.getValue()));
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, AbsoluteDate.J2000_EPOCH);
                     FieldVector3D<DerivativeStructure> losDS =

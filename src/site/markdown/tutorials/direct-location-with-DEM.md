@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2016 CS Systèmes d'Information
+<!--- Copyright 2013-2017 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -39,7 +39,7 @@ The class `VolcanicConeElevationUpdater` implements the interface `TileUpdater` 
 
 Here's the source code of the class `VolcanicConeElevationUpdater` :
 
-import org.hipparchus.util.FastMath;
+    import org.hipparchus.util.FastMath;
     import org.orekit.rugged.raster.TileUpdater;
     import org.orekit.rugged.raster.UpdatableTile;
     import org.orekit.bodies.GeodeticPoint;
@@ -88,7 +88,7 @@ import org.hipparchus.util.FastMath;
 
 ### Important notes on DEM tiles :
 
-* Ground point elevation are obtained by bilinear interpolation between 4 neighbouring cells. There is no specific algorithm for border management. As a consequence, a point falling on the border of the tile is considered outside. DEM tiles must be overlapping by at least one line/column in all directions, in a similar way as for the SRTM DEMs. 
+* Ground point elevation are obtained by bilinear interpolation between 4 neighbouring cells. There is no specific algorithm for border management. As a consequence, a point falling on the border of the tile is considered outside. **DEM tiles must be overlapping by at least one line/column in all directions**, in a similar way as for the SRTM DEMs. 
 
 * In Rugged terminology, the minimum latitude and longitude correspond to the centre of the farthest Southwest cell of the DEM. Be careful if using GDAL to pass the correct information as there is half a pixel shift with respect to the lower left corner coordinates in gdalinfo.
 
@@ -169,4 +169,4 @@ In a similar way as in the first tutorial [DirectLocation](./direct-location.htm
     }
 
 ## Source code
-The source code is available in DirectLocationWithDEM.java
+The source code is available in DirectLocationWithDEM.java (package fr.cs.examples under src/tutorials)

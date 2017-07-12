@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2016 CS Systèmes d'Information
+<!--- Copyright 2013-2017 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -64,7 +64,7 @@ Features
     * aberration of light correction (about 20m)
     * line-of-sight curvature in geodetic coordinates,
       (0m at nadir, 10m at 30° dive angle, hundreds of meters for skimming los)
-    * refraction not available in early 2016, but expected to be added soon
+    * atmospheric refraction
 
   * not limited to Earth
 
@@ -72,20 +72,14 @@ Features
 
   * Localized in several languages
 
+    * Danish
     * English
-
     * French
-
     * Galician
-
     * German
-
     * Italian
-
     * Norwegian
-
     * Romanian
-
     * Spanish
 
 Free software

@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -46,11 +46,9 @@ public interface TimeIndependentLOSTransform {
      * </p>
      * <p>
      * Note that in order for the partial derivatives to be properly set up, the
-     * {@link #setEstimatedParameters(double[], int, int) setEstimatedParameters}
-     * <em>must</em> have been called at least once before this method and its
-     * {@code start} parameter will be used to ensure the partial derivatives are
-     * ordered in the same way in the returned vector as they were in the set
-     * parameters.
+     * {@link org.orekit.utils.ParameterDriver#setSelected(boolean) setSelected}
+     * method must have been set to {@code true} for the various parameters returned
+     * by {@link #getParametersDrivers()} that should be estimated.
      * </p>
      * @param index los pixel index
      * @param los line-of-sight to transform

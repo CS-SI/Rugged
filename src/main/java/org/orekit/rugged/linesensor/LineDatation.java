@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -21,6 +21,7 @@ import org.orekit.time.AbsoluteDate;
 /** Interface representing line datation model.
  * @see LinearLineDatation
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface LineDatation {
 
@@ -29,6 +30,12 @@ public interface LineDatation {
      * @return date at which line is acquired
      */
     AbsoluteDate getDate(double lineNumber);
+
+    /** Get the line for a given date.
+     * @param date date
+     * @return line number
+     */
+    double getLine(AbsoluteDate date);
 
     /** Get the rate of lines scanning.
      * @param lineNumber line number

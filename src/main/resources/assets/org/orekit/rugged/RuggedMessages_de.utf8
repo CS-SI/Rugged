@@ -72,7 +72,7 @@ TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
 
 # unknown tile {0}, line {1}, file {2}: {3}
 UNKNOWN_TILE = <MISSING TRANSLATION>
- 
+
 # no parameters have been selected for estimation
 NO_PARAMETERS_SELECTED = <MISSING TRANSLATION>
 
@@ -81,3 +81,6 @@ NO_REFERENCE_MAPPINGS = <MISSING TRANSLATION>
 
 # a different parameter with name {0} already exists
 DUPLICATED_PARAMETER_NAME = <MISSING TRANSLATION>
+
+# no atmospheric layer data at altitude {0} (lowest altitude: {1})
+NO_LAYER_DATA = <MISSING TRANSLATION>

@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -129,7 +129,7 @@ public class SensorMeanPlaneCrossingTest {
 
     @Test
     public void testDerivativeWithoutCorrections() throws RuggedException, OrekitException {
-        doTestDerivative(false, false, 2.2e-11);
+        doTestDerivative(false, false, 3.1e-11);
     }
 
     @Test
@@ -205,7 +205,7 @@ public class SensorMeanPlaneCrossingTest {
             // the simple model from which reference results have been compute applies here
             Assert.assertEquals(refLine, result.getLine(), 7.0e-14 * refLine);
             Assert.assertEquals(0.0, result.getDate().durationFrom(refDate), 2.0e-13);
-            Assert.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 5.1e-15);
+            Assert.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 5.4e-15);
         }
 
         double deltaL = 0.5;

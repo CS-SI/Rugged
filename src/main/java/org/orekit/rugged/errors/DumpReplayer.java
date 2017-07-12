@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -69,6 +69,7 @@ import org.orekit.utils.ParameterDriver;
 
 /** Replayer for Rugged debug dumps.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  * @see DumpManager
  * @see Dump
  */
@@ -1264,6 +1265,33 @@ public class DumpReplayer {
             final AbsoluteDate dSup  = datation.get(sup).getSecond();
             final double       alpha = (lineNumber - lInf) / (lSup - lInf);
             return dInf.shiftedBy(alpha * dSup.durationFrom(dInf));
+
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public double getLine(final AbsoluteDate date) {
+
+            if (datation.size() < 2) {
+                return datation.get(0).getFirst();
+            }
+
+            // find entries bracketing the date
+            int sup = 0;
+            while (sup < datation.size() - 1) {
+                if (datation.get(sup).getSecond().compareTo(date) >= 0) {
+                    break;
+                }
+                ++sup;
+            }
+            final int inf = (sup == 0) ? sup++ : (sup - 1);
+
+            final double       lInf  = datation.get(inf).getFirst();
+            final AbsoluteDate dInf  = datation.get(inf).getSecond();
+            final double       lSup  = datation.get(sup).getFirst();
+            final AbsoluteDate dSup  = datation.get(sup).getSecond();
+            final double       alpha = date.durationFrom(dInf) / dSup.durationFrom(dInf);
+            return alpha * lSup + (1 - alpha) * lInf;
 
         }
 

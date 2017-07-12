@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,6 +20,7 @@ import org.hipparchus.util.FastMath;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -37,6 +38,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 
 /** Provider for observation transforms.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class SpacecraftToObservedBody implements Serializable {
 
@@ -110,7 +112,7 @@ public class SpacecraftToObservedBody implements Serializable {
             if (minPVDate.durationFrom(minDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
             }
-            if (maxDate.durationFrom(maxDate) > overshootTolerance) {
+            if (maxDate.durationFrom(maxPVDate) > overshootTolerance) {
                 throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
             }
 
@@ -163,7 +165,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 }
                 final TimeStampedAngularCoordinates interpolatedQuaternion =
                         TimeStampedAngularCoordinates.interpolate(aInterpolationDate, aFilter,
-                                                                  aCache.getNeighbors(aInterpolationDate));
+                                                                  aCache.getNeighbors(aInterpolationDate).collect(Collectors.toList()));
                 final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 
                 // store transform from spacecraft frame to inertial frame

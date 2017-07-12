@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,6 +25,7 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
+import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
@@ -44,6 +45,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
+import org.orekit.rugged.utils.RoughVisibilityEstimator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -65,10 +67,14 @@ public class InverseLocation {
             File orekitData = new File(home, "orekit-data");
             DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
+            // Sensor's definition
+            // ===================
+            // Line of sight
+            // -------------
             // The raw viewing direction of pixel i with respect to the instrument is defined by the vector:
             List<Vector3D> rawDirs = new ArrayList<Vector3D>();
             for (int i = 0; i < 2000; i++) {
-                //20° field of view, 2000 pixels
+                // 20° field of view, 2000 pixels
                 rawDirs.add(new Vector3D(0d, i*FastMath.toRadians(20)/2000d, 1d));
             }
 
@@ -79,17 +85,24 @@ public class InverseLocation {
 
             TimeDependentLOS lineOfSight = losBuilder.build();
 
+            // Datation model
+            // --------------
             // We use Orekit for handling time and dates, and Rugged for defining the datation model:
             TimeScale gps = TimeScalesFactory.getGPS();
             AbsoluteDate absDate = new AbsoluteDate("2009-12-11T16:59:30.0", gps);
             LinearLineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20);
 
+            // Line sensor
+            // -----------
             // With the LOS and the datation now defined , we can initialize a line sensor object in Rugged:
             String sensorName = "mySensor";
             LineSensor lineSensor = new LineSensor(sensorName, lineDatation, Vector3D.ZERO, lineOfSight);
 
+            // Satellite position, velocity and attitude
+            // =========================================
 
-
+            // Reference frames
+            // ----------------
             // In our application, we simply need to know the name of the frames we are working with. Positions and
             // velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
             // inertial frame.
@@ -97,8 +110,9 @@ public class InverseLocation {
             boolean simpleEOP = true; // we don't want to compute tiny tidal effects at millimeter level
             Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, simpleEOP);
 
+            // Satellite attitude
+            // ------------------
             ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
-            ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
 
             addSatelliteQ(gps, satelliteQList, "2009-12-11T16:58:42.592937", -0.340236d, 0.333952d, -0.844012d, -0.245684d);
             addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:06.592937", -0.354773d, 0.329336d, -0.837871d, -0.252281d);
@@ -110,6 +124,10 @@ public class InverseLocation {
             addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:30.592937", -0.439505d, 0.299722d, -0.795442d, -0.290301d);
             addSatelliteQ(gps, satelliteQList, "2009-12-11T17:01:54.592937", -0.452976d, 0.294556d, -0.787571d, -0.296279d);
             addSatelliteQ(gps, satelliteQList, "2009-12-11T17:02:18.592937", -0.466207d, 0.28935d, -0.779516d, -0.302131d);
+
+            // Positions and velocities
+            // ------------------------
+            ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
 
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:58:42.592937", -726361.466d, -5411878.485d, 4637549.599d, -2463.635d, -4447.634d, -5576.736d);
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T16:59:04.192937", -779538.267d, -5506500.533d, 4515934.894d, -2459.848d, -4312.676d, -5683.906d);
@@ -123,36 +141,76 @@ public class InverseLocation {
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -2369.401d, -3161.764d, -6433.531d);
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -2350.574d, -3010.159d, -6513.056d);
 
-            Rugged rugged = new RuggedBuilder().
-                    setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
-                    setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                    setTimeSpan(absDate, absDate.shiftedBy(60.0), 0.01, 5 / lineSensor.getRate(0)).
-                    setTrajectory(InertialFrameId.EME2000,
-                                  satellitePVList, 4, CartesianDerivativesFilter.USE_P,
-                                  satelliteQList,  4,  AngularDerivativesFilter.USE_R).
-                                  addLineSensor(lineSensor).
-                                  build();
+            // Rugged initialization
+            // ---------------------
+            RuggedBuilder ruggedBuilder = new RuggedBuilder();
 
+            ruggedBuilder.setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
+            ruggedBuilder.setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF);
+            ruggedBuilder.setTimeSpan(absDate, absDate.shiftedBy(60.0), 0.01, 5 / lineSensor.getRate(0));
+            ruggedBuilder.setTrajectory(InertialFrameId.EME2000,
+                                        satellitePVList, 4, CartesianDerivativesFilter.USE_P,
+                                        satelliteQList,  4,  AngularDerivativesFilter.USE_R).
+            addLineSensor(lineSensor);
+
+            Rugged rugged = ruggedBuilder.build();
+
+            // Inverse location of a Geodetic Point
+            // ------------------------------------
             // Point defined by its latitude, longitude and altitude
             double latitude = FastMath.toRadians(37.585);
             double longitude = FastMath.toRadians(-96.949);
             double altitude = 0.0d;
+            // For a GeodeticPoint : angles are given in radians and altitude in meters
             GeodeticPoint gp = new GeodeticPoint(latitude, longitude, altitude);
 
             // Search the sensor pixel seeing point
+            // ....................................
+            // interval of lines where to search the point
             int minLine = 0;
             int maxLine = 100;
             SensorPixel sensorPixel = rugged.inverseLocation(sensorName, gp, minLine, maxLine);
+
             // we need to test if the sensor pixel is found in the prescribed lines otherwise the sensor pixel is null
+            // Be careful: no exception is thrown if the pixel is not found
             if (sensorPixel != null){
+                // The pixel was found
                 System.out.format(Locale.US, "Sensor Pixel found : line = %5.3f, pixel = %5.3f %n", sensorPixel.getLineNumber(), sensorPixel.getPixelNumber());
             } else {
+                // The pixel was not found: set to null
                 System.out.println("Sensor Pixel is null: point cannot be seen between the prescribed line numbers\n");
             }
 
             // Find the date at which the sensor sees the ground point
+            // .......................................................
             AbsoluteDate dateLine = rugged.dateLocation(sensorName, gp, minLine, maxLine);
             System.out.println("Date at which the sensor sees the ground point : " + dateLine);
+
+
+
+            // How to find min and max lines ? with the RoughVisibilityEstimator
+            // -------------------------------
+            // Create a RoughVisibilityEstimator for inverse location
+            OneAxisEllipsoid oneAxisEllipsoid = ruggedBuilder.getEllipsoid();
+            Frame pvFrame = ruggedBuilder.getInertialFrame();
+
+            // Initialize the RoughVisibilityEstimator
+            RoughVisibilityEstimator roughVisibilityEstimator = new RoughVisibilityEstimator(oneAxisEllipsoid, pvFrame, satellitePVList);
+
+            // Compute the approximated line with a rough estimator
+            AbsoluteDate roughLineDate = roughVisibilityEstimator.estimateVisibility(gp);
+            double roughLine = lineSensor.getLine(roughLineDate);
+
+            // Compute the min / max lines interval using a margin around the roughLine
+            int sensorMinLine= 0;
+            int sensorMaxLine = 1000;
+
+            int margin = 100;
+            int minLineRough = (int) FastMath.max(roughLine - margin, sensorMinLine);
+            int maxLineRough = (int) FastMath.min(roughLine + margin, sensorMaxLine);
+            SensorPixel sensorPixelRoughLine = rugged.inverseLocation(sensorName, gp, minLineRough, maxLineRough);
+
+            System.out.format(Locale.US, "Rough line found = %5.1f; InverseLocation gives (margin of %d around rough line): line = %5.3f, pixel = %5.3f %n", roughLine, margin, sensorPixelRoughLine.getLineNumber(), sensorPixel.getPixelNumber());
 
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
@@ -165,13 +223,13 @@ public class InverseLocation {
     }
 
     private static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
-                                  ArrayList<TimeStampedPVCoordinates> satellitePVList,
-                                  String absDate,
-                                  double px, double py, double pz, double vx, double vy, double vz)
-        throws OrekitException {
+                                       ArrayList<TimeStampedPVCoordinates> satellitePVList,
+                                       String absDate,
+                                       double px, double py, double pz, double vx, double vy, double vz)
+                                                       throws OrekitException {
         AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
-        Vector3D position = new Vector3D(px, py, pz);
-        Vector3D velocity = new Vector3D(vx, vy, vz);
+        Vector3D position = new Vector3D(px, py, pz); // in ITRF, unit: m
+        Vector3D velocity = new Vector3D(vx, vy, vz); // in ITRF, unit: m/s
         PVCoordinates pvITRF = new PVCoordinates(position, velocity);
         Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
         PVCoordinates pvEME2000 = transform.transformPVCoordinates(pvITRF);
@@ -181,9 +239,9 @@ public class InverseLocation {
     private static void addSatelliteQ(TimeScale gps, ArrayList<TimeStampedAngularCoordinates> satelliteQList, String absDate,
                                       double q0, double q1, double q2, double q3) {
         AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
-        Rotation rotation = new Rotation(q0, q1, q2, q3, true);
+        Rotation rotation = new Rotation(q0, q1, q2, q3, true);  // q0 is the scalar term
         TimeStampedAngularCoordinates pair =
-                new TimeStampedAngularCoordinates(attitudeDate, rotation, Vector3D.ZERO, Vector3D.ZERO);
+                        new TimeStampedAngularCoordinates(attitudeDate, rotation, Vector3D.ZERO, Vector3D.ZERO);
         satelliteQList.add(pair);
     }
 

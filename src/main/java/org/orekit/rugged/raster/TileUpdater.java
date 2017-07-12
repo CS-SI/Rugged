@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -24,7 +24,8 @@ import org.orekit.rugged.errors.RuggedException;
  * the image processing mission-specific layer, thus allowing
  * the Rugged library to access the Digital Elevation Model data.
  * </p>
- *  * @author Luc Maisonobe
+ * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface TileUpdater {
 
@@ -76,8 +77,8 @@ public interface TileUpdater {
            latitudeStep, longitudeStep, latitudeRows, longitudeColumns)} call.
      *   </li>
      * </ul>
-     * @param latitude latitude that must be covered by the tile
-     * @param longitude longitude that must be covered by the tile
+     * @param latitude latitude that must be covered by the tile (rad)
+     * @param longitude longitude that must be covered by the tile (rad)
      * @param tile to update
      * @exception RuggedException if tile cannot be updated
      */

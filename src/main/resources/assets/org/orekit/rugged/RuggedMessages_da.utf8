@@ -1,0 +1,87 @@
+# internal error, contact maintenance at {0}
+INTERNAL_ERROR = intern fejl. Kontakt vedligeholdsansvarlig {0}
+
+# no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
+OUT_OF_TILE_INDICES = ingen data fundet på [{0}, {1}], flisen dækker kun fra [0, 0] til [{2}, {3}] (inkluderet)
+
+# no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
+OUT_OF_TILE_ANGLES = ingen data på breddegrad {0} og længdegrad {1}, flisen dækker kun breddegraderne {2} til {3} og længdegraderne {4} til {5} 
+
+# no Digital Elevation Model data at latitude {0} and longitude {1}
+NO_DEM_DATA = ingen digital højdemodel ved breddegrad {0} og længdegrad {1}
+
+# the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
+TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = den valgte flise for breddegrad {0} og længdegrad {1} indeholder ikke påkrævet nabopunkt
+
+# date {0} is out of time span [{1}, {2}] (UTC)
+OUT_OF_TIME_RANGE = datoen {0} er udenfor perioden [{1}, {2}] (UTC)
+
+# general context has not been initialized (missing call to {0})
+UNINITIALIZED_CONTEXT = generel kontekst har ikke været initialiseret ({0} har ikke været kaldt)
+
+# tile is empty: {0} ⨉ {1}
+EMPTY_TILE = flisen er tom: {0} ⨉ {1}
+
+# unknown sensor {0}
+UNKNOWN_SENSOR = ukendt måler {0}
+
+# line-of-sight does not reach ground
+LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = synslinjen når ikke bakken
+
+# line-of-sight never crosses latitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE = synslinjen krydser aldrig breddegrad {0}
+
+# line-of-sight never crosses longitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = synslinjen krydser aldrig længdegrad {0}
+
+# line never crosses altitude {0}
+LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = linjen krydser aldrig højden {0}
+
+# line-of-sight enters the Digital Elevation Model behind spacecraft!
+DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = synslinjen går ind i den digitale højdemodel bag rumfartøjet!
+
+# frame {0} does not match frame {1} from interpolator dump
+FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = rammen {0} stemmer ikke overens med rammen {1} fra interpolar-dumpet
+
+# data is not an interpolator dump
+NOT_INTERPOLATOR_DUMP_DATA = dataen er ikke et interpolar-dump
+
+# number of estimated parameters mismatch, expected {0} got {1}
+ESTIMATED_PARAMETERS_NUMBER_MISMATCH = antal forventede parametre stemmer ikke overens, forventede {0} og modtog {1}
+
+# debug dump is already active for this thread
+DEBUG_DUMP_ALREADY_ACTIVE = debug-dump er allerede aktivt for denne tråd
+
+# unable to active debug dump with file {0}: {1}
+DEBUG_DUMP_ACTIVATION_ERROR = kunne ikke aktivere debug-dump med fil {0}: {1}
+
+# debug dump is not active for this thread
+DEBUG_DUMP_NOT_ACTIVE = debug-dump er ikke aktivt for denne tråd
+
+# cannot parse line {0}, file {1}: {2}
+CANNOT_PARSE_LINE = kan ikke fortolke linje {0}, fil {1}: {2}
+
+# light time correction redefined, line {0}, file {1}: {2}
+LIGHT_TIME_CORRECTION_REDEFINED = lystidskorrektion omdefineret, linje {0}, fil {1}: {2}
+
+# aberration of light correction redefined, line {0}, file {1}: {2}
+ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = aberrationskorrektion omdefineret, linje {0}, fil {1}: {2}
+
+# tile {0} already defined, line {1}, file {2}: {3}
+TILE_ALREADY_DEFINED = flise {0} allerede defineret, linje {1}, fil {2}: {3}
+
+# unknown tile {0}, line {1}, file {2}: {3}
+UNKNOWN_TILE = ukendt flise {0}, linje {1}, fil {2}: {3}
+
+# no parameters have been selected for estimation
+NO_PARAMETERS_SELECTED =  <MISSING TRANSLATION>
+
+# no reference mappings for parameters estimation
+NO_REFERENCE_MAPPINGS =  <MISSING TRANSLATION>
+
+# a different parameter with name {0} already exists
+DUPLICATED_PARAMETER_NAME =  <MISSING TRANSLATION>
+
+# no atmospheric layer data at altitude {0} (lowest altitude: {1})
+NO_LAYER_DATA = <MISSING TRANSLATION>
+

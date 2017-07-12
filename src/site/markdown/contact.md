@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2016 CS Systèmes d'Information
+<!--- Copyright 2013-2017 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -51,5 +51,5 @@ please use the following address:
     31506 Toulouse CEDEX 5
     FRANCE
 
-    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Aude Espesset)
+    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe)
     fax:   +33 5-61-34-84-15

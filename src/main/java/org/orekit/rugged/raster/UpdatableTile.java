@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,14 +20,15 @@ import org.orekit.rugged.errors.RuggedException;
 
 /** Interface representing one tile of a raster Digital Elevation Model.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface UpdatableTile {
 
     /** Set the tile global geometry.
-     * @param minLatitude minimum latitude
-     * @param minLongitude minimum longitude
-     * @param latitudeStep step in latitude (size of one raster element)
-     * @param longitudeStep step in longitude (size of one raster element)
+     * @param minLatitude minimum latitude (rad)
+     * @param minLongitude minimum longitude (rad)
+     * @param latitudeStep step in latitude (size of one raster element) (rad)
+     * @param longitudeStep step in longitude (size of one raster element) (rad)
      * @param latitudeRows number of latitude rows
      * @param longitudeColumns number of longitude columns
      * @exception RuggedException if tile is empty (zero rows or columns)

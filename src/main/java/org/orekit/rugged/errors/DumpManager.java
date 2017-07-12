@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -139,13 +139,16 @@ public class DumpManager {
      * @param los normalized line-of-sight in spacecraft frame
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
+     * @param refractionCorrection flag for refraction correction
      * @exception RuggedException if date cannot be converted to UTC
      */
     public static void dumpDirectLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los,
-                                          final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection)
+                                          final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
+                                          final boolean refractionCorrection)
         throws RuggedException {
         if (isActive()) {
-            DUMP.get().dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection);
+            DUMP.get().dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection,
+                    refractionCorrection);
         }
     }
 

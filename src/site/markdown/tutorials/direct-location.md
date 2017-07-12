@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2016 CS Systèmes d'Information
+<!--- Copyright 2013-2017 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -55,7 +55,7 @@ The raw viewing direction of pixel i with respect to the instrument is defined b
 
     List<Vector3D> rawDirs = new ArrayList<Vector3D>();
     for (int i = 0; i < 2000; i++) {
-        //20° field of view, 2000 pixels
+        // 20° field of view, 2000 pixels
         rawDirs.add(new Vector3D(0d, i*FastMath.toRadians(20)/2000d, 1d));
     }
 
@@ -161,7 +161,7 @@ Each attitude sample (quaternion, time) is added to the list,
 
 where, for instance, gpsDateAsString is set to "2009-12-11T10:49:55.899994"
 
-### Position and velocities
+### Positions and velocities
 
 
 Similarly the positions and velocities will be set in a list of `TimeStampedPVCoordinates`. Before being
@@ -307,11 +307,17 @@ Finally everything is set to do some real work. Let's try to locate a point on E
 for upper left point (first line, first pixel): 
 
     import org.orekit.bodies.GeodeticPoint;
-    Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
+    Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.t. the satellite to 0.
     AbsoluteDate firstLineDate = lineSensor.getDate(0);
     Vector3D los = lineSensor.getLOS(firstLineDate, 0);
     GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
 
+The line number can have negative values; the associated date must belong to the time span given when building Rugged with setTimeSpan(acquisitionStartDate, acquisitionStopDate,...).
+Otherwise a RuggedException will be thrown.
+
+The pixel number must be given between 0 and the (Sensor pixel size – 1); in our example between 0 and 1999.
+Otherwise an ArrayIndexOutOfBoundsException will be thrown.
+
 ## Source code 
 
-The source code is available in DirectLocation.java
+The source code is available in DirectLocation.java (package fr.cs.examples under src/tutorials)

@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableFunction;
@@ -689,6 +690,14 @@ public class RuggedTest {
         checkDateLocation(2000, true,  false, 8.0e-7);
         checkDateLocation(2000, true,  true,  3.0e-6);
     }
+    
+    @Test
+    public void testLineDatation()
+        throws RuggedException, OrekitException, URISyntaxException {
+        checkLineDatation(2000, 7.0e-7);
+        checkLineDatation(10000, 8.0e-7);
+    }
+
 
     @Test
     public void testInverseLocNearLineEnd() throws OrekitException, RuggedException, URISyntaxException {
@@ -1044,28 +1053,28 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithoutCorrections()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, false,
-                                         7.0e-9, 4.0e-11, 2.0e-12, 7.0e-8);
+                                         8.0e-9, 3.0e-10, 5.0e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithLightTimeCorrection()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, false,
-                                         3.0e-9, 9.0e-9, 3.0e-13, 7.0e-8);
+                                         3.0e-9, 9.0e-9, 2.1e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, true,
-                                         3.0e-10, 3.0e-10, 7.0e-13, 7.0e-8);
+                                         4.2e-10, 3.0e-10, 3.4e-12, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAllCorrections()
         throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, true,
-                                         3.0e-10, 5.0e-10, 7.0e-14, 7.0e-8);
+                                         3.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
     }
 
     private void doTestInverseLocationDerivatives(int dimension,
@@ -1160,6 +1169,7 @@ public class RuggedTest {
             Assert.assertEquals(1, result[0].getOrder());
 
             // check the partial derivatives
+            DSFactory factory = new DSFactory(1, 1);
             double h = 1.0e-6;
             FiniteDifferencesDifferentiator differentiator = new FiniteDifferencesDifferentiator(8, h);
 
@@ -1175,7 +1185,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dLdR = lineVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dLdR = lineVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdR, result[0].getPartialDerivative(1, 0), dLdR * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction lineVSpitch =
@@ -1190,7 +1200,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dLdP = lineVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dLdP = lineVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdP, result[0].getPartialDerivative(0, 1), dLdP * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSroll =
@@ -1205,7 +1215,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dXdR = pixelVSroll.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dXdR = pixelVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdR, result[1].getPartialDerivative(1, 0), dXdR * pixelDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSpitch =
@@ -1220,7 +1230,7 @@ public class RuggedTest {
                                     throw new RuggedExceptionWrapper(e);
                                 }
                             });
-            double dXdP = pixelVSpitch.value(new DerivativeStructure(1, 1, 0, 0.0)).getPartialDerivative(1);
+            double dXdP = pixelVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
 
         } catch (InvocationTargetException | NoSuchMethodException |
@@ -1538,8 +1548,41 @@ public class RuggedTest {
                                                     -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
                                                     -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
                                                     0, dimension));
-
+        
     }
 
+    private void checkLineDatation(int dimension, double maxLineError)
+    				throws RuggedException, OrekitException, URISyntaxException {
+
+    	String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+    	DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+
+    	AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+
+    	// one line sensor
+    	// position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+    	// los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+    	Vector3D position = new Vector3D(1.5, 0, -0.2);
+    	TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+    			FastMath.toRadians(50.0),
+    			RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+    			Vector3D.PLUS_I,
+    			FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
+
+    	// linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
+    	LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+    	int firstLine = 0;
+    	int lastLine  = dimension;
+    	LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+    	AbsoluteDate minDate = lineSensor.getDate(firstLine).shiftedBy(-1.0);
+    	AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
+    	
+    	// Recompute the lines from the date with the appropriate shift of date
+    	double recomputedFirstLine = lineSensor.getLine(minDate.shiftedBy(+1.0));
+    	double recomputedLastLine = lineSensor.getLine(maxDate.shiftedBy(-1.0));
+
+    	Assert.assertEquals(firstLine, recomputedFirstLine, maxLineError);
+    	Assert.assertEquals(lastLine, recomputedLastLine, maxLineError);
+    }
 }
 

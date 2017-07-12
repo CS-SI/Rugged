@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -44,6 +44,7 @@ import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.raster.TileUpdater;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -84,6 +85,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
  * @see <a href="https://en.wikipedia.org/wiki/Builder_pattern">Builder pattern (wikipedia)</a>
  * @see <a href="https://en.wikipedia.org/wiki/Fluent_interface">Fluent interface (wikipedia)</a>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class RuggedBuilder {
 
@@ -96,7 +98,7 @@ public class RuggedBuilder {
     /** Updater used to load Digital Elevation Model tiles. */
     private TileUpdater tileUpdater;
 
-    /** Constant elevation over ellipsoid.
+    /** Constant elevation over ellipsoid (m).
      * used only with {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID. */
     private double constantElevation;
 
@@ -109,10 +111,10 @@ public class RuggedBuilder {
     /** End of search time span. */
     private AbsoluteDate maxDate;
 
-    /** Step to use for inertial frame to body frame transforms cache computations. */
+    /** Step to use for inertial frame to body frame transforms cache computations (s). */
     private double tStep;
 
-    /** OvershootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting. */
+    /** OvershootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting (s). */
     private double overshootTolerance;
 
     /** Inertial frame for position/velocity/attitude. */
@@ -139,7 +141,7 @@ public class RuggedBuilder {
     /** Propagator for position/velocity/attitude. */
     private Propagator pvaPropagator;
 
-    /** Step to use for inertial/Earth/spacraft transforms interpolations. */
+    /** Step to use for inertial/Earth/spacraft transforms interpolations (s). */
     private double iStep;
 
     /** Number of points to use for inertial/Earth/spacraft transforms interpolations. */
@@ -153,6 +155,9 @@ public class RuggedBuilder {
 
     /** Flag for aberration of light correction. */
     private boolean aberrationOfLightCorrection;
+
+    /** Atmospheric refraction to use for line of sight correction. */
+    private AtmosphericRefraction atmosphericRefraction;
 
     /** Sensors. */
     private final List<LineSensor> sensors;
@@ -313,7 +318,7 @@ public class RuggedBuilder {
      * AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID CONSTANT_ELEVATION_OVER_ELLIPSOID}.
      * If it is called for another algorithm, the elevation set here will be ignored.
      * </p>
-     * @param constantElevation constant elevation to use
+     * @param constantElevation constant elevation to use (m)
      * @return the builder instance
      * @see #setAlgorithm(AlgorithmId)
      * @see #getConstantElevation()
@@ -353,8 +358,8 @@ public class RuggedBuilder {
      * </p>
      * @param minDate start of search time span
      * @param maxDate end of search time span
-     * @param tStep step to use for inertial frame to body frame transforms cache computations
-     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
+     * @param tStep step to use for inertial frame to body frame transforms cache computations (s)
+     * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting (s)
      * @return the builder instance
      * @see #setTrajectoryAndTimeSpan(InputStream)
      * @see #getMinDate()
@@ -492,7 +497,7 @@ public class RuggedBuilder {
      * <em>must</em> be used together with the {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}
      * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
      * </p>
-     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
+     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations (s)
      * @param interpolationNumber number of points to use for inertial/Earth/spacraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
@@ -760,11 +765,6 @@ public class RuggedBuilder {
 
                 /** {@inheritDoc} */
                 @Override
-                public void init(final SpacecraftState s0, final AbsoluteDate t) {
-                }
-
-                /** {@inheritDoc} */
-                @Override
                 public void handleStep(final SpacecraftState currentState, final boolean isLast)
                                 throws OrekitException {
                     final AbsoluteDate  date = currentState.getDate();
@@ -853,6 +853,32 @@ public class RuggedBuilder {
         return aberrationOfLightCorrection;
     }
 
+    /** Set atmospheric refraction for line of sight correction.
+     * <p>
+     * This method sets an atmospheric refraction model to be used between
+     * spacecraft and ground for the correction of intersected points on ground.
+     * Compensating for the effect of atmospheric refraction improves location
+     * accuracy.
+     * </p>
+     * @param atmosphericRefraction the atmospheric refraction model to be used for more accurate location
+     * @return the builder instance
+     * @see #getRefractionCorrection()
+     */
+    // CHECKSTYLE: stop HiddenField check
+    public RuggedBuilder setRefractionCorrection(final AtmosphericRefraction atmosphericRefraction) {
+        // CHECKSTYLE: resume HiddenField check
+        this.atmosphericRefraction = atmosphericRefraction;
+        return this;
+    }
+
+    /** Get the atmospheric refraction model.
+     * @return atmospheric refraction model
+     * @see #setRefractionCorrection(AtmosphericRefraction)
+     */
+    public AtmosphericRefraction getRefractionCorrection() {
+        return atmosphericRefraction;
+    }
+
     /** Set up line sensor model.
      * @param lineSensor line sensor model
      * @return the builder instance
@@ -888,19 +914,19 @@ public class RuggedBuilder {
         try {
             // set up the inertial frame
             switch (inertialFrameId) {
-            case GCRF :
-                return FramesFactory.getGCRF();
-            case EME2000 :
-                return FramesFactory.getEME2000();
-            case MOD :
-                return FramesFactory.getMOD(IERSConventions.IERS_1996);
-            case TOD :
-                return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
-            case VEIS1950 :
-                return FramesFactory.getVeis1950();
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+                case GCRF :
+                    return FramesFactory.getGCRF();
+                case EME2000 :
+                    return FramesFactory.getEME2000();
+                case MOD :
+                    return FramesFactory.getMOD(IERSConventions.IERS_1996);
+                case TOD :
+                    return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
+                case VEIS1950 :
+                    return FramesFactory.getVeis1950();
+                default :
+                    // this should never happen
+                    throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -919,15 +945,15 @@ public class RuggedBuilder {
         try {
             // set up the rotating frame
             switch (bodyRotatingFrame) {
-            case ITRF :
-                return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-            case ITRF_EQUINOX :
-                return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
-            case GTOD :
-                return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+                case ITRF :
+                    return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+                case ITRF_EQUINOX :
+                    return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
+                case GTOD :
+                    return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
+                default :
+                    // this should never happen
+                    throw RuggedException.createInternalError(null);
             }
         } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
@@ -944,19 +970,19 @@ public class RuggedBuilder {
 
         // set up the ellipsoid
         switch (ellipsoidID) {
-        case GRS80 :
-            return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
-        case WGS84 :
-            return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                        Constants.WGS84_EARTH_FLATTENING,
-                                        bodyFrame);
-        case IERS96 :
-            return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
-        case IERS2003 :
-            return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
+            case GRS80 :
+                return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
+            case WGS84 :
+                return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.WGS84_EARTH_FLATTENING,
+                                            bodyFrame);
+            case IERS96 :
+                return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
+            case IERS2003 :
+                return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
         }
 
     }
@@ -974,19 +1000,19 @@ public class RuggedBuilder {
 
         // set up the algorithm
         switch (algorithmID) {
-        case DUVENHAGE :
-            return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
-        case DUVENHAGE_FLAT_BODY :
-            return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
-        case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-            return new BasicScanAlgorithm(updater, maxCachedTiles);
-        case CONSTANT_ELEVATION_OVER_ELLIPSOID :
-            return new ConstantElevationAlgorithm(constantElevation);
-        case IGNORE_DEM_USE_ELLIPSOID :
-            return new IgnoreDEMAlgorithm();
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
+            case DUVENHAGE :
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+            case DUVENHAGE_FLAT_BODY :
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
+            case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
+                return new BasicScanAlgorithm(updater, maxCachedTiles);
+            case CONSTANT_ELEVATION_OVER_ELLIPSOID :
+                return new ConstantElevationAlgorithm(constantElevation);
+            case IGNORE_DEM_USE_ELLIPSOID :
+                return new IgnoreDEMAlgorithm();
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
         }
 
     }
@@ -1011,7 +1037,8 @@ public class RuggedBuilder {
         }
         createInterpolatorIfNeeded();
         return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation), ellipsoid,
-                          lightTimeCorrection, aberrationOfLightCorrection, scToBody, sensors, name);
+                          lightTimeCorrection, aberrationOfLightCorrection, atmosphericRefraction, scToBody, sensors, name);
+
     }
 
 }
