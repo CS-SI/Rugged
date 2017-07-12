@@ -47,7 +47,6 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
-import org.orekit.utils.ParameterDriversList;
 
 public class PolynomialRotationTest {
 
@@ -173,19 +172,16 @@ public class PolynomialRotationTest {
                                                         2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3),
                                                         1.0e-4 * 2 * FastMath.PI * rng.nextNormalizedDouble() / FastMath.sqrt(3)));
             TimeDependentLOS tdl = builder.build();
-            final ParameterDriversList selected = new ParameterDriversList();
-            final List<ParameterDriver> list = tdl.getParametersDrivers().collect(Collectors.toList());
-            for (final ParameterDriver driver : list) {
+            final List<ParameterDriver> selected = tdl.getParametersDrivers().collect(Collectors.toList());
+            for (final ParameterDriver driver : selected) {
                 driver.setSelected(true);
-                selected.add(driver);
             }
-
             final DSFactory factoryS = new DSFactory(selected.size(), 1);
             DSGenerator generator = new DSGenerator() {
 
                 /** {@inheritDoc} */
                 @Override
-                public ParameterDriversList getSelected() {
+                public List<ParameterDriver> getSelected() {
                     return selected;
                 }
 
@@ -206,19 +202,18 @@ public class PolynomialRotationTest {
                         ++index;
                     }
                     return constant(driver.getValue());
-
                 }
 
             };
-            Assert.assertEquals(7, generator.getSelected().getNbParams());
+            Assert.assertEquals(7, generator.getSelected().size());
 
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.0001);
             int index = 0;
             DSFactory factory11 = new DSFactory(1, 1);
             final AbsoluteDate date = AbsoluteDate.J2000_EPOCH.shiftedBy(7.0);
-            for (final ParameterDriver driver : selected.getDrivers()) {
-                int[] orders = new int[selected.getNbParams()];
+            for (final ParameterDriver driver : selected) {
+                int[] orders = new int[selected.size()];
                 orders[index] = 1;
                 UnivariateDifferentiableMatrixFunction f =
                                 differentiator.differentiate((UnivariateMatrixFunction) x -> {

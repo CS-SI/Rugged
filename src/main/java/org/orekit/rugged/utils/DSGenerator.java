@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2016 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,9 +16,10 @@
  */
 package org.orekit.rugged.utils;
 
+import java.util.List;
+
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.orekit.utils.ParameterDriver;
-import org.orekit.utils.ParameterDriversList;
 
 /** Generator for {@link DerivativeStructure} instances from {@link ParameterDriver}.
  * <p>
@@ -32,7 +33,7 @@ public interface DSGenerator {
     /** Get the parameters selected for estimation.
      * @return parameters selected for estimation
      */
-    ParameterDriversList getSelected();
+    List<ParameterDriver> getSelected();
 
     /** Generate a constant {@link DerivativeStructure}.
      * @param value value of the constant
