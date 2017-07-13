@@ -25,6 +25,9 @@ EMPTY_TILE = regiunea este vidă: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = senzor necunoscut {0}
 
+#unknown pixel in mapping {0}
+UNKNOWN_PIXEL = <MISSING TRANSLATION>
+
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = linia de vizare nu ajunge la sol
 

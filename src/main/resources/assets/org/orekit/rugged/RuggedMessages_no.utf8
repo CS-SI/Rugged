@@ -25,6 +25,9 @@ EMPTY_TILE = flisen er tom: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = ukjent måler {0}
 
+#unknown pixel in mapping {0}
+UNKNOWN_PIXEL = <MISSING TRANSLATION>
+
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = synslinjen når ikke bakken
 

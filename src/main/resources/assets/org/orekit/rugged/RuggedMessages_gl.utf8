@@ -25,6 +25,9 @@ EMPTY_TILE = a faceta está baleira: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = sensor {0} descoñecido
 
+#unknown pixel in mapping {0}
+UNKNOWN_PIXEL = <MISSING TRANSLATION>
+
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = a liña de visión non chega ao chan
 

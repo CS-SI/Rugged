@@ -25,6 +25,9 @@ EMPTY_TILE = il quadrante è vuoto : {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = sensore {0} sconosciuto
 
+#unknown pixel in mapping {0}
+UNKNOWN_PIXEL = <MISSING TRANSLATION>
+
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = la linea di visibilità non raggiunge il suolo
 

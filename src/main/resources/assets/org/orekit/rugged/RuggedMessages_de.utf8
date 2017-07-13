@@ -25,6 +25,9 @@ EMPTY_TILE = die Ziegel ist leer: {0} * {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = unbekannter Sensor {0}
 
+#unknown pixel in mapping {0}
+UNKNOWN_PIXEL = <MISSING TRANSLATION>
+
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = die Sichtverbindung erreicht nicht die Erde
 
