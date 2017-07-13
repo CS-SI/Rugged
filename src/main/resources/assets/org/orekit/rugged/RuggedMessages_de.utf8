@@ -82,5 +82,11 @@ NO_REFERENCE_MAPPINGS = <MISSING TRANSLATION>
 # a different parameter with name {0} already exists
 DUPLICATED_PARAMETER_NAME = <MISSING TRANSLATION>
 
+# rugged name is not found 
+INVALID_RUGGED_NAME = <MISSING TRANSLATION>
+
+# refining context is only handled for limited number of configurations
+UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = <MISSING TRANSLATION>

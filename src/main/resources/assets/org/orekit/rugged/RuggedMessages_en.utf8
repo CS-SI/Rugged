@@ -82,5 +82,11 @@ NO_REFERENCE_MAPPINGS = no reference mappings for parameters estimation
 # a different parameter with name {0} already exists
 DUPLICATED_PARAMETER_NAME = a different parameter with name {0} already exists
 
+# rugged name is not found 
+INVALID_RUGGED_NAME = invalid rugged name.
+
+# refining context is only handled for limited number of configurations
+UNSUPPORTED_REFINING_CONTEXT = refining using {0} rugged instance is not handled.
+
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = no atmospheric layer data at altitude {0} (lowest altitude: {1})
