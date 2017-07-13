@@ -24,22 +24,21 @@ import java.util.ResourceBundle;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.orekit.rugged.errors.RuggedMessages;
 
 public class RuggedMessagesTest {
 
     private final String[] LANGUAGES_LIST = { "da", "de", "en", "es", "fr", "gl", "it", "no", "ro" } ;
     @Test
     public void testMessageNumber() {
-        Assert.assertEquals(29, RuggedMessages.values().length);
+        Assert.assertEquals(32, RuggedMessages.values().length);
     }
 
     @Test
     public void testAllKeysPresentInPropertiesFiles() {
         for (final String language : LANGUAGES_LIST) {
             ResourceBundle bundle =
-                ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
-                                         new Locale(language), new RuggedMessages.UTF8Control());
+                            ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
+                                                     new Locale(language), new RuggedMessages.UTF8Control());
             for (RuggedMessages message : RuggedMessages.values()) {
                 final String messageKey = message.toString();
                 boolean keyPresent = false;
@@ -58,8 +57,8 @@ public class RuggedMessagesTest {
     public void testAllPropertiesCorrespondToKeys() {
         for (final String language : LANGUAGES_LIST) {
             ResourceBundle bundle =
-                ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
-                                         new Locale(language), new RuggedMessages.UTF8Control());
+                            ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
+                                                     new Locale(language), new RuggedMessages.UTF8Control());
             for (final Enumeration<String> keys = bundle.getKeys(); keys.hasMoreElements();) {
                 final String propertyKey = keys.nextElement();
                 try {
