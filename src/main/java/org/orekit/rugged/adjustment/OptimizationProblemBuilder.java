@@ -110,6 +110,16 @@ abstract class OptimizationProblemBuilder {
     }
 
 
+    /**
+     * generator getter.
+     *
+     * @return the derivative structure generator.
+     */
+    public final DSGenerator getGenerator() {
+        return this.generator;
+    }
+
+
 
     /** leastsquare problem builder.
      * @param maxEvaluations maxIterations and evaluations
