@@ -57,6 +57,7 @@ import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.TestUtils;
+import org.orekit.rugged.adjustment.GroundOptimizationProblemBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
@@ -70,6 +71,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
+import org.orekit.rugged.refining.measures.Observables;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
@@ -187,6 +189,7 @@ public class RuggedTest {
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
@@ -1143,9 +1146,10 @@ public class RuggedTest {
             pitchDriver.setSelected(true);
 
             // prepare generator
-            Method createGenerator = Rugged.class.getDeclaredMethod("createGenerator", List.class);
-            createGenerator.setAccessible(true);
-            DSGenerator generator = (DSGenerator) createGenerator.invoke(rugged, Collections.singletonList(lineSensor));
+            final Observables measures = new Observables(1);
+            GroundOptimizationProblemBuilder OptimizationProblembuilder = new GroundOptimizationProblemBuilder(Collections.singletonList(lineSensor),
+                                                                                                               measures, rugged);
+            DSGenerator generator = OptimizationProblembuilder.getGenerator();
 
             double referenceLine = 0.87654 * dimension;
             GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
