@@ -94,7 +94,7 @@ public class RuggedTest {
     @Ignore
     @Test
     public void testMayonVolcanoTiming()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         long t0 = System.currentTimeMillis();
         int dimension = 2000;
@@ -107,11 +107,11 @@ public class RuggedTest {
 
         // Mayon Volcano location according to Wikipedia: 13°15′24″N 123°41′6″E
         GeodeticPoint summit =
-                        new GeodeticPoint(FastMath.toRadians(13.25667), FastMath.toRadians(123.685), 2463.0);
+                new GeodeticPoint(FastMath.toRadians(13.25667), FastMath.toRadians(123.685), 2463.0);
         VolcanicConeElevationUpdater updater =
-                        new VolcanicConeElevationUpdater(summit,
-                                                         FastMath.toRadians(30.0), 16.0,
-                                                         FastMath.toRadians(1.0), 1201);
+                new VolcanicConeElevationUpdater(summit,
+                                                 FastMath.toRadians(30.0), 16.0,
+                                                 FastMath.toRadians(1.0), 1201);
         final AbsoluteDate crossing = new AbsoluteDate("2012-01-06T02:27:16.139", TimeScalesFactory.getUTC());
 
         // one line sensor
@@ -134,15 +134,15 @@ public class RuggedTest {
         Propagator ephemeris = propagator.getGeneratedEphemeris();
 
         Rugged rugged = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(lineDatation.getDate(firstLine), lineDatation.getDate(lastLine), 0.001, 5.0).
-                        setTrajectory(1.0 / lineDatation.getRate(0.0),
-                                      8, CartesianDerivativesFilter.USE_PV,AngularDerivativesFilter.USE_R,
-                                      ephemeris).
-                        addLineSensor(lineSensor).
-                        build();
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(lineDatation.getDate(firstLine), lineDatation.getDate(lastLine), 0.001, 5.0).
+                setTrajectory(1.0 / lineDatation.getRate(0.0),
+                              8, CartesianDerivativesFilter.USE_PV,AngularDerivativesFilter.USE_R,
+                              ephemeris).
+                addLineSensor(lineSensor).
+                build();
 
         try {
 
@@ -172,10 +172,10 @@ public class RuggedTest {
             int sizeM = size / (1024 * 1024);
             System.out.format(Locale.US,
                               "%n%n%5dx%5d:%n" +
-                                              "  Orekit initialization and DEM creation   : %5.1fs%n" +
-                                              "  direct location and %3dM grid writing: %5.1fs (%.1f px/s)%n",
-                                              lastLine - firstLine, los.getNbPixels(),
-                                              1.0e-3 * (t1 - t0), sizeM, 1.0e-3 * (t2 - t1), pixels / (1.0e-3 * (t2 - t1)));
+                              "  Orekit initialization and DEM creation   : %5.1fs%n" +
+                              "  direct location and %3dM grid writing: %5.1fs (%.1f px/s)%n",
+                              lastLine - firstLine, los.getNbPixels(),
+                              1.0e-3 * (t1 - t0), sizeM, 1.0e-3 * (t2 - t1), pixels / (1.0e-3 * (t2 - t1)));
         } catch (IOException ioe) {
             Assert.fail(ioe.getLocalizedMessage());
         }
@@ -184,12 +184,11 @@ public class RuggedTest {
 
     @Test
     public void testLightTimeCorrection()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
@@ -212,15 +211,15 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         RuggedBuilder builder = new RuggedBuilder().
-                        setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
-                        setEllipsoid(EllipsoidId.IERS2003, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        addLineSensor(lineSensor);
+                setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
+                setEllipsoid(EllipsoidId.IERS2003, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor);
 
         Rugged rugged = builder.build();
         Assert.assertEquals(1, rugged.getLineSensors().size());
@@ -263,7 +262,7 @@ public class RuggedTest {
 
     @Test
     public void testAberrationOfLightCorrection()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         int dimension = 400;
 
@@ -290,18 +289,18 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         RuggedBuilder builder = new RuggedBuilder().
-
-                        setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        addLineSensor(lineSensor).
-                        setLightTimeCorrection(false).
-                        setAberrationOfLightCorrection(true);
+                
+                setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor).
+                setLightTimeCorrection(false).
+                setAberrationOfLightCorrection(true);
         Rugged rugged = builder.build();
         GeodeticPoint[] gpWithAberrationOfLightCorrection = rugged.directLocation("line", 200);
 
@@ -321,7 +320,7 @@ public class RuggedTest {
 
     @Test
     public void testFlatBodyCorrection()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         int dimension = 200;
 
@@ -350,24 +349,24 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
 
         RuggedBuilder builder = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        addLineSensor(lineSensor);
+                setDigitalElevationModel(updater, 8).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor);
         GeodeticPoint[] gpWithFlatBodyCorrection =
-                        builder.setAlgorithm(AlgorithmId.DUVENHAGE).build().directLocation("line", 100);
+                builder.setAlgorithm(AlgorithmId.DUVENHAGE).build().directLocation("line", 100);
 
         GeodeticPoint[] gpWithoutFlatBodyCorrection =
-                        builder.setAlgorithm(AlgorithmId.DUVENHAGE_FLAT_BODY).build().directLocation("line", 100);
+                builder.setAlgorithm(AlgorithmId.DUVENHAGE_FLAT_BODY).build().directLocation("line", 100);
 
         StreamingStatistics stats = new StreamingStatistics();
         for (int i = 0; i < gpWithFlatBodyCorrection.length; ++i) {
@@ -383,7 +382,7 @@ public class RuggedTest {
 
     @Test
     public void testLocationsinglePoint()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         int dimension = 200;
 
@@ -412,26 +411,26 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        addLineSensor(lineSensor).build();
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor).build();
         GeodeticPoint[] gpLine = rugged.directLocation("line", 100);
 
         for (int i = 0; i < gpLine.length; ++i) {
             GeodeticPoint gpPixel =
-                            rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
-                                                  lineSensor.getLOS(lineSensor.getDate(100), i));
+                    rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
+                                              lineSensor.getLOS(lineSensor.getDate(100), i));
             Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
             Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
             Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
@@ -441,7 +440,7 @@ public class RuggedTest {
 
     @Test
     public void testLocationsinglePointNoCorrections()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         int dimension = 200;
 
@@ -470,29 +469,29 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        setAberrationOfLightCorrection(false).
-                        setLightTimeCorrection(false).
-                        addLineSensor(lineSensor).
-                        build();
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                setAberrationOfLightCorrection(false).
+                setLightTimeCorrection(false).
+                addLineSensor(lineSensor).
+                build();
         GeodeticPoint[] gpLine = rugged.directLocation("line", 100);
 
         for (int i = 0; i < gpLine.length; ++i) {
             GeodeticPoint gpPixel =
-                            rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
-                                                  lineSensor.getLOS(lineSensor.getDate(100), i));
+                    rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
+                                              lineSensor.getLOS(lineSensor.getDate(100), i));
             Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
             Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
             Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
@@ -502,7 +501,7 @@ public class RuggedTest {
 
     @Test
     public void testBasicScan()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         int dimension = 200;
 
@@ -531,26 +530,26 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xe12ef744f224cf43l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xe12ef744f224cf43l,
+                                           FastMath.toRadians(1.0), 257);
 
         RuggedBuilder builder = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        addLineSensor(lineSensor);
+                setDigitalElevationModel(updater, 8).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor);
         GeodeticPoint[] gpDuvenhage =
-                        builder.setAlgorithm(AlgorithmId.DUVENHAGE).build().directLocation("line", 100);
+                builder.setAlgorithm(AlgorithmId.DUVENHAGE).build().directLocation("line", 100);
 
         GeodeticPoint[] gpBasicScan =
-                        builder.setAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY).build().directLocation("line", 100);
+                builder.setAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY).build().directLocation("line", 100);
 
-        double[] data = new double[gpDuvenhage.length];
+        double[] data = new double[gpDuvenhage.length]; 
         for (int i = 0; i < gpDuvenhage.length; ++i) {
             Vector3D pDuvenhage = earth.transform(gpDuvenhage[i]);
             Vector3D pBasicScan = earth.transform(gpBasicScan[i]);
@@ -565,7 +564,7 @@ public class RuggedTest {
     @Ignore
     @Test
     public void testInverseLocationTiming()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         long t0       = System.currentTimeMillis();
         int dimension = 2000;
@@ -600,19 +599,19 @@ public class RuggedTest {
         AbsoluteDate maxDate = sensors.get(sensors.size() - 1).getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
 
         RuggedBuilder builder = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R);
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R);
         builder.setLightTimeCorrection(true);
         builder.setAberrationOfLightCorrection(true);
         for (LineSensor lineSensor : sensors) {
@@ -662,12 +661,12 @@ public class RuggedTest {
             int sizeM = (int) (size / (1024l * 1024l));
             System.out.format(Locale.US,
                               "%n%n%5dx%5d, %d sensors:%n" +
-                                              "  Orekit initialization and DEM creation   : %5.1fs%n" +
-                                              "  inverse location and %3dM grid writing: %5.1fs (%.1f px/s, %.1f%% covered)%n",
-                                              dimension, dimension, nbSensors,
-                                              1.0e-3 * (t1 - t0), sizeM, 1.0e-3 * (t2 - t1),
-                                              (badPixels + goodPixels) / (1.0e-3 * (t2 - t1)),
-                                              (100.0 * goodPixels) / (goodPixels + badPixels));
+                              "  Orekit initialization and DEM creation   : %5.1fs%n" +
+                              "  inverse location and %3dM grid writing: %5.1fs (%.1f px/s, %.1f%% covered)%n",
+                              dimension, dimension, nbSensors,
+                              1.0e-3 * (t1 - t0), sizeM, 1.0e-3 * (t2 - t1),
+                              (badPixels + goodPixels) / (1.0e-3 * (t2 - t1)),
+                              (100.0 * goodPixels) / (goodPixels + badPixels));
         } catch (IOException ioe) {
             Assert.fail(ioe.getLocalizedMessage());
         }
@@ -675,7 +674,7 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocation()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
         checkInverseLocation(2000, false, false, 4.0e-7, 5.0e-6);
         checkInverseLocation(2000, false, true,  1.0e-5, 2.0e-7);
         checkInverseLocation(2000, true,  false, 4.0e-7, 4.0e-7);
@@ -684,16 +683,16 @@ public class RuggedTest {
 
     @Test
     public void testDateLocation()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
         checkDateLocation(2000, false, false, 7.0e-7);
         checkDateLocation(2000, false, true,  2.0e-5);
         checkDateLocation(2000, true,  false, 8.0e-7);
         checkDateLocation(2000, true,  true,  3.0e-6);
     }
-
+    
     @Test
     public void testLineDatation()
-                    throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
         checkLineDatation(2000, 7.0e-7);
         checkLineDatation(10000, 8.0e-7);
     }
@@ -737,13 +736,13 @@ public class RuggedTest {
 
         TileUpdater updater = new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l, FastMath.toRadians(1.0), 257);
         RuggedBuilder builder = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(satellitePVList.get(0).getDate(), satellitePVList.get(satellitePVList.size() - 1).getDate(), 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      satellitePVList, 8, CartesianDerivativesFilter.USE_PV,
-                                      satelliteQList, 8, AngularDerivativesFilter.USE_R);
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(satellitePVList.get(0).getDate(), satellitePVList.get(satellitePVList.size() - 1).getDate(), 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              satellitePVList, 8, CartesianDerivativesFilter.USE_PV,
+                              satelliteQList, 8, AngularDerivativesFilter.USE_R);
 
         List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
         lineOfSight.add(new Vector3D(-0.011204, 0.181530, 1d).normalize());
@@ -875,15 +874,15 @@ public class RuggedTest {
         LineSensor lineSensor = new LineSensor("QUICK_LOOK", lineDatation, offset,
                                                new LOSBuilder(lineOfSight).build());
         Rugged rugged = new RuggedBuilder().
-                        setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(satellitePVList.get(0).getDate(),
-                                    satellitePVList.get(satellitePVList.size() - 1).getDate(), 0.1, 10.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      satellitePVList, 6, CartesianDerivativesFilter.USE_P,
-                                      satelliteQList, 8, AngularDerivativesFilter.USE_R).
-                        addLineSensor(lineSensor).
-                        build();
+                setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(satellitePVList.get(0).getDate(),
+                            satellitePVList.get(satellitePVList.size() - 1).getDate(), 0.1, 10.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              satellitePVList, 6, CartesianDerivativesFilter.USE_P,
+                              satelliteQList, 8, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor).
+                build();
 
         GeodeticPoint[] temp = rugged.directLocation("QUICK_LOOK", -250);
         GeodeticPoint first = temp[0];
@@ -903,7 +902,7 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocCurvedLine()
-                    throws RuggedException, URISyntaxException, OrekitException {
+        throws RuggedException, URISyntaxException, OrekitException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -931,21 +930,21 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        addLineSensor(lineSensor).
-                        build();
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor).
+                build();
 
         int lineNumber = 97;
         GeodeticPoint[] gp = rugged.directLocation("curved", lineNumber);
@@ -959,7 +958,7 @@ public class RuggedTest {
 
     private void checkInverseLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                       double maxLineError, double maxPixelError)
-                                                      throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -987,23 +986,23 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        setLightTimeCorrection(lightTimeCorrection).
-                        setAberrationOfLightCorrection(aberrationOfLightCorrection).
-                        addLineSensor(lineSensor).
-                        build();
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                setLightTimeCorrection(lightTimeCorrection).
+                setAberrationOfLightCorrection(aberrationOfLightCorrection).
+                addLineSensor(lineSensor).
+                build();
 
         double referenceLine = 0.87654 * dimension;
         GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
@@ -1012,67 +1011,67 @@ public class RuggedTest {
             int    i = (int) FastMath.floor(p);
             double d = p - i;
             SensorPixel sp = rugged.inverseLocation("line",
-                                                    (1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
-                                                    (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
-                                                    0, dimension);
+                                                        (1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
+                                                        (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
+                                                        0, dimension);
             Assert.assertEquals(referenceLine, sp.getLineNumber(),  maxLineError);
             Assert.assertEquals(p,             sp.getPixelNumber(), maxPixelError);
         }
 
         // point out of line (20 pixels before first pixel)
         Assert.assertNull(rugged.inverseLocation("line",
-                                                 21 * gp[0].getLatitude()  - 20 * gp[1].getLatitude(),
-                                                 21 * gp[0].getLongitude() - 20 * gp[1].getLongitude(),
-                                                 0, dimension));
+                                                    21 * gp[0].getLatitude()  - 20 * gp[1].getLatitude(),
+                                                    21 * gp[0].getLongitude() - 20 * gp[1].getLongitude(),
+                                                    0, dimension));
 
         // point out of line (20 pixels after last pixel)
         Assert.assertNull(rugged.inverseLocation("line",
-                                                 -20 * gp[gp.length - 2].getLatitude()  + 21 * gp[gp.length - 1].getLatitude(),
-                                                 -20 * gp[gp.length - 2].getLongitude() + 21 * gp[gp.length - 1].getLongitude(),
-                                                 0, dimension));
+                                                    -20 * gp[gp.length - 2].getLatitude()  + 21 * gp[gp.length - 1].getLatitude(),
+                                                    -20 * gp[gp.length - 2].getLongitude() + 21 * gp[gp.length - 1].getLongitude(),
+                                                    0, dimension));
 
         // point out of line (20 lines before first line)
         GeodeticPoint[] gp0 = rugged.directLocation("line", 0);
         GeodeticPoint[] gp1 = rugged.directLocation("line", 1);
         Assert.assertNull(rugged.inverseLocation("line",
-                                                 21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
-                                                 21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
-                                                 0, dimension));
+                                                    21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
+                                                    21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
+                                                    0, dimension));
 
         // point out of line (20 lines after last line)
         GeodeticPoint[] gp2 = rugged.directLocation("line", dimension - 2);
         GeodeticPoint[] gp3 = rugged.directLocation("line", dimension - 1);
         Assert.assertNull(rugged.inverseLocation("line",
-                                                 -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
-                                                 -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
-                                                 0, dimension));
+                                                    -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
+                                                    -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
+                                                    0, dimension));
 
     }
 
     @Test
     public void testInverseLocationDerivativesWithoutCorrections()
-                    throws RuggedException, OrekitException {
+        throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, false,
                                          8.0e-9, 3.0e-10, 5.0e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithLightTimeCorrection()
-                    throws RuggedException, OrekitException {
+        throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, false,
                                          3.0e-9, 9.0e-9, 2.1e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
-                    throws RuggedException, OrekitException {
+        throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, false, true,
                                          4.2e-10, 3.0e-10, 3.4e-12, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAllCorrections()
-                    throws RuggedException, OrekitException {
+        throws RuggedException, OrekitException {
         doTestInverseLocationDerivatives(2000, true, true,
                                          3.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
     }
@@ -1084,7 +1083,7 @@ public class RuggedTest {
                                                   double pixelTolerance,
                                                   double lineDerivativeRelativeTolerance,
                                                   double pixelDerivativeRelativeTolerance)
-                                                                  throws RuggedException, OrekitException {
+        throws RuggedException, OrekitException {
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -1099,11 +1098,11 @@ public class RuggedTest {
             // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
             Vector3D position = new Vector3D(1.5, 0, -0.2);
             LOSBuilder losBuilder =
-                            TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                        FastMath.toRadians(50.0),
-                                                                        RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                           Vector3D.PLUS_I,
-                                                           FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+             TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
+                                                         FastMath.toRadians(50.0),
+                                                         RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+                                            Vector3D.PLUS_I,
+                                            FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
             losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.0));
             losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.0));
             TimeDependentLOS los = losBuilder.build();
@@ -1160,7 +1159,7 @@ public class RuggedTest {
                                                                DSGenerator.class);
             inverseLoc.setAccessible(true);
             int referencePixel = (3 * dimension) / 4;
-            DerivativeStructure[] result =
+            DerivativeStructure[] result = 
                             (DerivativeStructure[]) inverseLoc.invoke(rugged,
                                                                       "line", gp[referencePixel], 0, dimension,
                                                                       generator);
@@ -1235,21 +1234,21 @@ public class RuggedTest {
             Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
 
         } catch (InvocationTargetException | NoSuchMethodException |
-                        SecurityException | IllegalAccessException |
-                        IllegalArgumentException | URISyntaxException |
-                        OrekitExceptionWrapper | RuggedExceptionWrapper e) {
+                 SecurityException | IllegalAccessException |
+                 IllegalArgumentException | URISyntaxException |
+                 OrekitExceptionWrapper | RuggedExceptionWrapper e) {
             Assert.fail(e.getLocalizedMessage());
         }
     }
 
 
 
-    /*TODO add refining tests */
+    // TODO add refining tests
 
 
     private void checkDateLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
-                                   double maxDateError)
-                                                   throws RuggedException, OrekitException, URISyntaxException {
+                                       double maxDateError)
+        throws RuggedException, OrekitException, URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -1277,23 +1276,23 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                        new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
-                                                   FastMath.toRadians(1.0), 257);
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                                           FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
-                        setDigitalElevationModel(updater, 8).
-                        setAlgorithm(AlgorithmId.DUVENHAGE).
-                        setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                        setTimeSpan(minDate, maxDate, 0.001, 5.0).
-                        setTrajectory(InertialFrameId.EME2000,
-                                      TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      8, CartesianDerivativesFilter.USE_PV,
-                                      TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
-                                      2, AngularDerivativesFilter.USE_R).
-                        setLightTimeCorrection(lightTimeCorrection).
-                        setAberrationOfLightCorrection(aberrationOfLightCorrection).
-                        addLineSensor(lineSensor).
-                        build();
+                setDigitalElevationModel(updater, 8).
+                setAlgorithm(AlgorithmId.DUVENHAGE).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                setLightTimeCorrection(lightTimeCorrection).
+                setAberrationOfLightCorrection(aberrationOfLightCorrection).
+                addLineSensor(lineSensor).
+                build();
 
         double referenceLine = 0.87654 * dimension;
         GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
@@ -1302,9 +1301,9 @@ public class RuggedTest {
             int    i = (int) FastMath.floor(p);
             double d = p - i;
             AbsoluteDate date = rugged.dateLocation("line",
-                                                    (1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
-                                                    (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
-                                                    0, dimension);
+                                                        (1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
+                                                        (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
+                                                        0, dimension);
             Assert.assertEquals(0.0, date.durationFrom(lineSensor.getDate(referenceLine)),  maxDateError);
         }
 
@@ -1312,37 +1311,37 @@ public class RuggedTest {
         GeodeticPoint[] gp0 = rugged.directLocation("line", 0);
         GeodeticPoint[] gp1 = rugged.directLocation("line", 1);
         Assert.assertNull(rugged.dateLocation("line",
-                                              21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
-                                              21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
-                                              0, dimension));
+                                                    21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
+                                                    21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
+                                                    0, dimension));
 
         // point out of line (20 lines after last line)
         GeodeticPoint[] gp2 = rugged.directLocation("line", dimension - 2);
         GeodeticPoint[] gp3 = rugged.directLocation("line", dimension - 1);
         Assert.assertNull(rugged.dateLocation("line",
-                                              -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
-                                              -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
-                                              0, dimension));
-
+                                                    -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
+                                                    -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
+                                                    0, dimension));
+        
     }
 
     private void checkLineDatation(int dimension, double maxLineError)
-                    throws RuggedException, OrekitException, URISyntaxException {
+    				throws RuggedException, OrekitException, URISyntaxException {
 
-        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+    	String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+    	DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
 
-        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+    	AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
-        // one line sensor
+    	// one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                           FastMath.toRadians(50.0),
-                                                                           RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                              Vector3D.PLUS_I,
-                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
+                FastMath.toRadians(50.0),
+                RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+        		Vector3D.PLUS_I,
+        		FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
 
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
