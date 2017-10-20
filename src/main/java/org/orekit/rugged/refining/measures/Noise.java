@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,6 +19,7 @@ package org.orekit.rugged.refining.measures;
 
 /** Class for adding a noise to measures.
  * @author Lucie Labat-Allee
+ * @author Guylaine Prat
  * @since 2.0
  */
 public class Noise {
@@ -35,11 +36,8 @@ public class Noise {
     /** Standard deviation. */
     private double[] standardDeviation;
 
-
-
     /** Distribution. */
     private int distribution = GAUSSIAN;
-
 
     /** Build a new instance.
      * @param distribution noise type
@@ -52,56 +50,46 @@ public class Noise {
         this.distribution = distribution;
     }
 
-
-
-    /**
+    /** Get the mean
      * @return the mean
      */
     public double[] getMean() {
         return mean;
     }
 
-
-
-    /**
+    /** Set the mean
      * @param mean the mean to set
      */
     public void setMean(final double[] mean) {
         this.mean = mean;
     }
 
-
-
-    /**
-     * @return the standardDeviation
+    /** Get the standard deviation
+     * @return the standard deviation
      */
     public double[] getStandardDeviation() {
         return standardDeviation;
     }
 
-
-
-    /**
-     * @param standardDeviation the standardDeviation to set
+    /** Set the standard deviation
+     * @param standardDeviation the standard deviation to set
      */
     public void setStandardDeviation(final double[] standardDeviation) {
         this.standardDeviation = standardDeviation;
     }
 
-    /**
+    /** Get the distribution
      * @return the distribution
      */
     public int getDistribution() {
         return distribution;
     }
 
-    /**
+    /** Get the dimension
      * @return the dimension
      */
     public static int getDimension() {
         return dimension;
     }
-
-
 }
 

@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -31,7 +31,9 @@ import org.orekit.utils.ParameterObserver;
 /** {@link TimeIndependentLOSTransform LOS transform} based on a homothety along the Z axis.
  * inspired from FixedZHomothety / s2geolib
  * @author Lucie Labatallee
+ * @author Guylaine Prat
  * @see LOSBuilder
+ * @since 2.0
  */
 public class FixedZHomothety implements TimeIndependentLOSTransform {
 
@@ -69,7 +71,6 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
                 public void valueChanged(final double previousValue, final ParameterDriver driver) {
                     // reset factor to zero, they will be evaluated lazily if needed
                     factor = 0.0;
-//                    System.out.format("Value changed: %f %n", factorDriver.getValue());
                     factorDS = null;
                 }
             });

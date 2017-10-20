@@ -80,8 +80,8 @@ public enum RuggedMessages implements Localizable {
     NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),
     NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),
     DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
-    INVALID_RUGGED_NAME("invalid rugged name."),
-    UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled."),
+    INVALID_RUGGED_NAME("invalid rugged name"),
+    UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled"),
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})");
 
     // CHECKSTYLE: resume JavadocVariable check
@@ -111,12 +111,12 @@ public enum RuggedMessages implements Localizable {
     public String getLocalizedString(final Locale locale) {
         try {
             final ResourceBundle bundle =
-                            ResourceBundle.getBundle(RESOURCE_BASE_NAME, locale, new UTF8Control());
+                    ResourceBundle.getBundle(RESOURCE_BASE_NAME, locale, new UTF8Control());
             if (bundle.getLocale().getLanguage().equals(locale.getLanguage())) {
                 final String translated = bundle.getString(name());
                 if ((translated != null) &&
-                                (translated.length() > 0) &&
-                                (!translated.toLowerCase().contains("missing translation"))) {
+                    (translated.length() > 0) &&
+                    (!translated.toLowerCase().contains("missing translation"))) {
                     // the value of the resource is the translated format
                     return translated;
                 }
@@ -145,7 +145,7 @@ public enum RuggedMessages implements Localizable {
         @Override
         public ResourceBundle newBundle(final String baseName, final Locale locale, final String format,
                                         final ClassLoader loader, final boolean reload)
-                                                        throws IllegalAccessException, InstantiationException, IOException {
+            throws IllegalAccessException, InstantiationException, IOException {
             // The below is a copy of the default implementation.
             final String bundleName = toBundleName(baseName, locale);
             final String resourceName = toResourceName(bundleName, "utf8");

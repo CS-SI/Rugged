@@ -21,7 +21,6 @@ import org.orekit.time.AbsoluteDate;
 /** Interface representing line datation model.
  * @see LinearLineDatation
  * @author Luc Maisonobe
- * @author Guylaine Prat
  */
 public interface LineDatation {
 

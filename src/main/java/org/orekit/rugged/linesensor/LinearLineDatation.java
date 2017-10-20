@@ -24,8 +24,6 @@ import org.orekit.time.AbsoluteDate;
  * Instances of this class are guaranteed to be immutable.
  * </p>
  * @author Luc Maisonobe
- * @author Guylaine Prat
-
  */
 public class LinearLineDatation implements LineDatation {
 

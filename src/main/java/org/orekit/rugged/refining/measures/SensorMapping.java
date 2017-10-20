@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,38 +25,40 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for mapping sensor pixels with sensor pixels or ground points.
  * @author Lucie Labat-Allee
+ * @author Guylaine Prat
  * @since 2.0
  */
 public class SensorMapping<T> {
 
+    /** Default name for Rugged. */
+    private static final String RUGGED = "Rugged";
+
     /** Name of the sensor to which mapping applies. */
     private final String sensorName;
 
-    /** Name of the rugged to which mapping applies. */
+    /** Name of the Rugged to which mapping applies. */
     private final String ruggedName;
-
 
     /** Mapping from sensor to other (sensor or ground). */
     private final Map<SensorPixel, T> mapping;
 
 
-    /** Build a new instance.
+    /** Build a new instance (with default Rugged name).
      * @param sensorName name of the sensor to which mapping applies
      */
     public SensorMapping(final String sensorName) {
-        this(sensorName, "Rugged");
+        this(sensorName, RUGGED);
     }
 
-    /** Build a new instance.
+    /** Build a new instance with a specific Rugged name.
      * @param sensorName name of the sensor to which mapping applies
-     * @param ruggedName name of the rugged to which mapping applies
+     * @param ruggedName name of the Rugged to which mapping applies
      */
     public SensorMapping(final String sensorName, final String ruggedName) {
         this.sensorName     = sensorName;
         this.ruggedName     = ruggedName;
         this.mapping = new LinkedHashMap<SensorPixel, T>();
     }
-
 
     /** Get the name of the sensor to which mapping applies.
      * @return name of the sensor to which mapping applies
@@ -65,17 +67,16 @@ public class SensorMapping<T> {
         return sensorName;
     }
 
-    /** Get the name of the rugged to which mapping applies.
-     * @return name of the rugged to which mapping applies
+    /** Get the name of the Rugged to which mapping applies.
+     * @return name of the Rugged to which mapping applies
      */
     public String getRuggedName() {
         return ruggedName;
     }
 
-
     /** Add a mapping between a sensor pixel and another point (sensor pixel or ground point).
      * @param pixel sensor pixel
-     * @param point sensor pixel / ground point corresponding to the sensor pixel
+     * @param point sensor pixel or ground point corresponding to the sensor pixel
      */
     public void addMapping(final SensorPixel pixel, final T point) {
         mapping.put(pixel, point);

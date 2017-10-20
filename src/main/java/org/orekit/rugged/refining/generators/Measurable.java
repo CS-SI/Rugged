@@ -21,14 +21,30 @@ import org.orekit.rugged.refining.measures.Noise;
 
 /** For measures generator.
  * @author Lucie Labat-Allee
+ * @author Guylaine Prat
+ * @since 2.0
  */
-
 public interface Measurable {
-
+	
+    /** Get the number of measures
+     * @return the number of measures
+     * @throws RuggedException
+     */
     int  getMeasureCount() throws RuggedException;
 
+    /** Create measures (without noise)
+     * @param lineSampling line sampling
+     * @param pixelSampling pixel sampling
+     * @throws RuggedException 
+     */
     void createMeasure(int lineSampling, int pixelSampling)  throws RuggedException;
 
+    /** Create noisy measures
+     * @param lineSampling line sampling
+     * @param pixelSampling pixel sampling
+     * @param noise the noise to add to the measures
+     * @throws RuggedException
+     */
     void createNoisyMeasure(int lineSampling, int pixelSampling, Noise noise) throws RuggedException;
 
 }

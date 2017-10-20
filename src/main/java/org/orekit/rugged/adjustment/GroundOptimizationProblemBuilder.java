@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -46,8 +46,11 @@ import org.orekit.rugged.refining.measures.Observables;
 import org.orekit.rugged.refining.measures.SensorToGroundMapping;
 import org.orekit.utils.ParameterDriver;
 
-
-
+/**
+ *  TODO GP description a completer 
+ * @author Guylaine Prat
+ * @since 2.0
+ */
 public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder {
 
     /** Key for target. */
@@ -56,22 +59,23 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     /** Key for weight. */
     private static final String WEIGHT = "Weight";
 
-    /** rugged instance to refine.*/
+    /** Rugged instance to refine.*/
     private final Rugged rugged;
 
-    /** sensorToGround mapping to generate target tab for optimization.*/
+    /** Sensor to ground mapping to generate target tab for optimization.*/
     private List<SensorToGroundMapping> sensorToGroundMappings;
 
-    /** minimum line for inverse location estimation.*/
+    /** Minimum line for inverse location estimation.*/
     private int minLine;
 
-    /** maximum line for inverse location estimation.*/
+    /** Maximum line for inverse location estimation.*/
     private int maxLine;
 
-    /** target and weight (the solution of the optimization problem).*/
+    /** Target and weight (the solution of the optimization problem).*/
     private HashMap<String, double[] > targetAndWeight;
 
-    /**
+    
+    /** TODO GP description a completer 
      * @param sensors list of sensors to refine
      * @param measures set of observables
      * @param rugged name of rugged to refine
@@ -79,7 +83,8 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     public GroundOptimizationProblemBuilder(final List<LineSensor> sensors,
                                             final Observables measures, final Rugged rugged)
-                                                            throws RuggedException {
+        throws RuggedException {
+    	
         super(sensors, measures);
         this.rugged = rugged;
         this.initMapping();
@@ -90,18 +95,23 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     @Override
     protected void initMapping() {
+    	
         final String ruggedName = rugged.getName();
         this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
         for (final LineSensor lineSensor : sensors) {
             final SensorToGroundMapping mapping = this.measures.getGroundMapping(ruggedName, lineSensor.getName());
-            if (mapping != null)
+            if (mapping != null) {
                 this.sensorToGroundMappings.add(mapping);
+            }
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.orekit.rugged.adjustment.OptimizationProblemBuilder#createTargetAndWeight()
+     */
     @Override
-    protected void createTargetAndWeight()
-                    throws RuggedException {
+    protected void createTargetAndWeight() throws RuggedException {
+    	
         try {
             int n = 0;
             for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
@@ -141,9 +151,12 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.orekit.rugged.adjustment.OptimizationProblemBuilder#createFunction()
+     */
     @Override
-    protected MultivariateJacobianFunction createFunction()
-    {
+    protected MultivariateJacobianFunction createFunction() {
+    	
         // model function
         final MultivariateJacobianFunction model = point -> {
             try {
@@ -210,15 +223,16 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
                 throw new OrekitExceptionWrapper(oe);
             }
         };
+        
         return model;
     }
 
 
-    /** leastsquare problem builder.
+    /** Least square problem builder.
      * @param maxEvaluations maxIterations and evaluations
      * @param convergenceThreshold parameter convergence threshold
      * @throws RuggedException if sensor is not found
-     * @return
+     * @return the least square problem
      */
     @Override
     public final LeastSquaresProblem build(final int maxEvaluations, final double convergenceThreshold) throws RuggedException {
@@ -235,5 +249,4 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
                         .target(target).parameterValidator(validator).checker(checker)
                         .model(model).build();
     }
-
 }

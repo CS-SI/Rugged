@@ -24,12 +24,16 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for mapping between sensor pixels and ground points.
+ * @see SensorMapping
  * @author Luc Maisonobe
  * @author Lucie Labat-Allee
- * @see SensorMapping
+ * @author Guylaine Prat
  * @since 2.0
  */
 public class SensorToGroundMapping {
+
+    /** Default name for Rugged. */
+    private static final String RUGGED = "Rugged";
 
     /** Name of the sensor to which mapping applies. */
     private final String sensorName;
@@ -37,21 +41,21 @@ public class SensorToGroundMapping {
     /** Mapping from sensor to ground. */
     private final SensorMapping<GeodeticPoint> groundMapping;
 
-    /** Build a new instance.
-     * @param ruggedName name of the rugged to which mapping applies
+    
+    /** Build a new instance (with default Rugged name).
+     * @param sensorName name of the sensor to which mapping applies
+     */
+    public SensorToGroundMapping(final String sensorName) {
+        this(sensorName, RUGGED);
+    }
+
+    /** Build a new instance with a specific Rugged name.
+     * @param ruggedName name of the Rugged to which mapping applies
      * @param sensorName name of the sensor to which mapping applies
      */
     public SensorToGroundMapping(final String ruggedName, final String sensorName) {
         this.sensorName     = sensorName;
         this.groundMapping = new SensorMapping<GeodeticPoint>(sensorName, ruggedName);
-    }
-
-
-    /** Build a new instance.
-     * @param sensorName name of the sensor to which mapping applies
-     */
-    public SensorToGroundMapping(final String sensorName) {
-        this(sensorName, "Rugged");
     }
 
     /** Get the name of the sensor to which mapping applies.
@@ -61,8 +65,8 @@ public class SensorToGroundMapping {
         return sensorName;
     }
 
-    /** Get the name of the rugged to which mapping applies.
-     * @return name of the rugged to which mapping applies
+    /** Get the name of the Rugged to which mapping applies.
+     * @return name of the Rugged to which mapping applies
      */
     public String getRuggedName() {
         return this.groundMapping.getRuggedName();
@@ -82,5 +86,4 @@ public class SensorToGroundMapping {
     public Set<Map.Entry<SensorPixel, GeodeticPoint>> getMapping() {
         return Collections.unmodifiableSet(groundMapping.getMapping());
     }
-
 }

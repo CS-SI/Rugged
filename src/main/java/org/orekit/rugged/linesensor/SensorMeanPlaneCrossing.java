@@ -343,6 +343,7 @@ public class SensorMeanPlaneCrossing {
         /** Get the derivative of the normalized target direction in spacecraft frame at crossing.
          * @return derivative of the normalized target direction in spacecraft frame at crossing
          * with respect to line number
+         * @since 2.0
          */
         public Vector3D getTargetDirectionDerivative() {
             return targetDirectionDerivative;

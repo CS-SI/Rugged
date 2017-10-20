@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,18 +17,19 @@
 package org.orekit.rugged.adjustment;
 
 
-/** Enumerate for Optimizer used in Least Square optimization.
+/** Enumerate for Optimizer used in Least square optimization.
  * @author Jonathan Guinet
+ * @since 2.0
  */
 public enum OptimizerId {
 
-    /** Levenberg Marquadt.
-     */
+    /** Levenberg Marquadt. */
     LEVENBERG_MARQUADT,
-    /** Gauss Newton with LU decomposition.
-     */
+    
+    /** Gauss Newton with LU decomposition. */
     GAUSS_NEWTON_LU,
-    /** Gauss Newton with QR decomposition.
-     */
+    
+    /** Gauss Newton with QR decomposition. */
     GAUSS_NEWTON_QR
+    
 }

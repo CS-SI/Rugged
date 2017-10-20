@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 package org.orekit.rugged.refining.models;
-
-
 
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
@@ -41,24 +39,24 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.errors.OrekitException;
 
-
 /**
- * PleiadesViewingModel class definition.
- * @author Jonathan Guinet, Lucie LabatAllee
- *
+ * TODO GP add comments for tuto 
+ * Pleiades viewing model class definition.
+ * @author Jonathan Guinet
+ * @author Lucie Labat-Allee
+ * @since 2.0
  */
-
 
 public class PleiadesViewingModel {
 
-
     /** intrinsic Pleiades parameters. */
-    public  double fov = 1.65; // 20km - alt 694km
-    public  int dimension = 40000;
+    public double fov = 1.65; // 20km - alt 694km
+    // Number of line of the sensor
+    public int dimension = 40000;
 
-    public  double angle;
-    public  LineSensor lineSensor;
-    public  String date;
+    public double angle;
+    public LineSensor lineSensor;
+    public String date;
 
     private String sensorName;
 
@@ -71,8 +69,8 @@ public class PleiadesViewingModel {
      *  sensorName="line", incidenceAngle = 0.0, date = "2016-01-01T12:00:00.0"
      * </p>
      */
-    public PleiadesViewingModel(final String sensorName)
-        throws RuggedException, OrekitException {
+    public PleiadesViewingModel(final String sensorName) throws RuggedException, OrekitException {
+    	
         this(sensorName, 0.0, "2016-01-01T12:00:00.0");
     }
 
@@ -85,13 +83,15 @@ public class PleiadesViewingModel {
      */
     public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate)
         throws RuggedException, OrekitException {
+    	
         this.sensorName = sensorName;
         this.date = referenceDate;
         this.angle = incidenceAngle;
         this.createLineSensor();
     }
 
-
+    /** TODO GP add comments
+     */
     public LOSBuilder rawLOS(final Vector3D center, final Vector3D normal, final double halfAperture, final int n) {
 
         final List<Vector3D> list = new ArrayList<Vector3D>(n);
@@ -103,7 +103,10 @@ public class PleiadesViewingModel {
         return new LOSBuilder(list);
     }
 
-    public  TimeDependentLOS buildLOS() {
+    /** TODO GP add comments
+     */
+    public TimeDependentLOS buildLOS() {
+    	
         final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
                                                           FastMath.toRadians(this.angle),
                                                           RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
@@ -112,64 +115,71 @@ public class PleiadesViewingModel {
         losBuilder.addTransform(new FixedRotation(sensorName + "_roll",  Vector3D.MINUS_I, 0.00));
         losBuilder.addTransform(new FixedRotation(sensorName + "_pitch", Vector3D.MINUS_J, 0.00));
 
-        //factor is a common parameters shared between all Pleiades models
+        // factor is a common parameters shared between all Pleiades models
         losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
-        return  losBuilder.build();
+        
+        return losBuilder.build();
     }
 
 
-    public  AbsoluteDate getDatationReference() throws OrekitException {
-        // We use Orekit for handling time and dates, and Rugged for defining the datation model:
-        final TimeScale utc = TimeScalesFactory.getUTC();
-        return new AbsoluteDate(date, utc);
+    /** TODO GP add comments
+     */
+    public AbsoluteDate getDatationReference() throws OrekitException {
+
+    	// We use Orekit for handling time and dates, and Rugged for defining the datation model:
+    	final TimeScale utc = TimeScalesFactory.getUTC();
+
+    	return new AbsoluteDate(date, utc);
     }
 
-    public  AbsoluteDate getMinDate() throws RuggedException {
+    /** TODO GP add comments
+     */
+   public  AbsoluteDate getMinDate() throws RuggedException {
         return lineSensor.getDate(0);
     }
 
-    public  AbsoluteDate  getMaxDate() throws RuggedException {
+   /** TODO GP add comments
+    */
+   public  AbsoluteDate  getMaxDate() throws RuggedException {
         return lineSensor.getDate(dimension);
     }
 
-    public  LineSensor  getLineSensor() {
+   /** TODO GP add comments
+    */
+   public  LineSensor  getLineSensor() {
         return lineSensor;
     }
 
-    public  String getSensorName() {
+   /** TODO GP add comments
+    */
+   public  String getSensorName() {
         return sensorName;
     }
 
-    /**
-     * @return the dimension
-     */
-    public int getDimension() {
+   /** TODO GP add comments
+    */
+   public int getDimension() {
         return dimension;
     }
 
-    private  void  createLineSensor()
-        throws RuggedException, OrekitException {
-
-
+   /** TODO GP add comments
+    */
+   private void createLineSensor() throws RuggedException, OrekitException {
 
         // Offset of the MSI from center of mass of satellite
-        //System.out.println("MSI offset from center of mass of satellite");
         // one line sensor
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
-        //Vector3D msiOffset = new Vector3D(1.5, 0, -0.2);
         final Vector3D msiOffset = new Vector3D(0, 0, 0);
 
-        // to do build complex los
+        // TODO build complex los
         final TimeDependentLOS lineOfSight = buildLOS();
 
         final double rate =  1 / linePeriod;
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
 
         final LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, rate);
-        //LineDatation lineDatation = new LinearLineDatation(absDate, 1d, 20);
+        
         lineSensor = new LineSensor(sensorName, lineDatation, msiOffset, lineOfSight);
-
     }
-
 }
 

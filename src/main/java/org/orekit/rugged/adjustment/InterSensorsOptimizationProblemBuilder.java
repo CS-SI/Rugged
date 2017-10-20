@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -49,10 +49,12 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
-
-
-public class InterSensorsOptimizationProblemBuilder
-extends OptimizationProblemBuilder {
+/** TODO GP description a completer 
+ * @author ???
+ * @author Guylaine Prat
+ * @since 2.0
+ */
+public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemBuilder {
 
     /** Key for target. */
     private static final String TARGET = "Target";
@@ -60,17 +62,16 @@ extends OptimizationProblemBuilder {
     /** Key for weight. */
     private static final String WEIGHT = "Weight";
 
-    /** list of rugged instance to refine.*/
+    /** List of rugged instance to refine.*/
     private Map<String, Rugged> ruggedMap;
 
-    /** sensorToGround mapping to generate target tab for optimization.*/
+    /** Sensor to ground mapping to generate target tab for optimization.*/
     private List<SensorToSensorMapping> sensorToSensorMappings;
 
-
-    /** targets and weights of optimization problem. */
+    /** Targets and weights of optimization problem. */
     private HashMap<String, double[] > targetAndWeight;
 
-    /**
+    /** Constructor
      * @param sensors list of sensors to refine
      * @param measures set of observables
      * @param ruggedList names of rugged to refine
@@ -78,13 +79,11 @@ extends OptimizationProblemBuilder {
      */
     public InterSensorsOptimizationProblemBuilder(final List<LineSensor> sensors,
                                                   final Observables measures, final Collection<Rugged> ruggedList)
-                                                                  throws RuggedException {
+        throws RuggedException {
+    	
         super(sensors, measures);
-
         this.ruggedMap = new LinkedHashMap<String, Rugged>();
-
-        for (final Rugged rugged : ruggedList)
-        {
+        for (final Rugged rugged : ruggedList) {
             this.ruggedMap.put(rugged.getName(), rugged);
         }
         this.initMapping();
@@ -94,93 +93,96 @@ extends OptimizationProblemBuilder {
      * @see org.orekit.rugged.adjustment.OptimizationProblemBuilder#initMapping()
      */
     @Override
-    protected void initMapping()
-    {
-        this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
-        for (final String ruggedNameA : this.ruggedMap.keySet()) {
-            for (final String ruggedNameB : this.ruggedMap.keySet()) {
-                for (final LineSensor sensorA : this.sensors) {
-                    for (final LineSensor sensorB : this.sensors) {
-                        final String sensorNameA = sensorA.getName();
-                        final String sensorNameB = sensorB.getName();
-                        final SensorToSensorMapping mapping = this.measures.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
-                        if (mapping != null)
-                        {
+    protected void initMapping() {
 
-                            this.sensorToSensorMappings.add(mapping);
-                        }
-                    }
-                }
-
-            }
-
-        }
-
+    	this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
+    	
+    	for (final String ruggedNameA : this.ruggedMap.keySet()) {
+    		for (final String ruggedNameB : this.ruggedMap.keySet()) {
+    			
+    			for (final LineSensor sensorA : this.sensors) {
+    				for (final LineSensor sensorB : this.sensors) {
+    					
+    					final String sensorNameA = sensorA.getName();
+    					final String sensorNameB = sensorB.getName();
+    					final SensorToSensorMapping mapping = this.measures.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
+    					
+    					if (mapping != null) {
+    						this.sensorToSensorMappings.add(mapping);
+    					}
+    				}
+    			}
+    		}
+    	}
     }
 
+    /* (non-Javadoc)
+     * @see org.orekit.rugged.adjustment.OptimizationProblemBuilder#createTargetAndWeight()
+     */
     @Override
-    protected void createTargetAndWeight()
-                    throws RuggedException {
-        try {
-            int n = 0;
-            for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
-                n += reference.getMapping().size();
-            }
+    protected void createTargetAndWeight() throws RuggedException {
 
-            if (n == 0) {
-                throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
-            }
+    	try {
+    		int n = 0;
+    		for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
+    			n += reference.getMapping().size();
+    		}
+    		if (n == 0) {
+    			throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
+    		}
 
-            n = 2 * n;
+    		n = 2 * n;
 
-            final double[] target = new double[n];
-            final double[] weight = new double[n];
+    		final double[] target = new double[n];
+    		final double[] weight = new double[n];
 
-            int k = 0;
+    		int k = 0;
+    		for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
 
-            for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
+    			// Get Earth constraint weight
+    			final double earthConstraintWeight = reference.getEarthConstraintWeight();
+    			
+    			int i = 0;
+    			for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
+    				
+    				if (i == reference.getMapping().size()) break;
 
-                // Get Earth constraint weight
-                final double earthConstraintWeight = reference.getEarthConstraintWeight();
-                int i = 0;
-                for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
-                    if (i == reference.getMapping().size()) break;
+    				// Get LOS distance
+    				final Double losDistance  = reference.getLosDistance(i);
 
-                    // Get LOS distance
-                    final Double losDistance  = reference.getLosDistance(i);
+    				weight[k] = 1.0 - earthConstraintWeight;
+    				target[k++] = losDistance.doubleValue();
 
-                    weight[k] = 1.0 - earthConstraintWeight;
-                    target[k++] = losDistance.doubleValue();
+    				// Get Earth distance (constraint)
+    				final Double earthDistance  = reference.getEarthDistance(i);
+    				weight[k] = earthConstraintWeight;
+    				target[k++] = earthDistance.doubleValue();
+    			}
+    		}
 
-                    // Get Earth distance (constraint)
-                    final Double earthDistance  = reference.getEarthDistance(i);
-                    weight[k] = earthConstraintWeight;
-                    target[k++] = earthDistance.doubleValue();
-                }
-            }
+    		this.targetAndWeight = new HashMap<String, double[]>();
+    		this.targetAndWeight.put(TARGET, target);
+    		this.targetAndWeight.put(WEIGHT, weight);
 
-            this.targetAndWeight = new HashMap<String, double[]>();
-            this.targetAndWeight.put(TARGET, target);
-            this.targetAndWeight.put(WEIGHT, weight);
-
-        } catch  (RuggedExceptionWrapper rew) {
-            throw rew.getException();
-        }
+    	} catch  (RuggedExceptionWrapper rew) {
+    		throw rew.getException();
+    	}
     }
 
+    /* (non-Javadoc)
+     * @see org.orekit.rugged.adjustment.OptimizationProblemBuilder#createFunction()
+     */
     @Override
-    protected MultivariateJacobianFunction createFunction()
-    {
+    protected MultivariateJacobianFunction createFunction() {
+    	
         // model function
         final MultivariateJacobianFunction model = point -> {
 
-            try {
-
+        	try {
                 // set the current parameters values
                 int i = 0;
                 for (final ParameterDriver driver : this.drivers) {
                     driver.setNormalizedValue(point.getEntry(i++));
-
                 }
 
                 final double[] target = this.targetAndWeight.get(TARGET);
@@ -192,19 +194,17 @@ extends OptimizationProblemBuilder {
                 int l = 0;
                 for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
 
-
                     final String ruggedNameA = reference.getRuggedNameA();
                     final String ruggedNameB = reference.getRuggedNameB();
                     final Rugged ruggedA = this.ruggedMap.get(ruggedNameA);
-
                     if (ruggedA == null) {
                         throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
                     }
+                    
                     final Rugged ruggedB = this.ruggedMap.get(ruggedNameB);
                     if (ruggedB == null) {
                         throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
                     }
-
 
                     for (final Map.Entry<SensorPixel, SensorPixel> mapping : reference.getMapping()) {
 
@@ -222,19 +222,13 @@ extends OptimizationProblemBuilder {
 
                         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
-                        final DerivativeStructure[] ilResult = ruggedB.distanceBetweenLOSDerivatives(lineSensorA,
-                                                                                                     dateA,
-                                                                                                     pixelA,
-                                                                                                     scToBodyA,
-                                                                                                     lineSensorB,
-                                                                                                     dateB,
-                                                                                                     pixelB,
-                                                                                                     generator);
+                        final DerivativeStructure[] ilResult = 
+                        		ruggedB.distanceBetweenLOSDerivatives(lineSensorA, dateA, pixelA, scToBodyA, 
+                        				                              lineSensorB, dateB, pixelB, generator);
 
                         if (ilResult == null) {
-                            // TODO
+                            // TODO GP manque code
                         } else {
-
                             // extract the value
                             value.setEntry(l, ilResult[0].getValue());
                             value.setEntry(l + 1, ilResult[1].getValue());
@@ -271,11 +265,11 @@ extends OptimizationProblemBuilder {
     }
 
 
-    /** leastsquare problem builder.
+    /** Least square problem builder.
      * @param maxEvaluations maxIterations and evaluations
      * @param convergenceThreshold parameter convergence threshold
      * @throws RuggedException if sensor is not found
-     * @return
+     * @return the least square problem
      */
     @Override
     public final LeastSquaresProblem build(final int maxEvaluations, final double convergenceThreshold) throws RuggedException {
@@ -292,5 +286,4 @@ extends OptimizationProblemBuilder {
                         .target(target).parameterValidator(validator).checker(checker)
                         .model(model).build();
     }
-
 }

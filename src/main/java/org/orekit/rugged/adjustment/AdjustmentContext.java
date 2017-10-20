@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -35,29 +35,32 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.refining.measures.Observables;
 import org.orekit.utils.ParameterDriver;
 
-/**  Create adjustment context for viewing model refining refining.
- *
- *
+/** Create adjustment context for viewing model refining.
  * @author Lucie LabatAllee
  * @author Jonathan Guinet
+ * @author Luc Maisonobe
+ * @author Guylaine Prat
+ * @since 2.0
  */
 public class AdjustmentContext {
 
     /** List of Rugged instances to optimize. */
     private final Map<String, Rugged> viewingModel;
 
-    /** set of measures. */
+    /** Set of measures. */
     private final Observables measures;
 
-    /** least square optimizer choice.*/
+    /** Least square optimizer choice.*/
     private OptimizerId optimizerID;
 
 
     /** Build a new instance.
-     * @param viewingModel viewingModel
+     * The default optimizer is Gauss Newton with QR decomposition.
+     * @param viewingModel viewing model
      * @param measures control and tie points
      */
     public AdjustmentContext(final Collection<Rugged> viewingModel, final Observables measures) {
+    	
         this.viewingModel = new HashMap<String, Rugged>();
         for (final Rugged r : viewingModel) {
             this.viewingModel.put(r.getName(), r);
@@ -66,9 +69,8 @@ public class AdjustmentContext {
         this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;
     }
 
-
-    /** setter for optimizer algorithm.
-     * @param optimizerId the algorithm
+    /** Setter for optimizer algorithm.
+     * @param optimizerId the chosen algorithm
      */
     public void setOptimizer(final OptimizerId optimizerId)
     {
@@ -115,16 +117,16 @@ public class AdjustmentContext {
      * @param ruggedNameList list of rugged to refine
      * @param maxEvaluations maximum number of evaluations
      * @param parametersConvergenceThreshold convergence threshold on normalized
-     *        parameters (dimensionless, related to parameters scales)
-     *
+     *                                       parameters (dimensionless, related to parameters scales)
      * @return optimum of the least squares problem
      * @exception RuggedException if several parameters with the same name
      *            exist, if no parameters have been selected for estimation, or
      *            if parameters cannot be estimated (too few measurements,
      *            ill-conditioned problem ...)
      */
-    public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations, final double parametersConvergenceThreshold)
-                    throws RuggedException {
+    public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations, 
+    		                              final double parametersConvergenceThreshold)
+        throws RuggedException {
         try {
 
             final List<Rugged> ruggedList = new ArrayList<Rugged>();
@@ -141,7 +143,8 @@ public class AdjustmentContext {
 
             final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(this.optimizerID);
             LeastSquaresProblem theProblem = null;
-            /** builder */
+            
+            // builder
             switch (ruggedList.size()) {
             case 1:
                 final Rugged rugged = ruggedList.get(0);
@@ -165,5 +168,4 @@ public class AdjustmentContext {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
     }
-
 }

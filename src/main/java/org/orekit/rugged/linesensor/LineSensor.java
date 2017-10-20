@@ -104,6 +104,7 @@ public class LineSensor {
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @return pixel normalized line-of-sight
      * @exception RuggedException if date cannot be handled
+     * @since 2.0
      */
     public Vector3D getLOS(final AbsoluteDate date, final double i)
         throws RuggedException {
@@ -121,6 +122,7 @@ public class LineSensor {
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return pixel normalized line-of-sight
+     * @since 2.0
      */
     public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final int i,
                                                                 final DSGenerator generator) {
@@ -133,6 +135,7 @@ public class LineSensor {
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return pixel normalized line-of-sight
+     * @since 2.0
      */
     public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final double i,
                                                                 final DSGenerator generator) {

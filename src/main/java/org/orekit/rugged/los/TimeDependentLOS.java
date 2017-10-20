@@ -60,6 +60,7 @@ public interface TimeDependentLOS {
      * @param date date
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return line of sight, and its first partial derivatives with respect to the parameters
+     * @since 2.0
      */
     FieldVector3D<DerivativeStructure> getLOSDerivatives(int index, AbsoluteDate date,
                                                          DSGenerator generator);
