@@ -25,8 +25,8 @@ EMPTY_TILE = la tuile est vide : {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = capteur {0} inconnu
 
-#unknown pixel in mapping {0}
-UNKNOWN_PIXEL = <MISSING TRANSLATION>
+# unknown pixel in mapping {0}
+UNKNOWN_PIXEL = pixel inconnu dans le mapping {0}
 
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = la ligne de visée n''atteint pas le sol
@@ -86,10 +86,10 @@ NO_REFERENCE_MAPPINGS = aucune projection de référence pour l''estimation des 
 DUPLICATED_PARAMETER_NAME = il existe déjà un autre paramètre nommé {0}
 
 # rugged name is not found 
-INVALID_RUGGED_NAME = <MISSING TRANSLATION>
+INVALID_RUGGED_NAME = nom invalide pour Rugged
 
 # refining context is only handled for limited number of configurations
-UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+UNSUPPORTED_REFINING_CONTEXT = le refining utilisant {0} rugged instances n''est pas traité
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = pas de couche atmosphérique définie pour l''altitude {0} (altitude la plus basse : {1})
