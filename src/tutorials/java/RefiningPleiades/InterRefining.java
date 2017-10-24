@@ -354,12 +354,18 @@ public class InterRefining extends Refining {
      */
     private double computeDistance(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
 
+ 
+    	// Get number of line of sensors
+    	int dimensionA = pleiadesViewingModelA.getDimension();
+    	int dimensionB = pleiadesViewingModelB.getDimension();
+    	
+
     	Vector3D positionA = lineSensorA.getPosition(); 
     	// This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
 
     	
-        AbsoluteDate lineDateA = lineSensorA.getDate(pleiadesViewingModelA.dimension/2);
-        Vector3D losA = lineSensorA.getLOS(lineDateA,pleiadesViewingModelA.dimension/2);
+        AbsoluteDate lineDateA = lineSensorA.getDate(dimensionA/2);
+        Vector3D losA = lineSensorA.getLOS(lineDateA,dimensionA/2);
         GeodeticPoint centerPointA = ruggedA.directLocation(lineDateA, positionA, losA);
         System.out.format(Locale.US, "\ncenter geodetic position A : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                           FastMath.toDegrees(centerPointA.getLatitude()),
@@ -369,8 +375,8 @@ public class InterRefining extends Refining {
         Vector3D positionB = lineSensorB.getPosition(); 
         // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
 
-        AbsoluteDate lineDateB = lineSensorB.getDate(pleiadesViewingModelB.dimension/2);
-        Vector3D losB = lineSensorB.getLOS(lineDateB,pleiadesViewingModelB.dimension/2);
+        AbsoluteDate lineDateB = lineSensorB.getDate(dimensionB/2);
+        Vector3D losB = lineSensorB.getLOS(lineDateB,dimensionB/2);
         GeodeticPoint centerPointB = ruggedB.directLocation(lineDateB, positionB, losB);
         System.out.format(Locale.US, "center geodetic position B : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                           FastMath.toDegrees(centerPointB.getLatitude()),
@@ -384,8 +390,8 @@ public class InterRefining extends Refining {
                           FastMath.toDegrees(firstPointB.getLatitude()),
                           FastMath.toDegrees(firstPointB.getLongitude()),firstPointB.getAltitude());
 
-        lineDateB = lineSensorB.getDate(pleiadesViewingModelB.dimension-1);
-        losB = lineSensorB.getLOS(lineDateB,pleiadesViewingModelB.dimension-1);
+        lineDateB = lineSensorB.getDate(dimensionB-1);
+        losB = lineSensorB.getLOS(lineDateB,dimensionB-1);
         GeodeticPoint lastPointB = ruggedB.directLocation(lineDateB, positionB, losB);
         System.out.format(Locale.US, "last geodetic position  B : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                           FastMath.toDegrees(lastPointB.getLatitude()),
@@ -407,8 +413,7 @@ public class InterRefining extends Refining {
     /**
      * @param pleiadesViewingModelA the pleiadesViewingModelA to set
      */
-    public void
-    setPleiadesViewingModelA(PleiadesViewingModel pleiadesViewingModelA) {
+    public void setPleiadesViewingModelA(final PleiadesViewingModel pleiadesViewingModelA) {
         this.pleiadesViewingModelA = pleiadesViewingModelA;
     }
 
@@ -422,8 +427,7 @@ public class InterRefining extends Refining {
     /**
      * @param pleiadesViewingModelB the pleiadesViewingModelB to set
      */
-    public void
-    setPleiadesViewingModelB(PleiadesViewingModel pleiadesViewingModelB) {
+    public void setPleiadesViewingModelB(final PleiadesViewingModel pleiadesViewingModelB) {
         this.pleiadesViewingModelB = pleiadesViewingModelB;
     }
 
@@ -437,7 +441,7 @@ public class InterRefining extends Refining {
     /**
      * @param orbitmodelA the orbitmodelA to set
      */
-    public void setOrbitmodelA(OrbitModel orbitmodelA) {
+    public void setOrbitmodelA(final OrbitModel orbitmodelA) {
         this.orbitmodelA = orbitmodelA;
     }
 
@@ -451,7 +455,7 @@ public class InterRefining extends Refining {
     /**
      * @param orbitmodelB the orbitmodelB to set
      */
-    public void setOrbitmodelB(OrbitModel orbitmodelB) {
+    public void setOrbitmodelB(final OrbitModel orbitmodelB) {
         this.orbitmodelB = orbitmodelB;
     }
 
@@ -479,7 +483,7 @@ public class InterRefining extends Refining {
     /**
      * @param ruggedA the ruggedA to set
      */
-    public void setRuggedA(Rugged ruggedA) {
+    public void setRuggedA(final Rugged ruggedA) {
         this.ruggedA = ruggedA;
     }
 
@@ -501,14 +505,14 @@ public class InterRefining extends Refining {
     /**
      * @param ruggedB the ruggedB to set
      */
-    public void setRuggedB(Rugged ruggedB) {
+    public void setRuggedB(final Rugged ruggedB) {
         this.ruggedB = ruggedB;
     }
 
     /**
      * @param measures the measures to set
      */
-    public void setMeasures(InterMeasureGenerator measures) {
+    public void setMeasures(final InterMeasureGenerator measures) {
         this.measures = measures;
     }
 }

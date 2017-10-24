@@ -209,10 +209,8 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
                         }
 
                         l += 2;
-
                     }
                 }
-
 
                 // inverse loc result with Jacobian for all reference points
                 return new Pair<RealVector, RealMatrix>(value, jacobian);

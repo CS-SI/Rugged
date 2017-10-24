@@ -64,8 +64,8 @@ public class Refining {
      * @param factorValue scale factor
      * @throws RuggedException
      */
-    public void applyDisruptions(Rugged rugged, String sensorName,
-                                 double rollValue, double pitchValue, double factorValue)
+    public void applyDisruptions(final Rugged rugged, final String sensorName,
+    		                     final double rollValue, final double pitchValue, final double factorValue)
         throws OrekitException, RuggedException {
 
         final String commonFactorName = "factor";
@@ -98,9 +98,9 @@ public class Refining {
      * @return ground measures generator (sensor to ground mapping)
      * @throws RuggedException
      */
-    public GroundMeasureGenerator generatePoints(int lineSampling, int pixelSampling,
-                                                 Rugged rugged, String sensorName,
-                                                 int dimension) throws RuggedException {
+    public GroundMeasureGenerator generatePoints(final int lineSampling, final int pixelSampling,
+    		                                     final Rugged rugged, final String sensorName,
+                                                 final int dimension) throws RuggedException {
 
         GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
 
@@ -126,9 +126,10 @@ public class Refining {
      * @return inter measures generator (sensor to sensor mapping)
      * @throws RuggedException
      */
-    public InterMeasureGenerator generatePoints(int lineSampling, int pixelSampling,
-                                                Rugged ruggedA, String sensorNameA, int dimensionA,
-                                                Rugged ruggedB, String sensorNameB, int dimensionB) throws RuggedException {
+    public InterMeasureGenerator generatePoints(final int lineSampling, final int pixelSampling,
+    		                                    final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+    		                                    final Rugged ruggedB, final String sensorNameB, final int dimensionB) 
+        throws RuggedException {
 
     	// Outliers control
     	final double outlierValue = 1e+2;
@@ -161,9 +162,9 @@ public class Refining {
      * @return ground measures generator (sensor to ground mapping)
      * @throws RuggedException
      */
-    public GroundMeasureGenerator generateNoisyPoints(int lineSampling, int pixelSampling,
-                                                      Rugged rugged, String sensorName, int dimension,
-                                                      Noise noise) throws RuggedException {
+    public GroundMeasureGenerator generateNoisyPoints(final int lineSampling, final int pixelSampling,
+    		                                          final Rugged rugged, final String sensorName, final int dimension,
+    		                                          final Noise noise) throws RuggedException {
 
         // Generate ground measures
     	GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
@@ -191,10 +192,10 @@ public class Refining {
      * @return inter-measures generator (sensor to sensor mapping)
      * @throws RuggedException
      */
-    public InterMeasureGenerator generateNoisyPoints(int lineSampling, int pixelSampling,
-                                                     Rugged ruggedA, String sensorNameA, int dimensionA,
-                                                     Rugged ruggedB, String sensorNameB, int dimensionB,
-                                                     Noise noise) throws RuggedException {
+    public InterMeasureGenerator generateNoisyPoints(final int lineSampling, final int pixelSampling,
+    		                                         final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+                                                     final Rugged ruggedB, final String sensorNameB, final int dimensionB,
+                                                     final Noise noise) throws RuggedException {
 
     	// Outliers control
     	final double outlierValue = 1.e+2;    
@@ -224,8 +225,8 @@ public class Refining {
      * @param unit flag to know if distance is computed in meters (false) or with angular (true)
      * @throws RuggedException
      */
-    public void computeMetrics(SensorToGroundMapping groundMapping,
-                               Rugged rugged, boolean unit) throws RuggedException {
+    public void computeMetrics(final SensorToGroundMapping groundMapping,
+    		                   final Rugged rugged, final boolean unit) throws RuggedException {
 
         String stUnit = null;
         if(unit) {
@@ -246,9 +247,9 @@ public class Refining {
      * @param unit flag to know if distance is computed in meters (false) or with angular (true)
      * @throws RuggedException
      */
-    public void computeMetrics(SensorToSensorMapping interMapping,
-                               Rugged ruggedA, Rugged ruggedB,
-                               boolean unit) throws RuggedException {
+    public void computeMetrics(final SensorToSensorMapping interMapping,
+    		                   final Rugged ruggedA, final Rugged ruggedB,
+                               final boolean unit) throws RuggedException {
 
         String stUnit = null;
         if(unit) stUnit="degrees";
@@ -266,7 +267,7 @@ public class Refining {
      * @param isSelected flag to known if factor parameter is selected or not
      * @throws RuggedException
      */
-    public void resetModel(Rugged rugged, String sensorName, boolean isSelected) throws RuggedException {
+    public void resetModel(final Rugged rugged, final String sensorName, final boolean isSelected) throws RuggedException {
 
         final String commonFactorName = "factor";
 
@@ -307,8 +308,8 @@ public class Refining {
      * @param rugged Rugged instance
      * @throws RuggedException
      */
-    public void optimization(int maxIterations, double convergenceThreshold,
-                             Observables measures, Rugged rugged) throws RuggedException {
+    public void optimization(final int maxIterations, final double convergenceThreshold,
+    		                 final Observables measures, final Rugged rugged) throws RuggedException {
 
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
 
@@ -328,9 +329,9 @@ public class Refining {
      * @param ruggeds Rugged instances A and B
      * @throws RuggedException
      */
-    public void optimization(int maxIterations, double convergenceThreshold,
-                             Observables measures,
-                             Collection<Rugged> ruggeds) throws RuggedException {
+    public void optimization(final int maxIterations, final double convergenceThreshold,
+    		                 final Observables measures,
+    		                 final Collection<Rugged> ruggeds) throws RuggedException {
 
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
         
@@ -361,8 +362,8 @@ public class Refining {
      * @param factorValue scale factor
      * @throws RuggedException
      */
-    public void paramsEstimation(Rugged rugged, String sensorName,
-                                 double rollValue, double pitchValue, double factorValue)
+    public void paramsEstimation(final Rugged rugged, final String sensorName,
+    		                     final double rollValue, final double pitchValue, final double factorValue)
         throws RuggedException {
 
     	final String commonFactorName = "factor";

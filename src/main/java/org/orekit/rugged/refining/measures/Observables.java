@@ -49,6 +49,7 @@ public class Observables {
      * @param nbModels number of viewing models to map
      */
     public Observables(final int nbModels) {
+    	
         this.groundMappings = new LinkedHashMap<String, SensorToGroundMapping>();
         this.interMappings = new LinkedHashMap<String, SensorToSensorMapping>();
         this.nbModels = nbModels;
@@ -58,6 +59,7 @@ public class Observables {
      * @param interMapping sensor to sensor mapping
      */
     public void addInterMapping(final SensorToSensorMapping interMapping) {
+    	
         interMappings.put(this.createKey(interMapping), interMapping);
     }
 
@@ -66,6 +68,7 @@ public class Observables {
      * @param groundMapping sensor to ground mapping
      */
     public void addGroundMapping(final SensorToGroundMapping groundMapping) {
+    	
         groundMappings.put(this.createKey(groundMapping), groundMapping);
     }
 
@@ -83,6 +86,7 @@ public class Observables {
      * @return selected ground mapping or null if sensor is not found
      */
     public SensorToGroundMapping getGroundMapping(final String ruggedName, final String sensorName) {
+    	
         final SensorToGroundMapping mapping = this.groundMappings.get(ruggedName + RUGGED_SENSOR_SEPARATOR + sensorName);
         return mapping;
     }

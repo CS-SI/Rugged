@@ -127,6 +127,7 @@ public class AdjustmentContext {
     public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations, 
     		                              final double parametersConvergenceThreshold)
         throws RuggedException {
+    	
         try {
 
             final List<Rugged> ruggedList = new ArrayList<Rugged>();

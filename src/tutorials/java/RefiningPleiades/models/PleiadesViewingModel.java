@@ -50,13 +50,14 @@ import org.orekit.errors.OrekitException;
 public class PleiadesViewingModel {
 
     /** intrinsic Pleiades parameters. */
-    public double fov = 1.65; // 20km - alt 694km
+    private double fov = 1.65; // 20km - alt 694km
+    
     // Number of line of the sensor
-    public int dimension = 40000;
+    private int dimension = 40000;
 
-    public double angle;
-    public LineSensor lineSensor;
-    public String date;
+    private double angle;
+    private LineSensor lineSensor;
+    private String date;
 
     private String sensorName;
 
@@ -156,9 +157,10 @@ public class PleiadesViewingModel {
         return sensorName;
     }
 
-   /** TODO GP add comments
+   /** Get the number of lines of the sensor
+    * @return the number of lines of the sensor
     */
-   public int getDimension() {
+public int getDimension() {
         return dimension;
     }
 

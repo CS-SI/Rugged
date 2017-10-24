@@ -251,6 +251,9 @@ public class GroundRefining extends Refining {
      */
     private double[] computeGSD(final LineSensor lineSensor) throws RuggedException {
 
+    	// Get number of line
+    	int dimension = pleiadesViewingModel.getDimension();
+    	
         // Get position
         Vector3D position = lineSensor.getPosition(); // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
 
@@ -258,26 +261,26 @@ public class GroundRefining extends Refining {
         AbsoluteDate firstLineDate = lineSensor.getDate(0);
         Vector3D los = lineSensor.getLOS(firstLineDate,0);
         GeodeticPoint upLeftPoint = rugged.directLocation(firstLineDate, position, los);
-        los = lineSensor.getLOS(firstLineDate,pleiadesViewingModel.dimension-1);
+        los = lineSensor.getLOS(firstLineDate,dimension-1);
 
         // Get center geodetic point
-        AbsoluteDate lineDate = lineSensor.getDate(pleiadesViewingModel.dimension/2);
-        los = lineSensor.getLOS(lineDate,pleiadesViewingModel.dimension/2);
+        AbsoluteDate lineDate = lineSensor.getDate(dimension/2);
+        los = lineSensor.getLOS(lineDate,dimension/2);
 
         // Get upper right geodetic point
-        int pixelPosition = pleiadesViewingModel.dimension-1;
+        int pixelPosition = dimension-1;
         los = lineSensor.getLOS(firstLineDate,pixelPosition);
         GeodeticPoint upperRight = rugged.directLocation(firstLineDate, position, los);
 
         // Get lower left geodetic point
-        AbsoluteDate lineDate_y = lineSensor.getDate(pleiadesViewingModel.dimension-1);
+        AbsoluteDate lineDate_y = lineSensor.getDate(dimension-1);
         los = lineSensor.getLOS(lineDate_y,0);
         GeodeticPoint lowerLeft = rugged.directLocation(lineDate_y, position, los);
 
         double gsdX = DistanceTools.computeDistanceInMeter(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),
-        		                    upperRight.getLongitude() , upperRight.getLatitude())/pleiadesViewingModel.dimension;
+        		                    upperRight.getLongitude() , upperRight.getLatitude())/dimension;
         double gsdY = DistanceTools.computeDistanceInMeter(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),
-        		                    lowerLeft.getLongitude() , lowerLeft.getLatitude())/pleiadesViewingModel.dimension;
+        		                    lowerLeft.getLongitude() , lowerLeft.getLatitude())/dimension;
 
         double [] gsd = {gsdX, gsdY};
         return gsd;
@@ -295,7 +298,7 @@ public class GroundRefining extends Refining {
      * Set the Pleiades viewing model
      * @param pleiadesViewingModel Pleiades viewing model to set
      */
-    public void setPleiadesViewingModel(PleiadesViewingModel pleiadesViewingModel) {
+    public void setPleiadesViewingModel(final PleiadesViewingModel pleiadesViewingModel) {
         this.pleiadesViewingModel = pleiadesViewingModel;
     }
 
@@ -311,7 +314,7 @@ public class GroundRefining extends Refining {
      * Set the orbit model
      * @param orbitmodel the orbit model to set
      */
-    public void setOrbitmodel(OrbitModel orbitmodel) {
+    public void setOrbitmodel(final OrbitModel orbitmodel) {
         this.orbitmodel = orbitmodel;
     }
 
@@ -335,7 +338,7 @@ public class GroundRefining extends Refining {
      * Set the Rugged instance
      * @param rugged the Rugged instance to set
      */
-    public void setRugged(Rugged rugged) {
+    public void setRugged(final Rugged rugged) {
         this.rugged = rugged;
     }
 
@@ -343,7 +346,7 @@ public class GroundRefining extends Refining {
      * Set the measures
      * @param measures the measures to set
      */
-    public void setMeasures(GroundMeasureGenerator measures) {
+    public void setMeasures(final GroundMeasureGenerator measures) {
         this.measures = measures;
     }
 }
