@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 CS Systèmes d'Information
+/* Copyright 2013-2017 Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -36,40 +36,36 @@ import org.orekit.rugged.refining.measures.SensorToGroundMapping;
 import org.orekit.rugged.refining.measures.SensorToSensorMapping;
 import org.orekit.rugged.refining.metrics.LocalisationMetrics;
 
-
-
 /**
- * Class for refining
+ * Class for refining problems common methods
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
+ * @author Guylaine Prat
  * @see SensorToGroundMapping
  * @see SensorToSensorMapping
  * @see GroundMeasureGenerator
  * @see InterMeasureGenerator
+ * @since 2.0
  */
 public class Refining {
-
 
     /**
      * Constructor
      */
-    public Refining() throws RuggedException, OrekitException {
-
+    public Refining() throws RuggedException {
     }
 
-
-    /** Apply disruptions on acquisition
+    /** Apply disruptions on acquisition for roll, pitch and scale factor
      * @param rugged Rugged instance
      * @param sensorName line sensor name
-     * @param  rollValue rotation on roll value
-     * @param  pitchValue rotation on pitch value
-     * @param  factorValue scale factor
-     * @throws OrekitException
+     * @param rollValue rotation on roll value
+     * @param pitchValue rotation on pitch value
+     * @param factorValue scale factor
      * @throws RuggedException
      */
     public void applyDisruptions(Rugged rugged, String sensorName,
                                  double rollValue, double pitchValue, double factorValue)
-                                                 throws OrekitException, RuggedException {
+        throws OrekitException, RuggedException {
 
         final String commonFactorName = "factor";
 
@@ -92,24 +88,22 @@ public class Refining {
         findFirst().get().setValue(factorValue);
     }
 
-
-    /** Generate measurements without noise
+    /** Generate measurements without noise (sensor to ground mapping)
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
      * @param rugged Rugged instance
      * @param sensorName line sensor name
-     * @param dimension dimension
-     * @throws OrekitException
-     * @throws RuggedException
+     * @param dimension number of line of the sensor
      * @return ground measures generator (sensor to ground mapping)
+     * @throws RuggedException
      */
     public GroundMeasureGenerator generatePoints(int lineSampling, int pixelSampling,
                                                  Rugged rugged, String sensorName,
-                                                 int dimension) throws OrekitException, RuggedException {
+                                                 int dimension) throws RuggedException {
 
         GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
 
-        System.out.format("\n**** Generate measures (without noise) **** %n");
+        System.out.format("\n**** Generate measures (without noise; sensor to ground mapping) **** %n");
 
         // Generation measures without noise
         measures.createMeasure(lineSampling, pixelSampling);
@@ -119,8 +113,7 @@ public class Refining {
         return measures;
     }
 
-
-    /** Generate measurements without noise
+    /** Generate measurements without noise (sensor to sensor mapping)
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
      * @param ruggedA Rugged instance of acquisition A
@@ -129,24 +122,25 @@ public class Refining {
      * @param ruggedB Rugged instance of acquisition B
      * @param sensorNameB line sensor name B
      * @param dimensionB dimension for acquisition B
-     * @throws OrekitException
-     * @throws RuggedException
      * @return inter measures generator (sensor to sensor mapping)
+     * @throws RuggedException
      */
     public InterMeasureGenerator generatePoints(int lineSampling, int pixelSampling,
                                                 Rugged ruggedA, String sensorNameA, int dimensionA,
-                                                Rugged ruggedB, String sensorNameB, int dimensionB) throws OrekitException, RuggedException {
+                                                Rugged ruggedB, String sensorNameB, int dimensionB) throws RuggedException {
 
-        final double outlierValue = 1e+2;           // outliers control
-        final double earthConstraintWeight = 0.1;   // earth constraint weight
+    	// Outliers control
+    	final double outlierValue = 1e+2;
+    	// Earth constraint weight
+    	final double earthConstraintWeight = 0.1;
 
-        /* Generate measures with constraints on Earth distance and outliers control */
+        // Generate measures with constraints on outliers control and Earth distance
         InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
                                                                    ruggedB, sensorNameB, dimensionB,
                                                                    outlierValue,
                                                                    earthConstraintWeight);
 
-        System.out.format("\n**** Generate measures (without noise) **** %n");
+        System.out.format("\n**** Generate measures (without noise; sensor to sensor mapping) **** %n");
 
         // Generation measures without noise
         measures.createMeasure(lineSampling, pixelSampling);
@@ -156,27 +150,26 @@ public class Refining {
         return measures;
     }
 
-
-    /** Generate noisy measurements
+    /** Generate noisy measurements (sensor to ground mapping)
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
      * @param rugged Rugged instance
      * @param sensorName line sensor name
      * @param dimension dimension
      * @param noise Noise structure to generate noisy measures
-     * @throws OrekitException
-     * @throws RuggedException
      * @return ground measures generator (sensor to ground mapping)
+     * @throws RuggedException
      */
     public GroundMeasureGenerator generateNoisyPoints(int lineSampling, int pixelSampling,
                                                       Rugged rugged, String sensorName, int dimension,
-                                                      Noise noise) throws OrekitException, RuggedException {
+                                                      Noise noise) throws RuggedException {
 
-        GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
+        // Generate ground measures
+    	GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
 
-        System.out.format("\n**** Generate noisy measures **** %n");
+        System.out.format("\n**** Generate noisy measures (sensor to ground mapping) **** %n");
 
-        // Generation noisy measures
+        // Generate noisy measures
         measures.createNoisyMeasure(lineSampling, pixelSampling, noise);
 
         System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
@@ -184,8 +177,7 @@ public class Refining {
         return measures;
     }
 
-
-    /** Generate noisy measurements
+    /** Generate noisy measurements (sensor to sensor mapping)
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
      * @param ruggedA Rugged instance of acquisition A
@@ -194,25 +186,27 @@ public class Refining {
      * @param ruggedB Rugged instance of acquisition B
      * @param sensorNameB line sensor name B
      * @param dimensionB dimension for acquisition B
-     * @param noise Noise structure to generate noisy measures
-     * @throws OrekitException
+     * @param noise noise structure to generate noisy measures
+     * @return inter-measures generator (sensor to sensor mapping)
      * @throws RuggedException
-     * @return inter measures generator (sensor to sensor mapping)
      */
     public InterMeasureGenerator generateNoisyPoints(int lineSampling, int pixelSampling,
                                                      Rugged ruggedA, String sensorNameA, int dimensionA,
                                                      Rugged ruggedB, String sensorNameB, int dimensionB,
-                                                     Noise noise) throws OrekitException, RuggedException {
+                                                     Noise noise) throws RuggedException {
 
-        final double outlierValue = 1e+2;           // outliers control
-        final double earthConstraintWeight = 0.1;   // earth constraint weight
+    	// Outliers control
+    	final double outlierValue = 1.e+2;    
+    	
+        // Earth constraint weight
+        final double earthConstraintWeight = 0.1;  
 
-        /* Generate measures with constraints on Earth distance and outliers control */
+        // Generate measures with constraints on Earth distance and outliers control
         InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
                                                                    ruggedB, sensorNameB, dimensionB,
                                                                    outlierValue,
                                                                    earthConstraintWeight);
-        System.out.format("\n**** Generate noisy measures **** %n");
+        System.out.format("\n**** Generate noisy measures (sensor to sensor mapping) **** %n");
 
         // Generation noisy measures
         measures.createNoisyMeasure(lineSampling, pixelSampling, noise);
@@ -221,35 +215,34 @@ public class Refining {
 
         return measures;
     }
-
 
     /** Compute metrics to evaluate geometric performances in location,
      * for fulcrum points study.
      * @param groundMapping sensor to ground mapping
      * @param rugged Rugged instance
-     * @param unit flag to known distance's unit
-     * @throws OrekitException
+     * @param unit flag to know if distance is computed in meters (false) or with angular (true)
      * @throws RuggedException
      */
     public void computeMetrics(SensorToGroundMapping groundMapping,
                                Rugged rugged, boolean unit) throws RuggedException {
 
         String stUnit = null;
-        if(unit) stUnit="degrees";
-        else stUnit="meters";
+        if(unit) {
+        	stUnit="degrees";
+        } else {
+        	stUnit="meters";
+        }
 
         LocalisationMetrics residues = new LocalisationMetrics(groundMapping, rugged, unit);
         System.out.format("Max: %3.4e Mean: %3.4e %s%n",residues.getMaxResidual(),residues.getMeanResidual(), stUnit);
     }
-
 
     /** Compute metrics to evaluate geometric performances in location,
      * for liaison points study.
      * @param interMapping sensor to sensor mapping
      * @param ruggedA Rugged instance A
      * @param ruggedB Rugged instance B
-     * @param unit flag to known distance's unit
-     * @throws OrekitException
+     * @param unit flag to know if distance is computed in meters (false) or with angular (true)
      * @throws RuggedException
      */
     public void computeMetrics(SensorToSensorMapping interMapping,
@@ -266,15 +259,13 @@ public class Refining {
         System.out.format("Earth distance Max: %1.4e Mean: %1.4e %s%n",residues.getEarthMaxDistance(),residues.getEarthMeanDistance(), stUnit);
     }
 
-
     /** Reset a model
      * @param rugged Rugged instance
      * @param sensorName line sensor name
      * @param isSelected flag to known if factor parameter is selected or not
-     * @throws OrekitException
      * @throws RuggedException
      */
-    public void resetModel(Rugged rugged, String sensorName, boolean isSelected) throws OrekitException, RuggedException {
+    public void resetModel(Rugged rugged, String sensorName, boolean isSelected) throws RuggedException {
 
         final String commonFactorName = "factor";
 
@@ -291,6 +282,7 @@ public class Refining {
                 throw new OrekitExceptionWrapper(e);
             }
         });
+        
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
@@ -298,29 +290,24 @@ public class Refining {
         forEach(driver -> {
             try {
                 driver.setSelected(isSelected);
-                driver.setValue(1.0);       // default value: no Z scale factor applied
+                
+                // default value: no Z scale factor applied
+                driver.setValue(1.0);
             } catch (OrekitException e) {
                 throw new OrekitExceptionWrapper(e);
             }
         });
-
     }
-
-
-
 
     /** Start optimization to  adjust parameters (fulcrum points study).
      * @param maxIterations iterations max
      * @param convergenceThreshold threshold of convergence
      * @param measures ground measures
      * @param rugged Rugged instance
-     * @throws OrekitException
      * @throws RuggedException
      */
     public void optimization(int maxIterations, double convergenceThreshold,
-                             Observables measures,
-                             Rugged rugged) throws OrekitException, RuggedException {
-
+                             Observables measures, Rugged rugged) throws RuggedException {
 
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
 
@@ -333,24 +320,20 @@ public class Refining {
         System.out.format("RMSE: %f \n", optimum.getRMS());
     }
 
-
     /** Start optimization to  adjust parameters (liaison points study).
      * @param maxIterations iterations max
      * @param convergenceThreshold threshold of convergence
-     * @param interMapping sensor to sensor mapping
-     * @param ruggedA Rugged instance A
-     * @param ruggedB Rugged instance B
-     * @throws OrekitException
+     * @param measures measures
+     * @param ruggeds Rugged instances A and B
      * @throws RuggedException
      */
     public void optimization(int maxIterations, double convergenceThreshold,
                              Observables measures,
-                             Collection<Rugged> ruggeds) throws OrekitException, RuggedException {
-
+                             Collection<Rugged> ruggeds) throws RuggedException {
 
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
-        if(ruggeds.size()!= 2 )
-        {
+        
+        if(ruggeds.size()!= 2 ) {
             throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,ruggeds.size());
         }
 
@@ -361,7 +344,6 @@ public class Refining {
             ruggedNameList.add(rugged.getName());
         }
 
-
         Optimum optimum = adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
 
         // Print statistics
@@ -370,21 +352,19 @@ public class Refining {
         System.out.format("RMSE: %f \n", optimum.getRMS());
     }
 
-
     /** Check adjusted parameters of an acquisition
      * @param rugged Rugged instance
      * @param sensorName line sensor name
-     * @param  rollValue rotation on roll value
-     * @param  pitchValue rotation on pitch value
-     * @param  factorValue scale factor
-     * @throws OrekitException
+     * @param rollValue rotation on roll value
+     * @param pitchValue rotation on pitch value
+     * @param factorValue scale factor
      * @throws RuggedException
      */
     public void paramsEstimation(Rugged rugged, String sensorName,
                                  double rollValue, double pitchValue, double factorValue)
-                                                 throws OrekitException, RuggedException {
+        throws RuggedException {
 
-        final String commonFactorName = "factor";
+    	final String commonFactorName = "factor";
 
         // Estimate Roll
         double estimatedRoll = rugged.getLineSensor(sensorName).
@@ -404,7 +384,7 @@ public class Refining {
         double pitchError = (estimatedPitch - pitchValue);
         System.out.format("Estimated pitch: %3.5f\tpitch error: %3.6e %n", estimatedPitch, pitchError);
 
-        // Estimate factor
+        // Estimate scale factor
         double estimatedFactor = rugged.getLineSensor(sensorName).
                         getParametersDrivers().
                         filter(driver -> driver.getName().equals(commonFactorName)).
