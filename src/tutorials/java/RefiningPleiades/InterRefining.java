@@ -39,19 +39,20 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.refining.generators.GroundMeasureGenerator;
-import org.orekit.rugged.refining.generators.InterMeasureGenerator;
 import org.orekit.rugged.refining.measures.Noise;
 import org.orekit.rugged.refining.measures.SensorToGroundMapping;
-import org.orekit.rugged.refining.metrics.DistanceTools;
-import org.orekit.rugged.refining.models.OrbitModel;
-import org.orekit.rugged.refining.models.PleiadesViewingModel;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
+
+import RefiningPleiades.generators.GroundMeasureGenerator;
+import RefiningPleiades.generators.InterMeasureGenerator;
+import RefiningPleiades.metrics.DistanceTools;
+import RefiningPleiades.models.OrbitModel;
+import RefiningPleiades.models.PleiadesViewingModel;
 
 /**
  * Class for testing refining (liaison points study)

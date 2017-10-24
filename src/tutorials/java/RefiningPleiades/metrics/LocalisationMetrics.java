@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.refining.metrics;
+package RefiningPleiades.metrics;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -142,11 +142,11 @@ public class LocalisationMetrics {
 
             final GeodeticPoint esGP = rugged.directLocation(date, lineSensor.getPosition(),
                                                              lineSensor.getLOS(date,
-                                                                               (int) gtSP.getPixelNumber()));
+                                                             (int) gtSP.getPixelNumber()));
             // Compute distance
             double distance = DistanceTools.computeDistance(esGP.getLongitude(), esGP.getLatitude(),
-                                                     gtGP.getLongitude(), gtGP.getLatitude(),
-                                                     computeAngular);
+                                                            gtGP.getLongitude(), gtGP.getLatitude(),
+                                                            computeAngular);
             count += distance;
             if (distance > resMax) {
                 resMax = distance;

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.refining.metrics;
+package RefiningPleiades.metrics;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
@@ -42,7 +42,7 @@ public class DistanceTools {
      * @param lat1 Latitude of first geodetic point (rad)
      * @param long2 Longitude of second geodetic point (rad)
      * @param lat2 Latitude of second geodetic point (rad)
-     * @param computeAngular if true, distance will be angular
+     * @param computeAngular if true, distance will be angular, otherwise will be in meters
      * @return distance in meters or radians if flag computeAngular is true
      */
     public static double computeDistance(final double long1, final double lat1,

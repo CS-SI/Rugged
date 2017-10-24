@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.refining.generators;
+package RefiningPleiades.generators;
 
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.refining.measures.Noise;

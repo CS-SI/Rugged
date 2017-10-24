@@ -28,13 +28,14 @@ import org.orekit.rugged.adjustment.AdjustmentContext;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.refining.generators.GroundMeasureGenerator;
-import org.orekit.rugged.refining.generators.InterMeasureGenerator;
 import org.orekit.rugged.refining.measures.Noise;
 import org.orekit.rugged.refining.measures.Observables;
 import org.orekit.rugged.refining.measures.SensorToGroundMapping;
 import org.orekit.rugged.refining.measures.SensorToSensorMapping;
-import org.orekit.rugged.refining.metrics.LocalisationMetrics;
+
+import RefiningPleiades.generators.GroundMeasureGenerator;
+import RefiningPleiades.generators.InterMeasureGenerator;
+import RefiningPleiades.metrics.LocalisationMetrics;
 
 /**
  * Class for refining problems common methods
