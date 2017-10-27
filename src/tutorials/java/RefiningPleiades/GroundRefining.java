@@ -37,8 +37,8 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.refining.measures.Noise;
-import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.adjustment.measurements.Noise;
+import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
@@ -46,7 +46,7 @@ import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
-import RefiningPleiades.generators.GroundMeasureGenerator;
+import RefiningPleiades.generators.GroundMeasurementGenerator;
 import RefiningPleiades.metrics.DistanceTools;
 import RefiningPleiades.models.OrbitModel;
 import RefiningPleiades.models.PleiadesViewingModel;
@@ -58,7 +58,7 @@ import RefiningPleiades.models.PleiadesViewingModel;
  * @author Lucie Labat-Allee
  * @author Guylaine Prat
  * @see SensorToGroundMapping
- * @see GroundMeasureGenerator
+ * @see GroundMeasurementGenerator
  * @since 2.0
  */
 public class GroundRefining extends Refining {
@@ -76,7 +76,7 @@ public class GroundRefining extends Refining {
     Rugged rugged;
 
     /** Ground measurements */
-    GroundMeasureGenerator measures;
+    GroundMeasurementGenerator measurements;
 
     /** Main function
      */
@@ -170,8 +170,8 @@ public class GroundRefining extends Refining {
             refining.applyDisruptions(refining.getRugged(), refining.getSensorName(),
                                       rollValue, pitchValue, factorValue);
 
-            // Generate measures (observations) from physical model disrupted
-            // --------------------------------------------------------------
+            // Generate measurements (observations) from physical model disrupted
+            // ------------------------------------------------------------------
             int lineSampling = 1000;
             int pixelSampling = 1000;
 
@@ -182,16 +182,16 @@ public class GroundRefining extends Refining {
             noise.setMean(mean);
             noise.setStandardDeviation(standardDeviation);
 
-            GroundMeasureGenerator measures = refining.generateNoisyPoints(lineSampling, pixelSampling,
+            GroundMeasurementGenerator measurements = refining.generateNoisyPoints(lineSampling, pixelSampling,
                                                                            refining.getRugged(), refining.getSensorName(),
                                                                            refining.getPleiadesViewingModel().getDimension(),
                                                                            noise);
-            refining.setMeasures(measures);
+            refining.setMeasurements(measurements);
 
             // Compute ground truth residues
             // -----------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
-            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), false);
+            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
 
             // Initialize physical model without disruptions
             // ---------------------------------------------
@@ -201,7 +201,7 @@ public class GroundRefining extends Refining {
             // Compute initial residues
             // ------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
-            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), false);
+            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
 
             // Start optimization
             // ------------------
@@ -210,7 +210,7 @@ public class GroundRefining extends Refining {
             int maxIterations = 100;
             double convergenceThreshold =  1e-14;
 
-            refining.optimization(maxIterations, convergenceThreshold, measures.getObservables(), refining.getRugged());
+            refining.optimization(maxIterations, convergenceThreshold, measurements.getObservables(), refining.getRugged());
 
             // Check estimated values
             // ----------------------
@@ -223,10 +223,10 @@ public class GroundRefining extends Refining {
             System.out.format("\n**** Compute Statistics **** %n");
 
             // Residues computed in meters
-            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), false);
+            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
 
             // Residues computed in degrees
-            refining.computeMetrics(measures.getGroundMapping(), refining.getRugged(), true);
+            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), true);
 
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
@@ -343,11 +343,11 @@ public class GroundRefining extends Refining {
     }
 
     /**
-     * Set the measures
-     * @param measures the measures to set
+     * Set the measurements
+     * @param measurements the measurements to set
      */
-    public void setMeasures(final GroundMeasureGenerator measures) {
-        this.measures = measures;
+    public void setMeasurements(final GroundMeasurementGenerator measurements) {
+        this.measurements = measurements;
     }
 }
 

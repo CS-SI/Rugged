@@ -26,22 +26,22 @@ import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.refining.measures.Noise;
-import org.orekit.rugged.refining.measures.Observables;
-import org.orekit.rugged.refining.measures.SensorToSensorMapping;
+import org.orekit.rugged.adjustment.measurements.Noise;
+import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 
 import RefiningPleiades.metrics.DistanceTools;
 
 /**
- * Inter-measures generator (sensor to sensor mapping).
+ * Inter-measurements generator (sensor to sensor mapping).
  * @author Jonathan Guinet
  * @author Lucie Labatallee
  * @author Guylaine Prat
  * @since 2.0
  */
-public class InterMeasureGenerator implements Measurable {
+public class InterMeasurementGenerator implements Measurable {
 
     /** Mapping from sensor A to sensor B. */
     private SensorToSensorMapping interMapping;
@@ -61,8 +61,8 @@ public class InterMeasureGenerator implements Measurable {
     /** Sensor B */
     private LineSensor sensorB;
 
-    /** Number of measures */
-    private int measureCount;
+    /** Number of measurements */
+    private int measurementCount;
 
     // TODO GP pas utilise ... 
     //   private String sensorNameA;
@@ -80,7 +80,7 @@ public class InterMeasureGenerator implements Measurable {
     private double outlier;
 
 
-    /** Default constructor: measures generation without outlier points control
+    /** Default constructor: measurements generation without outlier points control
      * and without Earth distance constraint.
      * @param ruggedA Rugged instance corresponding to the viewing model A
      * @param sensorNameA sensor name A
@@ -90,7 +90,7 @@ public class InterMeasureGenerator implements Measurable {
      * @param dimensionB number of line for acquisition B
      * @throws RuggedException
      */
-    public InterMeasureGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+    public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
                                  final Rugged ruggedB, final String sensorNameB, final int dimensionB)
         throws RuggedException {
 
@@ -105,7 +105,7 @@ public class InterMeasureGenerator implements Measurable {
     }
 
 
-    /** Constructor for measures generation taking into account outlier points control,
+    /** Constructor for measurements generation taking into account outlier points control,
      * without Earth distance constraint.
      * @param ruggedA Rugged instance corresponding to the viewing model A
      * @param sensorNameA sensor name A
@@ -116,7 +116,7 @@ public class InterMeasureGenerator implements Measurable {
      * @param outlier limit value for outlier points
      * @throws RuggedException
      */
-    public InterMeasureGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+    public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
                                  final Rugged ruggedB, final String sensorNameB, final int dimensionB,
                                  final double outlier)
         throws RuggedException {
@@ -125,7 +125,7 @@ public class InterMeasureGenerator implements Measurable {
         this.outlier = outlier;
     }
 
-    /** Constructor for measures generation taking into account outlier points control,
+    /** Constructor for measurements generation taking into account outlier points control,
      * and Earth distance constraint.
      * @param ruggedA Rugged instance corresponding to the viewing model A
      * @param sensorNameA sensor name A
@@ -138,7 +138,7 @@ public class InterMeasureGenerator implements Measurable {
      * with respect to the LOS distance (between 0 and 1).
      * @throws RuggedException
      */
-    public InterMeasureGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
+    public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
                                  final Rugged ruggedB, final String sensorNameB, final int dimensionB,
                                  final double outlier, final double earthConstraintWeight)
         throws RuggedException {
@@ -174,12 +174,12 @@ public class InterMeasureGenerator implements Measurable {
     }
 
     @Override
-    public int getMeasureCount() {
-        return measureCount;
+    public int getMeasurementCount() {
+        return measurementCount;
     }
 
     @Override
-    public void createMeasure(final int lineSampling, final int pixelSampling) throws RuggedException {
+    public void createMeasurement(final int lineSampling, final int pixelSampling) throws RuggedException {
 
         // Search the sensor pixel seeing point
         final int minLine = 0;
@@ -225,8 +225,8 @@ public class InterMeasureGenerator implements Measurable {
 
                         interMapping.addMapping(RealPixelA, RealPixelB, losDistance, earthDistance);
 
-                        // increment the number of measures
-                        this.measureCount++;
+                        // increment the number of measurements
+                        this.measurementCount++;
                     }
                 }
             }
@@ -242,7 +242,7 @@ public class InterMeasureGenerator implements Measurable {
      * @param noise errors to apply to measure for pixel A and pixel B
      * @throws RuggedException
      */
-    public void createNoisyMeasure(final int lineSampling, final int pixelSampling, final Noise noise)
+    public void createNoisyMeasurement(final int lineSampling, final int pixelSampling, final Noise noise)
         throws RuggedException {
 
     	// Get noise features (errors)
@@ -309,8 +309,8 @@ public class InterMeasureGenerator implements Measurable {
 
                         interMapping.addMapping(RealPixelA, RealPixelB, losDistance, earthDistance);
 
-                        // increment the number of measures
-                        this.measureCount++;
+                        // increment the number of measurements
+                        this.measurementCount++;
                     }
                 }
             }
@@ -319,7 +319,7 @@ public class InterMeasureGenerator implements Measurable {
         this.observables.addInterMapping(interMapping);
     }
 
-    /** Default constructor: measures generation without outlier points control
+    /** Default constructor: measurements generation without outlier points control
      * and Earth distances constraint.
      * @param rA Rugged instance A
      * @param sNameA sensor name A
@@ -348,6 +348,6 @@ public class InterMeasureGenerator implements Measurable {
         this.dimensionA = dimA;
         this.dimensionB = dimB;
 
-        this.measureCount = 0;
+        this.measurementCount = 0;
     }
 }

@@ -39,8 +39,8 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.refining.measures.Noise;
-import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.adjustment.measurements.Noise;
+import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
@@ -48,8 +48,8 @@ import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
-import RefiningPleiades.generators.GroundMeasureGenerator;
-import RefiningPleiades.generators.InterMeasureGenerator;
+import RefiningPleiades.generators.GroundMeasurementGenerator;
+import RefiningPleiades.generators.InterMeasurementGenerator;
 import RefiningPleiades.metrics.DistanceTools;
 import RefiningPleiades.models.OrbitModel;
 import RefiningPleiades.models.PleiadesViewingModel;
@@ -61,7 +61,7 @@ import RefiningPleiades.models.PleiadesViewingModel;
  * @author Lucie Labat-Allee
  * @author Guylaine Prat
  * @see SensorToGroundMapping
- * @see GroundMeasureGenerator
+ * @see GroundMeasurementGenerator
  * @since 2.0
  */
 public class InterRefining extends Refining {
@@ -91,7 +91,7 @@ public class InterRefining extends Refining {
 	Rugged ruggedB;
 
 	/** Inter-measurements (between both viewing models) */
-	InterMeasureGenerator measures;
+	InterMeasurementGenerator measurements;
 
 
 	/** Main function
@@ -248,8 +248,8 @@ public class InterRefining extends Refining {
                                       rollValueB, pitchValueB, factorValue);
 
 
-            // Generate measures (observations) from physical model disrupted
-            // --------------------------------------------------------------
+            // Generate measurements (observations) from physical model disrupted
+            // ------------------------------------------------------------------
             int lineSampling = 1000;
             int pixelSampling = 1000;
 
@@ -267,18 +267,18 @@ public class InterRefining extends Refining {
             System.out.format("\tSensor A mean: %f std %f %n",mean[0],standardDeviation[0]);
             System.out.format("\tSensor B mean: %f std %f %n",mean[1],standardDeviation[1]);
 
-            InterMeasureGenerator measures = refining.generateNoisyPoints(lineSampling, pixelSampling,
+            InterMeasurementGenerator measurements = refining.generateNoisyPoints(lineSampling, pixelSampling,
                                                                           refining.getRuggedA(), refining.getSensorNameA(),
                                                                           refining.getPleiadesViewingModelA().getDimension(),
                                                                           refining.getRuggedB(), refining.getSensorNameB(),
                                                                           refining.getPleiadesViewingModelB().getDimension(),
                                                                           noise);
-            refining.setMeasures(measures);
+            refining.setMeasurements(measurements);
 
             // Compute ground truth residues
             // -----------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
-            refining.computeMetrics(measures.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
+            refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
 
             // Initialize physical models without disruptions
             // -----------------------------------------------
@@ -289,7 +289,7 @@ public class InterRefining extends Refining {
             // Compute initial residues
             // ------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
-            refining.computeMetrics(measures.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
+            refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
 
             // Start optimization
             // ------------------
@@ -299,7 +299,7 @@ public class InterRefining extends Refining {
             double convergenceThreshold =  1e-10;
 
             refining.optimization(maxIterations, convergenceThreshold,
-                                  measures.getObservables(),
+                                  measurements.getObservables(),
                                   refining.getRuggeds());
 
             // Check estimated values
@@ -317,7 +317,7 @@ public class InterRefining extends Refining {
             // Compute statistics
             // ------------------
             System.out.format("\n**** Compute Statistics **** %n");
-            refining.computeMetrics(measures.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
+            refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
 
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
@@ -510,9 +510,9 @@ public class InterRefining extends Refining {
     }
 
     /**
-     * @param measures the measures to set
+     * @param measurements the measurements to set
      */
-    public void setMeasures(final InterMeasureGenerator measures) {
-        this.measures = measures;
+    public void setMeasurements(final InterMeasurementGenerator measurements) {
+        this.measurements = measurements;
     }
 }

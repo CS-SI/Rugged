@@ -17,34 +17,34 @@
 package RefiningPleiades.generators;
 
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.refining.measures.Noise;
+import org.orekit.rugged.adjustment.measurements.Noise;
 
-/** For measures generator.
+/** For measurements generator.
  * @author Lucie Labat-Allee
  * @author Guylaine Prat
  * @since 2.0
  */
 public interface Measurable {
 	
-    /** Get the number of measures
-     * @return the number of measures
+    /** Get the number of measurements
+     * @return the number of measurements
      * @throws RuggedException
      */
-    int  getMeasureCount() throws RuggedException;
+    int  getMeasurementCount() throws RuggedException;
 
-    /** Create measures (without noise)
+    /** Create measurements (without noise)
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
      * @throws RuggedException 
      */
-    void createMeasure(int lineSampling, int pixelSampling)  throws RuggedException;
+    void createMeasurement(int lineSampling, int pixelSampling)  throws RuggedException;
 
-    /** Create noisy measures
+    /** Create noisy measurements
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
-     * @param noise the noise to add to the measures
+     * @param noise the noise to add to the measurements
      * @throws RuggedException
      */
-    void createNoisyMeasure(int lineSampling, int pixelSampling, Noise noise) throws RuggedException;
+    void createNoisyMeasurement(int lineSampling, int pixelSampling, Noise noise) throws RuggedException;
 
 }

@@ -26,18 +26,18 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.refining.measures.Noise;
-import org.orekit.rugged.refining.measures.Observables;
-import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.adjustment.measurements.Noise;
+import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.time.AbsoluteDate;
 
-/** Ground measures generator (sensor to ground mapping).
+/** Ground measurements generator (sensor to ground mapping).
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
  * @author Guylaine Prat
  * @since 2.0
  */
-public class GroundMeasureGenerator implements Measurable {
+public class GroundMeasurementGenerator implements Measurable {
 
     /** Sensor to ground mapping. */
     private SensorToGroundMapping groundMapping;
@@ -54,8 +54,8 @@ public class GroundMeasureGenerator implements Measurable {
     /** Number of lines of the sensor */
     private int dimension;
     
-    /** Number of measures */
-    private int measureCount;
+    /** Number of measurements */
+    private int measurementCount;
 
     /** Simple constructor.
      * @param rugged Rugged instance
@@ -63,7 +63,7 @@ public class GroundMeasureGenerator implements Measurable {
      * @param dimension number of line of the sensor
      * @throws RuggedException
      */
-    public GroundMeasureGenerator(final Rugged rugged, final String sensorName, final int dimension) 
+    public GroundMeasurementGenerator(final Rugged rugged, final String sensorName, final int dimension) 
         throws RuggedException {
     	
         // Generate reference mapping
@@ -75,7 +75,7 @@ public class GroundMeasureGenerator implements Measurable {
         this.rugged = rugged;
         this.sensor = rugged.getLineSensor(groundMapping.getSensorName());
         this.dimension = dimension;
-        this.measureCount = 0;
+        this.measurementCount = 0;
     }
 
     /** Get the sensor to ground mapping
@@ -93,12 +93,12 @@ public class GroundMeasureGenerator implements Measurable {
     }
 
     @Override
-    public int  getMeasureCount() {
-        return measureCount;
+    public int  getMeasurementCount() {
+        return measurementCount;
     }
 
     @Override
-    public void createMeasure(final int lineSampling, final int pixelSampling) throws RuggedException {
+    public void createMeasurement(final int lineSampling, final int pixelSampling) throws RuggedException {
     	
         for (double line = 0; line < dimension; line += lineSampling) {
 
@@ -111,8 +111,8 @@ public class GroundMeasureGenerator implements Measurable {
 
                 groundMapping.addMapping(new SensorPixel(line, pixel), gp2);
 
-                // increment the number of measures
-                measureCount++;
+                // increment the number of measurements
+                measurementCount++;
             }
         }
         
@@ -120,7 +120,7 @@ public class GroundMeasureGenerator implements Measurable {
     }
 
     @Override
-    public void createNoisyMeasure(final int lineSampling, final int pixelSampling, final Noise noise)
+    public void createNoisyMeasurement(final int lineSampling, final int pixelSampling, final Noise noise)
         throws RuggedException {
     	
         // Estimate latitude and longitude errors (rad)
@@ -162,8 +162,8 @@ public class GroundMeasureGenerator implements Measurable {
 
                 groundMapping.addMapping(new SensorPixel(line, pixel), gpNoisy);
                 
-                // increment the number of measures
-                measureCount++;
+                // increment the number of measurements
+                measurementCount++;
             }
         }
         

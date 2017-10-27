@@ -27,8 +27,8 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.refining.measures.SensorToGroundMapping;
-import org.orekit.rugged.refining.measures.SensorToSensorMapping;
+import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
+import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 
@@ -65,7 +65,7 @@ public class LocalisationMetrics {
 
     
     /** Compute metrics corresponding to the ground points study.
-     * @param measMapping Mapping of observations/measures = the ground truth
+     * @param measMapping Mapping of observations/measurements = the ground truth
      * @param rugged Rugged instance
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
      * @exception RuggedException if direct location fails
@@ -82,7 +82,7 @@ public class LocalisationMetrics {
     }
 
     /** Compute metrics corresponding to the liaison points study.
-     * @param measMapping Mapping of observations/measures = the ground truth
+     * @param measMapping Mapping of observations/measurements = the ground truth
      * @param ruggedA Rugged instance corresponding to viewing model A
      * @param ruggedB Rugged instance corresponding to viewing model B
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
@@ -106,7 +106,7 @@ public class LocalisationMetrics {
 
     /**
      * Compute metrics: case of ground control points.
-     * @param measMapping Mapping of observations/measures = the ground truth
+     * @param measMapping Mapping of observations/measurements = the ground truth
      * @param rugged Rugged instance
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
      * @exception RuggedException if direct location fails
@@ -114,23 +114,23 @@ public class LocalisationMetrics {
     public void computeMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
         throws RuggedException {
 
-        // Mapping of observations/measures = the ground truth
-        final Set<Map.Entry<SensorPixel, GeodeticPoint>> measuresMapping;
+        // Mapping of observations/measurements = the ground truth
+        final Set<Map.Entry<SensorPixel, GeodeticPoint>> measurementsMapping;
         final LineSensor lineSensor;
         
         // counter for compute mean distance
         double count = 0;
         
         // Initialization
-        measuresMapping = measMapping.getMapping();
+        measurementsMapping = measMapping.getMapping();
         lineSensor = rugged.getLineSensor(measMapping.getSensorName());
         
-        // number of measures
-        int nbMeas = measuresMapping.size();
+        // number of measurements
+        int nbMeas = measurementsMapping.size();
         
-        final Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = measuresMapping.iterator();
+        final Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = measurementsMapping.iterator();
 
-        // Browse map of measures
+        // Browse map of measurements
         while (gtIt.hasNext()) {
 
             final Map.Entry<SensorPixel, GeodeticPoint> gtMeas = gtIt.next();
@@ -158,7 +158,7 @@ public class LocalisationMetrics {
 
     /**
      * Compute metrics: case of liaison points.
-     * @param measMapping Mapping of observations/measures = the ground truth
+     * @param measMapping Mapping of observations/measurements = the ground truth
      * @param ruggedA Rugged instance corresponding to viewing model A
      * @param ruggedB Rugged instance corresponding to viewing model B
      * @param computeAngular Flag to know if distance is computed in meters (false) or with angular (true)
@@ -168,28 +168,28 @@ public class LocalisationMetrics {
                                       final boolean computeAngular)
         throws RuggedException {
 
-        // Mapping of observations/measures = the ground truth
-        final Set<Map.Entry<SensorPixel, SensorPixel>> measuresMapping;
+        // Mapping of observations/measurements = the ground truth
+        final Set<Map.Entry<SensorPixel, SensorPixel>> measurementsMapping;
 
         final LineSensor lineSensorA;   // line sensor corresponding to rugged A 
         final LineSensor lineSensorB;   // line sensor corresponding to rugged B 
         double count = 0;               // counter for computing remaining mean distance 
         double losDistanceCount = 0;    // counter for computing LOS distance mean 
         double earthDistanceCount = 0;  // counter for computing Earth distance mean 
-        int i = 0;                      // increment of measures 
+        int i = 0;                      // increment of measurements 
 
         // Initialization 
-        measuresMapping = measMapping.getMapping();
+        measurementsMapping = measMapping.getMapping();
         lineSensorA = ruggedA.getLineSensor(measMapping.getSensorNameA());
         lineSensorB = ruggedB.getLineSensor(measMapping.getSensorNameB());
-        int nbMeas = measuresMapping.size(); // number of measures 
+        int nbMeas = measurementsMapping.size(); // number of measurements 
  
-        // Browse map of measures 
-        for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = measuresMapping.iterator();
+        // Browse map of measurements 
+        for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = measurementsMapping.iterator();
                         gtIt.hasNext();
                         i++) {
 
-            if (i == measuresMapping.size()) {
+            if (i == measurementsMapping.size()) {
                 break;
             }
 
@@ -224,7 +224,7 @@ public class LocalisationMetrics {
 
             // Earth distance control
             final double estEarthDistance = distances[1]; // Earth distance estimation
-            final double measEarthDistance = measMapping.getEarthDistance(i).doubleValue(); // Earth measured distance
+            final double measEarthDistance = measMapping.getEarthDistance(i).doubleValue(); // Earth measurement distance
             final double earthDistance =  FastMath.abs(estEarthDistance - measEarthDistance);
 
             if (earthDistance > earthDistanceMax) {

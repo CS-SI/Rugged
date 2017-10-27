@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.refining.measures;
+package org.orekit.rugged.adjustment.measurements;
 
 import java.util.Collections;
 import java.util.Map;

@@ -32,7 +32,7 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.refining.measures.Observables;
+import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.utils.ParameterDriver;
 
 /** Create adjustment context for viewing model refining.
@@ -47,8 +47,8 @@ public class AdjustmentContext {
     /** List of Rugged instances to optimize. */
     private final Map<String, Rugged> viewingModel;
 
-    /** Set of measures. */
-    private final Observables measures;
+    /** Set of measurements. */
+    private final Observables measurements;
 
     /** Least square optimizer choice.*/
     private OptimizerId optimizerID;
@@ -57,15 +57,15 @@ public class AdjustmentContext {
     /** Build a new instance.
      * The default optimizer is Gauss Newton with QR decomposition.
      * @param viewingModel viewing model
-     * @param measures control and tie points
+     * @param measurements control and tie points
      */
-    public AdjustmentContext(final Collection<Rugged> viewingModel, final Observables measures) {
+    public AdjustmentContext(final Collection<Rugged> viewingModel, final Observables measurements) {
     	
         this.viewingModel = new HashMap<String, Rugged>();
         for (final Rugged r : viewingModel) {
             this.viewingModel.put(r.getName(), r);
         }
-        this.measures = measures;
+        this.measurements = measurements;
         this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;
     }
 
@@ -149,11 +149,11 @@ public class AdjustmentContext {
             switch (ruggedList.size()) {
             case 1:
                 final Rugged rugged = ruggedList.get(0);
-                final GroundOptimizationProblemBuilder groundOptimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measures, rugged);
+                final GroundOptimizationProblemBuilder groundOptimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measurements, rugged);
                 theProblem = groundOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
                 break;
             case 2:
-                final InterSensorsOptimizationProblemBuilder interSensorsOptimizationProblem = new InterSensorsOptimizationProblemBuilder(selectedSensors, measures, ruggedList);
+                final InterSensorsOptimizationProblemBuilder interSensorsOptimizationProblem = new InterSensorsOptimizationProblemBuilder(selectedSensors, measurements, ruggedList);
                 theProblem = interSensorsOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
                 break;
             default :

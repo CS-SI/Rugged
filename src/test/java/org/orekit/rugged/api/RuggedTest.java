@@ -71,7 +71,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
-import org.orekit.rugged.refining.measures.Observables;
+import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
@@ -1145,9 +1145,9 @@ public class RuggedTest {
             pitchDriver.setSelected(true);
 
             // prepare generator
-            final Observables measures = new Observables(1);
+            final Observables measurements = new Observables(1);
             GroundOptimizationProblemBuilder OptimizationProblembuilder = new GroundOptimizationProblemBuilder(Collections.singletonList(lineSensor),
-                                                                                                               measures, rugged);
+                                                                                                               measurements, rugged);
             DSGenerator generator = OptimizationProblembuilder.getGenerator();
 
             double referenceLine = 0.87654 * dimension;

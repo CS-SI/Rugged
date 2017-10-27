@@ -43,8 +43,8 @@ import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.refining.measures.Observables;
-import org.orekit.rugged.refining.measures.SensorToSensorMapping;
+import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
@@ -73,15 +73,15 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
 
     /** Constructor
      * @param sensors list of sensors to refine
-     * @param measures set of observables
+     * @param measurements set of observables
      * @param ruggedList names of rugged to refine
      * @throws RuggedException an exception is generated if no parameters has been selected for refining
      */
     public InterSensorsOptimizationProblemBuilder(final List<LineSensor> sensors,
-                                                  final Observables measures, final Collection<Rugged> ruggedList)
+                                                  final Observables measurements, final Collection<Rugged> ruggedList)
         throws RuggedException {
     	
-        super(sensors, measures);
+        super(sensors, measurements);
         this.ruggedMap = new LinkedHashMap<String, Rugged>();
         for (final Rugged rugged : ruggedList) {
             this.ruggedMap.put(rugged.getName(), rugged);
@@ -105,7 +105,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     					
     					final String sensorNameA = sensorA.getName();
     					final String sensorNameB = sensorB.getName();
-    					final SensorToSensorMapping mapping = this.measures.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
+    					final SensorToSensorMapping mapping = this.measurements.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
     					
     					if (mapping != null) {
     						this.sensorToSensorMappings.add(mapping);

@@ -42,8 +42,8 @@ import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.refining.measures.Observables;
-import org.orekit.rugged.refining.measures.SensorToGroundMapping;
+import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.utils.ParameterDriver;
 
 /**
@@ -77,15 +77,15 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     
     /** TODO GP description a completer 
      * @param sensors list of sensors to refine
-     * @param measures set of observables
+     * @param measurements set of observables
      * @param rugged name of rugged to refine
      * @throws RuggedException an exception is generated if no parameters has been selected for refining
      */
     public GroundOptimizationProblemBuilder(final List<LineSensor> sensors,
-                                            final Observables measures, final Rugged rugged)
+                                            final Observables measurements, final Rugged rugged)
         throws RuggedException {
     	
-        super(sensors, measures);
+        super(sensors, measurements);
         this.rugged = rugged;
         this.initMapping();
     }
@@ -99,7 +99,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
         final String ruggedName = rugged.getName();
         this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
         for (final LineSensor lineSensor : sensors) {
-            final SensorToGroundMapping mapping = this.measures.getGroundMapping(ruggedName, lineSensor.getName());
+            final SensorToGroundMapping mapping = this.measurements.getGroundMapping(ruggedName, lineSensor.getName());
             if (mapping != null) {
                 this.sensorToGroundMappings.add(mapping);
             }

@@ -36,7 +36,7 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.refining.measures.Observables;
+import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.utils.ParameterDriver;
 
@@ -63,18 +63,18 @@ abstract class OptimizationProblemBuilder {
     /** Number of parameters to refine. */
     protected final int nbParams;
 
-    /** Measures. */
-    protected Observables measures;
+    /** Measurements. */
+    protected Observables measurements;
 
     /** Sensors list. */
     protected final List<LineSensor> sensors;
 
     /** Constructor.
      * @param sensors list of sensors to refine
-     * @param measures set of observables
+     * @param measurements set of observables
      * @throws RuggedException an exception is generated if no parameters has been selected for refining
      */
-    OptimizationProblemBuilder(final List<LineSensor> sensors, final Observables measures) throws RuggedException {
+    OptimizationProblemBuilder(final List<LineSensor> sensors, final Observables measurements) throws RuggedException {
     	
         try {
             this.generator = this.createGenerator(sensors);
@@ -87,7 +87,7 @@ abstract class OptimizationProblemBuilder {
             throw rew.getException();
         }
 
-        this.measures = measures;
+        this.measurements = measurements;
         this.sensors = sensors;
     }
 

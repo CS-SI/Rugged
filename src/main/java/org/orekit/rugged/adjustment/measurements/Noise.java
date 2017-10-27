@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.refining.measures;
+package org.orekit.rugged.adjustment.measurements;
 
 
-/** Class for adding a noise to measures.
+/** Class for adding a noise to measurements.
  * @author Lucie Labat-Allee
  * @author Guylaine Prat
  * @since 2.0

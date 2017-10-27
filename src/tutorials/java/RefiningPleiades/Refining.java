@@ -28,13 +28,13 @@ import org.orekit.rugged.adjustment.AdjustmentContext;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.refining.measures.Noise;
-import org.orekit.rugged.refining.measures.Observables;
-import org.orekit.rugged.refining.measures.SensorToGroundMapping;
-import org.orekit.rugged.refining.measures.SensorToSensorMapping;
+import org.orekit.rugged.adjustment.measurements.Noise;
+import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
+import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 
-import RefiningPleiades.generators.GroundMeasureGenerator;
-import RefiningPleiades.generators.InterMeasureGenerator;
+import RefiningPleiades.generators.GroundMeasurementGenerator;
+import RefiningPleiades.generators.InterMeasurementGenerator;
 import RefiningPleiades.metrics.LocalisationMetrics;
 
 /**
@@ -44,8 +44,8 @@ import RefiningPleiades.metrics.LocalisationMetrics;
  * @author Guylaine Prat
  * @see SensorToGroundMapping
  * @see SensorToSensorMapping
- * @see GroundMeasureGenerator
- * @see InterMeasureGenerator
+ * @see GroundMeasurementGenerator
+ * @see InterMeasurementGenerator
  * @since 2.0
  */
 public class Refining {
@@ -95,23 +95,23 @@ public class Refining {
      * @param rugged Rugged instance
      * @param sensorName line sensor name
      * @param dimension number of line of the sensor
-     * @return ground measures generator (sensor to ground mapping)
+     * @return ground measurements generator (sensor to ground mapping)
      * @throws RuggedException
      */
-    public GroundMeasureGenerator generatePoints(final int lineSampling, final int pixelSampling,
+    public GroundMeasurementGenerator generatePoints(final int lineSampling, final int pixelSampling,
     		                                     final Rugged rugged, final String sensorName,
                                                  final int dimension) throws RuggedException {
 
-        GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
+        GroundMeasurementGenerator measurements = new GroundMeasurementGenerator(rugged, sensorName, dimension);
 
-        System.out.format("\n**** Generate measures (without noise; sensor to ground mapping) **** %n");
+        System.out.format("\n**** Generate measurements (without noise; sensor to ground mapping) **** %n");
 
-        // Generation measures without noise
-        measures.createMeasure(lineSampling, pixelSampling);
+        // Generation measurements without noise
+        measurements.createMeasurement(lineSampling, pixelSampling);
 
-        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
+        System.out.format("Number of tie points generated: %d %n", measurements.getMeasurementCount());
 
-        return measures;
+        return measurements;
     }
 
     /** Generate measurements without noise (sensor to sensor mapping)
@@ -123,10 +123,10 @@ public class Refining {
      * @param ruggedB Rugged instance of acquisition B
      * @param sensorNameB line sensor name B
      * @param dimensionB dimension for acquisition B
-     * @return inter measures generator (sensor to sensor mapping)
+     * @return inter measurements generator (sensor to sensor mapping)
      * @throws RuggedException
      */
-    public InterMeasureGenerator generatePoints(final int lineSampling, final int pixelSampling,
+    public InterMeasurementGenerator generatePoints(final int lineSampling, final int pixelSampling,
     		                                    final Rugged ruggedA, final String sensorNameA, final int dimensionA,
     		                                    final Rugged ruggedB, final String sensorNameB, final int dimensionB) 
         throws RuggedException {
@@ -136,20 +136,20 @@ public class Refining {
     	// Earth constraint weight
     	final double earthConstraintWeight = 0.1;
 
-        // Generate measures with constraints on outliers control and Earth distance
-        InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
+        // Generate measurements with constraints on outliers control and Earth distance
+        InterMeasurementGenerator measurements = new InterMeasurementGenerator(ruggedA, sensorNameA, dimensionA,
                                                                    ruggedB, sensorNameB, dimensionB,
                                                                    outlierValue,
                                                                    earthConstraintWeight);
 
-        System.out.format("\n**** Generate measures (without noise; sensor to sensor mapping) **** %n");
+        System.out.format("\n**** Generate measurements (without noise; sensor to sensor mapping) **** %n");
 
-        // Generation measures without noise
-        measures.createMeasure(lineSampling, pixelSampling);
+        // Generation measurements without noise
+        measurements.createMeasurement(lineSampling, pixelSampling);
 
-        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
+        System.out.format("Number of tie points generated: %d %n", measurements.getMeasurementCount());
 
-        return measures;
+        return measurements;
     }
 
     /** Generate noisy measurements (sensor to ground mapping)
@@ -158,25 +158,25 @@ public class Refining {
      * @param rugged Rugged instance
      * @param sensorName line sensor name
      * @param dimension dimension
-     * @param noise Noise structure to generate noisy measures
-     * @return ground measures generator (sensor to ground mapping)
+     * @param noise Noise structure to generate noisy measurements
+     * @return ground measurements generator (sensor to ground mapping)
      * @throws RuggedException
      */
-    public GroundMeasureGenerator generateNoisyPoints(final int lineSampling, final int pixelSampling,
+    public GroundMeasurementGenerator generateNoisyPoints(final int lineSampling, final int pixelSampling,
     		                                          final Rugged rugged, final String sensorName, final int dimension,
     		                                          final Noise noise) throws RuggedException {
 
-        // Generate ground measures
-    	GroundMeasureGenerator measures = new GroundMeasureGenerator(rugged, sensorName, dimension);
+        // Generate ground measurements
+    	GroundMeasurementGenerator measurements = new GroundMeasurementGenerator(rugged, sensorName, dimension);
 
-        System.out.format("\n**** Generate noisy measures (sensor to ground mapping) **** %n");
+        System.out.format("\n**** Generate noisy measurements (sensor to ground mapping) **** %n");
 
-        // Generate noisy measures
-        measures.createNoisyMeasure(lineSampling, pixelSampling, noise);
+        // Generate noisy measurements
+        measurements.createNoisyMeasurement(lineSampling, pixelSampling, noise);
 
-        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
+        System.out.format("Number of tie points generated: %d %n", measurements.getMeasurementCount());
 
-        return measures;
+        return measurements;
     }
 
     /** Generate noisy measurements (sensor to sensor mapping)
@@ -188,11 +188,11 @@ public class Refining {
      * @param ruggedB Rugged instance of acquisition B
      * @param sensorNameB line sensor name B
      * @param dimensionB dimension for acquisition B
-     * @param noise noise structure to generate noisy measures
-     * @return inter-measures generator (sensor to sensor mapping)
+     * @param noise noise structure to generate noisy measurements
+     * @return inter-measurements generator (sensor to sensor mapping)
      * @throws RuggedException
      */
-    public InterMeasureGenerator generateNoisyPoints(final int lineSampling, final int pixelSampling,
+    public InterMeasurementGenerator generateNoisyPoints(final int lineSampling, final int pixelSampling,
     		                                         final Rugged ruggedA, final String sensorNameA, final int dimensionA,
                                                      final Rugged ruggedB, final String sensorNameB, final int dimensionB,
                                                      final Noise noise) throws RuggedException {
@@ -203,19 +203,19 @@ public class Refining {
         // Earth constraint weight
         final double earthConstraintWeight = 0.1;  
 
-        // Generate measures with constraints on Earth distance and outliers control
-        InterMeasureGenerator measures = new InterMeasureGenerator(ruggedA, sensorNameA, dimensionA,
+        // Generate measurements with constraints on Earth distance and outliers control
+        InterMeasurementGenerator measurements = new InterMeasurementGenerator(ruggedA, sensorNameA, dimensionA,
                                                                    ruggedB, sensorNameB, dimensionB,
                                                                    outlierValue,
                                                                    earthConstraintWeight);
-        System.out.format("\n**** Generate noisy measures (sensor to sensor mapping) **** %n");
+        System.out.format("\n**** Generate noisy measurements (sensor to sensor mapping) **** %n");
 
-        // Generation noisy measures
-        measures.createNoisyMeasure(lineSampling, pixelSampling, noise);
+        // Generation noisy measurements
+        measurements.createNoisyMeasurement(lineSampling, pixelSampling, noise);
 
-        System.out.format("Number of tie points generated: %d %n", measures.getMeasureCount());
+        System.out.format("Number of tie points generated: %d %n", measurements.getMeasurementCount());
 
-        return measures;
+        return measurements;
     }
 
     /** Compute metrics to evaluate geometric performances in location,
@@ -304,16 +304,16 @@ public class Refining {
     /** Start optimization to  adjust parameters (fulcrum points study).
      * @param maxIterations iterations max
      * @param convergenceThreshold threshold of convergence
-     * @param measures ground measures
+     * @param measurements ground measurements
      * @param rugged Rugged instance
      * @throws RuggedException
      */
     public void optimization(final int maxIterations, final double convergenceThreshold,
-    		                 final Observables measures, final Rugged rugged) throws RuggedException {
+    		                 final Observables measurements, final Rugged rugged) throws RuggedException {
 
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
 
-        AdjustmentContext adjustmentContext = new AdjustmentContext(Collections.singletonList(rugged), measures);
+        AdjustmentContext adjustmentContext = new AdjustmentContext(Collections.singletonList(rugged), measurements);
         Optimum optimum = adjustmentContext.estimateFreeParameters(Collections.singletonList(rugged.getName()), maxIterations, convergenceThreshold);
 
         // Print statistics
@@ -325,12 +325,12 @@ public class Refining {
     /** Start optimization to  adjust parameters (liaison points study).
      * @param maxIterations iterations max
      * @param convergenceThreshold threshold of convergence
-     * @param measures measures
+     * @param measurements measurements
      * @param ruggeds Rugged instances A and B
      * @throws RuggedException
      */
     public void optimization(final int maxIterations, final double convergenceThreshold,
-    		                 final Observables measures,
+    		                 final Observables measurements,
     		                 final Collection<Rugged> ruggeds) throws RuggedException {
 
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
@@ -339,7 +339,7 @@ public class Refining {
             throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,ruggeds.size());
         }
 
-        AdjustmentContext adjustmentContext = new AdjustmentContext(ruggeds, measures);
+        AdjustmentContext adjustmentContext = new AdjustmentContext(ruggeds, measurements);
 
         List<String> ruggedNameList = new ArrayList<String>();
         for(Rugged rugged : ruggeds) {
