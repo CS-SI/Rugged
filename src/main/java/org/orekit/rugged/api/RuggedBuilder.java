@@ -256,7 +256,7 @@ public class RuggedBuilder {
      *   IGNORE_DEM_USE_ELLIPSOID} does not require
      *   any methods tobe called.</li>
      * </ul>
-     * </p>
+     * 
      * @param algorithmID identifier of algorithm to use for Digital Elevation Model intersection
      * @return the builder instance
      * @see #setDigitalElevationModel(TileUpdater, int)

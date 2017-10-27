@@ -262,7 +262,7 @@ public class SpacecraftToObservedBody implements Serializable {
     /** Get transform from spacecraft to inertial frame.
      * @param date date of the transform
      * @return transform from spacecraft to inertial frame
-     * @exception RuggedException if spacecraft position or attitude cannot be computed at date
+     * @exception RuggedException if frames cannot be computed at date
      */
     public Transform getScToInertial(final AbsoluteDate date)
         throws RuggedException {

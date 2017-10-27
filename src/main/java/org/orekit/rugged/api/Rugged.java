@@ -622,7 +622,7 @@ public class Rugged {
      * @param dateB current date for sensor B
      * @param pixelB pixel index for sensor B
      * @return distances computed between LOS and to the ground
-     * @exception RuggedException 
+     * @exception RuggedException if frames cannot be computed at date or if date cannot be handled
      * @since 2.0
      */
     public double[] distanceBetweenLOS(final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
@@ -695,7 +695,7 @@ public class Rugged {
      * @param pixelB pixel index for sensor B
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return distances computed, with derivatives, between LOS and to the ground
-     * @exception RuggedException 
+     * @exception RuggedException if frames cannot be computed at date
      * @see #distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)
      */
     public DerivativeStructure[] distanceBetweenLOSDerivatives(

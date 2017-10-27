@@ -28,7 +28,7 @@ import org.orekit.time.AbsoluteDate;
 
 /** Container for mapping sensors pixels of two viewing models.
  * Store the distance between both lines of sight computed with 
- * {@link Rugged#distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)}
+ * {@link org.orekit.rugged.api.Rugged#distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)}
  * <p> Constraints in relation to Earth distance can be added.
  * @see SensorMapping
  * @author Lucie LabatAllee
