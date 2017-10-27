@@ -18,6 +18,7 @@ package RefiningPleiades.metrics;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
+import org.orekit.utils.Constants;
 
 /**
  * Class for computing geodetic distance.
@@ -27,10 +28,6 @@ import org.hipparchus.util.FastMath;
  * @since 2.0
  */
 public class DistanceTools {
-
-    /** Earth radius in cms.  */
-	// TODO GP constant for earth ???
-    public static final double EARTH_RADIUS = 637100000d;
 
     /** Private constructor for utility class.
      */
@@ -65,12 +62,11 @@ public class DistanceTools {
      */
     public static double computeDistanceInMeter(final double long1, final double lat1,
                                                 final double long2, final double lat2) {
-    	
+
         // get vectors on unit sphere from angular coordinates
         final Vector3D p1 = new Vector3D(lat1, long1); //
         final Vector3D p2 = new Vector3D(lat2, long2);
-
-        final double distance = EARTH_RADIUS / 100 * Vector3D.angle(p1, p2);
+        final double distance =  Constants.WGS84_EARTH_EQUATORIAL_RADIUS * Vector3D.angle(p1, p2);
         return distance;
     }
 
