@@ -487,8 +487,8 @@
         <configuration>
           <links>
             <link>http://docs.oracle.com/javase/8/docs/api/</link>
-            <link>https://hipparchus.org/apidocs/</link>
-            <link>https://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
+            <link>http://hipparchus.org/apidocs/</link>
+            <link>http://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
           </links>
           <charset>${project.reporting.outputEncoding}</charset>
         </configuration>
