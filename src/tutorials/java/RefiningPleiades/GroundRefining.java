@@ -188,8 +188,8 @@ public class GroundRefining extends Refining {
                                                                            noise);
             refining.setMeasurements(measurements);
 
-            // Compute ground truth residues
-            // -----------------------------
+            // Compute ground truth residuals
+            // ------------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
             refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
 
@@ -198,8 +198,8 @@ public class GroundRefining extends Refining {
             System.out.format("\n**** Initialize physical model without disruptions: reset Roll/Pitch/Factor **** %n");
             refining.resetModel(refining.getRugged(), refining.getSensorName(), true);
 
-            // Compute initial residues
-            // ------------------------
+            // Compute initial residuals
+            // -------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
             refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
 
@@ -222,10 +222,10 @@ public class GroundRefining extends Refining {
             // ------------------
             System.out.format("\n**** Compute Statistics **** %n");
 
-            // Residues computed in meters
+            // Residuals computed in meters
             refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
 
-            // Residues computed in degrees
+            // Residuals computed in degrees
             refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), true);
 
         } catch (OrekitException oe) {

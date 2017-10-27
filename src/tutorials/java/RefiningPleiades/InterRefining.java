@@ -275,8 +275,8 @@ public class InterRefining extends Refining {
                                                                           noise);
             refining.setMeasurements(measurements);
 
-            // Compute ground truth residues
-            // -----------------------------
+            // Compute ground truth residuals
+            // ------------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
             refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
 
@@ -286,8 +286,8 @@ public class InterRefining extends Refining {
             refining.resetModel(refining.getRuggedA(), refining.getSensorNameA(), false);
             refining.resetModel(refining.getRuggedB(), refining.getSensorNameB(), false);
 
-            // Compute initial residues
-            // ------------------------
+            // Compute initial residuals
+            // -------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
             refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
 

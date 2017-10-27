@@ -45,10 +45,10 @@ import org.orekit.time.AbsoluteDate;
  */
 public class LocalisationMetrics {
 
-    /** Maximum residue distance. */
+    /** Maximum residual distance. */
     private double resMax;
 
-    /** Mean residue distance. */
+    /** Mean residual distance. */
     private double resMean;
 
     /** LOS distance max. */
@@ -152,7 +152,7 @@ public class LocalisationMetrics {
                 resMax = distance;
             }
         }
-        // Mean of residues
+        // Mean of residuals
         resMean = count / nbMeas;
     }
 
@@ -248,15 +248,15 @@ public class LocalisationMetrics {
         earthDistanceMean = earthDistanceCount / nbMeas;
     }
 
-    /** Get the max residue.
-     * @return maximum of residues
+    /** Get the max residual.
+     * @return maximum of residuals
      */
     public double getMaxResidual() {
         return resMax;
     }
 
-    /** Get the mean of residues.
-     * @return mean of residues
+    /** Get the mean of residuals.
+     * @return mean of residuals
      */
     public double getMeanResidual() {
         return resMean;
@@ -276,15 +276,15 @@ public class LocalisationMetrics {
         return losDistanceMean;
     }
 
-    /** Get the Earth distance maximum residue.
-     * @return Earth distance max residue
+    /** Get the Earth distance maximum residual.
+     * @return Earth distance max residual
      */
     public double getEarthMaxDistance() {
         return earthDistanceMax;
     }
 
-    /** Get the Earth distance mean residue.
-     * @return Earth distance mean residue
+    /** Get the Earth distance mean residual.
+     * @return Earth distance mean residual
      */
     public double getEarthMeanDistance() {
         return earthDistanceMean;

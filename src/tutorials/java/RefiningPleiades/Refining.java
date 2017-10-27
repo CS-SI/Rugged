@@ -235,8 +235,8 @@ public class Refining {
         	stUnit="meters";
         }
 
-        LocalisationMetrics residues = new LocalisationMetrics(groundMapping, rugged, unit);
-        System.out.format("Max: %3.4e Mean: %3.4e %s%n",residues.getMaxResidual(),residues.getMeanResidual(), stUnit);
+        LocalisationMetrics residuals = new LocalisationMetrics(groundMapping, rugged, unit);
+        System.out.format("Max: %3.4e Mean: %3.4e %s%n",residuals.getMaxResidual(),residuals.getMeanResidual(), stUnit);
     }
 
     /** Compute metrics to evaluate geometric performances in location,
@@ -255,10 +255,10 @@ public class Refining {
         if(unit) stUnit="degrees";
         else stUnit="meters";
 
-        LocalisationMetrics residues = new LocalisationMetrics(interMapping, ruggedA, ruggedB, unit);
-        System.out.format("Max: %1.4e Mean: %1.4e %s%n",residues.getMaxResidual(),residues.getMeanResidual(), stUnit);
-        System.out.format("LOS distance Max: %1.4e Mean: %1.4e %s%n",residues.getLosMaxDistance(),residues.getLosMeanDistance(), stUnit);
-        System.out.format("Earth distance Max: %1.4e Mean: %1.4e %s%n",residues.getEarthMaxDistance(),residues.getEarthMeanDistance(), stUnit);
+        LocalisationMetrics residuals = new LocalisationMetrics(interMapping, ruggedA, ruggedB, unit);
+        System.out.format("Max: %1.4e Mean: %1.4e %s%n",residuals.getMaxResidual(),residuals.getMeanResidual(), stUnit);
+        System.out.format("LOS distance Max: %1.4e Mean: %1.4e %s%n",residuals.getLosMaxDistance(),residuals.getLosMeanDistance(), stUnit);
+        System.out.format("Earth distance Max: %1.4e Mean: %1.4e %s%n",residuals.getEarthMaxDistance(),residuals.getEarthMeanDistance(), stUnit);
     }
 
     /** Reset a model
