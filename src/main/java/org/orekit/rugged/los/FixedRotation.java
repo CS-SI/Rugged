@@ -43,7 +43,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
      * in the multiplications/divisions sequences.
      * </p>
      */
-    private final double SCALE = FastMath.scalb(1.0, 0);
+    private final double SCALE = FastMath.scalb(1.0, -20);
 
     /** Rotation axis. */
     private final Vector3D axis;
