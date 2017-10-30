@@ -100,12 +100,12 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
         for (final String ruggedNameA : this.ruggedMap.keySet()) {
             for (final String ruggedNameB : this.ruggedMap.keySet()) {
                 
-                for (final LineSensor sensorA : this.sensors) {
-                    for (final LineSensor sensorB : this.sensors) {
+                for (final LineSensor sensorA : this.getSensors()) {
+                    for (final LineSensor sensorB : this.getSensors()) {
                         
                         final String sensorNameA = sensorA.getName();
                         final String sensorNameB = sensorB.getName();
-                        final SensorToSensorMapping mapping = this.measurements.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
+                        final SensorToSensorMapping mapping = this.getMeasurements().getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
                         
                         if (mapping != null) {
                             this.sensorToSensorMappings.add(mapping);
@@ -181,7 +181,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
             try {
                 // set the current parameters values
                 int i = 0;
-                for (final ParameterDriver driver : this.drivers) {
+                for (final ParameterDriver driver : this.getDrivers()) {
                     driver.setNormalizedValue(point.getEntry(i++));
                 }
 
@@ -189,7 +189,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
 
                 // compute distance and its partial derivatives
                 final RealVector value = new ArrayRealVector(target.length);
-                final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, this.nbParams);
+                final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, this.getNbParams());
 
                 int l = 0;
                 for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
@@ -224,7 +224,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
 
                         final DerivativeStructure[] ilResult = 
                                 ruggedB.distanceBetweenLOSDerivatives(lineSensorA, dateA, pixelA, scToBodyA, 
-                                                                      lineSensorB, dateB, pixelB, generator);
+                                                                      lineSensorB, dateB, pixelB, this.getGenerator());
 
                         if (ilResult == null) {
                             // TODO GP manque code
@@ -234,10 +234,10 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
                             value.setEntry(l + 1, ilResult[1].getValue());
 
                             // extract the Jacobian
-                            final int[] orders = new int[this.nbParams];
+                            final int[] orders = new int[this.getNbParams()];
                             int m = 0;
 
-                            for (final ParameterDriver driver : this.drivers) {
+                            for (final ParameterDriver driver : this.getDrivers()) {
                                 final double scale = driver.getScale();
                                 orders[m] = 1;
                                 jacobian.setEntry(l, m, ilResult[0].getPartialDerivative(orders) * scale);

@@ -55,19 +55,19 @@ abstract class OptimizationProblemBuilder {
     protected static final int ESTIMATION_LINE_RANGE_MARGIN = 100;
 
     /** Derivative structure generator.*/
-    protected final DSGenerator generator;
+    private final DSGenerator generator;
 
     /** Parameter drivers list. */
-    protected final List<ParameterDriver> drivers;
+    private final List<ParameterDriver> drivers;
 
     /** Number of parameters to refine. */
-    protected final int nbParams;
+    private final int nbParams;
 
     /** Measurements. */
-    protected Observables measurements;
+    private Observables measurements;
 
     /** Sensors list. */
-    protected final List<LineSensor> sensors;
+    private final List<LineSensor> sensors;
 
     /** Constructor.
      * @param sensors list of sensors to refine
@@ -89,29 +89,6 @@ abstract class OptimizationProblemBuilder {
 
         this.measurements = measurements;
         this.sensors = sensors;
-    }
-
-    /** Get the number of parameters to refine.
-     * @return the number of parameters to refine
-     */
-    public final int getNbParams() {
-        return this.nbParams;
-    }
-
-    /**
-     * Get the parameters drivers list.
-     * @return the selected list of parameters driver
-     */
-    public final List<ParameterDriver> getSelectedParametersDriver() {
-        return this.drivers;
-    }
-
-    /**
-     * Get the derivative structure generator.
-     * @return the derivative structure generator.
-     */
-    public final DSGenerator getGenerator() {
-        return this.generator;
     }
 
     /** Least squares problem builder.
@@ -258,5 +235,42 @@ abstract class OptimizationProblemBuilder {
                 }
             }
         };
+    }
+
+    /** Get the sensors list.
+     * @return the sensors list
+     */
+    protected List<LineSensor> getSensors() {
+        return sensors;
+    }
+    
+    /** Get the number of parameters to refine.
+     * @return the number of parameters to refine
+     */
+    protected final int getNbParams() {
+        return this.nbParams;
+    }
+
+    /**
+     * Get the parameters drivers list.
+     * @return the selected list of parameters driver
+     */
+    protected final List<ParameterDriver> getDrivers() {
+        return this.drivers;
+    }
+
+    /**
+     * Get the derivative structure generator.
+     * @return the derivative structure generator.
+     */
+    protected final DSGenerator getGenerator() {
+        return this.generator;
+    }
+    
+    /** Get the measurements.
+     * @return the measurements
+     */
+    protected Observables getMeasurements() {
+        return measurements;
     }
 }

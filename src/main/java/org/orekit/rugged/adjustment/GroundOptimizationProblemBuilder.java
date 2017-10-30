@@ -98,8 +98,8 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
         
         final String ruggedName = rugged.getName();
         this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
-        for (final LineSensor lineSensor : sensors) {
-            final SensorToGroundMapping mapping = this.measurements.getGroundMapping(ruggedName, lineSensor.getName());
+        for (final LineSensor lineSensor : this.getSensors()) {
+            final SensorToGroundMapping mapping = this.getMeasurements().getGroundMapping(ruggedName, lineSensor.getName());
             if (mapping != null) {
                 this.sensorToGroundMappings.add(mapping);
             }
@@ -163,7 +163,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
 
                 // set the current parameters values
                 int i = 0;
-                for (final ParameterDriver driver : this.drivers) {
+                for (final ParameterDriver driver : this.getDrivers()) {
                     driver.setNormalizedValue(point.getEntry(i++));
                 }
 
@@ -171,12 +171,12 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
 
                 // compute inverse loc and its partial derivatives
                 final RealVector value = new ArrayRealVector(target.length);
-                final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, this.nbParams);
+                final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, this.getNbParams());
                 int l = 0;
                 for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
                     for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMapping()) {
                         final GeodeticPoint gp = mapping.getValue();
-                        final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, generator);
+                        final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, this.getGenerator());
 
                         if (ilResult == null) {
                             value.setEntry(l, minLine - 100.0); // arbitrary
@@ -190,9 +190,9 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
                             value.setEntry(l + 1, ilResult[1].getValue());
 
                             // extract the Jacobian
-                            final int[] orders = new int[this.nbParams];
+                            final int[] orders = new int[this.getNbParams()];
                             int m = 0;
-                            for (final ParameterDriver driver : this.drivers) {
+                            for (final ParameterDriver driver : this.getDrivers()) {
                                 final double scale = driver.getScale();
                                 orders[m] = 1;
                                 jacobian.setEntry(l, m,
