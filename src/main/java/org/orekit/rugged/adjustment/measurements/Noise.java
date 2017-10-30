@@ -28,7 +28,7 @@ public class Noise {
     private static final int GAUSSIAN = 0;
 
     /** Dimension. */
-    private static int dimension;
+    private int dimension;
 
     /** Mean. */
     private double[] mean;
@@ -47,50 +47,49 @@ public class Noise {
         
         this.mean = new double[dimension];
         this.standardDeviation = new double[dimension];
-        Noise.dimension = dimension;
+        this.dimension = dimension;
         this.distribution = distribution;
     }
 
-    /** Get the mean
+    /** Get the mean.
      * @return the mean
      */
     public double[] getMean() {
-        return mean;
+        return mean.clone();
     }
 
-    /** Set the mean
-     * @param mean the mean to set
+    /** Set the mean.
+     * @param meanValue the mean to set
      */
-    public void setMean(final double[] mean) {
-        this.mean = mean;
+    public void setMean(final double[] meanValue) {
+        this.mean = meanValue.clone();
     }
 
-    /** Get the standard deviation
+    /** Get the standard deviation.
      * @return the standard deviation
      */
     public double[] getStandardDeviation() {
-        return standardDeviation;
+        return standardDeviation.clone();
     }
 
-    /** Set the standard deviation
-     * @param standardDeviation the standard deviation to set
+    /** Set the standard deviation.
+     * @param standardDeviationValue the standard deviation to set
      */
-    public void setStandardDeviation(final double[] standardDeviation) {
-        this.standardDeviation = standardDeviation;
+    public void setStandardDeviation(final double[] standardDeviationValue) {
+        this.standardDeviation = standardDeviationValue.clone();
     }
 
-    /** Get the distribution
+    /** Get the distribution.
      * @return the distribution
      */
     public int getDistribution() {
         return distribution;
     }
 
-    /** Get the dimension
+    /** Get the dimension.
      * @return the dimension
      */
-    public static int getDimension() {
+    public int getDimension() {
         return dimension;
     }
 }
-

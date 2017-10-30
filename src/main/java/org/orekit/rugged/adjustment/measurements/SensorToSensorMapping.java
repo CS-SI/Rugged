@@ -21,15 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.orekit.rugged.api.Rugged;
-import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.utils.SpacecraftToObservedBody;
-import org.orekit.time.AbsoluteDate;
 
 /** Container for mapping sensors pixels of two viewing models.
  * Store the distance between both lines of sight computed with 
- * {@link Rugged#distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)}
+ * {@link org.orekit.rugged.api.Rugged#distanceBetweenLOS(org.orekit.rugged.linesensor.LineSensor, org.orekit.time.AbsoluteDate, double, org.orekit.rugged.utils.SpacecraftToObservedBody, org.orekit.rugged.linesensor.LineSensor, org.orekit.time.AbsoluteDate, double)}
  * <p> Constraints in relation to Earth distance can be added.
  * @see SensorMapping
  * @author Lucie LabatAllee
