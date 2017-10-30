@@ -80,7 +80,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     public InterSensorsOptimizationProblemBuilder(final List<LineSensor> sensors,
                                                   final Observables measurements, final Collection<Rugged> ruggedList)
         throws RuggedException {
-    	
+        
         super(sensors, measurements);
         this.ruggedMap = new LinkedHashMap<String, Rugged>();
         for (final Rugged rugged : ruggedList) {
@@ -95,25 +95,25 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     @Override
     protected void initMapping() {
 
-    	this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
-    	
-    	for (final String ruggedNameA : this.ruggedMap.keySet()) {
-    		for (final String ruggedNameB : this.ruggedMap.keySet()) {
-    			
-    			for (final LineSensor sensorA : this.sensors) {
-    				for (final LineSensor sensorB : this.sensors) {
-    					
-    					final String sensorNameA = sensorA.getName();
-    					final String sensorNameB = sensorB.getName();
-    					final SensorToSensorMapping mapping = this.measurements.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
-    					
-    					if (mapping != null) {
-    						this.sensorToSensorMappings.add(mapping);
-    					}
-    				}
-    			}
-    		}
-    	}
+        this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
+        
+        for (final String ruggedNameA : this.ruggedMap.keySet()) {
+            for (final String ruggedNameB : this.ruggedMap.keySet()) {
+                
+                for (final LineSensor sensorA : this.sensors) {
+                    for (final LineSensor sensorB : this.sensors) {
+                        
+                        final String sensorNameA = sensorA.getName();
+                        final String sensorNameB = sensorB.getName();
+                        final SensorToSensorMapping mapping = this.measurements.getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
+                        
+                        if (mapping != null) {
+                            this.sensorToSensorMappings.add(mapping);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -122,51 +122,51 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     @Override
     protected void createTargetAndWeight() throws RuggedException {
 
-    	try {
-    		int n = 0;
-    		for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
-    			n += reference.getMapping().size();
-    		}
-    		if (n == 0) {
-    			throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
-    		}
+        try {
+            int n = 0;
+            for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
+                n += reference.getMapping().size();
+            }
+            if (n == 0) {
+                throw new RuggedException(RuggedMessages.NO_REFERENCE_MAPPINGS);
+            }
 
-    		n = 2 * n;
+            n = 2 * n;
 
-    		final double[] target = new double[n];
-    		final double[] weight = new double[n];
+            final double[] target = new double[n];
+            final double[] weight = new double[n];
 
-    		int k = 0;
-    		for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
+            int k = 0;
+            for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
 
-    			// Get Earth constraint weight
-    			final double earthConstraintWeight = reference.getEarthConstraintWeight();
-    			
-    			int i = 0;
-    			for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
-    				
-    				if (i == reference.getMapping().size()) break;
+                // Get Earth constraint weight
+                final double earthConstraintWeight = reference.getEarthConstraintWeight();
+                
+                int i = 0;
+                for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
+                    
+                    if (i == reference.getMapping().size()) break;
 
-    				// Get LOS distance
-    				final Double losDistance  = reference.getLosDistance(i);
+                    // Get LOS distance
+                    final Double losDistance  = reference.getLosDistance(i);
 
-    				weight[k] = 1.0 - earthConstraintWeight;
-    				target[k++] = losDistance.doubleValue();
+                    weight[k] = 1.0 - earthConstraintWeight;
+                    target[k++] = losDistance.doubleValue();
 
-    				// Get Earth distance (constraint)
-    				final Double earthDistance  = reference.getEarthDistance(i);
-    				weight[k] = earthConstraintWeight;
-    				target[k++] = earthDistance.doubleValue();
-    			}
-    		}
+                    // Get Earth distance (constraint)
+                    final Double earthDistance  = reference.getEarthDistance(i);
+                    weight[k] = earthConstraintWeight;
+                    target[k++] = earthDistance.doubleValue();
+                }
+            }
 
-    		this.targetAndWeight = new HashMap<String, double[]>();
-    		this.targetAndWeight.put(TARGET, target);
-    		this.targetAndWeight.put(WEIGHT, weight);
+            this.targetAndWeight = new HashMap<String, double[]>();
+            this.targetAndWeight.put(TARGET, target);
+            this.targetAndWeight.put(WEIGHT, weight);
 
-    	} catch  (RuggedExceptionWrapper rew) {
-    		throw rew.getException();
-    	}
+        } catch  (RuggedExceptionWrapper rew) {
+            throw rew.getException();
+        }
     }
 
     /* (non-Javadoc)
@@ -174,11 +174,11 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
      */
     @Override
     protected MultivariateJacobianFunction createFunction() {
-    	
+        
         // model function
         final MultivariateJacobianFunction model = point -> {
 
-        	try {
+            try {
                 // set the current parameters values
                 int i = 0;
                 for (final ParameterDriver driver : this.drivers) {
@@ -223,8 +223,8 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
                         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
                         final DerivativeStructure[] ilResult = 
-                        		ruggedB.distanceBetweenLOSDerivatives(lineSensorA, dateA, pixelA, scToBodyA, 
-                        				                              lineSensorB, dateB, pixelB, generator);
+                                ruggedB.distanceBetweenLOSDerivatives(lineSensorA, dateA, pixelA, scToBodyA, 
+                                                                      lineSensorB, dateB, pixelB, generator);
 
                         if (ilResult == null) {
                             // TODO GP manque code

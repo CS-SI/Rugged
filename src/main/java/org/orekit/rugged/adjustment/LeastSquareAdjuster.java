@@ -41,7 +41,7 @@ public class LeastSquareAdjuster {
      */
     // TODO GP public protected ???
     LeastSquareAdjuster(final OptimizerId optimizerID) {
-    	
+        
         this.optimizerID = optimizerID;
         this.adjuster = this.selectOptimizer();
     }
@@ -49,7 +49,7 @@ public class LeastSquareAdjuster {
     /** Default constructor with Gauss Newton with QR decomposition algorithm.*/
     // TODO GP public protected ???
     LeastSquareAdjuster() {
-    	
+        
         this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;
         this.adjuster = this.selectOptimizer();
     }
@@ -66,7 +66,7 @@ public class LeastSquareAdjuster {
      * @return the least square optimizer
      */
     private LeastSquaresOptimizer selectOptimizer() {
-    	
+        
         // Set up the optimizer
         switch (this.optimizerID) {
         

@@ -33,7 +33,6 @@ import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.adjustment.measurements.Observables;
-import org.orekit.utils.ParameterDriver;
 
 /** Create adjustment context for viewing model refining.
  * @author Lucie LabatAllee
@@ -60,7 +59,7 @@ public class AdjustmentContext {
      * @param measurements control and tie points
      */
     public AdjustmentContext(final Collection<Rugged> viewingModel, final Observables measurements) {
-    	
+        
         this.viewingModel = new HashMap<String, Rugged>();
         for (final Rugged r : viewingModel) {
             this.viewingModel.put(r.getName(), r);
@@ -85,15 +84,15 @@ public class AdjustmentContext {
      * parameters, like rotation angles polynomial coefficients.
      * </p>
      * <p>
-     * Before using this method, the {@link ParameterDriver viewing model
+     * Before using this method, the {@link org.orekit.utils.ParameterDriver viewing model
      * parameters} retrieved by calling the
      * {@link LineSensor#getParametersDrivers() getParametersDrivers()} method
      * on the desired sensors must be configured. The parameters that should be
-     * estimated must have their {@link ParameterDriver#setSelected(boolean)
+     * estimated must have their {@link org.orekit.utils.ParameterDriver#setSelected(boolean)
      * selection status} set to {@code true} whereas the parameters that should
      * retain their current value must have their
-     * {@link ParameterDriver#setSelected(boolean) selection status} set to
-     * {@code false}. If needed, the {@link ParameterDriver#setValue(double)
+     * {@link org.orekit.utils.ParameterDriver#setSelected(boolean) selection status} set to
+     * {@code false}. If needed, the {@link org.orekit.utils.ParameterDriver#setValue(double)
      * value} of the estimated/selected parameters can also be changed before
      * calling the method, as this value will serve as the initial value in the
      * estimation process.
@@ -125,9 +124,9 @@ public class AdjustmentContext {
      *            ill-conditioned problem ...)
      */
     public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations, 
-    		                              final double parametersConvergenceThreshold)
+                                          final double parametersConvergenceThreshold)
         throws RuggedException {
-    	
+        
         try {
 
             final List<Rugged> ruggedList = new ArrayList<Rugged>();

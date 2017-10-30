@@ -49,7 +49,7 @@ public class Observables {
      * @param nbModels number of viewing models to map
      */
     public Observables(final int nbModels) {
-    	
+        
         this.groundMappings = new LinkedHashMap<String, SensorToGroundMapping>();
         this.interMappings = new LinkedHashMap<String, SensorToSensorMapping>();
         this.nbModels = nbModels;
@@ -59,7 +59,7 @@ public class Observables {
      * @param interMapping sensor to sensor mapping
      */
     public void addInterMapping(final SensorToSensorMapping interMapping) {
-    	
+        
         interMappings.put(this.createKey(interMapping), interMapping);
     }
 
@@ -68,7 +68,7 @@ public class Observables {
      * @param groundMapping sensor to ground mapping
      */
     public void addGroundMapping(final SensorToGroundMapping groundMapping) {
-    	
+        
         groundMappings.put(this.createKey(groundMapping), groundMapping);
     }
 
@@ -86,7 +86,7 @@ public class Observables {
      * @return selected ground mapping or null if sensor is not found
      */
     public SensorToGroundMapping getGroundMapping(final String ruggedName, final String sensorName) {
-    	
+        
         final SensorToGroundMapping mapping = this.groundMappings.get(ruggedName + RUGGED_SENSOR_SEPARATOR + sensorName);
         return mapping;
     }
@@ -116,9 +116,9 @@ public class Observables {
      * @return selected ground mapping or null if a sensor is not found
      */
     public SensorToSensorMapping getInterMapping(final String ruggedNameA, final String sensorNameA, 
-    		                                     final String ruggedNameB, final String sensorNameB) {
+                                                 final String ruggedNameB, final String sensorNameB) {
 
-    	//TODO GP revoir la creation de string par "+"
+        //TODO GP revoir la creation de string par "+"
         final String keyA = ruggedNameA + RUGGED_SENSOR_SEPARATOR + sensorNameA;
         final String keyB = ruggedNameB + RUGGED_SENSOR_SEPARATOR + sensorNameB;
         final SensorToSensorMapping mapping = interMappings.get(keyA + SENSORS_SEPARATOR + keyB);
@@ -131,7 +131,7 @@ public class Observables {
      */
     private String createKey(final SensorToGroundMapping groundMapping)
     {
-    	//TODO GP revoir la creation de string par "+"
+        //TODO GP revoir la creation de string par "+"
         final String key = groundMapping.getRuggedName() + RUGGED_SENSOR_SEPARATOR + groundMapping.getSensorName();
         return key;
     }
@@ -142,7 +142,7 @@ public class Observables {
      */
     private String createKey(final SensorToSensorMapping sensorMapping)
     {
-    	//TODO GP revoir la creation de string par "+"
+        //TODO GP revoir la creation de string par "+"
         final String keyA = sensorMapping.getRuggedNameA() + RUGGED_SENSOR_SEPARATOR + sensorMapping.getSensorNameA();
         final String keyB = sensorMapping.getRuggedNameB() + RUGGED_SENSOR_SEPARATOR + sensorMapping.getSensorNameB();
         return keyA + SENSORS_SEPARATOR + keyB;

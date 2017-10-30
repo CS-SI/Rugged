@@ -84,7 +84,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     public GroundOptimizationProblemBuilder(final List<LineSensor> sensors,
                                             final Observables measurements, final Rugged rugged)
         throws RuggedException {
-    	
+        
         super(sensors, measurements);
         this.rugged = rugged;
         this.initMapping();
@@ -95,7 +95,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     @Override
     protected void initMapping() {
-    	
+        
         final String ruggedName = rugged.getName();
         this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
         for (final LineSensor lineSensor : sensors) {
@@ -111,7 +111,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     @Override
     protected void createTargetAndWeight() throws RuggedException {
-    	
+        
         try {
             int n = 0;
             for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
@@ -156,7 +156,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     @Override
     protected MultivariateJacobianFunction createFunction() {
-    	
+        
         // model function
         final MultivariateJacobianFunction model = point -> {
             try {

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -28,7 +29,7 @@ import org.orekit.time.AbsoluteDate;
 
 /** Container for mapping sensors pixels of two viewing models.
  * Store the distance between both lines of sight computed with 
- * {@link org.orekit.rugged.api.Rugged#distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)}
+ * {@link Rugged#distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)}
  * <p> Constraints in relation to Earth distance can be added.
  * @see SensorMapping
  * @author Lucie LabatAllee
@@ -64,7 +65,7 @@ public class SensorToSensorMapping {
      * @param sensorNameB name of the sensor B to which mapping applies
      */
     public SensorToSensorMapping(final String sensorNameA, final String sensorNameB) {
-    	
+        
         this(sensorNameA, RUGGED, sensorNameB, RUGGED, 0.0);
     }
 
@@ -82,10 +83,10 @@ public class SensorToSensorMapping {
      * </ul>
      */
     public SensorToSensorMapping(final String sensorNameA, final String ruggedNameA, 
-    		                     final String sensorNameB, final String ruggedNameB, 
-    		                     final double earthConstraintWeight) {
-    	
-    	this.interMapping = new SensorMapping<SensorPixel>(sensorNameA, ruggedNameA);
+                                 final String sensorNameB, final String ruggedNameB, 
+                                 final double earthConstraintWeight) {
+        
+        this.interMapping = new SensorMapping<SensorPixel>(sensorNameA, ruggedNameA);
         this.sensorNameB = sensorNameB;
         this.ruggedNameB = ruggedNameB;
         this.losDistances = new ArrayList<Double>();
@@ -100,8 +101,8 @@ public class SensorToSensorMapping {
      * @param ruggedNameB name of the Rugged B to which mapping applies
      */
     public SensorToSensorMapping(final String sensorNameA, final String ruggedNameA, 
-    		                     final String sensorNameB, final String ruggedNameB) {
-    	
+                                 final String sensorNameB, final String ruggedNameB) {
+        
         this(sensorNameA, ruggedNameA, sensorNameB, ruggedNameB, 0.0);
     }
 
@@ -119,7 +120,7 @@ public class SensorToSensorMapping {
      */
     public SensorToSensorMapping(final String sensorNameA, final String sensorNameB,
                                  final double earthConstraintWeight) {
-    	
+        
         this(sensorNameA, RUGGED, sensorNameB, RUGGED, earthConstraintWeight);
     }
 
@@ -201,7 +202,7 @@ public class SensorToSensorMapping {
      * @param losDistance distance between both line of sight
      */
     public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB, final Double losDistance) {
-    	
+        
         interMapping.addMapping(pixelA, pixelB);
         losDistances.add(losDistance);
     }
@@ -215,7 +216,7 @@ public class SensorToSensorMapping {
      */
     public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB,
                            final Double losDistance, final Double earthDistance) {
-    	
+        
         interMapping.addMapping(pixelA, pixelB);
         losDistances.add(losDistance);
         earthDistances.add(earthDistance);

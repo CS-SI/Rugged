@@ -75,7 +75,7 @@ abstract class OptimizationProblemBuilder {
      * @throws RuggedException an exception is generated if no parameters has been selected for refining
      */
     OptimizationProblemBuilder(final List<LineSensor> sensors, final Observables measurements) throws RuggedException {
-    	
+        
         try {
             this.generator = this.createGenerator(sensors);
             this.drivers = this.generator.getSelected();
@@ -134,12 +134,12 @@ abstract class OptimizationProblemBuilder {
     final ConvergenceChecker<LeastSquaresProblem.Evaluation> 
                             createChecker(final double parametersConvergenceThreshold) {
 
-    	// TODO GP description a completer 
-    	final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = 
-    			(iteration, previous, current) 
-    			-> current.getPoint().getLInfDistance(previous.getPoint()) 
-    			<= parametersConvergenceThreshold;
-    			
+        // TODO GP description a completer 
+        final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = 
+                (iteration, previous, current) 
+                -> current.getPoint().getLInfDistance(previous.getPoint()) 
+                <= parametersConvergenceThreshold;
+                
         return checker;
     }
 
@@ -147,7 +147,7 @@ abstract class OptimizationProblemBuilder {
      * @return start parameters values (normalized)
      */
     final double[] createStartTab() {
-    	
+        
         // Get start points (as a normalized value)
         final double[] start = new double[this.nbParams];
         int iStart = 0;
@@ -170,14 +170,14 @@ abstract class OptimizationProblemBuilder {
      * @return parameter validator
      */
     final ParameterValidator createParameterValidator() {
-    	
+        
         // Prevent parameters to exceed their prescribed bounds
         // TODO GP description a completer 
         final ParameterValidator validator = params -> {
             try {
                 int i = 0;
                 for (final ParameterDriver driver : this.drivers) {
-                	
+                    
                     // let the parameter handle min/max clipping
                     driver.setNormalizedValue(params.getEntry(i));
                     params.setEntry(i++, driver.getNormalizedValue());
@@ -199,15 +199,15 @@ abstract class OptimizationProblemBuilder {
     private DSGenerator createGenerator(final List<LineSensor> selectedSensors) {
 
         // Initialize set of drivers name
-    	final Set<String> names = new HashSet<>();
+        final Set<String> names = new HashSet<>();
         
         // Get the drivers name 
         for (final LineSensor sensor : selectedSensors) {
-        	
-        	// Get the drivers name for the sensor 
+            
+            // Get the drivers name for the sensor 
             sensor.getParametersDrivers().forEach(driver -> {
-            	
-            	// Add the name of the driver to the set of drivers name
+                
+                // Add the name of the driver to the set of drivers name
                 if (names.contains(driver.getName()) == false) {
                     names.add(driver.getName());
                 }
@@ -220,7 +220,7 @@ abstract class OptimizationProblemBuilder {
         
         // Get the list of selected drivers
         for (final LineSensor sensor : selectedSensors) {
-        	
+            
             sensor.getParametersDrivers().filter(driver -> driver.isSelected()).forEach(driver -> {
                 if (map.get(driver.getName()) == null) {
                     map.put(driver.getName(), map.size());
@@ -249,7 +249,7 @@ abstract class OptimizationProblemBuilder {
             /** {@inheritDoc} */
             @Override
             public DerivativeStructure variable(final ParameterDriver driver) {
-            	
+                
                 final Integer index = map.get(driver.getName());
                 if (index == null) {
                     return constant(driver.getValue());

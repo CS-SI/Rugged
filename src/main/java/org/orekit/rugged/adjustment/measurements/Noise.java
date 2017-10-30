@@ -44,7 +44,7 @@ public class Noise {
      * @param dimension noise dimension
      */
     public Noise(final int distribution, final int dimension) {
-    	
+        
         this.mean = new double[dimension];
         this.standardDeviation = new double[dimension];
         Noise.dimension = dimension;

@@ -631,7 +631,7 @@ public class Rugged {
         throws RuggedException {
 
         // Compute the approximate transform between spacecraft and observed body
-    	// from Rugged instance A
+        // from Rugged instance A
         final Transform scToInertA = scToBodyA.getScToInertial(dateA); 
         final Transform inertToBodyA = scToBodyA.getInertialToBody(dateA);
         final Transform transformScToBodyA = new Transform(dateA, scToInertA, inertToBodyA);
@@ -699,20 +699,20 @@ public class Rugged {
      * @see #distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)
      */
     public DerivativeStructure[] distanceBetweenLOSDerivatives(
-    		                     final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
-    		                     final SpacecraftToObservedBody scToBodyA,
-    		                     final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB,
-    		                     final DSGenerator generator)
+                                 final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
+                                 final SpacecraftToObservedBody scToBodyA,
+                                 final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB,
+                                 final DSGenerator generator)
         throws RuggedException {
 
         // Compute the approximate transforms between spacecraft and observed body
-    	// from Rugged instance A
-    	final Transform scToInertA = scToBodyA.getScToInertial(dateA); 
+        // from Rugged instance A
+        final Transform scToInertA = scToBodyA.getScToInertial(dateA); 
         final Transform inertToBodyA = scToBodyA.getInertialToBody(dateA);
         final Transform transformScToBodyA = new Transform(dateA, scToInertA, inertToBodyA);
-    	
-    	// from (current) Rugged instance B
-    	final Transform scToInertB = scToBody.getScToInertial(dateB);  
+        
+        // from (current) Rugged instance B
+        final Transform scToInertB = scToBody.getScToInertial(dateB);  
         final Transform inertToBodyB = scToBody.getInertialToBody(dateB);
         final Transform transformScToBodyB = new Transform(dateB, scToInertB, inertToBodyB);
 
