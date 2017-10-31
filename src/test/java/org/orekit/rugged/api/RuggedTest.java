@@ -1076,6 +1076,17 @@ public class RuggedTest {
                                          3.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
     }
 
+    /**
+     * @param dimension
+     * @param lightTimeCorrection
+     * @param aberrationOfLightCorrection
+     * @param lineTolerance
+     * @param pixelTolerance
+     * @param lineDerivativeRelativeTolerance
+     * @param pixelDerivativeRelativeTolerance
+     * @throws RuggedException
+     * @throws OrekitException
+     */
     private void doTestInverseLocationDerivatives(int dimension,
                                                   boolean lightTimeCorrection,
                                                   boolean aberrationOfLightCorrection,
@@ -1146,9 +1157,13 @@ public class RuggedTest {
 
             // prepare generator
             final Observables measurements = new Observables(1);
-            GroundOptimizationProblemBuilder OptimizationProblembuilder = new GroundOptimizationProblemBuilder(Collections.singletonList(lineSensor),
+            GroundOptimizationProblemBuilder optimizationPbBuilder = new GroundOptimizationProblemBuilder(Collections.singletonList(lineSensor),
                                                                                                                measurements, rugged);
-            DSGenerator generator = OptimizationProblembuilder.getGenerator();
+            
+            java.lang.reflect.Method getGenerator = GroundOptimizationProblemBuilder.class.getSuperclass().getDeclaredMethod("getGenerator");
+            getGenerator.setAccessible(true);
+            
+            DSGenerator generator = (DSGenerator) getGenerator.invoke(optimizationPbBuilder);
 
             double referenceLine = 0.87654 * dimension;
             GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
@@ -1234,9 +1249,9 @@ public class RuggedTest {
             Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
 
         } catch (InvocationTargetException | NoSuchMethodException |
-                 SecurityException | IllegalAccessException |
-                 IllegalArgumentException | URISyntaxException |
-                 OrekitExceptionWrapper | RuggedExceptionWrapper e) {
+                SecurityException | IllegalAccessException |
+                IllegalArgumentException | URISyntaxException |
+                OrekitExceptionWrapper | RuggedExceptionWrapper e) {
             Assert.fail(e.getLocalizedMessage());
         }
     }
