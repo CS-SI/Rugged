@@ -139,8 +139,8 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
             int k = 0;
             for (final SensorToSensorMapping reference : this.sensorToSensorMappings) {
 
-                // Get Earth constraint weight
-                final double earthConstraintWeight = reference.getEarthConstraintWeight();
+                // Get central body constraint weight
+                final double bodyConstraintWeight = reference.getBodyConstraintWeight();
 
                 int i = 0;
                 for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
@@ -150,13 +150,13 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
                     // Get LOS distance
                     final Double losDistance  = reference.getLosDistance(i);
 
-                    weight[k] = 1.0 - earthConstraintWeight;
+                    weight[k] = 1.0 - bodyConstraintWeight;
                     target[k++] = losDistance.doubleValue();
 
-                    // Get Earth distance (constraint)
-                    final Double earthDistance  = reference.getEarthDistance(i);
-                    weight[k] = earthConstraintWeight;
-                    target[k++] = earthDistance.doubleValue();
+                    // Get central body distance (constraint)
+                    final Double bodyDistance  = reference.getBodyDistance(i);
+                    weight[k] = bodyConstraintWeight;
+                    target[k++] = bodyDistance.doubleValue();
                 }
             }
 

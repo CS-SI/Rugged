@@ -224,7 +224,7 @@ public class LocalisationMetrics {
 
             // Earth distance control
             final double estEarthDistance = distances[1]; // Earth distance estimation
-            final double measEarthDistance = measMapping.getEarthDistance(i).doubleValue(); // Earth measurement distance
+            final double measEarthDistance = measMapping.getBodyDistance(i).doubleValue(); // Earth measurement distance
             final double earthDistance =  FastMath.abs(estEarthDistance - measEarthDistance);
 
             if (earthDistance > earthDistanceMax) {

@@ -767,9 +767,9 @@ public class Rugged {
         // between LOS
         final DerivativeStructure dMin = vDistanceMin.getNorm();
         // to the ground
-        final DerivativeStructure dEarth = midPoint.getNorm();
+        final DerivativeStructure dCentralBody = midPoint.getNorm();
 
-        return new DerivativeStructure[] {dMin, dEarth};
+        return new DerivativeStructure[] {dMin, dCentralBody};
     }
 
 

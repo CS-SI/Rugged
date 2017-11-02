@@ -26,7 +26,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 /** Container for mapping sensors pixels of two viewing models.
  * Store the distance between both lines of sight computed with
  * {@link org.orekit.rugged.api.Rugged#distanceBetweenLOS(org.orekit.rugged.linesensor.LineSensor, org.orekit.time.AbsoluteDate, double, org.orekit.rugged.utils.SpacecraftToObservedBody, org.orekit.rugged.linesensor.LineSensor, org.orekit.time.AbsoluteDate, double)}
- * <p> Constraints in relation to Earth distance can be added.
+ * <p> Constraints in relation to central body distance can be added.
  * @see SensorMapping
  * @author Lucie LabatAllee
  * @author Guylaine Prat
@@ -49,14 +49,14 @@ public class SensorToSensorMapping {
     /** Distances between two LOS. */
     private final List<Double> losDistances;
 
-    /** Earth distances associated with pixel A. */
-    private final List<Double> earthDistances;
+    /** Central body distances associated with pixel A. */
+    private final List<Double> bodyDistances;
 
-    /** Earth constraint weight. */
-    private double earthConstraintWeight;
+    /** Body constraint weight. */
+    private double bodyConstraintWeight;
 
 
-    /** Build a new instance without Earth constraint (with default Rugged names).
+    /** Build a new instance without central body constraint (with default Rugged names).
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
      */
@@ -65,32 +65,32 @@ public class SensorToSensorMapping {
         this(sensorNameA, RUGGED, sensorNameB, RUGGED, 0.0);
     }
 
-    /** Build a new instance with Earth constraint.
+    /** Build a new instance with central body constraint.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param ruggedNameA name of the Rugged A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
      * @param ruggedNameB name of the Rugged B to which mapping applies
-     * @param earthConstraintWeight weight given to the Earth distance constraint
+     * @param bodyConstraintWeight weight given to the central body distance constraint
      * with respect to the LOS distance (between 0 and 1).
      * <br>Weighting will be applied as follow :
      * <ul>
-     *    <li>(1 - earthConstraintWeight) for LOS distance weighting</li>
-     *    <li>earthConstraintWeight for Earth distance weighting</li>
+     *    <li>(1 - bodyConstraintWeight) for LOS distance weighting</li>
+     *    <li>bodyConstraintWeight for central body distance weighting</li>
      * </ul>
      */
     public SensorToSensorMapping(final String sensorNameA, final String ruggedNameA,
                                  final String sensorNameB, final String ruggedNameB,
-                                 final double earthConstraintWeight) {
+                                 final double bodyConstraintWeight) {
 
         this.interMapping = new SensorMapping<SensorPixel>(sensorNameA, ruggedNameA);
         this.sensorNameB = sensorNameB;
         this.ruggedNameB = ruggedNameB;
         this.losDistances = new ArrayList<Double>();
-        this.earthDistances = new ArrayList<Double>();
-        this.earthConstraintWeight = earthConstraintWeight;
+        this.bodyDistances = new ArrayList<Double>();
+        this.bodyConstraintWeight = bodyConstraintWeight;
     }
 
-    /** Build a new instance without Earth constraints.
+    /** Build a new instance without central body constraints.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param ruggedNameA name of the Rugged A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
@@ -102,22 +102,22 @@ public class SensorToSensorMapping {
         this(sensorNameA, ruggedNameA, sensorNameB, ruggedNameB, 0.0);
     }
 
-    /** Build a new instance with Earth constraints  (with default Rugged names):
-     * we want to minimize the distance between pixel A and Earth.
+    /** Build a new instance with central body constraints  (with default Rugged names):
+     * we want to minimize the distance between pixel A and central body.
      * @param sensorNameA name of the sensor A to which mapping applies
      * @param sensorNameB name of the sensor B to which mapping applies
-     * @param earthConstraintWeight weight given to the Earth distance constraint
+     * @param bodyConstraintWeight weight given to the central body distance constraint
      * with respect to the LOS distance (between 0 and 1).
      * <br>Weighting will be applied as follow :
      * <ul>
-     *    <li>(1 - earthConstraintWeight) for LOS distance weighting</li>
-     *    <li>earthConstraintWeight for Earth distance weighting</li>
+     *    <li>(1 - bodyConstraintWeight) for LOS distance weighting</li>
+     *    <li>bodyConstraintWeight for central body distance weighting</li>
      * </ul>
      */
     public SensorToSensorMapping(final String sensorNameA, final String sensorNameB,
-                                 final double earthConstraintWeight) {
+                                 final double bodyConstraintWeight) {
 
-        this(sensorNameA, RUGGED, sensorNameB, RUGGED, earthConstraintWeight);
+        this(sensorNameA, RUGGED, sensorNameB, RUGGED, bodyConstraintWeight);
     }
 
     /** Get the name of the sensor B to which mapping applies.
@@ -162,26 +162,26 @@ public class SensorToSensorMapping {
         return losDistances;
     }
 
-    /** Get distances between Earth and pixel A (mapping with constraints).
-     * @return the Earth distances
+    /** Get distances between central body and pixel A (mapping with constraints).
+     * @return the central body distances
      */
-    public List<Double> getEarthDistances() {
-        return earthDistances;
+    public List<Double> getBodyDistances() {
+        return bodyDistances;
     }
 
-    /** Get the weight given to the Earth distance constraint with respect to the LOS distance.
-     * @return the Earth constraint weight
+    /** Get the weight given to the central body distance constraint with respect to the LOS distance.
+     * @return the central body constraint weight
      */
-    public double getEarthConstraintWeight() {
-        return earthConstraintWeight;
+    public double getBodyConstraintWeight() {
+        return bodyConstraintWeight;
     }
 
-    /** Get distance between Earth and pixel A, corresponding to the inter-mapping index.
+    /** Get distance between central body and pixel A, corresponding to the inter-mapping index.
      * @param idx inter-mapping index
-     * @return the Earth distances at index idx
+     * @return the central body distances at index idx
      */
-    public Double getEarthDistance(final int idx) {
-        return getEarthDistances().get(idx);
+    public Double getBodyDistance(final int idx) {
+        return getBodyDistances().get(idx);
     }
 
     /** Get distance between LOS, corresponding to the inter-mapping index.
@@ -204,24 +204,24 @@ public class SensorToSensorMapping {
     }
 
     /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS.
-     *  and the Earth distance constraint associated with pixel A
+     *  and the central body distance constraint associated with pixel A
      * @param pixelA sensor pixel A
      * @param pixelB sensor pixel B corresponding to the sensor pixel A (by direct then inverse location)
      * @param losDistance distance between both line of sight
-     * @param earthDistance distance between Earth and pixel A
+     * @param bodyDistance distance between central body and pixel A
      */
     public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB,
-                           final Double losDistance, final Double earthDistance) {
+                           final Double losDistance, final Double bodyDistance) {
 
         interMapping.addMapping(pixelA, pixelB);
         losDistances.add(losDistance);
-        earthDistances.add(earthDistance);
+        bodyDistances.add(bodyDistance);
     }
 
-    /** Set the Earth constraint weight.
-     * @param earthConstraintWeight the Earth constraint weight to set
+    /** Set the central body constraint weight.
+     * @param bodyConstraintWeight the central body constraint weight to set
      */
-    public void setEarthConstraintWeight(final double earthConstraintWeight) {
-        this.earthConstraintWeight = earthConstraintWeight;
+    public void setBodyConstraintWeight(final double bodyConstraintWeight) {
+        this.bodyConstraintWeight = bodyConstraintWeight;
     }
 }
