@@ -40,7 +40,7 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.errors.OrekitException;
 
 /**
- * TODO GP add comments for tuto 
+ * TODO GP add comments for tuto
  * Pleiades viewing model class definition.
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
@@ -51,7 +51,7 @@ public class PleiadesViewingModel {
 
     /** intrinsic Pleiades parameters. */
     private double fov = 1.65; // 20km - alt 694km
-    
+
     // Number of line of the sensor
     private int dimension = 40000;
 
@@ -118,7 +118,7 @@ public class PleiadesViewingModel {
 
         // factor is a common parameters shared between all Pleiades models
         losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
-        
+
         return losBuilder.build();
     }
 
@@ -180,7 +180,7 @@ public int getDimension() {
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
 
         final LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, rate);
-        
+
         lineSensor = new LineSensor(sensorName, lineDatation, msiOffset, lineOfSight);
     }
 }

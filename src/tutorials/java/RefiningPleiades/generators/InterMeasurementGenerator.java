@@ -64,7 +64,7 @@ public class InterMeasurementGenerator implements Measurable {
     /** Number of measurements */
     private int measurementCount;
 
-    // TODO GP pas utilise ... 
+    // TODO GP pas utilise ...
     //   private String sensorNameA;
 
     /** Sensor name B */
@@ -75,7 +75,7 @@ public class InterMeasurementGenerator implements Measurable {
 
     /** Number of line for acquisition B */
     private int dimensionB;
-    
+
     /** Limit value for outlier points */
     private double outlier;
 
@@ -195,8 +195,8 @@ public class InterMeasurementGenerator implements Measurable {
                                                                  sensorA.getLOS(dateA, pixelA));
 
                 final SensorPixel sensorPixelB = ruggedB.inverseLocation(sensorNameB, gpA, minLine, maxLine);
-                
-                // We need to test if the sensor pixel is found in the prescribed lines 
+
+                // We need to test if the sensor pixel is found in the prescribed lines
                 // otherwise the sensor pixel is null
                 if (sensorPixelB != null) {
                 	
@@ -231,7 +231,7 @@ public class InterMeasurementGenerator implements Measurable {
                 }
             }
         }
-        
+
         this.observables.addInterMapping(interMapping);
     }
 
@@ -246,10 +246,10 @@ public class InterMeasurementGenerator implements Measurable {
         throws RuggedException {
 
     	// Get noise features (errors)
-    	// [pixelA, pixelB] mean 
-    	final double[] mean = noise.getMean(); 
-    	// [pixelA, pixelB] standard deviation 
-    	final double[] std = noise.getStandardDeviation(); 
+    	// [pixelA, pixelB] mean
+    	final double[] mean = noise.getMean();
+    	// [pixelA, pixelB] standard deviation
+    	final double[] std = noise.getStandardDeviation();
 
     	// Search the sensor pixel seeing point
         final int minLine = 0;
@@ -276,14 +276,14 @@ public class InterMeasurementGenerator implements Measurable {
                 final GeodeticPoint gpA = ruggedA.directLocation(dateA, sensorA.getPosition(),
                                                                  sensorA.getLOS(dateA, pixelA));
                 final SensorPixel sensorPixelB = ruggedB.inverseLocation(sensorNameB, gpA, minLine, maxLine);
-                
+
                 // We need to test if the sensor pixel is found in the prescribed lines
                 // otherwise the sensor pixel is null
                 if (sensorPixelB != null) {
                 	
                     final AbsoluteDate dateB = sensorB.getDate(sensorPixelB.getLineNumber());
                     final double pixelB = sensorPixelB.getPixelNumber();
-                    
+
                     // Get spacecraft to body transform of Rugged instance A
                     final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
@@ -315,7 +315,7 @@ public class InterMeasurementGenerator implements Measurable {
                 }
             }
         }
-        
+
         this.observables.addInterMapping(interMapping);
     }
 

@@ -59,7 +59,7 @@ public class AdjustmentContext {
      * @param measurements control and tie points
      */
     public AdjustmentContext(final Collection<Rugged> viewingModel, final Observables measurements) {
-        
+
         this.viewingModel = new HashMap<String, Rugged>();
         for (final Rugged r : viewingModel) {
             this.viewingModel.put(r.getName(), r);
@@ -123,10 +123,10 @@ public class AdjustmentContext {
      *            if parameters cannot be estimated (too few measurements,
      *            ill-conditioned problem ...)
      */
-    public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations, 
+    public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations,
                                           final double parametersConvergenceThreshold)
         throws RuggedException {
-        
+
         try {
 
             final List<Rugged> ruggedList = new ArrayList<Rugged>();
@@ -143,7 +143,7 @@ public class AdjustmentContext {
 
             final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(this.optimizerID);
             LeastSquaresProblem theProblem = null;
-            
+
             // builder
             switch (ruggedList.size()) {
             case 1:

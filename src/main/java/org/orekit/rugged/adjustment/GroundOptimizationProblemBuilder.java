@@ -46,8 +46,7 @@ import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.utils.ParameterDriver;
 
-/**
- *  TODO GP description a completer 
+/** TODO GP description a completer.
  * @author Guylaine Prat
  * @since 2.0
  */
@@ -74,8 +73,8 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     /** Target and weight (the solution of the optimization problem).*/
     private HashMap<String, double[] > targetAndWeight;
 
-    
-    /** TODO GP description a completer 
+
+    /** TODO GP description a completer.
      * @param sensors list of sensors to refine
      * @param measurements set of observables
      * @param rugged name of rugged to refine
@@ -84,7 +83,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     public GroundOptimizationProblemBuilder(final List<LineSensor> sensors,
                                             final Observables measurements, final Rugged rugged)
         throws RuggedException {
-        
+
         super(sensors, measurements);
         this.rugged = rugged;
         this.initMapping();
@@ -95,7 +94,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     @Override
     protected void initMapping() {
-        
+
         final String ruggedName = rugged.getName();
         this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
         for (final LineSensor lineSensor : this.getSensors()) {
@@ -111,7 +110,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     @Override
     protected void createTargetAndWeight() throws RuggedException {
-        
+
         try {
             int n = 0;
             for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
@@ -156,7 +155,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
      */
     @Override
     protected MultivariateJacobianFunction createFunction() {
-        
+
         // model function
         final MultivariateJacobianFunction model = point -> {
             try {
@@ -221,7 +220,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
                 throw new OrekitExceptionWrapper(oe);
             }
         };
-        
+
         return model;
     }
 

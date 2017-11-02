@@ -64,10 +64,10 @@ public class DirectLocation {
             File orekitData = new File(home, "orekit-data");
             DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
-            // Sensor's definition 
+            // Sensor's definition
             // ===================
             // Line of sight
-            // -------------            
+            // -------------
             // The raw viewing direction of pixel i with respect to the instrument is defined by the vector:
             List<Vector3D> rawDirs = new ArrayList<Vector3D>();
             for (int i = 0; i < 2000; i++) {
@@ -82,7 +82,7 @@ public class DirectLocation {
 
             TimeDependentLOS lineOfSight = losBuilder.build();
 
-            // Datation model 
+            // Datation model
             // --------------
             // We use Orekit for handling time and dates, and Rugged for defining the datation model:
             TimeScale gps = TimeScalesFactory.getGPS();
@@ -176,7 +176,7 @@ public class DirectLocation {
                                   double px, double py, double pz, double vx, double vy, double vz)
         throws OrekitException {
         AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
-        Vector3D position = new Vector3D(px, py, pz); // in ITRF, unit: m 
+        Vector3D position = new Vector3D(px, py, pz); // in ITRF, unit: m
         Vector3D velocity = new Vector3D(vx, vy, vz); // in ITRF, unit: m/s
         PVCoordinates pvITRF = new PVCoordinates(position, velocity);
         Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);

@@ -25,11 +25,11 @@ public enum OptimizerId {
 
     /** Levenberg Marquadt. */
     LEVENBERG_MARQUADT,
-    
+
     /** Gauss Newton with LU decomposition. */
     GAUSS_NEWTON_LU,
-    
+
     /** Gauss Newton with QR decomposition. */
     GAUSS_NEWTON_QR
-    
+
 }

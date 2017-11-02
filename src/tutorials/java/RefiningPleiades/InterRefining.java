@@ -161,19 +161,19 @@ public class InterRefining extends Refining {
             ruggedBuilderA.setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
             ruggedBuilderA.setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF);
             ruggedBuilderA.setTimeSpan(minDateA,maxDateA, 0.001, 5.0);
-            ruggedBuilderA.setTrajectory(InertialFrameId.EME2000, satellitePVListA, nbPVPoints, 
-            		                     CartesianDerivativesFilter.USE_PV, satelliteQListA, 
+            ruggedBuilderA.setTrajectory(InertialFrameId.EME2000, satellitePVListA, nbPVPoints,
+            		                     CartesianDerivativesFilter.USE_PV, satelliteQListA,
             		                     nbQPoints, AngularDerivativesFilter.USE_R);
             ruggedBuilderA.setLightTimeCorrection(false);
             ruggedBuilderA.setAberrationOfLightCorrection(false);
-            
+
             ruggedBuilderA.setName("RuggedA");
-            
+
             refining.setRuggedA(ruggedBuilderA.build());
 
-            
+
             System.out.format("\n**** Build Pleiades viewing model B and its orbit definition **** %n");
-            
+
             // 2/- Create Second Pleiades Viewing Model
             PleiadesViewingModel pleiadesViewingModelB = refining.getPleiadesViewingModelB();
             final AbsoluteDate minDateB =  pleiadesViewingModelB.getMinDate();
@@ -210,14 +210,14 @@ public class InterRefining extends Refining {
             ruggedBuilderB.setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
             ruggedBuilderB.setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF);
             ruggedBuilderB.setTimeSpan(minDateB,maxDateB, 0.001, 5.0);
-            ruggedBuilderB.setTrajectory(InertialFrameId.EME2000, satellitePVListB, nbPVPoints, 
-            		                     CartesianDerivativesFilter.USE_PV, satelliteQListB, 
+            ruggedBuilderB.setTrajectory(InertialFrameId.EME2000, satellitePVListB, nbPVPoints,
+            		                     CartesianDerivativesFilter.USE_PV, satelliteQListB,
             		                     nbQPoints, AngularDerivativesFilter.USE_R);
             ruggedBuilderB.setLightTimeCorrection(false);
             ruggedBuilderB.setAberrationOfLightCorrection(false);
-            
+
             ruggedBuilderB.setName("RuggedB");
-            
+
             refining.setRuggedB(ruggedBuilderB.build());
 
             // Compute distance between LOS
@@ -256,11 +256,11 @@ public class InterRefining extends Refining {
             // Noise definition
             // distribution: gaussian(0), vector dimension: 2
             final Noise noise = new Noise(0,2);
-            // {pixelA mean, pixelB mean} 
+            // {pixelA mean, pixelB mean}
             final double[] mean = {5.0,0.0};
             // {pixelB std, pixelB std}
             final double[] standardDeviation = {0.1,0.1};
-            
+
             noise.setMean(mean);
             noise.setStandardDeviation(standardDeviation);
 
@@ -354,13 +354,13 @@ public class InterRefining extends Refining {
      */
     private double computeDistance(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
 
- 
+
     	// Get number of line of sensors
     	int dimensionA = pleiadesViewingModelA.getDimension();
     	int dimensionB = pleiadesViewingModelB.getDimension();
     	
 
-    	Vector3D positionA = lineSensorA.getPosition(); 
+    	Vector3D positionA = lineSensorA.getPosition();
     	// This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
 
     	
@@ -372,7 +372,7 @@ public class InterRefining extends Refining {
                           FastMath.toDegrees(centerPointA.getLongitude()),centerPointA.getAltitude());
 
 
-        Vector3D positionB = lineSensorB.getPosition(); 
+        Vector3D positionB = lineSensorB.getPosition();
         // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
 
         AbsoluteDate lineDateB = lineSensorB.getDate(dimensionB/2);

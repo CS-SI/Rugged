@@ -53,7 +53,7 @@ public class GroundMeasurementGenerator implements Measurable {
 
     /** Number of lines of the sensor */
     private int dimension;
-    
+
     /** Number of measurements */
     private int measurementCount;
 
@@ -63,7 +63,7 @@ public class GroundMeasurementGenerator implements Measurable {
      * @param dimension number of line of the sensor
      * @throws RuggedException
      */
-    public GroundMeasurementGenerator(final Rugged rugged, final String sensorName, final int dimension) 
+    public GroundMeasurementGenerator(final Rugged rugged, final String sensorName, final int dimension)
         throws RuggedException {
     	
         // Generate reference mapping
@@ -103,7 +103,7 @@ public class GroundMeasurementGenerator implements Measurable {
         for (double line = 0; line < dimension; line += lineSampling) {
 
             final AbsoluteDate date = sensor.getDate(line);
-            
+
             for (int pixel = 0; pixel < sensor.getNbPixels(); pixel += pixelSampling) {
 
                 final GeodeticPoint gp2 = rugged.directLocation(date, sensor.getPosition(),
@@ -115,7 +115,7 @@ public class GroundMeasurementGenerator implements Measurable {
                 measurementCount++;
             }
         }
-        
+
         observables.addGroundMapping(groundMapping);
     }
 
@@ -127,8 +127,8 @@ public class GroundMeasurementGenerator implements Measurable {
         final Vector3D latLongError = estimateLatLongError();
 
         // Get noise features
-        final double[] mean = noise.getMean(); // [latitude, longitude, altitude] mean 
-        final double[] std = noise.getStandardDeviation(); // [latitude, longitude, altitude] standard deviation 
+        final double[] mean = noise.getMean(); // [latitude, longitude, altitude] mean
+        final double[] std = noise.getStandardDeviation(); // [latitude, longitude, altitude] standard deviation
 
         final double latErrorMean = mean[0] * latLongError.getX();
         final double lonErrorMean = mean[1] * latLongError.getY();
@@ -161,12 +161,12 @@ public class GroundMeasurementGenerator implements Measurable {
                                                                 gp2.getAltitude() + vecRandom.getZ());
 
                 groundMapping.addMapping(new SensorPixel(line, pixel), gpNoisy);
-                
+
                 // increment the number of measurements
                 measurementCount++;
             }
         }
-        
+
         this.observables.addGroundMapping(groundMapping);
     }
 
@@ -180,16 +180,16 @@ public class GroundMeasurementGenerator implements Measurable {
 
         final int pix = sensor.getNbPixels() / 2;
         final int line = (int) FastMath.floor(pix); // assumption : same number of line and pixels;
-        
+
         final AbsoluteDate date = sensor.getDate(line);
         final GeodeticPoint gp_pix0 = rugged.directLocation(date, sensor.getPosition(), sensor.getLOS(date, pix));
-        
+
         final AbsoluteDate date1 = sensor.getDate(line + 1);
         final GeodeticPoint gp_pix1 = rugged.directLocation(date1, sensor.getPosition(), sensor.getLOS(date1, pix + 1));
-        
+
         final double latErr = FastMath.abs(gp_pix0.getLatitude() - gp_pix1.getLatitude());
         final double lonErr = FastMath.abs(gp_pix0.getLongitude() - gp_pix1.getLongitude());
-        
+
 //        final double distanceX =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(), gp_pix1.getLongitude(), gp_pix0.getLatitude());
 //        final double distanceY =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(), gp_pix0.getLongitude(), gp_pix1.getLatitude());
 

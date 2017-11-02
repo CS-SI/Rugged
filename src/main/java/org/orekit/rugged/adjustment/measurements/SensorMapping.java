@@ -55,7 +55,7 @@ public class SensorMapping<T> {
      * @param ruggedName name of the Rugged to which mapping applies
      */
     public SensorMapping(final String sensorName, final String ruggedName) {
-        
+
         this.sensorName     = sensorName;
         this.ruggedName     = ruggedName;
         this.mapping = new LinkedHashMap<SensorPixel, T>();

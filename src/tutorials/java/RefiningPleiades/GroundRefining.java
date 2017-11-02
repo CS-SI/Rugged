@@ -117,13 +117,13 @@ public class GroundRefining extends Refining {
             orbitmodel.setLOFTransform(rollPoly, pitchPoly, yawPoly, minDate);
 
             // Satellite attitude
-            List<TimeStampedAngularCoordinates> satelliteQList = 
+            List<TimeStampedAngularCoordinates> satelliteQList =
             		orbitmodel.orbitToQ(orbit, earth, minDate.shiftedBy(-0.0), maxDate.shiftedBy(+0.0), 0.25);
             int nbQPoints = 2;
 
             // Position and velocities
             PVCoordinates PV = orbit.getPVCoordinates(earth.getBodyFrame());
-            List<TimeStampedPVCoordinates> satellitePVList = 
+            List<TimeStampedPVCoordinates> satellitePVList =
             		orbitmodel.orbitToPV(orbit, earth, minDate.shiftedBy(-0.0), maxDate.shiftedBy(+0.0), 0.25);
             int nbPVPoints = 8;
 
@@ -144,10 +144,10 @@ public class GroundRefining extends Refining {
             ruggedBuilder.setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
             ruggedBuilder.setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF);
             ruggedBuilder.setTimeSpan(minDate,maxDate, 0.001, 5.0);
-            ruggedBuilder.setTrajectory(InertialFrameId.EME2000, satellitePVList,nbPVPoints, 
+            ruggedBuilder.setTrajectory(InertialFrameId.EME2000, satellitePVList,nbPVPoints,
             		                    CartesianDerivativesFilter.USE_PV, satelliteQList,
             		                    nbQPoints, AngularDerivativesFilter.USE_R);
-            
+
             ruggedBuilder.setName("Rugged_refining");
 
             refining.setRugged(ruggedBuilder.build());
@@ -285,7 +285,7 @@ public class GroundRefining extends Refining {
         double [] gsd = {gsdX, gsdY};
         return gsd;
     }
-    
+
     /**
      * Get the Pleiades viewing model
      * @return the Pleiades viewing model

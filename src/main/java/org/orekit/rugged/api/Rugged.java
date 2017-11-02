@@ -613,7 +613,7 @@ public class Rugged {
 
     }
 
-    /** Compute distances between two line sensors. 
+    /** Compute distances between two line sensors.
      * @param sensorA line sensor A
      * @param dateA current date for sensor A
      * @param pixelA pixel index for sensor A
@@ -632,28 +632,28 @@ public class Rugged {
 
         // Compute the approximate transform between spacecraft and observed body
         // from Rugged instance A
-        final Transform scToInertA = scToBodyA.getScToInertial(dateA); 
+        final Transform scToInertA = scToBodyA.getScToInertial(dateA);
         final Transform inertToBodyA = scToBodyA.getInertialToBody(dateA);
         final Transform transformScToBodyA = new Transform(dateA, scToInertA, inertToBodyA);
-        
+
         // from (current) Rugged instance B
-        final Transform scToInertB = scToBody.getScToInertial(dateB); 
+        final Transform scToInertB = scToBody.getScToInertial(dateB);
         final Transform inertToBodyB = scToBody.getInertialToBody(dateB);
         final Transform transformScToBodyB = new Transform(dateB, scToInertB, inertToBodyB);
 
         // Get sensors LOS into local frame
-        final Vector3D vALocal = sensorA.getLOS(dateA, pixelA); 
-        final Vector3D vBLocal = sensorB.getLOS(dateB, pixelB); 
+        final Vector3D vALocal = sensorA.getLOS(dateA, pixelA);
+        final Vector3D vBLocal = sensorB.getLOS(dateB, pixelB);
 
         // Position of sensors into local frame
         final Vector3D sALocal = sensorA.getPosition(); // S_a : sensorA 's position
         final Vector3D sBLocal = sensorB.getPosition(); // S_b : sensorB 's position
 
         // Get sensors position and LOS into body frame
-        final Vector3D sA = transformScToBodyA.transformPosition(sALocal); // S_a : sensorA's position 
-        final Vector3D vA = transformScToBodyA.transformVector(vALocal);   // V_a : line of sight's vectorA 
-        final Vector3D sB = transformScToBodyB.transformPosition(sBLocal); // S_b : sensorB's position 
-        final Vector3D vB = transformScToBodyB.transformVector(vBLocal);   // V_b : line of sight's vectorB 
+        final Vector3D sA = transformScToBodyA.transformPosition(sALocal); // S_a : sensorA's position
+        final Vector3D vA = transformScToBodyA.transformVector(vALocal);   // V_a : line of sight's vectorA
+        final Vector3D sB = transformScToBodyB.transformPosition(sBLocal); // S_b : sensorB's position
+        final Vector3D vB = transformScToBodyB.transformVector(vBLocal);   // V_b : line of sight's vectorB
 
         // Compute distance
         final Vector3D vBase = sB.subtract(sA);            // S_b - S_a
@@ -675,13 +675,13 @@ public class Rugged {
 
         // Compute vector M_a -> M_B for which distance between LOS is minimum
         final Vector3D vDistanceMin = mB.subtract(mA); // M_b - M_a
-        
+
         // Compute vector from mid point of vector M_a -> M_B to the ground (corresponds to minimum elevation)
         final Vector3D midPoint = (mB.add(mA)).scalarMultiply(0.5);
 
         // Get the euclidean norms to compute the minimum distances: between LOS and to the ground
         final double[] distances = {vDistanceMin.getNorm(), midPoint.getNorm()};
-        
+
         return distances;
     }
 
@@ -707,12 +707,12 @@ public class Rugged {
 
         // Compute the approximate transforms between spacecraft and observed body
         // from Rugged instance A
-        final Transform scToInertA = scToBodyA.getScToInertial(dateA); 
+        final Transform scToInertA = scToBodyA.getScToInertial(dateA);
         final Transform inertToBodyA = scToBodyA.getInertialToBody(dateA);
         final Transform transformScToBodyA = new Transform(dateA, scToInertA, inertToBodyA);
-        
+
         // from (current) Rugged instance B
-        final Transform scToInertB = scToBody.getScToInertial(dateB);  
+        final Transform scToInertB = scToBody.getScToInertial(dateB);
         final Transform inertToBodyB = scToBody.getInertialToBody(dateB);
         final Transform transformScToBodyB = new Transform(dateB, scToInertB, inertToBodyB);
 
@@ -722,14 +722,14 @@ public class Rugged {
 
         // Get sensors LOS into body frame
         final FieldVector3D<DerivativeStructure> vA = transformScToBodyA.transformVector(vALocal); // V_a : line of sight's vectorA
-        final FieldVector3D<DerivativeStructure> vB = transformScToBodyB.transformVector(vBLocal); // V_b : line of sight's vectorB 
+        final FieldVector3D<DerivativeStructure> vB = transformScToBodyB.transformVector(vBLocal); // V_b : line of sight's vectorB
 
         // Position of sensors into local frame
-        final Vector3D sAtmp = sensorA.getPosition(); 
-        final Vector3D sBtmp = sensorB.getPosition(); 
-        
+        final Vector3D sAtmp = sensorA.getPosition();
+        final Vector3D sBtmp = sensorB.getPosition();
+
         final DerivativeStructure scaleFactor = FieldVector3D.dotProduct(vA.normalize(), vA.normalize()); // V_a.V_a=1
-        
+
         // Build a vector from the position and a scale factor (equals to 1).
         // The vector built will be scaleFactor * sAtmp for example.
         final FieldVector3D<DerivativeStructure> sALocal = new FieldVector3D<DerivativeStructure>(scaleFactor, sAtmp);
@@ -752,19 +752,19 @@ public class Rugged {
         // Compute lambda_a = SV_a + lambdaB * V_a.V_b
         final DerivativeStructure lambdaA = vAvB.multiply(lambdaB).add(svA);
 
-        // Compute vector M_a: 
+        // Compute vector M_a:
         final FieldVector3D<DerivativeStructure> mA = sA.add(vA.scalarMultiply(lambdaA)); // M_a = S_a + lambda_a * V_a
         // Compute vector M_b
-       final FieldVector3D<DerivativeStructure> mB = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
+        final FieldVector3D<DerivativeStructure> mB = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
 
         // Compute vector M_a -> M_B for which distance between LOS is minimum
         final FieldVector3D<DerivativeStructure> vDistanceMin = mB.subtract(mA); // M_b - M_a
-        
+
         // Compute vector from mid point of vector M_a -> M_B to the ground (corresponds to minimum elevation)
         final FieldVector3D<DerivativeStructure> midPoint = (mB.add(mA)).scalarMultiply(0.5);
 
         // Get the euclidean norms to compute the minimum distances:
-        // between LOS 
+        // between LOS
         final DerivativeStructure dMin = vDistanceMin.getNorm();
         // to the ground
         final DerivativeStructure dEarth = midPoint.getNorm();
@@ -828,7 +828,7 @@ public class Rugged {
      */
 
     public DerivativeStructure[] inverseLocationDerivatives(final String sensorName,
-                                                            final GeodeticPoint point, 
+                                                            final GeodeticPoint point,
                                                             final int minLine,
                                                             final int maxLine,
                                                             final DSGenerator generator)

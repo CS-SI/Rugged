@@ -49,7 +49,7 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
-/** TODO GP description a completer 
+/** TODO GP description a completer.
  * @author ???
  * @author Guylaine Prat
  * @since 2.0
@@ -71,7 +71,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     /** Targets and weights of optimization problem. */
     private HashMap<String, double[] > targetAndWeight;
 
-    /** Constructor
+    /** Constructor.
      * @param sensors list of sensors to refine
      * @param measurements set of observables
      * @param ruggedList names of rugged to refine
@@ -80,7 +80,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     public InterSensorsOptimizationProblemBuilder(final List<LineSensor> sensors,
                                                   final Observables measurements, final Collection<Rugged> ruggedList)
         throws RuggedException {
-        
+
         super(sensors, measurements);
         this.ruggedMap = new LinkedHashMap<String, Rugged>();
         for (final Rugged rugged : ruggedList) {
@@ -96,17 +96,17 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     protected void initMapping() {
 
         this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
-        
+
         for (final String ruggedNameA : this.ruggedMap.keySet()) {
             for (final String ruggedNameB : this.ruggedMap.keySet()) {
-                
+
                 for (final LineSensor sensorA : this.getSensors()) {
                     for (final LineSensor sensorB : this.getSensors()) {
-                        
+
                         final String sensorNameA = sensorA.getName();
                         final String sensorNameB = sensorB.getName();
                         final SensorToSensorMapping mapping = this.getMeasurements().getInterMapping(ruggedNameA, sensorNameA, ruggedNameB, sensorNameB);
-                        
+
                         if (mapping != null) {
                             this.sensorToSensorMappings.add(mapping);
                         }
@@ -141,10 +141,10 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
 
                 // Get Earth constraint weight
                 final double earthConstraintWeight = reference.getEarthConstraintWeight();
-                
+
                 int i = 0;
                 for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
-                    
+
                     if (i == reference.getMapping().size()) break;
 
                     // Get LOS distance
@@ -174,7 +174,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
      */
     @Override
     protected MultivariateJacobianFunction createFunction() {
-        
+
         // model function
         final MultivariateJacobianFunction model = point -> {
 
@@ -200,7 +200,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
                     if (ruggedA == null) {
                         throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
                     }
-                    
+
                     final Rugged ruggedB = this.ruggedMap.get(ruggedNameB);
                     if (ruggedB == null) {
                         throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
@@ -222,8 +222,8 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
 
                         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
-                        final DerivativeStructure[] ilResult = 
-                                ruggedB.distanceBetweenLOSDerivatives(lineSensorA, dateA, pixelA, scToBodyA, 
+                        final DerivativeStructure[] ilResult =
+                                ruggedB.distanceBetweenLOSDerivatives(lineSensorA, dateA, pixelA, scToBodyA,
                                                                       lineSensorB, dateB, pixelB, this.getGenerator());
 
                         if (ilResult == null) {

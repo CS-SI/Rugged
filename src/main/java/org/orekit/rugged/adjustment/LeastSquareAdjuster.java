@@ -24,7 +24,7 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
 import org.orekit.rugged.errors.RuggedException;
 
-/** TODO GP description a completer 
+/** TODO GP description a completer.
  * @author Guylaine Prat
  * @since 2.0
  */
@@ -41,7 +41,7 @@ public class LeastSquareAdjuster {
      */
     // TODO GP public protected ???
     LeastSquareAdjuster(final OptimizerId optimizerID) {
-        
+
         this.optimizerID = optimizerID;
         this.adjuster = this.selectOptimizer();
     }
@@ -49,7 +49,7 @@ public class LeastSquareAdjuster {
     /** Default constructor with Gauss Newton with QR decomposition algorithm.*/
     // TODO GP public protected ???
     LeastSquareAdjuster() {
-        
+
         this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;
         this.adjuster = this.selectOptimizer();
     }
@@ -66,19 +66,19 @@ public class LeastSquareAdjuster {
      * @return the least square optimizer
      */
     private LeastSquaresOptimizer selectOptimizer() {
-        
+
         // Set up the optimizer
         switch (this.optimizerID) {
-        
+
         case LEVENBERG_MARQUADT:
             return new LevenbergMarquardtOptimizer();
-            
+
         case GAUSS_NEWTON_LU :
             return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.LU);
-            
+
         case GAUSS_NEWTON_QR :
             return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
-            
+
         default :
             // this should never happen
             throw RuggedException.createInternalError(null);

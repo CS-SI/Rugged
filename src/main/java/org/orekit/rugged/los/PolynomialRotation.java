@@ -125,7 +125,7 @@ public class PolynomialRotation implements LOSTransform {
         this(name, axis, referenceDate, angle.getCoefficients());
     }
 
-    /** {@inheritDoc} 
+    /** {@inheritDoc}
      * @since 2.0
      */
     @Override

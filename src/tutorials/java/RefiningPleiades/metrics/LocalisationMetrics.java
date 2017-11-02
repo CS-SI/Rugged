@@ -63,7 +63,7 @@ public class LocalisationMetrics {
     /** Earth distance mean.*/
     private double earthDistanceMean;
 
-    
+
     /** Compute metrics corresponding to the ground points study.
      * @param measMapping Mapping of observations/measurements = the ground truth
      * @param rugged Rugged instance
@@ -117,17 +117,17 @@ public class LocalisationMetrics {
         // Mapping of observations/measurements = the ground truth
         final Set<Map.Entry<SensorPixel, GeodeticPoint>> measurementsMapping;
         final LineSensor lineSensor;
-        
+
         // counter for compute mean distance
         double count = 0;
-        
+
         // Initialization
         measurementsMapping = measMapping.getMapping();
         lineSensor = rugged.getLineSensor(measMapping.getSensorName());
-        
+
         // number of measurements
         int nbMeas = measurementsMapping.size();
-        
+
         final Iterator<Map.Entry<SensorPixel, GeodeticPoint>> gtIt = measurementsMapping.iterator();
 
         // Browse map of measurements
@@ -171,20 +171,20 @@ public class LocalisationMetrics {
         // Mapping of observations/measurements = the ground truth
         final Set<Map.Entry<SensorPixel, SensorPixel>> measurementsMapping;
 
-        final LineSensor lineSensorA;   // line sensor corresponding to rugged A 
-        final LineSensor lineSensorB;   // line sensor corresponding to rugged B 
-        double count = 0;               // counter for computing remaining mean distance 
-        double losDistanceCount = 0;    // counter for computing LOS distance mean 
-        double earthDistanceCount = 0;  // counter for computing Earth distance mean 
-        int i = 0;                      // increment of measurements 
+        final LineSensor lineSensorA;   // line sensor corresponding to rugged A
+        final LineSensor lineSensorB;   // line sensor corresponding to rugged B
+        double count = 0;               // counter for computing remaining mean distance
+        double losDistanceCount = 0;    // counter for computing LOS distance mean
+        double earthDistanceCount = 0;  // counter for computing Earth distance mean
+        int i = 0;                      // increment of measurements
 
-        // Initialization 
+        // Initialization
         measurementsMapping = measMapping.getMapping();
         lineSensorA = ruggedA.getLineSensor(measMapping.getSensorNameA());
         lineSensorB = ruggedB.getLineSensor(measMapping.getSensorNameB());
-        int nbMeas = measurementsMapping.size(); // number of measurements 
- 
-        // Browse map of measurements 
+        int nbMeas = measurementsMapping.size(); // number of measurements
+
+        // Browse map of measurements
         for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = measurementsMapping.iterator();
                         gtIt.hasNext();
                         i++) {

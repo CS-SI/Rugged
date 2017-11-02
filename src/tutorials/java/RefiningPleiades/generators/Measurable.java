@@ -35,7 +35,7 @@ public interface Measurable {
     /** Create measurements (without noise)
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
-     * @throws RuggedException 
+     * @throws RuggedException
      */
     void createMeasurement(int lineSampling, int pixelSampling)  throws RuggedException;
 

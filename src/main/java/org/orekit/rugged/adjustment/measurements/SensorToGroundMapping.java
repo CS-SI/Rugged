@@ -41,7 +41,7 @@ public class SensorToGroundMapping {
     /** Mapping from sensor to ground. */
     private final SensorMapping<GeodeticPoint> groundMapping;
 
-    
+
     /** Build a new instance (with default Rugged name).
      * @param sensorName name of the sensor to which mapping applies
      */
@@ -54,7 +54,7 @@ public class SensorToGroundMapping {
      * @param sensorName name of the sensor to which mapping applies
      */
     public SensorToGroundMapping(final String ruggedName, final String sensorName) {
-        
+
         this.sensorName     = sensorName;
         this.groundMapping = new SensorMapping<GeodeticPoint>(sensorName, ruggedName);
     }

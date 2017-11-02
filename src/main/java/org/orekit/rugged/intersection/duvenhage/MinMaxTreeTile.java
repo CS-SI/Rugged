@@ -53,7 +53,7 @@ import org.orekit.rugged.utils.Selector;
  * If we consider for example a tall 107 ⨉ 19 raw tile, the min/max kd-tree will
  * have 9 levels:
  * </p>
- * 
+ *
  * <table border="0">
  * <tr BGCOLOR="#EEEEFF">
  *             <td>Level</td>         <td>Number of sub-tiles</td>    <td>Regular sub-tiles dimension</td></tr>
@@ -153,7 +153,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * tree level l includes cell (i,j) but not cell (i+1, j+1). In other words,
      * interpolation implies sub-tile boundaries are overshoot by one column to
      * the East and one row to the North when computing min.
-     * 
+     *
      * @param i row index of the cell
      * @param j column index of the cell
      * @param level tree level
@@ -213,7 +213,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * tree level l includes cell (i,j) but not cell (i+1, j+1). In other words,
      * interpolation implies sub-tile boundaries are overshoot by one column to
      * the East and one row to the North when computing max.
-     * 
+     *
      * @param i row index of the cell
      * @param j column index of the cell
      * @param level tree level

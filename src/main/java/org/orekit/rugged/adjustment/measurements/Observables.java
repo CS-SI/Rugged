@@ -49,7 +49,7 @@ public class Observables {
      * @param nbModels number of viewing models to map
      */
     public Observables(final int nbModels) {
-        
+
         this.groundMappings = new LinkedHashMap<String, SensorToGroundMapping>();
         this.interMappings = new LinkedHashMap<String, SensorToSensorMapping>();
         this.nbModels = nbModels;
@@ -59,16 +59,16 @@ public class Observables {
      * @param interMapping sensor to sensor mapping
      */
     public void addInterMapping(final SensorToSensorMapping interMapping) {
-        
+
         interMappings.put(this.createKey(interMapping), interMapping);
     }
 
     /** Add a ground mapping between ????
-     * TODO GP commentaire a completer 
+     * TODO GP commentaire a completer
      * @param groundMapping sensor to ground mapping
      */
     public void addGroundMapping(final SensorToGroundMapping groundMapping) {
-        
+
         groundMappings.put(this.createKey(groundMapping), groundMapping);
     }
 
@@ -86,12 +86,12 @@ public class Observables {
      * @return selected ground mapping or null if sensor is not found
      */
     public SensorToGroundMapping getGroundMapping(final String ruggedName, final String sensorName) {
-        
+
         final SensorToGroundMapping mapping = this.groundMappings.get(ruggedName + RUGGED_SENSOR_SEPARATOR + sensorName);
         return mapping;
     }
 
-    /** Get the sensor to sensor values
+    /** Get the sensor to sensor values.
      * TODO GP commentaire a completer
      * @return the inter-mappings
      */
@@ -99,7 +99,7 @@ public class Observables {
         return interMappings.values();
     }
 
-    /** Get the number of viewing models to map
+    /** Get the number of viewing models to map.
      * @return the number of viewing models to map
      */
     public int getNbModels() {
@@ -115,7 +115,7 @@ public class Observables {
      * @param sensorNameB sensor name B
      * @return selected ground mapping or null if a sensor is not found
      */
-    public SensorToSensorMapping getInterMapping(final String ruggedNameA, final String sensorNameA, 
+    public SensorToSensorMapping getInterMapping(final String ruggedNameA, final String sensorNameA,
                                                  final String ruggedNameB, final String sensorNameB) {
 
         //TODO GP revoir la creation de string par "+"

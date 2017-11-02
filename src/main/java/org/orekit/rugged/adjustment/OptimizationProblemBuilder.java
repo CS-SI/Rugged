@@ -43,7 +43,7 @@ import org.orekit.utils.ParameterDriver;
 /**
  * Builder for optimization problem.
  * <p>
- * TODO GP description a completer 
+ * TODO GP description a completer
  * </p>
  * @author Jonathan Guinet
  * @author Guylaine Prat
@@ -75,7 +75,7 @@ abstract class OptimizationProblemBuilder {
      * @throws RuggedException an exception is generated if no parameters has been selected for refining
      */
     OptimizationProblemBuilder(final List<LineSensor> sensors, final Observables measurements) throws RuggedException {
-        
+
         try {
             this.generator = this.createGenerator(sensors);
             this.drivers = this.generator.getSelected();
@@ -98,7 +98,7 @@ abstract class OptimizationProblemBuilder {
      * @return the least squares problem
      */
 
-    public abstract LeastSquaresProblem build(int maxEvaluations, double convergenceThreshold) 
+    public abstract LeastSquaresProblem build(int maxEvaluations, double convergenceThreshold)
         throws RuggedException;
 
     /** Create the convergence check.
@@ -108,15 +108,13 @@ abstract class OptimizationProblemBuilder {
      * @param parametersConvergenceThreshold convergence threshold
      * @return the checker
      */
-    final ConvergenceChecker<LeastSquaresProblem.Evaluation> 
+    final ConvergenceChecker<LeastSquaresProblem.Evaluation>
                             createChecker(final double parametersConvergenceThreshold) {
 
-        // TODO GP description a completer 
-        final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = 
-                (iteration, previous, current) 
-                -> current.getPoint().getLInfDistance(previous.getPoint()) 
-                <= parametersConvergenceThreshold;
-                
+        // TODO GP description a completer
+        final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = (iteration, previous, current)
+            -> current.getPoint().getLInfDistance(previous.getPoint()) <= parametersConvergenceThreshold;
+
         return checker;
     }
 
@@ -124,7 +122,7 @@ abstract class OptimizationProblemBuilder {
      * @return start parameters values (normalized)
      */
     final double[] createStartTab() {
-        
+
         // Get start points (as a normalized value)
         final double[] start = new double[this.nbParams];
         int iStart = 0;
@@ -134,38 +132,42 @@ abstract class OptimizationProblemBuilder {
         return start;
     }
 
-    // TODO GP description a completer 
+    /** Create targets and weights of optimization problem.
+     * @throws RuggedException if no reference mappings for parameters estimation are found
+     */
     protected abstract void createTargetAndWeight() throws RuggedException;
 
-    // TODO GP description a completer 
+    /** Create the model function value and its Jacobian.
+     * @return the model function value and its Jacobian
+     */
     protected abstract MultivariateJacobianFunction createFunction();
 
     /** Parse the observables to select mapping .*/
     protected abstract void initMapping();
-    
+
     /** Create parameter validator.
      * @return parameter validator
      */
     final ParameterValidator createParameterValidator() {
-        
+
         // Prevent parameters to exceed their prescribed bounds
-        // TODO GP description a completer 
+        // TODO GP description a completer
         final ParameterValidator validator = params -> {
             try {
                 int i = 0;
                 for (final ParameterDriver driver : this.drivers) {
-                    
+
                     // let the parameter handle min/max clipping
                     driver.setNormalizedValue(params.getEntry(i));
                     params.setEntry(i++, driver.getNormalizedValue());
                 }
                 return params;
-                
+
             } catch (OrekitException oe) {
                 throw new OrekitExceptionWrapper(oe);
             }
         };
-        
+
         return validator;
     }
 
@@ -177,13 +179,13 @@ abstract class OptimizationProblemBuilder {
 
         // Initialize set of drivers name
         final Set<String> names = new HashSet<>();
-        
-        // Get the drivers name 
+
+        // Get the drivers name
         for (final LineSensor sensor : selectedSensors) {
-            
-            // Get the drivers name for the sensor 
+
+            // Get the drivers name for the sensor
             sensor.getParametersDrivers().forEach(driver -> {
-                
+
                 // Add the name of the driver to the set of drivers name
                 if (names.contains(driver.getName()) == false) {
                     names.add(driver.getName());
@@ -194,10 +196,10 @@ abstract class OptimizationProblemBuilder {
         // Set up generator list and map
         final List<ParameterDriver> selected = new ArrayList<>();
         final Map<String, Integer> map = new HashMap<>();
-        
+
         // Get the list of selected drivers
         for (final LineSensor sensor : selectedSensors) {
-            
+
             sensor.getParametersDrivers().filter(driver -> driver.isSelected()).forEach(driver -> {
                 if (map.get(driver.getName()) == null) {
                     map.put(driver.getName(), map.size());
@@ -208,7 +210,7 @@ abstract class OptimizationProblemBuilder {
 
         final DSFactory factory = new DSFactory(map.size(), 1);
 
-        // TODO GP description a completer 
+        // TODO GP description a completer
         return new DSGenerator() {
 
             /** {@inheritDoc} */
@@ -226,7 +228,7 @@ abstract class OptimizationProblemBuilder {
             /** {@inheritDoc} */
             @Override
             public DerivativeStructure variable(final ParameterDriver driver) {
-                
+
                 final Integer index = map.get(driver.getName());
                 if (index == null) {
                     return constant(driver.getValue());
@@ -243,7 +245,7 @@ abstract class OptimizationProblemBuilder {
     protected List<LineSensor> getSensors() {
         return sensors;
     }
-    
+
     /** Get the number of parameters to refine.
      * @return the number of parameters to refine
      */
@@ -266,7 +268,7 @@ abstract class OptimizationProblemBuilder {
     protected final DSGenerator getGenerator() {
         return this.generator;
     }
-    
+
     /** Get the measurements.
      * @return the measurements
      */

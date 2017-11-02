@@ -128,7 +128,7 @@ public class Refining {
      */
     public InterMeasurementGenerator generatePoints(final int lineSampling, final int pixelSampling,
     		                                    final Rugged ruggedA, final String sensorNameA, final int dimensionA,
-    		                                    final Rugged ruggedB, final String sensorNameB, final int dimensionB) 
+    		                                    final Rugged ruggedB, final String sensorNameB, final int dimensionB)
         throws RuggedException {
 
     	// Outliers control
@@ -198,10 +198,10 @@ public class Refining {
                                                      final Noise noise) throws RuggedException {
 
     	// Outliers control
-    	final double outlierValue = 1.e+2;    
+    	final double outlierValue = 1.e+2;
     	
         // Earth constraint weight
-        final double earthConstraintWeight = 0.1;  
+        final double earthConstraintWeight = 0.1;
 
         // Generate measurements with constraints on Earth distance and outliers control
         InterMeasurementGenerator measurements = new InterMeasurementGenerator(ruggedA, sensorNameA, dimensionA,
@@ -284,7 +284,7 @@ public class Refining {
                 throw new OrekitExceptionWrapper(e);
             }
         });
-        
+
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
@@ -292,7 +292,7 @@ public class Refining {
         forEach(driver -> {
             try {
                 driver.setSelected(isSelected);
-                
+
                 // default value: no Z scale factor applied
                 driver.setValue(1.0);
             } catch (OrekitException e) {
@@ -334,7 +334,7 @@ public class Refining {
     		                 final Collection<Rugged> ruggeds) throws RuggedException {
 
         System.out.format("Iterations max: %d\tconvergence threshold: %3.6e \n", maxIterations, convergenceThreshold);
-        
+
         if(ruggeds.size()!= 2 ) {
             throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,ruggeds.size());
         }
