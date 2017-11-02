@@ -37,7 +37,6 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.adjustment.measurements.Noise;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
@@ -47,6 +46,7 @@ import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
 import RefiningPleiades.generators.GroundMeasurementGenerator;
+import RefiningPleiades.generators.Noise;
 import RefiningPleiades.metrics.DistanceTools;
 import RefiningPleiades.models.OrbitModel;
 import RefiningPleiades.models.PleiadesViewingModel;

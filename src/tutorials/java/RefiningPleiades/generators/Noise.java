@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.adjustment.measurements;
+package RefiningPleiades.generators;
 
 
 /** Class for adding a noise to measurements.

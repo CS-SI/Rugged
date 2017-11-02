@@ -17,7 +17,6 @@
 package RefiningPleiades.generators;
 
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.adjustment.measurements.Noise;
 
 /** For measurements generator.
  * @author Lucie Labat-Allee

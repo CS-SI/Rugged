@@ -28,13 +28,13 @@ import org.orekit.rugged.adjustment.AdjustmentContext;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.adjustment.measurements.Noise;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 
 import RefiningPleiades.generators.GroundMeasurementGenerator;
 import RefiningPleiades.generators.InterMeasurementGenerator;
+import RefiningPleiades.generators.Noise;
 import RefiningPleiades.metrics.LocalisationMetrics;
 
 /**
