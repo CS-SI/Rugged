@@ -48,6 +48,7 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
+import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.los.LOSBuilder;
@@ -354,6 +355,7 @@ public class SensorMeanPlaneCrossingTest {
 
     @Before
     public void setUp() throws OrekitException, URISyntaxException {
+        TestUtils.clearFactories();
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
     }

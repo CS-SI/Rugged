@@ -41,6 +41,7 @@ import org.hipparchus.stat.descriptive.StreamingStatistics;
 import org.hipparchus.stat.descriptive.rank.Percentile;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -1372,6 +1373,11 @@ public class RuggedTest {
 
         Assert.assertEquals(firstLine, recomputedFirstLine, maxLineError);
         Assert.assertEquals(lastLine, recomputedLastLine, maxLineError);
+    }
+    
+    @Before
+    public void setUp() throws OrekitException, URISyntaxException {
+        TestUtils.clearFactories();
     }
 }
 

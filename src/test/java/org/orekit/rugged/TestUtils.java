@@ -22,8 +22,13 @@ import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
+import org.junit.Assert;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.NadirPointing;
@@ -31,6 +36,7 @@ import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.OneAxisEllipsoid;
+import org.orekit.data.DataProvidersManager;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
@@ -40,6 +46,10 @@ import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
 import org.orekit.orbits.CircularOrbit;
+import org.orekit.orbits.FieldCartesianOrbit;
+import org.orekit.orbits.FieldCircularOrbit;
+import org.orekit.orbits.FieldEquinoctialOrbit;
+import org.orekit.orbits.FieldKeplerianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.OrbitType;
 import org.orekit.orbits.PositionAngle;
@@ -48,6 +58,8 @@ import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
+import org.orekit.propagation.semianalytical.dsst.utilities.JacobiPolynomials;
+import org.orekit.propagation.semianalytical.dsst.utilities.NewcombOperators;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
@@ -59,8 +71,89 @@ import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
+/**
+ * @author Luc Maisonobe
+ * @author Guylaine Prat
+ */
 public class TestUtils {
+    
+    /**
+     * Clean up of factories for JUnit 
+     * TBN: copied from Utils of Test suite of Orekit 9.0
+     * @since 2.0
+     */
+    public static void clearFactories() {
+        
+        clearFactoryMaps(CelestialBodyFactory.class);
+        CelestialBodyFactory.clearCelestialBodyLoaders();
+        clearFactoryMaps(FramesFactory.class);
+        clearFactoryMaps(TimeScalesFactory.class);
+        clearFactory(TimeScalesFactory.class, TimeScale.class);
+        clearFactoryMaps(FieldCartesianOrbit.class);
+        clearFactoryMaps(FieldKeplerianOrbit.class);
+        clearFactoryMaps(FieldCircularOrbit.class);
+        clearFactoryMaps(FieldEquinoctialOrbit.class);
+        clearFactoryMaps(JacobiPolynomials.class);
+        clearFactoryMaps(NewcombOperators.class);
+        for (final Class<?> c : NewcombOperators.class.getDeclaredClasses()) {
+            if (c.getName().endsWith("PolynomialsGenerator")) {
+                clearFactoryMaps(c);
+            }
+        }
+        FramesFactory.clearEOPHistoryLoaders();
+        FramesFactory.setEOPContinuityThreshold(5 * Constants.JULIAN_DAY);
+        TimeScalesFactory.clearUTCTAIOffsetsLoaders();
+        GravityFieldFactory.clearPotentialCoefficientsReaders();
+        GravityFieldFactory.clearOceanTidesReaders();
+        DataProvidersManager.getInstance().clearProviders();
+        DataProvidersManager.getInstance().clearLoadedDataNames();
+    }
 
+    /** Clean up of factory map
+     * @param factoryClass
+     * @since 2.0
+    */
+    private static void clearFactoryMaps(Class<?> factoryClass) {
+        try {
+            
+            for (Field field : factoryClass.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) &&
+                    Map.class.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    ((Map<?, ?>) field.get(null)).clear();
+                }
+            }
+        } catch (IllegalAccessException iae) {
+            Assert.fail(iae.getMessage());
+        }
+    }
+    
+    /** Clean up of a factory
+     * @param factoryClass
+     * @param cachedFieldsClass
+     * @since 2.0
+    */
+    private static void clearFactory(Class<?> factoryClass, Class<?> cachedFieldsClass) {
+        try {
+            
+            for (Field field : factoryClass.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) &&
+                        cachedFieldsClass.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    field.set(null, null);
+                }
+            }
+        } catch (IllegalAccessException iae) {
+            Assert.fail(iae.getMessage());
+        }
+    }
+    
+    
+
+    
+    /**
+     * Generate satellite ephemeris
+     */
     public static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
                                       ArrayList<TimeStampedPVCoordinates> satellitePVList,
                                       String absDate,
@@ -76,6 +169,9 @@ public class TestUtils {
         satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000, Vector3D.ZERO));
     }
 
+    /**
+     * Generate satellite attitudes
+     */
     public static void addSatelliteQ(TimeScale gps, ArrayList<TimeStampedAngularCoordinates> satelliteQList,
                                      String absDate, double q0, double q1, double q2, double q3) {
         AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
@@ -85,6 +181,10 @@ public class TestUtils {
         satelliteQList.add(pair);
     }
 
+    /** Create an Earth for Junit tests
+     * @return the Earth as the WGS84 ellipsoid
+     * @throws OrekitException
+     */
     public static BodyShape createEarth()
        throws OrekitException {
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
@@ -92,11 +192,19 @@ public class TestUtils {
                                     FramesFactory.getITRF(IERSConventions.IERS_2010, true));
     }
 
+    /** Created a gravity field
+     * @return normalized spherical harmonics coefficients
+     * @throws OrekitException
+     */
     public static NormalizedSphericalHarmonicsProvider createGravityField()
         throws OrekitException {
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
 
+    /** Create an orbit
+     * @return the orbit
+     * @throws OrekitException
+     */
     public static Orbit createOrbit(double mu)
         throws OrekitException {
         // the following orbital parameters have been computed using
@@ -120,6 +228,10 @@ public class TestUtils {
                                  eme2000, date, mu);
     }
 
+    /** Create the propagator of an orbit.
+     * @return propagator of the orbit
+     * @throws OrekitException
+     */
     public static Propagator createPropagator(BodyShape earth,
                                               NormalizedSphericalHarmonicsProvider gravityField,
                                               Orbit orbit)
@@ -151,6 +263,9 @@ public class TestUtils {
 
     }
 
+    /** Create a perfect Line Of Sight list
+     * @return the perfect LOS list
+     */
     public static LOSBuilder createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
@@ -160,6 +275,9 @@ public class TestUtils {
         return new LOSBuilder(list);
     }
 
+    /** Create a Line Of Sight which depends on time.
+     * @return the dependent of time LOS
+     */
     public static TimeDependentLOS createLOSCurvedLine(Vector3D center, Vector3D normal,
                                                  double halfAperture, double sagitta, int n) {
         Vector3D u = Vector3D.crossProduct(center, normal);
@@ -175,6 +293,10 @@ public class TestUtils {
         return new LOSBuilder(list).build();
     }
 
+    /** Propagate an orbit between 2 given dates
+     * @return a list of TimeStampedPVCoordinates
+     * @throws OrekitException
+     */
     public static List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
                                                      AbsoluteDate minDate, AbsoluteDate maxDate,
                                                      double step)
@@ -197,6 +319,10 @@ public class TestUtils {
         return list;
     }
 
+    /** Propagate an attitude between 2 given dates
+     * @return a list of TimeStampedAngularCoordinates
+     * @throws OrekitException
+     */
     public static List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
                                                          AbsoluteDate minDate, AbsoluteDate maxDate,
                                                          double step)
@@ -217,6 +343,5 @@ public class TestUtils {
         propagator.propagate(maxDate);
         return list;
     }
-
 }
 
