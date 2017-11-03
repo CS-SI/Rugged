@@ -296,7 +296,7 @@ public class InterRefining extends Refining {
             System.out.format("\n**** Start optimization  **** %n");
 
             int maxIterations = 100;
-            double convergenceThreshold =  1e-10;
+            double convergenceThreshold = 1.e-7;
 
             refining.optimization(maxIterations, convergenceThreshold,
                                   measurements.getObservables(),

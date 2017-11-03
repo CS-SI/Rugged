@@ -208,7 +208,7 @@ public class GroundRefining extends Refining {
             System.out.format("\n**** Start optimization  **** %n");
 
             int maxIterations = 100;
-            double convergenceThreshold =  1e-14;
+            double convergenceThreshold =  1.e-11;
 
             refining.optimization(maxIterations, convergenceThreshold, measurements.getObservables(), refining.getRugged());
 
