@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package RefiningPleiades;
+package fr.cs.examples.refiningPleiades;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,10 +32,10 @@ import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 
-import RefiningPleiades.generators.GroundMeasurementGenerator;
-import RefiningPleiades.generators.InterMeasurementGenerator;
-import RefiningPleiades.generators.Noise;
-import RefiningPleiades.metrics.LocalisationMetrics;
+import fr.cs.examples.refiningPleiades.generators.GroundMeasurementGenerator;
+import fr.cs.examples.refiningPleiades.generators.InterMeasurementGenerator;
+import fr.cs.examples.refiningPleiades.generators.Noise;
+import fr.cs.examples.refiningPleiades.metrics.LocalisationMetrics;
 
 /**
  * Class for refining problems common methods

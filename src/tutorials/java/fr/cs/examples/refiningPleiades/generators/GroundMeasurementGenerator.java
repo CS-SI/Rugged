@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package RefiningPleiades.generators;
+package fr.cs.examples.refiningPleiades.generators;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.random.GaussianRandomGenerator;

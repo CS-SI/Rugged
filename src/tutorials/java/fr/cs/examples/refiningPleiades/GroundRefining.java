@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package RefiningPleiades;
+package fr.cs.examples.refiningPleiades;
 
 import java.io.File;
 import java.util.List;
@@ -45,11 +45,11 @@ import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
-import RefiningPleiades.generators.GroundMeasurementGenerator;
-import RefiningPleiades.generators.Noise;
-import RefiningPleiades.metrics.DistanceTools;
-import RefiningPleiades.models.OrbitModel;
-import RefiningPleiades.models.PleiadesViewingModel;
+import fr.cs.examples.refiningPleiades.generators.GroundMeasurementGenerator;
+import fr.cs.examples.refiningPleiades.generators.Noise;
+import fr.cs.examples.refiningPleiades.metrics.DistanceTools;
+import fr.cs.examples.refiningPleiades.models.OrbitModel;
+import fr.cs.examples.refiningPleiades.models.PleiadesViewingModel;
 
 /**
  * Class for testing refining (fulcrum points study)

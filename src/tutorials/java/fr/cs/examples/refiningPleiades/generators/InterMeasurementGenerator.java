@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package RefiningPleiades.generators;
+package fr.cs.examples.refiningPleiades.generators;
 
 import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
@@ -31,7 +31,7 @@ import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 
-import RefiningPleiades.metrics.DistanceTools;
+import fr.cs.examples.refiningPleiades.metrics.DistanceTools;
 
 /**
  * Inter-measurements generator (sensor to sensor mapping).
