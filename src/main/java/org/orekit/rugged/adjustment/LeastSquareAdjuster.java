@@ -24,7 +24,8 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
 import org.orekit.rugged.errors.RuggedException;
 
-/** TODO GP description a completer.
+/** LeastSquareAdjuster
+ * class for setting least square algorithm chosen for solving optimization problem.
  * @author Guylaine Prat
  * @since 2.0
  */

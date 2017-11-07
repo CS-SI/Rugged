@@ -43,7 +43,7 @@ import org.orekit.utils.ParameterDriver;
 /**
  * Builder for optimization problem.
  * <p>
- * TODO GP description a completer
+ * Constructs the optimization problem defined by a set of measurement and sensors.
  * </p>
  * @author Jonathan Guinet
  * @author Guylaine Prat
@@ -111,7 +111,6 @@ abstract class OptimizationProblemBuilder {
     final ConvergenceChecker<LeastSquaresProblem.Evaluation>
                             createChecker(final double parametersConvergenceThreshold) {
 
-        // TODO GP description a completer
         final ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = (iteration, previous, current)
             -> current.getPoint().getLInfDistance(previous.getPoint()) <= parametersConvergenceThreshold;
 
@@ -151,7 +150,6 @@ abstract class OptimizationProblemBuilder {
     final ParameterValidator createParameterValidator() {
 
         // Prevent parameters to exceed their prescribed bounds
-        // TODO GP description a completer
         final ParameterValidator validator = params -> {
             try {
                 int i = 0;
@@ -210,7 +208,7 @@ abstract class OptimizationProblemBuilder {
 
         final DSFactory factory = new DSFactory(map.size(), 1);
 
-        // TODO GP description a completer
+        // Derivative Structure Generator
         return new DSGenerator() {
 
             /** {@inheritDoc} */
