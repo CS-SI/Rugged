@@ -63,9 +63,6 @@ public class InterMeasurementGenerator implements Measurable {
     /** Number of measurements */
     private int measurementCount;
 
-    // TODO GP pas utilise ...
-    //   private String sensorNameA;
-
     /** Sensor name B */
     private String sensorNameB;
 
@@ -259,11 +256,11 @@ public class InterMeasurementGenerator implements Measurable {
         final double meanB[] = { mean[1], mean[1] };
         final double stdB[]  = { std[1], std[1] };
 
-        // TODO GP explanation about seed ???
+        // seed has been fixed for tests purpose
         final GaussianRandomGenerator rngA = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
         final UncorrelatedRandomVectorGenerator rvgA = new UncorrelatedRandomVectorGenerator(meanA, stdA, rngA);
 
-        // TODO GP explanation about seed ???
+        // seed has been fixed for tests purpose
         final GaussianRandomGenerator rngB = new GaussianRandomGenerator(new Well19937a(0xdf1c03d9be0b34b9l));
         final UncorrelatedRandomVectorGenerator rvgB = new UncorrelatedRandomVectorGenerator(meanB, stdB, rngB);
 
@@ -290,7 +287,7 @@ public class InterMeasurementGenerator implements Measurable {
                                                                      sensorB.getLOS(dateB, pixelB));
                     final double GEOdistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
                                                                                     gpB.getLongitude(), gpB.getLatitude());
-                    // TODO GP explanation about computation here
+                    // create the inter mapping if distance is below outlier value
                     if (GEOdistance < outlier) {
 
                         final double[] vecRandomA = rvgA.nextVector();

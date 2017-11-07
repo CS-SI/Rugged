@@ -40,8 +40,8 @@ import org.orekit.rugged.errors.RuggedException;
 import org.orekit.errors.OrekitException;
 
 /**
- * TODO GP add comments for tuto
  * Pleiades viewing model class definition.
+ * the aim of this class is to simulate PHR sensor.
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
  * @since 2.0
