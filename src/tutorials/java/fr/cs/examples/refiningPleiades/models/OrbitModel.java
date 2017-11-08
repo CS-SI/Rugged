@@ -105,8 +105,7 @@ public class OrbitModel {
         final Transform transform = itrf.getTransformTo(eme2000, ephemerisDate);
         final Vector3D pEME2000 = transform.transformPosition(pvITRF.getPosition());
         final Vector3D vEME2000 = transform.transformVector(pvITRF.getVelocity());
-        satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000,
-                                                         Vector3D.ZERO));
+        satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000, Vector3D.ZERO));
     }
 
     /** TODO GP add comments
@@ -118,10 +117,8 @@ public class OrbitModel {
     	
         final AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
         final Rotation rotation = new Rotation(q0, q1, q2, q3, true);
-        final TimeStampedAngularCoordinates pair = new TimeStampedAngularCoordinates(attitudeDate,
-                                                                                     rotation,
-                                                                                     Vector3D.ZERO,
-                                                                                     Vector3D.ZERO);
+        final TimeStampedAngularCoordinates pair = 
+                new TimeStampedAngularCoordinates(attitudeDate, rotation, Vector3D.ZERO, Vector3D.ZERO);
         satelliteQList.add(pair);
     }
 

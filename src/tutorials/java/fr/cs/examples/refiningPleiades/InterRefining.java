@@ -127,7 +127,7 @@ public class InterRefining extends Refining {
             OrbitModel orbitmodelA = refining.getOrbitmodelA();
             BodyShape earthA = orbitmodelA.createEarth();
             NormalizedSphericalHarmonicsProvider gravityFieldA = orbitmodelA.createGravityField();
-            Orbit orbitA  = orbitmodelA.createOrbit(gravityFieldA.getMu(), refDateA);
+            Orbit orbitA = orbitmodelA.createOrbit(gravityFieldA.getMu(), refDateA);
 
             // ----If no LOF Transform Attitude Provider is Nadir Pointing Yaw Compensation
             final double [] rollPoly = {0.0,0.0,0.0};
@@ -183,10 +183,10 @@ public class InterRefining extends Refining {
             System.out.format(Locale.US, "Viewing model B - date min: %s max: %s ref: %s  %n", minDateB, maxDateB, refDateB);
 
             // ----Satellite position, velocity and attitude: create orbit model B
-            OrbitModel orbitmodelB =  new OrbitModel();
+            OrbitModel orbitmodelB =  refining.getOrbitmodelB();
             BodyShape earthB = orbitmodelB.createEarth();
             NormalizedSphericalHarmonicsProvider gravityFieldB = orbitmodelB.createGravityField();
-            Orbit orbitB  = orbitmodelB.createOrbit(gravityFieldB.getMu(), refDateB);
+            Orbit orbitB = orbitmodelB.createOrbit(gravityFieldB.getMu(), refDateB);
 
             // ----Satellite attitude
             List<TimeStampedAngularCoordinates> satelliteQListB = orbitmodelB.orbitToQ(orbitB, earthB, minDateB.shiftedBy(-0.0), maxDateB.shiftedBy(+0.0), 0.25);
@@ -222,7 +222,7 @@ public class InterRefining extends Refining {
 
             // Compute distance between LOS
             // -----------------------------
-            double distance = refining.computeDistance(lineSensorA, lineSensorB);
+            double distance = refining.computeDistanceBetweenLOS(lineSensorA, lineSensorB);
             System.out.format("distance %f meters %n",distance);
 
 
@@ -331,20 +331,20 @@ public class InterRefining extends Refining {
 	/** Constructor */
 	public InterRefining() throws RuggedException, OrekitException {
 
-		sensorNameA = "SensorA";
+		this.sensorNameA = "SensorA";
 		final double incidenceAngleA = -5.0;
 		final String dateA = "2016-01-01T11:59:50.0";
 
-		pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
+		this.pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
 
-		sensorNameB = "SensorB";
+		this.sensorNameB = "SensorB";
 		final double incidenceAngleB = 0.0;
 		final String dateB = "2016-01-01T12:02:50.0";
 
-		pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
+		this.pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
 
-		orbitmodelA =  new OrbitModel();
-		orbitmodelB =  new OrbitModel();
+		this.orbitmodelA =  new OrbitModel();
+		this.orbitmodelB =  new OrbitModel();
 	}
 
     /** Estimate distance between LOS
@@ -352,7 +352,7 @@ public class InterRefining extends Refining {
      * @param lineSensorB line sensor B
      * @return GSD
      */
-    private double computeDistance(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
+    private double computeDistanceBetweenLOS(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
 
 
     	// Get number of line of sensors

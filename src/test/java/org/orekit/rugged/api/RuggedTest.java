@@ -74,6 +74,8 @@ import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.RefiningLiaisonMetrics;
+import org.orekit.rugged.utils.RefiningTest;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -84,6 +86,7 @@ import org.orekit.utils.IERSConventions;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
+
 
 public class RuggedTest {
 
@@ -1258,10 +1261,6 @@ public class RuggedTest {
     }
 
 
-
-    // TODO add refining tests
-
-
     private void checkDateLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                        double maxDateError)
         throws RuggedException, OrekitException, URISyntaxException {
@@ -1373,6 +1372,25 @@ public class RuggedTest {
 
         Assert.assertEquals(firstLine, recomputedFirstLine, maxLineError);
         Assert.assertEquals(lastLine, recomputedLastLine, maxLineError);
+    }
+    
+    // TODO add refining tests
+    @Test
+    public void testDistanceBetweenLOS() throws RuggedException {
+        
+        RefiningTest refiningTest = new RefiningTest();
+        refiningTest.InitRefiningTest();
+        
+        // Compute ground truth residuals
+        // ------------------------------
+        System.out.format("\n**** Ground truth residuals **** %n");
+        
+        RefiningLiaisonMetrics liaisonMetrics = refiningTest.computeLiaisonMetrics(refiningTest.getInterMapping(), refiningTest.getRuggedA(), refiningTest.getRuggedB());
+        
+        System.out.format("Max: %1.4e Mean: %1.4e %n",liaisonMetrics.getMaxResidual(),liaisonMetrics.getMeanResidual());
+        System.out.format("LOS distance Max: %1.4e Mean: %1.4e %n",liaisonMetrics.getLosMaxDistance(),liaisonMetrics.getLosMeanDistance());
+        System.out.format("Earth distance Max: %1.4e Mean: %1.4e %n",liaisonMetrics.getEarthMaxDistance(),liaisonMetrics.getEarthMeanDistance());
+
     }
     
     @Before

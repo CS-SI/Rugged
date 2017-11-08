@@ -202,11 +202,12 @@ public class TestUtils {
     }
 
     /** Create an orbit
+     * @param mu Earth gravitational constant
      * @return the orbit
      * @throws OrekitException
      */
-    public static Orbit createOrbit(double mu)
-        throws OrekitException {
+    public static Orbit createOrbit(double mu) throws OrekitException {
+        
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
         //
@@ -226,6 +227,27 @@ public class TestUtils {
                                  FastMath.toRadians(77.55565567747836),
                                  FastMath.PI, PositionAngle.TRUE,
                                  eme2000, date, mu);
+    }
+    
+    /** Create an orbit at a chosen date for Refining tests
+     * @param mu Earth gravitational constant
+     * @param date the chosen date
+     * @return the orbit
+     * @throws OrekitException
+     */
+    public Orbit createOrbit(final double mu, final AbsoluteDate date) throws OrekitException {
+
+        final Frame eme2000 = FramesFactory.getEME2000();
+        return new CircularOrbit(694000.0 + Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                 -4.029194321683225E-4,
+                                 0.0013530362644647786,
+                                 FastMath.toRadians(98.2), // Pleiades inclination 98.2 deg
+                                 FastMath.toRadians(-86.47 + 180),
+                                 FastMath.toRadians(135.9 + 0.3),
+                                 PositionAngle.TRUE,
+                                 eme2000,
+                                 date,
+                                 mu);
     }
 
     /** Create the propagator of an orbit.
@@ -298,7 +320,13 @@ public class TestUtils {
      * @throws OrekitException
      */
     public static List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
-                                                     AbsoluteDate minDate, AbsoluteDate maxDate,
+                                                     AbsoluteDate//    /** TODO GP add comments
+//                                                   */
+//                                                   public NormalizedSphericalHarmonicsProvider createGravityField() throws OrekitException {
+//                                                       
+//                                                       return GravityFieldFactory.getNormalizedProvider(12, 12);
+//                                                   }
+ minDate, AbsoluteDate maxDate,
                                                      double step)
         throws OrekitException {
         Propagator propagator = new KeplerianPropagator(orbit);
