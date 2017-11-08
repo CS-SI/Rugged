@@ -63,8 +63,10 @@ public class Observables {
         interMappings.put(this.createKey(interMapping), interMapping);
     }
 
-    /** Add a ground mapping between ????
-     * TODO GP commentaire a completer
+    /** Add a ground mapping 
+     * <p>
+     * a ground mapping is defined by a set of GCPs 
+     * </p>
      * @param groundMapping sensor to ground mapping
      */
     public void addGroundMapping(final SensorToGroundMapping groundMapping) {
@@ -92,7 +94,6 @@ public class Observables {
     }
 
     /** Get the sensor to sensor values.
-     * TODO GP commentaire a completer
      * @return the inter-mappings
      */
     public Collection<SensorToSensorMapping> getInterMappings() {
@@ -108,7 +109,9 @@ public class Observables {
 
     /**
      * Get a sensor mapping for a sensor.
-     * TODO GP commentaire a completer
+     * <p>
+     * returns sensor to sensor mapping associated with specific sensors and related rugged instance.
+     * </p>
      * @param ruggedNameA Rugged name A
      * @param sensorNameA sensor name A
      * @param ruggedNameB Rugged name B

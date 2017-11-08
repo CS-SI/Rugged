@@ -60,8 +60,10 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 import org.orekit.utils.AngularDerivativesFilter;
 
 /**
- * TODO GP add comments for tuto
  * Orbit Model class to generate positions-velocities and attitude quaternions.
+ * <p>
+ * the aim of this class is to simulate the orbit model of an LEO satellite
+ * </p>
  * @author Jonathan Guinet
  * @author Guylaine Prat
  * @since 2.0 */

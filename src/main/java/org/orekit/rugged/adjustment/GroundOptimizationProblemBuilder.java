@@ -46,8 +46,12 @@ import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.utils.ParameterDriver;
 
-/** TODO GP description a completer.
+/** Ground optimization problem builder.
+ * builds the optimization problem relying on ground measurements.
  * @author Guylaine Prat
+ * @author Lucie Labat Allee
+ * @author Jonathan Guinet
+ * @author Luc Maisonobe
  * @since 2.0
  */
 public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder {
@@ -74,7 +78,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     private HashMap<String, double[] > targetAndWeight;
 
 
-    /** TODO GP description a completer.
+    /** Build a new instance of the optimization problem.
      * @param sensors list of sensors to refine
      * @param measurements set of observables
      * @param rugged name of rugged to refine

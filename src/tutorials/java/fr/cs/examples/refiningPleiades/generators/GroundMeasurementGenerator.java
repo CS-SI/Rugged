@@ -139,7 +139,7 @@ public class GroundMeasurementGenerator implements Measurable {
         final double meanGenerator[] =  {latErrorMean, lonErrorMean, mean[2]};
         final double stdGenerator[] = {latErrorStd, lonErrorStd, std[2]};
 
-        // TODO GP commentaire sur la seed du generator ???
+        // seed has been fixed for tests purpose
         final GaussianRandomGenerator rng = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
         final UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(meanGenerator, stdGenerator, rng);
 
@@ -174,9 +174,6 @@ public class GroundMeasurementGenerator implements Measurable {
      * @throws RuggedException
      */
     private Vector3D estimateLatLongError() throws RuggedException {
-
-        // TODO GP add explanation
-
         final int pix = sensor.getNbPixels() / 2;
         final int line = (int) FastMath.floor(pix); // assumption : same number of line and pixels;
 
@@ -188,10 +185,6 @@ public class GroundMeasurementGenerator implements Measurable {
 
         final double latErr = FastMath.abs(gp_pix0.getLatitude() - gp_pix1.getLatitude());
         final double lonErr = FastMath.abs(gp_pix0.getLongitude() - gp_pix1.getLongitude());
-
-//        final double distanceX =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(), gp_pix1.getLongitude(), gp_pix0.getLatitude());
-//        final double distanceY =  DistanceTools.computeDistanceInMeter(gp_pix0.getLongitude(), gp_pix0.getLatitude(), gp_pix0.getLongitude(), gp_pix1.getLatitude());
-
         return new Vector3D(latErr, lonErr, 0.0);
     }
 }

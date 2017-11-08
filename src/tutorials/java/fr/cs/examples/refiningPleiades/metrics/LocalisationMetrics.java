@@ -33,7 +33,6 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 
 /**
- * TODO GP migrer sous tutorials
  * Class for testing geometric performances in absolute location.
  * Metrics are computed for two scenarios: ground points and liaison points.
  * @see SensorToSensorMapping
