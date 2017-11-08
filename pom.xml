@@ -19,11 +19,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rugged.findbugs-maven-plugin.version>3.0.0</rugged.findbugs-maven-plugin.version>
-    <rugged.jacoco-maven-plugin.version>0.7.7.201606060606</rugged.jacoco-maven-plugin.version>
+    <rugged.jacoco-maven-plugin.version>0.7.9</rugged.jacoco-maven-plugin.version>
     <rugged.maven-assembly-plugin.version>2.6</rugged.maven-assembly-plugin.version>
     <rugged.maven-bundle-plugin.version>3.2.0</rugged.maven-bundle-plugin.version>
     <rugged.maven-changes-plugin.version>2.12</rugged.maven-changes-plugin.version>
     <rugged.maven-checkstyle-plugin.version>2.17</rugged.maven-checkstyle-plugin.version>
+    <rugged.checkstyle.version>8.1</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.0.0</rugged.maven-clean-plugin.version>
     <rugged.maven-compiler-plugin.version>3.5.1</rugged.maven-compiler-plugin.version>
     <rugged.maven-javadoc-plugin.version>2.10.4</rugged.maven-javadoc-plugin.version>
@@ -302,6 +303,11 @@
             <goals>
               <goal>prepare-agent</goal>
             </goals>
+            <configuration>
+              <excludes>
+               <exclude>fr/cs/examples/**/*.class</exclude>
+              </excludes>
+            </configuration>
           </execution>
           <execution>
             <id>report</id>
@@ -309,6 +315,60 @@
             <goals>
               <goal>report</goal>
             </goals>
+            <configuration>
+              <excludes>
+               <exclude>fr/cs/examples/**/*.class</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>CLASS</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>1.00</minimum>
+                    </limit>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.90</minimum>
+                    </limit>
+                    <limit>
+                      <counter>METHOD</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.95</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.85</minimum>
+                    </limit>
+                    <limit>
+                      <counter>COMPLEXITY</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.85</minimum>
+                    </limit>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.90</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <haltOnFailure>false</haltOnFailure>
+              <excludes>
+               <exclude>fr/cs/examples/**/*.class</exclude>
+              </excludes>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -377,6 +437,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${rugged.maven-checkstyle-plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${rugged.checkstyle.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <configLocation>${basedir}/checkstyle.xml</configLocation>
           <enableRulesSummary>false</enableRulesSummary>
@@ -456,6 +523,13 @@
           <enableRulesSummary>false</enableRulesSummary>
           <headerLocation>${basedir}/license-header.txt</headerLocation>
         </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -478,6 +552,7 @@
         <version>${rugged.maven-jxr-plugin.version}</version>
         <configuration>
           <linkJavadoc>false</linkJavadoc>
+          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="http://www.c-s.fr">CS Syst&egrave;mes d&apos;information</a>. All rights reserved.]]></bottom>
         </configuration>
       </plugin>
       <plugin>
@@ -485,6 +560,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${rugged.maven-javadoc-plugin.version}</version>
         <configuration>
+          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="http://www.c-s.fr">CS Syst&egrave;mes d&apos;information</a>. All rights reserved.]]></bottom>
           <links>
             <link>http://docs.oracle.com/javase/8/docs/api/</link>
             <link>http://hipparchus.org/apidocs/</link>
