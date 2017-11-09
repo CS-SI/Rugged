@@ -334,8 +334,6 @@ public class TestUtils {
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 list.add(new TimeStampedPVCoordinates(currentState.getDate(),
                                                       currentState.getPVCoordinates().getPosition(),
@@ -360,8 +358,6 @@ public class TestUtils {
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
         propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
                                                            currentState.getAttitude().getRotation(),

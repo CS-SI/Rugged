@@ -72,8 +72,6 @@ public class RoughVisibilityEstimatorTest {
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
         final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(1.0, new OrekitFixedStepHandler() {
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 pv.add(currentState.getPVCoordinates());
             }
@@ -100,8 +98,6 @@ public class RoughVisibilityEstimatorTest {
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
         final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
         propagator.setMasterMode(1.0, new OrekitFixedStepHandler() {
-            public void init(SpacecraftState s0, AbsoluteDate t) {
-            }
             public void handleStep(SpacecraftState currentState, boolean isLast) {
                 pv.add(currentState.getPVCoordinates());
             }
