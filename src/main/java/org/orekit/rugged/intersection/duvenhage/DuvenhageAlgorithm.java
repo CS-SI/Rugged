@@ -530,53 +530,52 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         final NormalizedGeodeticPoint exitGP    = ellipsoid.transform(exitP, ellipsoid.getBodyFrame(), null, reference);
 
         switch (tile.getLocation(exitGP.getLatitude(), exitGP.getLongitude())) {
-        case SOUTH_WEST :
-            return new LimitPoint(ellipsoid, reference,
-                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMinimumLatitude(),  exitP),
-                                                longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
-                                                position),
-                                  true);
-        case WEST :
-            return new LimitPoint(ellipsoid, reference,
-                                  longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
-                                  true);
-        case NORTH_WEST:
-            return new LimitPoint(ellipsoid, reference,
-                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMaximumLatitude(),  exitP),
-                                                longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
-                                                position),
-                                  true);
-        case NORTH :
-            return new LimitPoint(ellipsoid, reference,
-                                  latitudeCrossing(ellipsoid, position, los, tile.getMaximumLatitude(), exitP),
-                                  true);
-        case NORTH_EAST :
-            return new LimitPoint(ellipsoid, reference,
-                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMaximumLatitude(),  exitP),
-                                                longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
-                                                position),
-                                  true);
-        case EAST :
-            return new LimitPoint(ellipsoid, reference,
-                                  longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
-                                  true);
-        case SOUTH_EAST :
-            return new LimitPoint(ellipsoid, reference,
-                                  selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMinimumLatitude(),  exitP),
-                                                longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
-                                                position),
-                                  true);
-        case SOUTH :
-            return new LimitPoint(ellipsoid, reference,
-                                  latitudeCrossing(ellipsoid, position, los, tile.getMinimumLatitude(), exitP),
-                                  true);
-        case HAS_INTERPOLATION_NEIGHBORS :
-            return new LimitPoint(exitGP, false);
+            case SOUTH_WEST :
+                return new LimitPoint(ellipsoid, reference,
+                                      selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMinimumLatitude(),  exitP),
+                                                    longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
+                                                    position),
+                                      true);
+            case WEST :
+                return new LimitPoint(ellipsoid, reference,
+                                      longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
+                                      true);
+            case NORTH_WEST:
+                return new LimitPoint(ellipsoid, reference,
+                                      selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMaximumLatitude(),  exitP),
+                                                    longitudeCrossing(ellipsoid, position, los, tile.getMinimumLongitude(), exitP),
+                                                    position),
+                                      true);
+            case NORTH :
+                return new LimitPoint(ellipsoid, reference,
+                                      latitudeCrossing(ellipsoid, position, los, tile.getMaximumLatitude(), exitP),
+                                      true);
+            case NORTH_EAST :
+                return new LimitPoint(ellipsoid, reference,
+                                      selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMaximumLatitude(),  exitP),
+                                                    longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
+                                                    position),
+                                      true);
+            case EAST :
+                return new LimitPoint(ellipsoid, reference,
+                                      longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
+                                      true);
+            case SOUTH_EAST :
+                return new LimitPoint(ellipsoid, reference,
+                                      selectClosest(latitudeCrossing(ellipsoid, position,  los, tile.getMinimumLatitude(),  exitP),
+                                                    longitudeCrossing(ellipsoid, position, los, tile.getMaximumLongitude(), exitP),
+                                                    position),
+                                      true);
+            case SOUTH :
+                return new LimitPoint(ellipsoid, reference,
+                                      latitudeCrossing(ellipsoid, position, los, tile.getMinimumLatitude(), exitP),
+                                      true);
+            case HAS_INTERPOLATION_NEIGHBORS :
+                return new LimitPoint(exitGP, false);
 
-        default :
-            // this should never happen
-            throw RuggedException.createInternalError(null);
-
+            default :
+                // this should never happen
+                throw RuggedException.createInternalError(null);
         }
 
     }

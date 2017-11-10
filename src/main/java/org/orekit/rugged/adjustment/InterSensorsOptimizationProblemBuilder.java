@@ -49,8 +49,7 @@ import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
-/** InterSensorsOptimizationProblemBuilder 
- * Constructs the optimization problem for a list of tie points.
+/** Constructs the optimization problem for a list of tie points.
  * @author Guylaine Prat
  * @author Lucie Labat Allee
  * @author Jonathan Guinet

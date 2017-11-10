@@ -63,9 +63,9 @@ public class Observables {
         interMappings.put(this.createKey(interMapping), interMapping);
     }
 
-    /** Add a ground mapping 
+    /** Add a ground mapping.
      * <p>
-     * a ground mapping is defined by a set of GCPs 
+     * A ground mapping is defined by a set of GCPs.
      * </p>
      * @param groundMapping sensor to ground mapping
      */
