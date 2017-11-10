@@ -54,8 +54,8 @@ import org.orekit.rugged.utils.Selector;
  * have 9 levels:
  * </p>
  *
- * <table border="0">
- * <tr BGCOLOR="#EEEEFF">
+ * <table summary="" border="0">
+ * <tr style="background-color:#EEEEFF;">
  *             <td>Level</td>         <td>Number of sub-tiles</td>    <td>Regular sub-tiles dimension</td></tr>
  * <tr>  <td align="center">8</td>  <td align="center">107 ⨉ 10</td>       <td align="center"> 1 ⨉   2</td>
  * <tr>  <td align="center">7</td>  <td align="center"> 54 ⨉ 10</td>       <td align="center"> 2 ⨉   2</td>
@@ -139,10 +139,10 @@ public class MinMaxTreeTile extends SimpleTile {
      * considering also Eastwards and Northwards neighbors, and extends
      * up to the center of these neighbors. As an example, lets consider
      * four neighboring cells in some Digital Elevation Model:
-     * <table border="0" cellpadding="5" bgcolor="#f5f5dc">
-     * <tr><th bgcolor="#c9d5c9">j+1</th><td>11</td><td>10</td></tr>
-     * <tr><th bgcolor="#c9d5c9">j</th><td>12</td><td>11</td></tr>
-     * <tr  bgcolor="#c9d5c9"><th>j/i</th><th>i</th><th>i+1</th></tr>
+     * <table summary="" border="0" cellpadding="5" style="background-color:#f5f5dc;">
+     * <tr><th style="background-color:#c9d5c9;">j+1</th><td>11</td><td>10</td></tr>
+     * <tr><th style="background-color:#c9d5c9;">j</th><td>12</td><td>11</td></tr>
+     * <tr  style="background-color:#c9d5c9;"><th>j/i</th><th>i</th><th>i+1</th></tr>
      * </table>
      * When we interpolate elevation at a point located slightly South-West
      * to the center of the (i+1, j+1) cell, we use all four cells in the
@@ -199,10 +199,10 @@ public class MinMaxTreeTile extends SimpleTile {
      * considering also Eastwards and Northwards neighbors, and extends
      * up to the center of these neighbors. As an example, lets consider
      * four neighboring cells in some Digital Elevation Model:
-     * <table border="0" cellpadding="5" bgcolor="#f5f5dc">
-     * <tr><th bgcolor="#c9d5c9">j+1</th><td>11</td><td>12</td></tr>
-     * <tr><th bgcolor="#c9d5c9">j</th><td>10</td><td>11</td></tr>
-     * <tr  bgcolor="#c9d5c9"><th>j/i</th><th>i</th><th>i+1</th></tr>
+     * <table summary="" border="0" cellpadding="5" style="background-color:#f5f5dc;">
+     * <tr><th style="background-color:#c9d5c9;">j+1</th><td>11</td><td>12</td></tr>
+     * <tr><th style="background-color:#c9d5c9;">j</th><td>10</td><td>11</td></tr>
+     * <tr  style="background-color:#c9d5c9;"><th>j/i</th><th>i</th><th>i+1</th></tr>
      * </table>
      * When we interpolate elevation at a point located slightly South-West
      * to the center of the (i+1, j+1) cell, we use all four cells in the
