@@ -64,26 +64,20 @@ import fr.cs.examples.refiningPleiades.models.PleiadesViewingModel;
 public class GroundRefining extends Refining {
 
     /** Pleiades viewing model */
-    PleiadesViewingModel pleiadesViewingModel;
-
-    /** Orbit model */
-    OrbitModel orbitmodel;
+    private static PleiadesViewingModel pleiadesViewingModel;
 
     /** Sensor name */
-    String sensorName;
+    private static String sensorName;
 
     /** Rugged instance */
-    Rugged rugged;
-
-    /** Ground measurements */
-    GroundMeasurementGenerator measurements;
+    private static Rugged rugged;
+    
 
     /** Main function
      */
     public static void main(String[] args) {
     	
     	try {
-    		
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             // ---------------------------------------------------------------------------
             File home       = new File(System.getProperty("user.home"));
@@ -97,7 +91,6 @@ public class GroundRefining extends Refining {
             // Sensor's definition: create Pleiades viewing model
             // --------------------------------------------------
             System.out.format("**** Build Pleiades viewing model and orbit definition **** %n");
-            PleiadesViewingModel pleiadesViewingModel = refining.getPleiadesViewingModel();
             AbsoluteDate minDate =  pleiadesViewingModel.getMinDate();
             AbsoluteDate maxDate =  pleiadesViewingModel.getMaxDate();
             AbsoluteDate refDate = pleiadesViewingModel.getDatationReference();
@@ -105,7 +98,7 @@ public class GroundRefining extends Refining {
 
             // Satellite position, velocity and attitude: create an orbit model
             // ----------------------------------------------------------------
-            OrbitModel orbitmodel = refining.getOrbitmodel();
+            OrbitModel orbitmodel = new OrbitModel();
             BodyShape earth = orbitmodel.createEarth();
             NormalizedSphericalHarmonicsProvider gravityField = orbitmodel.createGravityField();
             Orbit orbit = orbitmodel.createOrbit(gravityField.getMu(), refDate);
@@ -150,8 +143,9 @@ public class GroundRefining extends Refining {
 
             ruggedBuilder.setName("Rugged_refining");
 
-            refining.setRugged(ruggedBuilder.build());
+            rugged = ruggedBuilder.build();
 
+            
             // Compute ground sample distance (GSD)
             // ------------------------------------
             double [] gsd = refining.computeGSD(lineSensor);
@@ -167,8 +161,7 @@ public class GroundRefining extends Refining {
             System.out.format("roll: %3.5f \tpitch: %3.5f \tfactor: %3.5f \n",rollValue, pitchValue, factorValue);
 
             // Apply disruptions on physical model
-            refining.applyDisruptions(refining.getRugged(), refining.getSensorName(),
-                                      rollValue, pitchValue, factorValue);
+            refining.applyDisruptions(rugged, sensorName, rollValue, pitchValue, factorValue);
 
             // Generate measurements (observations) from physical model disrupted
             // ------------------------------------------------------------------
@@ -176,32 +169,37 @@ public class GroundRefining extends Refining {
             int pixelSampling = 1000;
 
             // Noise definition
-            final Noise noise = new Noise(0,3); /* distribution: gaussian(0), vector dimension:3 */
-            final double[] mean = {0.0,0.0,0.0};                /* {lat mean, long mean, alt mean} */
-            final double[] standardDeviation = {0.0,0.0,0.0};   /* {lat std, long std, alt std} */
+            // distribution: gaussian(0), vector dimension:3
+            final Noise noise = new Noise(0,3);
+            
+            // lat mean, long mean, alt mean
+            final double[] mean = {0.0,0.0,0.0};
+            // lat std, long std, alt std}
+            final double[] standardDeviation = {0.0,0.0,0.0};
+            
             noise.setMean(mean);
             noise.setStandardDeviation(standardDeviation);
 
+            // Ground measurements
             GroundMeasurementGenerator measurements = refining.generateNoisyPoints(lineSampling, pixelSampling,
-                                                                           refining.getRugged(), refining.getSensorName(),
-                                                                           refining.getPleiadesViewingModel().getDimension(),
-                                                                           noise);
-            refining.setMeasurements(measurements);
+                                                                                   rugged, sensorName,
+                                                                                   pleiadesViewingModel.getDimension(),
+                                                                                   noise);
 
             // Compute ground truth residuals
             // ------------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
-            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
+            refining.computeMetrics(measurements.getGroundMapping(), rugged, false);
 
             // Initialize physical model without disruptions
             // ---------------------------------------------
             System.out.format("\n**** Initialize physical model without disruptions: reset Roll/Pitch/Factor **** %n");
-            refining.resetModel(refining.getRugged(), refining.getSensorName(), true);
+            refining.resetModel(rugged, sensorName, true);
 
             // Compute initial residuals
             // -------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
-            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
+            refining.computeMetrics(measurements.getGroundMapping(), rugged, false);
 
             // Start optimization
             // ------------------
@@ -210,23 +208,22 @@ public class GroundRefining extends Refining {
             int maxIterations = 100;
             double convergenceThreshold =  1.e-11;
 
-            refining.optimization(maxIterations, convergenceThreshold, measurements.getObservables(), refining.getRugged());
+            refining.optimization(maxIterations, convergenceThreshold, measurements.getObservables(), rugged);
 
             // Check estimated values
             // ----------------------
             System.out.format("\n**** Check parameters ajustement **** %n");
-            refining.paramsEstimation(refining.getRugged(), refining.getSensorName(),
-                                      rollValue, pitchValue, factorValue);
+            refining.paramsEstimation(rugged, sensorName, rollValue, pitchValue, factorValue);
 
             // Compute statistics
             // ------------------
             System.out.format("\n**** Compute Statistics **** %n");
 
             // Residuals computed in meters
-            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), false);
+            refining.computeMetrics(measurements.getGroundMapping(), rugged, false);
 
             // Residuals computed in degrees
-            refining.computeMetrics(measurements.getGroundMapping(), refining.getRugged(), true);
+            refining.computeMetrics(measurements.getGroundMapping(), rugged, true);
 
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
@@ -242,7 +239,7 @@ public class GroundRefining extends Refining {
 
         sensorName = "line";
         pleiadesViewingModel = new PleiadesViewingModel(sensorName);
-        orbitmodel =  new OrbitModel();
+
     }
 
      /** Estimate ground sample distance (GSD)
@@ -286,68 +283,60 @@ public class GroundRefining extends Refining {
         return gsd;
     }
 
-    /**
-     * Get the Pleiades viewing model
-     * @return the Pleiades viewing model
-     */
-    public PleiadesViewingModel getPleiadesViewingModel() {
-        return pleiadesViewingModel;
-    }
-
-    /**
-     * Set the Pleiades viewing model
-     * @param pleiadesViewingModel Pleiades viewing model to set
-     */
-    public void setPleiadesViewingModel(final PleiadesViewingModel pleiadesViewingModel) {
-        this.pleiadesViewingModel = pleiadesViewingModel;
-    }
-
-    /**
-     * Get the orbit model
-     * @return the orbit model
-     */
-    public OrbitModel getOrbitmodel() {
-        return orbitmodel;
-    }
-
-    /**
-     * Set the orbit model
-     * @param orbitmodel the orbit model to set
-     */
-    public void setOrbitmodel(final OrbitModel orbitmodel) {
-        this.orbitmodel = orbitmodel;
-    }
-
-    /**
-     * Get the sensor name
-     * @return the sensor name
-     */
-    public String getSensorName() {
-        return sensorName;
-    }
-
-    /**
-     * Get the Rugged instance
-     * @return the rugged instance
-     */
-    public Rugged getRugged() {
-        return rugged;
-    }
-
-    /**
-     * Set the Rugged instance
-     * @param rugged the Rugged instance to set
-     */
-    public void setRugged(final Rugged rugged) {
-        this.rugged = rugged;
-    }
-
-    /**
-     * Set the measurements
-     * @param measurements the measurements to set
-     */
-    public void setMeasurements(final GroundMeasurementGenerator measurements) {
-        this.measurements = measurements;
-    }
+//    /**
+//     * Get the Pleiades viewing model
+//     * @return the Pleiades viewing model
+//     */
+//    public PleiadesViewingModel getPleiadesViewingModel() {
+//        return pleiadesViewingModel;
+//    }
+//
+//    /**
+//     * Set the Pleiades viewing model
+//     * @param pleiadesViewingModel Pleiades viewing model to set
+//     */
+//    public void setPleiadesViewingModel(final PleiadesViewingModel pleiadesViewingModel) {
+//        this.pleiadesViewingModel = pleiadesViewingModel;
+//    }
+//
+//    /**
+//     * Get the orbit model
+//     * @return the orbit model
+//     */
+//    public OrbitModel getOrbitmodel() {
+//        return orbitmodel;
+//    }
+//
+//    /**
+//     * Set the orbit model
+//     * @param orbitmodel the orbit model to set
+//     */
+//    public void setOrbitmodel(final OrbitModel orbitmodel) {
+//        this.orbitmodel = orbitmodel;
+//    }
+//
+//    /**
+//     * Get the sensor name
+//     * @return the sensor name
+//     */
+//    public String getSensorName() {
+//        return sensorName;
+//    }
+//
+//    /**
+//     * Get the Rugged instance
+//     * @return the rugged instance
+//     */
+//    public Rugged getRugged() {
+//        return rugged;
+//    }
+//
+//    /**
+//     * Set the Rugged instance
+//     * @param rugged the Rugged instance to set
+//     */
+//    public void setRugged(final Rugged rugged) {
+//        this.rugged = rugged;
+//    }
 }
 

@@ -67,31 +67,22 @@ import fr.cs.examples.refiningPleiades.models.PleiadesViewingModel;
 public class InterRefining extends Refining {
 
 	/** Pleiades viewing model A */
-	PleiadesViewingModel pleiadesViewingModelA;
+	private static PleiadesViewingModel pleiadesViewingModelA;
 
 	/** Pleiades viewing model B */
-	PleiadesViewingModel pleiadesViewingModelB;
-
-	/** Orbit model corresponding to viewing model A */
-	OrbitModel orbitmodelA;
-
-	/** Orbit model corresponding to viewing model B */
-	OrbitModel orbitmodelB;
+	private static PleiadesViewingModel pleiadesViewingModelB;
 
 	/** Sensor name A corresponding to viewing model A */
-	String sensorNameA;
+	private static String sensorNameA;
 
 	/** Sensor name A corresponding to viewing model B */
-	String sensorNameB;
+	private static String sensorNameB;
 
 	/** RuggedA's instance */
-	Rugged ruggedA;
+	private static Rugged ruggedA;
 
 	/** RuggedB's instance */
-	Rugged ruggedB;
-
-	/** Inter-measurements (between both viewing models) */
-	InterMeasurementGenerator measurements;
+	private static Rugged ruggedB;
 
 
 	/** Main function
@@ -99,7 +90,6 @@ public class InterRefining extends Refining {
 	public static void main(String[] args) {
 		
 		try {
-			
 			// Initialize Orekit, assuming an orekit-data folder is in user home directory
 			// ---------------------------------------------------------------------------
 			File home       = new File(System.getProperty("user.home"));
@@ -116,7 +106,6 @@ public class InterRefining extends Refining {
             System.out.format("**** Build Pleiades viewing model A and its orbit definition **** %n");
 
             // 1/- Create First Pleiades Viewing Model
-            PleiadesViewingModel pleiadesViewingModelA = refining.getPleiadesViewingModelA();
             final AbsoluteDate minDateA =  pleiadesViewingModelA.getMinDate();
             final AbsoluteDate maxDateA =  pleiadesViewingModelA.getMaxDate();
             final AbsoluteDate refDateA = pleiadesViewingModelA.getDatationReference();
@@ -124,7 +113,7 @@ public class InterRefining extends Refining {
             System.out.format(Locale.US, "Viewing model A - date min: %s max: %s ref: %s %n", minDateA, maxDateA, refDateA);
 
             // ----Satellite position, velocity and attitude: create orbit model A
-            OrbitModel orbitmodelA = refining.getOrbitmodelA();
+            OrbitModel orbitmodelA = new OrbitModel();
             BodyShape earthA = orbitmodelA.createEarth();
             NormalizedSphericalHarmonicsProvider gravityFieldA = orbitmodelA.createGravityField();
             Orbit orbitA = orbitmodelA.createOrbit(gravityFieldA.getMu(), refDateA);
@@ -169,13 +158,12 @@ public class InterRefining extends Refining {
 
             ruggedBuilderA.setName("RuggedA");
 
-            refining.setRuggedA(ruggedBuilderA.build());
+            ruggedA = ruggedBuilderA.build();
 
 
             System.out.format("\n**** Build Pleiades viewing model B and its orbit definition **** %n");
 
             // 2/- Create Second Pleiades Viewing Model
-            PleiadesViewingModel pleiadesViewingModelB = refining.getPleiadesViewingModelB();
             final AbsoluteDate minDateB =  pleiadesViewingModelB.getMinDate();
             final AbsoluteDate maxDateB =  pleiadesViewingModelB.getMaxDate();
             final AbsoluteDate refDateB = pleiadesViewingModelB.getDatationReference();
@@ -183,7 +171,7 @@ public class InterRefining extends Refining {
             System.out.format(Locale.US, "Viewing model B - date min: %s max: %s ref: %s  %n", minDateB, maxDateB, refDateB);
 
             // ----Satellite position, velocity and attitude: create orbit model B
-            OrbitModel orbitmodelB =  refining.getOrbitmodelB();
+            OrbitModel orbitmodelB =  new OrbitModel();
             BodyShape earthB = orbitmodelB.createEarth();
             NormalizedSphericalHarmonicsProvider gravityFieldB = orbitmodelB.createGravityField();
             Orbit orbitB = orbitmodelB.createOrbit(gravityFieldB.getMu(), refDateB);
@@ -218,7 +206,7 @@ public class InterRefining extends Refining {
 
             ruggedBuilderB.setName("RuggedB");
 
-            refining.setRuggedB(ruggedBuilderB.build());
+            ruggedB = ruggedBuilderB.build();
 
             // Compute distance between LOS
             // -----------------------------
@@ -240,12 +228,10 @@ public class InterRefining extends Refining {
             System.out.format("Acquisition B roll: %3.5f \tpitch: %3.5f \tfactor: %3.5f \n",rollValueB,pitchValueB,factorValue);
 
             // Apply disruptions on physical model (acquisition A)
-            refining.applyDisruptions(refining.getRuggedA(),refining.getSensorNameA(),
-                                      rollValueA, pitchValueA, factorValue);
+            refining.applyDisruptions(ruggedA, sensorNameA, rollValueA, pitchValueA, factorValue);
 
             // Apply disruptions on physical model (acquisition B)
-            refining.applyDisruptions(refining.getRuggedB(),refining.getSensorNameB(),
-                                      rollValueB, pitchValueB, factorValue);
+            refining.applyDisruptions(ruggedB, sensorNameB, rollValueB, pitchValueB, factorValue);
 
 
             // Generate measurements (observations) from physical model disrupted
@@ -267,57 +253,51 @@ public class InterRefining extends Refining {
             System.out.format("\tSensor A mean: %f std %f %n",mean[0],standardDeviation[0]);
             System.out.format("\tSensor B mean: %f std %f %n",mean[1],standardDeviation[1]);
 
+            // Inter-measurements (between both viewing models)
             InterMeasurementGenerator measurements = refining.generateNoisyPoints(lineSampling, pixelSampling,
-                                                                          refining.getRuggedA(), refining.getSensorNameA(),
-                                                                          refining.getPleiadesViewingModelA().getDimension(),
-                                                                          refining.getRuggedB(), refining.getSensorNameB(),
-                                                                          refining.getPleiadesViewingModelB().getDimension(),
+                                                                          ruggedA, sensorNameA,
+                                                                          pleiadesViewingModelA.getDimension(),
+                                                                          ruggedB, sensorNameB,
+                                                                          pleiadesViewingModelB.getDimension(),
                                                                           noise);
-            refining.setMeasurements(measurements);
 
             // Compute ground truth residuals
             // ------------------------------
             System.out.format("\n**** Ground truth residuals **** %n");
-            refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
+            refining.computeMetrics(measurements.getInterMapping(), ruggedA, ruggedB, false);
 
             // Initialize physical models without disruptions
             // -----------------------------------------------
             System.out.format("\n**** Initialize physical models (A,B) without disruptions: reset Roll/Pitch/Factor **** %n");
-            refining.resetModel(refining.getRuggedA(), refining.getSensorNameA(), false);
-            refining.resetModel(refining.getRuggedB(), refining.getSensorNameB(), false);
+            refining.resetModel(ruggedA, sensorNameA, false);
+            refining.resetModel(ruggedB, sensorNameB, false);
 
             // Compute initial residuals
             // -------------------------
             System.out.format("\n**** Initial Residuals  **** %n");
-            refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
+            refining.computeMetrics(measurements.getInterMapping(), ruggedA, ruggedB, false);
 
             // Start optimization
             // ------------------
             System.out.format("\n**** Start optimization  **** %n");
-
-            int maxIterations = 100;
-            double convergenceThreshold = 1.e-7;
+            final int maxIterations = 100;
+            final double convergenceThreshold = 1.e-7;
 
             refining.optimization(maxIterations, convergenceThreshold,
-                                  measurements.getObservables(),
-                                  refining.getRuggeds());
+                                  measurements.getObservables(), refining.getRuggeds());
 
             // Check estimated values
             // ----------------------
             System.out.format("\n**** Check parameters ajustement **** %n");
             System.out.format("Acquisition A:%n");
-            refining.paramsEstimation(refining.getRuggedA(), refining.getSensorNameA(),
-                                      rollValueA, pitchValueA, factorValue);
+            refining.paramsEstimation(ruggedA, sensorNameA, rollValueA, pitchValueA, factorValue);
             System.out.format("Acquisition B:%n");
-            refining.paramsEstimation(refining.getRuggedB(), refining.getSensorNameB(),
-                                      rollValueB, pitchValueB, factorValue);
-            //refining.paramsEstimation(rollValueA, pitchValueA, factorValue, rollValueB, pitchValueB);
-
+            refining.paramsEstimation(ruggedB, sensorNameB, rollValueB, pitchValueB, factorValue);
 
             // Compute statistics
             // ------------------
             System.out.format("\n**** Compute Statistics **** %n");
-            refining.computeMetrics(measurements.getInterMapping(), refining.getRuggedA(), refining.getRuggedB(), false);
+            refining.computeMetrics(measurements.getInterMapping(), ruggedA, ruggedB, false);
 
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
@@ -331,20 +311,18 @@ public class InterRefining extends Refining {
 	/** Constructor */
 	public InterRefining() throws RuggedException, OrekitException {
 
-		this.sensorNameA = "SensorA";
+		sensorNameA = "SensorA";
 		final double incidenceAngleA = -5.0;
 		final String dateA = "2016-01-01T11:59:50.0";
 
-		this.pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
+		pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
 
-		this.sensorNameB = "SensorB";
+		sensorNameB = "SensorB";
 		final double incidenceAngleB = 0.0;
 		final String dateB = "2016-01-01T12:02:50.0";
 
-		this.pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
+		pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
 
-		this.orbitmodelA =  new OrbitModel();
-		this.orbitmodelB =  new OrbitModel();
 	}
 
     /** Estimate distance between LOS
@@ -354,23 +332,19 @@ public class InterRefining extends Refining {
      */
     private double computeDistanceBetweenLOS(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
 
-
     	// Get number of line of sensors
     	int dimensionA = pleiadesViewingModelA.getDimension();
     	int dimensionB = pleiadesViewingModelB.getDimension();
-    	
 
     	Vector3D positionA = lineSensorA.getPosition();
     	// This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
 
-    	
         AbsoluteDate lineDateA = lineSensorA.getDate(dimensionA/2);
         Vector3D losA = lineSensorA.getLOS(lineDateA,dimensionA/2);
         GeodeticPoint centerPointA = ruggedA.directLocation(lineDateA, positionA, losA);
         System.out.format(Locale.US, "\ncenter geodetic position A : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                           FastMath.toDegrees(centerPointA.getLatitude()),
                           FastMath.toDegrees(centerPointA.getLongitude()),centerPointA.getAltitude());
-
 
         Vector3D positionB = lineSensorB.getPosition();
         // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
@@ -381,7 +355,6 @@ public class InterRefining extends Refining {
         System.out.format(Locale.US, "center geodetic position B : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
                           FastMath.toDegrees(centerPointB.getLatitude()),
                           FastMath.toDegrees(centerPointB.getLongitude()),centerPointB.getAltitude());
-
 
         lineDateB = lineSensorB.getDate(0);
         losB = lineSensorB.getLOS(lineDateB,0);
@@ -404,115 +377,10 @@ public class InterRefining extends Refining {
     }
 
     /**
-     * @return the pleiadesViewingModelA
-     */
-    public PleiadesViewingModel getPleiadesViewingModelA() {
-        return pleiadesViewingModelA;
-    }
-
-    /**
-     * @param pleiadesViewingModelA the pleiadesViewingModelA to set
-     */
-    public void setPleiadesViewingModelA(final PleiadesViewingModel pleiadesViewingModelA) {
-        this.pleiadesViewingModelA = pleiadesViewingModelA;
-    }
-
-    /**
-     * @return the pleiadesViewingModelB
-     */
-    public PleiadesViewingModel getPleiadesViewingModelB() {
-        return pleiadesViewingModelB;
-    }
-
-    /**
-     * @param pleiadesViewingModelB the pleiadesViewingModelB to set
-     */
-    public void setPleiadesViewingModelB(final PleiadesViewingModel pleiadesViewingModelB) {
-        this.pleiadesViewingModelB = pleiadesViewingModelB;
-    }
-
-    /**
-     * @return the orbitmodelA
-     */
-    public OrbitModel getOrbitmodelA() {
-        return orbitmodelA;
-    }
-
-    /**
-     * @param orbitmodelA the orbitmodelA to set
-     */
-    public void setOrbitmodelA(final OrbitModel orbitmodelA) {
-        this.orbitmodelA = orbitmodelA;
-    }
-
-    /**
-     * @return the orbitmodelB
-     */
-    public OrbitModel getOrbitmodelB() {
-        return orbitmodelB;
-    }
-
-    /**
-     * @param orbitmodelB the orbitmodelB to set
-     */
-    public void setOrbitmodelB(final OrbitModel orbitmodelB) {
-        this.orbitmodelB = orbitmodelB;
-    }
-
-    /**
-     * @return the sensorNameA
-     */
-    public String getSensorNameA() {
-        return sensorNameA;
-    }
-
-    /**
-     * @return the sensorNameB
-     */
-    public String getSensorNameB() {
-        return sensorNameB;
-    }
-
-    /**
-     * @return the ruggedA
-     */
-    public Rugged getRuggedA() {
-        return ruggedA;
-    }
-
-    /**
-     * @param ruggedA the ruggedA to set
-     */
-    public void setRuggedA(final Rugged ruggedA) {
-        this.ruggedA = ruggedA;
-    }
-
-    /**
-     * @return the ruggedB
-     */
-    public Rugged getRuggedB() {
-        return ruggedB;
-    }
-
-    /**
      * @return the ruggedList
      */
     public  Collection<Rugged> getRuggeds() {
-        List<Rugged> ruggedList = Arrays.asList(this.ruggedA, this.ruggedB);
+        List<Rugged> ruggedList = Arrays.asList(ruggedA, ruggedB);
         return ruggedList;
-    }
-
-    /**
-     * @param ruggedB the ruggedB to set
-     */
-    public void setRuggedB(final Rugged ruggedB) {
-        this.ruggedB = ruggedB;
-    }
-
-    /**
-     * @param measurements the measurements to set
-     */
-    public void setMeasurements(final InterMeasurementGenerator measurements) {
-        this.measurements = measurements;
     }
 }

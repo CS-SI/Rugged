@@ -4,12 +4,3 @@ bin
 .settings
 target
 
-/erreur.txt
-/erreurApresGraphivz.txt
-/erreurMvnSiteVO
-/listeWarningDeprecatedTest.txt
-/titi
-/toto
-/traceMvnFindbugs.txt
-/tutu
-/.gitignore

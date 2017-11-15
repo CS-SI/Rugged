@@ -203,25 +203,25 @@ public class InterMeasurementGenerator implements Measurable {
                     final GeodeticPoint gpB = ruggedB.directLocation(dateB, sensorB.getPosition(),
                                                                      sensorB.getLOS(dateB, pixelB));
 
-                    final double GEOdistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
+                    final double geoDistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
                                                                                     gpB.getLongitude(), gpB.getLatitude());
 
-                    if (GEOdistance < this.outlier) {
+                    if (geoDistance < this.outlier) {
                     	
-                        final SensorPixel RealPixelA = new SensorPixel(line, pixelA);
-                        final SensorPixel RealPixelB = new SensorPixel(sensorPixelB.getLineNumber(), sensorPixelB.getPixelNumber());
+                        final SensorPixel realPixelA = new SensorPixel(line, pixelA);
+                        final SensorPixel realPixelB = new SensorPixel(sensorPixelB.getLineNumber(), sensorPixelB.getPixelNumber());
 
-                        final AbsoluteDate RealDateA = sensorA.getDate(RealPixelA.getLineNumber());
-                        final AbsoluteDate RealDateB = sensorB.getDate(RealPixelB.getLineNumber());
-                        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(sensorA, RealDateA, RealPixelA.getPixelNumber(), scToBodyA,
-                                                                                 sensorB, RealDateB, RealPixelB.getPixelNumber());
+                        final AbsoluteDate realDateA = sensorA.getDate(realPixelA.getLineNumber());
+                        final AbsoluteDate realDateB = sensorB.getDate(realPixelB.getLineNumber());
+                        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(sensorA, realDateA, realPixelA.getPixelNumber(), scToBodyA,
+                                                                                 sensorB, realDateB, realPixelB.getPixelNumber());
 
                         final double losDistance = 0.0;
                         final double earthDistance = distanceLOSB[1];
 
-                        interMapping.addMapping(RealPixelA, RealPixelB, losDistance, earthDistance);
+                        interMapping.addMapping(realPixelA, realPixelB, losDistance, earthDistance);
 
-                        // increment the number of measurements
+                        // Increment the number of measurements
                         this.measurementCount++;
                     }
                 }
@@ -256,11 +256,11 @@ public class InterMeasurementGenerator implements Measurable {
         final double meanB[] = { mean[1], mean[1] };
         final double stdB[]  = { std[1], std[1] };
 
-        // seed has been fixed for tests purpose
+        // Seed has been fixed for tests purpose
         final GaussianRandomGenerator rngA = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
         final UncorrelatedRandomVectorGenerator rvgA = new UncorrelatedRandomVectorGenerator(meanA, stdA, rngA);
 
-        // seed has been fixed for tests purpose
+        // Seed has been fixed for tests purpose
         final GaussianRandomGenerator rngB = new GaussianRandomGenerator(new Well19937a(0xdf1c03d9be0b34b9l));
         final UncorrelatedRandomVectorGenerator rvgB = new UncorrelatedRandomVectorGenerator(meanB, stdB, rngB);
 
@@ -285,27 +285,27 @@ public class InterMeasurementGenerator implements Measurable {
 
                     final GeodeticPoint gpB = ruggedB.directLocation(dateB, sensorB.getPosition(),
                                                                      sensorB.getLOS(dateB, pixelB));
-                    final double GEOdistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
+                    final double geoDistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
                                                                                     gpB.getLongitude(), gpB.getLatitude());
-                    // create the inter mapping if distance is below outlier value
-                    if (GEOdistance < outlier) {
+                    // Create the inter mapping if distance is below outlier value
+                    if (geoDistance < outlier) {
 
                         final double[] vecRandomA = rvgA.nextVector();
                         final double[] vecRandomB = rvgB.nextVector();
 
-                        final SensorPixel RealPixelA = new SensorPixel(line + vecRandomA[0], pixelA + vecRandomA[1]);
-                        final SensorPixel RealPixelB = new SensorPixel(sensorPixelB.getLineNumber() + vecRandomB[0],
+                        final SensorPixel realPixelA = new SensorPixel(line + vecRandomA[0], pixelA + vecRandomA[1]);
+                        final SensorPixel realPixelB = new SensorPixel(sensorPixelB.getLineNumber() + vecRandomB[0],
                                                                        sensorPixelB.getPixelNumber() + vecRandomB[1]);
-                        final AbsoluteDate RealDateA = sensorA.getDate(RealPixelA.getLineNumber());
-                        final AbsoluteDate RealDateB = sensorB.getDate(RealPixelB.getLineNumber());
-                        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(sensorA, RealDateA, RealPixelA.getPixelNumber(), scToBodyA,
-                                                                                 sensorB, RealDateB, RealPixelB.getPixelNumber());
+                        final AbsoluteDate realDateA = sensorA.getDate(realPixelA.getLineNumber());
+                        final AbsoluteDate realDateB = sensorB.getDate(realPixelB.getLineNumber());
+                        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(sensorA, realDateA, realPixelA.getPixelNumber(), scToBodyA,
+                                                                                 sensorB, realDateB, realPixelB.getPixelNumber());
                         final Double losDistance = 0.0;
                         final Double earthDistance = distanceLOSB[1];
 
-                        interMapping.addMapping(RealPixelA, RealPixelB, losDistance, earthDistance);
+                        interMapping.addMapping(realPixelA, realPixelB, losDistance, earthDistance);
 
-                        // increment the number of measurements
+                        // Increment the number of measurements
                         this.measurementCount++;
                     }
                 }

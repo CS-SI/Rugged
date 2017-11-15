@@ -74,7 +74,6 @@ import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.utils.DSGenerator;
-import org.orekit.rugged.utils.RefiningLiaisonMetrics;
 import org.orekit.rugged.utils.RefiningTest;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
@@ -1381,17 +1380,41 @@ public class RuggedTest {
         RefiningTest refiningTest = new RefiningTest();
         refiningTest.InitRefiningTest();
         
-        // Compute ground truth residuals
-        // ------------------------------
-        System.out.format("\n**** Ground truth residuals **** %n");
-        
-        RefiningLiaisonMetrics liaisonMetrics = refiningTest.computeLiaisonMetrics(refiningTest.getInterMapping(), refiningTest.getRuggedA(), refiningTest.getRuggedB());
-        
-        System.out.format("Max: %1.4e Mean: %1.4e %n",liaisonMetrics.getMaxResidual(),liaisonMetrics.getMeanResidual());
-        System.out.format("LOS distance Max: %1.4e Mean: %1.4e %n",liaisonMetrics.getLosMaxDistance(),liaisonMetrics.getLosMeanDistance());
-        System.out.format("Earth distance Max: %1.4e Mean: %1.4e %n",liaisonMetrics.getEarthMaxDistance(),liaisonMetrics.getEarthMeanDistance());
+        final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
+        final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
+        double[] distancesBetweenLOS = refiningTest.computeDistancesBetweenLOS(realPixelA, realPixelB);
+        
+        double expectedDistanceBetweenLOS = 3.887643821673281; // 3.8880172668944164
+        double expectedDistanceToTheGround = 6368020.620436288; // 6368020.560101736
+        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-2);
+        Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 5.e-1);
+        
+        
     }
+    
+    @Test
+    public void testDistanceBetweenLOSDerivatives() throws RuggedException {
+        
+//        try {
+            RefiningTest refiningTest = new RefiningTest();
+            refiningTest.InitRefiningTest();
+
+            final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
+            final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
+            double losDistance = 3.887643821673281;
+            double earthDistance = 6368020.620436288;
+
+            // TODO GP a debugger
+//            DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, losDistance, earthDistance);
+
+//
+//        } catch (InvocationTargetException | NoSuchMethodException |
+//                SecurityException | IllegalAccessException | IllegalArgumentException e) {
+//            Assert.fail(e.getLocalizedMessage());
+//        }
+    }
+    
     
     @Before
     public void setUp() throws OrekitException, URISyntaxException {

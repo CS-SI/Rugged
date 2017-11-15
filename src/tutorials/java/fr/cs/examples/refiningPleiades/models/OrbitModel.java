@@ -66,7 +66,8 @@ import org.orekit.utils.AngularDerivativesFilter;
  * </p>
  * @author Jonathan Guinet
  * @author Guylaine Prat
- * @since 2.0 */
+ * @since 2.0 
+ */
 
 public class OrbitModel {
 

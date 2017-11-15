@@ -698,7 +698,7 @@ public class Rugged {
      * @exception RuggedException if frames cannot be computed at date
      * @see #distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)
      */
-    public DerivativeStructure[] distanceBetweenLOSDerivatives(
+    public DerivativeStructure[] distanceBetweenLOSderivatives(
                                  final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
                                  final SpacecraftToObservedBody scToBodyA,
                                  final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB,

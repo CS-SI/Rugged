@@ -225,7 +225,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
                         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
                         final DerivativeStructure[] ilResult =
-                                ruggedB.distanceBetweenLOSDerivatives(lineSensorA, dateA, pixelA, scToBodyA,
+                                ruggedB.distanceBetweenLOSderivatives(lineSensorA, dateA, pixelA, scToBodyA,
                                                                       lineSensorB, dateB, pixelB, this.getGenerator());
 
                         if (ilResult == null) {
