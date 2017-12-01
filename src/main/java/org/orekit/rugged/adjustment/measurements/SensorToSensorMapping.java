@@ -195,7 +195,7 @@ public class SensorToSensorMapping {
     /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS.
      * @param pixelA sensor pixel A
      * @param pixelB sensor pixel B corresponding to the sensor pixel A (by direct then inverse location)
-     * @param losDistance distance between both line of sight
+     * @param losDistance distance between the two lines of sight
      */
     public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB, final Double losDistance) {
 
@@ -203,12 +203,12 @@ public class SensorToSensorMapping {
         losDistances.add(losDistance);
     }
 
-    /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS.
-     *  and the central body distance constraint associated with pixel A
+    /** Add a mapping between two sensor pixels (A and B) and corresponding distance between the LOS
+     *  and the central body distance constraint associated with pixel A.
      * @param pixelA sensor pixel A
      * @param pixelB sensor pixel B corresponding to the sensor pixel A (by direct then inverse location)
-     * @param losDistance distance between both line of sight
-     * @param bodyDistance distance between central body and pixel A
+     * @param losDistance distance between the two lines of sight
+     * @param bodyDistance elevation to central body 
      */
     public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB,
                            final Double losDistance, final Double bodyDistance) {

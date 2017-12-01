@@ -32,6 +32,9 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
+
+import fr.cs.examples.refiningPleiades.Refining;
+
 import org.orekit.rugged.linesensor.LinearLineDatation;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
@@ -44,24 +47,22 @@ import org.orekit.errors.OrekitException;
  * the aim of this class is to simulate PHR sensor.
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
+ * @author Guylaine Prat
  * @since 2.0
  */
 
 public class PleiadesViewingModel {
 
-    /** intrinsic Pleiades parameters. */
-    private double fov = 1.65; // 20km - alt 694km
-
-    // Number of line of the sensor
-    private int dimension = 40000;
+    /** Pleiades parameters. */
+    private static final double FOV = 1.65; // 20km - alt 694km
+    private static final int DIMENSION = 40000;
+    private static final double LINE_PERIOD =  1.e-4; 
 
     private double angle;
     private LineSensor lineSensor;
     private String date;
 
     private String sensorName;
-
-    private final double linePeriod =  1e-4;
 
 
     /** Simple constructor.
@@ -111,13 +112,13 @@ public class PleiadesViewingModel {
         final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
                                                           FastMath.toRadians(this.angle),
                                                           RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                             Vector3D.PLUS_I, FastMath.toRadians(fov / 2), dimension);
+                                             Vector3D.PLUS_I, FastMath.toRadians(FOV / 2), DIMENSION);
 
-        losBuilder.addTransform(new FixedRotation(sensorName + "_roll",  Vector3D.MINUS_I, 0.00));
-        losBuilder.addTransform(new FixedRotation(sensorName + "_pitch", Vector3D.MINUS_J, 0.00));
+        losBuilder.addTransform(new FixedRotation(sensorName + Refining.getRollsuffix(),  Vector3D.MINUS_I, 0.00));
+        losBuilder.addTransform(new FixedRotation(sensorName + Refining.getPitchsuffix(), Vector3D.MINUS_J, 0.00));
 
         // factor is a common parameters shared between all Pleiades models
-        losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
+        losBuilder.addTransform(new FixedZHomothety(Refining.getFactorname(), 1.0));
 
         return losBuilder.build();
     }
@@ -142,7 +143,7 @@ public class PleiadesViewingModel {
    /** TODO GP add comments
     */
    public  AbsoluteDate  getMaxDate() throws RuggedException {
-        return lineSensor.getDate(dimension);
+        return lineSensor.getDate(DIMENSION);
     }
 
    /** TODO GP add comments
@@ -161,7 +162,7 @@ public class PleiadesViewingModel {
     * @return the number of lines of the sensor
     */
 public int getDimension() {
-        return dimension;
+        return DIMENSION;
     }
 
    /** TODO GP add comments
@@ -176,10 +177,10 @@ public int getDimension() {
         // TODO build complex los
         final TimeDependentLOS lineOfSight = buildLOS();
 
-        final double rate =  1 / linePeriod;
+        final double rate =  1. / LINE_PERIOD;
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
 
-        final LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, rate);
+        final LineDatation lineDatation = new LinearLineDatation(getDatationReference(), DIMENSION / 2, rate);
 
         lineSensor = new LineSensor(sensorName, lineDatation, msiOffset, lineOfSight);
     }

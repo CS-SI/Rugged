@@ -86,13 +86,13 @@ public class OrbitModel {
     /** Reference date. */
     private AbsoluteDate refDate;
 
-    /** Simple constructor.
+    /** Default constructor.
      */
     public OrbitModel() {
         userDefinedLOFTransform = false;
     }
 
-    /** TODO GP add comments
+    /** Generate satellite ephemeris.
      */
     public static void addSatellitePV(final TimeScale gps, final Frame eme2000, final Frame itrf,
                                       final List<TimeStampedPVCoordinates> satellitePVList,
@@ -111,7 +111,7 @@ public class OrbitModel {
         satellitePVList.add(new TimeStampedPVCoordinates(ephemerisDate, pEME2000, vEME2000, Vector3D.ZERO));
     }
 
-    /** TODO GP add comments
+    /** Generate satellite attitude.
      */
     public void addSatelliteQ(final TimeScale gps,
                               final List<TimeStampedAngularCoordinates> satelliteQList,
@@ -125,7 +125,9 @@ public class OrbitModel {
         satelliteQList.add(pair);
     }
 
-    /** TODO GP add comments
+    /** Create an Earth.
+     * @return the Earth as the WGS84 ellipsoid
+     * @throws OrekitException
      */
     public BodyShape createEarth() throws OrekitException {
     	
@@ -134,14 +136,19 @@ public class OrbitModel {
                                     FramesFactory.getITRF(IERSConventions.IERS_2010, true));
     }
 
-    /** TODO GP add comments
+    /** Created a gravity field.
+     * @return normalized spherical harmonics coefficients
+     * @throws OrekitException
      */
     public NormalizedSphericalHarmonicsProvider createGravityField() throws OrekitException {
     	
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
 
-    /** TODO GP add comments
+    /** Create an orbit at a chosen date.
+     * @param mu Earth gravitational constant
+     * @return the orbit
+     * @throws OrekitException
      */
     public Orbit createOrbit(final double mu, final AbsoluteDate date) throws OrekitException {
     	
@@ -170,7 +177,7 @@ public class OrbitModel {
                                  mu);
     }
 
-    /** TODO GP add comments
+    /** Set the Local Orbital Frame characteristics.
      */
     public void setLOFTransform(final double[] rollPoly, final double[] pitchPoly,
                                 final double[] yawPoly, final AbsoluteDate date) {
@@ -182,7 +189,7 @@ public class OrbitModel {
         this.refDate = date;
     }
 
-    /** TODO GP add comments
+    /** Recompute the polynom coefficients with shift.
      */
     private double getPoly(final double[] poly, final double shift) {
     	
@@ -193,7 +200,7 @@ public class OrbitModel {
         return val;
     }
 
-    /** TODO GP add comments
+    /** Get the offset.
      */
    private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift)
         throws OrekitException {
@@ -217,7 +224,7 @@ public class OrbitModel {
         return offsetProper;
     }
 
-   /** TODO GP add comments
+   /** Create the attitude provider.
     */
     public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit)
         throws OrekitException {
@@ -243,7 +250,7 @@ public class OrbitModel {
         }
     }
 
-    /** TODO GP add comments
+    /** Create the orbit propagator.
      */
    public Propagator createPropagator(final BodyShape earth,
                                        final NormalizedSphericalHarmonicsProvider gravityField,
@@ -277,7 +284,7 @@ public class OrbitModel {
         return numericalPropagator;
     }
 
-   /** TODO GP add comments
+   /** Generate the orbit.
     */
    public List<TimeStampedPVCoordinates> orbitToPV(final Orbit orbit, final BodyShape earth,
     		                                        final AbsoluteDate minDate, final AbsoluteDate maxDate,
@@ -301,7 +308,7 @@ public class OrbitModel {
         return list;
     }
 
-   /** TODO GP add comments
+   /** Generate the attitude.
     */
    public List<TimeStampedAngularCoordinates> orbitToQ(final Orbit orbit, final BodyShape earth,
     		                                            final AbsoluteDate minDate, final AbsoluteDate maxDate,

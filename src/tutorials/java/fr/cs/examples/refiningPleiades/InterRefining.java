@@ -18,7 +18,6 @@ package fr.cs.examples.refiningPleiades;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -77,12 +76,6 @@ public class InterRefining extends Refining {
 
 	/** Sensor name A corresponding to viewing model B */
 	private static String sensorNameB;
-
-	/** RuggedA's instance */
-	private static Rugged ruggedA;
-
-	/** RuggedB's instance */
-	private static Rugged ruggedB;
 
 
 	/** Main function
@@ -158,7 +151,7 @@ public class InterRefining extends Refining {
 
             ruggedBuilderA.setName("RuggedA");
 
-            ruggedA = ruggedBuilderA.build();
+            Rugged ruggedA = ruggedBuilderA.build();
 
 
             System.out.format("\n**** Build Pleiades viewing model B and its orbit definition **** %n");
@@ -206,11 +199,11 @@ public class InterRefining extends Refining {
 
             ruggedBuilderB.setName("RuggedB");
 
-            ruggedB = ruggedBuilderB.build();
+            Rugged ruggedB = ruggedBuilderB.build();
 
             // Compute distance between LOS
             // -----------------------------
-            double distance = refining.computeDistanceBetweenLOS(lineSensorA, lineSensorB);
+            double distance = refining.computeDistanceBetweenLOS(ruggedA, lineSensorA, ruggedB, lineSensorB);
             System.out.format("distance %f meters %n",distance);
 
 
@@ -282,9 +275,10 @@ public class InterRefining extends Refining {
             System.out.format("\n**** Start optimization  **** %n");
             final int maxIterations = 100;
             final double convergenceThreshold = 1.e-7;
-
+            List<Rugged> ruggedList = Arrays.asList(ruggedA, ruggedB);
+            
             refining.optimization(maxIterations, convergenceThreshold,
-                                  measurements.getObservables(), refining.getRuggeds());
+                                  measurements.getObservables(), ruggedList);
 
             // Check estimated values
             // ----------------------
@@ -330,7 +324,8 @@ public class InterRefining extends Refining {
      * @param lineSensorB line sensor B
      * @return GSD
      */
-    private double computeDistanceBetweenLOS(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
+    private double computeDistanceBetweenLOS(final Rugged ruggedA, final LineSensor lineSensorA, 
+                                             final Rugged ruggedB, final LineSensor lineSensorB) throws RuggedException {
 
     	// Get number of line of sensors
     	int dimensionA = pleiadesViewingModelA.getDimension();
@@ -374,13 +369,5 @@ public class InterRefining extends Refining {
                                                                centerPointB.getLongitude(), centerPointB.getLatitude());
 
         return distance;
-    }
-
-    /**
-     * @return the ruggedList
-     */
-    public  Collection<Rugged> getRuggeds() {
-        List<Rugged> ruggedList = Arrays.asList(ruggedA, ruggedB);
-        return ruggedList;
     }
 }

@@ -47,8 +47,8 @@ public interface LOSTransform {
      * These polynomials can be used for example to model thermo-elastic effects.
      * </p>
      * @param index los pixel index
-     * @param date date
      * @param los line-of-sight to transform
+     * @param date date
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return line of sight, and its first partial derivatives with respect to the parameters
      */

@@ -68,24 +68,22 @@ public class Refining {
     		                     final double rollValue, final double pitchValue, final double factorValue)
         throws OrekitException, RuggedException {
 
-        final String commonFactorName = "factor";
-
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_roll")).
+        filter(driver -> driver.getName().equals(sensorName + rollSuffix)).
         findFirst().get().setValue(rollValue);
 
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_pitch")).
+        filter(driver -> driver.getName().equals(sensorName + pitchSuffix)).
         findFirst().get().setValue(pitchValue);
 
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(commonFactorName)).
+        filter(driver -> driver.getName().equals(factorName)).
         findFirst().get().setValue(factorValue);
     }
 
@@ -269,13 +267,11 @@ public class Refining {
      */
     public void resetModel(final Rugged rugged, final String sensorName, final boolean isSelected) throws RuggedException {
 
-        final String commonFactorName = "factor";
-
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_roll")
-               || driver.getName().equals(sensorName+"_pitch")).
+        filter(driver -> driver.getName().equals(sensorName + rollSuffix)
+               || driver.getName().equals(sensorName + pitchSuffix)).
         forEach(driver -> {
             try {
                 driver.setSelected(true);
@@ -288,7 +284,7 @@ public class Refining {
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(commonFactorName)).
+        filter(driver -> driver.getName().equals(factorName)).
         forEach(driver -> {
             try {
                 driver.setSelected(isSelected);
@@ -366,12 +362,10 @@ public class Refining {
     		                     final double rollValue, final double pitchValue, final double factorValue)
         throws RuggedException {
 
-    	final String commonFactorName = "factor";
-
         // Estimate Roll
         double estimatedRoll = rugged.getLineSensor(sensorName).
                         getParametersDrivers().
-                        filter(driver -> driver.getName().equals(sensorName+"_roll")).
+                        filter(driver -> driver.getName().equals(sensorName + rollSuffix)).
                         findFirst().get().getValue();
 
         double rollError = (estimatedRoll - rollValue);
@@ -380,7 +374,7 @@ public class Refining {
         // Estimate pitch
         double estimatedPitch = rugged.getLineSensor(sensorName).
                         getParametersDrivers().
-                        filter(driver -> driver.getName().equals(sensorName+"_pitch")).
+                        filter(driver -> driver.getName().equals(sensorName + pitchSuffix)).
                         findFirst().get().getValue();
 
         double pitchError = (estimatedPitch - pitchValue);
@@ -389,10 +383,31 @@ public class Refining {
         // Estimate scale factor
         double estimatedFactor = rugged.getLineSensor(sensorName).
                         getParametersDrivers().
-                        filter(driver -> driver.getName().equals(commonFactorName)).
+                        filter(driver -> driver.getName().equals(factorName)).
                         findFirst().get().getValue();
 
         double factorError = (estimatedFactor - factorValue);
         System.out.format("Estimated factor: %3.5f\tfactor error: %3.6e %n", estimatedFactor, factorError);
     }
+    
+    /**
+     * Part of the name of parameter drivers 
+     */
+    static final String rollSuffix = "_roll";
+    static final String pitchSuffix = "_pitch";
+    static final String factorName = "factor";
+    
+    public static String getRollsuffix() {
+        return rollSuffix;
+    }
+
+    public static String getPitchsuffix() {
+        return pitchSuffix;
+    }
+
+    public static String getFactorname() {
+        return factorName;
+    }
+    
+    
 }

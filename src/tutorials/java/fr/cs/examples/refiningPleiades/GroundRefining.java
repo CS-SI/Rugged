@@ -69,9 +69,6 @@ public class GroundRefining extends Refining {
     /** Sensor name */
     private static String sensorName;
 
-    /** Rugged instance */
-    private static Rugged rugged;
-    
 
     /** Main function
      */
@@ -143,12 +140,12 @@ public class GroundRefining extends Refining {
 
             ruggedBuilder.setName("Rugged_refining");
 
-            rugged = ruggedBuilder.build();
+            Rugged rugged = ruggedBuilder.build();
 
             
             // Compute ground sample distance (GSD)
             // ------------------------------------
-            double [] gsd = refining.computeGSD(lineSensor);
+            double [] gsd = refining.computeGSD(rugged, lineSensor);
             System.out.format("GSD - X: %2.2f Y: %2.2f **** %n", gsd[0], gsd[1]);
 
             // Initialize disruptions:
@@ -246,7 +243,7 @@ public class GroundRefining extends Refining {
      * @param LineSensor line sensor
      * @return the GSD
      */
-    private double[] computeGSD(final LineSensor lineSensor) throws RuggedException {
+    private double[] computeGSD(final Rugged rugged, final LineSensor lineSensor) throws RuggedException {
 
     	// Get number of line
     	int dimension = pleiadesViewingModel.getDimension();
