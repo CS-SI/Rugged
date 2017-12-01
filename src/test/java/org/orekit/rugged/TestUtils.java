@@ -83,7 +83,7 @@ public class TestUtils {
      * @since 2.0
      */
     public static void clearFactories() {
-        
+
         clearFactoryMaps(CelestialBodyFactory.class);
         CelestialBodyFactory.clearCelestialBodyLoaders();
         clearFactoryMaps(FramesFactory.class);
@@ -112,7 +112,7 @@ public class TestUtils {
     /** Clean up of factory map
      * @param factoryClass
      * @since 2.0
-    */
+     */
     private static void clearFactoryMaps(Class<?> factoryClass) {
         try {
             
@@ -132,7 +132,7 @@ public class TestUtils {
      * @param factoryClass
      * @param cachedFieldsClass
      * @since 2.0
-    */
+     */
     private static void clearFactory(Class<?> factoryClass, Class<?> cachedFieldsClass) {
         try {
             
@@ -149,16 +149,15 @@ public class TestUtils {
     }
     
     
-
-    
     /**
-     * Generate satellite ephemeris
+     * Generate satellite ephemeris.
      */
     public static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
                                       ArrayList<TimeStampedPVCoordinates> satellitePVList,
                                       String absDate,
                                       double px, double py, double pz, double vx, double vy, double vz)
         throws OrekitException {
+        
         AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
         Vector3D position = new Vector3D(px, py, pz);
         Vector3D velocity = new Vector3D(vx, vy, vz);
@@ -170,10 +169,11 @@ public class TestUtils {
     }
 
     /**
-     * Generate satellite attitudes
+     * Generate satellite attitudes.
      */
     public static void addSatelliteQ(TimeScale gps, ArrayList<TimeStampedAngularCoordinates> satelliteQList,
                                      String absDate, double q0, double q1, double q2, double q3) {
+        
         AbsoluteDate attitudeDate = new AbsoluteDate(absDate, gps);
         Rotation rotation = new Rotation(q0, q1, q2, q3, true);
         TimeStampedAngularCoordinates pair =
@@ -181,27 +181,29 @@ public class TestUtils {
         satelliteQList.add(pair);
     }
 
-    /** Create an Earth for Junit tests
+    /** Create an Earth for Junit tests.
      * @return the Earth as the WGS84 ellipsoid
      * @throws OrekitException
      */
     public static BodyShape createEarth()
        throws OrekitException {
+        
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                     Constants.WGS84_EARTH_FLATTENING,
                                     FramesFactory.getITRF(IERSConventions.IERS_2010, true));
     }
 
-    /** Created a gravity field
+    /** Created a gravity field.
      * @return normalized spherical harmonics coefficients
      * @throws OrekitException
      */
     public static NormalizedSphericalHarmonicsProvider createGravityField()
         throws OrekitException {
+        
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
 
-    /** Create an orbit
+    /** Create an orbit.
      * @param mu Earth gravitational constant
      * @return the orbit
      * @throws OrekitException
@@ -289,6 +291,7 @@ public class TestUtils {
      * @return the perfect LOS list
      */
     public static LOSBuilder createLOSPerfectLine(Vector3D center, Vector3D normal, double halfAperture, int n) {
+
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
             double alpha = (halfAperture * (2 * i + 1 - n)) / (n - 1);
@@ -302,6 +305,7 @@ public class TestUtils {
      */
     public static TimeDependentLOS createLOSCurvedLine(Vector3D center, Vector3D normal,
                                                  double halfAperture, double sagitta, int n) {
+        
         Vector3D u = Vector3D.crossProduct(center, normal);
         List<Vector3D> list = new ArrayList<Vector3D>(n);
         for (int i = 0; i < n; ++i) {
@@ -320,15 +324,10 @@ public class TestUtils {
      * @throws OrekitException
      */
     public static List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
-                                                     AbsoluteDate//    /** TODO GP add comments
-//                                                   */
-//                                                   public NormalizedSphericalHarmonicsProvider createGravityField() throws OrekitException {
-//                                                       
-//                                                       return GravityFieldFactory.getNormalizedProvider(12, 12);
-//                                                   }
- minDate, AbsoluteDate maxDate,
-                                                     double step)
+                                                           AbsoluteDate minDate, AbsoluteDate maxDate,
+                                                           double step) 
         throws OrekitException {
+        
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
@@ -353,6 +352,7 @@ public class TestUtils {
                                                          AbsoluteDate minDate, AbsoluteDate maxDate,
                                                          double step)
         throws OrekitException {
+        
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);

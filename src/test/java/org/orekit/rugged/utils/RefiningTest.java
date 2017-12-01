@@ -64,6 +64,7 @@ import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.Constants;
+import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
@@ -87,6 +88,14 @@ public class RefiningTest {
 
     /** RuggedB's instance */
     Rugged ruggedB;
+    
+    
+    /**
+     * Part of the name of parameter drivers 
+     */
+    static final String rollSuffix = "_roll";
+    static final String pitchSuffix = "_pitch";
+    static final String factorName = "factor";
 
 
     /** Initialize refining tests
@@ -100,12 +109,12 @@ public class RefiningTest {
             
             // Initialize refining context
             // ---------------------------
-            String sensorNameA = "SensorA";
+            final String sensorNameA = "SensorA";
             final double incidenceAngleA = -5.0;
             final String dateA = "2016-01-01T11:59:50.0";
             this.pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
 
-            String sensorNameB = "SensorB";
+            final String sensorNameB = "SensorB";
             final double incidenceAngleB = 0.0;
             final String dateB = "2016-01-01T12:02:50.0";
             this.pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
@@ -135,11 +144,11 @@ public class RefiningTest {
 
             // ----Satellite attitude
             List<TimeStampedAngularCoordinates> satelliteQListA = orbitmodelA.orbitToQ(orbitA, earthA, minDateA.shiftedBy(-0.0), maxDateA.shiftedBy(+0.0), 0.25);
-            int nbQPoints = 2;
+            final int nbQPoints = 2;
 
             // ----Position and velocities
             List<TimeStampedPVCoordinates> satellitePVListA = orbitmodelA.orbitToPV(orbitA, earthA, minDateA.shiftedBy(-0.0), maxDateA.shiftedBy(+0.0), 0.25);
-            int nbPVPoints = 8;
+            final int nbPVPoints = 8;
 
             // Rugged A initialization
             // ---------------------
@@ -197,19 +206,29 @@ public class RefiningTest {
 
             // Initialize disruptions:
             // -----------------------
-            // Introduce rotations around instrument axes (roll and pitch translations, scale factor)
-            double rollValueA =  FastMath.toRadians(0.004);
-            double pitchValueA = FastMath.toRadians(0.0008);
-            double rollValueB =  FastMath.toRadians(-0.004);
-            double pitchValueB = FastMath.toRadians(0.0008);
-            double factorValue = 1.0;
+            // Introduce rotations around instrument axes (roll and pitch angles, scale factor)
+            final double rollValueA =  FastMath.toRadians(0.004);
+            final double pitchValueA = FastMath.toRadians(0.0008);
+            final double pitchValueB = FastMath.toRadians(-0.0008);
+            final double factorValue = 1.000000001;
+
+            // Select parameters to adjust
+            setSelectedRoll(ruggedA, sensorNameA);
+            setSelectedPitch(ruggedA, sensorNameA);
+            setSelectedFactor(ruggedA, sensorNameA);
+            
+            setSelectedRoll(ruggedB, sensorNameB);
+            setSelectedPitch(ruggedB, sensorNameB);
+//            setSelectedFactor(ruggedB, sensorNameB);
 
             // Apply disruptions on physical model (acquisition A)
-            applyDisruptions(this.ruggedA, sensorNameA, rollValueA, pitchValueA, factorValue);
+            applyDisruptionsRoll(ruggedA, sensorNameA, rollValueA);
+            applyDisruptionsPitch(ruggedA, sensorNameA, pitchValueA);
+            applyDisruptionsFactor(ruggedA, sensorNameA, factorValue);
             
             // Apply disruptions on physical model (acquisition B)
-            applyDisruptions(this.ruggedB, sensorNameB, rollValueB, pitchValueB, factorValue);
-
+            applyDisruptionsPitch(ruggedB, sensorNameB, pitchValueB);
+            
         } catch (OrekitException oe) {
             Assert.fail(oe.getLocalizedMessage());
         } catch (URISyntaxException use) {
@@ -218,222 +237,89 @@ public class RefiningTest {
     }
     
     
-//    /** Estimate distance between LOS
-//     * @param lineSensorA line sensor A
-//     * @param lineSensorB line sensor B
-//     * @return GSD
-//     */
-//    private double computeDistanceBetweenLOS(final LineSensor lineSensorA, final LineSensor lineSensorB) throws RuggedException {
-//
-//
-//        // Get number of line of sensors
-//        int dimensionA = pleiadesViewingModelA.getDimension();
-//        int dimensionB = pleiadesViewingModelB.getDimension();
-//        
-//
-//        Vector3D positionA = lineSensorA.getPosition();
-//        // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
-//
-//        
-//        AbsoluteDate lineDateA = lineSensorA.getDate(dimensionA/2);
-//        Vector3D losA = lineSensorA.getLOS(lineDateA,dimensionA/2);
-//        GeodeticPoint centerPointA = ruggedA.directLocation(lineDateA, positionA, losA);
-//        System.out.format(Locale.US, "\ncenter geodetic position A : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
-//                          FastMath.toDegrees(centerPointA.getLatitude()),
-//                          FastMath.toDegrees(centerPointA.getLongitude()),centerPointA.getAltitude());
-//
-//
-//        Vector3D positionB = lineSensorB.getPosition();
-//        // This returns a zero vector since we set the relative position of the sensor w.r.T the satellite to 0.
-//
-//        AbsoluteDate lineDateB = lineSensorB.getDate(dimensionB/2);
-//        Vector3D losB = lineSensorB.getLOS(lineDateB,dimensionB/2);
-//        GeodeticPoint centerPointB = ruggedB.directLocation(lineDateB, positionB, losB);
-//        System.out.format(Locale.US, "center geodetic position B : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
-//                          FastMath.toDegrees(centerPointB.getLatitude()),
-//                          FastMath.toDegrees(centerPointB.getLongitude()),centerPointB.getAltitude());
-//
-//
-//        lineDateB = lineSensorB.getDate(0);
-//        losB = lineSensorB.getLOS(lineDateB,0);
-//        GeodeticPoint firstPointB = ruggedB.directLocation(lineDateB, positionB, losB);
-//        System.out.format(Locale.US, "first geodetic position B : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
-//                          FastMath.toDegrees(firstPointB.getLatitude()),
-//                          FastMath.toDegrees(firstPointB.getLongitude()),firstPointB.getAltitude());
-//
-//        lineDateB = lineSensorB.getDate(dimensionB-1);
-//        losB = lineSensorB.getLOS(lineDateB,dimensionB-1);
-//        GeodeticPoint lastPointB = ruggedB.directLocation(lineDateB, positionB, losB);
-//        System.out.format(Locale.US, "last geodetic position  B : φ = %8.10f °, λ = %8.10f °, h = %8.3f m%n",
-//                          FastMath.toDegrees(lastPointB.getLatitude()),
-//                          FastMath.toDegrees(lastPointB.getLongitude()),lastPointB.getAltitude());
-//
-////        final Vector3D p1 = new Vector3D(centerPointA.getLatitude(), centerPointA.getLongitude()); //
-////        final Vector3D p2 = new Vector3D(centerPointB.getLatitude(), centerPointB.getLongitude());
-////        double distance =  Constants.WGS84_EARTH_EQUATORIAL_RADIUS * Vector3D.angle(p1, p2);
-//
-//        return computeDistanceInMeter(centerPointA.getLongitude(), centerPointA.getLatitude(), centerPointB.getLongitude(), centerPointB.getLatitude());
-//    }
-    
-//    /** Compute a geodetic distance in meters between 2 geodetic points (long1, lat1) and point (long2, lat2).
-//     * @param long1 Longitude of first geodetic point (rad)
-//     * @param lat1 Latitude of first geodetic point (rad)
-//     * @param long2 Longitude of second geodetic point (rad)
-//     * @param lat2 Latitude of second geodetic point (rad)
-//     * @return distance in meters
-//     */
-//    public static double computeDistanceInMeter(final double long1, final double lat1,
-//                                                final double long2, final double lat2) {
-//
-//        // get vectors on unit sphere from angular coordinates
-//        final Vector3D p1 = new Vector3D(lat1, long1); //
-//        final Vector3D p2 = new Vector3D(lat2, long2);
-//        final double distance =  Constants.WGS84_EARTH_EQUATORIAL_RADIUS * Vector3D.angle(p1, p2);
-//        return distance;
-//    }
-
-//    /**
-//     * Compute metrics: case of liaison points.
-//     * @param measMapping Mapping of observations/measurements = the ground truth
-//     * @param ruggedA Rugged instance corresponding to viewing model A
-//     * @param ruggedB Rugged instance corresponding to viewing model B
-//     * @param computeAngular Flag to know if distance is computed in meters (false) or with angular (true)
-//     * @exception RuggedException if direct location fails
-//     */
-//    public RefiningLiaisonMetrics computeLiaisonMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB)
-//        throws RuggedException {
-//        
-//        RefiningLiaisonMetrics liaisonMetrics = new RefiningLiaisonMetrics();
-//        double resMax = liaisonMetrics.getMaxResidual();
-//        double resMean = liaisonMetrics.getMeanResidual();
-//        double losDistanceMax = liaisonMetrics.getLosMaxDistance();
-//        double losDistanceMean = liaisonMetrics.getLosMeanDistance();
-//        double earthDistanceMax = liaisonMetrics.getEarthMaxDistance();
-//        double earthDistanceMean = liaisonMetrics.getEarthMeanDistance();
-//        
-//
-//        // Mapping of observations/measurements = the ground truth
-//        final Set<Map.Entry<SensorPixel, SensorPixel>> measurementsMapping;
-//
-//        final LineSensor lineSensorA;   // line sensor corresponding to rugged A
-//        final LineSensor lineSensorB;   // line sensor corresponding to rugged B
-//        double count = 0;               // counter for computing remaining mean distance
-//        double losDistanceCount = 0;    // counter for computing LOS distance mean
-//        double earthDistanceCount = 0;  // counter for computing Earth distance mean
-//        int i = 0;                      // increment of measurements
-//
-//        // Initialization
-//        measurementsMapping = measMapping.getMapping();
-//        lineSensorA = ruggedA.getLineSensor(measMapping.getSensorNameA());
-//        lineSensorB = ruggedB.getLineSensor(measMapping.getSensorNameB());
-//        int nbMeas = measurementsMapping.size(); // number of measurements
-//
-//        // Browse map of measurements
-//        for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = measurementsMapping.iterator();
-//                        gtIt.hasNext();
-//                        i++) {
-//
-//            if (i == measurementsMapping.size()) {
-//                break;
-//            }
-//
-//            final Map.Entry<SensorPixel, SensorPixel> gtMapping = gtIt.next();
-//
-//            final SensorPixel spA = gtMapping.getKey();
-//            final SensorPixel spB = gtMapping.getValue();
-//
-//            final AbsoluteDate dateA = lineSensorA.getDate(spA.getLineNumber());
-//            final AbsoluteDate dateB = lineSensorB.getDate(spB.getLineNumber());
-//
-//            final double pixelA = spA.getPixelNumber();
-//            final double pixelB = spB.getPixelNumber();
-//
-//            final Vector3D losA = lineSensorA.getLOS(dateA, pixelA);
-//            final Vector3D losB = lineSensorB.getLOS(dateB, pixelB);
-//
-//            final GeodeticPoint gpA = ruggedA.directLocation(dateA, lineSensorA.getPosition(), losA);
-//            final GeodeticPoint gpB = ruggedB.directLocation(dateB, lineSensorB.getPosition(), losB);
-//
-//            final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
-//
-//            // Estimated distances (LOS / Earth)
-//            final double[] distances = ruggedB.distanceBetweenLOS(lineSensorA, dateA, pixelA, scToBodyA, lineSensorB, dateB, pixelB);
-//
-//            // LOS distance control
-//            final double estLosDistance =  distances[0]; // LOS distance estimation
-//            if (estLosDistance > losDistanceMax) {
-//                losDistanceMax = estLosDistance;
-//            }
-//            losDistanceCount += estLosDistance;
-//
-//            // Earth distance control
-//            final double estEarthDistance = distances[1]; // Earth distance estimation
-//            final double measEarthDistance = measMapping.getBodyDistance(i).doubleValue(); // Earth measurement distance
-//            final double earthDistance =  FastMath.abs(estEarthDistance - measEarthDistance);
-//
-//            if (earthDistance > earthDistanceMax) {
-//                earthDistanceMax = earthDistance;
-//
-//            }
-//            earthDistanceCount += earthDistance;
-//
-//            // Compute remaining distance
-//            double distance = RefiningTest.computeDistanceInMeter(gpB.getLongitude(), gpB.getLatitude(),
-//                                                                  gpA.getLongitude(), gpA.getLatitude());
-//            count += distance;
-//            if (distance > resMax) {
-//                resMax = distance;
-//            }
-//        }
-//
-//        resMean = count / nbMeas;
-//        losDistanceMean = losDistanceCount / nbMeas;
-//        earthDistanceMean = earthDistanceCount / nbMeas;
-//        
-//        // Set the results
-//        liaisonMetrics.setMaxResidual(resMax);
-//        liaisonMetrics.setMeanResidual(resMean);
-//        liaisonMetrics.setLosMaxDistance(losDistanceMax);
-//        liaisonMetrics.setLosMeanDistance(losDistanceMean);
-//        liaisonMetrics.setEarthMaxDistance(earthDistanceMax);
-//        liaisonMetrics.setEarthMeanDistance(earthDistanceMean);
-//        
-//        return liaisonMetrics;
-//    }
-    
-    /** Apply disruptions on acquisition for roll, pitch and scale factor
+    /** Apply disruptions on acquisition for roll angle
      * @param rugged Rugged instance
      * @param sensorName line sensor name
      * @param rollValue rotation on roll value
-     * @param pitchValue rotation on pitch value
-     * @param factorValue scale factor
-     * @throws RuggedException
      */
-    private void applyDisruptions(final Rugged rugged, final String sensorName,
-                                 final double rollValue, final double pitchValue, final double factorValue)
+    private void applyDisruptionsRoll(final Rugged rugged, final String sensorName, final double rollValue) 
         throws OrekitException, RuggedException {
 
-        final String commonFactorName = "factor";
-
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_roll")).
+        filter(driver -> driver.getName().equals(sensorName + rollSuffix)).
         findFirst().get().setValue(rollValue);
+    }
+    
+    /** Apply disruptions on acquisition for pitch angle
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @param pitchValue rotation on pitch value
+     */
+    private void applyDisruptionsPitch(final Rugged rugged, final String sensorName, final double pitchValue) 
+        throws OrekitException, RuggedException {
 
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(sensorName+"_pitch")).
+        filter(driver -> driver.getName().equals(sensorName + pitchSuffix)).
         findFirst().get().setValue(pitchValue);
+    }
+    
+    /** Apply disruptions on acquisition for scale factor
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @param factorValue scale factor
+     */
+    private void applyDisruptionsFactor(final Rugged rugged, final String sensorName, final double factorValue)
+        throws OrekitException, RuggedException {
 
         rugged.
         getLineSensor(sensorName).
         getParametersDrivers().
-        filter(driver -> driver.getName().equals(commonFactorName)).
+        filter(driver -> driver.getName().equals(factorName)).
         findFirst().get().setValue(factorValue);
     }
     
+    /** Select roll angle to adjust
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @throws OrekitException, RuggedException
+     */
+    private void setSelectedRoll(final Rugged rugged, final String sensorName) throws OrekitException, RuggedException {
+
+        ParameterDriver rollDriver =
+                rugged.getLineSensor(sensorName).getParametersDrivers().
+                filter(driver -> driver.getName().equals(sensorName+rollSuffix)).findFirst().get();
+        rollDriver.setSelected(true);
+    }
+    
+    /** Select pitch angle to adjust
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @throws OrekitException, RuggedException
+     */
+    private void setSelectedPitch(final Rugged rugged, final String sensorName) throws OrekitException, RuggedException {
+        
+        ParameterDriver pitchDriver =
+                rugged.getLineSensor(sensorName).getParametersDrivers().
+                filter(driver -> driver.getName().equals(sensorName + pitchSuffix)).findFirst().get();
+        pitchDriver.setSelected(true);
+    }
+
+    /** Select scale factor to adjust
+     * @param rugged Rugged instance
+     * @param sensorName line sensor name
+     * @throws OrekitException, RuggedException
+     */
+    private void setSelectedFactor(final Rugged rugged, final String sensorName) throws OrekitException, RuggedException {
+
+        ParameterDriver factorDriver =
+                rugged.getLineSensor(sensorName).getParametersDrivers().
+                filter(driver -> driver.getName().equals(factorName)).findFirst().get();
+        factorDriver.setSelected(true);
+    }
 
     /** Compute the distances between LOS of two real pixels (one from sensor A and one from sensor B)
      * @param realPixelA real pixel from sensor A
@@ -445,13 +331,13 @@ public class RefiningTest {
         
         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
-        final AbsoluteDate realDateA = this.lineSensorA.getDate(realPixelA.getLineNumber());
-        final AbsoluteDate realDateB = this.lineSensorB.getDate(realPixelB.getLineNumber());
+        final AbsoluteDate realDateA = lineSensorA.getDate(realPixelA.getLineNumber());
+        final AbsoluteDate realDateB = lineSensorB.getDate(realPixelB.getLineNumber());
         
-        final double[] distanceLOSB = this.ruggedB.distanceBetweenLOS(
-                                           this.lineSensorA, realDateA, realPixelA.getPixelNumber(), 
+        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(
+                                           lineSensorA, realDateA, realPixelA.getPixelNumber(), 
                                            scToBodyA,
-                                           this.lineSensorB, realDateB, realPixelB.getPixelNumber());
+                                           lineSensorB, realDateB, realPixelB.getPixelNumber());
         
         return distanceLOSB;
     }
@@ -471,62 +357,40 @@ public class RefiningTest {
                                                                        double losDistance, double earthDistance) 
         throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
-        final SpacecraftToObservedBody scToBodyA = this.ruggedA.getScToBody();
+        final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
-        final AbsoluteDate realDateA = this.lineSensorA.getDate(realPixelA.getLineNumber());
-        final AbsoluteDate realDateB = this.lineSensorB.getDate(realPixelB.getLineNumber());
+        final AbsoluteDate realDateA = lineSensorA.getDate(realPixelA.getLineNumber());
+        final AbsoluteDate realDateB = lineSensorB.getDate(realPixelB.getLineNumber());
         
         final List<LineSensor> sensors = new ArrayList<LineSensor>();
-        sensors.addAll(this.ruggedA.getLineSensors());
-        sensors.addAll(this.ruggedB.getLineSensors());
+        sensors.addAll(ruggedA.getLineSensors());
+        sensors.addAll(ruggedB.getLineSensors());
         
         final List<Rugged> ruggedList = new ArrayList<Rugged>();
-        ruggedList.add(this.ruggedA);
-        ruggedList.add(this.ruggedB);
-        
-//        // we want to adjust sensor roll and pitch angles
-//        ParameterDriver rollDriverA =
-//                        this.lineSensorA.getParametersDrivers().
-//                        filter(driver -> driver.getName().equals("roll")).findFirst().get();
-//        rollDriverA.setSelected(true);
-//        ParameterDriver pitchDriverA =
-//                        this.lineSensorA.getParametersDrivers().
-//                        filter(driver -> driver.getName().equals("pitch")).findFirst().get();
-//        pitchDriverA.setSelected(true);
-
-
-        
-//        rugged.
-//        getLineSensor(sensorName).
-//        getParametersDrivers().
-//        filter(driver -> driver.getName().equals(sensorName+"_roll") || driver.getName().equals(sensorName+"_pitch")).
-//        forEach(driver -> {
-//            try {
-//                driver.setSelected(true);
-//                driver.setValue(0.0);
-//            } catch (OrekitException e) {
-//                throw new OrekitExceptionWrapper(e);
-//            }
-//        });
-
+        ruggedList.add(ruggedA);
+        ruggedList.add(ruggedB);
         
         // prepare generator
         final Observables measurements = new Observables(2);
-        SensorToSensorMapping interMapping = new SensorToSensorMapping(this.lineSensorA.getName(), ruggedA.getName(), this.lineSensorB.getName(), ruggedB.getName());
+        SensorToSensorMapping interMapping = new SensorToSensorMapping(lineSensorA.getName(), ruggedA.getName(), lineSensorB.getName(), ruggedB.getName());
         interMapping.addMapping(realPixelA, realPixelB, losDistance, earthDistance);
         measurements.addInterMapping(interMapping);
         
         
         InterSensorsOptimizationProblemBuilder optimizationPbBuilder = new InterSensorsOptimizationProblemBuilder(sensors, measurements, ruggedList);
-        
-        java.lang.reflect.Method createGenerator = InterSensorsOptimizationProblemBuilder.class.getSuperclass().getDeclaredMethod("createGenerator");
+        java.lang.reflect.Method createGenerator = InterSensorsOptimizationProblemBuilder.class.getSuperclass().getDeclaredMethod("createGenerator", List.class);
         createGenerator.setAccessible(true);
-        DSGenerator generator = (DSGenerator) createGenerator.invoke(optimizationPbBuilder);
+        
+        List<LineSensor> listLineSensor = new ArrayList<LineSensor>();
+        listLineSensor.addAll(ruggedA.getLineSensors());
+        listLineSensor.addAll(ruggedB.getLineSensors());
 
-        final DerivativeStructure[] distanceLOSwithDS = this.ruggedB.distanceBetweenLOSderivatives(
-                                           this.lineSensorA, realDateA, realPixelA.getPixelNumber(), 
+        DSGenerator generator = (DSGenerator) createGenerator.invoke(optimizationPbBuilder, listLineSensor);
+
+        final DerivativeStructure[] distanceLOSwithDS = ruggedB.distanceBetweenLOSderivatives(
+                                           lineSensorA, realDateA, realPixelA.getPixelNumber(), 
                                            scToBodyA,
-                                           this.lineSensorB, realDateB, realPixelB.getPixelNumber(),
+                                           lineSensorB, realDateB, realPixelB.getPixelNumber(),
                                            generator);
         
         return distanceLOSwithDS;
@@ -555,12 +419,15 @@ class OrbitModel {
     /** Reference date. */
     private AbsoluteDate refDate;
 
+    
+    
+    /** Default constructor.
+     */
     public OrbitModel() {
         userDefinedLOFTransform = false;
     }
 
-
-    /** TODO GP add comments
+    /** Create a circular orbit.
      */
     public Orbit createOrbit(final double mu, final AbsoluteDate date) throws OrekitException {
         
@@ -589,7 +456,7 @@ class OrbitModel {
                                  mu);
     }
 
-    /** TODO GP add comments
+    /** Set the Local Orbital Frame characteristics.
      */
     public void setLOFTransform(final double[] rollPoly, final double[] pitchPoly,
                                 final double[] yawPoly, final AbsoluteDate date) {
@@ -601,7 +468,7 @@ class OrbitModel {
         this.refDate = date;
     }
 
-    /** TODO GP add comments
+    /** Recompute the polynom coefficients with shift.
      */
     private double getPoly(final double[] poly, final double shift) {
         
@@ -612,7 +479,7 @@ class OrbitModel {
         return val;
     }
 
-    /** TODO GP add comments
+    /** Get the offset.
      */
    private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift)
         throws OrekitException {
@@ -636,7 +503,7 @@ class OrbitModel {
         return offsetProper;
     }
 
-   /** TODO GP add comments
+   /** Create the attitude provider.
     */
     public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit)
         throws OrekitException {
@@ -647,8 +514,8 @@ class OrbitModel {
             final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
 
             for (double shift = -10.0; shift < +10.0; shift += 1e-2) {
-                list.add(new TimeStampedAngularCoordinates(refDate
-                    .shiftedBy(shift), getOffset(earth, orbit, shift),
+                list.add(new TimeStampedAngularCoordinates(refDate.shiftedBy(shift), 
+                                                           getOffset(earth, orbit, shift),
                                                            Vector3D.ZERO,
                                                            Vector3D.ZERO));
             }
@@ -662,7 +529,7 @@ class OrbitModel {
         }
     }
 
-    /** TODO GP add comments
+    /** Create the orbit propagator.
      */
    public Propagator createPropagator(final BodyShape earth,
                                        final NormalizedSphericalHarmonicsProvider gravityField,
@@ -696,7 +563,7 @@ class OrbitModel {
         return numericalPropagator;
     }
 
-   /** TODO GP add comments
+   /** Generate the orbit.
     */
    public List<TimeStampedPVCoordinates> orbitToPV(final Orbit orbit, final BodyShape earth,
                                                     final AbsoluteDate minDate, final AbsoluteDate maxDate,
@@ -720,7 +587,7 @@ class OrbitModel {
         return list;
     }
 
-   /** TODO GP add comments
+   /** Generate the attitude.
     */
    public List<TimeStampedAngularCoordinates> orbitToQ(final Orbit orbit, final BodyShape earth,
                                                         final AbsoluteDate minDate, final AbsoluteDate maxDate,
@@ -743,227 +610,21 @@ class OrbitModel {
     }
 }  
 
-///**
-// * Inter-measurements generator (sensor to sensor mapping).
-// */
-//class InterMeasurementGenerator {
-//
-//    /** Mapping from sensor A to sensor B. */
-//    private SensorToSensorMapping interMappingGenerated;
-//
-//    /** Observables which contains sensor to sensor mapping.*/
-//    private Observables observables;
-//
-//    /** Rugged instance corresponding to the viewing model A */
-//    private Rugged ruggedA;
-//
-//    /** Rugged instance corresponding to the viewing model B */
-//    private Rugged ruggedB;
-//
-//    /** Sensor A */
-//    private LineSensor sensorA;
-//
-//    /** Sensor B */
-//    private LineSensor sensorB;
-//
-//    /** Number of measurements */
-//    private int measurementCount;
-//
-//
-//    /** Sensor name B */
-//    private String sensorNameB;
-//
-//    /** Number of line for acquisition A */
-//    private int dimensionA;
-//
-//    /** Number of line for acquisition B */
-//    private int dimensionB;
-//
-//    /** Limit value for outlier points */
-//    private double outlier;
-//
-//
-//    /** Default constructor: measurements generation without outlier points control
-//     * and without Earth distance constraint.
-//     */
-//    public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
-//                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB)
-//        throws RuggedException {
-//
-//        // Initialize parameters
-//        initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
-//
-//        // Generate reference mapping, without Earth distance constraint
-//        interMappingGenerated = new SensorToSensorMapping(sensorNameA, sensorNameB);
-//
-//        // Create observables for two models
-//        observables = new Observables(2);
-//    }
-//
-//
-//    /** Constructor for measurements generation taking into account outlier points control,
-//     * without Earth distance constraint.
-//     */
-//    public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
-//                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB,
-//                                 final double outlier)
-//        throws RuggedException {
-//
-//        this(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
-//        this.outlier = outlier;
-//    }
-//
-//    /** Constructor for measurements generation taking into account outlier points control,
-//     * and Earth distance constraint.
-//     */
-//    public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
-//                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB,
-//                                 final double outlier, final double earthConstraintWeight)
-//        throws RuggedException {
-//
-//        // Initialize parameters
-//        initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
-//
-//        // Generate reference mapping, with Earth distance constraints.
-//        // Weighting will be applied as follow :
-//        //     (1-earthConstraintWeight) for losDistance weighting
-//        //     earthConstraintWeight for earthDistance weighting
-//        interMappingGenerated = new SensorToSensorMapping(sensorNameA, ruggedA.getName(), sensorNameB, ruggedB.getName(), earthConstraintWeight);
-//
-//        // Outlier points control
-//        this.outlier = outlier;
-//
-//        // Observables which contains sensor to sensor mapping
-//        this.observables = new Observables(2);
-//    }
-//
-//    /** Get the mapping from sensor A to sensor B
-//     * @return the mapping from sensor A to sensor B
-//     */
-//    public SensorToSensorMapping getInterMapping() {
-//        return interMappingGenerated;
-//    }
-//
-//    /**  Get the observables which contains sensor to sensor mapping
-//     * @return the observables which contains sensor to sensor mapping
-//     */
-//    public Observables getObservables() {
-//        return observables;
-//    }
-//
-//    public int getMeasurementCount() {
-//        return measurementCount;
-//    }
-//
-//    public void createMeasurement(final int lineSampling, final int pixelSampling) throws RuggedException {
-//
-//        // Search the sensor pixel seeing point
-//        final int minLine = 0;
-//        final int maxLine = dimensionB - 1;
-//
-//        for (double line = 0; line < dimensionA; line += lineSampling) {
-//
-//            final AbsoluteDate dateA = sensorA.getDate(line);
-//
-//            for (double pixelA = 0; pixelA < sensorA.getNbPixels(); pixelA += pixelSampling) {
-//
-//                final GeodeticPoint gpA = ruggedA.directLocation(dateA, sensorA.getPosition(),
-//                                                                 sensorA.getLOS(dateA, pixelA));
-//
-//                final SensorPixel sensorPixelB = ruggedB.inverseLocation(sensorNameB, gpA, minLine, maxLine);
-//
-//                // We need to test if the sensor pixel is found in the prescribed lines
-//                // otherwise the sensor pixel is null
-//                if (sensorPixelB != null) {
-//                    
-//                    final AbsoluteDate dateB = sensorB.getDate(sensorPixelB.getLineNumber());
-//                    final double pixelB = sensorPixelB.getPixelNumber();
-//                    final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
-//
-//                    final GeodeticPoint gpB = ruggedB.directLocation(dateB, sensorB.getPosition(),
-//                                                                     sensorB.getLOS(dateB, pixelB));
-//
-//                    final double GEOdistance = RefiningTest.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
-//                                                                      gpB.getLongitude(), gpB.getLatitude());
-//
-//                    if (GEOdistance < this.outlier) {
-//                        
-//                        final SensorPixel RealPixelA = new SensorPixel(line, pixelA);
-//                        final SensorPixel RealPixelB = new SensorPixel(sensorPixelB.getLineNumber(), sensorPixelB.getPixelNumber());
-//
-//                        final AbsoluteDate RealDateA = sensorA.getDate(RealPixelA.getLineNumber());
-//                        final AbsoluteDate RealDateB = sensorB.getDate(RealPixelB.getLineNumber());
-//                        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(sensorA, RealDateA, RealPixelA.getPixelNumber(), scToBodyA,
-//                                                                                 sensorB, RealDateB, RealPixelB.getPixelNumber());
-//
-//                        final double losDistance = 0.0;
-//                        final double earthDistance = distanceLOSB[1];
-//
-//                        interMappingGenerated.addMapping(RealPixelA, RealPixelB, losDistance, earthDistance);
-//
-//                        // increment the number of measurements
-//                        this.measurementCount++;
-//                    }
-//                }
-//            }
-//        }
-//
-//        this.observables.addInterMapping(interMappingGenerated);
-//    }
-//
-//
-//    /** Default constructor: measurements generation without outlier points control
-//     * and Earth distances constraint.
-//     * @param rA Rugged instance A
-//     * @param sNameA sensor name A
-//     * @param dimA dimension for acquisition A
-//     * @param rB Rugged instance B
-//     * @param sNameB sensor name B
-//     * @param dimB dimension for acquisition B
-//     * @throws RuggedException
-//     */
-//    private void initParams(final Rugged rA, final String sNameA, final int dimA,
-//                            final Rugged rB, final String sNameB, final int dimB)
-//        throws RuggedException {
-//
-//        this.sensorNameB = sNameB;
-//        // Check that sensors's name is different
-//        if (sNameA.contains(sNameB)) {
-//           throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, sNameA));
-//        }
-//
-//        this.ruggedA = rA;
-//        this.ruggedB = rB;
-//
-//        this.sensorA = rA.getLineSensor(sNameA);
-//        this.sensorB = rB.getLineSensor(sNameB);
-//
-//        this.dimensionA = dimA;
-//        this.dimensionB = dimB;
-//
-//        this.measurementCount = 0;
-//    }
-//}
-
 
 /**
  * Pleiades viewing model class definition.
  */
 class PleiadesViewingModel {
 
-    /** intrinsic Pleiades parameters. */
-    private double fov = 1.65; // 20km - alt 694km
+    /** Pleiades parameters. */
+    private static final double FOV = 1.65; // 20km - alt 694km
+    private static final int DIMENSION = 40000;
+    private static final double LINE_PERIOD =  1.e-4; 
 
-    // Number of line of the sensor
-    private int dimension = 40000;
-
-    private double angle;
+    private double incidenceAngle;
     private LineSensor lineSensor;
-    private String date;
-
+    private String referenceDate;
     private String sensorName;
-
-    private final double linePeriod =  1e-4;
 
 
     /** Simple constructor.
@@ -973,7 +634,7 @@ class PleiadesViewingModel {
      * </p>
      */
     public PleiadesViewingModel(final String sensorName) throws RuggedException, OrekitException {
-        
+
         this(sensorName, 0.0, "2016-01-01T12:00:00.0");
     }
 
@@ -981,19 +642,17 @@ class PleiadesViewingModel {
      * @param sensorName sensor name
      * @param incidenceAngle incidence angle
      * @param referenceDate reference date
-     * @throws RuggedException
-     * @throws OrekitException
      */
     public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate)
-        throws RuggedException, OrekitException {
-        
+            throws RuggedException, OrekitException {
+
         this.sensorName = sensorName;
-        this.date = referenceDate;
-        this.angle = incidenceAngle;
+        this.referenceDate = referenceDate;
+        this.incidenceAngle = incidenceAngle;
         this.createLineSensor();
     }
 
-    /** TODO GP add comments
+    /** Create raw fixed Line Of sight
      */
     public LOSBuilder rawLOS(final Vector3D center, final Vector3D normal, final double halfAperture, final int n) {
 
@@ -1006,69 +665,69 @@ class PleiadesViewingModel {
         return new LOSBuilder(list);
     }
 
-    /** TODO GP add comments
+    /** Build a LOS provider
      */
     public TimeDependentLOS buildLOS() {
-        
-        final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
-                                                          FastMath.toRadians(this.angle),
-                                                          RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                             Vector3D.PLUS_I, FastMath.toRadians(fov / 2), dimension);
 
-        losBuilder.addTransform(new FixedRotation(sensorName + "_roll",  Vector3D.MINUS_I, 0.00));
-        losBuilder.addTransform(new FixedRotation(sensorName + "_pitch", Vector3D.MINUS_J, 0.00));
+        final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
+                FastMath.toRadians(incidenceAngle),
+                RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+                Vector3D.PLUS_I, FastMath.toRadians(FOV / 2), DIMENSION);
+
+        losBuilder.addTransform(new FixedRotation(sensorName + RefiningTest.rollSuffix,  Vector3D.MINUS_I, 0.00));
+        losBuilder.addTransform(new FixedRotation(sensorName + RefiningTest.pitchSuffix, Vector3D.MINUS_J, 0.00));
 
         // factor is a common parameters shared between all Pleiades models
-        losBuilder.addTransform(new FixedZHomothety("factor", 1.0));
+        losBuilder.addTransform(new FixedZHomothety(RefiningTest.factorName, 1.0));
 
         return losBuilder.build();
     }
 
 
-    /** TODO GP add comments
+    /** Get the reference date.
      */
     public AbsoluteDate getDatationReference() throws OrekitException {
 
         // We use Orekit for handling time and dates, and Rugged for defining the datation model:
         final TimeScale utc = TimeScalesFactory.getUTC();
 
-        return new AbsoluteDate(date, utc);
+        return new AbsoluteDate(referenceDate, utc);
     }
 
-    /** TODO GP add comments
+    /** Get the min date.
      */
-   public  AbsoluteDate getMinDate() throws RuggedException {
+    public AbsoluteDate getMinDate() throws RuggedException {
         return lineSensor.getDate(0);
     }
 
-   /** TODO GP add comments
-    */
-   public  AbsoluteDate  getMaxDate() throws RuggedException {
-        return lineSensor.getDate(dimension);
+    /** Get the max date.
+     */
+    public AbsoluteDate getMaxDate() throws RuggedException {
+        return lineSensor.getDate(DIMENSION);
     }
 
-   /** TODO GP add comments
-    */
-   public  LineSensor  getLineSensor() {
+    /** Get the line sensor.
+     */
+    public LineSensor getLineSensor() {
         return lineSensor;
     }
 
-   /** TODO GP add comments
-    */
-   public  String getSensorName() {
+    /** Get the sensor name.
+     */
+    public String getSensorName() {
         return sensorName;
     }
 
-   /** Get the number of lines of the sensor
-    * @return the number of lines of the sensor
-    */
-public int getDimension() {
-        return dimension;
+    /** Get the number of lines of the sensor.
+     * @return the number of lines of the sensor
+     */
+    public int getDimension() {
+        return DIMENSION;
     }
 
-   /** TODO GP add comments
-    */
-   private void createLineSensor() throws RuggedException, OrekitException {
+    /** Create the line sensor.
+     */
+    private void createLineSensor() throws RuggedException, OrekitException {
 
         // Offset of the MSI from center of mass of satellite
         // one line sensor
@@ -1078,85 +737,11 @@ public int getDimension() {
         // TODO build complex los
         final TimeDependentLOS lineOfSight = buildLOS();
 
-        final double rate =  1 / linePeriod;
+        final double rate =  1. / LINE_PERIOD;
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
 
-        final LineDatation lineDatation = new LinearLineDatation(getDatationReference(), dimension / 2, rate);
+        final LineDatation lineDatation = new LinearLineDatation(getDatationReference(), DIMENSION / 2, rate);
 
         lineSensor = new LineSensor(sensorName, lineDatation, msiOffset, lineOfSight);
     }
 }
-
-///** Class for adding a noise to measurements.
-// */
-//class Noise {
-//
-//    /** Type of distribution. */
-//    private static final int GAUSSIAN = 0;
-//
-//    /** Dimension. */
-//    private int dimension;
-//
-//    /** Mean. */
-//    private double[] mean;
-//
-//    /** Standard deviation. */
-//    private double[] standardDeviation;
-//
-//    /** Distribution. */
-//    private int distribution = GAUSSIAN;
-//
-//    /** Build a new instance.
-//     * @param distribution noise type
-//     * @param dimension noise dimension
-//     */
-//    public Noise(final int distribution, final int dimension) {
-//
-//        this.mean = new double[dimension];
-//        this.standardDeviation = new double[dimension];
-//        this.dimension = dimension;
-//        this.distribution = distribution;
-//    }
-//
-//    /** Get the mean.
-//     * @return the mean
-//     */
-//    public double[] getMean() {
-//        return mean.clone();
-//    }
-//
-//    /** Set the mean.
-//     * @param meanValue the mean to set
-//     */
-//    public void setMean(final double[] meanValue) {
-//        this.mean = meanValue.clone();
-//    }
-//
-//    /** Get the standard deviation.
-//     * @return the standard deviation
-//     */
-//    public double[] getStandardDeviation() {
-//        return standardDeviation.clone();
-//    }
-//
-//    /** Set the standard deviation.
-//     * @param standardDeviationValue the standard deviation to set
-//     */
-//    public void setStandardDeviation(final double[] standardDeviationValue) {
-//        this.standardDeviation = standardDeviationValue.clone();
-//    }
-//
-//    /** Get the distribution.
-//     * @return the distribution
-//     */
-//    public int getDistribution() {
-//        return distribution;
-//    }
-//
-//    /** Get the dimension.
-//     * @return the dimension
-//     */
-//    public int getDimension() {
-//        return dimension;
-//    }
-//}

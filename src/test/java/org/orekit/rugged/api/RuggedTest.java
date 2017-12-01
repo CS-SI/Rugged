@@ -1385,34 +1385,49 @@ public class RuggedTest {
 
         double[] distancesBetweenLOS = refiningTest.computeDistancesBetweenLOS(realPixelA, realPixelB);
         
-        double expectedDistanceBetweenLOS = 3.887643821673281; // 3.8880172668944164
-        double expectedDistanceToTheGround = 6368020.620436288; // 6368020.560101736
+        double expectedDistanceBetweenLOS = 1.4324023535733088; //  3.9004125582817846
+        double expectedDistanceToTheGround = 6367488.110070567; // 6368020.030898279
+
         Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-2);
         Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 5.e-1);
-        
         
     }
     
     @Test
-    public void testDistanceBetweenLOSDerivatives() throws RuggedException {
+    public void testDistanceBetweenLOSDerivatives() throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
-//        try {
             RefiningTest refiningTest = new RefiningTest();
             refiningTest.InitRefiningTest();
 
             final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
             final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
-            double losDistance = 3.887643821673281;
-            double earthDistance = 6368020.620436288;
+            double losDistance = 1.4324023534834665;
+            double earthDistance = 6367488.110062852;
 
-            // TODO GP a debugger
-//            DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, losDistance, earthDistance);
+            DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, losDistance, earthDistance);
 
-//
-//        } catch (InvocationTargetException | NoSuchMethodException |
-//                SecurityException | IllegalAccessException | IllegalArgumentException e) {
-//            Assert.fail(e.getLocalizedMessage());
-//        }
+            // Minimum distance between LOS
+            DerivativeStructure dMin = distancesBetweenLOSwithDS[0]; // [1.4324023534834665, 153938.2318141503, 679398.14124085, -12779.33148208561, -191388.29547926865, -669127.0811123198]
+            // Minimum distance to the ground
+            DerivativeStructure dCentralBody = distancesBetweenLOSwithDS[1]; // [6367488.110062852, 7018752.447074092, -1578384.972353925, -589929.2355500134, -6850070.113251391, 1958371.974455633]
+            
+            System.out.println(dMin.getValue());
+            System.out.println(dMin.getReal());
+            for (int i = 0; i < dMin.getAllDerivatives().length; i++) {
+                System.out.println("i = " + i + " : " + dMin.getAllDerivatives()[i]);
+            }
+            System.out.println(dMin.getFreeParameters());
+            System.out.println(dMin.getOrder());
+//            int[] orders = {0,0,0,0};
+//            System.out.println(dMin.getPartialDerivative(orders));
+            
+            System.out.println(dCentralBody.getValue());
+            System.out.println(dCentralBody.getReal());
+            for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
+                System.out.println("i = " + i + " : " + dCentralBody.getAllDerivatives()[i]);
+            }
+            System.out.println(dCentralBody.getFreeParameters());
+            System.out.println(dCentralBody.getOrder());
     }
     
     

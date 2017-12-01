@@ -794,6 +794,7 @@ public class RuggedBuilderTest {
                                                      AbsoluteDate minDate, AbsoluteDate maxDate,
                                                      double step)
         throws OrekitException {
+        
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
