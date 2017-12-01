@@ -18,29 +18,34 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <rugged.findbugs-maven-plugin.version>3.0.0</rugged.findbugs-maven-plugin.version>
+    <rugged.findbugs-maven-plugin.version>3.0.4</rugged.findbugs-maven-plugin.version>
     <rugged.jacoco-maven-plugin.version>0.7.9</rugged.jacoco-maven-plugin.version>
-    <rugged.maven-assembly-plugin.version>2.6</rugged.maven-assembly-plugin.version>
-    <rugged.maven-bundle-plugin.version>3.2.0</rugged.maven-bundle-plugin.version>
-    <rugged.maven-changes-plugin.version>2.12</rugged.maven-changes-plugin.version>
+    <rugged.maven-assembly-plugin.version>3.0.0</rugged.maven-assembly-plugin.version>
+    <rugged.maven-bundle-plugin.version>3.3.0</rugged.maven-bundle-plugin.version>
+    <rugged.maven-changes-plugin.version>2.12.1</rugged.maven-changes-plugin.version>
     <rugged.maven-checkstyle-plugin.version>2.17</rugged.maven-checkstyle-plugin.version>
     <rugged.checkstyle.version>8.1</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.0.0</rugged.maven-clean-plugin.version>
-    <rugged.maven-compiler-plugin.version>3.5.1</rugged.maven-compiler-plugin.version>
+    <rugged.maven-compiler-plugin.version>3.6.1</rugged.maven-compiler-plugin.version>
     <rugged.maven-javadoc-plugin.version>2.10.4</rugged.maven-javadoc-plugin.version>
     <rugged.maven-jar-plugin.version>3.0.2</rugged.maven-jar-plugin.version>
     <rugged.maven-jxr-plugin.version>2.5</rugged.maven-jxr-plugin.version>
-    <rugged.maven-plantuml-plugin.version>7940</rugged.maven-plantuml-plugin.version>
+    <rugged.plantuml-maven-plugin.version>1.2</rugged.plantuml-maven-plugin.version>
+    <rugged.plantuml.version>1.2017.15</rugged.plantuml.version>
     <rugged.maven-project-info-reports-plugin.version>2.9</rugged.maven-project-info-reports-plugin.version>
-    <rugged.maven-site-plugin.version>3.5.1</rugged.maven-site-plugin.version>
+    <rugged.maven-resources-plugin.version>3.0.2</rugged.maven-resources-plugin.version>
+    <rugged.maven-site-plugin.version>3.6</rugged.maven-site-plugin.version>
     <rugged.maven-source-plugin.version>3.0.1</rugged.maven-source-plugin.version>
-    <rugged.maven-surefire-plugin.version>2.19.1</rugged.maven-surefire-plugin.version>
-    <rugged.maven-surefire-report-plugin.version>2.19.1</rugged.maven-surefire-report-plugin.version>
-    <rugged.maven-resources-plugin.version>3.0.1</rugged.maven-resources-plugin.version>
+    <rugged.maven-surefire-plugin.version>2.20</rugged.maven-surefire-plugin.version>
+    <rugged.maven-surefire-report-plugin.version>2.20</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.10</rugged.jgit.buildnumber.version>
-    <rugged.plantuml.version>7999</rugged.plantuml.version>
-    <rugged.orekit.version>9.0.1</rugged.orekit.version>
-    <rugged.hipparchus.version>1.1</rugged.hipparchus.version>
+    <!-- orekit.build-helper-maven-plugin.version>3.0.0</orekit.build-helper-maven-plugin.version-->
+    <!-- orekit.nexus-staging-maven-plugin.version>1.6.8</orekit.nexus-staging-maven-plugin.version-->
+    <!-- orekit.maven-gpg-plugin.version>1.6</orekit.maven-gpg-plugin.version-->
+    <!-- orekit.maven-install-plugin.version>2.5.2</orekit.maven-install-plugin.version-->
+    <rugged.orekit.version>9.1</rugged.orekit.version>
+    <rugged.hipparchus.version>1.2</rugged.hipparchus.version>
+    <rugged.junit.version>4.12</rugged.junit.version>
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
@@ -193,7 +198,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>${rugged.junit.version}</version>
       <type>jar</type>
       <scope>test</scope>
       <optional>false</optional>
@@ -379,19 +384,28 @@
       </plugin>
       <plugin>
         <groupId>com.github.jeluard</groupId>
-        <artifactId>maven-plantuml-plugin</artifactId>
-        <version>${rugged.maven-plantuml-plugin.version}</version>
+        <artifactId>plantuml-maven-plugin</artifactId>
+        <version>${rugged.plantuml-maven-plugin.version}</version>
         <configuration>
           <sourceFiles>
-            <directory>${basedir}</directory>
+            <directory>${basedir}/design</directory>
             <includes>
               <include>
-                design/**/*.puml
+                *.puml
               </include>
             </includes>
           </sourceFiles>
-          <outputDirectory>${project.build.directory}/site/images/design</outputDirectory>
+          <outputDirectory>
+            ${project.build.directory}/site/images/design
+          </outputDirectory>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml</artifactId>
+            <version>${rugged.plantuml.version}</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <phase>pre-site</phase>
@@ -400,14 +414,10 @@
             </goals>
           </execution>
         </executions>
-        <dependencies>
-          <dependency>
-            <groupId>net.sourceforge.plantuml</groupId>
-            <artifactId>plantuml</artifactId>
-            <version>${rugged.plantuml.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
+       
+       
+       
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
