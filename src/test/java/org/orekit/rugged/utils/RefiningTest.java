@@ -99,9 +99,13 @@ public class RefiningTest {
 
 
     /** Initialize refining tests
+     * @param rollDisruptionA disruption to apply to roll angle for sensor A (deg)
+     * @param pitchDisruptionA disruption to apply to pitch angle for sensor A (deg)
+     * @param factorDisruptionA disruption to apply to homothety factor for sensor A
+     * @param pitchDisruptionB disruption to apply to pitch angle for sensor B (deg)
      * @throws RuggedException
      */
-    public void InitRefiningTest() throws RuggedException {
+    public void InitRefiningTest(double rollDisruptionA, double pitchDisruptionA, double factorDisruptionA, double pitchDisruptionB) throws RuggedException {
         try {
             
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -207,10 +211,10 @@ public class RefiningTest {
             // Initialize disruptions:
             // -----------------------
             // Introduce rotations around instrument axes (roll and pitch angles, scale factor)
-            final double rollValueA =  FastMath.toRadians(0.004);
-            final double pitchValueA = FastMath.toRadians(0.0008);
-            final double pitchValueB = FastMath.toRadians(-0.0008);
-            final double factorValue = 1.000000001;
+            final double rollValueA =  FastMath.toRadians(rollDisruptionA);
+            final double pitchValueA = FastMath.toRadians(pitchDisruptionA);
+            final double pitchValueB = FastMath.toRadians(pitchDisruptionB);
+            final double factorValueA = factorDisruptionA;
 
             // Select parameters to adjust
             setSelectedRoll(ruggedA, sensorNameA);
@@ -224,7 +228,7 @@ public class RefiningTest {
             // Apply disruptions on physical model (acquisition A)
             applyDisruptionsRoll(ruggedA, sensorNameA, rollValueA);
             applyDisruptionsPitch(ruggedA, sensorNameA, pitchValueA);
-            applyDisruptionsFactor(ruggedA, sensorNameA, factorValue);
+            applyDisruptionsFactor(ruggedA, sensorNameA, factorValueA);
             
             // Apply disruptions on physical model (acquisition B)
             applyDisruptionsPitch(ruggedB, sensorNameB, pitchValueB);

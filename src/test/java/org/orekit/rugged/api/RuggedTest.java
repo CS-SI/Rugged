@@ -1377,59 +1377,72 @@ public class RuggedTest {
     @Test
     public void testDistanceBetweenLOS() throws RuggedException {
         
+        // Disruption to apply to roll, pitch (deg) and factor 
+        final double rollValueA =  0.004;
+        final double pitchValueA = 0.0008;
+        final double factorValueA = 1.000000001;
+        final double pitchValueB = -0.0008;
+        
         RefiningTest refiningTest = new RefiningTest();
-        refiningTest.InitRefiningTest();
+        refiningTest.InitRefiningTest(rollValueA, pitchValueA, factorValueA, pitchValueB);
         
         final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
         final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
         double[] distancesBetweenLOS = refiningTest.computeDistancesBetweenLOS(realPixelA, realPixelB);
         
-        double expectedDistanceBetweenLOS = 1.4324023535733088; //  3.9004125582817846
-        double expectedDistanceToTheGround = 6367488.110070567; // 6368020.030898279
+        double expectedDistanceBetweenLOS = 1.4324023534834665;
+        double expectedDistanceToTheGround = 6367488.110062852;
 
-        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-2);
-        Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 5.e-1);
-        
-    }
+        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-10);
+        Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 1.e-5);
+     }
     
     @Test
     public void testDistanceBetweenLOSDerivatives() throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
-            RefiningTest refiningTest = new RefiningTest();
-            refiningTest.InitRefiningTest();
+        // Disruption to apply to roll, pitch (deg) and factor 
+        final double rollValueA =  0.004;
+        final double pitchValueA = 0.0008;
+        final double factorValueA = 1.000000001;
+        final double pitchValueB = -0.0008;
+        
+        RefiningTest refiningTest = new RefiningTest();
+        refiningTest.InitRefiningTest(rollValueA, pitchValueA, factorValueA, pitchValueB);
 
-            final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
-            final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
-            double losDistance = 1.4324023534834665;
-            double earthDistance = 6367488.110062852;
+        final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
+        final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
-            DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, losDistance, earthDistance);
+        // Expected distances between LOS and to the ground
+        double expectedDistanceBetweenLOS = 1.4324023534834665;
+        double expectedDistanceToTheGround = 6367488.110062852;
 
-            // Minimum distance between LOS
-            DerivativeStructure dMin = distancesBetweenLOSwithDS[0]; // [1.4324023534834665, 153938.2318141503, 679398.14124085, -12779.33148208561, -191388.29547926865, -669127.0811123198]
-            // Minimum distance to the ground
-            DerivativeStructure dCentralBody = distancesBetweenLOSwithDS[1]; // [6367488.110062852, 7018752.447074092, -1578384.972353925, -589929.2355500134, -6850070.113251391, 1958371.974455633]
-            
-            System.out.println(dMin.getValue());
-            System.out.println(dMin.getReal());
-            for (int i = 0; i < dMin.getAllDerivatives().length; i++) {
-                System.out.println("i = " + i + " : " + dMin.getAllDerivatives()[i]);
-            }
-            System.out.println(dMin.getFreeParameters());
-            System.out.println(dMin.getOrder());
-//            int[] orders = {0,0,0,0};
-//            System.out.println(dMin.getPartialDerivative(orders));
-            
-            System.out.println(dCentralBody.getValue());
-            System.out.println(dCentralBody.getReal());
-            for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
-                System.out.println("i = " + i + " : " + dCentralBody.getAllDerivatives()[i]);
-            }
-            System.out.println(dCentralBody.getFreeParameters());
-            System.out.println(dCentralBody.getOrder());
+        // Expected derivatives for
+        // minimum distance between LOS
+        double[] expectedDminDerivatives = {1.4324023534834665, 153938.2318141503, 679398.14124085, -12779.33148208561, -191388.29547926865, -669127.0811123198} ;
+        // minimum distance to the ground
+        double[] expectedDcentralBodyDerivatives = {6367488.110062852, 7018752.447074092, -1578384.972353925, -589929.2355500134, -6850070.113251391, 1958371.974455633};
+
+        DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
+
+        // Minimum distance between LOS
+        DerivativeStructure dMin = distancesBetweenLOSwithDS[0];
+        // Minimum distance to the ground
+        DerivativeStructure dCentralBody = distancesBetweenLOSwithDS[1];
+
+        Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 1.e-10);
+        Assert.assertEquals(expectedDistanceToTheGround, dCentralBody.getValue() , 1.e-5);
+
+
+        for (int i = 0; i < dMin.getAllDerivatives().length; i++) {
+            Assert.assertEquals(expectedDminDerivatives[i], dMin.getAllDerivatives()[i], 1.e-10);
+        }
+
+        for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
+            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 1.e-10);
+        }
     }
-    
+
     
     @Before
     public void setUp() throws OrekitException, URISyntaxException {
