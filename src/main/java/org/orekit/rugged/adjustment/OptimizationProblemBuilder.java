@@ -49,7 +49,7 @@ import org.orekit.utils.ParameterDriver;
  * @author Guylaine Prat
  * @since 2.0
  */
- abstract class OptimizationProblemBuilder {
+abstract class OptimizationProblemBuilder {
 
     /** Margin used in parameters estimation for the inverse location lines range. */
     protected static final int ESTIMATION_LINE_RANGE_MARGIN = 100;

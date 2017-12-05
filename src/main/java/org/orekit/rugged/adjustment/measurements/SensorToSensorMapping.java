@@ -208,7 +208,7 @@ public class SensorToSensorMapping {
      * @param pixelA sensor pixel A
      * @param pixelB sensor pixel B corresponding to the sensor pixel A (by direct then inverse location)
      * @param losDistance distance between the two lines of sight
-     * @param bodyDistance elevation to central body 
+     * @param bodyDistance elevation to central body
      */
     public void addMapping(final SensorPixel pixelA, final SensorPixel pixelB,
                            final Double losDistance, final Double bodyDistance) {
