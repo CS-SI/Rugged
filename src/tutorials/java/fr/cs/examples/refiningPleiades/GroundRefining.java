@@ -271,10 +271,8 @@ public class GroundRefining extends Refining {
         los = lineSensor.getLOS(lineDate_y,0);
         GeodeticPoint lowerLeft = rugged.directLocation(lineDate_y, position, los);
 
-        double gsdX = DistanceTools.computeDistanceInMeter(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),
-        		                    upperRight.getLongitude() , upperRight.getLatitude())/dimension;
-        double gsdY = DistanceTools.computeDistanceInMeter(upLeftPoint.getLongitude(), upLeftPoint.getLatitude(),
-        		                    lowerLeft.getLongitude() , lowerLeft.getLatitude())/dimension;
+        double gsdX = DistanceTools.computeDistanceInMeter(upLeftPoint, upperRight)/dimension;
+        double gsdY = DistanceTools.computeDistanceInMeter(upLeftPoint, lowerLeft)/dimension;
 
         double [] gsd = {gsdX, gsdY};
         return gsd;

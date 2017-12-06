@@ -203,8 +203,7 @@ public class InterMeasurementGenerator implements Measurable {
                     final GeodeticPoint gpB = ruggedB.directLocation(dateB, sensorB.getPosition(),
                                                                      sensorB.getLOS(dateB, pixelB));
 
-                    final double geoDistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
-                                                                                    gpB.getLongitude(), gpB.getLatitude());
+                    final double geoDistance = DistanceTools.computeDistanceInMeter(gpA, gpB);
 
                     if (geoDistance < this.outlier) {
                     	
@@ -285,8 +284,7 @@ public class InterMeasurementGenerator implements Measurable {
 
                     final GeodeticPoint gpB = ruggedB.directLocation(dateB, sensorB.getPosition(),
                                                                      sensorB.getLOS(dateB, pixelB));
-                    final double geoDistance = DistanceTools.computeDistanceInMeter(gpA.getLongitude(), gpA.getLatitude(),
-                                                                                    gpB.getLongitude(), gpB.getLatitude());
+                    final double geoDistance = DistanceTools.computeDistanceInMeter(gpA, gpB);
                     // Create the inter mapping if distance is below outlier value
                     if (geoDistance < outlier) {
 

@@ -25,7 +25,9 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOpti
 import org.orekit.rugged.errors.RuggedException;
 
 /** LeastSquareAdjuster
- * class for setting least square algorithm chosen for solving optimization problem.
+ * Class for setting least square algorithm chosen for solving optimization problem.
+ * @author Jonathan Guinet
+ * @author Lucie Labat-Allee
  * @author Guylaine Prat
  * @since 2.0
  */
@@ -40,16 +42,14 @@ public class LeastSquareAdjuster {
     /** Constructor.
      * @param optimizerID optimizer choice
      */
-    // TODO GP public protected ???
-    LeastSquareAdjuster(final OptimizerId optimizerID) {
+    public LeastSquareAdjuster(final OptimizerId optimizerID) {
 
         this.optimizerID = optimizerID;
         this.adjuster = this.selectOptimizer();
     }
 
     /** Default constructor with Gauss Newton with QR decomposition algorithm.*/
-    // TODO GP public protected ???
-    LeastSquareAdjuster() {
+    public LeastSquareAdjuster() {
 
         this.optimizerID = OptimizerId.GAUSS_NEWTON_QR;
         this.adjuster = this.selectOptimizer();

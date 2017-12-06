@@ -143,9 +143,7 @@ public class LocalisationMetrics {
                                                              lineSensor.getLOS(date,
                                                              (int) gtSP.getPixelNumber()));
             // Compute distance
-            double distance = DistanceTools.computeDistance(esGP.getLongitude(), esGP.getLatitude(),
-                                                            gtGP.getLongitude(), gtGP.getLatitude(),
-                                                            computeAngular);
+            double distance = DistanceTools.computeDistance(esGP, gtGP, computeAngular);
             count += distance;
             if (distance > resMax) {
                 resMax = distance;
@@ -233,9 +231,7 @@ public class LocalisationMetrics {
             earthDistanceCount += earthDistance;
 
             // Compute remaining distance
-            double distance = DistanceTools.computeDistance(gpB.getLongitude(), gpB.getLatitude(),
-                                                     gpA.getLongitude(), gpA.getLatitude(),
-                                                     computeAngular);
+            double distance = DistanceTools.computeDistance(gpB, gpA, computeAngular);
             count += distance;
             if (distance > resMax) {
                 resMax = distance;

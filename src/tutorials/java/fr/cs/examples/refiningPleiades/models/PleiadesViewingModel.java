@@ -44,7 +44,7 @@ import org.orekit.errors.OrekitException;
 
 /**
  * Pleiades viewing model class definition.
- * the aim of this class is to simulate PHR sensor.
+ * The aim of this class is to simulate PHR sensor.
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
  * @author Guylaine Prat
@@ -92,7 +92,7 @@ public class PleiadesViewingModel {
         this.createLineSensor();
     }
 
-    /** TODO GP add comments
+    /** Create raw fixed Line Of sight
      */
     public LOSBuilder rawLOS(final Vector3D center, final Vector3D normal, final double halfAperture, final int n) {
 
@@ -105,7 +105,7 @@ public class PleiadesViewingModel {
         return new LOSBuilder(list);
     }
 
-    /** TODO GP add comments
+    /** Build a LOS provider
      */
     public TimeDependentLOS buildLOS() {
     	
@@ -124,7 +124,7 @@ public class PleiadesViewingModel {
     }
 
 
-    /** TODO GP add comments
+    /** Get the reference date.
      */
     public AbsoluteDate getDatationReference() throws OrekitException {
 
@@ -134,25 +134,25 @@ public class PleiadesViewingModel {
     	return new AbsoluteDate(date, utc);
     }
 
-    /** TODO GP add comments
+    /** Get the min date.
      */
    public  AbsoluteDate getMinDate() throws RuggedException {
         return lineSensor.getDate(0);
     }
 
-   /** TODO GP add comments
+   /** Get the max date.
     */
    public  AbsoluteDate  getMaxDate() throws RuggedException {
         return lineSensor.getDate(DIMENSION);
     }
 
-   /** TODO GP add comments
+   /** Get the line sensor.
     */
    public  LineSensor  getLineSensor() {
         return lineSensor;
     }
 
-   /** TODO GP add comments
+   /** Get the sensor name.
     */
    public  String getSensorName() {
         return sensorName;
@@ -165,7 +165,7 @@ public int getDimension() {
         return DIMENSION;
     }
 
-   /** TODO GP add comments
+   /** Create the line sensor
     */
    private void createLineSensor() throws RuggedException, OrekitException {
 
@@ -174,7 +174,6 @@ public int getDimension() {
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         final Vector3D msiOffset = new Vector3D(0, 0, 0);
 
-        // TODO build complex los
         final TimeDependentLOS lineOfSight = buildLOS();
 
         final double rate =  1. / LINE_PERIOD;

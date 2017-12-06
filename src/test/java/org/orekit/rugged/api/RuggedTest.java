@@ -1373,7 +1373,6 @@ public class RuggedTest {
         Assert.assertEquals(lastLine, recomputedLastLine, maxLineError);
     }
     
-    // TODO add refining tests
     @Test
     public void testDistanceBetweenLOS() throws RuggedException {
         

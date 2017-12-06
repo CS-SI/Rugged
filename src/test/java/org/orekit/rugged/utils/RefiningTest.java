@@ -674,9 +674,9 @@ class PleiadesViewingModel {
     public TimeDependentLOS buildLOS() {
 
         final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
-                FastMath.toRadians(incidenceAngle),
-                RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                Vector3D.PLUS_I, FastMath.toRadians(FOV / 2), DIMENSION);
+                                                          FastMath.toRadians(incidenceAngle),
+                                                          RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+                                             Vector3D.PLUS_I, FastMath.toRadians(FOV / 2), DIMENSION);
 
         losBuilder.addTransform(new FixedRotation(sensorName + RefiningTest.rollSuffix,  Vector3D.MINUS_I, 0.00));
         losBuilder.addTransform(new FixedRotation(sensorName + RefiningTest.pitchSuffix, Vector3D.MINUS_J, 0.00));
@@ -738,7 +738,6 @@ class PleiadesViewingModel {
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         final Vector3D msiOffset = new Vector3D(0, 0, 0);
 
-        // TODO build complex los
         final TimeDependentLOS lineOfSight = buildLOS();
 
         final double rate =  1. / LINE_PERIOD;

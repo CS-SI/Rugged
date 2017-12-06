@@ -365,8 +365,7 @@ public class InterRefining extends Refining {
                           FastMath.toDegrees(lastPointB.getLatitude()),
                           FastMath.toDegrees(lastPointB.getLongitude()),lastPointB.getAltitude());
 
-        double distance = DistanceTools.computeDistanceInMeter(centerPointA.getLongitude(), centerPointA.getLatitude(),
-                                                               centerPointB.getLongitude(), centerPointB.getLatitude());
+        double distance = DistanceTools.computeDistanceInMeter(centerPointA, centerPointB);
 
         return distance;
     }
