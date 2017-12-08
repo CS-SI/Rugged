@@ -228,25 +228,21 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
                                 ruggedB.distanceBetweenLOSderivatives(lineSensorA, dateA, pixelA, scToBodyA,
                                                                       lineSensorB, dateB, pixelB, this.getGenerator());
 
-                        if (ilResult == null) {
-                            // TODO GP manque code
-                        } else {
-                            // extract the value
-                            value.setEntry(l, ilResult[0].getValue());
-                            value.setEntry(l + 1, ilResult[1].getValue());
+                        // extract the value
+                        value.setEntry(l, ilResult[0].getValue());
+                        value.setEntry(l + 1, ilResult[1].getValue());
 
-                            // extract the Jacobian
-                            final int[] orders = new int[this.getNbParams()];
-                            int m = 0;
+                        // extract the Jacobian
+                        final int[] orders = new int[this.getNbParams()];
+                        int m = 0;
 
-                            for (final ParameterDriver driver : this.getDrivers()) {
-                                final double scale = driver.getScale();
-                                orders[m] = 1;
-                                jacobian.setEntry(l, m, ilResult[0].getPartialDerivative(orders) * scale);
-                                jacobian.setEntry(l + 1, m, ilResult[1].getPartialDerivative(orders) * scale);
-                                orders[m] = 0;
-                                m++;
-                            }
+                        for (final ParameterDriver driver : this.getDrivers()) {
+                            final double scale = driver.getScale();
+                            orders[m] = 1;
+                            jacobian.setEntry(l, m, ilResult[0].getPartialDerivative(orders) * scale);
+                            jacobian.setEntry(l + 1, m, ilResult[1].getPartialDerivative(orders) * scale);
+                            orders[m] = 0;
+                            m++;
                         }
 
                         l += 2; // pass to the next evaluation
