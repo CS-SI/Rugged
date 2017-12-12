@@ -36,7 +36,7 @@ Technical contact
 If for some reason you cannot use the public lists, you can reach the CS
 Systèmes d'Information Rugged team for any question (either technically
 oriented or administrative) at the following email address:
-[orekit@c-s.fr](mailto:orekit@c-s.fr)
+[rugged@c-s.fr](mailto:rugged@c-s.fr)
 
 Administrative contact
 ----------------------
@@ -51,5 +51,5 @@ please use the following address:
     31506 Toulouse CEDEX 5
     FRANCE
 
-    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe)
+    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Sébastien Harasse)
     fax:   +33 5-61-34-84-15

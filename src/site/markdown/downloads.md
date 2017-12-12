@@ -46,6 +46,13 @@ as required.
 
 |  package |                                              link                                                         |
 |----------|-----------------------------------------------------------------------------------------------------------|
+|  source  | [rugged-2.0-sources.zip](https://www.orekit.org/forge/attachments/download/717/rugged-2.0-sources.zip)    |
+|  binary  | [rugged-2.0.jar](https://www.orekit.org/forge/attachments/download/718/rugged-2.0.jar)                    |
+|  javadoc | [rugged-2.0-javadoc.jar](https://www.orekit.org/forge/attachments/download/719/rugged-2.0-javadoc.jar)    |
+version 2.0 downloads (release date: 2017-12-22)
+
+|  package |                                              link                                                         |
+|----------|-----------------------------------------------------------------------------------------------------------|
 |  source  | [rugged-1.0-sources.zip](https://www.orekit.org/forge/attachments/download/592/rugged-1.0-sources.zip)    |
 |  binary  | [rugged-1.0.jar](https://www.orekit.org/forge/attachments/download/593/rugged-1.0.jar)                    |
 |  javadoc | [rugged-1.0-javadoc.jar](https://www.orekit.org/forge/attachments/download/594/rugged-1.0-javadoc.jar)    |
@@ -66,12 +73,12 @@ your program:
 
 This file contents is:
 
-  * leap seconds data up to end of 2016,
+  * leap seconds data up to end of 2017,
 
-  * IERS Earth orientation parameters from 1973 to mid 2016
-    with predicted date to fall 2016 for some parameters (both IAU-1980 and IAU-2000),
+  * IERS Earth orientation parameters from 1973 to end 2017
+    with predicted date to mid 2018 for some parameters (both IAU-1980 and IAU-2000),
 
-  * Marshall Solar Activity Futur Estimation from 1999 to mid 2016,
+  * Marshall Solar Activity Futur Estimation from 1999 to end 2017,
 
   * DE 430 planetary ephemerides from 1990 to 2069,
 
@@ -83,5 +90,5 @@ There are no guarantees that this file will be available indefinitely or that it
 content will be updated. It should be considered as a simple configuration example.
 Users are encouraged to set up their own configuration data.
 
-The file is available by following this link: [orekit-data.zip](https://www.orekit.org/forge/attachments/download/610/orekit-data.zip).
+The file is available in the [orekit files page](https://www.orekit.org/forge/projects/orekit/files).
 

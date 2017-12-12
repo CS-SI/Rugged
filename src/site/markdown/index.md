@@ -41,6 +41,8 @@ Features
 
   * Direct/inverse location
 
+  * Refinement
+
   * can support several types of Digital Elevation Models, including user-provided models
 
   * several intersection models algorithms available
