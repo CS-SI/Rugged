@@ -603,7 +603,7 @@
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <nexusUrl>http://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>false</autoReleaseAfterClose>
             </configuration>
           </plugin>
