@@ -23,6 +23,9 @@
     <release version="2.0" date="2017-12-22" description="This is a major release.
       It mainly provides a refinement feature (i.e. adjusting the viewing model
       parameters to match ground control points.">
+      <action dev="guylaine" type="update">
+        Updated dependencies to Orekit 9.1 and Hipparchus 1.2.
+      </action>
       <action dev="guylaine" type="add" due-to="Jonathan Guinet, Lucie Labat-Allée">
         Added refinement feature, to adjust viewing model parameters
       </action>
