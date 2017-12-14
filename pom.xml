@@ -160,7 +160,7 @@
     <site>
       <id>rugged.website</id>
       <name>Rugged Website</name>
-      <url>https://www.orekit.org/rugged/static/</url>
+      <url>https://www.orekit.org/rugged/</url>
     </site>
   </distributionManagement>
 
