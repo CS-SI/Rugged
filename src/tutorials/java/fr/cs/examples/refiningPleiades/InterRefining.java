@@ -86,7 +86,7 @@ public class InterRefining extends Refining {
 			// Initialize Orekit, assuming an orekit-data folder is in user home directory
 			// ---------------------------------------------------------------------------
 			File home       = new File(System.getProperty("user.home"));
-			File orekitData = new File(home, "COTS/orekit-data");
+			File orekitData = new File(home, "orekit-data");
 			DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
 			// Initialize refining context
