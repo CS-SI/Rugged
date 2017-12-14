@@ -361,6 +361,7 @@
         <artifactId>plantuml-maven-plugin</artifactId>
         <version>${rugged.plantuml-maven-plugin.version}</version>
         <configuration>
+          <charset>UTF-8</charset>
           <sourceFiles>
             <directory>${basedir}/src/design</directory>
             <includes>
