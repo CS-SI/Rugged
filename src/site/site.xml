@@ -46,7 +46,6 @@
       <item name="Direct location"          href="/tutorials/direct-location.html"          />
       <item name="Direct location with DEM" href="/tutorials/direct-location-with-DEM.html" />
       <item name="Inverse location"         href="/tutorials/inverse-location.html"         />
-      <item name="Tile Updater"             href="/tutorials/tile-updater.html"             />
     </menu>
     <menu name="Development">
       <item name="Contributing"             href="/contributing.html"                       />
