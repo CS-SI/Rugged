@@ -8,7 +8,7 @@ OUT_OF_TILE_INDICES = date inexistente pentru indicii [{0}, {1}], regiunea ofer�
 OUT_OF_TILE_ANGLES = nu există date pentru latitudinea {0} și longitudinea {1}, regiunea oferă acoperire doar pentru latitudini de la {2} la {3} și longitudini de la {4} la {5}
 
 # no Digital Elevation Model data at latitude {0} and longitude {1}
-NO_DEM_DATA = <MISSING TRANSLATION>
+NO_DEM_DATA = nu există date la latitudinea {0} și longitudinea {1} pentru Modelul Numeric al Terenului
 
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = regiunea selectată pentru latitudinea {0} și longitudinea {1} nu conține vecinătatea necesară a punctului
@@ -47,43 +47,43 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = sistemul de coordonate {0} nu se potriv
 NOT_INTERPOLATOR_DUMP_DATA = datele nu reprezintă o copie de siguranță a interpolatorului
 
 # debug dump is already active for this thread
-DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_ALREADY_ACTIVE = captarea informațiilor de debug este deja activă pentru acest fir de execuție
 
 # unable to active debug dump with file {0}: {1}
-DEBUG_DUMP_ACTIVATION_ERROR = <MISSING TRANSLATION>
+DEBUG_DUMP_ACTIVATION_ERROR = imposibil de activat captarea informațiilor de debug cu fișierul {0}: {1}
 
 # debug dump is not active for this thread
-DEBUG_DUMP_NOT_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_NOT_ACTIVE = captarea informațiilor de debug nu este activă pentru acest fir de execuție
 
 # cannot parse line {0}, file {1}: {2}
-CANNOT_PARSE_LINE = <MISSING TRANSLATION>
+CANNOT_PARSE_LINE = imposibil de analizat linia {0} din fișierul {1}: {2}
 
 # light time correction redefined, line {0}, file {1}: {2}
-LIGHT_TIME_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+LIGHT_TIME_CORRECTION_REDEFINED = corecția duratei luminoase redefinită la linia {0} din fișierul {1}: {2}
 
 # aberration of light correction redefined, line {0}, file {1}: {2}
-ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = corecția aberației luminoase redefinită la linia {0} din fișierul {1}: {2}
 
 # tile {0} already defined, line {1}, file {2}: {3}
-TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
+TILE_ALREADY_DEFINED = titlul {0} este deja definit, linia {1} din fișierul {2}: {3}
 
 # unknown tile {0}, line {1}, file {2}: {3}
-UNKNOWN_TILE = <MISSING TRANSLATION>
+UNKNOWN_TILE = titlul {0} necunoscut la linia {1} din fișierul {2}: {3}
 
 # no parameters have been selected for estimation
-NO_PARAMETERS_SELECTED = <MISSING TRANSLATION>
+NO_PARAMETERS_SELECTED = niciun parametru nu a fost selectat pentru estimare
 
 # no reference mappings for parameters estimation
-NO_REFERENCE_MAPPINGS = <MISSING TRANSLATION>
+NO_REFERENCE_MAPPINGS = nicio proiecție a referinței pentru estimarea parametrilor
 
 # a different parameter with name {0} already exists
-DUPLICATED_PARAMETER_NAME = <MISSING TRANSLATION>
+DUPLICATED_PARAMETER_NAME = un alt parametru cu numele {0} există deja
 
 # rugged name is not found 
-INVALID_RUGGED_NAME = <MISSING TRANSLATION>
+INVALID_RUGGED_NAME = nume invalid pentru Rugged
 
 # refining context is only handled for limited number of configurations
-UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+UNSUPPORTED_REFINING_CONTEXT = contextul de rafinare este gestionat numai pentru un număr limitat de configurații
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
-NO_LAYER_DATA = <MISSING TRANSLATION>
+NO_LAYER_DATA = nu există informații referitoare la atmosferă pentru altitudinea {0} (altitudinea minimă: {1})
