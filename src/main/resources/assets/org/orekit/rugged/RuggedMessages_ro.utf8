@@ -82,8 +82,8 @@ DUPLICATED_PARAMETER_NAME = un alt parametru cu numele {0} există deja
 # rugged name is not found 
 INVALID_RUGGED_NAME = nume invalid pentru Rugged
 
-# refining context is only handled for limited number of configurations
-UNSUPPORTED_REFINING_CONTEXT = contextul de rafinare este gestionat numai pentru un număr limitat de configurații
+# refining using {0} rugged instance is not handled
+UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = nu există informații referitoare la atmosferă pentru altitudinea {0} (altitudinea minimă: {1})
