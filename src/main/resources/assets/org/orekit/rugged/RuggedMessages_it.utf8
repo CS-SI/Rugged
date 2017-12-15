@@ -25,9 +25,6 @@ EMPTY_TILE = il quadrante è vuoto : {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = sensore {0} sconosciuto
 
-#unknown pixel in mapping {0}
-UNKNOWN_PIXEL = <MISSING TRANSLATION>
-
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = la linea di visibilità non raggiunge il suolo
 
@@ -48,9 +45,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = il riferimento {0} non corrisponde al r
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = i dati non corrispondono a un salvatagggio d''interpolatore
-
-# number of estimated parameters mismatch, expected {0} got {1}
-ESTIMATED_PARAMETERS_NUMBER_MISMATCH = <MISSING TRANSLATION>
 
 # debug dump is already active for this thread
 DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>

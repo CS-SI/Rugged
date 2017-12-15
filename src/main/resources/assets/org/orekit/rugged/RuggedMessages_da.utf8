@@ -25,9 +25,6 @@ EMPTY_TILE = flisen er tom: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = ukendt måler {0}
 
-#unknown pixel in mapping {0}
-UNKNOWN_PIXEL = <MISSING TRANSLATION>
-
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = synslinjen når ikke bakken
 
@@ -48,9 +45,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = rammen {0} stemmer ikke overens med ram
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = dataen er ikke et interpolar-dump
-
-# number of estimated parameters mismatch, expected {0} got {1}
-ESTIMATED_PARAMETERS_NUMBER_MISMATCH = antal forventede parametre stemmer ikke overens, forventede {0} og modtog {1}
 
 # debug dump is already active for this thread
 DEBUG_DUMP_ALREADY_ACTIVE = debug-dump er allerede aktivt for denne tråd

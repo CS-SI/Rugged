@@ -25,9 +25,6 @@ EMPTY_TILE = regiunea este vidă: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = senzor necunoscut {0}
 
-#unknown pixel in mapping {0}
-UNKNOWN_PIXEL = <MISSING TRANSLATION>
-
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = linia de vizare nu ajunge la sol
 
@@ -48,9 +45,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = sistemul de coordonate {0} nu se potriv
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = datele nu reprezintă o copie de siguranță a interpolatorului
-
-# number of estimated parameters mismatch, expected {0} got {1}
-ESTIMATED_PARAMETERS_NUMBER_MISMATCH = <MISSING TRANSLATION>
 
 # debug dump is already active for this thread
 DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>

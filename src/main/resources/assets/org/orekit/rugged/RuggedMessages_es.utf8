@@ -25,9 +25,6 @@ EMPTY_TILE = la faceta está vacía: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = sensor {0} desconocido
 
-#unknown pixel in mapping {0}
-UNKNOWN_PIXEL = <MISSING TRANSLATION>
-
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = la línea de visión no llega al suelo
 
@@ -48,9 +45,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = el sistema de referencia {0} no corresp
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = los datos no están en el volcado de datos del interpolador
-
-# number of estimated parameters mismatch, expected {0} got {1}
-ESTIMATED_PARAMETERS_NUMBER_MISMATCH = <MISSING TRANSLATION>
 
 # debug dump is already active for this thread
 DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>

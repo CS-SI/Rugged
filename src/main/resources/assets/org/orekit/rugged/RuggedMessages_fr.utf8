@@ -25,9 +25,6 @@ EMPTY_TILE = la tuile est vide : {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = capteur {0} inconnu
 
-# unknown pixel in mapping {0}
-UNKNOWN_PIXEL = pixel inconnu dans le mapping {0}
-
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = la ligne de visée n''atteint pas le sol
 
@@ -48,9 +45,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = le repère {0} ne correspond pas au rep
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = les données ne correspondent pas à une sauvegarde d''interpolateur
-
-# number of estimated parameters mismatch, expected {0} got {1}
-ESTIMATED_PARAMETERS_NUMBER_MISMATCH = incohérence du nombre de paramètres estimés, {0} attendus, {1} renseignés
 
 # debug dump is already active for this thread
 DEBUG_DUMP_ALREADY_ACTIVE = capture de débogage déjà active pour ce fil d''exécution
