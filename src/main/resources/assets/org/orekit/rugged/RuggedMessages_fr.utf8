@@ -83,7 +83,7 @@ DUPLICATED_PARAMETER_NAME = il existe déjà un autre paramètre nommé {0}
 INVALID_RUGGED_NAME = nom invalide pour Rugged
 
 # refining using {0} rugged instance is not handled
-UNSUPPORTED_REFINING_CONTEXT = le refining utilisant {0} rugged instances n''est pas traité
+UNSUPPORTED_REFINING_CONTEXT = le cas d''affinage utilisant {0} instances de rugged n''est pas traité
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = pas de couche atmosphérique définie pour l''altitude {0} (altitude la plus basse : {1})
