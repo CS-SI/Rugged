@@ -20,7 +20,12 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="2.0" date="2017-12-22" description="This is a major release.
+     <release version="2.1-SNAPSHOT" date="TBD" description="TTBD">
+      <action dev="guylaine" type="add" due-to="Roberto Alacevich">
+        Added Italian translations of error messages.
+      </action>
+      </release>
+    <release version="2.0" date="2017-12-19" description="This is a major release.
       It mainly provides a refinement feature (i.e. adjusting the viewing model
       parameters to match ground control points.">
       <action dev="guylaine" type="update">
