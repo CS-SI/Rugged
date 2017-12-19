@@ -46,10 +46,10 @@ as required.
 
 |  package |                                              link                                                         |
 |----------|-----------------------------------------------------------------------------------------------------------|
-|  source  | [rugged-2.0-sources.zip](https://www.orekit.org/forge/attachments/download/717/rugged-2.0-sources.zip)    |
-|  binary  | [rugged-2.0.jar](https://www.orekit.org/forge/attachments/download/718/rugged-2.0.jar)                    |
-|  javadoc | [rugged-2.0-javadoc.jar](https://www.orekit.org/forge/attachments/download/719/rugged-2.0-javadoc.jar)    |
-version 2.0 downloads (release date: 2017-12-22)
+|  source  | [rugged-2.0-sources.zip](https://www.orekit.org/forge/attachments/download/719/rugged-2.0-sources.zip)    |
+|  binary  | [rugged-2.0.jar](https://www.orekit.org/forge/attachments/download/720/rugged-2.0.jar)                    |
+|  javadoc | [rugged-2.0-javadoc.jar](https://www.orekit.org/forge/attachments/download/721/rugged-2.0-javadoc.jar)    |
+version 2.0 downloads (release date: 2017-12-19)
 
 |  package |                                              link                                                         |
 |----------|-----------------------------------------------------------------------------------------------------------|
