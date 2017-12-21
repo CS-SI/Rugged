@@ -24,6 +24,10 @@
       <action dev="guylaine" type="add" due-to="Roberto Alacevich">
         Added Italian translations of error messages.
       </action>
+      <action dev="luc" type="fix">
+        Fixed a parameters reversal error.
+        Fixes issue #371.
+      </action>
       </release>
     <release version="2.0" date="2017-12-19" description="This is a major release.
       It mainly provides a refinement feature (i.e. adjusting the viewing model
