@@ -46,7 +46,7 @@ public class SensorToGroundMapping {
      * @param sensorName name of the sensor to which mapping applies
      */
     public SensorToGroundMapping(final String sensorName) {
-        this(sensorName, RUGGED);
+        this(RUGGED, sensorName);
     }
 
     /** Build a new instance with a specific Rugged name.
