@@ -1,5 +1,5 @@
 # internal error, contact maintenance at {0}
-INTERNAL_ERROR = intern fejl. Kontakt vedligeholdsansvarlig {0}
+INTERNAL_ERROR = intern fejl. Kontakt vedligeholdsansvarlig på {0}
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
 OUT_OF_TILE_INDICES = ingen data fundet på [{0}, {1}], flisen dækker kun fra [0, 0] til [{2}, {3}] (inkluderet)
@@ -25,6 +25,9 @@ EMPTY_TILE = flisen er tom: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = ukendt måler {0}
 
+#unknown pixel in mapping {0}
+UNKNOWN_PIXEL = ukendt pixel i mapping {0}
+
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = synslinjen når ikke bakken
 
@@ -45,6 +48,9 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = rammen {0} stemmer ikke overens med ram
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = dataen er ikke et interpolar-dump
+
+# number of estimated parameters mismatch, expected {0} got {1}
+ESTIMATED_PARAMETERS_NUMBER_MISMATCH = antal forventede parametre stemmer ikke overens, forventede {0} og modtog {1}
 
 # debug dump is already active for this thread
 DEBUG_DUMP_ALREADY_ACTIVE = debug-dump er allerede aktivt for denne tråd
@@ -71,20 +77,20 @@ TILE_ALREADY_DEFINED = flise {0} allerede defineret, linje {1}, fil {2}: {3}
 UNKNOWN_TILE = ukendt flise {0}, linje {1}, fil {2}: {3}
 
 # no parameters have been selected for estimation
-NO_PARAMETERS_SELECTED =  <MISSING TRANSLATION>
+NO_PARAMETERS_SELECTED =  ingen parametre er udvalgt til estimering
 
 # no reference mappings for parameters estimation
-NO_REFERENCE_MAPPINGS =  <MISSING TRANSLATION>
+NO_REFERENCE_MAPPINGS =  ingen referencemapping til estimering af parametre
 
 # a different parameter with name {0} already exists
-DUPLICATED_PARAMETER_NAME =  <MISSING TRANSLATION>
+DUPLICATED_PARAMETER_NAME =  en anden parameter ned navnet {0} findes allerede
 
 # rugged name is not found 
-INVALID_RUGGED_NAME = <MISSING TRANSLATION>
+INVALID_RUGGED_NAME = rugged navn blev ikke fundet
 
-# refining using {0} rugged instance is not handled
-UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+# refining context is only handled for limited number of configurations
+UNSUPPORTED_REFINING_CONTEXT = raffineringskontekst håndteres kun ved et begrænset antal konfigurationer
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
-NO_LAYER_DATA = <MISSING TRANSLATION>
+NO_LAYER_DATA = ingen atsmosfæriske lagdata ved højden {0} (laveste højde: {1})
 
