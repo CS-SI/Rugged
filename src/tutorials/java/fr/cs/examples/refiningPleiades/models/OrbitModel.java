@@ -250,40 +250,6 @@ public class OrbitModel {
         }
     }
 
-    /** Create the orbit propagator.
-     */
-   public Propagator createPropagator(final BodyShape earth,
-                                       final NormalizedSphericalHarmonicsProvider gravityField,
-                                       final Orbit orbit)
-        throws OrekitException {
-
-        final AttitudeProvider attitudeProvider = createAttitudeProvider(earth, orbit);
-
-        final SpacecraftState state =
-        		new SpacecraftState(orbit,
-        				            attitudeProvider.getAttitude(orbit, orbit.getDate(), orbit.getFrame()), 1180.0);
-
-        // numerical model for improving orbit
-        final OrbitType type = OrbitType.CIRCULAR;
-        final double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit, type);
-        final DormandPrince853Integrator integrator =
-        		     new DormandPrince853Integrator(1.0e-4 * orbit.getKeplerianPeriod(),
-        				                            1.0e-1 * orbit.getKeplerianPeriod(),
-        				                            tolerances[0],
-        				                            tolerances[1]);
-        integrator.setInitialStepSize(1.0e-2 * orbit.getKeplerianPeriod());
-
-        final NumericalPropagator numericalPropagator = new NumericalPropagator(integrator);
-        numericalPropagator.addForceModel(new HolmesFeatherstoneAttractionModel(earth.getBodyFrame(), gravityField));
-        numericalPropagator .addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getSun()));
-        numericalPropagator .addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getMoon()));
-        numericalPropagator.setOrbitType(type);
-        numericalPropagator.setInitialState(state);
-        numericalPropagator.setAttitudeProvider(attitudeProvider);
-
-        return numericalPropagator;
-    }
-
    /** Generate the orbit.
     */
    public List<TimeStampedPVCoordinates> orbitToPV(final Orbit orbit, final BodyShape earth,
