@@ -4,7 +4,11 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Assert;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
@@ -12,9 +16,11 @@ import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.RotationOrder;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
+import org.hipparchus.random.GaussianRandomGenerator;
+import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
+import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
-import org.junit.After;
-import org.junit.Assert;
+
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.LofOffset;
 import org.orekit.attitudes.NadirPointing;
@@ -22,6 +28,7 @@ import org.orekit.attitudes.TabulatedLofOffset;
 import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
@@ -39,6 +46,16 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
+import org.orekit.time.AbsoluteDate;
+import org.orekit.time.TimeScale;
+import org.orekit.time.TimeScalesFactory;
+import org.orekit.utils.AngularDerivativesFilter;
+import org.orekit.utils.CartesianDerivativesFilter;
+import org.orekit.utils.Constants;
+import org.orekit.utils.ParameterDriver;
+import org.orekit.utils.TimeStampedAngularCoordinates;
+import org.orekit.utils.TimeStampedPVCoordinates;
+
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.InterSensorsOptimizationProblemBuilder;
 import org.orekit.rugged.adjustment.measurements.Observables;
@@ -58,17 +75,11 @@ import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.FixedZHomothety;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.time.AbsoluteDate;
-import org.orekit.time.TimeScale;
-import org.orekit.time.TimeScalesFactory;
-import org.orekit.utils.AngularDerivativesFilter;
-import org.orekit.utils.CartesianDerivativesFilter;
-import org.orekit.utils.Constants;
-import org.orekit.utils.ParameterDriver;
-import org.orekit.utils.TimeStampedAngularCoordinates;
-import org.orekit.utils.TimeStampedPVCoordinates;
 
 
+/** Initialization for refining Junit tests.
+ * @author Guylaine Prat
+ */
 public class RefiningTest {
 
     /** Pleiades viewing model A */
@@ -97,15 +108,32 @@ public class RefiningTest {
     static final String pitchSuffix = "_pitch";
     static final String factorName = "factor";
 
+    
+    /**
+     * Default values for disruption to apply to roll (deg), pitch (deg) and factor 
+     */
+    static final double defaultRollDisruptionA =  0.004;
+    static final double defaultPitchDisruptionA = 0.0008;
+    static final double defaultFactorDisruptionA = 1.000000001;
+    static final double defaultPitchDisruptionB = -0.0008;
+    
+    /**
+     * Initialize refining tests with default values for disruptions on sensors characteristics
+     * @throws RuggedException
+     */
+    public void initRefiningTest() throws RuggedException {
+        
+        initRefiningTest(defaultRollDisruptionA, defaultPitchDisruptionA, defaultFactorDisruptionA, defaultPitchDisruptionB);
+    }
 
-    /** Initialize refining tests
+    /** Initialize refining tests with disruption on sensors characteristics
      * @param rollDisruptionA disruption to apply to roll angle for sensor A (deg)
      * @param pitchDisruptionA disruption to apply to pitch angle for sensor A (deg)
      * @param factorDisruptionA disruption to apply to homothety factor for sensor A
      * @param pitchDisruptionB disruption to apply to pitch angle for sensor B (deg)
      * @throws RuggedException
      */
-    public void InitRefiningTest(double rollDisruptionA, double pitchDisruptionA, double factorDisruptionA, double pitchDisruptionB) throws RuggedException {
+    public void initRefiningTest(double rollDisruptionA, double pitchDisruptionA, double factorDisruptionA, double pitchDisruptionB) throws RuggedException {
         try {
             
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -137,8 +165,7 @@ public class RefiningTest {
 
             // ----Satellite position, velocity and attitude: create orbit model A
             BodyShape earthA = TestUtils.createEarth();
-            NormalizedSphericalHarmonicsProvider gravityFieldA = TestUtils.createGravityField();
-            Orbit orbitA  = orbitmodelA.createOrbit(gravityFieldA.getMu(), refDateA);
+            Orbit orbitA  = orbitmodelA.createOrbit(Constants.EIGEN5C_EARTH_MU, refDateA);
 
             // ----If no LOF Transform Attitude Provider is Nadir Pointing Yaw Compensation
             final double [] rollPoly = {0.0,0.0,0.0};
@@ -181,8 +208,7 @@ public class RefiningTest {
 
             // ----Satellite position, velocity and attitude: create orbit model B
             BodyShape earthB = TestUtils.createEarth();
-            NormalizedSphericalHarmonicsProvider gravityFieldB = TestUtils.createGravityField();
-            Orbit orbitB = orbitmodelB.createOrbit(gravityFieldB.getMu(), refDateB);
+            Orbit orbitB = orbitmodelB.createOrbit(Constants.EIGEN5C_EARTH_MU, refDateB);
 
             // ----Satellite attitude
             List<TimeStampedAngularCoordinates> satelliteQListB = orbitmodelB.orbitToQ(orbitB, earthB, minDateB.shiftedBy(-0.0), maxDateB.shiftedBy(+0.0), 0.25);
@@ -208,30 +234,27 @@ public class RefiningTest {
 
             this.ruggedB = ruggedBuilderB.build();
 
-            // Initialize disruptions:
-            // -----------------------
-            // Introduce rotations around instrument axes (roll and pitch angles, scale factor)
-            final double rollValueA =  FastMath.toRadians(rollDisruptionA);
-            final double pitchValueA = FastMath.toRadians(pitchDisruptionA);
-            final double pitchValueB = FastMath.toRadians(pitchDisruptionB);
-            final double factorValueA = factorDisruptionA;
-
+            
             // Select parameters to adjust
+            // ---------------------------
             setSelectedRoll(ruggedA, sensorNameA);
             setSelectedPitch(ruggedA, sensorNameA);
-            setSelectedFactor(ruggedA, sensorNameA);
-            
+
             setSelectedRoll(ruggedB, sensorNameB);
             setSelectedPitch(ruggedB, sensorNameB);
-//            setSelectedFactor(ruggedB, sensorNameB);
 
-            // Apply disruptions on physical model (acquisition A)
-            applyDisruptionsRoll(ruggedA, sensorNameA, rollValueA);
-            applyDisruptionsPitch(ruggedA, sensorNameA, pitchValueA);
-            applyDisruptionsFactor(ruggedA, sensorNameA, factorValueA);
+            // Initialize disruptions:
+            // -----------------------
+            // introduce rotations around instrument axes (roll and pitch angles, scale factor)
+
+            // apply disruptions on physical model (acquisition A)
+            applyDisruptionsRoll(ruggedA, sensorNameA, FastMath.toRadians(rollDisruptionA));
+            applyDisruptionsPitch(ruggedA, sensorNameA, FastMath.toRadians(pitchDisruptionA));
+            applyDisruptionsFactor(ruggedA, sensorNameA, factorDisruptionA);
             
-            // Apply disruptions on physical model (acquisition B)
-            applyDisruptionsPitch(ruggedB, sensorNameB, pitchValueB);
+            // apply disruptions on physical model (acquisition B)
+            applyDisruptionsPitch(ruggedB, sensorNameB, FastMath.toRadians(pitchDisruptionB));
+            
             
         } catch (OrekitException oe) {
             Assert.fail(oe.getLocalizedMessage());
@@ -240,6 +263,15 @@ public class RefiningTest {
         }
     }
     
+    /**
+     * Get the list of Rugged instances
+     * @return rugged instances as list
+     */
+    public List<Rugged> getRuggedList(){
+        
+        List<Rugged> ruggedList = Arrays.asList(ruggedA, ruggedB);
+        return ruggedList;
+    }
     
     /** Apply disruptions on acquisition for roll angle
      * @param rugged Rugged instance
@@ -295,7 +327,7 @@ public class RefiningTest {
 
         ParameterDriver rollDriver =
                 rugged.getLineSensor(sensorName).getParametersDrivers().
-                filter(driver -> driver.getName().equals(sensorName+rollSuffix)).findFirst().get();
+                filter(driver -> driver.getName().equals(sensorName + rollSuffix)).findFirst().get();
         rollDriver.setSelected(true);
     }
     
@@ -399,6 +431,136 @@ public class RefiningTest {
         
         return distanceLOSwithDS;
     }
+    
+    /** Generate noisy measurements (sensor to sensor mapping)
+     * @param lineSampling line sampling
+     * @param pixelSampling pixel sampling
+     * @throws RuggedException
+     */
+    public Observables generateNoisyPoints(final int lineSampling, final int pixelSampling) throws RuggedException {
+
+        // Outliers control
+        final double outlierValue = 1.e+2;
+        
+        // Earth constraint weight
+        final double earthConstraintWeight = 0.1;
+
+        // Number of measurements
+        int measurementCount = 0;
+
+        // Generate measurements with constraints on Earth distance and outliers control
+        
+        // Generate reference mapping, with Earth distance constraints.
+        // Weighting will be applied as follow :
+        //     (1-earthConstraintWeight) for losDistance weighting
+        //     earthConstraintWeight for earthDistance weighting
+        SensorToSensorMapping interMapping = new SensorToSensorMapping(lineSensorA.getName(), ruggedA.getName(), 
+                                                                       lineSensorB.getName(), ruggedB.getName(), 
+                                                                       earthConstraintWeight);
+        
+        // Observables which contains sensor to sensor mapping
+        Observables observables = new Observables(2);
+        
+        
+        System.out.format("\n**** Generate noisy measurements (sensor to sensor mapping) **** %n");
+
+        // Generation noisy measurements
+        
+        // distribution: gaussian(0), vector dimension: 2
+        final double meanA[] = { 5.0, 5.0 };
+        final double stdA[]  = { 0.1, 0.1 };
+        final double meanB[] = { 0.0, 0.0 };
+        final double stdB[]  = { 0.1, 0.1 };
+
+        // Seed has been fixed for tests purpose
+        final GaussianRandomGenerator rngA = new GaussianRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
+        final UncorrelatedRandomVectorGenerator rvgA = new UncorrelatedRandomVectorGenerator(meanA, stdA, rngA);
+
+        // Seed has been fixed for tests purpose
+        final GaussianRandomGenerator rngB = new GaussianRandomGenerator(new Well19937a(0xdf1c03d9be0b34b9l));
+        final UncorrelatedRandomVectorGenerator rvgB = new UncorrelatedRandomVectorGenerator(meanB, stdB, rngB);
+
+        
+        // Search the sensor pixel seeing point
+        final int minLine = 0;
+        final int maxLine = pleiadesViewingModelB.getDimension() - 1;
+        
+        final String sensorNameB = lineSensorB.getName();
+
+        for (double line = 0; line < pleiadesViewingModelA.getDimension(); line += lineSampling) {
+
+            final AbsoluteDate dateA = lineSensorA.getDate(line);
+            
+            for (double pixelA = 0; pixelA < lineSensorA.getNbPixels(); pixelA += pixelSampling) {
+                
+                final GeodeticPoint gpA = ruggedA.directLocation(dateA, lineSensorA.getPosition(),
+                                                                 lineSensorA.getLOS(dateA, pixelA));
+                final SensorPixel sensorPixelB = ruggedB.inverseLocation(sensorNameB, gpA, minLine, maxLine);
+
+                // We need to test if the sensor pixel is found in the prescribed lines
+                // otherwise the sensor pixel is null
+                if (sensorPixelB != null) {
+                    
+                    final AbsoluteDate dateB = lineSensorB.getDate(sensorPixelB.getLineNumber());
+                    final double pixelB = sensorPixelB.getPixelNumber();
+
+                    // Get spacecraft to body transform of Rugged instance A
+                    final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
+
+                    final GeodeticPoint gpB = ruggedB.directLocation(dateB, lineSensorB.getPosition(),
+                                                                     lineSensorB.getLOS(dateB, pixelB));
+                    final double geoDistance = computeDistanceInMeter(gpA, gpB);
+                    
+                    // Create the inter mapping if distance is below outlier value
+                    if (geoDistance < outlierValue) {
+
+                        final double[] vecRandomA = rvgA.nextVector();
+                        final double[] vecRandomB = rvgB.nextVector();
+
+                        final SensorPixel realPixelA = new SensorPixel(line + vecRandomA[0], pixelA + vecRandomA[1]);
+                        final SensorPixel realPixelB = new SensorPixel(sensorPixelB.getLineNumber() + vecRandomB[0],
+                                                                       sensorPixelB.getPixelNumber() + vecRandomB[1]);
+                        
+                        final AbsoluteDate realDateA = lineSensorA.getDate(realPixelA.getLineNumber());
+                        final AbsoluteDate realDateB = lineSensorB.getDate(realPixelB.getLineNumber());
+                        
+                        final double[] distanceLOSB = ruggedB.distanceBetweenLOS(lineSensorA, realDateA, realPixelA.getPixelNumber(), scToBodyA,
+                                                                                 lineSensorB, realDateB, realPixelB.getPixelNumber());
+                        final Double losDistance = 0.0;
+                        final Double earthDistance = distanceLOSB[1];
+
+                        interMapping.addMapping(realPixelA, realPixelB, losDistance, earthDistance);
+
+                        // Increment the number of measurements
+                        measurementCount++;
+                        
+                    } // end test if geoDistance < outlierValue
+                } // end test if sensorPixelB != null
+                
+            } // end loop on pixel of sensorA
+        } // end loop on line of sensorA
+
+        observables.addInterMapping(interMapping);
+        
+        System.out.format("Number of tie points generated: %d %n", measurementCount);
+        
+        return observables;
+    }
+    
+    
+    /** Compute a geodetic distance in meters between two geodetic points.
+     * @param geoPoint1 first geodetic point (rad)
+     * @param geoPoint2 second geodetic point (rad)
+     * @return distance in meters
+     */
+    private static double computeDistanceInMeter(final GeodeticPoint geoPoint1, final GeodeticPoint geoPoint2) {
+
+        // get vectors on unit sphere from angular coordinates
+        final Vector3D p1 = new Vector3D(geoPoint1.getLatitude(), geoPoint1.getLongitude());
+        final Vector3D p2 = new Vector3D(geoPoint2.getLatitude(), geoPoint2.getLongitude());
+        return Constants.WGS84_EARTH_EQUATORIAL_RADIUS * Vector3D.angle(p1, p2);
+    }
+
 
     @After
     public void tearDown() {
@@ -406,6 +568,10 @@ public class RefiningTest {
 }
 
 
+
+/**
+ * Class to compute orbit for refining tests
+ */
 class OrbitModel {
 
     /** Flag to change Attitude Law (by default Nadir Pointing Yaw Compensation). */
@@ -612,7 +778,7 @@ class OrbitModel {
 
         return list;
     }
-}  
+}  // end class OrbitModel
 
 
 /**
@@ -747,4 +913,5 @@ class PleiadesViewingModel {
 
         lineSensor = new LineSensor(sensorName, lineDatation, msiOffset, lineOfSight);
     }
-}
+    
+} // end class PleiadesViewingModel
