@@ -1376,51 +1376,39 @@ public class RuggedTest {
     @Test
     public void testDistanceBetweenLOS() throws RuggedException {
         
-        // Disruption to apply to roll, pitch (deg) and factor 
-        final double rollValueA =  0.004;
-        final double pitchValueA = 0.0008;
-        final double factorValueA = 1.000000001;
-        final double pitchValueB = -0.0008;
-        
         RefiningTest refiningTest = new RefiningTest();
-        refiningTest.InitRefiningTest(rollValueA, pitchValueA, factorValueA, pitchValueB);
+        refiningTest.initRefiningTest();
         
         final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
         final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
         double[] distancesBetweenLOS = refiningTest.computeDistancesBetweenLOS(realPixelA, realPixelB);
         
-        double expectedDistanceBetweenLOS = 1.4324023534834665;
-        double expectedDistanceToTheGround = 6367488.110062852;
+        double expectedDistanceBetweenLOS = 1.43205763;
+        double expectedDistanceToTheGround = 6367488.049257;
 
-        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-10);
+        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-8);
         Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 1.e-5);
      }
     
     @Test
     public void testDistanceBetweenLOSDerivatives() throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
-        // Disruption to apply to roll, pitch (deg) and factor 
-        final double rollValueA =  0.004;
-        final double pitchValueA = 0.0008;
-        final double factorValueA = 1.000000001;
-        final double pitchValueB = -0.0008;
-        
         RefiningTest refiningTest = new RefiningTest();
-        refiningTest.InitRefiningTest(rollValueA, pitchValueA, factorValueA, pitchValueB);
+        refiningTest.initRefiningTest();
 
         final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
         final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
         // Expected distances between LOS and to the ground
-        double expectedDistanceBetweenLOS = 1.4324023534834665;
-        double expectedDistanceToTheGround = 6367488.110062852;
+        double expectedDistanceBetweenLOS = 1.43205763;
+        double expectedDistanceToTheGround = 6367488.049257;
 
         // Expected derivatives for
         // minimum distance between LOS
-        double[] expectedDminDerivatives = {1.4324023534834665, 153938.2318141503, 679398.14124085, -12779.33148208561, -191388.29547926865, -669127.0811123198} ;
+        double[] expectedDminDerivatives = {1.43205763, 153938.24840674, 679398.19955421, -191388.31413817, -669127.13904528} ;
         // minimum distance to the ground
-        double[] expectedDcentralBodyDerivatives = {6367488.110062852, 7018752.447074092, -1578384.972353925, -589929.2355500134, -6850070.113251391, 1958371.974455633};
+        double[] expectedDcentralBodyDerivatives = {6367488.04924976, 7018753.80043417, -1578385.34826076, -6850071.440488495, 1958372.41322515};
 
         DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
 
@@ -1429,16 +1417,16 @@ public class RuggedTest {
         // Minimum distance to the ground
         DerivativeStructure dCentralBody = distancesBetweenLOSwithDS[1];
 
-        Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 1.e-10);
+        Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 1.e-8);
         Assert.assertEquals(expectedDistanceToTheGround, dCentralBody.getValue() , 1.e-5);
 
 
         for (int i = 0; i < dMin.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDminDerivatives[i], dMin.getAllDerivatives()[i], 1.e-10);
+            Assert.assertEquals(expectedDminDerivatives[i], dMin.getAllDerivatives()[i], 1.e-8);
         }
 
         for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 1.e-10);
+            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 1.e-8);
         }
     }
 
