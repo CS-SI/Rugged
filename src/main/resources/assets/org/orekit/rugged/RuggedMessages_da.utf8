@@ -25,9 +25,6 @@ EMPTY_TILE = flisen er tom: {0} ⨉ {1}
 # unknown sensor {0}
 UNKNOWN_SENSOR = ukendt måler {0}
 
-#unknown pixel in mapping {0}
-UNKNOWN_PIXEL = ukendt pixel i mapping {0}
-
 # line-of-sight does not reach ground
 LINE_OF_SIGHT_DOES_NOT_REACH_GROUND = synslinjen når ikke bakken
 
@@ -48,9 +45,6 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = rammen {0} stemmer ikke overens med ram
 
 # data is not an interpolator dump
 NOT_INTERPOLATOR_DUMP_DATA = dataen er ikke et interpolar-dump
-
-# number of estimated parameters mismatch, expected {0} got {1}
-ESTIMATED_PARAMETERS_NUMBER_MISMATCH = antal forventede parametre stemmer ikke overens, forventede {0} og modtog {1}
 
 # debug dump is already active for this thread
 DEBUG_DUMP_ALREADY_ACTIVE = debug-dump er allerede aktivt for denne tråd
@@ -88,8 +82,8 @@ DUPLICATED_PARAMETER_NAME =  en anden parameter ned navnet {0} findes allerede
 # rugged name is not found 
 INVALID_RUGGED_NAME = rugged navn blev ikke fundet
 
-# refining context is only handled for limited number of configurations
-UNSUPPORTED_REFINING_CONTEXT = raffineringskontekst håndteres kun ved et begrænset antal konfigurationer
+# refining using {0} rugged instance is not handled
+UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = ingen atsmosfæriske lagdata ved højden {0} (laveste højde: {1})
