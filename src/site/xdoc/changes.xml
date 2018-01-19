@@ -21,8 +21,19 @@
   </properties>
   <body>
      <release version="2.1-SNAPSHOT" date="TBD" description="TTBD">
+      <action dev="guylaine" type="add" due-to="Issam Boukerch">
+        Changed terms for refining tutorials.
+        The "fulcrum points" term is changed into "Ground Control Points (GCP)" and 
+        the "liaison points" term into "tie points".
+      </action>
       <action dev="guylaine" type="add" due-to="Roberto Alacevich">
         Added Italian translations of error messages.
+      </action>
+      <action dev="luc" type="add" due-to="Beatriz Salazar García">
+        Updated Spanish translations of error messages.
+      </action>
+      <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
+        Updated Danish translations of error messages.
       </action>
       <action dev="luc" type="fix">
         Fixed a parameters reversal error.
