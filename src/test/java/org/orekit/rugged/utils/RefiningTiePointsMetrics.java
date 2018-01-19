@@ -1,9 +1,9 @@
 package org.orekit.rugged.utils;
 
 /**
- * Contains results from liaison metrics computation
+ * Contains results from tie metrics computation
  */
-public class RefiningLiaisonMetrics {
+public class RefiningTiePointsMetrics {
     
     /** Maximum residual distance. */
     private double resMax;
@@ -18,7 +18,7 @@ public class RefiningLiaisonMetrics {
     /** Earth distance mean.*/
     private double earthDistanceMean;
     
-    public RefiningLiaisonMetrics() {
+    public RefiningTiePointsMetrics() {
         
         this.resMax = 0.0;
         this.resMean = 0.0;

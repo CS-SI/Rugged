@@ -83,35 +83,32 @@ import org.orekit.rugged.los.TimeDependentLOS;
 public class RefiningTest {
 
     /** Pleiades viewing model A */
-    PleiadesViewingModel pleiadesViewingModelA;
+    private PleiadesViewingModel pleiadesViewingModelA;
 
     /** Pleiades viewing model B */
-    PleiadesViewingModel pleiadesViewingModelB;
+    private PleiadesViewingModel pleiadesViewingModelB;
     
     /** Line sensor A */
-    LineSensor lineSensorA;
+    private LineSensor lineSensorA;
     
     /** Line sensor B */
-    LineSensor lineSensorB;
+    private LineSensor lineSensorB;
 
     /** RuggedA's instance */
-    Rugged ruggedA;
+    private Rugged ruggedA;
 
     /** RuggedB's instance */
-    Rugged ruggedB;
+    private Rugged ruggedB;
     
+    /** Number of parameters to adjust */
+    private int parameterToAdjust;
     
-    /**
-     * Part of the name of parameter drivers 
-     */
+    // Part of the name of parameter drivers
     static final String rollSuffix = "_roll";
     static final String pitchSuffix = "_pitch";
     static final String factorName = "factor";
 
-    
-    /**
-     * Default values for disruption to apply to roll (deg), pitch (deg) and factor 
-     */
+    // Default values for disruption to apply to roll (deg), pitch (deg) and factor 
     static final double defaultRollDisruptionA =  0.004;
     static final double defaultPitchDisruptionA = 0.0008;
     static final double defaultFactorDisruptionA = 1.000000001;
@@ -242,6 +239,8 @@ public class RefiningTest {
 
             setSelectedRoll(ruggedB, sensorNameB);
             setSelectedPitch(ruggedB, sensorNameB);
+            
+            this.parameterToAdjust = 4;
 
             // Initialize disruptions:
             // -----------------------
@@ -461,11 +460,7 @@ public class RefiningTest {
         // Observables which contains sensor to sensor mapping
         Observables observables = new Observables(2);
         
-        
-        System.out.format("\n**** Generate noisy measurements (sensor to sensor mapping) **** %n");
-
         // Generation noisy measurements
-        
         // distribution: gaussian(0), vector dimension: 2
         final double meanA[] = { 5.0, 5.0 };
         final double stdA[]  = { 0.1, 0.1 };
@@ -541,9 +536,6 @@ public class RefiningTest {
         } // end loop on line of sensorA
 
         observables.addInterMapping(interMapping);
-        
-        System.out.format("Number of tie points generated: %d %n", measurementCount);
-        
         return observables;
     }
     
@@ -564,6 +556,13 @@ public class RefiningTest {
 
     @After
     public void tearDown() {
+    }
+    
+    /** Get the number of parameters to adjust
+     * @return number of parameters to adjust
+     */
+    public int getParameterToAdjust() {
+        return parameterToAdjust;
     }
 }
 

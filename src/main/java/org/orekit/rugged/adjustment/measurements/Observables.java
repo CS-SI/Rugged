@@ -35,10 +35,10 @@ public class Observables {
     /** Separator between sensors. */
     private static final String SENSORS_SEPARATOR = "__";
 
-    /** Sensor to ground mapping structure (example: for GCP points).*/
+    /** Sensor to ground mapping structure (example: for Ground Control Points GCP points).*/
     private final Map<String, SensorToGroundMapping> groundMappings;
 
-    /** Sensor to sensor mappings structure (liaison points). */
+    /** Sensor to sensor mappings structure (Tie points). */
     private final Map<String, SensorToSensorMapping> interMappings;
 
     /** Number of viewing models to map.*/
