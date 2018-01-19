@@ -305,10 +305,11 @@ public class InterMeasurementGenerator implements Measurable {
 
                         // Increment the number of measurements
                         this.measurementCount++;
-                    }
-                }
-            }
-        }
+                        
+                    } // end test if geoDistance < outlier
+                } // end test if sensorPixelB != null
+            } // end loop on pixel of sensorA
+        } // end loop on line of sensorA
 
         this.observables.addInterMapping(interMapping);
     }

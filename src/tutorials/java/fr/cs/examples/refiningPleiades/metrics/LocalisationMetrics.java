@@ -34,7 +34,7 @@ import org.orekit.time.AbsoluteDate;
 
 /**
  * Class for testing geometric performances in absolute location.
- * Metrics are computed for two scenarios: ground points and liaison points.
+ * Metrics are computed for two scenarios: ground control points and tie points.
  * @see SensorToSensorMapping
  * @see SensorToGroundMapping
  * @author Jonathan Guinet
@@ -63,7 +63,7 @@ public class LocalisationMetrics {
     private double earthDistanceMean;
 
 
-    /** Compute metrics corresponding to the ground points study.
+    /** Compute metrics corresponding to the Ground Control Points (GCP) study.
      * @param measMapping Mapping of observations/measurements = the ground truth
      * @param rugged Rugged instance
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
@@ -76,11 +76,11 @@ public class LocalisationMetrics {
         this.resMax = 0.0;
         this.resMean = 0.0;
 
-        // Compute metrics - Case of Sensor to Ground mapping (fulcrum points study)
-        computeMetrics(measMapping, rugged, computeAngular);
+        // Compute metrics - Case of Sensor to Ground mapping (Ground Control Points GCP study)
+        computeGCPmetrics(measMapping, rugged, computeAngular);
     }
 
-    /** Compute metrics corresponding to the liaison points study.
+    /** Compute metrics corresponding to the tie points study.
      * @param measMapping Mapping of observations/measurements = the ground truth
      * @param ruggedA Rugged instance corresponding to viewing model A
      * @param ruggedB Rugged instance corresponding to viewing model B
@@ -99,18 +99,18 @@ public class LocalisationMetrics {
         this.earthDistanceMax = 0.0;
         this.earthDistanceMean = 0.0;
 
-        // Compute metrics - Case of Sensor to Sensor mapping (liaison points study)
-        computeLiaisonMetrics(measMapping, ruggedA, ruggedB, computeAngular);
+        // Compute metrics - Case of Sensor to Sensor mapping (tie points study)
+        computeTiePointsMetrics(measMapping, ruggedA, ruggedB, computeAngular);
     }
 
     /**
-     * Compute metrics: case of ground control points.
+     * Compute metrics: case of ground control points (GCP).
      * @param measMapping Mapping of observations/measurements = the ground truth
      * @param rugged Rugged instance
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
      * @exception RuggedException if direct location fails
      */
-    public void computeMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
+    public void computeGCPmetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
         throws RuggedException {
 
         // Mapping of observations/measurements = the ground truth
@@ -154,14 +154,14 @@ public class LocalisationMetrics {
     }
 
     /**
-     * Compute metrics: case of liaison points.
+     * Compute metrics: case of tie points.
      * @param measMapping Mapping of observations/measurements = the ground truth
      * @param ruggedA Rugged instance corresponding to viewing model A
      * @param ruggedB Rugged instance corresponding to viewing model B
      * @param computeAngular Flag to know if distance is computed in meters (false) or with angular (true)
      * @exception RuggedException if direct location fails
      */
-    public void computeLiaisonMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
+    public void computeTiePointsMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
                                       final boolean computeAngular)
         throws RuggedException {
 

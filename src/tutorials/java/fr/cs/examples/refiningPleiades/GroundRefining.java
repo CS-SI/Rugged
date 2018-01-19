@@ -52,7 +52,7 @@ import fr.cs.examples.refiningPleiades.models.OrbitModel;
 import fr.cs.examples.refiningPleiades.models.PleiadesViewingModel;
 
 /**
- * Class for testing refining (fulcrum points study)
+ * Class for testing refining (Ground Control Points GCP study)
  * with or without noisy measurements
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee

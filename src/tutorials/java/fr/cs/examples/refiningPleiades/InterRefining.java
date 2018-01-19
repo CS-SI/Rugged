@@ -54,7 +54,7 @@ import fr.cs.examples.refiningPleiades.models.OrbitModel;
 import fr.cs.examples.refiningPleiades.models.PleiadesViewingModel;
 
 /**
- * Class for testing refining (liaison points study)
+ * Class for testing refining (tie points study)
  * with or without noisy measurements
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee

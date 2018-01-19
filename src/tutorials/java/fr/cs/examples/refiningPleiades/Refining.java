@@ -217,7 +217,7 @@ public class Refining {
     }
 
     /** Compute metrics to evaluate geometric performances in location,
-     * for fulcrum points study.
+     * for Ground Control Points GCP study.
      * @param groundMapping sensor to ground mapping
      * @param rugged Rugged instance
      * @param unit flag to know if distance is computed in meters (false) or with angular (true)
@@ -238,7 +238,7 @@ public class Refining {
     }
 
     /** Compute metrics to evaluate geometric performances in location,
-     * for liaison points study.
+     * for tie points study.
      * @param interMapping sensor to sensor mapping
      * @param ruggedA Rugged instance A
      * @param ruggedB Rugged instance B
@@ -297,7 +297,7 @@ public class Refining {
         });
     }
 
-    /** Start optimization to  adjust parameters (fulcrum points study).
+    /** Start optimization to  adjust parameters (Ground Control Points GCP study).
      * @param maxIterations iterations max
      * @param convergenceThreshold threshold of convergence
      * @param measurements ground measurements
@@ -314,11 +314,12 @@ public class Refining {
 
         // Print statistics
         System.out.format("Max value: %3.6e %n", optimum.getResiduals().getMaxValue());
-        System.out.format("Optimization performed in %d iterations \n", optimum.getEvaluations());
+        System.out.format("Optimization performed in %d iterations \n", optimum.getIterations());
+        System.out.format("Optimization performed with %d evaluations of model (objective) function \n", optimum.getEvaluations());
         System.out.format("RMSE: %f \n", optimum.getRMS());
     }
 
-    /** Start optimization to  adjust parameters (liaison points study).
+    /** Start optimization to  adjust parameters (tie points study).
      * @param maxIterations iterations max
      * @param convergenceThreshold threshold of convergence
      * @param measurements measurements
@@ -346,7 +347,8 @@ public class Refining {
 
         // Print statistics
         System.out.format("Max value: %3.6e %n", optimum.getResiduals().getMaxValue());
-        System.out.format("Optimization performed in %d iterations \n", optimum.getEvaluations());
+        System.out.format("Optimization performed in %d iterations \n", optimum.getIterations());
+        System.out.format("Optimization performed with %d evaluations of model (objective) function \n", optimum.getEvaluations());
         System.out.format("RMSE: %f \n", optimum.getRMS());
     }
 
