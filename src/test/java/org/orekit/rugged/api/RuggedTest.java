@@ -73,8 +73,8 @@ import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
 import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.utils.DSGenerator;
-import org.orekit.rugged.utils.RefiningTest;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -1376,7 +1376,7 @@ public class RuggedTest {
     @Test
     public void testDistanceBetweenLOS() throws RuggedException {
         
-        RefiningTest refiningTest = new RefiningTest();
+        InitInterRefiningTest refiningTest = new InitInterRefiningTest();
         refiningTest.initRefiningTest();
         
         final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
@@ -1384,8 +1384,8 @@ public class RuggedTest {
 
         double[] distancesBetweenLOS = refiningTest.computeDistancesBetweenLOS(realPixelA, realPixelB);
         
-        double expectedDistanceBetweenLOS = 1.43205763;
-        double expectedDistanceToTheGround = 6367488.049257;
+        double expectedDistanceBetweenLOS = 3.88800245;
+        double expectedDistanceToTheGround = 6368020.559109;
 
         Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-8);
         Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 1.e-5);
@@ -1394,21 +1394,21 @@ public class RuggedTest {
     @Test
     public void testDistanceBetweenLOSDerivatives() throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
-        RefiningTest refiningTest = new RefiningTest();
+        InitInterRefiningTest refiningTest = new InitInterRefiningTest();
         refiningTest.initRefiningTest();
 
         final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
         final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
         // Expected distances between LOS and to the ground
-        double expectedDistanceBetweenLOS = 1.43205763;
-        double expectedDistanceToTheGround = 6367488.049257;
+        double expectedDistanceBetweenLOS = 3.88800245;
+        double expectedDistanceToTheGround = 6368020.559109;
 
         // Expected derivatives for
         // minimum distance between LOS
-        double[] expectedDminDerivatives = {1.43205763, 153938.24840674, 679398.19955421, -191388.31413817, -669127.13904528} ;
+        double[] expectedDminDerivatives = {3.88800245, -153874.01319097, -678866.03112033, 191294.06938169, 668600.16715270} ;
         // minimum distance to the ground
-        double[] expectedDcentralBodyDerivatives = {6367488.04924976, 7018753.80043417, -1578385.34826076, -6850071.440488495, 1958372.41322515};
+        double[] expectedDcentralBodyDerivatives = {6368020.55910153, 7007767.46926062, -1577060.82402054, -6839286.39593802, 1956452.66636262};
 
         DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
 

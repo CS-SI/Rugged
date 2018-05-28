@@ -94,6 +94,9 @@ public class ConstantElevationAlgorithmTest {
                                                                                  2 * FastMath.PI));
         Assert.assertEquals(2 * FastMath.PI + gpConst.getLongitude(), shifted.getLongitude(), 1.0e-6);
 
+        // Simple test for test coverage purpose
+        double elevation0 = ignore.getElevation(gpRef.getLatitude(), gpConst.getLatitude());
+        Assert.assertEquals(elevation0, 0.0, 1.e-15);
     }
 
     @Before

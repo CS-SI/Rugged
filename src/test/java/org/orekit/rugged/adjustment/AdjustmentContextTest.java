@@ -16,21 +16,26 @@
  */
 package org.orekit.rugged.adjustment;
 
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Field;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.measurements.SensorMapping;
+import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.utils.RefiningTest;
+import org.orekit.rugged.errors.RuggedMessages;
+import org.orekit.rugged.linesensor.SensorPixel;
 
 public class AdjustmentContextTest {
     
@@ -38,16 +43,18 @@ public class AdjustmentContextTest {
     public void setUp() {
         
         try {
-            RefiningTest refiningTest = new RefiningTest();
+            // One must set a context for the adjustment ... Here we choose an inter sensors optimization problem
+            InitInterRefiningTest refiningTest = new InitInterRefiningTest();
             refiningTest.initRefiningTest();
 
             ruggedList = refiningTest.getRuggedList();
 
             int lineSampling = 1000;
             int pixelSampling = 1000;
+            
+            double earthConstraintWeight = 0.1;
 
-            measurements = refiningTest.generateNoisyPoints(lineSampling, pixelSampling);
-            numberOfParameters = refiningTest.getParameterToAdjust();
+            measurements = refiningTest.generateNoisyPoints(lineSampling, pixelSampling, earthConstraintWeight, false);
             
         }  catch (RuggedException re) {
             Assert.fail(re.getLocalizedMessage());
@@ -59,81 +66,126 @@ public class AdjustmentContextTest {
         
         AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
         
-        // Check if the default OptimizerId is the expected one
+        // Check if the default OptimizerId is the expected one (use reflectivity)
         Field optimizerId = adjustmentContext.getClass().getDeclaredField("optimizerID");
         optimizerId.setAccessible(true);
         OptimizerId defaultOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
+        Assert.assertTrue((defaultOptimizerId == OptimizerId.GAUSS_NEWTON_QR));
         
-        System.out.println(defaultOptimizerId);
-        assertTrue((defaultOptimizerId == OptimizerId.GAUSS_NEWTON_QR));
+        // Check if the change of the default OptimizerId is correct
+        adjustmentContext.setOptimizer(OptimizerId.GAUSS_NEWTON_LU);
+        OptimizerId modifiedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
+        Assert.assertTrue((modifiedOptimizerId == OptimizerId.GAUSS_NEWTON_LU));
         
-//        // Check if the change of the default OptimizerId is correct
-//        adjustmentContext.setOptimizer(OptimizerId.GAUSS_NEWTON_LU);
-//        OptimizerId modifiedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
-//        System.out.println(modifiedOptimizerId);
-//        assertTrue((modifiedOptimizerId == OptimizerId.GAUSS_NEWTON_LU));
-        
-//        // Check if the change of the default OptimizerId is correct
-//        adjustmentContext.setOptimizer(OptimizerId.GAUSS_NEWTON_LU);
-//        OptimizerId modifiedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
-//        System.out.println(modifiedOptimizerId);
-//        assertTrue((modifiedOptimizerId == OptimizerId.GAUSS_NEWTON_LU));
+        // Check if the change of the default OptimizerId is correct
+        adjustmentContext.setOptimizer(OptimizerId.LEVENBERG_MARQUADT);
+        modifiedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
+        Assert.assertTrue((modifiedOptimizerId == OptimizerId.LEVENBERG_MARQUADT));
 
-        
-//        OptimizerId.valueOf(OptimizerId.LEVENBERG_MARQUADT.toString());
-    }
-    
  
+    }
 
     @Test
     public void testEstimateFreeParameters() throws RuggedException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         
         AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
         
-        List<String> ruggedNameList = new ArrayList<String>();
-        for(Rugged rugged : ruggedList) {
-            ruggedNameList.add(rugged.getName());
-        }
-        final int maxIterations = 120;
-        final double convergenceThreshold = 1.e-7;
+        for (OptimizerId optimizer : OptimizerId.values()) {
+            
+            // Set the optimizer
+            adjustmentContext.setOptimizer(optimizer);
 
-        Optimum optimum = adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
-        
-        Assert.assertTrue(optimum.getIterations() < 20);
-        Field optimizerId = adjustmentContext.getClass().getDeclaredField("optimizerID");
-        optimizerId.setAccessible(true);
-        OptimizerId usedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
-        if (usedOptimizerId == OptimizerId.GAUSS_NEWTON_QR || usedOptimizerId == OptimizerId.GAUSS_NEWTON_LU) {
-            // For Gauss Newton, the number of evaluations is equal to the number of iterations
-            Assert.assertTrue(optimum.getEvaluations() == optimum.getIterations());
-        } else if (usedOptimizerId == OptimizerId.LEVENBERG_MARQUADT) {
-            // For Levenberg Marquadt, the number of evaluations is slightly greater than the number of iterations
-            Assert.assertTrue(optimum.getEvaluations() >= optimum.getIterations());
-        }
+            List<String> ruggedNameList = new ArrayList<String>();
+            for(Rugged rugged : ruggedList) {
+                ruggedNameList.add(rugged.getName());
+            }
+            final int maxIterations = 120;
+            final double convergenceThreshold = 1.e-7;
 
-        final double expectedMaxValue = 3.324585e-03;
-        Assert.assertEquals(expectedMaxValue, optimum.getResiduals().getMaxValue(), 1.0e-6);
+            Optimum optimum = adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
+            
+            Field optimizerId = adjustmentContext.getClass().getDeclaredField("optimizerID");
+            optimizerId.setAccessible(true);
+            OptimizerId usedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
 
-        final double expectedRMS = 0.069669;
-        Assert.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
+            if (usedOptimizerId == OptimizerId.GAUSS_NEWTON_QR || usedOptimizerId == OptimizerId.GAUSS_NEWTON_LU) {
+                // For Gauss Newton, the number of evaluations is equal to the number of iterations
+                Assert.assertTrue(optimum.getEvaluations() == optimum.getIterations());
+            } else if (usedOptimizerId == OptimizerId.LEVENBERG_MARQUADT) {
+                // For Levenberg Marquadt, the number of evaluations is slightly greater than the number of iterations
+                Assert.assertTrue(optimum.getEvaluations() >= optimum.getIterations());
+            }
 
-        System.out.format("Chi sqaure %3.8e %n", optimum.getChiSquare());
-        
-        assertTrue(numberOfParameters == optimum.getPoint().getDimension());
-        
-        System.out.format("residuals %d \n", optimum.getResiduals().getDimension());
-//        int measureCount = 0;
-//        while (measurements.getInterMappings().iterator().hasNext()) {
-//            measureCount++; 
-//            System.out.println("measure " + measureCount);
-//        }
-//        System.out.format(" measurements %d \n", measureCount);
-        System.out.format("cost %3.8e \n", optimum.getCost());
-        
-
-        
+        } // loop on OptimizerId
     }
 
+    @Test
+    public void testInvalidRuggedName() {
+        try {
+
+            AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
+
+            List<String> ruggedNameList = new ArrayList<String>();
+            // the list must not have a null value
+            Iterator<Rugged> it = ruggedList.iterator();
+            while (it.hasNext()) {
+                ruggedNameList.add(null);
+                it.next();
+            }
+            final int maxIterations = 1;
+            final double convergenceThreshold = 1.e-7;
+
+            adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
+            Assert.fail("An exception should have been thrown");
+
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
+        }
+    }
+
+    @Test
+    public void testUnsupportedRefiningContext() {
+        try {
+            
+            AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
+            
+            List<String> ruggedNameList = new ArrayList<String>();
+            // Add too many rugged name: the list must have 1 or 2 items 
+            for(Rugged rugged : ruggedList) {
+                ruggedNameList.add(rugged.getName());
+                ruggedNameList.add(rugged.getName());
+                ruggedNameList.add(rugged.getName());
+            }
+            final int maxIterations = 1;
+            final double convergenceThreshold = 1.e-7;
+
+            adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
+            Assert.fail("An exception should have been thrown");
+            
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,re.getSpecifier());
+        }
+    }
+    
+    @Test
+    public void testSensorMapping() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+ 
+        String sensorGiven = "lineSensor";
+        String ruggedGiven = "Rugged";
+        SensorMapping<SensorPixel> simpleMapping = new SensorMapping<SensorPixel>(sensorGiven) ;
+        
+        Field ruggedField = simpleMapping.getClass().getDeclaredField("ruggedName");
+        ruggedField.setAccessible(true);
+        String ruggedRead = (String) ruggedField.get(simpleMapping);
+        
+        Field sensorField = simpleMapping.getClass().getDeclaredField("sensorName");
+        sensorField.setAccessible(true);
+        String sensorRead = (String) sensorField.get(simpleMapping);
+
+        Assert.assertTrue(ruggedGiven.equals(ruggedRead));
+        Assert.assertTrue(sensorGiven.equals(sensorRead));
+    }
+    
     @After
     public void tearDown() {
         measurements = null;
@@ -142,6 +194,5 @@ public class AdjustmentContextTest {
     
     private Observables measurements;
     private List<Rugged> ruggedList;
-    private int numberOfParameters;
 
 }

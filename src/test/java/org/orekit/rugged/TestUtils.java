@@ -24,6 +24,8 @@ import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 
+import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.errors.OrekitException;
@@ -60,6 +63,7 @@ import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.propagation.semianalytical.dsst.utilities.JacobiPolynomials;
 import org.orekit.propagation.semianalytical.dsst.utilities.NewcombOperators;
+import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
@@ -230,28 +234,7 @@ public class TestUtils {
                                  FastMath.PI, PositionAngle.TRUE,
                                  eme2000, date, mu);
     }
-    
-    /** Create an orbit at a chosen date for Refining tests
-     * @param mu Earth gravitational constant
-     * @param date the chosen date
-     * @return the orbit
-     * @throws OrekitException
-     */
-    public Orbit createOrbit(final double mu, final AbsoluteDate date) throws OrekitException {
-
-        final Frame eme2000 = FramesFactory.getEME2000();
-        return new CircularOrbit(694000.0 + Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
-                                 -4.029194321683225E-4,
-                                 0.0013530362644647786,
-                                 FastMath.toRadians(98.2), // Pleiades inclination 98.2 deg
-                                 FastMath.toRadians(-86.47 + 180),
-                                 FastMath.toRadians(135.9 + 0.3),
-                                 PositionAngle.TRUE,
-                                 eme2000,
-                                 date,
-                                 mu);
-    }
-
+ 
     /** Create the propagator of an orbit.
      * @return propagator of the orbit
      * @throws OrekitException
@@ -367,5 +350,77 @@ public class TestUtils {
         propagator.propagate(maxDate);
         return list;
     }
+    
+    /**
+     * Asserts that two SensorPixel are equal to within a positive delta for each component.
+     * For more details see: 
+     * org.junit.assert.assertEquals(String message, double expected, double actual, double delta)
+     */
+    static public void sensorPixelAssertEquals(SensorPixel expected, SensorPixel result, double delta) {
+        
+        assertEquals(null,expected.getLineNumber(), result.getLineNumber(), delta);
+        assertEquals(null,expected.getPixelNumber(), result.getPixelNumber(), delta);
+    }
+
+    /**
+     * Tell if two SensorPixel are the same, where each components are equal to within a positive delta.
+     * For more details see: 
+     * org.junit.assert.assertEquals(String message, double expected, double actual, double delta)
+     * @param expected expected sensor pixel
+     * @param result actual sensor pixel
+     * @param delta delta within two values are consider equal
+     * @return true if the two SensorPixel are the same, false otherwise
+     */
+    static public Boolean sameSensorPixels(SensorPixel expected, SensorPixel result, double delta) {
+        
+        Boolean sameSensorPixel = false;
+        
+        // To have same pixel (true)
+        sameSensorPixel = !(isDifferent(expected.getLineNumber(), result.getLineNumber(), delta) ||
+                            isDifferent(expected.getPixelNumber(), result.getPixelNumber(), delta));
+        
+        return sameSensorPixel;
+    }
+    
+    /**
+     * Tell if two SensorPixel are the same, where each components are equal to within a positive delta.
+     * For more details see: 
+     * org.junit.assert.assertEquals(String message, double expected, double actual, double delta)
+     * @param expected expected sensor pixel
+     * @param result actual sensor pixel
+     * @param delta delta within two values are consider equal
+     * @return true if the two SensorPixel are the same, false otherwise
+     */
+    static public Boolean sameGeodeticPoints(GeodeticPoint expected, GeodeticPoint result, double delta) {
+        
+        Boolean sameGeodeticPoint = false;
+        
+        // To have same GeodeticPoint (true)
+        sameGeodeticPoint = !(isDifferent(expected.getLatitude(), result.getLatitude(), delta) ||
+                            isDifferent(expected.getLongitude(), result.getLongitude(), delta) ||
+                            isDifferent(expected.getAltitude(), result.getAltitude(), delta));
+        
+        return sameGeodeticPoint;
+    }
+
+    
+    /** Return true if two double values are different within a positive delta.
+     * @param val1 first value to compare
+     * @param val2 second value to compare 
+     * @param delta delta within the two values are consider equal
+     * @return true is different, false if equal within the positive delta
+     */
+    static private boolean isDifferent(double val1, double val2, double delta) {
+        
+        if (Double.compare(val1, val2) == 0) {
+            return false;
+        }
+        if ((FastMath.abs(val1 - val2) <= delta)) {
+            return false;
+        }
+        return true;
+    }
+
+
 }
 
