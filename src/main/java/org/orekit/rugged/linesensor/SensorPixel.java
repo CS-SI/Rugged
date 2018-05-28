@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,12 +17,16 @@
 package org.orekit.rugged.linesensor;
 
 import java.io.Serializable;
+import java.text.NumberFormat;
+
+import org.hipparchus.util.CompositeFormat;
 
 /** Container for sensor pixel.
  * <p>
  * Instances of this class are guaranteed to be immutable.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class SensorPixel implements Serializable {
 
@@ -60,4 +64,14 @@ public class SensorPixel implements Serializable {
         return pixelNumber;
     }
 
+    @Override
+    public String toString() {
+        final NumberFormat format = CompositeFormat.getDefaultNumberFormat();
+        format.setMaximumFractionDigits(6);
+        return "{Line: " +
+               format.format(getLineNumber()) +
+               " , Pixel: " +
+               format.format(getPixelNumber()) +
+               "}";
+    }
 }
