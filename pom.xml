@@ -24,7 +24,7 @@
     <rugged.maven-bundle-plugin.version>3.3.0</rugged.maven-bundle-plugin.version>
     <rugged.maven-changes-plugin.version>2.12.1</rugged.maven-changes-plugin.version>
     <rugged.maven-checkstyle-plugin.version>2.17</rugged.maven-checkstyle-plugin.version>
-    <rugged.checkstyle.version>8.1</rugged.checkstyle.version>
+    <rugged.checkstyle.version>8.10</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.0.0</rugged.maven-clean-plugin.version>
     <rugged.maven-compiler-plugin.version>3.6.1</rugged.maven-compiler-plugin.version>
     <rugged.maven-javadoc-plugin.version>2.10.4</rugged.maven-javadoc-plugin.version>
@@ -42,8 +42,8 @@
     <rugged.nexus-staging-maven-plugin.version>1.6.8</rugged.nexus-staging-maven-plugin.version>
     <rugged.maven-gpg-plugin.version>1.6</rugged.maven-gpg-plugin.version>
     <rugged.maven-install-plugin.version>2.5.2</rugged.maven-install-plugin.version>
-    <rugged.orekit.version>9.1</rugged.orekit.version>
-    <rugged.hipparchus.version>1.2</rugged.hipparchus.version>
+    <rugged.orekit.version>9.2</rugged.orekit.version>
+    <rugged.hipparchus.version>1.3</rugged.hipparchus.version>
     <rugged.junit.version>4.12</rugged.junit.version>
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
