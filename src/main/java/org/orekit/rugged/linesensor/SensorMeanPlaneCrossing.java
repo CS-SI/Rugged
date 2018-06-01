@@ -540,7 +540,7 @@ public class SensorMeanPlaneCrossing {
             }
 
             final UnivariateSolver solver = new BracketingNthOrderBrentSolver(accuracy, 5);
-            double crossingLine = solver.solve(maxEval, new UnivariateFunction() {
+            final double crossingLine = solver.solve(maxEval, new UnivariateFunction() {
                 /** {@inheritDoc} */
                 @Override
                 public double value(final double x) throws RuggedExceptionWrapper {
