@@ -17,6 +17,8 @@
 
 package org.orekit.rugged.adjustment;
 
+import org.hipparchus.linear.LUDecomposer;
+import org.hipparchus.linear.QRDecomposer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.GaussNewtonOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
@@ -75,10 +77,10 @@ public class LeastSquareAdjuster {
                 return new LevenbergMarquardtOptimizer();
 
             case GAUSS_NEWTON_LU :
-                return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.LU);
+                return new GaussNewtonOptimizer(new LUDecomposer(1e-11), true);
 
             case GAUSS_NEWTON_QR :
-                return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
+                return new GaussNewtonOptimizer(new QRDecomposer(1e-11), false);
 
             default :
                 // this should never happen
