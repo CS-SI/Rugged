@@ -21,8 +21,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -300,7 +300,8 @@ public class InterSensorOptimizationProblemBuilderTest {
 
             Field ruggedMapField = interSensorsOptimizationProblem.getClass().getDeclaredField("ruggedMap");
             ruggedMapField.setAccessible(true);
-            LinkedHashMap<String,Rugged> ruggedMap = (LinkedHashMap<String,Rugged>) ruggedMapField.get(interSensorsOptimizationProblem);
+            @SuppressWarnings("unchecked")
+            Map<String,Rugged> ruggedMap = (Map<String,Rugged>) ruggedMapField.get(interSensorsOptimizationProblem);
             
             // Set first RuggedB to null to get the right exception ...
             try {
