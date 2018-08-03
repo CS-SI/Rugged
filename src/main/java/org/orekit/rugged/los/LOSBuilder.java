@@ -51,7 +51,7 @@ import org.orekit.utils.ParameterObserver;
  */
 public class LOSBuilder {
 
-    /** Raw fixed ine-of-sights. */
+    /** Raw fixed line-of-sights. */
     private final List<Vector3D> rawLOS;
 
     /** Transforms to be applied. */

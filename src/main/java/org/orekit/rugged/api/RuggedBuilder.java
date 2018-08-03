@@ -141,10 +141,10 @@ public class RuggedBuilder {
     /** Propagator for position/velocity/attitude. */
     private Propagator pvaPropagator;
 
-    /** Step to use for inertial/Earth/spacraft transforms interpolations (s). */
+    /** Step to use for inertial/Earth/spacecraft transforms interpolations (s). */
     private double iStep;
 
-    /** Number of points to use for inertial/Earth/spacraft transforms interpolations. */
+    /** Number of points to use for inertial/Earth/spacecraft transforms interpolations. */
     private int iN;
 
     /** Converter between spacecraft and body. */
@@ -407,7 +407,7 @@ public class RuggedBuilder {
      * <em>must</em> be used together with the {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}
      * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
      * </p>
-     * @param inertialFrame inertial frame used for spacecraft positions/velocities/quaternions
+     * @param inertialFrameId inertial frame Id used for spacecraft positions/velocities/quaternions
      * @param positionsVelocities satellite position and velocity (m and m/s in inertial frame)
      * @param pvInterpolationNumber number of points to use for position/velocity interpolation
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
@@ -427,13 +427,13 @@ public class RuggedBuilder {
      * @see #getAInterpolationNumber()
      * @see #getAFilter()
      */
-    public RuggedBuilder setTrajectory(final InertialFrameId inertialFrame,
+    public RuggedBuilder setTrajectory(final InertialFrameId inertialFrameId,
                                        final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                                        final CartesianDerivativesFilter pvFilter,
                                        final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
                                        final AngularDerivativesFilter aFilter)
         throws RuggedException {
-        return setTrajectory(selectInertialFrame(inertialFrame),
+        return setTrajectory(selectInertialFrame(inertialFrameId),
                              positionsVelocities, pvInterpolationNumber, pvFilter,
                              quaternions, aInterpolationNumber, aFilter);
     }
@@ -487,8 +487,8 @@ public class RuggedBuilder {
      * <em>must</em> be used together with the {@link #setTimeSpan(AbsoluteDate, AbsoluteDate, double, double)}
      * but should <em>not</em> be mixed with {@link #setTrajectoryAndTimeSpan(InputStream)}.
      * </p>
-     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations (s)
-     * @param interpolationNumber number of points to use for inertial/Earth/spacraft transforms interpolations
+     * @param interpolationStep step to use for inertial/Earth/spacecraft transforms interpolations (s)
+     * @param interpolationNumber number of points to use for inertial/Earth/spacecraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @param propagator global propagator
@@ -728,8 +728,8 @@ public class RuggedBuilder {
      * @param maxDate end of search time span
      * @param tStep step to use for inertial frame to body frame transforms cache computations
      * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
-     * @param interpolationStep step to use for inertial/Earth/spacraft transforms interpolations
-     * @param interpolationNumber number of points of to use for inertial/Earth/spacraft transforms interpolations
+     * @param interpolationStep step to use for inertial/Earth/spacecraft transforms interpolations
+     * @param interpolationNumber number of points of to use for inertial/Earth/spacecraft transforms interpolations
      * @param pvFilter filter for derivatives from the sample to use in position/velocity interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @param propagator global propagator
