@@ -9,7 +9,7 @@
 * [Building](src/site/markdown/building.md)
 * [Configuration](src/site/markdown/configuration.md)
 * [FAQ](src/site/markdown/faq.md)
-* [`License`](src/site/markdown/license.md)
+* [`License`](License.txt)
 * [`Downloads`](src/site/markdown/downloads.md)
 * [`Changes`](src/site/markdown/changes-report.md)
 * [Contact](src/site/markdown/contact.md)
