@@ -9,8 +9,8 @@
 * [Configuration](src/site/markdown/configuration.md)
 * [FAQ](src/site/markdown/faq.md)
 * [License](LICENSE.txt)
-* [`Downloads`](src/site/markdown/downloads.md)
-* [`Changes`](src/site/markdown/changes-report.md)
+* [Downloads](src/site/markdown/downloads.md)
+* [`Changes`](src/site/xdoc/changes.xml)
 * [Contact](src/site/markdown/contact.md)
 
 ## Design
@@ -26,7 +26,7 @@
 * [Direct location](src/site/markdown/tutorials/direct-location.md)
 * [Direct location with DEM](src/site/markdown/tutorials/direct-location-with-DEM.md)
 * [Inverse location](src/site/markdown/tutorials/inverse-location.md)
-* [`Example in Matlab`]()
+* [Example in Matlab](src/site/markdown/tutorials/matlab-example.md)
 
 ## Development
 
