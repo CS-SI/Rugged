@@ -92,5 +92,5 @@ content will be updated. It should be considered as a simple configuration examp
 Users are encouraged to set up their own configuration data.
 
 
-The orekit-data.zip file is available in the [orekit download page](https://www.orekit.org/download.html) (Physical Data).
+The orekit-data.zip file is available in the [Orekit project download page](https://www.orekit.org/download.html) (Physical Data).
 
