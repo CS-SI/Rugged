@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -18,8 +18,8 @@ Configuration
 As Rugged relied on Orekit for the frames computation, Orekit
 must be properly initialized for Rugged to run.
 
-The simplest way to configure is to first retrieve the example `orekit-data.zip
-file from Orekit [files](https://www.orekit.org/forge/projects/orekit/files) section`
+The simplest way to configure is to first retrieve the example orekit-data.zip
+file from Orekit, available in the [orekit download page](https://www.orekit.org/download.html) (Physical Data)
 and to unzip it in a known fixed location on your computer (let's assume it is on
 your home folder, and it creates an orekit-data subfolder there).
 
