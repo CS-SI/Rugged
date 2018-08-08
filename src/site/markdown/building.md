@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -89,7 +89,7 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
   * set the external libraries to JRE system library (provided by Eclipse),
     Junit 4.x (provided by Eclipse), Hipparchus (available at
     Hipparchus project
-    [downloads page](https://www.hipparchus.org/downloads.html),
-    and Orekit (available at `Orekit
-    [downloads page](https://www.orekit.org/forge/projects/orekit/files)
-    in the libraries tab of the Configure Build Path dialog`
+    [downloads page](https://www.hipparchus.org/downloads.html)),
+    and Orekit (available at Orekit
+    [download page](https://www.orekit.org/download.html))
+    in the libraries tab of the Configure Build Path dialog
