@@ -31,7 +31,7 @@ development environment:
 
     git clone https://gitlab.orekit.org/orekit/rugged.git
 
-`EXPLANATIONS TO ADD about branches : master, develop, ...`
+ :interrobang: EXPLANATIONS TO ADD about branches : master, develop, ... :interrobang:
 
 Released Library versions
 -------------------------
