@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -67,7 +67,7 @@ often seen very early and is the first one unsuspecting users experience. It oft
 to configure Orekit to load data.
 
 Configuring data loading is explained in the configuration page For a start, the simplest configuration
-is to download the orekit-data.zip file from the Orekit project download page, to unzip it anywhere you
+is to download the orekit-data.zip file available in the [Orekit project download page](https://www.orekit.org/download.html) (Physical Data)., to unzip it anywhere you
 want, note the path of the orekit-data folder that will be created and add the following lines at the start
 of your program:
 
