@@ -3,13 +3,12 @@
 ![rugged-logo.png](src/site/resources/images/rugged-logo.png)
 
 
-
 * [Overview](src/site/markdown/index.md)  
 * [Getting the sources](src/site/markdown/sources.md)
 * [Building](src/site/markdown/building.md)
 * [Configuration](src/site/markdown/configuration.md)
 * [FAQ](src/site/markdown/faq.md)
-* [`License`](License.txt)
+* [License](LICENSE.txt)
 * [`Downloads`](src/site/markdown/downloads.md)
 * [`Changes`](src/site/markdown/changes-report.md)
 * [Contact](src/site/markdown/contact.md)
