@@ -29,7 +29,9 @@ be easily adapted if you are using one of the numerous Git graphical
 user interface available or if Git is supported by you integrated
 development environment:
 
-    git clone https://www.orekit.org/git/rugged-main.git
+    git clone https://gitlab.orekit.org/orekit/rugged.git
+
+`EXPLANATIONS TO ADD about branches : master, develop, ...`
 
 Released Library versions
 -------------------------
@@ -44,19 +46,22 @@ with groupID org.orekit and artifactId rugged so maven
 internal mechanism will download automatically all artifacts and dependencies
 as required.
 
+`Below URLs to be CHANGED ...`
+
 |  package |                                              link                                                         |
 |----------|-----------------------------------------------------------------------------------------------------------|
-|  source  | [rugged-2.0-sources.zip](https://www.orekit.org/forge/attachments/download/719/rugged-2.0-sources.zip)    |
-|  binary  | [rugged-2.0.jar](https://www.orekit.org/forge/attachments/download/720/rugged-2.0.jar)                    |
-|  javadoc | [rugged-2.0-javadoc.jar](https://www.orekit.org/forge/attachments/download/721/rugged-2.0-javadoc.jar)    |
+|  source  | [`rugged-2.0-sources.zip`](https://www.orekit.org/forge/attachments/download/719/rugged-2.0-sources.zip)    |
+|  binary  | [`rugged-2.0.jar`](https://www.orekit.org/forge/attachments/download/720/rugged-2.0.jar)                    |
+|  javadoc | [`rugged-2.0-javadoc.jar`](https://www.orekit.org/forge/attachments/download/721/rugged-2.0-javadoc.jar)    |
 version 2.0 downloads (release date: 2017-12-19)
 
 |  package |                                              link                                                         |
 |----------|-----------------------------------------------------------------------------------------------------------|
-|  source  | [rugged-1.0-sources.zip](https://www.orekit.org/forge/attachments/download/592/rugged-1.0-sources.zip)    |
-|  binary  | [rugged-1.0.jar](https://www.orekit.org/forge/attachments/download/593/rugged-1.0.jar)                    |
-|  javadoc | [rugged-1.0-javadoc.jar](https://www.orekit.org/forge/attachments/download/594/rugged-1.0-javadoc.jar)    |
+|  source  | [`rugged-1.0-sources.zip`](https://www.orekit.org/forge/attachments/download/592/rugged-1.0-sources.zip)    |
+|  binary  | [`rugged-1.0.jar`](https://www.orekit.org/forge/attachments/download/593/rugged-1.0.jar)                    |
+|  javadoc | [`rugged-1.0-javadoc.jar`](https://www.orekit.org/forge/attachments/download/594/rugged-1.0-javadoc.jar)    |
 version 1.0 downloads (release date: 2016-02-10)
+
 
 ## Data
 
@@ -90,5 +95,7 @@ There are no guarantees that this file will be available indefinitely or that it
 content will be updated. It should be considered as a simple configuration example.
 Users are encouraged to set up their own configuration data.
 
-The file is available in the [orekit files page](https://www.orekit.org/forge/projects/orekit/files).
+`Below URLs to be CHANGED ...`
+
+The file is available in the [`orekit files page`](https://www.orekit.org/forge/projects/orekit/files).
 
