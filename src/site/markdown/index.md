@@ -19,7 +19,7 @@ Overview
   in its line of sight computation. It is a free software
   intermediate-level library written in Java and implemented as an add-on for Orekit.
 
-  ![Earth_FlatVsRugged.gif](./images/Earth_FlatVsRugged.gif)
+  ![Earth_FlatVsRugged.gif](src/site/resources/images/Earth_FlatVsRugged.gif)
 
   It mainly provides direct and inverse location, i.e. it allows
   to compute accurately which ground point is looked at from a specific
@@ -30,7 +30,7 @@ Overview
   on-board sensor pixels individual line-of-sights, spacecraft motion and
   attitude and several physical effects.
 
-![RuggedExplained.png](./images/RuggedExplained.png)
+![RuggedExplained.png](src/site/resources/images/RuggedExplained.png)
  *Effects of taking into account the DEM in the computation of latitude, longitude and altitude*
 
   Direct and inverse location can be used to perform full ortho-rectification
@@ -90,7 +90,7 @@ Free software
 Rugged is freely available both in source and binary formats, with all related
 documentation and tests.
 
-It is distributed under the [Apache License Version 2.0](./license.html). This
+It is distributed under the [Apache License Version 2.0](LICENSE.txt). This
 is a well known business-friendly license. This means anybody can use it to build
 any application, free or not. There are no strings attached to your own code.
 
