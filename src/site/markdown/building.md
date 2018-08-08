@@ -90,6 +90,6 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
     Junit 4.x (provided by Eclipse), Hipparchus (available at
     Hipparchus project
     [downloads page](https://www.hipparchus.org/downloads.html),
-    and Orekit (available at Orekit
+    and Orekit (available at `Orekit
     [downloads page](https://www.orekit.org/forge/projects/orekit/files)
-    in the libraries tab of the Configure Build Path dialog
+    in the libraries tab of the Configure Build Path dialog`
