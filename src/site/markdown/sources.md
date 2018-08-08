@@ -41,4 +41,4 @@ tab in Rugged forge`.
 
      git clone git@gitlab.orekit.org:orekit/rugged.git
   
-`In both cases, the development version is under the branch develop TO BE COMPLETED`.
+:interrobang:`In both cases, the development version is under the branch develop TO BE COMPLETED`.:interrobang:
