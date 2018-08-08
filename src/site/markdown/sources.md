@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -18,11 +18,10 @@ Getting the sources
 Released versions
 -----------------
 
-`In order to get the source for officially released versions, go to the
-[Files](https://www.orekit.org/forge/projects/rugged/files) tab in Rugged
-forge` and select one of the rugged-{module}-x.y-src.zip files. The module
-part is the module (you need at least the core module, but other modules
-may be interesting for you too). The x.y part in the name specifies the version.
+In order to get the source for officially released versions, go to the
+[Downloads page](src/site/markdown/downloads.md) and select one of the 
+rugged-x.y-sources.zip files.
+The x.y part in the name specifies the version.
 
 Development version
 -------------------
@@ -30,8 +29,8 @@ Development version
 The development of the Rugged project is done using the [Git](http://git-scm.com/)
 source code control system. Rugged Git master repository is available online.
 
-You can browse it using `the [Repository](https://gitlab.orekit.org/orekit/rugged)
-tab in Rugged forge`.
+You can browse it using the [Repository](https://gitlab.orekit.org/orekit/rugged)
+tab in Rugged Gitlab.
 
 `You can clone it anonymously with the command:`
 
