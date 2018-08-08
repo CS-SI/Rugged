@@ -19,7 +19,7 @@ As Rugged relied on Orekit for the frames computation, Orekit
 must be properly initialized for Rugged to run.
 
 The simplest way to configure is to first retrieve the example orekit-data.zip
-file from Orekit, available in the [orekit download page](https://www.orekit.org/download.html) (Physical Data)
+file from Orekit, available in the [Orekit project download page](https://www.orekit.org/download.html) (Physical Data)
 and to unzip it in a known fixed location on your computer (let's assume it is on
 your home folder, and it creates an orekit-data subfolder there).
 
