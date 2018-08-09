@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,8 +12,8 @@
   limitations under the License.
 -->
 
-Overview
---------
+## Overview
+
 
 The top level design describes the various libraries and their interactions. The lowest level
 corresponding to the Hipparchus library is not shown here for clarity.
@@ -29,7 +29,8 @@ He also creates a LineSensor containing the geometry of the pixels line-of-sight
 an instance of the top-level Rugged class and provides it the created objects as well as its selection
 of options for algorithm, ellipsoid and frame choices.
 
-![initialization class diagram](../images/design/initialization-class-diagram.png)
+![initialization class diagram](src/site/resources/images/uml/initialization-class-diagram.png)
+
 
 The Rugged instance will store everything and create the various objects defining the configuration
 (creating the algorithm, ellipsoid and frames from the identifiers provided by the user. Using simple
@@ -39,7 +40,7 @@ if the predefined identifiers do not cover his needs. As shown in the following 
 added to a single Rugged instance, this is intended to compute correlation grid, when images coming from
 two different sensors are expected to be accurately combined.
 
-![initialization sequence diagram](../images/design/initialization-sequence-diagram.png)
+![initialization sequence diagram](src/site/resources/images/uml/initialization-sequence-diagram.png)
 
 ### Direct location
 
@@ -51,7 +52,7 @@ SpacecraftToObservedBody converter, the conversions between Cartesian coordinate
 to an internal ExtendedEllipsoid object, and the computation of the intersection with the Digital Elevation
 Model to the algorithm that was selected by user at configuration time.
 
-![direct location class diagram](../images/design/direct-location-class-diagram.png)
+![direct location class diagram](src/site/resources/images/uml/direct-location-class-diagram.png)
 
 The pixels independent computation (orbit and attitude interpolation, Earth frame to inertial frame transforms,
 transforms composition) are performed only once per date inside the caching combined transform provider set up
@@ -63,17 +64,17 @@ and followed by the Digital Elevation Model intersection. The callback to the mi
 retrieve DEM raw data is called from the inner loop but is expected to be triggered only infrequently thanks to a
 caching feature done at Rugged library level.
 
-![direct location sequence diagram](../images/design/direct-location-sequence-diagram.png)
+![direct location sequence diagram](src/site/resources/images/uml/direct-location-sequence-diagram.png)
 
 The following figure describes the algorithm used for tile selection and how the underlying intersection algorithm
 (Duvenhage in this example) is called for one tile:
 
-![duvenhage top loop activity diagram](../images/design/duvenhage-top-loop-activity-diagram.png)
+![duvenhage top loop activity diagram](src/site/resources/images/uml/duvenhage-top-loop-activity-diagram.png)
 
 The recommended Digital Elevation Model intersection algorithm is the Duvenhage algorithm. The following figure
 describes how it is implemented in the Rugged library.
 
-![duvenhage inner recursion activity diagram](../images/design/duvenhage-inner-recursion-activity-diagram.png)
+![duvenhage inner recursion activity diagram](src/site/resources/images/uml/duvenhage-inner-recursion-activity-diagram.png)
 
 ### Inverse location
 
@@ -84,7 +85,7 @@ pixel number). The pixels independent computation (orbit and attitude interpolat
 frame transforms, transforms composition) are performed only once per line and cached across successive calls to
 inverse location, thus greatly improving performances.
 
-![inverse location sequence diagram](../images/design/inverse-location-sequence-diagram.png)
+![inverse location sequence diagram](src/site/resources/images/uml/inverse-location-sequence-diagram.png)
 
 The computation is performed in several steps. The line to which the points belong is first searched using a dedicated
 solver taking advantage of the first time derivatives automatically included in Orekit transforms. It can therefore set
@@ -98,8 +99,7 @@ were done using a mean plane do not represent reality. These final fixes are sim
 simple values as results, the first step in fact provided a Taylor expansion, thus allowing to slightly shift the result
 at will.
 
-Focus point on Digital Elevation Model loading
-----------------------------------------------
+## Focus point on Digital Elevation Model loading
 
 The Digital Elevation Model is used at a very low level in the Rugged library, but read at a high level in the mission
 specific interface library. The following design has been selected in order to allow the lower layer to delegate the
@@ -107,7 +107,7 @@ implementation of the loading to the upper layer, and to avoid too many calls. T
 for DEM tiles, keeping a set of recently used tiles in memory up to a customizable maximum number of tiles, and asking for
 new tiles when what is in memory does not cover the region of interest.
 
-![DEM loading class diagram](../images/design/dem-loading-class-diagram.png)
+![DEM loading class diagram](src/site/resources/images/uml/dem-loading-class-diagram.png)
 
 The cache and the tiles themselves are implemented at Rugged library level. The loader is implemented at mission specific
 interface level, by implementing the TileUpdater interface, which defines a single updateTile method. When this updateTile
