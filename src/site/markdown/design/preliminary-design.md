@@ -12,14 +12,14 @@
   limitations under the License.
 -->
 
-## Overview
+## Design of the major functions
 
 
 The top level design describes the various libraries and their interactions. The lowest level
 corresponding to the Hipparchus library is not shown here for clarity.
 
 The following sequence and class diagrams show the three most important functions: initialization
-of the libraries, direct location and inverse location.
+of the libraries, direct location and inverse location. The last class diagram is a focus on Digital Elevation Model loading.
 
 ### Initialization
 
