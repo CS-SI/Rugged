@@ -11,9 +11,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+# FAQ
 
-References
-----------
+## References
 
 ### Has Rugged already been used?
 
@@ -39,8 +39,7 @@ configuring Rugged to use the same legacy models (these legacy models like for e
 TOD and MOD frames are available for consistency with existing systems).
 
 
-Installation
-------------
+## Installation
 
 ### What are the dependencies for Rugged?
 
@@ -49,8 +48,7 @@ Hipparchus mathematical libraries. Both libraries are free
 software libraries distributed under the terms of the Apache Software
 License version 2.0.
 
-Runtime errors
---------------
+## Runtime errors
 
 ### I get an error "no IERS UTC-TAI history data loaded" (or something similar in another language). What does it mean?
 
