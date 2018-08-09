@@ -19,7 +19,7 @@
 * [Overview](src/site/markdown/design/overview.md)
 * [Technical choices](src/site/markdown/design/technical-choices.md)
 * [Digital Elevation Model](src/site/markdown/design/digital-elevation-model.md)
-* [Design of major functions](src/site/markdown/design/preliminary-design.md)
+* [Design of major functions](src/site/markdown/design/design.md)
 
 ## Tutorial
 
