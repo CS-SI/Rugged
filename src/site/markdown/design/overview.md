@@ -12,8 +12,9 @@
   limitations under the License.
 -->
 
-Global architecture
--------------------
+#Design Overview 
+
+## Global architecture
 
 Rugged is an intermediate level mission-independent library. It relies on
 the Orekit library and on the Hipparchus library. It is itself
@@ -48,8 +49,7 @@ The Rugged library is developed in the Java language and has full access to the 
 Hipparchus libraries. It is designed and developed by space flight dynamics and
 geometry specialists, with support from the image processing specialists for the API definition.
 
-Functional Breakdown
---------------------
+## Functional Breakdown
 
 The following table sorts out the various topics between the various layers.
 
