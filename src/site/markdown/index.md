@@ -12,8 +12,7 @@
   limitations under the License.
 -->
 
-Overview
-========
+# Overview
 
   Rugged is  a sensor-to-terrain mapping tool which takes into account Digital Elevation Models (DEM)
   in its line of sight computation. It is a free software
@@ -36,8 +35,7 @@ Overview
   Direct and inverse location can be used to perform full ortho-rectification
   of images and correlation between sensors observing the same area.
 
-Features
---------
+## Features
 
   * Direct/inverse location
 
@@ -84,8 +82,7 @@ Features
     * Romanian
     * Spanish
 
-Free software
--------------
+## Free software
 
 Rugged is freely available both in source and binary formats, with all related
 documentation and tests.
@@ -97,8 +94,7 @@ any application, free or not. There are no strings attached to your own code.
 Everybody is encouraged to use Rugged as a common intermediate level layer to improve
 interoperability in space systems.
 
-Maintained library
-------------------
+## Maintained library
 
 Rugged has been in development since 2014 inside [CS Systèmes
 d'Information](http://www.c-s.fr/) and is still used and maintained by its dual teams
