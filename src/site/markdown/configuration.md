@@ -12,8 +12,7 @@
   limitations under the License.
 -->
 
-Configuration
-=============
+# Configuration
 
 As Rugged relied on Orekit for the frames computation, Orekit
 must be properly initialized for Rugged to run.
