@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,9 +12,11 @@
   limitations under the License.
 -->
 
-DEM intersection
-------------
-The page [technical choices](./technical-choices.html) explain how Rugged goes from an on-board pixel
+# Digital Elevation Model 
+
+## DEM intersection
+
+The page [technical choices](./technical-choices.md) explain how Rugged goes from an on-board pixel
 line-of-sight to a ground-based line-of-sight arrival in the vicinity of the ellipsoid entry point. At
 this step, we have a 3D line defined near the surface and want to compute where it exactly traverses the
 Digital Elevation Model surface. There is no support for this computation at Orekit library level,
@@ -43,8 +45,7 @@ meaningful in terms of computation, so it should only be used for testing purpos
 intended as a basic reference that can be used for validation and tests. The no-operation algorithm can be used for
 low accuracy fast computation needs without changing the complete data product work-flow.
 
-DEM loading
------------
+## DEM loading
 
 As the min/max KD-tree structure is specific to the Duvenhage algorithm, and as the algorithm is hidden behind
 a generic interface, the tree remains an implementation detail the user should not see. The min/max KD-tree structure is
