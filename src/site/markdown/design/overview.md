@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -20,7 +20,7 @@ the Orekit library and on the Hipparchus library. It is itself
 intended to be used from a mission-specific interface by one or more
 image processing applications.
 
-![architecture](../images/rugged-architecture.png)
+![architecture](src/site/resources/images/rugged-architecture.png)
 
 The Java platform provides the runtime environment, the Hipparchus
 library provides the mathematical algorithms (3D geometry, root
