@@ -12,19 +12,17 @@
   limitations under the License.
 -->
 
-Getting the sources
-===================
+# Getting the sources
 
-Released versions
------------------
+
+## Released versions
 
 In order to get the source for officially released versions, go to the
 [Downloads page](src/site/markdown/downloads.md) and select one of the 
 rugged-x.y-sources.zip files.
 The x.y part in the name specifies the version.
 
-Development version
--------------------
+## Development version
 
 The development of the Rugged project is done using the [Git](http://git-scm.com/)
 source code control system. Rugged Git master repository is available online.
