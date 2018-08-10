@@ -1,4 +1,5 @@
 # Rugged 
+**A sensor-to-terrain mapping tool**
 
 ![rugged-logo.png](src/site/resources/images/rugged-logo.png)
 
