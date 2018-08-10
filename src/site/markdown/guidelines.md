@@ -15,7 +15,7 @@
 
 The following guidelines are used for Rugged development.
 
-# Development
+## Development
 
 Rugged is an intermediate level library. It may be used in very different
 contexts which cannot be foreseen, from quick studies up to critical
@@ -81,7 +81,7 @@ difficult to catch bugs are caused by mutable objects that are changed in some d
 buried code and have an impact on user code that forgot to perform a defensive copy.
 Orbits, dates, vectors, and rotations are all immutable objects.
 
-# Style Rules
+## Style Rules
 
 For reading ease and consistency, the existing code style should be
 preserved for all new developments. The rules are common ones, inherited
@@ -149,7 +149,7 @@ root directory.
   _star_ imports are forbidden, parameters and local variables are final
   wherever possible.
 
-# Design Rules
+## Design Rules
 
 * *coverage* (validation)
 
