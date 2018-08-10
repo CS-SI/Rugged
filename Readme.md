@@ -1,5 +1,8 @@
 # Rugged 
+
 **A sensor-to-terrain mapping tool**
+
+Rugged is a free java library for geolocation and used for satellite imagery.
 
 ![rugged-logo.png](src/site/resources/images/rugged-logo.png)
 
