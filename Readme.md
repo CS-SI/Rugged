@@ -23,7 +23,7 @@
 
 ## Tutorial
 
-* [Direct location](src/site/markdown/tutorials/direct-location.md)
+* [Direct location (with Rugged initialization example)](src/site/markdown/tutorials/direct-location.md)
 * [Direct location with DEM](src/site/markdown/tutorials/direct-location-with-DEM.md)
 * [Inverse location](src/site/markdown/tutorials/inverse-location.md)
 * [Example in Matlab](src/site/markdown/tutorials/matlab-example.md)
