@@ -32,5 +32,5 @@
 
 * [Contributing](src/site/markdown/contributing.md)
 * [Guidelines](src/site/markdown/guidelines.md)
-* [Javadoc, development](https://www.orekit.org/site-rugged-development/apidocs/index.html)
+* [`Javadoc, development`](https://www.orekit.org/site-rugged-development/apidocs/index.html)
 * [`SOCIS|Summer Of Code In Space (SOCIS)`]()

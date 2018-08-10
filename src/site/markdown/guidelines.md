@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2018 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -11,14 +11,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-Development Guidelines
-======================
+# Development Guidelines
 
 The following guidelines are used for Rugged development.
 
-Development
------------
+## Development
 
 Rugged is an intermediate level library. It may be used in very different
 contexts which cannot be foreseen, from quick studies up to critical
@@ -84,13 +81,12 @@ difficult to catch bugs are caused by mutable objects that are changed in some d
 buried code and have an impact on user code that forgot to perform a defensive copy.
 Orbits, dates, vectors, and rotations are all immutable objects.
 
-Style Rules
------------
+## Style Rules
 
 For reading ease and consistency, the existing code style should be
 preserved for all new developments. The rules are common ones, inherited
-mainly from the Sun [Code Conventions for the Java
-Programming Language](http://java.sun.com/docs/codeconv/) guide style and
+mainly from the Sun :interrobang:[Code Conventions for the Java
+Programming Language](http://java.sun.com/docs/codeconv/) :interrobang: guide style and
 from the default [checkstyle](http://checkstyle.sourceforge.net/) tool
 configuration. A few of these rules are displayed below. The complete
 definition is given by the checkstyle configuration file in the project
@@ -153,8 +149,7 @@ root directory.
   _star_ imports are forbidden, parameters and local variables are final
   wherever possible.
 
-Design Rules
-------------
+## Design Rules
 
 * *coverage* (validation)
 
