@@ -23,7 +23,7 @@ ground and sensor is computed with a viewing model taking into account:
 Direct and inverse location can be used to perform full ortho-rectification of 
 images and correlation between sensors observing the same area.
 
-Homepage: [https://www.orekit.org/rugged/](https://www.orekit.org/rugged/)
+Homepage: [www.orekit.org/rugged/](https://www.orekit.org/rugged/)
 
 
 
