@@ -12,7 +12,7 @@
   <a href="#introduction">Introduction</a> •
   <a href="#design">Design</a> •
   <a href="#tutorial">Tutorial</a> •
-  <a href="#development">Development</a> •
+  <a href="#development">Development</a>
 </p>
 
 
