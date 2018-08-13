@@ -1,8 +1,21 @@
-# Rugged 
+<h1 style="color:blue;" align="center">
+  Rugged
+</h1>
+<h1>
+  <img src="https://gitlab.orekit.org/orekit/rugged/raw/develop/src/site/resources/images/rugged-logo.png" alt="Rugged">
+  A sensor-to-terrain mapping tool
+</h1>
 
-_**A sensor-to-terrain mapping tool**_
+<h4 align="center">Rugged is a free java library for geolocation and used for satellite imagery.</h4>
 
-**Rugged is a free java library for geolocation and used for satellite imagery.**
+<p align="center">
+  <a href="#Overview">Overview</a> •
+  <a href="#Design">Design</a> •
+  <a href="#Tutorial">Tutorial</a> •
+  <a href="#Development">Development</a> •
+</p>
+
+
 
 ![rugged-logo.png](src/site/resources/images/rugged-logo.png)
 
