@@ -2,22 +2,19 @@
   Rugged
 </h1>
 <h1>
-  <img src="https://gitlab.orekit.org/orekit/rugged/raw/develop/src/site/resources/images/rugged-logo.png" alt="Rugged">
+  <img src="src/site/resources/images/rugged-logo.png" alt="Rugged">
   A sensor-to-terrain mapping tool
 </h1>
 
 <h4 align="center">Rugged is a free java library for geolocation and used for satellite imagery.</h4>
 
 <p align="center">
-  <a href="#Overview">Overview</a> •
-  <a href="#Design">Design</a> •
-  <a href="#Tutorial">Tutorial</a> •
-  <a href="#Development">Development</a> •
+  <a href="#introduction">Introduction</a> •
+  <a href="#design">Design</a> •
+  <a href="#tutorial">Tutorial</a> •
+  <a href="#development">Development</a> •
 </p>
 
-
-
-![rugged-logo.png](src/site/resources/images/rugged-logo.png)
 
 
 Rugged is an add-on for [Orekit](https://www.orekit.org/) handling Digital Elevation Models contribution to 
@@ -40,7 +37,7 @@ Homepage: [www.orekit.org/rugged/](https://www.orekit.org/rugged/)
 
 
 
-
+## Introduction
 * [Overview](src/site/markdown/index.md)  
 * [Getting the sources](src/site/markdown/sources.md)
 * [Building](src/site/markdown/building.md)
