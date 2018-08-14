@@ -1,8 +1,10 @@
+{::options parse_block_html="true" /}
+
 <h1 style="color:blue;" align="center">
   Rugged
 </h1>
 <h1>
-  <img src="src/site/resources/images/rugged-logo.png" alt="Rugged">
+  <img src="src/site/resources/images/rugged-logo.png" alt="Rugged"/>
   A sensor-to-terrain mapping tool
 </h1>
 
@@ -15,6 +17,7 @@
   <a href="#development">Development</a>
 </p>
 
+{::options parse_block_html="false" /}
 
 
 Rugged is an add-on for [Orekit](https://www.orekit.org/) handling Digital Elevation Models contribution to 
