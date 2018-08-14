@@ -1,5 +1,3 @@
-{::options parse_block_html="true" /}
-
 <h1 style="color:blue;" align="center">
   Rugged
 </h1>
@@ -16,8 +14,6 @@
   <a href="#tutorial">Tutorial</a> •
   <a href="#development">Development</a>
 </p>
-
-{::options parse_block_html="false" /}
 
 
 Rugged is an add-on for [Orekit](https://www.orekit.org/) handling Digital Elevation Models contribution to 
