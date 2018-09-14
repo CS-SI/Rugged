@@ -72,6 +72,9 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
+import org.orekit.rugged.refraction.ConstantRefractionLayer;
+import org.orekit.rugged.refraction.MultiLayerModel;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.utils.DSGenerator;
@@ -320,6 +323,82 @@ public class RuggedTest {
         }
 
     }
+    
+    @Test
+    public void testAtmosphericRefractionCorrection()
+        throws RuggedException, OrekitException, URISyntaxException {
+
+        int dimension = 400;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:46:35.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                              FastMath.toRadians(10.0), dimension).build();
+
+        // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine);
+
+        RuggedBuilder builder = new RuggedBuilder().
+                
+                setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
+                setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor).
+                setLightTimeCorrection(false).
+                setAberrationOfLightCorrection(false);
+        
+        Rugged rugged = builder.build();
+        GeodeticPoint[] gpWithoutAtmosphericRefractionCorrection = rugged.directLocation("line", 200);
+
+        // With a user defined multi layers model
+        List<ConstantRefractionLayer> refractionLayers = new ArrayList<ConstantRefractionLayer>();
+        refractionLayers.add(new ConstantRefractionLayer(100000.00, 1.000000));
+        refractionLayers.add(new ConstantRefractionLayer( 50000.00, 1.000000));
+        refractionLayers.add(new ConstantRefractionLayer( 40000.00, 1.000001));
+        refractionLayers.add(new ConstantRefractionLayer( 30000.00, 1.000004));
+        refractionLayers.add(new ConstantRefractionLayer( 23000.00, 1.000012));
+        refractionLayers.add(new ConstantRefractionLayer( 18000.00, 1.000028));
+        refractionLayers.add(new ConstantRefractionLayer( 14000.00, 1.000052));
+        refractionLayers.add(new ConstantRefractionLayer( 11000.00, 1.000083));
+        refractionLayers.add(new ConstantRefractionLayer(  9000.00, 1.000106));
+        refractionLayers.add(new ConstantRefractionLayer(  7000.00, 1.000134));
+        refractionLayers.add(new ConstantRefractionLayer(  5000.00, 1.000167));
+        refractionLayers.add(new ConstantRefractionLayer(  3000.00, 1.000206));
+        refractionLayers.add(new ConstantRefractionLayer(  1000.00, 1.000252));
+        refractionLayers.add(new ConstantRefractionLayer(     0.00, 1.000278));
+        refractionLayers.add(new ConstantRefractionLayer( -1000.00, 1.000306));
+
+        AtmosphericRefraction atmosphericRefractionCustom = new MultiLayerModel(rugged.getEllipsoid(), refractionLayers);
+        builder.setRefractionCorrection(atmosphericRefractionCustom);
+        rugged = builder.build();
+        GeodeticPoint[] gpWithAtmosphericCustomRefractionCorrection = rugged.directLocation("line", 200);
+
+        for (int i = 0; i < gpWithAtmosphericCustomRefractionCorrection.length; ++i) {
+            Vector3D pWith    = earth.transform(gpWithAtmosphericCustomRefractionCorrection[i]);
+            Vector3D pWithout = earth.transform(gpWithoutAtmosphericRefractionCorrection[i]);
+            Assert.assertTrue(Vector3D.distance(pWith, pWithout) < 1.);
+        }
+    }
+
 
     @Test
     public void testFlatBodyCorrection()
