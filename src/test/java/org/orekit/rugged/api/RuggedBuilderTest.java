@@ -22,6 +22,7 @@ import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StreamCorruptedException;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +76,10 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
+import org.orekit.rugged.refraction.ConstantRefractionLayer;
+import org.orekit.rugged.refraction.MultiLayerModel;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -92,7 +98,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testSetContextWithEphemerides()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws RuggedException, OrekitException, URISyntaxException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -195,7 +201,36 @@ public class RuggedBuilderTest {
         Assert.assertFalse(rugged.isAberrationOfLightCorrected());
         Assert.assertFalse(builder.getLightTimeCorrection());
         Assert.assertFalse(builder.getAberrationOfLightCorrection());
+        
+        AtmosphericRefraction atmosphericRefraction = new MultiLayerModel(builder.getEllipsoid());
+        builder.setRefractionCorrection(atmosphericRefraction);
+        rugged = builder.build();
+        
+        MultiLayerModel atmosphericRefractionFromBuilder = (MultiLayerModel) builder.getRefractionCorrection();
+        Field atmos = atmosphericRefractionFromBuilder.getClass().getDeclaredField("ellipsoid");
+        atmos.setAccessible(true);
+        ExtendedEllipsoid ellipsoidAtmos = (ExtendedEllipsoid) atmos.get(atmosphericRefractionFromBuilder);
+        Assert.assertEquals(builder.getEllipsoid().getEquatorialRadius(), ellipsoidAtmos.getEquatorialRadius(), 1.0e-9);
+        Assert.assertEquals(builder.getEllipsoid().getFlattening(), ellipsoidAtmos.getFlattening(), 1.0e-10);
 
+        Field layers = atmosphericRefractionFromBuilder.getClass().getDeclaredField("refractionLayers");
+        layers.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        List<ConstantRefractionLayer> layersAtmos = (List<ConstantRefractionLayer>) layers.get(atmosphericRefractionFromBuilder);
+        
+        Field layersExpected = atmosphericRefraction.getClass().getDeclaredField("refractionLayers");
+        layersExpected.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        List<ConstantRefractionLayer> layersAtmosExpected = (List<ConstantRefractionLayer>) layersExpected.get(atmosphericRefraction);
+        Assert.assertEquals(layersAtmosExpected.size(), layersAtmos.size());
+        
+        List<ConstantRefractionLayer> copyAtmosExpected = new ArrayList<ConstantRefractionLayer>(layersAtmosExpected);
+        List<ConstantRefractionLayer> copyAtmos = new ArrayList<ConstantRefractionLayer>(layersAtmos);
+        
+        Assert.assertTrue(copyAtmosExpected.removeAll(layersAtmos) && copyAtmos.removeAll(layersAtmosExpected));
+        Assert.assertTrue(copyAtmosExpected.isEmpty() && copyAtmos.isEmpty());
+        
+        
         Assert.assertEquals(AlgorithmId.DUVENHAGE, builder.getAlgorithm());
         Assert.assertEquals(6378137.0, builder.getEllipsoid().getEquatorialRadius(), 1.0e-9);
         Assert.assertEquals(1.0 / 298.257222101, builder.getEllipsoid().getFlattening(), 1.0e-10);
