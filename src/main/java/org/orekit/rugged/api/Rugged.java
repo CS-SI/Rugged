@@ -241,8 +241,11 @@ public class Rugged {
         final Vector3D spacecraftVelocity =
                 scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
 
-        // compute location of each pixel
+        // compute sensor position in inertial frame
+        // TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
         final Vector3D pInert    = scToInert.transformPosition(sensor.getPosition());
+
+        // compute location of each pixel
         final GeodeticPoint[] gp = new GeodeticPoint[sensor.getNbPixels()];
         for (int i = 0; i < sensor.getNbPixels(); ++i) {
 
@@ -271,6 +274,8 @@ public class Rugged {
 
             if (lightTimeCorrection) {
                 // compute DEM intersection with light time correction
+
+                // TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
                 final Vector3D  sP       = approximate.transformPosition(sensor.getPosition());
                 final Vector3D  sL       = approximate.transformVector(sensor.getLOS(date, i));
                 final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL, 0.0));
@@ -312,16 +317,17 @@ public class Rugged {
     }
 
     /** Direct location of a single line-of-sight.
+     *  TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
      * @param date date of the location
-     * @param position pixel position in spacecraft frame
+     * @param sensorPosition sensor position in spacecraft frame
      * @param los normalized line-of-sight in spacecraft frame
      * @return ground position of intersection point between specified los and ground
      * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los)
+    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los)
         throws RuggedException {
 
-        DumpManager.dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection,
+        DumpManager.dumpDirectLocation(date, sensorPosition, los, lightTimeCorrection, aberrationOfLightCorrection,
                                        atmosphericRefraction != null);
 
         // compute the approximate transform between spacecraft and observed body
@@ -332,9 +338,11 @@ public class Rugged {
         final Vector3D spacecraftVelocity =
                 scToInert.transformPVCoordinates(PVCoordinates.ZERO).getVelocity();
 
-        // compute location of specified pixel
-        final Vector3D pInert    = scToInert.transformPosition(position);
+        // compute sensor position in inertial frame
+        // TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
+        final Vector3D pInert    = scToInert.transformPosition(sensorPosition);
 
+        // compute location of specified pixel
         final Vector3D obsLInert = scToInert.transformVector(los);
         final Vector3D lInert;
         if (aberrationOfLightCorrection) {
@@ -358,7 +366,8 @@ public class Rugged {
         final NormalizedGeodeticPoint gp;
         if (lightTimeCorrection) {
             // compute DEM intersection with light time correction
-            final Vector3D  sP       = approximate.transformPosition(position);
+            // TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
+            final Vector3D  sP       = approximate.transformPosition(sensorPosition);
             final Vector3D  sL       = approximate.transformVector(los);
             final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL, 0.0));
             final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
@@ -389,6 +398,7 @@ public class Rugged {
             final Vector3D pBody = inertToBody.transformPosition(pInert);
             final Vector3D lBody = inertToBody.transformVector(lInert);
             result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
+
         } else {
             // don't apply atmospheric refraction correction
             result = gp;

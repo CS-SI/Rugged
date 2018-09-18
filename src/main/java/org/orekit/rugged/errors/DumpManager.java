@@ -135,19 +135,19 @@ public class DumpManager {
 
     /** Dump a direct location computation.
      * @param date date of the location
-     * @param position pixel position in spacecraft frame
+     * @param sensorPosition sensor position in spacecraft frame
      * @param los normalized line-of-sight in spacecraft frame
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
      * @param refractionCorrection flag for refraction correction
      * @exception RuggedException if date cannot be converted to UTC
      */
-    public static void dumpDirectLocation(final AbsoluteDate date, final Vector3D position, final Vector3D los,
+    public static void dumpDirectLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los,
                                           final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
                                           final boolean refractionCorrection)
         throws RuggedException {
         if (isActive()) {
-            DUMP.get().dumpDirectLocation(date, position, los, lightTimeCorrection, aberrationOfLightCorrection,
+            DUMP.get().dumpDirectLocation(date, sensorPosition, los, lightTimeCorrection, aberrationOfLightCorrection,
                     refractionCorrection);
         }
     }
