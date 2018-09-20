@@ -34,6 +34,7 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
+import org.orekit.rugged.los.PixelLOS;
 import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
@@ -302,24 +303,36 @@ public class Rugged {
             }
 
             if (atmosphericRefraction != null) {
-                // apply atmospheric refraction correction
-                final Vector3D pBody = inertToBody.transformPosition(pInert);
-                final Vector3D lBody = inertToBody.transformVector(lInert);
-                gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
+                // compute atmospheric refraction
+
+                // Test if optimization is not required
+                if (! atmosphericRefraction.isOptimized()) {
+
+                    // apply atmospheric refraction correction
+                    final Vector3D pBody = inertToBody.transformPosition(pInert);
+                    final Vector3D lBody = inertToBody.transformVector(lInert);
+                    gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
+
+                } else { // Optimization is required
+
+                    // TODO algo with optimization
+
+                }
             }
 
             DumpManager.dumpDirectLocationResult(gp[i]);
-
         }
 
         return gp;
-
     }
 
     /** Direct location of a single line-of-sight.
-     *  TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
+     * <br>
+     * NB: if (the optionnal) atmospheric refraction must be computed with the optimization algorithm,
+     *     see {@link #directLocation(AbsoluteDate, Vector3D, PixelLOS)})
      * @param date date of the location
-     * @param sensorPosition sensor position in spacecraft frame
+     * @param sensorPosition sensor position in spacecraft frame. For simplicity, due to the size of sensor,
+     * we consider each pixel to be at sensor position
      * @param los normalized line-of-sight in spacecraft frame
      * @return ground position of intersection point between specified los and ground
      * @exception RuggedException if line cannot be localized, or sensor is unknown
@@ -327,6 +340,24 @@ public class Rugged {
     public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los)
         throws RuggedException {
 
+        // Set the pixel to null in order not to compute atmosphere with optimization
+        final PixelLOS pixelLOS = new PixelLOS(null, los);
+
+        return directLocation(date, sensorPosition, pixelLOS);
+    }
+
+
+    /** Direct location of a single line-of-sight.
+     * @param date date of the location
+     * @param sensorPosition sensor position in spacecraft frame. For simplicity, due to the size of sensor,
+     * we consider each pixel to be at sensor position
+     * @param pixelLOS pixel definition with normalized line-of-sight in spacecraft frame
+     * @return ground position of intersection point between specified los and ground
+     * @exception RuggedException if line cannot be localized, or sensor is unknown
+     */
+    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final PixelLOS pixelLOS) throws RuggedException {
+
+        final Vector3D los = pixelLOS.getLOS();
         DumpManager.dumpDirectLocation(date, sensorPosition, los, lightTimeCorrection, aberrationOfLightCorrection,
                                        atmosphericRefraction != null);
 
@@ -342,9 +373,10 @@ public class Rugged {
         // TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
         final Vector3D pInert    = scToInert.transformPosition(sensorPosition);
 
-        // compute location of specified pixel
+        // compute line of sight in inertial frame
         final Vector3D obsLInert = scToInert.transformVector(los);
         final Vector3D lInert;
+
         if (aberrationOfLightCorrection) {
             // apply aberration of light correction
             // as the spacecraft velocity is small with respect to speed of light,
@@ -363,7 +395,9 @@ public class Rugged {
             lInert = obsLInert;
         }
 
+        // compute ground location of specified pixel
         final NormalizedGeodeticPoint gp;
+
         if (lightTimeCorrection) {
             // compute DEM intersection with light time correction
             // TBN: for simplicity, due to the size of sensor, we consider each pixel to be at sensor position
@@ -392,21 +426,28 @@ public class Rugged {
                                                   algorithm.intersection(ellipsoid, pBody, lBody));
         }
 
-        final NormalizedGeodeticPoint result;
-        if (atmosphericRefraction != null) {
-            // apply atmospheric refraction correction
-            final Vector3D pBody = inertToBody.transformPosition(pInert);
-            final Vector3D lBody = inertToBody.transformVector(lInert);
-            result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
+        // compute the ground location with atmospheric correction if asked for
+        NormalizedGeodeticPoint result = gp;
 
-        } else {
-            // don't apply atmospheric refraction correction
-            result = gp;
+        if (atmosphericRefraction != null) {
+            // compute atmospheric refraction
+
+            // Test if optimization is not required or if sensor pixel is not defined
+            if (! atmosphericRefraction.isOptimized() || pixelLOS.getSensorPixel() == null) {
+
+                // apply atmospheric refraction correction
+                final Vector3D pBody = inertToBody.transformPosition(pInert);
+                final Vector3D lBody = inertToBody.transformVector(lInert);
+                result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
+
+            } else { // Optimization is required and sensor pixel is defined
+
+                // TODO algo with optimization
+            }
         }
 
         DumpManager.dumpDirectLocationResult(result);
         return result;
-
     }
 
     /** Find the date at which sensor sees a ground point.
