@@ -70,7 +70,7 @@ public class SensorPixel implements Serializable {
         format.setMaximumFractionDigits(6);
         return "{Line: " +
                format.format(getLineNumber()) +
-               " , Pixel: " +
+               ", Pixel: " +
                format.format(getPixelNumber()) +
                "}";
     }

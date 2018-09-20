@@ -20,14 +20,26 @@ package org.orekit.rugged.refraction;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /**
  * Interface for atmospheric refraction model.
  * @author Sergio Esteves
+ * @author Guylaine Prat
  * @since 2.0
  */
-public interface AtmosphericRefraction {
+public abstract class AtmosphericRefraction {
+
+    /**
+     * Flag to tell if we must compute the correction with an optimization grid
+     */
+    private boolean isOptimized = false;
+
+    /**
+     * The current optimization grid
+     */
+    private AtmosphericOptimizationGrid optimizationGrid;
 
     /** Apply correction to the intersected point with an atmospheric refraction model.
      * @param satPos satellite position, in <em>body frame</em>
@@ -37,10 +49,61 @@ public interface AtmosphericRefraction {
      * @return corrected point with the effect of atmospheric refraction
      * @throws RuggedException if there is no refraction data at altitude of rawIntersection or see
      * {@link org.orekit.rugged.utils.ExtendedEllipsoid#pointAtAltitude(Vector3D, Vector3D, double)} or see
-     * {@link IntersectionAlgorithm#refineIntersection(ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
+     * {@link org.orekit.rugged.intersection.IntersectionAlgorithm#refineIntersection(org.orekit.rugged.utils.ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
      */
-    NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
+    public abstract NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
                                             IntersectionAlgorithm algorithm)
         throws RuggedException;
 
+
+    // TODO to be implemented
+    public void setOptimizationGrid() throws RuggedException {
+
+        this.isOptimized = true;
+
+        // TODO default value to compute/initialize here ...
+        final SensorPixel sensorPixelStart = new SensorPixel(Double.NaN, Double.NaN);
+        final int pixelColumns = Integer.MAX_VALUE;
+        final int lineRows = Integer.MAX_VALUE;
+
+
+        // Set the grid for optimization
+        this.optimizationGrid = new AtmosphericOptimizationGrid(sensorPixelStart, pixelColumns, lineRows);
+
+        //TODO add check of input : see SimpleTile
+
+    };
+
+    public void setOptimizationGrid(final SensorPixel sensorPixelStart,
+                                    final int pixelColumns, final int lineRows) throws RuggedException {
+
+        this.isOptimized = true;
+
+        // Set the grid for optimization
+        this.optimizationGrid = new AtmosphericOptimizationGrid(sensorPixelStart, pixelColumns, lineRows);
+
+        //TODO add check of input : see SimpleTile
+
+    };
+
+    /** Tell if the computation must be optimized
+     * @return the isOptimized
+     */
+    public boolean isOptimized() {
+        return isOptimized;
+    }
+
+    /**
+     * @return the optimizationGrid
+     */
+    public AtmosphericOptimizationGrid getOptimizationGrid() {
+        return optimizationGrid;
+    }
+
+    /**
+     * @param optimizationGrid the optimizationGrid to set
+     */
+    public void setOptimizationGrid(final AtmosphericOptimizationGrid optimizationGrid) {
+        this.optimizationGrid = optimizationGrid;
+    }
 }

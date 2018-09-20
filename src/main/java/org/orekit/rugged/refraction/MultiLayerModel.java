@@ -32,10 +32,12 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /**
  * Atmospheric refraction model based on multiple layers with associated refractive index.
- * @author Sergio Esteves, Luc Maisonobe
+ * @author Sergio Esteves
+ * @author Luc Maisonobe
+ * @author Guylaine Prat
  * @since 2.0
  */
-public class MultiLayerModel implements AtmosphericRefraction {
+public class MultiLayerModel extends AtmosphericRefraction {
 
     /** Observed body ellipsoid. */
     private final ExtendedEllipsoid ellipsoid;
@@ -86,6 +88,7 @@ public class MultiLayerModel implements AtmosphericRefraction {
             (l1, l2) -> Double.compare(l2.getLowestAltitude(), l1.getLowestAltitude()));
         atmosphereLowestAltitude = this.refractionLayers.get(this.refractionLayers.size() - 1).getLowestAltitude();
     }
+    
 
     /** {@inheritDoc} */
     @Override
