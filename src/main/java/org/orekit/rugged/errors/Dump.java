@@ -345,18 +345,12 @@ class Dump {
     /** Convert a date to string with high accuracy.
      * @param date computation date
      * @return converted date
-     * @exception RuggedException if date cannot be converted to UTC
      */
-    private String convertDate(final AbsoluteDate date)
-        throws RuggedException {
-        try {
-            final DateTimeComponents dt = date.getComponents(TimeScalesFactory.getUTC());
-            return String.format(Locale.US, "%04d-%02d-%02dT%02d:%02d:%017.14fZ",
-                                 dt.getDate().getYear(), dt.getDate().getMonth(), dt.getDate().getDay(),
-                                 dt.getTime().getHour(), dt.getTime().getMinute(), dt.getTime().getSecond());
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
+    private String convertDate(final AbsoluteDate date) {
+        final DateTimeComponents dt = date.getComponents(TimeScalesFactory.getUTC());
+        return String.format(Locale.US, "%04d-%02d-%02dT%02d:%02d:%017.14fZ",
+                dt.getDate().getYear(), dt.getDate().getMonth(), dt.getDate().getDay(),
+                dt.getTime().getHour(), dt.getTime().getMinute(), dt.getTime().getSecond());
     }
 
     /** Convert a translation to string.

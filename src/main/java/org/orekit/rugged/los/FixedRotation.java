@@ -66,23 +66,19 @@ public class FixedRotation implements TimeIndependentLOSTransform {
      * @param angle rotation angle
      */
     public FixedRotation(final String name, final Vector3D axis, final double angle) {
+        
         this.axis     = axis;
         this.rotation = null;
         this.rDS      = null;
-        try {
-            this.angleDriver = new ParameterDriver(name, angle, SCALE, -2 * FastMath.PI, 2 * FastMath.PI);
-            angleDriver.addObserver(new ParameterObserver() {
-                @Override
-                public void valueChanged(final double previousValue, final ParameterDriver driver) {
-                    // reset rotations to null, they will be evaluated lazily if needed
-                    rotation = null;
-                    rDS      = null;
-                }
-            });
-        } catch (OrekitException oe) {
-            // this should never happen
-            throw RuggedException.createInternalError(oe);
-        }
+        this.angleDriver = new ParameterDriver(name, angle, SCALE, -2 * FastMath.PI, 2 * FastMath.PI);
+        angleDriver.addObserver(new ParameterObserver() {
+            @Override
+            public void valueChanged(final double previousValue, final ParameterDriver driver) {
+                // reset rotations to null, they will be evaluated lazily if needed
+                rotation = null;
+                rDS      = null;
+            }
+        });
     }
 
     /** {@inheritDoc} */

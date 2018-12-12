@@ -191,24 +191,19 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param centralLongitude reference longitude lc such that the point longitude will
      * be normalized between lc-π and lc+π (rad)
      * @return point on ground
-     * @exception RuggedException if no such point exists (typically line-of-sight missing body)
      */
     public NormalizedGeodeticPoint pointOnGround(final Vector3D position, final Vector3D los,
-                                                 final double centralLongitude)
-        throws RuggedException {
-        try {
-            DumpManager.dumpEllipsoid(this);
-            final GeodeticPoint gp =
-                    getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),
-                                         position, getBodyFrame(), null);
-            if (gp == null) {
-                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND);
-            }
-            return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
-                                               centralLongitude);
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+                                                 final double centralLongitude) {
+        
+        DumpManager.dumpEllipsoid(this);
+        final GeodeticPoint gp =
+                getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),
+                        position, getBodyFrame(), null);
+        if (gp == null) {
+            throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND);
         }
+        return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
+                centralLongitude);
     }
 
     /** Get point at some altitude along a pixel line of sight.
@@ -216,55 +211,47 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param altitude altitude with respect to ellipsoid (m)
      * @return point at altitude (m)
-     * @exception RuggedException if no such point exists (typically too negative altitude)
      */
-    public Vector3D pointAtAltitude(final Vector3D position, final Vector3D los, final double altitude)
-        throws RuggedException {
-        try {
+    public Vector3D pointAtAltitude(final Vector3D position, final Vector3D los, final double altitude) {
 
-            DumpManager.dumpEllipsoid(this);
+        DumpManager.dumpEllipsoid(this);
 
-            // point on line closest to origin
-            final double   los2   = los.getNormSq();
-            final double   dot    = Vector3D.dotProduct(position, los);
-            final double   k0     = -dot / los2;
-            final Vector3D close0 = new Vector3D(1, position, k0, los);
+        // point on line closest to origin
+        final double   los2   = los.getNormSq();
+        final double   dot    = Vector3D.dotProduct(position, los);
+        final double   k0     = -dot / los2;
+        final Vector3D close0 = new Vector3D(1, position, k0, los);
 
-            // very rough guess: if body is spherical, the desired point on line
-            // is at distance ae + altitude from origin
-            final double r        = getEquatorialRadius() + altitude;
-            final double delta2   = r * r - close0.getNormSq();
-            if (delta2 < 0) {
-                throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, altitude);
-            }
-            final double deltaK   = FastMath.sqrt(delta2 / los2);
-            final double k1       = k0 + deltaK;
-            final double k2       = k0 - deltaK;
-            double k              = (FastMath.abs(k1) <= FastMath.abs(k2)) ? k1 : k2;
-
-            // this loop generally converges in 3 iterations
-            for (int i = 0; i < 100; ++i) {
-
-                final Vector3D      point   = new Vector3D(1, position, k, los);
-                final GeodeticPoint gpK     = transform(point, getBodyFrame(), null);
-                final double        deltaH  = altitude - gpK.getAltitude();
-                if (FastMath.abs(deltaH) <= ALTITUDE_CONVERGENCE) {
-                    return point;
-                }
-
-                // improve the offset using linear ratio between
-                // altitude variation and displacement along line-of-sight
-                k += deltaH / Vector3D.dotProduct(gpK.getZenith(), los);
-
-            }
-
-            // this should never happen
+        // very rough guess: if body is spherical, the desired point on line
+        // is at distance ae + altitude from origin
+        final double r        = getEquatorialRadius() + altitude;
+        final double delta2   = r * r - close0.getNormSq();
+        if (delta2 < 0) {
             throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, altitude);
-
-        } catch (OrekitException oe) {
-            // this should never happen
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+        final double deltaK   = FastMath.sqrt(delta2 / los2);
+        final double k1       = k0 + deltaK;
+        final double k2       = k0 - deltaK;
+        double k              = (FastMath.abs(k1) <= FastMath.abs(k2)) ? k1 : k2;
+
+        // this loop generally converges in 3 iterations
+        for (int i = 0; i < 100; ++i) {
+
+            final Vector3D      point   = new Vector3D(1, position, k, los);
+            final GeodeticPoint gpK     = transform(point, getBodyFrame(), null);
+            final double        deltaH  = altitude - gpK.getAltitude();
+            if (FastMath.abs(deltaH) <= ALTITUDE_CONVERGENCE) {
+                return point;
+            }
+
+            // improve the offset using linear ratio between
+            // altitude variation and displacement along line-of-sight
+            k += deltaH / Vector3D.dotProduct(gpK.getZenith(), los);
+
+        }
+
+        // this should never happen
+        throw new RuggedException(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, altitude);
     }
 
     /** Convert a line-of-sight from Cartesian to topocentric.
@@ -302,22 +289,15 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * with respect to the primary point (in body frame and Cartesian coordinates)
      * @return line-of-sight in topocentric frame (East, North, Zenith) of the point,
      * scaled to match radians in the horizontal plane and meters along the vertical axis
-     * @exception RuggedException if points cannot be converted to geodetic coordinates
      */
-    public Vector3D convertLos(final Vector3D primary, final Vector3D secondary)
-        throws RuggedException {
-        try {
+    public Vector3D convertLos(final Vector3D primary, final Vector3D secondary) {
 
-            // switch to geodetic coordinates using primary point as reference
-            final GeodeticPoint point = transform(primary, getBodyFrame(), null);
-            final Vector3D      los   = secondary.subtract(primary);
+        // switch to geodetic coordinates using primary point as reference
+        final GeodeticPoint point = transform(primary, getBodyFrame(), null);
+        final Vector3D      los   = secondary.subtract(primary);
 
-            // convert line of sight
-            return convertLos(point, los);
-
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
+        // convert line of sight
+        return convertLos(point, los);
     }
 
     /** Transform a cartesian point to a surface-relative point.

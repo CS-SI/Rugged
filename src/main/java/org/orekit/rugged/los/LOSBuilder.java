@@ -234,14 +234,8 @@ public class LOSBuilder {
                 }
             };
             getParametersDrivers().forEach(driver -> {
-                try {
-                    driver.addObserver(resettingObserver);
-                } catch (OrekitException oe) {
-                    // this should never happen
-                    throw RuggedException.createInternalError(oe);
-                }
+                driver.addObserver(resettingObserver);
             });
-
         }
 
         /** {@inheritDoc} */

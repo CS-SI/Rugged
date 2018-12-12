@@ -162,8 +162,6 @@ public class AdjustmentContext {
 
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
     }
 }

@@ -86,9 +86,6 @@ public class SpacecraftToObservedBody implements Serializable {
      * @param quaternions satellite quaternions
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
-     * @exception RuggedException if [{@code minDate}, {@code maxDate}] search time span overshoots
-     * position or attitude samples by more than {@code overshootTolerance}
-     * ,
      */
     public SpacecraftToObservedBody(final Frame inertialFrame, final Frame bodyFrame,
                                     final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
@@ -96,92 +93,86 @@ public class SpacecraftToObservedBody implements Serializable {
                                     final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                                     final CartesianDerivativesFilter pvFilter,
                                     final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                                    final AngularDerivativesFilter aFilter)
-        throws RuggedException {
-        try {
+                                    final AngularDerivativesFilter aFilter) {
 
-            this.inertialFrame      = inertialFrame;
-            this.bodyFrame          = bodyFrame;
-            this.minDate            = minDate;
-            this.maxDate            = maxDate;
-            this.overshootTolerance = overshootTolerance;
+        this.inertialFrame      = inertialFrame;
+        this.bodyFrame          = bodyFrame;
+        this.minDate            = minDate;
+        this.maxDate            = maxDate;
+        this.overshootTolerance = overshootTolerance;
 
-            // safety checks
-            final AbsoluteDate minPVDate = positionsVelocities.get(0).getDate();
-            final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getDate();
-            if (minPVDate.durationFrom(minDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
+        // safety checks
+        final AbsoluteDate minPVDate = positionsVelocities.get(0).getDate();
+        final AbsoluteDate maxPVDate = positionsVelocities.get(positionsVelocities.size() - 1).getDate();
+        if (minPVDate.durationFrom(minDate) > overshootTolerance) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minPVDate, maxPVDate);
+        }
+        if (maxDate.durationFrom(maxPVDate) > overshootTolerance) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
+        }
+
+        final AbsoluteDate minQDate  = quaternions.get(0).getDate();
+        final AbsoluteDate maxQDate  = quaternions.get(quaternions.size() - 1).getDate();
+        if (minQDate.durationFrom(minDate) > overshootTolerance) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minQDate, maxQDate);
+        }
+        if (maxDate.durationFrom(maxQDate) > overshootTolerance) {
+            throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minQDate, maxQDate);
+        }
+
+        // set up the cache for position-velocities
+        final TimeStampedCache<TimeStampedPVCoordinates> pvCache =
+                new ImmutableTimeStampedCache<TimeStampedPVCoordinates>(pvInterpolationNumber, positionsVelocities);
+
+        // set up the cache for attitudes
+        final TimeStampedCache<TimeStampedAngularCoordinates> aCache =
+                new ImmutableTimeStampedCache<TimeStampedAngularCoordinates>(aInterpolationNumber, quaternions);
+
+        final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
+        this.tStep          = tStep;
+        this.bodyToInertial = new ArrayList<Transform>(n);
+        this.inertialToBody = new ArrayList<Transform>(n);
+        this.scToInertial   = new ArrayList<Transform>(n);
+        for (AbsoluteDate date = minDate; bodyToInertial.size() < n; date = date.shiftedBy(tStep)) {
+
+            // interpolate position-velocity, allowing slight extrapolation near the boundaries
+            final AbsoluteDate pvInterpolationDate;
+            if (date.compareTo(pvCache.getEarliest().getDate()) < 0) {
+                pvInterpolationDate = pvCache.getEarliest().getDate();
+            } else if (date.compareTo(pvCache.getLatest().getDate()) > 0) {
+                pvInterpolationDate = pvCache.getLatest().getDate();
+            } else {
+                pvInterpolationDate = date;
             }
-            if (maxDate.durationFrom(maxPVDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minPVDate, maxPVDate);
+            final TimeStampedPVCoordinates interpolatedPV =
+                    TimeStampedPVCoordinates.interpolate(pvInterpolationDate, pvFilter,
+                            pvCache.getNeighbors(pvInterpolationDate));
+            final TimeStampedPVCoordinates pv = interpolatedPV.shiftedBy(date.durationFrom(pvInterpolationDate));
+
+            // interpolate attitude, allowing slight extrapolation near the boundaries
+            final AbsoluteDate aInterpolationDate;
+            if (date.compareTo(aCache.getEarliest().getDate()) < 0) {
+                aInterpolationDate = aCache.getEarliest().getDate();
+            } else if (date.compareTo(aCache.getLatest().getDate()) > 0) {
+                aInterpolationDate = aCache.getLatest().getDate();
+            } else {
+                aInterpolationDate = date;
             }
+            final TimeStampedAngularCoordinates interpolatedQuaternion =
+                    TimeStampedAngularCoordinates.interpolate(aInterpolationDate, aFilter,
+                            aCache.getNeighbors(aInterpolationDate).collect(Collectors.toList()));
+            final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 
-            final AbsoluteDate minQDate  = quaternions.get(0).getDate();
-            final AbsoluteDate maxQDate  = quaternions.get(quaternions.size() - 1).getDate();
-            if (minQDate.durationFrom(minDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, minDate, minQDate, maxQDate);
-            }
-            if (maxDate.durationFrom(maxQDate) > overshootTolerance) {
-                throw new RuggedException(RuggedMessages.OUT_OF_TIME_RANGE, maxDate, minQDate, maxQDate);
-            }
+            // store transform from spacecraft frame to inertial frame
+            scToInertial.add(new Transform(date,
+                    new Transform(date, quaternion.revert()),
+                    new Transform(date, pv)));
 
-            // set up the cache for position-velocities
-            final TimeStampedCache<TimeStampedPVCoordinates> pvCache =
-                    new ImmutableTimeStampedCache<TimeStampedPVCoordinates>(pvInterpolationNumber, positionsVelocities);
+            // store transform from body frame to inertial frame
+            final Transform b2i = bodyFrame.getTransformTo(inertialFrame, date);
+            bodyToInertial.add(b2i);
+            inertialToBody.add(b2i.getInverse());
 
-            // set up the cache for attitudes
-            final TimeStampedCache<TimeStampedAngularCoordinates> aCache =
-                    new ImmutableTimeStampedCache<TimeStampedAngularCoordinates>(aInterpolationNumber, quaternions);
-
-            final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
-            this.tStep          = tStep;
-            this.bodyToInertial = new ArrayList<Transform>(n);
-            this.inertialToBody = new ArrayList<Transform>(n);
-            this.scToInertial   = new ArrayList<Transform>(n);
-            for (AbsoluteDate date = minDate; bodyToInertial.size() < n; date = date.shiftedBy(tStep)) {
-
-                // interpolate position-velocity, allowing slight extrapolation near the boundaries
-                final AbsoluteDate pvInterpolationDate;
-                if (date.compareTo(pvCache.getEarliest().getDate()) < 0) {
-                    pvInterpolationDate = pvCache.getEarliest().getDate();
-                } else if (date.compareTo(pvCache.getLatest().getDate()) > 0) {
-                    pvInterpolationDate = pvCache.getLatest().getDate();
-                } else {
-                    pvInterpolationDate = date;
-                }
-                final TimeStampedPVCoordinates interpolatedPV =
-                        TimeStampedPVCoordinates.interpolate(pvInterpolationDate, pvFilter,
-                                                             pvCache.getNeighbors(pvInterpolationDate));
-                final TimeStampedPVCoordinates pv = interpolatedPV.shiftedBy(date.durationFrom(pvInterpolationDate));
-
-                // interpolate attitude, allowing slight extrapolation near the boundaries
-                final AbsoluteDate aInterpolationDate;
-                if (date.compareTo(aCache.getEarliest().getDate()) < 0) {
-                    aInterpolationDate = aCache.getEarliest().getDate();
-                } else if (date.compareTo(aCache.getLatest().getDate()) > 0) {
-                    aInterpolationDate = aCache.getLatest().getDate();
-                } else {
-                    aInterpolationDate = date;
-                }
-                final TimeStampedAngularCoordinates interpolatedQuaternion =
-                        TimeStampedAngularCoordinates.interpolate(aInterpolationDate, aFilter,
-                                                                  aCache.getNeighbors(aInterpolationDate).collect(Collectors.toList()));
-                final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
-
-                // store transform from spacecraft frame to inertial frame
-                scToInertial.add(new Transform(date,
-                                               new Transform(date, quaternion.revert()),
-                                               new Transform(date, pv)));
-
-                // store transform from body frame to inertial frame
-                final Transform b2i = bodyFrame.getTransformTo(inertialFrame, date);
-                bodyToInertial.add(b2i);
-                inertialToBody.add(b2i.getInverse());
-
-            }
-
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
     }
 

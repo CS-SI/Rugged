@@ -737,46 +737,41 @@ public class RuggedBuilder {
      * @exception RuggedException if data needed for some frame cannot be loaded
      */
     private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
-                                                               final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                                               final double tStep, final double overshootTolerance,
-                                                               final double interpolationStep, final int interpolationNumber,
-                                                               final CartesianDerivativesFilter pvFilter,
-                                                               final AngularDerivativesFilter aFilter,
-                                                               final Propagator propagator)
-        throws RuggedException {
-        try {
+            final AbsoluteDate minDate, final AbsoluteDate maxDate,
+            final double tStep, final double overshootTolerance,
+            final double interpolationStep, final int interpolationNumber,
+            final CartesianDerivativesFilter pvFilter,
+            final AngularDerivativesFilter aFilter,
+            final Propagator propagator) {
 
-            // extract position/attitude samples from propagator
-            final List<TimeStampedPVCoordinates> positionsVelocities =
-                    new ArrayList<TimeStampedPVCoordinates>();
-            final List<TimeStampedAngularCoordinates> quaternions =
-                    new ArrayList<TimeStampedAngularCoordinates>();
-            propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
+        // extract position/attitude samples from propagator
+        final List<TimeStampedPVCoordinates> positionsVelocities =
+                new ArrayList<TimeStampedPVCoordinates>();
+        final List<TimeStampedAngularCoordinates> quaternions =
+                new ArrayList<TimeStampedAngularCoordinates>();
+        propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
 
-                /** {@inheritDoc} */
-                @Override
-                public void handleStep(final SpacecraftState currentState, final boolean isLast)
+            /** {@inheritDoc} */
+            @Override
+            public void handleStep(final SpacecraftState currentState, final boolean isLast)
                     throws OrekitException {
-                    final AbsoluteDate  date = currentState.getDate();
-                    final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
-                    final Rotation      q    = currentState.getAttitude().getRotation();
-                    positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
-                    quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
-                }
+                final AbsoluteDate  date = currentState.getDate();
+                final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
+                final Rotation      q    = currentState.getAttitude().getRotation();
+                positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
+                quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
+            }
 
-            });
-            propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
+        });
+        propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
 
-            // orbit/attitude to body converter
-            return createInterpolator(inertialFrame, bodyFrame,
-                                      minDate, maxDate, tStep, overshootTolerance,
-                                      positionsVelocities, interpolationNumber,
-                                      pvFilter, quaternions, interpolationNumber,
-                                      aFilter);
+        // orbit/attitude to body converter
+        return createInterpolator(inertialFrame, bodyFrame,
+                minDate, maxDate, tStep, overshootTolerance,
+                positionsVelocities, interpolationNumber,
+                pvFilter, quaternions, interpolationNumber,
+                aFilter);
 
-        } catch (OrekitException pe) {
-            throw new RuggedException(pe, pe.getSpecifier(), pe.getParts());
-        }
     }
 
     /** Set flag for light time correction.
@@ -890,59 +885,45 @@ public class RuggedBuilder {
     /** Select inertial frame.
      * @param inertialFrameId inertial frame identifier
      * @return inertial frame
-     * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    private static Frame selectInertialFrame(final InertialFrameId inertialFrameId)
-        throws RuggedException {
+    private static Frame selectInertialFrame(final InertialFrameId inertialFrameId) {
 
-        try {
-            // set up the inertial frame
-            switch (inertialFrameId) {
-                case GCRF :
-                    return FramesFactory.getGCRF();
-                case EME2000 :
-                    return FramesFactory.getEME2000();
-                case MOD :
-                    return FramesFactory.getMOD(IERSConventions.IERS_1996);
-                case TOD :
-                    return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
-                case VEIS1950 :
-                    return FramesFactory.getVeis1950();
-                default :
-                    // this should never happen
-                    throw RuggedException.createInternalError(null);
-            }
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
+        // set up the inertial frame
+        switch (inertialFrameId) {
+        case GCRF :
+            return FramesFactory.getGCRF();
+        case EME2000 :
+            return FramesFactory.getEME2000();
+        case MOD :
+            return FramesFactory.getMOD(IERSConventions.IERS_1996);
+        case TOD :
+            return FramesFactory.getTOD(IERSConventions.IERS_1996, true);
+        case VEIS1950 :
+            return FramesFactory.getVeis1950();
+        default :
+            // this should never happen
+            throw RuggedException.createInternalError(null);
         }
-
     }
 
     /** Select body rotating frame.
      * @param bodyRotatingFrame body rotating frame identifier
      * @return body rotating frame
-     * @exception RuggedException if data needed for some frame cannot be loaded
      */
-    private static Frame selectBodyRotatingFrame(final BodyRotatingFrameId bodyRotatingFrame)
-        throws RuggedException {
+    private static Frame selectBodyRotatingFrame(final BodyRotatingFrameId bodyRotatingFrame) {
 
-        try {
-            // set up the rotating frame
-            switch (bodyRotatingFrame) {
-                case ITRF :
-                    return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-                case ITRF_EQUINOX :
-                    return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
-                case GTOD :
-                    return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
-                default :
-                    // this should never happen
-                    throw RuggedException.createInternalError(null);
-            }
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts().clone());
+        // set up the rotating frame
+        switch (bodyRotatingFrame) {
+        case ITRF :
+            return FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+        case ITRF_EQUINOX :
+            return FramesFactory.getITRFEquinox(IERSConventions.IERS_1996, true);
+        case GTOD :
+            return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
+        default :
+            // this should never happen
+            throw RuggedException.createInternalError(null);
         }
-
     }
 
     /** Select ellipsoid.
@@ -984,21 +965,20 @@ public class RuggedBuilder {
 
         // set up the algorithm
         switch (algorithmID) {
-            case DUVENHAGE :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
-            case DUVENHAGE_FLAT_BODY :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
-            case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-                return new BasicScanAlgorithm(updater, maxCachedTiles);
-            case CONSTANT_ELEVATION_OVER_ELLIPSOID :
-                return new ConstantElevationAlgorithm(constantElevation);
-            case IGNORE_DEM_USE_ELLIPSOID :
-                return new IgnoreDEMAlgorithm();
-            default :
-                // this should never happen
-                throw RuggedException.createInternalError(null);
+        case DUVENHAGE :
+            return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+        case DUVENHAGE_FLAT_BODY :
+            return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
+        case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
+            return new BasicScanAlgorithm(updater, maxCachedTiles);
+        case CONSTANT_ELEVATION_OVER_ELLIPSOID :
+            return new ConstantElevationAlgorithm(constantElevation);
+        case IGNORE_DEM_USE_ELLIPSOID :
+            return new IgnoreDEMAlgorithm();
+        default :
+            // this should never happen
+            throw RuggedException.createInternalError(null);
         }
-
     }
 
     /** Build a {@link Rugged} instance.

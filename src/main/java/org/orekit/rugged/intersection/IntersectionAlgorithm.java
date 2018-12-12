@@ -31,10 +31,8 @@ public interface IntersectionAlgorithm {
      * @param position pixel position in ellipsoid frame
      * @param los pixel line-of-sight in ellipsoid frame
      * @return point at which the line first enters ground
-     * @exception RuggedException if intersection cannot be found
      */
-    NormalizedGeodeticPoint intersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los)
-        throws RuggedException;
+    NormalizedGeodeticPoint intersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los);
 
     /** Refine intersection of line with Digital Elevation Model.
      * <p>
@@ -49,11 +47,9 @@ public interface IntersectionAlgorithm {
      * @param los pixel line-of-sight in ellipsoid frame
      * @param closeGuess guess close to the real intersection
      * @return point at which the line first enters ground
-     * @exception RuggedException if intersection cannot be found
      */
     NormalizedGeodeticPoint refineIntersection(ExtendedEllipsoid ellipsoid, Vector3D position, Vector3D los,
-                                               NormalizedGeodeticPoint closeGuess)
-        throws RuggedException;
+                                               NormalizedGeodeticPoint closeGuess);
 
     /** Get elevation at a given ground point.
      * @param latitude ground point latitude

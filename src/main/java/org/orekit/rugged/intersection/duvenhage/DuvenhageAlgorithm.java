@@ -69,146 +69,131 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                                final Vector3D position, final Vector3D los)
-        throws RuggedException {
-        try {
+                                                final Vector3D position, final Vector3D los) {
 
-            DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
 
-            // compute intersection with ellipsoid
-            final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
+        // compute intersection with ellipsoid
+        final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
 
-            // compute atmosphere deviation
+        // compute atmosphere deviation
 
-            // locate the entry tile along the line-of-sight
-            MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
+        // locate the entry tile along the line-of-sight
+        MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
 
-            NormalizedGeodeticPoint current = null;
-            double hMax = tile.getMaxElevation();
-            while (current == null) {
+        NormalizedGeodeticPoint current = null;
+        double hMax = tile.getMaxElevation();
+        while (current == null) {
 
-                // find where line-of-sight crosses tile max altitude
-                final Vector3D entryP = ellipsoid.pointAtAltitude(position, los, hMax + STEP);
-                if (Vector3D.dotProduct(entryP.subtract(position), los) < 0) {
-                    // the entry point is behind spacecraft!
-                    throw new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT);
-                }
-                current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
+            // find where line-of-sight crosses tile max altitude
+            final Vector3D entryP = ellipsoid.pointAtAltitude(position, los, hMax + STEP);
+            if (Vector3D.dotProduct(entryP.subtract(position), los) < 0) {
+                // the entry point is behind spacecraft!
+                throw new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT);
+            }
+            current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
 
-                if (tile.getLocation(current.getLatitude(), current.getLongitude()) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
-                    // the entry point is in another tile
-                    tile    = cache.getTile(current.getLatitude(), current.getLongitude());
-                    hMax    = FastMath.max(hMax, tile.getMaxElevation());
-                    current = null;
-                }
-
+            if (tile.getLocation(current.getLatitude(), current.getLongitude()) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
+                // the entry point is in another tile
+                tile    = cache.getTile(current.getLatitude(), current.getLongitude());
+                hMax    = FastMath.max(hMax, tile.getMaxElevation());
+                current = null;
             }
 
-            // loop along the path
-            while (true) {
+        }
 
-                // find where line-of-sight exit tile
-                final LimitPoint exit = findExit(tile, ellipsoid, position, los);
+        // loop along the path
+        while (true) {
 
-                // compute intersection with Digital Elevation Model
-                final int entryLat = FastMath.max(0,
-                                                  FastMath.min(tile.getLatitudeRows() - 1,
-                                                               tile.getFloorLatitudeIndex(current.getLatitude())));
-                final int entryLon = FastMath.max(0,
-                                                  FastMath.min(tile.getLongitudeColumns() - 1,
-                                                               tile.getFloorLongitudeIndex(current.getLongitude())));
-                final int exitLat  = FastMath.max(0,
-                                                  FastMath.min(tile.getLatitudeRows() - 1,
-                                                               tile.getFloorLatitudeIndex(exit.getPoint().getLatitude())));
-                final int exitLon  = FastMath.max(0,
-                                                  FastMath.min(tile.getLongitudeColumns() - 1,
-                                                               tile.getFloorLongitudeIndex(exit.getPoint().getLongitude())));
-                NormalizedGeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
-                                                                           current, entryLat, entryLon,
-                                                                           exit.getPoint(), exitLat, exitLon);
+            // find where line-of-sight exit tile
+            final LimitPoint exit = findExit(tile, ellipsoid, position, los);
 
+            // compute intersection with Digital Elevation Model
+            final int entryLat = FastMath.max(0,
+                    FastMath.min(tile.getLatitudeRows() - 1,
+                            tile.getFloorLatitudeIndex(current.getLatitude())));
+            final int entryLon = FastMath.max(0,
+                    FastMath.min(tile.getLongitudeColumns() - 1,
+                            tile.getFloorLongitudeIndex(current.getLongitude())));
+            final int exitLat  = FastMath.max(0,
+                    FastMath.min(tile.getLatitudeRows() - 1,
+                            tile.getFloorLatitudeIndex(exit.getPoint().getLatitude())));
+            final int exitLon  = FastMath.max(0,
+                    FastMath.min(tile.getLongitudeColumns() - 1,
+                            tile.getFloorLongitudeIndex(exit.getPoint().getLongitude())));
+            NormalizedGeodeticPoint intersection = recurseIntersection(0, ellipsoid, position, los, tile,
+                    current, entryLat, entryLon,
+                    exit.getPoint(), exitLat, exitLon);
+
+            if (intersection != null) {
+                // we have found the intersection
+                return intersection;
+            } else if (exit.atSide()) {
+                // no intersection on this tile, we can proceed to next part of the line-of-sight
+
+                // select next tile after current point
+                final Vector3D forward = new Vector3D(1.0, ellipsoid.transform(exit.getPoint()), STEP, los);
+                current = ellipsoid.transform(forward, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
+                tile = cache.getTile(current.getLatitude(), current.getLongitude());
+
+                if (tile.interpolateElevation(current.getLatitude(), current.getLongitude()) >= current.getAltitude()) {
+                    // extremely rare case! The line-of-sight traversed the Digital Elevation Model
+                    // during the very short forward step we used to move to next tile
+                    // we consider this point to be OK
+                    return current;
+                }
+
+            } else {
+
+                // this should never happen
+                // we should have left the loop with an intersection point
+                // try a fallback non-recursive search
+                intersection = noRecurseIntersection(ellipsoid, position, los, tile,
+                        current, entryLat, entryLon,
+                        exitLat, exitLon);
                 if (intersection != null) {
-                    // we have found the intersection
                     return intersection;
-                } else if (exit.atSide()) {
-                    // no intersection on this tile, we can proceed to next part of the line-of-sight
-
-                    // select next tile after current point
-                    final Vector3D forward = new Vector3D(1.0, ellipsoid.transform(exit.getPoint()), STEP, los);
-                    current = ellipsoid.transform(forward, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
-                    tile = cache.getTile(current.getLatitude(), current.getLongitude());
-
-                    if (tile.interpolateElevation(current.getLatitude(), current.getLongitude()) >= current.getAltitude()) {
-                        // extremely rare case! The line-of-sight traversed the Digital Elevation Model
-                        // during the very short forward step we used to move to next tile
-                        // we consider this point to be OK
-                        return current;
-                    }
-
                 } else {
-
-                    // this should never happen
-                    // we should have left the loop with an intersection point
-                    // try a fallback non-recursive search
-                    intersection = noRecurseIntersection(ellipsoid, position, los, tile,
-                                                         current, entryLat, entryLon,
-                                                         exitLat, exitLon);
-                    if (intersection != null) {
-                        return intersection;
-                    } else {
-                        throw RuggedException.createInternalError(null);
-                    }
-
+                    throw RuggedException.createInternalError(null);
                 }
-
-
             }
-
-
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
-                                                      final Vector3D position, final Vector3D los,
-                                                      final NormalizedGeodeticPoint closeGuess)
-        throws RuggedException {
-        try {
+            final Vector3D position, final Vector3D los,
+            final NormalizedGeodeticPoint closeGuess) {
 
-            DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
 
-            if (flatBody) {
-                // under the (bad) flat-body assumption, the reference point must remain
-                // at DEM entry and exit, even if we already have a much better close guess :-(
-                // this is in order to remain consistent with other systems
-                final Tile tile = cache.getTile(closeGuess.getLatitude(), closeGuess.getLongitude());
-                final Vector3D      exitP  = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
-                final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
-                final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
-                                                                           tile.getMinimumLongitude());
-                return tile.cellIntersection(entry, ellipsoid.convertLos(entryP, exitP),
-                                              tile.getFloorLatitudeIndex(closeGuess.getLatitude()),
-                                              tile.getFloorLongitudeIndex(closeGuess.getLongitude()));
-            } else {
-                final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
-                final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
-                final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                    ellipsoid.getBodyFrame(), null);
-                final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
-                                                                                                projected.getLongitude(),
-                                                                                                projected.getAltitude(),
-                                                                                                closeGuess.getLongitude());
-                final Tile          tile      = cache.getTile(normalizedProjected.getLatitude(),
-                                                              normalizedProjected.getLongitude());
-                return tile.cellIntersection(normalizedProjected, ellipsoid.convertLos(normalizedProjected, los),
-                                              tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
-                                              tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
-            }
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
+        if (flatBody) {
+            // under the (bad) flat-body assumption, the reference point must remain
+            // at DEM entry and exit, even if we already have a much better close guess :-(
+            // this is in order to remain consistent with other systems
+            final Tile tile = cache.getTile(closeGuess.getLatitude(), closeGuess.getLongitude());
+            final Vector3D      exitP  = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
+            final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
+            final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
+                    tile.getMinimumLongitude());
+            return tile.cellIntersection(entry, ellipsoid.convertLos(entryP, exitP),
+                    tile.getFloorLatitudeIndex(closeGuess.getLatitude()),
+                    tile.getFloorLongitudeIndex(closeGuess.getLongitude()));
+        } else {
+            final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
+            final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+            final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                    ellipsoid.getBodyFrame(), null);
+            final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
+                    projected.getLongitude(),
+                    projected.getAltitude(),
+                    closeGuess.getLongitude());
+            final Tile          tile      = cache.getTile(normalizedProjected.getLatitude(),
+                    normalizedProjected.getLongitude());
+            return tile.cellIntersection(normalizedProjected, ellipsoid.convertLos(normalizedProjected, los),
+                    tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
+                    tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
         }
     }
 

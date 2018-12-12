@@ -94,15 +94,10 @@ public class PolynomialRotation implements LOSTransform {
                 angleDS = null;
             }
         };
-        try {
-            for (int i = 0; i < angleCoeffs.length; ++i) {
-                coefficientsDrivers[i] = new ParameterDriver(name + "[" + i + "]", angleCoeffs[i], SCALE,
-                                                             Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-                coefficientsDrivers[i].addObserver(resettingObserver);
-            }
-        } catch (OrekitException oe) {
-            // this should never happen
-            throw RuggedException.createInternalError(oe);
+        for (int i = 0; i < angleCoeffs.length; ++i) {
+            coefficientsDrivers[i] = new ParameterDriver(name + "[" + i + "]", angleCoeffs[i], SCALE,
+                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+            coefficientsDrivers[i].addObserver(resettingObserver);
         }
     }
 

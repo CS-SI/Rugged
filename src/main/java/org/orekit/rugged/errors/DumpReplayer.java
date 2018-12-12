@@ -524,8 +524,6 @@ public class DumpReplayer {
                 final Frame  bodyFrame;
                 try {
                     bodyFrame = FramesFactory.getFrame(Predefined.valueOf(fields[5]));
-                } catch (OrekitException oe) {
-                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
                 } catch (IllegalArgumentException iae) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
@@ -539,9 +537,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
-                try {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                     if (fields.length < 14 ||
                         !fields[0].equals(DATE) ||
                         !fields[2].equals(POSITION) || !fields[6].equals(LOS) ||
@@ -577,11 +573,7 @@ public class DumpReplayer {
                         }
 
                     });
-                } catch (OrekitException oe) {
-                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-                }
             }
-
         },
 
         /** Parser for direct location result dump lines. */
@@ -609,9 +601,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
-                try {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                     if (fields.length < 10 ||
                         !fields[0].equals(MIN_DATE)  || !fields[2].equals(MAX_DATE) || !fields[4].equals(T_STEP)   ||
                         !fields[6].equals(TOLERANCE) || !fields[8].equals(INERTIAL_FRAME)) {
@@ -628,11 +618,7 @@ public class DumpReplayer {
                     } catch (IllegalArgumentException iae) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                     }
-                } catch (OrekitException oe) {
-                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-                }
             }
-
         },
 
         /** Parser for observation transforms dump lines. */
@@ -843,9 +829,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
-                try {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                     if (fields.length < 16 || !fields[0].equals(SENSOR_NAME) ||
                         !fields[2].equals(MIN_LINE) || !fields[4].equals(MAX_LINE) ||
                         !fields[6].equals(MAX_EVAL) || !fields[8].equals(ACCURACY) ||
@@ -884,12 +868,7 @@ public class DumpReplayer {
                         base += 15;
                     }
                     global.getSensor(sensorName).setMeanPlane(new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal, cachedResults));
-
-                } catch (OrekitException oe) {
-                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-                }
             }
-
         },
 
         /** Parser for sensor LOS dump lines. */
@@ -897,9 +876,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
-                try {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                     if (fields.length < 10 || !fields[0].equals(SENSOR_NAME) ||
                             !fields[2].equals(DATE) || !fields[4].equals(PIXEL_NUMBER) ||
                             !fields[6].equals(LOS)) {
@@ -912,12 +889,7 @@ public class DumpReplayer {
                                                                   Double.parseDouble(fields[8]),
                                                                   Double.parseDouble(fields[9]));
                     global.getSensor(sensorName).setLOS(date, pixelNumber, los);
-
-                } catch (OrekitException oe) {
-                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-                }
             }
-
         },
 
         /** Parser for sensor datation dump lines. */
@@ -925,9 +897,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
-                try {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                     if (fields.length < 6 || !fields[0].equals(SENSOR_NAME) ||
                         !fields[2].equals(LINE_NUMBER) || !fields[4].equals(DATE)) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
@@ -936,13 +906,7 @@ public class DumpReplayer {
                     final double       lineNumber  = Double.parseDouble(fields[3]);
                     final AbsoluteDate date        = new AbsoluteDate(fields[5], TimeScalesFactory.getUTC());
                     global.getSensor(sensorName).setDatation(lineNumber, date);
-
-                } catch (OrekitException oe) {
-                    throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-                }
-
             }
-
         },
 
         /** Parser for sensor rate dump lines. */
