@@ -87,3 +87,9 @@ UNSUPPORTED_REFINING_CONTEXT = il refining che usa {0} istanze rugged non è ges
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = nessun dato atmosferico all''altitudine {0} (altitudine più bassa: {1})
+
+# step {0} is not valid : {1}
+INVALID_STEP = <MISSING TRANSLATION>
+
+# range between min line {0} and max line {1} too small {2}
+ INVALID_RANGE_FOR_LINES = <MISSING TRANSLATION>

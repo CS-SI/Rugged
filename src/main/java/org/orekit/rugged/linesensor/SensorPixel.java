@@ -17,9 +17,6 @@
 package org.orekit.rugged.linesensor;
 
 import java.io.Serializable;
-import java.text.NumberFormat;
-
-import org.hipparchus.util.CompositeFormat;
 
 /** Container for sensor pixel.
  * <p>
@@ -62,16 +59,5 @@ public class SensorPixel implements Serializable {
      */
     public double getPixelNumber() {
         return pixelNumber;
-    }
-
-    @Override
-    public String toString() {
-        final NumberFormat format = CompositeFormat.getDefaultNumberFormat();
-        format.setMaximumFractionDigits(6);
-        return "{Line: " +
-               format.format(getLineNumber()) +
-               ", Pixel: " +
-               format.format(getPixelNumber()) +
-               "}";
     }
 }
