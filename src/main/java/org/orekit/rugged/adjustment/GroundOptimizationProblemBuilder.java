@@ -34,8 +34,6 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
 import org.hipparchus.util.FastMath;
 import org.hipparchus.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
@@ -220,8 +218,6 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
 
             } catch (RuggedException re) {
                 throw new RuggedExceptionWrapper(re);
-            } catch (OrekitException oe) {
-                throw new OrekitExceptionWrapper(oe);
             }
         };
 

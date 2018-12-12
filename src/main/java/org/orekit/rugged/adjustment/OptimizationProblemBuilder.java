@@ -30,13 +30,11 @@ import org.hipparchus.optim.ConvergenceChecker;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
+import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.utils.ParameterDriver;
 
@@ -151,19 +149,14 @@ abstract class OptimizationProblemBuilder {
 
         // Prevent parameters to exceed their prescribed bounds
         final ParameterValidator validator = params -> {
-            try {
-                int i = 0;
-                for (final ParameterDriver driver : this.drivers) {
+            int i = 0;
+            for (final ParameterDriver driver : this.drivers) {
 
-                    // let the parameter handle min/max clipping
-                    driver.setNormalizedValue(params.getEntry(i));
-                    params.setEntry(i++, driver.getNormalizedValue());
-                }
-                return params;
-
-            } catch (OrekitException oe) {
-                throw new OrekitExceptionWrapper(oe);
+                // let the parameter handle min/max clipping
+                driver.setNormalizedValue(params.getEntry(i));
+                params.setEntry(i++, driver.getNormalizedValue());
             }
+            return params;
         };
 
         return validator;

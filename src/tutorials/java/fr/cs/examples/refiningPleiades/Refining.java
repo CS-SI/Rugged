@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.adjustment.AdjustmentContext;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
@@ -271,14 +270,10 @@ public class Refining {
         getLineSensor(sensorName).
         getParametersDrivers().
         filter(driver -> driver.getName().equals(sensorName + rollSuffix)
-               || driver.getName().equals(sensorName + pitchSuffix)).
+                || driver.getName().equals(sensorName + pitchSuffix)).
         forEach(driver -> {
-            try {
-                driver.setSelected(true);
-                driver.setValue(0.0);
-            } catch (OrekitException e) {
-                throw new OrekitExceptionWrapper(e);
-            }
+            driver.setSelected(true);
+            driver.setValue(0.0);
         });
 
         rugged.
@@ -286,14 +281,10 @@ public class Refining {
         getParametersDrivers().
         filter(driver -> driver.getName().equals(factorName)).
         forEach(driver -> {
-            try {
-                driver.setSelected(isSelected);
+            driver.setSelected(isSelected);
 
-                // default value: no Z scale factor applied
-                driver.setValue(1.0);
-            } catch (OrekitException e) {
-                throw new OrekitExceptionWrapper(e);
-            }
+            // default value: no Z scale factor applied
+            driver.setValue(1.0);
         });
     }
 

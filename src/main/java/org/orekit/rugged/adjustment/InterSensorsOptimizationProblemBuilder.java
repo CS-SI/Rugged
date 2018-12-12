@@ -35,8 +35,6 @@ import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
 import org.hipparchus.util.Pair;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
@@ -254,8 +252,6 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
 
             } catch (RuggedException re) {
                 throw new RuggedExceptionWrapper(re);
-            } catch (OrekitException oe) {
-                throw new OrekitExceptionWrapper(oe);
             }
         };
 

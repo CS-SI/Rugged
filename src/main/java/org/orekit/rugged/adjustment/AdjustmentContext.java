@@ -26,7 +26,6 @@ import java.util.Map;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedExceptionWrapper;
@@ -163,8 +162,7 @@ public class AdjustmentContext {
 
         } catch (RuggedExceptionWrapper rew) {
             throw rew.getException();
-        } catch (OrekitExceptionWrapper oew) {
-            final OrekitException oe = oew.getException();
+        } catch (OrekitException oe) {
             throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
     }

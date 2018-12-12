@@ -39,7 +39,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.PolynomialRotation;
@@ -216,20 +215,16 @@ public class PolynomialRotationTest {
                 int[] orders = new int[selected.size()];
                 orders[index] = 1;
                 UnivariateDifferentiableMatrixFunction f =
-                                differentiator.differentiate((UnivariateMatrixFunction) x -> {
-                                    try {
-                                        double oldX = driver.getValue();
-                                        double[][] matrix = new double[raw.size()][];
-                                        driver.setValue(x);
-                                        for (int i = 0 ; i < raw.size(); ++i) {
-                                            matrix[i] = tdl.getLOS(i, date).toArray();
-                                        }
-                                        driver.setValue(oldX);
-                                        return matrix;
-                                    } catch (OrekitException oe) {
-                                        throw new OrekitExceptionWrapper(oe);
-                                    }
-                                });
+                        differentiator.differentiate((UnivariateMatrixFunction) x -> {
+                            double oldX = driver.getValue();
+                            double[][] matrix = new double[raw.size()][];
+                            driver.setValue(x);
+                            for (int i = 0 ; i < raw.size(); ++i) {
+                                matrix[i] = tdl.getLOS(i, date).toArray();
+                            }
+                            driver.setValue(oldX);
+                            return matrix;
+                        });
                 DerivativeStructure[][] mDS = f.value(factory11.variable(0, driver.getValue()));
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, date);

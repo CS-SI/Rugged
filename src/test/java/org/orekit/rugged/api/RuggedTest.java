@@ -54,7 +54,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
@@ -1316,8 +1315,6 @@ public class RuggedTest {
                                     rollDriver.setValue(roll);
                                     pitchDriver.setValue(0);
                                     return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
                                 } catch (RuggedException e) {
                                     throw new RuggedExceptionWrapper(e);
                                 }
@@ -1331,8 +1328,6 @@ public class RuggedTest {
                                     rollDriver.setValue(0);
                                     pitchDriver.setValue(pitch);
                                     return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
                                 } catch (RuggedException e) {
                                     throw new RuggedExceptionWrapper(e);
                                 }
@@ -1346,8 +1341,6 @@ public class RuggedTest {
                                     rollDriver.setValue(roll);
                                     pitchDriver.setValue(0);
                                     return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
                                 } catch (RuggedException e) {
                                     throw new RuggedExceptionWrapper(e);
                                 }
@@ -1361,8 +1354,6 @@ public class RuggedTest {
                                     rollDriver.setValue(0);
                                     pitchDriver.setValue(pitch);
                                     return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
                                 } catch (RuggedException e) {
                                     throw new RuggedExceptionWrapper(e);
                                 }
@@ -1373,7 +1364,7 @@ public class RuggedTest {
         } catch (InvocationTargetException | NoSuchMethodException |
                 SecurityException | IllegalAccessException |
                 IllegalArgumentException | URISyntaxException |
-                OrekitExceptionWrapper | RuggedExceptionWrapper e) {
+                OrekitException | RuggedExceptionWrapper e) {
             Assert.fail(e.getLocalizedMessage());
         }
     }
