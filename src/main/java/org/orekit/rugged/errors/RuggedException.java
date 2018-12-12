@@ -35,7 +35,7 @@ import org.hipparchus.exception.LocalizedException;
 
  */
 
-public class RuggedException extends Exception implements LocalizedException {
+public class RuggedException extends RuntimeException implements LocalizedException {
 
     /** Serializable UID. */
     private static final long serialVersionUID = 20140309L;
