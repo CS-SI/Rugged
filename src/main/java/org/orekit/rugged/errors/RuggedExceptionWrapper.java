@@ -26,7 +26,11 @@ package org.orekit.rugged.errors;
  * which is distributed under the terms of the Apache License V2.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
+ * @deprecated as of 3.0, this class is not used anymore, as {@link RuggedException}
+ * is now an unchecked exception
  */
+@Deprecated
 public class RuggedExceptionWrapper extends RuntimeException {
 
     /** serializable UID. */
