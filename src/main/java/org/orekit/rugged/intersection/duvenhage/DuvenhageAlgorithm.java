@@ -199,8 +199,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
     /** {@inheritDoc} */
     @Override
-    public double getElevation(final double latitude, final double longitude)
-        throws RuggedException {
+    public double getElevation(final double latitude, final double longitude) {
+        
         DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
         final Tile tile = cache.getTile(latitude, longitude);
         return tile.interpolateElevation(latitude, longitude);
@@ -220,15 +220,12 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @param exitLon index to use for interpolating exit point elevation
      * @return point at which the line first enters ground, or null if does not enter
      * ground in the search sub-tile
-     * @exception RuggedException if intersection cannot be found
-     * @exception OrekitException if points cannot be converted to geodetic coordinates
      */
     private NormalizedGeodeticPoint recurseIntersection(final int depth, final ExtendedEllipsoid ellipsoid,
                                                         final Vector3D position, final Vector3D los,
                                                         final MinMaxTreeTile tile,
                                                         final NormalizedGeodeticPoint entry, final int entryLat, final int entryLon,
-                                                        final NormalizedGeodeticPoint exit, final int exitLat, final int exitLon)
-        throws RuggedException, OrekitException {
+                                                        final NormalizedGeodeticPoint exit, final int exitLat, final int exitLon) {
 
         if (depth > 30) {
             // this should never happen
@@ -274,7 +271,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                             final Vector3D crossingP = ellipsoid.pointAtLongitude(position, los, longitude);
                             crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null,
                                                              tile.getMinimumLongitude());
-                        } catch  (RuggedException re) {
+                        } catch (RuggedException re) {
                             // in some very rare cases of numerical noise, we miss the crossing point
                             crossingGP = null;
                         }
@@ -344,7 +341,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                                                  ellipsoid.transform(entry));
                             crossingGP = ellipsoid.transform(crossingP, ellipsoid.getBodyFrame(), null,
                                                              tile.getMinimumLongitude());
-                        } catch  (RuggedException re) {
+                        } catch (RuggedException re) {
                             // in some very rare cases of numerical noise, we miss the crossing point
                             crossingGP = null;
                         }
@@ -426,16 +423,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @param exitLon index to use for interpolating exit point elevation
      * @return point at which the line first enters ground, or null if does not enter
      * ground in the search sub-tile
-     * @exception RuggedException if intersection cannot be found
-     * @exception OrekitException if points cannot be converted to geodetic coordinates
      */
     private NormalizedGeodeticPoint noRecurseIntersection(final ExtendedEllipsoid ellipsoid,
                                                           final Vector3D position, final Vector3D los,
                                                           final MinMaxTreeTile tile,
                                                           final NormalizedGeodeticPoint entry,
                                                           final int entryLat, final int entryLon,
-                                                          final int exitLat, final int exitLon)
-        throws OrekitException, RuggedException {
+                                                          final int exitLat, final int exitLon) {
 
         NormalizedGeodeticPoint intersectionGP = null;
         double intersectionDot = Double.POSITIVE_INFINITY;
@@ -502,12 +496,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @param position pixel position in ellipsoid frame
      * @param los pixel line-of-sight in ellipsoid frame
      * @return exit point
-     * @exception RuggedException if exit point cannot be found
-     * @exception OrekitException if geodetic coordinates cannot be computed
      */
     private LimitPoint findExit(final Tile tile, final ExtendedEllipsoid ellipsoid,
-                                final Vector3D position, final Vector3D los)
-        throws RuggedException, OrekitException {
+                                final Vector3D position, final Vector3D los) {
 
         // look for an exit at bottom
         final double                  reference = tile.getMinimumLongitude();
@@ -629,11 +620,9 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
          * @param cartesian Cartesian point
          * @param side if true, the point is on a side limit, otherwise
          * it is on a top/bottom limit
-         * @exception OrekitException if geodetic coordinates cannot be computed
          */
         LimitPoint(final ExtendedEllipsoid ellipsoid, final double referenceLongitude,
-                   final Vector3D cartesian, final boolean side)
-            throws OrekitException {
+                   final Vector3D cartesian, final boolean side) {
             this(ellipsoid.transform(cartesian, ellipsoid.getBodyFrame(), null, referenceLongitude), side);
         }
 

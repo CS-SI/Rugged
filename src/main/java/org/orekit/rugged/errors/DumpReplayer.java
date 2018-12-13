@@ -273,7 +273,7 @@ public class DumpReplayer {
      * @param file dump file to parse
      * @exception RuggedException if file cannot be parsed
      */
-    public void parse(final File file) throws RuggedException {
+    public void parse(final File file) {
         try {
             final BufferedReader reader =
                     new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
@@ -291,7 +291,7 @@ public class DumpReplayer {
      * @return rugged instance
      * @exception RuggedException if some data are inconsistent or incomplete
      */
-    public Rugged createRugged() throws RuggedException {
+    public Rugged createRugged() {
         try {
             final RuggedBuilder builder = new RuggedBuilder();
 
@@ -306,8 +306,7 @@ public class DumpReplayer {
 
                     /** {@inheritDoc} */
                     @Override
-                    public void updateTile(final double latitude, final double longitude, final UpdatableTile tile)
-                        throws RuggedException {
+                    public void updateTile(final double latitude, final double longitude, final UpdatableTile tile) {
                         for (final ParsedTile parsedTile : tiles) {
                             if (parsedTile.isInterpolable(latitude, longitude)) {
                                 parsedTile.updateTile(tile);
@@ -317,7 +316,6 @@ public class DumpReplayer {
                         throw new RuggedException(RuggedMessages.NO_DEM_DATA,
                                                   FastMath.toDegrees(latitude), FastMath.toDegrees(longitude));
                     }
-
                 }, 8);
             }
 
@@ -411,7 +409,6 @@ public class DumpReplayer {
             // this should never happen
             throw RuggedException.createInternalError(e);
         }
-
     }
 
     /** Get a sensor by name.
@@ -436,9 +433,8 @@ public class DumpReplayer {
      * </p>
      * @param rugged Rugged instance on which calls will be performed
      * @return results of all dumped calls
-     * @exception RuggedException if a call fails
      */
-    public Result[] execute(final Rugged rugged) throws RuggedException {
+    public Result[] execute(final Rugged rugged) {
         final Result[] results = new Result[calls.size()];
         for (int i = 0; i < calls.size(); ++i) {
             results[i] = new Result(calls.get(i).expected,
@@ -489,8 +485,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 try {
                     if (fields.length < 1) {
                         throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
@@ -514,8 +509,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 6 || !fields[0].equals(AE) || !fields[2].equals(F) || !fields[4].equals(FRAME)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
@@ -568,7 +562,7 @@ public class DumpReplayer {
 
                         /** {@inheritDoc} */
                         @Override
-                        public Object execute(final Rugged rugged) throws RuggedException {
+                        public Object execute(final Rugged rugged) {
                             return rugged.directLocation(date, position, los);
                         }
 
@@ -581,8 +575,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 6 || !fields[0].equals(LATITUDE) ||
                     !fields[2].equals(LONGITUDE) || !fields[4].equals(ELEVATION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
@@ -626,8 +619,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 42 ||
                     !fields[0].equals(INDEX) ||
                     !fields[2].equals(BODY)  ||
@@ -685,8 +677,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 13 ||
                         !fields[1].equals(LAT_MIN) || !fields[3].equals(LAT_STEP) || !fields[5].equals(LAT_ROWS) ||
                         !fields[7].equals(LON_MIN) || !fields[9].equals(LON_STEP) || !fields[11].equals(LON_COLS)) {
@@ -717,8 +708,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 7 ||
                     !fields[1].equals(LAT_INDEX) || !fields[3].equals(LON_INDEX) || !fields[5].equals(ELEVATION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
@@ -745,8 +735,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 16 ||
                         !fields[0].equals(SENSOR_NAME) ||
                         !fields[2].equals(LATITUDE) || !fields[4].equals(LONGITUDE) || !fields[6].equals(ELEVATION) ||
@@ -777,7 +766,7 @@ public class DumpReplayer {
 
                     /** {@inheritDoc} */
                     @Override
-                    public Object execute(final Rugged rugged) throws RuggedException {
+                    public Object execute(final Rugged rugged) {
                         return rugged.inverseLocation(sensorName, point, minLine, maxLine);
                     }
 
@@ -791,8 +780,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 4 || !fields[0].equals(LINE_NUMBER) || !fields[2].equals(PIXEL_NUMBER)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
@@ -809,8 +797,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 8 || !fields[0].equals(SENSOR_NAME) ||
                     !fields[2].equals(NB_PIXELS) || !fields[4].equals(POSITION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
@@ -914,8 +901,7 @@ public class DumpReplayer {
 
             /** {@inheritDoc} */
             @Override
-            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global)
-                throws RuggedException {
+            public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
                 if (fields.length < 6 || !fields[0].equals(SENSOR_NAME) ||
                     !fields[2].equals(LINE_NUMBER) || !fields[4].equals(RATE)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
@@ -934,10 +920,8 @@ public class DumpReplayer {
          * @param file dump file
          * @param line line to parse
          * @param global global parser to store parsed data
-         * @exception RuggedException if line is not supported
          */
-        public static void parse(final int l, final File file, final String line, final DumpReplayer global)
-            throws RuggedException {
+        public static void parse(final int l, final File file, final String line, final DumpReplayer global) {
 
             final String trimmed = line.trim();
             if (trimmed.length() == 0 || trimmed.startsWith(COMMENT_START)) {
@@ -972,10 +956,8 @@ public class DumpReplayer {
          * @param line complete line
          * @param fields data fields from the line
          * @param global global parser to store parsed data
-         * @exception RuggedException if line cannot be parsed
          */
-        public abstract void parse(int l, File file, String line, String[] fields, DumpReplayer global)
-            throws RuggedException;
+        public abstract void parse(int l, File file, String line, String[] fields, DumpReplayer global);
 
     }
 
@@ -1042,10 +1024,8 @@ public class DumpReplayer {
 
         /** Update the tile according to the Digital Elevation Model.
          * @param tile to update
-         * @exception RuggedException if tile cannot be updated
          */
-        public void updateTile(final UpdatableTile tile)
-            throws RuggedException {
+        public void updateTile(final UpdatableTile tile) {
 
             tile.setGeometry(minLatitude, minLongitude,
                              latitudeStep, longitudeStep,
@@ -1361,9 +1341,8 @@ public class DumpReplayer {
         /** Execute a call.
          * @param rugged Rugged instance on which called should be performed
          * @return result of the call
-         * @exception RuggedException if the call fails
          */
-        public abstract Object execute(Rugged rugged) throws RuggedException;
+        public abstract Object execute(Rugged rugged);
 
     }
 

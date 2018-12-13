@@ -144,8 +144,7 @@ public enum RuggedMessages implements Localizable {
         /** {@inheritDoc} */
         @Override
         public ResourceBundle newBundle(final String baseName, final Locale locale, final String format,
-                                        final ClassLoader loader, final boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException {
+                                        final ClassLoader loader, final boolean reload) throws IOException {
             // The below is a copy of the default implementation.
             final String bundleName = toBundleName(baseName, locale);
             final String resourceName = toResourceName(bundleName, "utf8");

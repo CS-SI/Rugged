@@ -302,7 +302,7 @@ public class InterRefining extends Refining {
     }
 
 	/** Constructor */
-	public InterRefining() throws RuggedException, OrekitException {
+	public InterRefining() {
 
 		sensorNameA = "SensorA";
 		final double incidenceAngleA = -5.0;
@@ -324,7 +324,7 @@ public class InterRefining extends Refining {
      * @return GSD
      */
     private double computeDistanceBetweenLOS(final Rugged ruggedA, final LineSensor lineSensorA, 
-                                             final Rugged ruggedB, final LineSensor lineSensorB) throws RuggedException {
+                                             final Rugged ruggedB, final LineSensor lineSensorB) {
 
     	// Get number of line of sensors
     	int dimensionA = pleiadesViewingModelA.getDimension();

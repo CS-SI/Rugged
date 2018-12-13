@@ -39,8 +39,7 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                                final Vector3D position, final Vector3D los)
-        throws RuggedException {
+                                                final Vector3D position, final Vector3D los) {
         DumpManager.dumpAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
         return ellipsoid.pointOnGround(position, los, 0.0);
     }
@@ -49,8 +48,7 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
     @Override
     public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
                                                       final Vector3D position, final Vector3D los,
-                                                      final NormalizedGeodeticPoint closeGuess)
-        throws RuggedException {
+                                                      final NormalizedGeodeticPoint closeGuess) {
         DumpManager.dumpAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
         return intersection(ellipsoid, position, los);
     }

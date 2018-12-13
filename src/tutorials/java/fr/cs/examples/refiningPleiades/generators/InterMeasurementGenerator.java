@@ -84,11 +84,9 @@ public class InterMeasurementGenerator implements Measurable {
      * @param ruggedB Rugged instance corresponding to the viewing model B
      * @param sensorNameB sensor name B
      * @param dimensionB number of line for acquisition B
-     * @throws RuggedException
      */
     public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
-                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB)
-        throws RuggedException {
+                                 final Rugged ruggedB, final String sensorNameB, final int dimensionB) {
 
         // Initialize parameters
         initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
@@ -110,12 +108,10 @@ public class InterMeasurementGenerator implements Measurable {
      * @param sensorNameB sensor name B
      * @param dimensionB dimension for acquisition B
      * @param outlier limit value for outlier points
-     * @throws RuggedException
      */
     public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
                                  final Rugged ruggedB, final String sensorNameB, final int dimensionB,
-                                 final double outlier)
-        throws RuggedException {
+                                 final double outlier) {
 
         this(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
         this.outlier = outlier;
@@ -132,12 +128,10 @@ public class InterMeasurementGenerator implements Measurable {
      * @param outlier limit value for outlier points
      * @param earthConstraintWeight weight given to the Earth distance constraint
      * with respect to the LOS distance (between 0 and 1).
-     * @throws RuggedException
      */
     public InterMeasurementGenerator(final Rugged ruggedA, final String sensorNameA, final int dimensionA,
                                  final Rugged ruggedB, final String sensorNameB, final int dimensionB,
-                                 final double outlier, final double earthConstraintWeight)
-        throws RuggedException {
+                                 final double outlier, final double earthConstraintWeight) {
 
         // Initialize parameters
         initParams(ruggedA, sensorNameA, dimensionA, ruggedB, sensorNameB, dimensionB);
@@ -175,7 +169,7 @@ public class InterMeasurementGenerator implements Measurable {
     }
 
     @Override
-    public void createMeasurement(final int lineSampling, final int pixelSampling) throws RuggedException {
+    public void createMeasurement(final int lineSampling, final int pixelSampling) {
 
         // Search the sensor pixel seeing point
         final int minLine = 0;
@@ -235,10 +229,8 @@ public class InterMeasurementGenerator implements Measurable {
      * @param lineSampling sampling along lines
      * @param pixelSampling sampling along columns
      * @param noise errors to apply to measure for pixel A and pixel B
-     * @throws RuggedException
      */
-    public void createNoisyMeasurement(final int lineSampling, final int pixelSampling, final Noise noise)
-        throws RuggedException {
+    public void createNoisyMeasurement(final int lineSampling, final int pixelSampling, final Noise noise) {
 
     	// Get noise features (errors)
     	// [pixelA, pixelB] mean
@@ -322,16 +314,14 @@ public class InterMeasurementGenerator implements Measurable {
      * @param rB Rugged instance B
      * @param sNameB sensor name B
      * @param dimB dimension for acquisition B
-     * @throws RuggedException
      */
     private void initParams(final Rugged rA, final String sNameA, final int dimA,
-                            final Rugged rB, final String sNameB, final int dimB)
-        throws RuggedException {
+                            final Rugged rB, final String sNameB, final int dimB) {
 
         this.sensorNameB = sNameB;
         // Check that sensors's name is different
         if (sNameA.contains(sNameB)) {
-           throw new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, sNameA));
+           throw new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, sNameA);
         }
 
         this.ruggedA = rA;

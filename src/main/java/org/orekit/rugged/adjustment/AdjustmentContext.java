@@ -117,51 +117,40 @@ public class AdjustmentContext {
      * @param parametersConvergenceThreshold convergence threshold on normalized
      *                                       parameters (dimensionless, related to parameters scales)
      * @return optimum of the least squares problem
-     * @exception RuggedException if several parameters with the same name
-     *            exist, if no parameters have been selected for estimation, or
-     *            if parameters cannot be estimated (too few measurements,
-     *            ill-conditioned problem ...)
      */
     public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations,
-                                          final double parametersConvergenceThreshold)
-        throws RuggedException {
+                                          final double parametersConvergenceThreshold) {
 
-        try {
-
-            final List<Rugged> ruggedList = new ArrayList<Rugged>();
-            final List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
-            for (String ruggedName : ruggedNameList) {
-                final Rugged rugged = this.viewingModel.get(ruggedName);
-                if (rugged == null) {
-                    throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
-                }
-
-                ruggedList.add(rugged);
-                selectedSensors.addAll(rugged.getLineSensors());
+        final List<Rugged> ruggedList = new ArrayList<Rugged>();
+        final List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
+        for (String ruggedName : ruggedNameList) {
+            final Rugged rugged = this.viewingModel.get(ruggedName);
+            if (rugged == null) {
+                throw new RuggedException(RuggedMessages.INVALID_RUGGED_NAME);
             }
 
-            final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(this.optimizerID);
-            LeastSquaresProblem theProblem = null;
-
-            // builder
-            switch (ruggedList.size()) {
-                case 1:
-                    final Rugged rugged = ruggedList.get(0);
-                    final GroundOptimizationProblemBuilder groundOptimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measurements, rugged);
-                    theProblem = groundOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
-                    break;
-                case 2:
-                    final InterSensorsOptimizationProblemBuilder interSensorsOptimizationProblem = new InterSensorsOptimizationProblemBuilder(selectedSensors, measurements, ruggedList);
-                    theProblem = interSensorsOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
-                    break;
-                default :
-                    throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT, ruggedList.size());
-            }
-
-            return adjuster.optimize(theProblem);
-
-        } catch (RuggedExceptionWrapper rew) {
-            throw rew.getException();
+            ruggedList.add(rugged);
+            selectedSensors.addAll(rugged.getLineSensors());
         }
+
+        final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(this.optimizerID);
+        LeastSquaresProblem theProblem = null;
+
+        // builder
+        switch (ruggedList.size()) {
+        case 1:
+            final Rugged rugged = ruggedList.get(0);
+            final GroundOptimizationProblemBuilder groundOptimizationProblem = new GroundOptimizationProblemBuilder(selectedSensors, measurements, rugged);
+            theProblem = groundOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
+            break;
+        case 2:
+            final InterSensorsOptimizationProblemBuilder interSensorsOptimizationProblem = new InterSensorsOptimizationProblemBuilder(selectedSensors, measurements, ruggedList);
+            theProblem = interSensorsOptimizationProblem.build(maxEvaluations, parametersConvergenceThreshold);
+            break;
+        default :
+            throw new RuggedException(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT, ruggedList.size());
+        }
+
+        return adjuster.optimize(theProblem);
     }
 }

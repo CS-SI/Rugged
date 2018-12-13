@@ -107,8 +107,7 @@ public class RandomLandscapeUpdater implements TileUpdater {
     }
 
     @Override
-    public void updateTile(double latitude, double longitude, UpdatableTile tile)
-                    throws RuggedException {
+    public void updateTile(double latitude, double longitude, UpdatableTile tile) {
                 
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);

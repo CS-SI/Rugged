@@ -52,7 +52,7 @@ public class PolynomialRotationTest {
     private List<Vector3D> raw;
 
     @Test
-    public void testIdentity() throws RuggedException, OrekitException {
+    public void testIdentity() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xbe0d9b530fe7f53cl));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -74,7 +74,7 @@ public class PolynomialRotationTest {
     }
 
     @Test
-    public void testFixedCombination() throws RuggedException, OrekitException {
+    public void testFixedCombination() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xdc4cfdea38edd2bbl));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -145,7 +145,7 @@ public class PolynomialRotationTest {
     }
 
     @Test
-    public void testDerivatives() throws RuggedException, OrekitException {
+    public void testDerivatives() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xc60acfc04eb27935l));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -243,7 +243,7 @@ public class PolynomialRotationTest {
     }
 
     @Before
-    public void setUp() throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
 
         final Vector3D normal    = Vector3D.PLUS_I;
         final Vector3D fovCenter = Vector3D.PLUS_K;

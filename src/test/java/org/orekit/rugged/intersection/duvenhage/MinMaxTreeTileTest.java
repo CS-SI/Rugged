@@ -29,7 +29,7 @@ public class MinMaxTreeTileTest {
 
     @Test
     public void testSizeTall()
-        throws RuggedException, SecurityException, NoSuchFieldException,
+        throws SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
         MinMaxTreeTile tile = createTile(107, 19);
         Assert.assertEquals(9, tile.getLevels());
@@ -68,7 +68,7 @@ public class MinMaxTreeTileTest {
 
     @Test
     public void testSizeFat()
-        throws RuggedException, SecurityException, NoSuchFieldException,
+        throws SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
         MinMaxTreeTile tile = createTile(4, 7);
         Assert.assertEquals(4, tile.getLevels());
@@ -96,12 +96,12 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testSinglePixel() throws RuggedException {
+    public void testSinglePixel() {
         Assert.assertEquals(0, createTile(1, 1).getLevels());
     }
 
     @Test
-    public void testMinMax() throws RuggedException {
+    public void testMinMax() {
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
 
@@ -133,7 +133,7 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testLocateMinMax() throws RuggedException {
+    public void testLocateMinMax() {
         RandomGenerator random = new Well1024a(0xca9883209c6e740cl);
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
@@ -167,7 +167,7 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testIssue189() throws RuggedException {
+    public void testIssue189() {
         MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 2, 2);
         tile.setElevation(0, 0, 1.0);
@@ -182,14 +182,14 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testMergeLarge() throws RuggedException {
+    public void testMergeLarge() {
         MinMaxTreeTile tile = createTile(1201, 1201);
         Assert.assertEquals(21, tile.getLevels());
         Assert.assertEquals( 7, tile.getMergeLevel(703, 97, 765, 59));
     }
 
     @Test
-    public void testMergeLevel() throws RuggedException {
+    public void testMergeLevel() {
         for (int nbRows = 1; nbRows < 20; nbRows++) {
             for (int nbColumns = 1; nbColumns < 20; nbColumns++) {
 
@@ -236,7 +236,7 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testSubTilesLimits() throws RuggedException {
+    public void testSubTilesLimits() {
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
 
@@ -335,7 +335,7 @@ public class MinMaxTreeTileTest {
 
     }
 
-    private MinMaxTreeTile createTile(int nbRows, int nbColumns) throws RuggedException {
+    private MinMaxTreeTile createTile(int nbRows, int nbColumns) {
         MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, nbRows, nbColumns);
         for (int i = 0; i < nbRows; ++i) {

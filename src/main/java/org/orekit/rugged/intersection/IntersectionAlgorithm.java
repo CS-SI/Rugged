@@ -55,9 +55,7 @@ public interface IntersectionAlgorithm {
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return elevation at specified point
-     * @exception RuggedException if Digital Elevation Model does not cover point
      */
-    double getElevation(double latitude, double longitude)
-        throws RuggedException;
+    double getElevation(double latitude, double longitude);
 
 }

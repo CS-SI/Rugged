@@ -32,7 +32,7 @@ import org.hipparchus.exception.LocalizedException;
  * </p>
  *
  * @author Luc Maisonobe
-
+ * @author Guylaine Prat
  */
 
 public class RuggedException extends RuntimeException implements LocalizedException {

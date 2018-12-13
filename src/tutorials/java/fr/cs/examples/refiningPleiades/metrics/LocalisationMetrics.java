@@ -67,10 +67,8 @@ public class LocalisationMetrics {
      * @param measMapping Mapping of observations/measurements = the ground truth
      * @param rugged Rugged instance
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
-     * @exception RuggedException if direct location fails
      */
-    public LocalisationMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
-        throws RuggedException {
+    public LocalisationMetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular) {
     	
         // Initialization
         this.resMax = 0.0;
@@ -85,11 +83,9 @@ public class LocalisationMetrics {
      * @param ruggedA Rugged instance corresponding to viewing model A
      * @param ruggedB Rugged instance corresponding to viewing model B
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
-     * @exception RuggedException if direct location fails
      */
     public LocalisationMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
-                               final boolean computeAngular)
-        throws RuggedException {
+                               final boolean computeAngular) {
 
         // Initialization
         this.resMax = 0.0;
@@ -108,10 +104,8 @@ public class LocalisationMetrics {
      * @param measMapping Mapping of observations/measurements = the ground truth
      * @param rugged Rugged instance
      * @param computeAngular flag to know if distance is computed in meters (false) or with angular (true)
-     * @exception RuggedException if direct location fails
      */
-    public void computeGCPmetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular)
-        throws RuggedException {
+    public void computeGCPmetrics(final SensorToGroundMapping measMapping, final Rugged rugged, final boolean computeAngular) {
 
         // Mapping of observations/measurements = the ground truth
         final Set<Map.Entry<SensorPixel, GeodeticPoint>> measurementsMapping;
@@ -159,11 +153,9 @@ public class LocalisationMetrics {
      * @param ruggedA Rugged instance corresponding to viewing model A
      * @param ruggedB Rugged instance corresponding to viewing model B
      * @param computeAngular Flag to know if distance is computed in meters (false) or with angular (true)
-     * @exception RuggedException if direct location fails
      */
     public void computeTiePointsMetrics(final SensorToSensorMapping measMapping, final Rugged ruggedA, final Rugged ruggedB,
-                                      final boolean computeAngular)
-        throws RuggedException {
+                                      final boolean computeAngular) {
 
         // Mapping of observations/measurements = the ground truth
         final Set<Map.Entry<SensorPixel, SensorPixel>> measurementsMapping;

@@ -28,7 +28,7 @@ import org.orekit.rugged.raster.TilesCache;
 public class TilesCacheTest {
 
     @Test
-    public void testSingleTile() throws RuggedException {
+    public void testSingleTile() {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory,
                 new CheckedPatternElevationUpdater(FastMath.toRadians(3.0), 11, 10.0, 20.0), 1000);
@@ -43,7 +43,7 @@ public class TilesCacheTest {
     }
 
     @Test
-    public void testEviction() throws RuggedException {
+    public void testEviction() {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory,
                 new CheckedPatternElevationUpdater(FastMath.toRadians(1.0), 11, 10.0, 20.0), 12);
@@ -95,7 +95,7 @@ public class TilesCacheTest {
     }
 
     @Test
-    public void testExactEnd() throws RuggedException {
+    public void testExactEnd() {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache =
                 new TilesCache<SimpleTile>(factory,
@@ -123,7 +123,7 @@ public class TilesCacheTest {
     }
 
     @Test
-    public void testNonContiguousFill() throws RuggedException {
+    public void testNonContiguousFill() {
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache =
                 new TilesCache<SimpleTile>(factory,

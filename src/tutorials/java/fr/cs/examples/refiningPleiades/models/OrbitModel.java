@@ -91,8 +91,7 @@ public class OrbitModel {
                                       final List<TimeStampedPVCoordinates> satellitePVList,
                                       final String absDate,
                                       final double px, final double py, final double pz,
-                                      final double vx, final double vy, final double vz)
-        throws OrekitException {
+                                      final double vx, final double vy, final double vz) {
     	
         final AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
         final Vector3D position = new Vector3D(px, py, pz);
@@ -120,9 +119,8 @@ public class OrbitModel {
 
     /** Create an Earth.
      * @return the Earth as the WGS84 ellipsoid
-     * @throws OrekitException
      */
-    public BodyShape createEarth() throws OrekitException {
+    public BodyShape createEarth() {
     	
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                     Constants.WGS84_EARTH_FLATTENING,
@@ -131,9 +129,8 @@ public class OrbitModel {
 
     /** Created a gravity field.
      * @return normalized spherical harmonics coefficients
-     * @throws OrekitException
      */
-    public NormalizedSphericalHarmonicsProvider createGravityField() throws OrekitException {
+    public NormalizedSphericalHarmonicsProvider createGravityField() {
     	
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
@@ -141,9 +138,8 @@ public class OrbitModel {
     /** Create an orbit at a chosen date.
      * @param mu Earth gravitational constant
      * @return the orbit
-     * @throws OrekitException
      */
-    public Orbit createOrbit(final double mu, final AbsoluteDate date) throws OrekitException {
+    public Orbit createOrbit(final double mu, final AbsoluteDate date) {
     	
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
@@ -195,8 +191,7 @@ public class OrbitModel {
 
     /** Get the offset.
      */
-   private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift)
-        throws OrekitException {
+   private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift){
     	
         final LOFType type = LOFType.VVLH;
         final double roll = getPoly(lofTransformRollPoly, shift);
@@ -219,8 +214,7 @@ public class OrbitModel {
 
    /** Create the attitude provider.
     */
-    public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit)
-        throws OrekitException {
+    public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit) {
 
         if (userDefinedLOFTransform) {
             final LOFType type = LOFType.VVLH;
@@ -247,8 +241,7 @@ public class OrbitModel {
     */
    public List<TimeStampedPVCoordinates> orbitToPV(final Orbit orbit, final BodyShape earth,
     		                                        final AbsoluteDate minDate, final AbsoluteDate maxDate,
-    		                                        final double step)
-        throws OrekitException {
+    		                                        final double step) {
     	
         final Propagator propagator = new KeplerianPropagator(orbit);
 
@@ -271,8 +264,7 @@ public class OrbitModel {
     */
    public List<TimeStampedAngularCoordinates> orbitToQ(final Orbit orbit, final BodyShape earth,
     		                                            final AbsoluteDate minDate, final AbsoluteDate maxDate,
-    		                                            final double step)
-        throws OrekitException {
+    		                                            final double step) {
     	
         final Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(createAttitudeProvider(earth, orbit));

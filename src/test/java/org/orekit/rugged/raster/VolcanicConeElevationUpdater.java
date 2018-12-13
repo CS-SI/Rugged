@@ -38,8 +38,8 @@ public class VolcanicConeElevationUpdater implements TileUpdater {
         this.n      = n;
     }
 
-    public void updateTile(double latitude, double longitude, UpdatableTile tile)
-        throws RuggedException {
+    public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+        
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
         double minLongitude = size * FastMath.floor(longitude / size);
@@ -58,5 +58,4 @@ public class VolcanicConeElevationUpdater implements TileUpdater {
             }
         }
     }
-
 }

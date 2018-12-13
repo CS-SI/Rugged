@@ -90,10 +90,8 @@ public class LineSensor {
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @return pixel normalized line-of-sight
-     * @exception RuggedException if date cannot be handled
      */
-    public Vector3D getLOS(final AbsoluteDate date, final int i)
-        throws RuggedException {
+    public Vector3D getLOS(final AbsoluteDate date, final int i) {
         final Vector3D l = los.getLOS(i, date);
         DumpManager.dumpSensorLOS(this, date, i, l);
         return l;
@@ -106,8 +104,7 @@ public class LineSensor {
      * @exception RuggedException if date cannot be handled
      * @since 2.0
      */
-    public Vector3D getLOS(final AbsoluteDate date, final double i)
-        throws RuggedException {
+    public Vector3D getLOS(final AbsoluteDate date, final double i) {
 
         final int iInf = FastMath.max(0, FastMath.min(getNbPixels() - 2, (int) FastMath.floor(i)));
         final int iSup = iInf + 1;
@@ -155,10 +152,8 @@ public class LineSensor {
     /** Get the date.
      * @param lineNumber line number
      * @return date corresponding to line number
-     * @exception RuggedException if date cannot be handled
      */
-    public AbsoluteDate getDate(final double lineNumber)
-        throws RuggedException {
+    public AbsoluteDate getDate(final double lineNumber) {
         final AbsoluteDate date = datationModel.getDate(lineNumber);
         DumpManager.dumpSensorDatation(this, lineNumber, date);
         return date;
@@ -167,10 +162,8 @@ public class LineSensor {
     /** Get the line number.
      * @param date date
      * @return line number corresponding to date
-     * @exception RuggedException if date cannot be handled
      */
-    public double getLine(final AbsoluteDate date)
-        throws RuggedException {
+    public double getLine(final AbsoluteDate date) {
         final double lineNumber = datationModel.getLine(date);
         DumpManager.dumpSensorDatation(this, lineNumber, date);
         return lineNumber;

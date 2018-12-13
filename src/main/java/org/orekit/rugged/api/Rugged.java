@@ -238,10 +238,8 @@ public class Rugged {
      * @param sensorName name of the line sensor
      * @param lineNumber number of the line to localize on ground
      * @return ground position of all pixels of the specified sensor line
-     * @exception RuggedException if line cannot be localized, or sensor is unknown
      */
-    public GeodeticPoint[] directLocation(final String sensorName, final double lineNumber)
-        throws RuggedException {
+    public GeodeticPoint[] directLocation(final String sensorName, final double lineNumber) {
 
         final LineSensor   sensor = getLineSensor(sensorName);
         final Vector3D sensorPosition   = sensor.getPosition();
@@ -323,10 +321,8 @@ public class Rugged {
      * we consider each pixel to be at sensor position
      * @param los normalized line-of-sight in spacecraft frame
      * @return ground position of intersection point between specified los and ground
-     * @exception RuggedException if line cannot be localized, sensor is unknown or problem with atmospheric data
      */
-    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los)
-        throws RuggedException {
+    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los) {
 
         // Set the pixel to null in order not to compute atmosphere with optimization
         final PixelLOS pixelLOS = new PixelLOS(null, los);
@@ -344,10 +340,8 @@ public class Rugged {
      * we consider each pixel to be at sensor position
      * @param pixelLOS pixel definition with normalized line-of-sight in spacecraft frame
      * @return ground position of intersection point between specified los and ground
-     * @exception RuggedException if line cannot be localized, sensor is unknown or problem with atmospheric data
      */
-    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final PixelLOS pixelLOS)
-        throws RuggedException {
+    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final PixelLOS pixelLOS) {
 
         final Vector3D los = pixelLOS.getLOS();
         // TODO change dump to add sensorPixel
@@ -449,14 +443,13 @@ public class Rugged {
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return date at which ground point is seen by line sensor
-     * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #inverseLocation(String, double, double, int, int)
      * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public AbsoluteDate dateLocation(final String sensorName,
                                      final double latitude, final double longitude,
-                                     final int minLine, final int maxLine)
-        throws RuggedException {
+                                     final int minLine, final int maxLine) {
+        
         final GeodeticPoint groundPoint =
                 new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
         return dateLocation(sensorName, groundPoint, minLine, maxLine);
@@ -485,13 +478,11 @@ public class Rugged {
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return date at which ground point is seen by line sensor
-     * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #inverseLocation(String, GeodeticPoint, int, int)
      * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public AbsoluteDate dateLocation(final String sensorName, final GeodeticPoint point,
-                                     final int minLine, final int maxLine)
-        throws RuggedException {
+                                     final int minLine, final int maxLine) {
 
         final LineSensor sensor = getLineSensor(sensorName);
         final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
@@ -532,13 +523,12 @@ public class Rugged {
      * @param maxLine maximum line number
      * @return sensor pixel seeing ground point, or null if ground point cannot
      * be seen between the prescribed line numbers
-     * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public SensorPixel inverseLocation(final String sensorName,
                                        final double latitude, final double longitude,
-                                       final int minLine,  final int maxLine)
-        throws RuggedException {
+                                       final int minLine,  final int maxLine) {
+        
         final GeodeticPoint groundPoint = new GeodeticPoint(latitude, longitude, algorithm.getElevation(latitude, longitude));
         return inverseLocation(sensorName, groundPoint, minLine, maxLine);
     }
@@ -563,13 +553,11 @@ public class Rugged {
      * @param maxLine maximum line number where the search will be performed
      * @return sensor pixel seeing point, or null if point cannot be seen between the
      * prescribed line numbers
-     * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #dateLocation(String, GeodeticPoint, int, int)
      * @see org.orekit.rugged.utils.RoughVisibilityEstimator
      */
     public SensorPixel inverseLocation(final String sensorName, final GeodeticPoint point,
-                                       final int minLine, final int maxLine)
-        throws RuggedException {
+                                       final int minLine, final int maxLine) {
 
         final LineSensor sensor = getLineSensor(sensorName);
         DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine, lightTimeCorrection, aberrationOfLightCorrection);
@@ -620,13 +608,11 @@ public class Rugged {
      * @param pInert sensor position in inertial frame
      * @param lInert line of sight in inertial frame
      * @return geodetic point with light time correction
-     * @throws RuggedException if intersection cannot be found
      */
     private NormalizedGeodeticPoint computeWithLightTimeCorrection(final AbsoluteDate date,
                                                                    final Vector3D sensorPosition, final Vector3D los,
                                                                    final Transform scToInert, final Transform inertToBody,
-                                                                   final Vector3D pInert, final Vector3D lInert)
-        throws RuggedException {
+                                                                   final Vector3D pInert, final Vector3D lInert) {
 
         // compute the approximate transform between spacecraft and observed body
         final Transform approximate = new Transform(date, scToInert, inertToBody);
@@ -656,12 +642,10 @@ public class Rugged {
      * @param sensor the line sensor
      * @param planeCrossing the sensor mean plane crossing
      * @return the sensor pixel crossing or null if cannot be found
-     * @throws RuggedException if sensor cannot be found
      * @since 3.0
      */
     private SensorPixel findSensorPixelWithoutAtmosphere(final GeodeticPoint point,
-                                                         final LineSensor sensor, final SensorMeanPlaneCrossing planeCrossing)
-        throws RuggedException {
+                                                         final LineSensor sensor, final SensorMeanPlaneCrossing planeCrossing) {
 
         // find approximately the sensor line at which ground point crosses sensor mean plane
         final Vector3D target = ellipsoid.transform(point);
@@ -722,12 +706,10 @@ public class Rugged {
      * @param minLine minimum line number where the search will be performed
      * @param maxLine maximum line number where the search will be performed
      * @return the sensor pixel crossing or null if cannot be found
-     * @throws RuggedException if problem while computing correction
      * @since 3.0
      */
     private SensorPixel findSensorPixelWithAtmosphere(final GeodeticPoint point,
-                                                      final LineSensor sensor, final int minLine, final int maxLine)
-        throws RuggedException {
+                                                      final LineSensor sensor, final int minLine, final int maxLine) {
 
         // TBN: there is no direct way to compute the inverse location.
         // The method is based on an interpolation grid associated with the fixed point method
@@ -820,12 +802,10 @@ public class Rugged {
      * @param minLine minimum line number where the search will be performed
      * @param maxLine maximum line number where the search will be performed
      * @return the sensor pixel grid computed without atmosphere
-     * @throws RuggedException if invalid range for lines
      */
     private SensorPixel[][] computeInverseLocOnGridWithoutAtmosphere(final GeodeticPoint[][] groundGridWithAtmosphere,
                                                                      final int nbPixelGrid, final int nbLineGrid,
-                                                                     final LineSensor sensor, final int minLine, final int maxLine)
-        throws RuggedException {
+                                                                     final LineSensor sensor, final int minLine, final int maxLine) {
 
         final SensorPixel[][] sensorPixelGrid = new SensorPixel[nbPixelGrid][nbLineGrid];
         final String sensorName = sensor.getName();
@@ -850,8 +830,8 @@ public class Rugged {
                         } else if (sensorPixelGrid[uIndex][vIndex] == null) {
                             throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
                         }
-                    } catch (RuggedException re) {
-                        throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
+                    } catch (RuggedException re) { // This should never happen
+                        throw RuggedException.createInternalError(re);
                     }
 
                 } else { // groundGrid[uIndex][vIndex] == null: impossible to compute inverse loc because ground point not defined
@@ -868,10 +848,9 @@ public class Rugged {
      * @param lineGrid the line grid
      * @param sensor the line sensor
      * @return the ground grid computed with atmosphere
-     * @throws RuggedException if a problem occurs while computing direct location on sensor grid with atmospheric refraction
      */
-    private GeodeticPoint[][] computeDirectLocOnGridWithAtmosphere(final double[] pixelGrid, final double[] lineGrid, final LineSensor sensor)
-            throws RuggedException {
+    private GeodeticPoint[][] computeDirectLocOnGridWithAtmosphere(final double[] pixelGrid, final double[] lineGrid, 
+                                                                   final LineSensor sensor) {
 
         final int nbPixelGrid = pixelGrid.length;
         final int nbLineGrid = lineGrid.length;
@@ -887,7 +866,7 @@ public class Rugged {
                 try {
                     groundGridWithAtmosphere[uIndex][vIndex] = directLocation(date, sensorPosition, los);
                 } catch (RuggedException re) { // This should never happen
-                    throw new RuggedException(RuggedMessages.INTERNAL_ERROR, re);
+                    throw RuggedException.createInternalError(re);
                 }
             } // end loop vIndex
         } // end loop uIndex
@@ -903,13 +882,11 @@ public class Rugged {
      * @param dateB current date for sensor B
      * @param pixelB pixel index for sensor B
      * @return distances computed between LOS and to the ground
-     * @exception RuggedException if frames cannot be computed at date or if date cannot be handled
      * @since 2.0
      */
     public double[] distanceBetweenLOS(final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
                                        final SpacecraftToObservedBody scToBodyA,
-                                       final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB)
-        throws RuggedException {
+                                       final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB) {
 
         // Compute the approximate transform between spacecraft and observed body
         // from Rugged instance A
@@ -976,15 +953,13 @@ public class Rugged {
      * @param pixelB pixel index for sensor B
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return distances computed, with derivatives, between LOS and to the ground
-     * @exception RuggedException if frames cannot be computed at date
      * @see #distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)
      */
     public DerivativeStructure[] distanceBetweenLOSderivatives(
                                  final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
                                  final SpacecraftToObservedBody scToBodyA,
                                  final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB,
-                                 final DSGenerator generator)
-        throws RuggedException {
+                                 final DSGenerator generator) {
 
         // Compute the approximate transforms between spacecraft and observed body
         // from Rugged instance A
@@ -1059,11 +1034,9 @@ public class Rugged {
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @return mean plane crossing finder
-     * @exception RuggedException if sensor is unknown
      */
     private SensorMeanPlaneCrossing getPlaneCrossing(final String sensorName,
-                                                     final int minLine, final int maxLine)
-        throws RuggedException {
+                                                     final int minLine, final int maxLine) {
         
         final LineSensor sensor = getLineSensor(sensorName);
         SensorMeanPlaneCrossing planeCrossing = finders.get(sensorName);
@@ -1087,10 +1060,8 @@ public class Rugged {
 
     /** Set the mean plane crossing finder for a sensor.
      * @param planeCrossing plane crossing finder
-     * @exception RuggedException if sensor is unknown
      */
-    private void setPlaneCrossing(final SensorMeanPlaneCrossing planeCrossing)
-        throws RuggedException {
+    private void setPlaneCrossing(final SensorMeanPlaneCrossing planeCrossing) {
         finders.put(planeCrossing.getSensor().getName(), planeCrossing);
     }
 
@@ -1102,7 +1073,6 @@ public class Rugged {
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return sensor pixel seeing point with derivatives, or null if point cannot be seen between the
      * prescribed line numbers
-     * @exception RuggedException if line cannot be localized, or sensor is unknown
      * @see #inverseLocation(String, GeodeticPoint, int, int)
      * @since 2.0
      */
@@ -1111,8 +1081,7 @@ public class Rugged {
                                                             final GeodeticPoint point,
                                                             final int minLine,
                                                             final int maxLine,
-                                                            final DSGenerator generator)
-        throws RuggedException {
+                                                            final DSGenerator generator) {
 
         final LineSensor sensor = getLineSensor(sensorName);
 
@@ -1176,30 +1145,24 @@ public class Rugged {
     /** Get transform from spacecraft to inertial frame.
      * @param date date of the transform
      * @return transform from spacecraft to inertial frame
-     * @exception RuggedException if spacecraft position or attitude cannot be computed at date
      */
-    public Transform getScToInertial(final AbsoluteDate date)
-        throws RuggedException {
+    public Transform getScToInertial(final AbsoluteDate date) {
         return scToBody.getScToInertial(date);
     }
 
     /** Get transform from inertial frame to observed body frame.
      * @param date date of the transform
      * @return transform from inertial frame to observed body frame
-     * @exception RuggedException if frames cannot be computed at date
      */
-    public Transform getInertialToBody(final AbsoluteDate date)
-        throws RuggedException {
+    public Transform getInertialToBody(final AbsoluteDate date) {
         return scToBody.getInertialToBody(date);
     }
 
     /** Get transform from observed body frame to inertial frame.
      * @param date date of the transform
      * @return transform from observed body frame to inertial frame
-     * @exception RuggedException if frames cannot be computed at date
      */
-    public Transform getBodyToInertial(final AbsoluteDate date)
-        throws RuggedException {
+    public Transform getBodyToInertial(final AbsoluteDate date) {
         return scToBody.getBodyToInertial(date);
     }
 
@@ -1208,7 +1171,7 @@ public class Rugged {
      * @return selected sensor
      * @exception RuggedException if sensor is not known
      */
-    public LineSensor getLineSensor(final String sensorName) throws RuggedException {
+    public LineSensor getLineSensor(final String sensorName) {
         final LineSensor sensor = sensors.get(sensorName);
         if (sensor == null) {
             throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);

@@ -59,7 +59,7 @@ public class DumpManager {
      * @exception RuggedException if debug dump is already active for this thread
      * or if debug file cannot be opened
      */
-    public static void activate(final File file) throws RuggedException {
+    public static void activate(final File file) {
         if (isActive()) {
             throw new RuggedException(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE);
         } else {
@@ -75,7 +75,7 @@ public class DumpManager {
     /** Deactivate debug dump.
      * @exception RuggedException if debug dump is already active for this thread
      */
-    public static void deactivate() throws RuggedException {
+    public static void deactivate() {
         if (isActive()) {
             DUMP.get().deactivate();
             DUMP.set(null);
@@ -140,12 +140,10 @@ public class DumpManager {
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
      * @param refractionCorrection flag for refraction correction
-     * @exception RuggedException if date cannot be converted to UTC
      */
     public static void dumpDirectLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los,
                                           final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
-                                          final boolean refractionCorrection)
-        throws RuggedException {
+                                          final boolean refractionCorrection) {
         if (isActive()) {
             DUMP.get().dumpDirectLocation(date, sensorPosition, los, lightTimeCorrection, aberrationOfLightCorrection,
                     refractionCorrection);
@@ -154,10 +152,8 @@ public class DumpManager {
 
     /** Dump a direct location result.
      * @param gp resulting geodetic point
-     * @exception RuggedException if date cannot be converted to UTC
      */
-    public static void dumpDirectLocationResult(final GeodeticPoint gp)
-        throws RuggedException {
+    public static void dumpDirectLocationResult(final GeodeticPoint gp) {
         if (isActive()) {
             DUMP.get().dumpDirectLocationResult(gp);
         }
@@ -194,11 +190,9 @@ public class DumpManager {
      * @param index index of the transform
      * @param bodyToInertial transform from body frame to inertial frame
      * @param scToInertial transfrom from spacecraft frame to inertial frame
-     * @exception RuggedException if reference date cannot be converted to UTC
      */
     public static void dumpTransform(final SpacecraftToObservedBody scToBody, final int index,
-                                     final Transform bodyToInertial, final Transform scToInertial)
-        throws RuggedException {
+                                     final Transform bodyToInertial, final Transform scToInertial) {
         if (isActive()) {
             DUMP.get().dumpTransform(scToBody, index, bodyToInertial, scToInertial);
         }
@@ -206,10 +200,8 @@ public class DumpManager {
 
     /** Dump a sensor mean plane.
      * @param meanPlane mean plane associated with sensor
-     * @exception RuggedException if some frames cannot be computed at mid date
      */
-    public static void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane)
-        throws RuggedException {
+    public static void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane) {
         if (isActive()) {
             DUMP.get().dumpSensorMeanPlane(meanPlane);
         }
@@ -220,10 +212,8 @@ public class DumpManager {
      * @param date date
      * @param i pixel index
      * @param los pixel normalized line-of-sight
-     * @exception RuggedException if date cannot be converted to UTC
      */
-    public static void dumpSensorLOS(final LineSensor sensor, final AbsoluteDate date, final int i, final Vector3D los)
-        throws RuggedException {
+    public static void dumpSensorLOS(final LineSensor sensor, final AbsoluteDate date, final int i, final Vector3D los) {
         if (isActive()) {
             DUMP.get().dumpSensorLOS(sensor, date, i, los);
         }
@@ -233,10 +223,8 @@ public class DumpManager {
      * @param sensor sensor
      * @param lineNumber line number
      * @param date date
-     * @exception RuggedException if date cannot be converted to UTC
      */
-    public static void dumpSensorDatation(final LineSensor sensor, final double lineNumber, final AbsoluteDate date)
-        throws RuggedException {
+    public static void dumpSensorDatation(final LineSensor sensor, final double lineNumber, final AbsoluteDate date) {
         if (isActive()) {
             DUMP.get().dumpSensorDatation(sensor, lineNumber, date);
         }

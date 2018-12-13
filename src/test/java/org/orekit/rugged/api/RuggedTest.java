@@ -101,7 +101,7 @@ public class RuggedTest {
     @Ignore
     @Test
     public void testMayonVolcanoTiming()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         long t0 = System.currentTimeMillis();
         int dimension = 2000;
@@ -192,7 +192,7 @@ public class RuggedTest {
 
     @Test
     public void testLightTimeCorrection()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 400;
 
@@ -270,7 +270,7 @@ public class RuggedTest {
 
     @Test
     public void testAberrationOfLightCorrection()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 400;
 
@@ -326,7 +326,7 @@ public class RuggedTest {
     }
     
     @Test
-    public void testAtmosphericRefractionCorrection() throws RuggedException, OrekitException, URISyntaxException  {
+    public void testAtmosphericRefractionCorrection() throws URISyntaxException  {
 
         String sensorName = "line";
         int dimension = 4000;
@@ -438,7 +438,7 @@ public class RuggedTest {
     
     @Test
     public void testFlatBodyCorrection()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -500,7 +500,7 @@ public class RuggedTest {
 
     @Test
     public void testLocationSinglePoint()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -558,7 +558,7 @@ public class RuggedTest {
 
     @Test
     public void testLocationsinglePointNoCorrections()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -619,7 +619,7 @@ public class RuggedTest {
 
     @Test
     public void testBasicScan()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -682,7 +682,7 @@ public class RuggedTest {
     @Ignore
     @Test
     public void testInverseLocationTiming()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         long t0       = System.currentTimeMillis();
         int dimension = 2000;
@@ -792,7 +792,7 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocation()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
         checkInverseLocation(2000, false, false, 4.0e-7, 5.0e-6);
         checkInverseLocation(2000, false, true,  1.0e-5, 2.0e-7);
         checkInverseLocation(2000, true,  false, 4.0e-7, 4.0e-7);
@@ -801,7 +801,7 @@ public class RuggedTest {
 
     @Test
     public void testDateLocation()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
         checkDateLocation(2000, false, false, 7.0e-7);
         checkDateLocation(2000, false, true,  2.0e-5);
         checkDateLocation(2000, true,  false, 8.0e-7);
@@ -810,7 +810,7 @@ public class RuggedTest {
     
     @Test
     public void testLineDatation()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
         checkLineDatation(2000, 7.0e-7);
         checkLineDatation(10000, 8.0e-7);
     }
@@ -1020,7 +1020,7 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocCurvedLine()
-        throws RuggedException, URISyntaxException, OrekitException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -1076,7 +1076,7 @@ public class RuggedTest {
 
     private void checkInverseLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                       double maxLineError, double maxPixelError)
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -1170,28 +1170,28 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocationDerivativesWithoutCorrections()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, false, false,
                                          8.0e-9, 3.0e-10, 5.0e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithLightTimeCorrection()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, true, false,
                                          3.0e-9, 9.0e-9, 2.1e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, false, true,
                                          4.2e-10, 3.0e-10, 3.4e-12, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAllCorrections()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, true, true,
                                          3.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
     }
@@ -1204,8 +1204,6 @@ public class RuggedTest {
      * @param pixelTolerance
      * @param lineDerivativeRelativeTolerance
      * @param pixelDerivativeRelativeTolerance
-     * @throws RuggedException
-     * @throws OrekitException
      */
     private void doTestInverseLocationDerivatives(int dimension,
                                                   boolean lightTimeCorrection,
@@ -1214,7 +1212,7 @@ public class RuggedTest {
                                                   double pixelTolerance,
                                                   double lineDerivativeRelativeTolerance,
                                                   double pixelDerivativeRelativeTolerance)
-        throws RuggedException, OrekitException {
+        {
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -1372,7 +1370,7 @@ public class RuggedTest {
 
     private void checkDateLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                        double maxDateError)
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -1451,7 +1449,7 @@ public class RuggedTest {
     }
 
     private void checkLineDatation(int dimension, double maxLineError)
-                    throws RuggedException, OrekitException, URISyntaxException {
+                    throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -1486,7 +1484,7 @@ public class RuggedTest {
     }
 
     @Test
-    public void testDistanceBetweenLOS() throws RuggedException {
+    public void testDistanceBetweenLOS() {
         
         InitInterRefiningTest refiningTest = new InitInterRefiningTest();
         refiningTest.initRefiningTest();
@@ -1504,7 +1502,7 @@ public class RuggedTest {
      }
 
     @Test
-    public void testDistanceBetweenLOSDerivatives() throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public void testDistanceBetweenLOSDerivatives() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
         InitInterRefiningTest refiningTest = new InitInterRefiningTest();
         refiningTest.initRefiningTest();

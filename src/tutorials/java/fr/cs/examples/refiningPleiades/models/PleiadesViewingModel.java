@@ -71,7 +71,7 @@ public class PleiadesViewingModel {
      *  sensorName="line", incidenceAngle = 0.0, date = "2016-01-01T12:00:00.0"
      * </p>
      */
-    public PleiadesViewingModel(final String sensorName) throws RuggedException, OrekitException {
+    public PleiadesViewingModel(final String sensorName) {
     	
         this(sensorName, 0.0, "2016-01-01T12:00:00.0");
     }
@@ -80,11 +80,8 @@ public class PleiadesViewingModel {
      * @param sensorName sensor name
      * @param incidenceAngle incidence angle
      * @param referenceDate reference date
-     * @throws RuggedException
-     * @throws OrekitException
      */
-    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate)
-        throws RuggedException, OrekitException {
+    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate) {
     	
         this.sensorName = sensorName;
         this.date = referenceDate;
@@ -126,7 +123,7 @@ public class PleiadesViewingModel {
 
     /** Get the reference date.
      */
-    public AbsoluteDate getDatationReference() throws OrekitException {
+    public AbsoluteDate getDatationReference() {
 
     	// We use Orekit for handling time and dates, and Rugged for defining the datation model:
     	final TimeScale utc = TimeScalesFactory.getUTC();
@@ -136,13 +133,13 @@ public class PleiadesViewingModel {
 
     /** Get the min date.
      */
-   public  AbsoluteDate getMinDate() throws RuggedException {
+   public  AbsoluteDate getMinDate() {
         return lineSensor.getDate(0);
     }
 
    /** Get the max date.
     */
-   public  AbsoluteDate  getMaxDate() throws RuggedException {
+   public  AbsoluteDate  getMaxDate() {
         return lineSensor.getDate(DIMENSION);
     }
 
@@ -167,7 +164,7 @@ public int getDimension() {
 
    /** Create the line sensor
     */
-   private void createLineSensor() throws RuggedException, OrekitException {
+   private void createLineSensor() {
 
         // Offset of the MSI from center of mass of satellite
         // one line sensor

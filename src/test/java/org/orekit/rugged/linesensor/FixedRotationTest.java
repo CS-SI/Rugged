@@ -51,7 +51,7 @@ public class FixedRotationTest {
     private List<Vector3D> raw;
 
     @Test
-    public void testIdentity() throws RuggedException, OrekitException {
+    public void testIdentity() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xaba71348a77d77cbl));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -73,7 +73,7 @@ public class FixedRotationTest {
     }
 
     @Test
-    public void testCombination() throws RuggedException, OrekitException {
+    public void testCombination() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -138,7 +138,7 @@ public class FixedRotationTest {
     }
 
     @Test
-    public void testDerivatives() throws RuggedException, OrekitException {
+    public void testDerivatives() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xddae2b46b2207e08l));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -227,7 +227,7 @@ public class FixedRotationTest {
     }
 
     @Before
-    public void setUp() throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
 
         final Vector3D normal    = Vector3D.PLUS_I;
         final Vector3D fovCenter = Vector3D.PLUS_K;

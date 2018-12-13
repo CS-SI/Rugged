@@ -56,8 +56,7 @@ public abstract class AbstractAlgorithmTest {
     protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles);
 
     @Test
-    public void testMayonVolcanoOnSubTileCorner()
-        throws RuggedException, OrekitException {
+    public void testMayonVolcanoOnSubTileCorner() {
 
         setUpMayonVolcanoContext();
 
@@ -94,8 +93,7 @@ public abstract class AbstractAlgorithmTest {
     }
 
     @Test
-    public void testMayonVolcanoWithinPixel()
-        throws RuggedException, OrekitException {
+    public void testMayonVolcanoWithinPixel() {
 
         setUpMayonVolcanoContext();
 

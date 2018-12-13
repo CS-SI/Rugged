@@ -113,10 +113,8 @@ public interface Tile extends UpdatableTile {
     }
 
     /** Hook called at the end of tile update completion.
-     * @exception RuggedException if something wrong occurs
-     * (missing data ...)
      */
-    void tileUpdateCompleted() throws RuggedException;
+    void tileUpdateCompleted();
 
     /** Get minimum latitude of grid interpolation points.
      * @return minimum latitude of grid interpolation points

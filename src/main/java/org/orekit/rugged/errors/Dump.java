@@ -31,7 +31,6 @@ import org.hipparchus.util.FastMath;
 import org.hipparchus.util.OpenIntToDoubleHashMap;
 import org.hipparchus.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.FactoryManagedFrame;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
@@ -150,12 +149,10 @@ class Dump {
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
      * @param refractionCorrection flag for refraction correction
-     * @exception RuggedException if date cannot be converted to UTC
      */
     public void dumpDirectLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los,
                                    final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
-                                   final boolean refractionCorrection)
-        throws RuggedException {
+                                   final boolean refractionCorrection) {
         writer.format(Locale.US,
                       "direct location: date %s position %22.15e %22.15e %22.15e los %22.15e %22.15e %22.15e lightTime %b aberration %b refraction %b %n",
                       convertDate(date),
@@ -166,10 +163,8 @@ class Dump {
 
     /** Dump a direct location result.
      * @param gp resulting geodetic point
-     * @exception RuggedException if date cannot be converted to UTC
      */
-    public void dumpDirectLocationResult(final GeodeticPoint gp)
-        throws RuggedException {
+    public void dumpDirectLocationResult(final GeodeticPoint gp) {
         if (gp != null) {
             writer.format(Locale.US,
                           "direct location result: latitude %22.15e longitude %22.15e elevation %22.15e%n",
@@ -213,11 +208,9 @@ class Dump {
      * @param index index of the transform
      * @param bodyToInertial transform from body frame to inertial frame
      * @param scToInertial transfrom from spacecraft frame to inertial frame
-     * @exception RuggedException if reference date cannot be converted to UTC
      */
     public void dumpTransform(final SpacecraftToObservedBody scToBody, final int index,
-                              final Transform bodyToInertial, final Transform scToInertial)
-        throws RuggedException {
+                              final Transform bodyToInertial, final Transform scToInertial) {
         if (tranformsDumped == null) {
             final AbsoluteDate minDate   = scToBody.getMinDate();
             final AbsoluteDate maxDate   = scToBody.getMaxDate();
@@ -243,10 +236,8 @@ class Dump {
 
     /** Dump a sensor mean plane.
      * @param meanPlane mean plane associated with sensor
-     * @exception RuggedException if some frames cannot be computed at mid date
      */
-    public void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane)
-        throws RuggedException {
+    public void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane){
         getSensorData(meanPlane.getSensor()).setMeanPlane(meanPlane);
     }
 
@@ -255,10 +246,8 @@ class Dump {
      * @param date date
      * @param i pixel index
      * @param los pixel normalized line-of-sight
-     * @exception RuggedException if date cannot be converted to UTC
      */
-    public void dumpSensorLOS(final LineSensor sensor, final AbsoluteDate date, final int i, final Vector3D los)
-        throws RuggedException {
+    public void dumpSensorLOS(final LineSensor sensor, final AbsoluteDate date, final int i, final Vector3D los) {
         getSensorData(sensor).setLOS(date, i, los);
     }
 
@@ -266,10 +255,8 @@ class Dump {
      * @param sensor sensor
      * @param lineNumber line number
      * @param date date
-     * @exception RuggedException if date cannot be converted to UTC
      */
-    public void dumpSensorDatation(final LineSensor sensor, final double lineNumber, final AbsoluteDate date)
-        throws RuggedException {
+    public void dumpSensorDatation(final LineSensor sensor, final double lineNumber, final AbsoluteDate date) {
         getSensorData(sensor).setDatation(lineNumber, date);
     }
 
@@ -492,46 +479,41 @@ class Dump {
 
         /** Set the mean plane finder.
          * @param meanPlane mean plane finder
-         * @exception RuggedException if frames cannot be computed at mid date
          */
-        public void setMeanPlane(final SensorMeanPlaneCrossing meanPlane) throws RuggedException {
-            try {
-                if (this.meanPlane == null) {
-                    this.meanPlane = meanPlane;
-                    final long nbResults = meanPlane.getCachedResults().count();
-                    writer.format(Locale.US,
-                                  "sensor mean plane: sensorName %s minLine %d maxLine %d maxEval %d accuracy %22.15e normal %22.15e %22.15e %22.15e cachedResults %d",
-                                  dumpName,
-                                  meanPlane.getMinLine(), meanPlane.getMaxLine(),
-                                  meanPlane.getMaxEval(), meanPlane.getAccuracy(),
-                                  meanPlane.getMeanPlaneNormal().getX(), meanPlane.getMeanPlaneNormal().getY(), meanPlane.getMeanPlaneNormal().getZ(),
-                                  nbResults);
-                    meanPlane.getCachedResults().forEach(result -> {
-                        try {
-                            writer.format(Locale.US,
-                                          " lineNumber %22.15e date %s target %22.15e %22.15e %22.15e targetDirection %22.15e %22.15e %22.15e %22.15e %22.15e %22.15e",
-                                          result.getLine(), convertDate(result.getDate()),
-                                          result.getTarget().getX(), result.getTarget().getY(), result.getTarget().getZ(),
-                                          result.getTargetDirection().getX(),
-                                          result.getTargetDirection().getY(),
-                                          result.getTargetDirection().getZ(),
-                                          result.getTargetDirectionDerivative().getZ(),
-                                          result.getTargetDirectionDerivative().getY(),
-                                          result.getTargetDirectionDerivative().getZ());
-                        } catch (RuggedException re) {
-                            throw new RuggedExceptionWrapper(re);
-                        }
-                    });
-                    writer.format(Locale.US, "%n");
+        public void setMeanPlane(final SensorMeanPlaneCrossing meanPlane) {
+            
+            if (this.meanPlane == null) {
+                this.meanPlane = meanPlane;
+                final long nbResults = meanPlane.getCachedResults().count();
+                writer.format(Locale.US,
+                        "sensor mean plane: sensorName %s minLine %d maxLine %d maxEval %d accuracy %22.15e normal %22.15e %22.15e %22.15e cachedResults %d",
+                        dumpName,
+                        meanPlane.getMinLine(), meanPlane.getMaxLine(),
+                        meanPlane.getMaxEval(), meanPlane.getAccuracy(),
+                        meanPlane.getMeanPlaneNormal().getX(), meanPlane.getMeanPlaneNormal().getY(), meanPlane.getMeanPlaneNormal().getZ(),
+                        nbResults);
+                meanPlane.getCachedResults().forEach(result -> {
+                    try {
+                        writer.format(Locale.US,
+                                " lineNumber %22.15e date %s target %22.15e %22.15e %22.15e targetDirection %22.15e %22.15e %22.15e %22.15e %22.15e %22.15e",
+                                result.getLine(), convertDate(result.getDate()),
+                                result.getTarget().getX(), result.getTarget().getY(), result.getTarget().getZ(),
+                                result.getTargetDirection().getX(),
+                                result.getTargetDirection().getY(),
+                                result.getTargetDirection().getZ(),
+                                result.getTargetDirectionDerivative().getZ(),
+                                result.getTargetDirectionDerivative().getY(),
+                                result.getTargetDirectionDerivative().getZ());
+                    } catch (RuggedException re) {
+                        throw RuggedException.createInternalError(re);
+                    }
+                });
+                writer.format(Locale.US, "%n");
 
-                    // ensure the transforms for mid date are dumped
-                    final AbsoluteDate midDate = meanPlane.getSensor().getDate(0.5 * (meanPlane.getMinLine() + meanPlane.getMaxLine()));
-                    meanPlane.getScToBody().getBodyToInertial(midDate);
-                    meanPlane.getScToBody().getScToInertial(midDate);
-
-                }
-            } catch (RuggedExceptionWrapper rew) {
-                throw rew.getException();
+                // ensure the transforms for mid date are dumped
+                final AbsoluteDate midDate = meanPlane.getSensor().getDate(0.5 * (meanPlane.getMinLine() + meanPlane.getMaxLine()));
+                meanPlane.getScToBody().getBodyToInertial(midDate);
+                meanPlane.getScToBody().getScToInertial(midDate);
             }
         }
 
@@ -539,10 +521,8 @@ class Dump {
          * @param date date
          * @param pixelNumber number of the pixel
          * @param los los direction
-         * @exception RuggedException if date cannot be converted to UTC
          */
-        public void setLOS(final AbsoluteDate date, final int pixelNumber, final Vector3D los)
-            throws RuggedException {
+        public void setLOS(final AbsoluteDate date, final int pixelNumber, final Vector3D los) {
             List<Pair<AbsoluteDate, Vector3D>> list = losMap.get(pixelNumber);
             if (list == null) {
                 list = new ArrayList<Pair<AbsoluteDate, Vector3D>>();
@@ -563,10 +543,8 @@ class Dump {
         /** Set a datation pair.
          * @param lineNumber line number
          * @param date date
-         * @exception RuggedException if date cannot be converted to UTC
          */
-        public void setDatation(final double lineNumber, final AbsoluteDate date)
-            throws RuggedException {
+        public void setDatation(final double lineNumber, final AbsoluteDate date) {
             for (final Pair<Double, AbsoluteDate> alreadyDumped : datation) {
                 if (FastMath.abs(date.durationFrom(alreadyDumped.getSecond())) < 1.0e-12 &&
                     FastMath.abs(lineNumber - alreadyDumped.getFirst()) < 1.0e-12) {

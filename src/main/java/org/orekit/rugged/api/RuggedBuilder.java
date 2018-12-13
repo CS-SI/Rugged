@@ -183,28 +183,22 @@ public class RuggedBuilder {
     /** Set the reference ellipsoid.
      * @param ellipsoidID reference ellipsoid
      * @param bodyRotatingFrameID body rotating frame identifier
-     * @exception RuggedException if data needed for some frame cannot be loaded
-     * or if trajectory has been {@link #setTrajectoryAndTimeSpan(InputStream) recovered}
      * from an earlier run and frames mismatch
      * @return the builder instance
      * @see #setEllipsoid(OneAxisEllipsoid)
      * @see #getEllipsoid()
      */
-    public RuggedBuilder setEllipsoid(final EllipsoidId ellipsoidID, final BodyRotatingFrameId bodyRotatingFrameID)
-        throws RuggedException {
+    public RuggedBuilder setEllipsoid(final EllipsoidId ellipsoidID, final BodyRotatingFrameId bodyRotatingFrameID) {
         return setEllipsoid(selectEllipsoid(ellipsoidID, selectBodyRotatingFrame(bodyRotatingFrameID)));
     }
 
     /** Set the reference ellipsoid.
      * @param newEllipsoid reference ellipsoid
      * @return the builder instance
-     * @exception RuggedException if trajectory has been
-     * {@link #setTrajectoryAndTimeSpan(InputStream) recovered} from an earlier run and frames mismatch
      * @see #setEllipsoid(EllipsoidId, BodyRotatingFrameId)
      * @see #getEllipsoid()
      */
-    public RuggedBuilder setEllipsoid(final OneAxisEllipsoid newEllipsoid)
-        throws RuggedException {
+    public RuggedBuilder setEllipsoid(final OneAxisEllipsoid newEllipsoid) {
         this.ellipsoid = new ExtendedEllipsoid(newEllipsoid.getEquatorialRadius(),
                                                newEllipsoid.getFlattening(),
                                                newEllipsoid.getBodyFrame());
@@ -415,7 +409,6 @@ public class RuggedBuilder {
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @return the builder instance
-     * @exception RuggedException if data needed for inertial frame cannot be loaded
      * @see #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #setTrajectoryAndTimeSpan(InputStream)
@@ -431,8 +424,8 @@ public class RuggedBuilder {
                                        final List<TimeStampedPVCoordinates> positionsVelocities, final int pvInterpolationNumber,
                                        final CartesianDerivativesFilter pvFilter,
                                        final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
-                                       final AngularDerivativesFilter aFilter)
-        throws RuggedException {
+                                       final AngularDerivativesFilter aFilter) {
+        
         return setTrajectory(selectInertialFrame(inertialFrameId),
                              positionsVelocities, pvInterpolationNumber, pvFilter,
                              quaternions, aInterpolationNumber, aFilter);
@@ -467,6 +460,7 @@ public class RuggedBuilder {
                                        final CartesianDerivativesFilter pvFilter,
                                        final List<TimeStampedAngularCoordinates> quaternions, final int aInterpolationNumber,
                                        final AngularDerivativesFilter aFilter) {
+
         this.inertial        = inertialFrame;
         this.pvSample        = positionsVelocities;
         this.pvNeighborsSize = pvInterpolationNumber;
@@ -588,8 +582,8 @@ public class RuggedBuilder {
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #storeInterpolator(OutputStream)
      */
-    public RuggedBuilder setTrajectoryAndTimeSpan(final InputStream storageStream)
-        throws RuggedException {
+    public RuggedBuilder setTrajectoryAndTimeSpan(final InputStream storageStream) {
+        
         try {
             this.inertial           = null;
             this.pvSample           = null;
@@ -608,6 +602,7 @@ public class RuggedBuilder {
             this.overshootTolerance = scToBody.getOvershootTolerance();
             checkFramesConsistency();
             return this;
+        
         } catch (ClassNotFoundException cnfe) {
             throw new RuggedException(cnfe, RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA);
         } catch (ClassCastException cce) {
@@ -638,7 +633,7 @@ public class RuggedBuilder {
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
      * @see #setTrajectoryAndTimeSpan(InputStream)
      */
-    public void storeInterpolator(final OutputStream storageStream) throws RuggedException {
+    public void storeInterpolator(final OutputStream storageStream) {
         try {
             createInterpolatorIfNeeded();
             new ObjectOutputStream(storageStream).writeObject(scToBody);
@@ -651,7 +646,7 @@ public class RuggedBuilder {
      * @exception RuggedException if frames have been set both by direct calls and by
      * deserializing an interpolator dump and a mismatch occurs
      */
-    private void checkFramesConsistency() throws RuggedException {
+    private void checkFramesConsistency() {
         if (ellipsoid != null && scToBody != null &&
             !ellipsoid.getBodyFrame().getName().equals(scToBody.getBodyFrame().getName())) {
             throw new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
@@ -664,7 +659,7 @@ public class RuggedBuilder {
      * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span,
      * or propagator fails.
      */
-    private void createInterpolatorIfNeeded() throws RuggedException {
+    private void createInterpolatorIfNeeded() {
 
         if (ellipsoid == null) {
             throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setEllipsoid()");
@@ -684,7 +679,6 @@ public class RuggedBuilder {
                 throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setTrajectory()");
             }
         }
-
     }
 
     /** Create a transform interpolator from positions and quaternions lists.
@@ -701,8 +695,6 @@ public class RuggedBuilder {
      * @param aInterpolationNumber number of points to use for attitude interpolation
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @return transforms interpolator
-     * @exception RuggedException if data needed for some frame cannot be loaded or if position
-     * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span
      */
     private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
                                                                final AbsoluteDate minDate, final AbsoluteDate maxDate,
@@ -712,8 +704,8 @@ public class RuggedBuilder {
                                                                final CartesianDerivativesFilter pvFilter,
                                                                final List<TimeStampedAngularCoordinates> quaternions,
                                                                final int aInterpolationNumber,
-                                                               final AngularDerivativesFilter aFilter)
-        throws RuggedException {
+                                                               final AngularDerivativesFilter aFilter) {
+        
         return new SpacecraftToObservedBody(inertialFrame, bodyFrame,
                                             minDate, maxDate, tStep, overshootTolerance,
                                             positionsVelocities, pvInterpolationNumber,
@@ -734,7 +726,6 @@ public class RuggedBuilder {
      * @param aFilter filter for derivatives from the sample to use in attitude interpolation
      * @param propagator global propagator
      * @return transforms interpolator
-     * @exception RuggedException if data needed for some frame cannot be loaded
      */
     private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
             final AbsoluteDate minDate, final AbsoluteDate maxDate,
@@ -753,8 +744,7 @@ public class RuggedBuilder {
 
             /** {@inheritDoc} */
             @Override
-            public void handleStep(final SpacecraftState currentState, final boolean isLast)
-                    throws OrekitException {
+            public void handleStep(final SpacecraftState currentState, final boolean isLast) {
                 final AbsoluteDate  date = currentState.getDate();
                 final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
                 final Rotation      q    = currentState.getAttitude().getRotation();
@@ -771,7 +761,6 @@ public class RuggedBuilder {
                 positionsVelocities, interpolationNumber,
                 pvFilter, quaternions, interpolationNumber,
                 aFilter);
-
     }
 
     /** Set flag for light time correction.
@@ -986,7 +975,8 @@ public class RuggedBuilder {
      * @exception RuggedException if the builder is not properly configured
      * or if some internal elements cannot be built (frames, ephemerides, ...)
      */
-    public Rugged build() throws RuggedException {
+    public Rugged build() {
+        
         if (algorithmID == null) {
             throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "RuggedBuilder.setAlgorithmID()");
         }
@@ -1002,7 +992,5 @@ public class RuggedBuilder {
         createInterpolatorIfNeeded();
         return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation), ellipsoid,
                           lightTimeCorrection, aberrationOfLightCorrection, atmosphericRefraction, scToBody, sensors, name);
-
     }
-
 }

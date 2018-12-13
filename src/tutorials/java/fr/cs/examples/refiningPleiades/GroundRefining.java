@@ -232,7 +232,7 @@ public class GroundRefining extends Refining {
     }
 
     /** Constructor */
-    public GroundRefining() throws RuggedException, OrekitException {
+    public GroundRefining() {
 
         sensorName = "line";
         pleiadesViewingModel = new PleiadesViewingModel(sensorName);
@@ -243,7 +243,7 @@ public class GroundRefining extends Refining {
      * @param LineSensor line sensor
      * @return the GSD
      */
-    private double[] computeGSD(final Rugged rugged, final LineSensor lineSensor) throws RuggedException {
+    private double[] computeGSD(final Rugged rugged, final LineSensor lineSensor) {
 
     	// Get number of line
     	int dimension = pleiadesViewingModel.getDimension();

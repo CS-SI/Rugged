@@ -49,7 +49,7 @@ import org.orekit.utils.PVCoordinates;
 public class ConstantElevationAlgorithmTest {
 
     @Test
-    public void testDuvenhageComparison() throws RuggedException {
+    public void testDuvenhageComparison() {
         final Vector3D los = new Vector3D(-0.626242839, 0.0124194184, -0.7795291301);
         IntersectionAlgorithm duvenhage = new DuvenhageAlgorithm(new CheckedPatternElevationUpdater(FastMath.toRadians(1.0),
                                                                                                     256, 150.0, 150.0),
@@ -74,7 +74,7 @@ public class ConstantElevationAlgorithmTest {
     }
 
     @Test
-    public void testIgnoreDEMComparison() throws RuggedException {
+    public void testIgnoreDEMComparison() {
         final Vector3D los = new Vector3D(-0.626242839, 0.0124194184, -0.7795291301);
         IntersectionAlgorithm ignore = new IgnoreDEMAlgorithm();
         IntersectionAlgorithm constantElevation = new ConstantElevationAlgorithm(0.0);

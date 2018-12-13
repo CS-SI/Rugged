@@ -60,10 +60,8 @@ public class GroundMeasurementGenerator implements Measurable {
      * @param rugged Rugged instance
      * @param sensorName sensor name
      * @param dimension number of line of the sensor
-     * @throws RuggedException
      */
-    public GroundMeasurementGenerator(final Rugged rugged, final String sensorName, final int dimension)
-        throws RuggedException {
+    public GroundMeasurementGenerator(final Rugged rugged, final String sensorName, final int dimension) {
     	
         // Generate reference mapping
         this.groundMapping = new SensorToGroundMapping(rugged.getName(), sensorName);
@@ -97,7 +95,7 @@ public class GroundMeasurementGenerator implements Measurable {
     }
 
     @Override
-    public void createMeasurement(final int lineSampling, final int pixelSampling) throws RuggedException {
+    public void createMeasurement(final int lineSampling, final int pixelSampling) {
     	
         for (double line = 0; line < dimension; line += lineSampling) {
 
@@ -119,8 +117,7 @@ public class GroundMeasurementGenerator implements Measurable {
     }
 
     @Override
-    public void createNoisyMeasurement(final int lineSampling, final int pixelSampling, final Noise noise)
-        throws RuggedException {
+    public void createNoisyMeasurement(final int lineSampling, final int pixelSampling, final Noise noise) {
     	
         // Estimate latitude and longitude errors (rad)
         final Vector3D latLongError = estimateLatLongError();
@@ -171,9 +168,8 @@ public class GroundMeasurementGenerator implements Measurable {
 
     /** Compute latitude and longitude errors
      * @return the latitude and longitude errors (rad)
-     * @throws RuggedException
      */
-    private Vector3D estimateLatLongError() throws RuggedException {
+    private Vector3D estimateLatLongError() {
         final int pix = sensor.getNbPixels() / 2;
         final int line = (int) FastMath.floor(pix); // assumption : same number of line and pixels;
 

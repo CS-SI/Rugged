@@ -61,8 +61,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 public class RoughVisibilityEstimatorTest {
 
     @Test
-    public void testThreeOrbitsSpan()
-        throws RuggedException, OrekitException, URISyntaxException {
+    public void testThreeOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -87,8 +86,7 @@ public class RoughVisibilityEstimatorTest {
     }
 
     @Test
-    public void testOneOrbitsSpan()
-        throws RuggedException, OrekitException, URISyntaxException {
+    public void testOneOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -112,20 +110,17 @@ public class RoughVisibilityEstimatorTest {
 
     }
 
-    private BodyShape createEarth()
-                    throws OrekitException {
+    private BodyShape createEarth() {
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                     Constants.WGS84_EARTH_FLATTENING,
                                     FramesFactory.getITRF(IERSConventions.IERS_2010, true));
     }
 
-    private NormalizedSphericalHarmonicsProvider createGravityField()
-                    throws OrekitException {
+    private NormalizedSphericalHarmonicsProvider createGravityField() {
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
 
-    private Orbit createOrbit(double mu)
-                    throws OrekitException {
+    private Orbit createOrbit(double mu) {
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
         //
@@ -149,8 +144,7 @@ public class RoughVisibilityEstimatorTest {
 
     private Propagator createPropagator(BodyShape earth,
                                         NormalizedSphericalHarmonicsProvider gravityField,
-                                        Orbit orbit)
-                                                        throws OrekitException {
+                                        Orbit orbit) {
 
         AttitudeProvider yawCompensation = new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth));
         SpacecraftState state = new SpacecraftState(orbit,

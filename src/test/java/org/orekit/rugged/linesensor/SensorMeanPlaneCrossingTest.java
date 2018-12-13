@@ -65,7 +65,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 public class SensorMeanPlaneCrossingTest {
 
     @Test
-    public void testPerfectLine() throws RuggedException, OrekitException {
+    public void testPerfectLine() {
 
         final Vector3D position  = new Vector3D(1.5, Vector3D.PLUS_I);
         final Vector3D normal    = Vector3D.PLUS_I;
@@ -94,7 +94,7 @@ public class SensorMeanPlaneCrossingTest {
     }
 
     @Test
-    public void testNoisyLine() throws RuggedException, OrekitException {
+    public void testNoisyLine() {
 
         final RandomGenerator random    = new Well19937a(0xf3ddb33785e12bdal);
         final Vector3D        position  = new Vector3D(1.5, Vector3D.PLUS_I);
@@ -129,29 +129,29 @@ public class SensorMeanPlaneCrossingTest {
     }
 
     @Test
-    public void testDerivativeWithoutCorrections() throws RuggedException, OrekitException {
+    public void testDerivativeWithoutCorrections() {
         doTestDerivative(false, false, 3.1e-11);
     }
 
     @Test
-    public void testDerivativeLightTimeCorrection() throws RuggedException, OrekitException {
+    public void testDerivativeLightTimeCorrection() {
         doTestDerivative(true, false, 2.4e-7);
     }
 
     @Test
-    public void testDerivativeAberrationOfLightCorrection() throws RuggedException, OrekitException {
+    public void testDerivativeAberrationOfLightCorrection() {
         doTestDerivative(false, true, 1.1e-7);
     }
 
     @Test
-    public void testDerivativeWithAllCorrections() throws RuggedException, OrekitException {
+    public void testDerivativeWithAllCorrections() {
         doTestDerivative(true, true, 1.4e-7);
     }
 
     private void doTestDerivative(boolean lightTimeCorrection,
                                   boolean aberrationOfLightCorrection,
                                   double tol)
-        throws RuggedException, OrekitException {
+        {
 
         final Vector3D position  = new Vector3D(1.5, Vector3D.PLUS_I);
         final Vector3D normal    = Vector3D.PLUS_I;
@@ -223,7 +223,7 @@ public class SensorMeanPlaneCrossingTest {
 
     @Test
     public void testSlowFind()
-        throws RuggedException, OrekitException, NoSuchMethodException,
+        throws NoSuchMethodException,
                SecurityException, IllegalAccessException, IllegalArgumentException,
                InvocationTargetException {
 
@@ -287,8 +287,8 @@ public class SensorMeanPlaneCrossingTest {
                             1.0e-15);
     }
 
-    private SpacecraftToObservedBody createInterpolator(LineSensor sensor)
-        throws RuggedException, OrekitException {
+    private SpacecraftToObservedBody createInterpolator(LineSensor sensor) {
+        
         Orbit orbit = new CircularOrbit(7173352.811913891,
                                         -4.029194321683225E-4, 0.0013530362644647786,
                                         FastMath.toRadians(98.63218182243709),
@@ -312,8 +312,8 @@ public class SensorMeanPlaneCrossingTest {
 
     private List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
                                                      AbsoluteDate minDate, AbsoluteDate maxDate,
-                                                     double step)
-        throws OrekitException {
+                                                     double step) {
+        
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
@@ -332,8 +332,8 @@ public class SensorMeanPlaneCrossingTest {
 
     private List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
                                                          AbsoluteDate minDate, AbsoluteDate maxDate,
-                                                         double step)
-        throws OrekitException {
+                                                         double step) {
+        
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
@@ -350,7 +350,7 @@ public class SensorMeanPlaneCrossingTest {
     }
 
     @Before
-    public void setUp() throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
         TestUtils.clearFactories();
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
