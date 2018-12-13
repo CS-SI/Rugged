@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,18 +19,19 @@ package org.orekit.rugged.refraction;
 /**
  * Class that represents a constant refraction layer to be used with {@link MultiLayerModel}.
  * @author Sergio Esteves
+ * @author Guylaine Prat
  * @since 2.0
  */
 public class ConstantRefractionLayer {
 
-    /** lowest altitude of this layer. */
+    /** lowest altitude of this layer (m). */
     private final Double lowestAltitude;
 
     /** refractive index of this layer. */
     private final double refractiveIndex;
 
     /** Simple constructor.
-     * @param lowestAltitude lowest altitude of the layer
+     * @param lowestAltitude lowest altitude of the layer (m)
      * @param refractiveIndex refractive index of the layer
      */
     public ConstantRefractionLayer(final double lowestAltitude, final double refractiveIndex) {
@@ -38,12 +39,17 @@ public class ConstantRefractionLayer {
         this.refractiveIndex = refractiveIndex;
     }
 
+    /**
+     * @return the lowest altitude of the layer (m)
+     */
     public double getLowestAltitude() {
         return lowestAltitude;
     }
 
+    /**
+     * @return the refractive index of the layer
+     */
     public double getRefractiveIndex() {
         return refractiveIndex;
     }
-
 }

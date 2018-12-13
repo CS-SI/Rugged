@@ -30,9 +30,18 @@ public class RandomLandscapeUpdater implements TileUpdater {
     private int    n;
     private double[][] heightMap;
 
+    /**
+     * @param baseH elevation of the base of DEM; unit = m
+     * @param initialScale
+     * @param reductionFactor for smoothing for low value (0.1) or not (0.5 for instance) the landscape
+     * @param seed
+     * @param size size in latitude / size in longitude (rad)
+     * @param n number of latitude / number of longitude
+     * @throws MathIllegalArgumentException
+     */
     public RandomLandscapeUpdater(double baseH, double initialScale, double reductionFactor,
                                   long seed, double size, int n)
-                                                  throws MathIllegalArgumentException {
+        throws MathIllegalArgumentException {
 
         if (!ArithmeticUtils.isPowerOfTwo(n - 1)) {
             throw new MathIllegalArgumentException(LocalizedCoreFormats.SIMPLE_MESSAGE,
@@ -100,7 +109,7 @@ public class RandomLandscapeUpdater implements TileUpdater {
     @Override
     public void updateTile(double latitude, double longitude, UpdatableTile tile)
                     throws RuggedException {
-
+                
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
         double minLongitude = size * FastMath.floor(longitude / size);
@@ -110,7 +119,6 @@ public class RandomLandscapeUpdater implements TileUpdater {
                 tile.setElevation(i, j, heightMap[i][j]);
             }
         }
-
     }
 
     private double mean(int i1, int j1, int i2, int j2, int i3, int j3, int i4, int j4) {

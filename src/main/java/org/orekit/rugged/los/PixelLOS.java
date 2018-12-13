@@ -14,50 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.linesensor;
+package org.orekit.rugged.los;
 
 import java.io.Serializable;
 
-/** Container for sensor pixel.
- * <p>
- * Instances of this class are guaranteed to be immutable.
- * </p>
- * @author Luc Maisonobe
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.orekit.rugged.linesensor.SensorPixel;
+
+/** Container for pixel line-of-sight.
  * @author Guylaine Prat
+ * @since 3.0
  */
-public class SensorPixel implements Serializable {
+public class PixelLOS implements Serializable {
 
     /** Serializable UID. */
-    private static final long serialVersionUID = 20140309L;
+    private static final long serialVersionUID = -6674056279573271367L;
 
-    /** Line number. */
-    private final double lineNumber;
+    /** Sensor pixel. */
+    private final SensorPixel sensorPixel;
 
-    /** Pixel number. */
-    private final double pixelNumber;
+    /** Pixel line-of-sight in spacecraft frame. */
+    private final Vector3D los;
 
     /**
      * Build a new instance.
-     *
-     * @param lineNumber line number
-     * @param pixelNumber pixel number
+     * @param sensorPixel the sensor pixel cell
+     * @param los the pixel line-of-sight in spacecraft frame
      */
-    public SensorPixel(final double lineNumber, final double pixelNumber) {
-        this.lineNumber  = lineNumber;
-        this.pixelNumber = pixelNumber;
+    public PixelLOS(final SensorPixel sensorPixel, final Vector3D los) {
+        this.sensorPixel = sensorPixel;
+        this.los = los;
     }
 
-    /** Get the line number.
-     * @return line number
+    /**
+     * @return the sensorPixel
      */
-    public double getLineNumber() {
-        return lineNumber;
+    public SensorPixel getSensorPixel() {
+        return sensorPixel;
     }
 
-    /** Get the pixel number.
-     * @return pixel number
+    /**
+     * @return the lOS in spacecraft frame
      */
-    public double getPixelNumber() {
-        return pixelNumber;
+    public Vector3D getLOS() {
+        return los;
     }
 }
