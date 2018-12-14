@@ -51,7 +51,7 @@ public enum RuggedMessages implements Localizable {
 
     // CHECKSTYLE: stop JavadocVariable check
 
-    INTERNAL_ERROR("internal error, contact maintenance at {0}"),
+    INTERNAL_ERROR("internal error, please notify development team by creating an issue at {0}"),
     OUT_OF_TILE_INDICES("no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)"),
     OUT_OF_TILE_ANGLES("no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}"),
     NO_DEM_DATA("no Digital Elevation Model data at latitude {0} and longitude {1}"),

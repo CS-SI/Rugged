@@ -123,7 +123,7 @@ public class RuggedException extends RuntimeException implements LocalizedExcept
         final Localizable specifier = RuggedMessages.INTERNAL_ERROR;
 
         /** Parts to insert in the format (no translation). */
-        final String parts     = "rugged-developers@orekit.org";
+        final String parts     = "https://gitlab.orekit.org/orekit/rugged/issues";
 
         return new RuntimeException() {
 
