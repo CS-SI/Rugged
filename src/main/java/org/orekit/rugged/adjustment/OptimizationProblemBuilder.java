@@ -30,13 +30,10 @@ import org.hipparchus.optim.ConvergenceChecker;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.ParameterValidator;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
+import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.utils.ParameterDriver;
 
@@ -72,21 +69,15 @@ abstract class OptimizationProblemBuilder {
     /** Constructor.
      * @param sensors list of sensors to refine
      * @param measurements set of observables
-     * @throws RuggedException an exception is generated if no parameters has been selected for refining
      */
-    OptimizationProblemBuilder(final List<LineSensor> sensors, final Observables measurements) throws RuggedException {
+    OptimizationProblemBuilder(final List<LineSensor> sensors, final Observables measurements) {
 
-        try {
-            this.generator = this.createGenerator(sensors);
-            this.drivers = this.generator.getSelected();
-            this.nbParams = this.drivers.size();
-            if (this.nbParams == 0) {
-                throw new RuggedException(RuggedMessages.NO_PARAMETERS_SELECTED);
-            }
-        } catch (RuggedExceptionWrapper rew) {
-            throw rew.getException();
+        this.generator = this.createGenerator(sensors);
+        this.drivers = this.generator.getSelected();
+        this.nbParams = this.drivers.size();
+        if (this.nbParams == 0) {
+            throw new RuggedException(RuggedMessages.NO_PARAMETERS_SELECTED);
         }
-
         this.measurements = measurements;
         this.sensors = sensors;
     }
@@ -94,12 +85,10 @@ abstract class OptimizationProblemBuilder {
     /** Least squares problem builder.
      * @param maxEvaluations maximum number of evaluations
      * @param convergenceThreshold convergence threshold
-     * @throws RuggedException if sensor is not found
      * @return the least squares problem
      */
 
-    public abstract LeastSquaresProblem build(int maxEvaluations, double convergenceThreshold)
-        throws RuggedException;
+    public abstract LeastSquaresProblem build(int maxEvaluations, double convergenceThreshold);
 
     /** Create the convergence check.
      * <p>
@@ -131,10 +120,8 @@ abstract class OptimizationProblemBuilder {
         return start;
     }
 
-    /** Create targets and weights of optimization problem.
-     * @throws RuggedException if no reference mappings for parameters estimation are found
-     */
-    protected abstract void createTargetAndWeight() throws RuggedException;
+    /** Create targets and weights of optimization problem. */
+    protected abstract void createTargetAndWeight();
 
     /** Create the model function value and its Jacobian.
      * @return the model function value and its Jacobian
@@ -151,19 +138,14 @@ abstract class OptimizationProblemBuilder {
 
         // Prevent parameters to exceed their prescribed bounds
         final ParameterValidator validator = params -> {
-            try {
-                int i = 0;
-                for (final ParameterDriver driver : this.drivers) {
+            int i = 0;
+            for (final ParameterDriver driver : this.drivers) {
 
-                    // let the parameter handle min/max clipping
-                    driver.setNormalizedValue(params.getEntry(i));
-                    params.setEntry(i++, driver.getNormalizedValue());
-                }
-                return params;
-
-            } catch (OrekitException oe) {
-                throw new OrekitExceptionWrapper(oe);
+                // let the parameter handle min/max clipping
+                driver.setNormalizedValue(params.getEntry(i));
+                params.setEntry(i++, driver.getNormalizedValue());
             }
+            return params;
         };
 
         return validator;

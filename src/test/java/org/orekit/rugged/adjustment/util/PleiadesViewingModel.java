@@ -7,7 +7,6 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
@@ -15,8 +14,6 @@ import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.FixedZHomothety;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
-
-import org.orekit.errors.OrekitException;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -41,8 +38,7 @@ public class PleiadesViewingModel {
      * @param incidenceAngle incidence angle
      * @param referenceDate reference date
      */
-    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate)
-            throws RuggedException, OrekitException {
+    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate) {
 
         this.sensorName = sensorName;
         this.referenceDate = referenceDate;
@@ -83,7 +79,7 @@ public class PleiadesViewingModel {
 
     /** Get the reference date.
      */
-    public AbsoluteDate getDatationReference() throws OrekitException {
+    public AbsoluteDate getDatationReference() {
 
         // We use Orekit for handling time and dates, and Rugged for defining the datation model:
         final TimeScale utc = TimeScalesFactory.getUTC();
@@ -93,13 +89,13 @@ public class PleiadesViewingModel {
 
     /** Get the min date.
      */
-    public AbsoluteDate getMinDate() throws RuggedException {
+    public AbsoluteDate getMinDate() {
         return lineSensor.getDate(0);
     }
 
     /** Get the max date.
      */
-    public AbsoluteDate getMaxDate() throws RuggedException {
+    public AbsoluteDate getMaxDate() {
         return lineSensor.getDate(DIMENSION);
     }
 
@@ -124,7 +120,7 @@ public class PleiadesViewingModel {
 
     /** Create the line sensor.
      */
-    private void createLineSensor() throws RuggedException, OrekitException {
+    private void createLineSensor() {
 
         // Offset of the MSI from center of mass of satellite
         // one line sensor

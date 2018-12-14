@@ -17,13 +17,6 @@
 package org.orekit.rugged;
 
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.RotationConvention;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
-import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-
 import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Field;
@@ -32,6 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
+import org.hipparchus.util.FastMath;
+import org.junit.Assert;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
@@ -40,7 +39,6 @@ import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
-import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
@@ -159,8 +157,7 @@ public class TestUtils {
     public static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
                                       ArrayList<TimeStampedPVCoordinates> satellitePVList,
                                       String absDate,
-                                      double px, double py, double pz, double vx, double vy, double vz)
-        throws OrekitException {
+                                      double px, double py, double pz, double vx, double vy, double vz) {
         
         AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
         Vector3D position = new Vector3D(px, py, pz);
@@ -186,11 +183,8 @@ public class TestUtils {
     }
 
     /** Create an Earth for Junit tests.
-     * @return the Earth as the WGS84 ellipsoid
-     * @throws OrekitException
      */
-    public static BodyShape createEarth()
-       throws OrekitException {
+    public static BodyShape createEarth() {
         
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                     Constants.WGS84_EARTH_FLATTENING,
@@ -199,10 +193,8 @@ public class TestUtils {
 
     /** Created a gravity field.
      * @return normalized spherical harmonics coefficients
-     * @throws OrekitException
      */
-    public static NormalizedSphericalHarmonicsProvider createGravityField()
-        throws OrekitException {
+    public static NormalizedSphericalHarmonicsProvider createGravityField() {
         
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
@@ -210,9 +202,8 @@ public class TestUtils {
     /** Create an orbit.
      * @param mu Earth gravitational constant
      * @return the orbit
-     * @throws OrekitException
      */
-    public static Orbit createOrbit(double mu) throws OrekitException {
+    public static Orbit createOrbit(double mu) {
         
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
@@ -237,12 +228,10 @@ public class TestUtils {
  
     /** Create the propagator of an orbit.
      * @return propagator of the orbit
-     * @throws OrekitException
      */
     public static Propagator createPropagator(BodyShape earth,
                                               NormalizedSphericalHarmonicsProvider gravityField,
-                                              Orbit orbit)
-        throws OrekitException {
+                                              Orbit orbit) {
 
         AttitudeProvider yawCompensation = new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth));
         SpacecraftState state = new SpacecraftState(orbit,
@@ -304,12 +293,10 @@ public class TestUtils {
 
     /** Propagate an orbit between 2 given dates
      * @return a list of TimeStampedPVCoordinates
-     * @throws OrekitException
      */
     public static List<TimeStampedPVCoordinates> orbitToPV(Orbit orbit, BodyShape earth,
                                                            AbsoluteDate minDate, AbsoluteDate maxDate,
-                                                           double step) 
-        throws OrekitException {
+                                                           double step)  {
         
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
@@ -329,12 +316,10 @@ public class TestUtils {
 
     /** Propagate an attitude between 2 given dates
      * @return a list of TimeStampedAngularCoordinates
-     * @throws OrekitException
      */
     public static List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
                                                          AbsoluteDate minDate, AbsoluteDate maxDate,
-                                                         double step)
-        throws OrekitException {
+                                                         double step) {
         
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));

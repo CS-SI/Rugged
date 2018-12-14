@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,16 +16,14 @@
  */
 package org.orekit.rugged.intersection;
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.errors.DumpManager;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.raster.SimpleTile;
 import org.orekit.rugged.raster.SimpleTileFactory;
 import org.orekit.rugged.raster.Tile;
@@ -66,137 +64,124 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                                final Vector3D position, final Vector3D los)
-        throws RuggedException {
-        try {
+            final Vector3D position, final Vector3D los) {
 
-            DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
+        DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
 
-            // find the tiles between the entry and exit point in the Digital Elevation Model
-            NormalizedGeodeticPoint entryPoint = null;
-            NormalizedGeodeticPoint exitPoint  = null;
-            double minLatitude  = Double.NaN;
-            double maxLatitude  = Double.NaN;
-            double minLongitude = Double.NaN;
-            double maxLongitude = Double.NaN;
-            final List<SimpleTile> scannedTiles = new ArrayList<SimpleTile>();
-            double centralLongitude = Double.NaN;
-            for (boolean changedMinMax = true; changedMinMax; changedMinMax = checkMinMax(scannedTiles)) {
+        // find the tiles between the entry and exit point in the Digital Elevation Model
+        NormalizedGeodeticPoint entryPoint = null;
+        NormalizedGeodeticPoint exitPoint  = null;
+        double minLatitude  = Double.NaN;
+        double maxLatitude  = Double.NaN;
+        double minLongitude = Double.NaN;
+        double maxLongitude = Double.NaN;
+        final List<SimpleTile> scannedTiles = new ArrayList<SimpleTile>();
+        double centralLongitude = Double.NaN;
+        for (boolean changedMinMax = true; changedMinMax; changedMinMax = checkMinMax(scannedTiles)) {
 
-                scannedTiles.clear();
-                // compute entry and exit points
-                entryPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMax) ? 0.0 : hMax),
-                                                 ellipsoid.getBodyFrame(), null,
-                                                 Double.isNaN(centralLongitude) ? 0.0 : centralLongitude);
-                final SimpleTile entryTile = cache.getTile(entryPoint.getLatitude(), entryPoint.getLongitude());
-                if (Double.isNaN(centralLongitude)) {
-                    centralLongitude = entryTile.getMinimumLongitude();
-                    entryPoint = new NormalizedGeodeticPoint(entryPoint.getLatitude(), entryPoint.getLongitude(),
-                                                             entryPoint.getAltitude(), centralLongitude);
-                }
-                addIfNotPresent(scannedTiles, entryTile);
-
-                exitPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMin) ? 0.0 : hMin),
-                                                ellipsoid.getBodyFrame(), null, centralLongitude);
-                final SimpleTile exitTile = cache.getTile(exitPoint.getLatitude(), exitPoint.getLongitude());
-                addIfNotPresent(scannedTiles, exitTile);
-
-                minLatitude  = FastMath.min(entryPoint.getLatitude(),  exitPoint.getLatitude());
-                maxLatitude  = FastMath.max(entryPoint.getLatitude(),  exitPoint.getLatitude());
-                minLongitude = FastMath.min(entryPoint.getLongitude(), exitPoint.getLongitude());
-                maxLongitude = FastMath.max(entryPoint.getLongitude(), exitPoint.getLongitude());
-
-                if (scannedTiles.size() > 1) {
-                    // the entry and exit tiles are different, maybe other tiles should be added on the way
-                    // in the spirit of simple and exhaustive, we add all tiles in a rectangular area
-                    final double latStep = 0.5 * FastMath.min(entryTile.getLatitudeStep()  * entryTile.getLatitudeRows(),
-                                                              exitTile.getLatitudeStep()   * exitTile.getLatitudeRows());
-                    final double lonStep = 0.5 * FastMath.min(entryTile.getLongitudeStep() * entryTile.getLongitudeColumns(),
-                                                              exitTile.getLongitudeStep()  * exitTile.getLongitudeColumns());
-                    for (double latitude = minLatitude; latitude <= maxLatitude; latitude += latStep) {
-                        for (double longitude = minLongitude; longitude < maxLongitude; longitude += lonStep) {
-                            addIfNotPresent(scannedTiles, cache.getTile(latitude, longitude));
-                        }
-                    }
-                }
-
+            scannedTiles.clear();
+            // compute entry and exit points
+            entryPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMax) ? 0.0 : hMax),
+                    ellipsoid.getBodyFrame(), null,
+                    Double.isNaN(centralLongitude) ? 0.0 : centralLongitude);
+            final SimpleTile entryTile = cache.getTile(entryPoint.getLatitude(), entryPoint.getLongitude());
+            if (Double.isNaN(centralLongitude)) {
+                centralLongitude = entryTile.getMinimumLongitude();
+                entryPoint = new NormalizedGeodeticPoint(entryPoint.getLatitude(), entryPoint.getLongitude(),
+                        entryPoint.getAltitude(), centralLongitude);
             }
+            addIfNotPresent(scannedTiles, entryTile);
 
-            // scan the tiles
-            NormalizedGeodeticPoint intersectionGP = null;
-            double intersectionDot = Double.POSITIVE_INFINITY;
-            for (final SimpleTile tile : scannedTiles) {
-                for (int i = latitudeIndex(tile, minLatitude); i <= latitudeIndex(tile, maxLatitude); ++i) {
-                    for (int j = longitudeIndex(tile, minLongitude); j <= longitudeIndex(tile, maxLongitude); ++j) {
-                        final NormalizedGeodeticPoint gp = tile.cellIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
-                        if (gp != null) {
+            exitPoint = ellipsoid.transform(ellipsoid.pointAtAltitude(position, los, Double.isInfinite(hMin) ? 0.0 : hMin),
+                    ellipsoid.getBodyFrame(), null, centralLongitude);
+            final SimpleTile exitTile = cache.getTile(exitPoint.getLatitude(), exitPoint.getLongitude());
+            addIfNotPresent(scannedTiles, exitTile);
 
-                            // improve the point, by projecting it back on the 3D line, fixing the small body curvature at cell level
-                            final Vector3D      delta     = ellipsoid.transform(gp).subtract(position);
-                            final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
-                            final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                                ellipsoid.getBodyFrame(), null);
-                            final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
-                                                                                                            projected.getLongitude(),
-                                                                                                            projected.getAltitude(),
-                                                                                                            gp.getLongitude());
-                            final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(normalizedProjected,
-                                                                                             ellipsoid.convertLos(normalizedProjected, los),
-                                                                                             i, j);
+            minLatitude  = FastMath.min(entryPoint.getLatitude(),  exitPoint.getLatitude());
+            maxLatitude  = FastMath.max(entryPoint.getLatitude(),  exitPoint.getLatitude());
+            minLongitude = FastMath.min(entryPoint.getLongitude(), exitPoint.getLongitude());
+            maxLongitude = FastMath.max(entryPoint.getLongitude(), exitPoint.getLongitude());
 
-                            if (gpImproved != null) {
-                                final Vector3D point = ellipsoid.transform(gpImproved);
-                                final double dot = Vector3D.dotProduct(point.subtract(position), los);
-                                if (dot < intersectionDot) {
-                                    intersectionGP  = gpImproved;
-                                    intersectionDot = dot;
-                                }
-                            }
-
-                        }
+            if (scannedTiles.size() > 1) {
+                // the entry and exit tiles are different, maybe other tiles should be added on the way
+                // in the spirit of simple and exhaustive, we add all tiles in a rectangular area
+                final double latStep = 0.5 * FastMath.min(entryTile.getLatitudeStep()  * entryTile.getLatitudeRows(),
+                        exitTile.getLatitudeStep()   * exitTile.getLatitudeRows());
+                final double lonStep = 0.5 * FastMath.min(entryTile.getLongitudeStep() * entryTile.getLongitudeColumns(),
+                        exitTile.getLongitudeStep()  * exitTile.getLongitudeColumns());
+                for (double latitude = minLatitude; latitude <= maxLatitude; latitude += latStep) {
+                    for (double longitude = minLongitude; longitude < maxLongitude; longitude += lonStep) {
+                        addIfNotPresent(scannedTiles, cache.getTile(latitude, longitude));
                     }
                 }
             }
 
-            return intersectionGP;
-
-        } catch (OrekitException oe) {
-            // this should never happen
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
         }
+
+        // scan the tiles
+        NormalizedGeodeticPoint intersectionGP = null;
+        double intersectionDot = Double.POSITIVE_INFINITY;
+        for (final SimpleTile tile : scannedTiles) {
+            for (int i = latitudeIndex(tile, minLatitude); i <= latitudeIndex(tile, maxLatitude); ++i) {
+                for (int j = longitudeIndex(tile, minLongitude); j <= longitudeIndex(tile, maxLongitude); ++j) {
+                    final NormalizedGeodeticPoint gp = tile.cellIntersection(entryPoint, ellipsoid.convertLos(entryPoint, los), i, j);
+                    if (gp != null) {
+
+                        // improve the point, by projecting it back on the 3D line, fixing the small body curvature at cell level
+                        final Vector3D      delta     = ellipsoid.transform(gp).subtract(position);
+                        final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                        final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                ellipsoid.getBodyFrame(), null);
+                        final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
+                                projected.getLongitude(),
+                                projected.getAltitude(),
+                                gp.getLongitude());
+                        final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(normalizedProjected,
+                                ellipsoid.convertLos(normalizedProjected, los),
+                                i, j);
+
+                        if (gpImproved != null) {
+                            final Vector3D point = ellipsoid.transform(gpImproved);
+                            final double dot = Vector3D.dotProduct(point.subtract(position), los);
+                            if (dot < intersectionDot) {
+                                intersectionGP  = gpImproved;
+                                intersectionDot = dot;
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        return intersectionGP;
     }
 
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
                                                       final Vector3D position, final Vector3D los,
-                                                      final NormalizedGeodeticPoint closeGuess)
-        throws RuggedException {
-        try {
-            DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
-            final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
-            final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
-            final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                ellipsoid.getBodyFrame(), null);
-            final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
-                                                                                            projected.getLongitude(),
-                                                                                            projected.getAltitude(),
-                                                                                            closeGuess.getLongitude());
-            final Tile          tile      = cache.getTile(normalizedProjected.getLatitude(),
-                                                          normalizedProjected.getLongitude());
-            return tile.cellIntersection(normalizedProjected,
-                                         ellipsoid.convertLos(normalizedProjected, los),
-                                         tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
-                                         tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
+                                                      final NormalizedGeodeticPoint closeGuess) {
+        DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
+        final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
+        final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+        final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                ellipsoid.getBodyFrame(), null);
+        final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
+                projected.getLongitude(),
+                projected.getAltitude(),
+                closeGuess.getLongitude());
+        final Tile          tile      = cache.getTile(normalizedProjected.getLatitude(),
+                normalizedProjected.getLongitude());
+        return tile.cellIntersection(normalizedProjected,
+                ellipsoid.convertLos(normalizedProjected, los),
+                tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
+                tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
     }
 
     /** {@inheritDoc} */
     @Override
-    public double getElevation(final double latitude, final double longitude)
-        throws RuggedException {
+    public double getElevation(final double latitude, final double longitude) {
         DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
         final Tile tile = cache.getTile(latitude, longitude);
         return tile.interpolateElevation(latitude, longitude);

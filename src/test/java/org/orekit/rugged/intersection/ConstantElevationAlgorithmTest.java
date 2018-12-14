@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,12 +17,12 @@
 package org.orekit.rugged.intersection;
 
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import java.io.File;
 import java.net.URISyntaxException;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,11 +30,9 @@ import org.junit.Test;
 import org.orekit.attitudes.Attitude;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.propagation.SpacecraftState;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.raster.CheckedPatternElevationUpdater;
 import org.orekit.rugged.raster.TileUpdater;
@@ -49,7 +47,7 @@ import org.orekit.utils.PVCoordinates;
 public class ConstantElevationAlgorithmTest {
 
     @Test
-    public void testDuvenhageComparison() throws RuggedException {
+    public void testDuvenhageComparison() {
         final Vector3D los = new Vector3D(-0.626242839, 0.0124194184, -0.7795291301);
         IntersectionAlgorithm duvenhage = new DuvenhageAlgorithm(new CheckedPatternElevationUpdater(FastMath.toRadians(1.0),
                                                                                                     256, 150.0, 150.0),
@@ -74,7 +72,7 @@ public class ConstantElevationAlgorithmTest {
     }
 
     @Test
-    public void testIgnoreDEMComparison() throws RuggedException {
+    public void testIgnoreDEMComparison() {
         final Vector3D los = new Vector3D(-0.626242839, 0.0124194184, -0.7795291301);
         IntersectionAlgorithm ignore = new IgnoreDEMAlgorithm();
         IntersectionAlgorithm constantElevation = new ConstantElevationAlgorithm(0.0);
@@ -100,8 +98,7 @@ public class ConstantElevationAlgorithmTest {
     }
 
     @Before
-    public void setUp()
-            throws OrekitException, URISyntaxException {
+    public void setUp() throws  URISyntaxException {
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         earth = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,

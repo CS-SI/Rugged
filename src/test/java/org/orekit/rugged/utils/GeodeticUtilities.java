@@ -86,7 +86,6 @@ public class GeodeticUtilities {
      * Convert longitude (in decimal degrees) in degrees/minutes/seconds
      * @param longitudeInDecimalDegrees
      * @return the DMS angle
-     * @throws S2GeolibException
      */
     static DMSangle convertLongitudeToDMS(double longitudeInDecimalDegrees) {
 
@@ -99,14 +98,12 @@ public class GeodeticUtilities {
         }
 
         return convertToDMS(longitudeInDecimalDegrees, cardinalDirection);
-
     }
 
     /**
      * Convert latitude (in decimal degrees) in degrees/minutes/seconds
      * @param latitudeInDecimalDegrees
      * @return the DMSangle
-     * @throws S2GeolibException
      */
     public static DMSangle convertLatitudeToDMS(double latitudeInDecimalDegrees){
 
@@ -127,9 +124,8 @@ public class GeodeticUtilities {
      * @param angleInDecimalDegrees angle in decimal degrees
      * @param cardinalDirection the associated cardinal direction
      * @return the DMSangle 
-     * @throws S2GeolibException
      */
-    private static DMSangle convertToDMS(double angleInDecimalDegrees, String cardinalDirection) throws OrekitException{
+    private static DMSangle convertToDMS(double angleInDecimalDegrees, String cardinalDirection) {
 
         // We know the cardinal direction so we work on |angleInDecimalDegrees| the positive value 
         double angleInDD = FastMath.abs(angleInDecimalDegrees);
@@ -184,9 +180,8 @@ class DMSangle {
      * @param minutes minutes part
      * @param seconds seconds part 
      * @param cardinalName cardinal direction
-     * @throws S2GeolibException
      */
-    public DMSangle(int degrees, int minutes, double seconds, String cardinalName) throws OrekitException {
+    public DMSangle(int degrees, int minutes, double seconds, String cardinalName) {
         this.degrees = degrees;
         this.minutes = minutes;
         this.seconds = seconds;

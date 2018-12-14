@@ -17,13 +17,13 @@
 package org.orekit.rugged.intersection;
 
 
+import java.io.File;
+import java.net.URISyntaxException;
+
 import org.hipparchus.geometry.euclidean.threed.Line;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import java.io.File;
-import java.net.URISyntaxException;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,13 +32,10 @@ import org.orekit.attitudes.Attitude;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.propagation.SpacecraftState;
-import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTile;
 import org.orekit.rugged.intersection.duvenhage.MinMaxTreeTileFactory;
 import org.orekit.rugged.raster.CliffsElevationUpdater;
@@ -56,8 +53,7 @@ public abstract class AbstractAlgorithmTest {
     protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles);
 
     @Test
-    public void testMayonVolcanoOnSubTileCorner()
-        throws RuggedException, OrekitException {
+    public void testMayonVolcanoOnSubTileCorner() {
 
         setUpMayonVolcanoContext();
 
@@ -94,8 +90,7 @@ public abstract class AbstractAlgorithmTest {
     }
 
     @Test
-    public void testMayonVolcanoWithinPixel()
-        throws RuggedException, OrekitException {
+    public void testMayonVolcanoWithinPixel() {
 
         setUpMayonVolcanoContext();
 
@@ -121,7 +116,7 @@ public abstract class AbstractAlgorithmTest {
 
     @Test
     public void testCliffsOfMoher()
-        throws RuggedException, OrekitException {
+         {
 
         setUpCliffsOfMoherContext();
 
@@ -154,8 +149,7 @@ public abstract class AbstractAlgorithmTest {
 
     }
 
-    protected void checkIntersection(Vector3D position, Vector3D los, GeodeticPoint intersection)
-        throws RuggedException {
+    protected void checkIntersection(Vector3D position, Vector3D los, GeodeticPoint intersection) {
 
         // check the point is on the line
         Line line = new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12);
@@ -170,7 +164,7 @@ public abstract class AbstractAlgorithmTest {
     }
 
     protected void setUpMayonVolcanoContext()
-        throws RuggedException, OrekitException {
+         {
 
         // Mayon Volcano location according to Wikipedia: 13°15′24″N 123°41′6″E
         GeodeticPoint summit =
@@ -218,7 +212,7 @@ public abstract class AbstractAlgorithmTest {
     }
 
     protected void setUpCliffsOfMoherContext()
-        throws RuggedException, OrekitException {
+         {
 
         // cliffs of Moher location according to Wikipedia: 52°56′10″N 9°28′15″ W
         GeodeticPoint north = new GeodeticPoint(FastMath.toRadians(52.9984),
@@ -272,8 +266,8 @@ public abstract class AbstractAlgorithmTest {
     }
 
     @Before
-    public void setUp()
-            throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
+        
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
         earth = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,

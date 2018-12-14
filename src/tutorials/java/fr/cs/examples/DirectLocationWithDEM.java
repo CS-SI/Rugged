@@ -182,8 +182,8 @@ public class DirectLocationWithDEM {
     private static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
                                        ArrayList<TimeStampedPVCoordinates> satellitePVList,
                                        String absDate,
-                                       double px, double py, double pz, double vx, double vy, double vz)
-                                                       throws OrekitException {
+                                       double px, double py, double pz, double vx, double vy, double vz) {
+        
         AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
         Vector3D position = new Vector3D(px, py, pz); // in ITRF, unit: m
         Vector3D velocity = new Vector3D(vx, vy, vz); // in ITRF, unit: m/s
@@ -221,8 +221,8 @@ public class DirectLocationWithDEM {
         }
 
         @Override
-        public void updateTile(double latitude, double longitude, UpdatableTile tile)
-                        throws RuggedException {
+        public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+            
             double step         = size / (n - 1);
             double minLatitude  = size * FastMath.floor(latitude  / size);
             double minLongitude = size * FastMath.floor(longitude / size);

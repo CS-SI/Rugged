@@ -22,7 +22,6 @@ import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.ArithmeticUtils;
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.errors.RuggedException;
 
 public class RandomLandscapeUpdater implements TileUpdater {
 
@@ -37,11 +36,9 @@ public class RandomLandscapeUpdater implements TileUpdater {
      * @param seed
      * @param size size in latitude / size in longitude (rad)
      * @param n number of latitude / number of longitude
-     * @throws MathIllegalArgumentException
      */
     public RandomLandscapeUpdater(double baseH, double initialScale, double reductionFactor,
-                                  long seed, double size, int n)
-        throws MathIllegalArgumentException {
+                                  long seed, double size, int n) {
 
         if (!ArithmeticUtils.isPowerOfTwo(n - 1)) {
             throw new MathIllegalArgumentException(LocalizedCoreFormats.SIMPLE_MESSAGE,
@@ -107,8 +104,7 @@ public class RandomLandscapeUpdater implements TileUpdater {
     }
 
     @Override
-    public void updateTile(double latitude, double longitude, UpdatableTile tile)
-                    throws RuggedException {
+    public void updateTile(double latitude, double longitude, UpdatableTile tile) {
                 
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);

@@ -36,7 +36,6 @@ import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.SensorPixel;
 
@@ -46,7 +45,7 @@ public class DumpReplayerTest {
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
-    public void testDirectLoc01() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testDirectLoc01() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -69,7 +68,7 @@ public class DumpReplayerTest {
     }
 
     @Test
-    public void testDirectLoc02() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testDirectLoc02() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -92,7 +91,7 @@ public class DumpReplayerTest {
     }
 
     @Test
-    public void testDirectLoc03() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testDirectLoc03() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -115,7 +114,7 @@ public class DumpReplayerTest {
     }
 
     @Test
-    public void testDirectLoc04() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testDirectLoc04() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -146,7 +145,7 @@ public class DumpReplayerTest {
     }
 
     @Test
-    public void testInverseLoc01() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testInverseLoc01() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -168,7 +167,7 @@ public class DumpReplayerTest {
     }
 
     @Test
-    public void testInverseLoc02() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testInverseLoc02() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -190,7 +189,7 @@ public class DumpReplayerTest {
     }
 
     @Test
-    public void testInverseLoc03() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testInverseLoc03() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -212,7 +211,7 @@ public class DumpReplayerTest {
     }
 
     @Test
-    public void testCorruptedFiles() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testCorruptedFiles() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));

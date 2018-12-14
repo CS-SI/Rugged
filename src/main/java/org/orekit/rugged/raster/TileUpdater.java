@@ -16,8 +16,6 @@
  */
 package org.orekit.rugged.raster;
 
-import org.orekit.rugged.errors.RuggedException;
-
 /** Interface used to update Digital Elevation Model tiles.
  * <p>
  * Implementations of this interface are must be provided by
@@ -80,9 +78,7 @@ public interface TileUpdater {
      * @param latitude latitude that must be covered by the tile (rad)
      * @param longitude longitude that must be covered by the tile (rad)
      * @param tile to update
-     * @exception RuggedException if tile cannot be updated
      */
-    void updateTile(double latitude, double longitude, UpdatableTile tile)
-        throws RuggedException;
+    void updateTile(double latitude, double longitude, UpdatableTile tile);
 
 }

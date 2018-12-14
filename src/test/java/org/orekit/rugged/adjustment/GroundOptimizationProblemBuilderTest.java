@@ -1,7 +1,6 @@
 package org.orekit.rugged.adjustment;
 
 import java.lang.reflect.Field;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,14 +10,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
@@ -53,7 +49,7 @@ public class GroundOptimizationProblemBuilderTest {
     }
     
     @Test
-    public void testEstimateFreeParameters() throws RuggedException {
+    public void testEstimateFreeParameters() {
         
         AdjustmentContext adjustmentContext = new AdjustmentContext(Collections.singletonList(rugged), measurements);
         final int maxIterations = 50;
@@ -88,7 +84,7 @@ public class GroundOptimizationProblemBuilderTest {
     }
 
     @Test
-    public void testNoParametersSelected() throws RuggedException, OrekitException {
+    public void testNoParametersSelected() {
         try {
             RefiningParametersDriver.unselectRoll(rugged, sensorName);
             RefiningParametersDriver.unselectPitch(rugged, sensorName);
@@ -131,7 +127,7 @@ public class GroundOptimizationProblemBuilderTest {
     }
     
     @Test
-    public void testDefaultRuggedName() throws RuggedException {
+    public void testDefaultRuggedName(){
         
         // Get the measurements as computed in other tests
         Collection<SensorToGroundMapping> sensorToGroundMapping = measurements.getGroundMappings();

@@ -54,9 +54,8 @@ public class MultiLayerModel extends AtmosphericRefraction {
      * This model uses a built-in set of layers.
      * </p>
      * @param ellipsoid the ellipsoid to be used.
-     * @throws RuggedException if problem at layers construction
      */
-    public MultiLayerModel(final ExtendedEllipsoid ellipsoid) throws RuggedException {
+    public MultiLayerModel(final ExtendedEllipsoid ellipsoid) {
 
         super();
 
@@ -86,10 +85,8 @@ public class MultiLayerModel extends AtmosphericRefraction {
     /** Simple constructor.
      * @param ellipsoid the ellipsoid to be used.
      * @param refractionLayers the refraction layers to be used with this model (layers can be in any order).
-     * @throws RuggedException if problem at layers construction
      */
-    public MultiLayerModel(final ExtendedEllipsoid ellipsoid, final List<ConstantRefractionLayer> refractionLayers)
-        throws RuggedException {
+    public MultiLayerModel(final ExtendedEllipsoid ellipsoid, final List<ConstantRefractionLayer> refractionLayers) {
 
         super();
         // at this stage no optimization is set up: no optimization grid is defined
@@ -110,12 +107,11 @@ public class MultiLayerModel extends AtmosphericRefraction {
      * @param satLos satellite line of sight, in body frame
      * @param rawIntersection intersection point without refraction correction
      * @return the intersection position and LOS with the lowest atmospheric layer
-     * @throws RuggedException if no layer data at asked altitude
      * @since 3.0
      */
     private IntersectionLOS computeToLowestAtmosphereLayer(
                             final Vector3D satPos, final Vector3D satLos,
-                            final NormalizedGeodeticPoint rawIntersection) throws RuggedException {
+                            final NormalizedGeodeticPoint rawIntersection) {
 
         if (rawIntersection.getAltitude() < atmosphereLowestAltitude) {
             throw new RuggedException(RuggedMessages.NO_LAYER_DATA, rawIntersection.getAltitude(),
@@ -241,7 +237,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
     public NormalizedGeodeticPoint applyCorrection(final Vector3D satPos, final Vector3D satLos,
                                                    final NormalizedGeodeticPoint rawIntersection,
                                                    final IntersectionAlgorithm algorithm)
-                                                   throws RuggedException {
+                                                   {
 
         final IntersectionLOS intersectionLOS = computeToLowestAtmosphereLayer(satPos, satLos, rawIntersection);
         final Vector3D pos = intersectionLOS.getIntersectionPos();
@@ -258,8 +254,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
     public NormalizedGeodeticPoint applyCorrection(final LineSensor lineSensor, final SensorPixel sensorPixel,
                                                    final Vector3D satPos, final Vector3D satLos,
                                                    final NormalizedGeodeticPoint rawIntersection,
-                                                   final IntersectionAlgorithm algorithm)
-        throws RuggedException {
+                                                   final IntersectionAlgorithm algorithm) {
 
         // TODO to be done
         throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "Atmospheric optimization for direct loc");

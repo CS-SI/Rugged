@@ -74,9 +74,8 @@ public class AtmosphericComputationParameters {
      * @param sensor line sensor
      * @param minLine min line defined for the inverse location
      * @param maxLine max line defined for the inverse location
-     * @throws RuggedException if invalid range for lines
      */
-    public void configureCorrectionGrid(final LineSensor sensor, final int minLine, final int maxLine) throws RuggedException {
+    public void configureCorrectionGrid(final LineSensor sensor, final int minLine, final int maxLine) {
 
         // Keep information about the sensor and the required search lines.
         // Needed to test if the grid is initialized with this context.
@@ -110,9 +109,8 @@ public class AtmosphericComputationParameters {
      * Overwrite the default values, for time optimization if necessary.
      * @param gridPixelStep grid pixel step for the inverse location computation
      * @param gridLineStep grid line step for the inverse location computation
-     * @throws RuggedException if invalid steps
      */
-    public void setGridSteps(final int gridPixelStep, final int gridLineStep) throws RuggedException {
+    public void setGridSteps(final int gridPixelStep, final int gridLineStep) {
 
         if (gridPixelStep <= 0) {
             final String reason = " pixelStep <= 0";

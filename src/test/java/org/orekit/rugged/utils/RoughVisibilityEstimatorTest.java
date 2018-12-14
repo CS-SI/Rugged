@@ -16,13 +16,13 @@
  */
 package org.orekit.rugged.utils;
 
-import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
-import org.hipparchus.util.FastMath;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
+import org.hipparchus.util.FastMath;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,7 +51,6 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;
@@ -61,8 +60,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 public class RoughVisibilityEstimatorTest {
 
     @Test
-    public void testThreeOrbitsSpan()
-        throws RuggedException, OrekitException, URISyntaxException {
+    public void testThreeOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -87,8 +85,7 @@ public class RoughVisibilityEstimatorTest {
     }
 
     @Test
-    public void testOneOrbitsSpan()
-        throws RuggedException, OrekitException, URISyntaxException {
+    public void testOneOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -112,20 +109,17 @@ public class RoughVisibilityEstimatorTest {
 
     }
 
-    private BodyShape createEarth()
-                    throws OrekitException {
+    private BodyShape createEarth() {
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                     Constants.WGS84_EARTH_FLATTENING,
                                     FramesFactory.getITRF(IERSConventions.IERS_2010, true));
     }
 
-    private NormalizedSphericalHarmonicsProvider createGravityField()
-                    throws OrekitException {
+    private NormalizedSphericalHarmonicsProvider createGravityField() {
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
 
-    private Orbit createOrbit(double mu)
-                    throws OrekitException {
+    private Orbit createOrbit(double mu) {
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
         //
@@ -149,8 +143,7 @@ public class RoughVisibilityEstimatorTest {
 
     private Propagator createPropagator(BodyShape earth,
                                         NormalizedSphericalHarmonicsProvider gravityField,
-                                        Orbit orbit)
-                                                        throws OrekitException {
+                                        Orbit orbit) {
 
         AttitudeProvider yawCompensation = new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth));
         SpacecraftState state = new SpacecraftState(orbit,

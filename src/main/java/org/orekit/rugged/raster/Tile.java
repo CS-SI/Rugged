@@ -18,7 +18,6 @@ package org.orekit.rugged.raster;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface representing a raster tile.
@@ -113,10 +112,8 @@ public interface Tile extends UpdatableTile {
     }
 
     /** Hook called at the end of tile update completion.
-     * @exception RuggedException if something wrong occurs
-     * (missing data ...)
      */
-    void tileUpdateCompleted() throws RuggedException;
+    void tileUpdateCompleted();
 
     /** Get minimum latitude of grid interpolation points.
      * @return minimum latitude of grid interpolation points
@@ -240,10 +237,8 @@ public interface Tile extends UpdatableTile {
      * @param latitudeIndex grid point index along latitude
      * @param longitudeIndex grid point index along longitude
      * @return elevation at grid point
-     * @exception RuggedException if indices are out of bound
      */
-    double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
-        throws RuggedException;
+    double getElevationAtIndices(int latitudeIndex, int longitudeIndex);
 
     /** Interpolate elevation.
      * <p>
@@ -257,10 +252,8 @@ public interface Tile extends UpdatableTile {
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return interpolated elevation
-     * @exception RuggedException if point is farthest from the tile than the tolerance
      */
-    double interpolateElevation(double latitude, double longitude)
-        throws RuggedException;
+    double interpolateElevation(double latitude, double longitude);
 
     /** Find the intersection of a line-of-sight and a Digital Elevation Model cell.
      * @param p point on the line
@@ -270,11 +263,9 @@ public interface Tile extends UpdatableTile {
      * @param longitudeIndex longitude index of the Digital Elevation Model cell
      * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
      * if it lies within the cell, null otherwise
-     * @exception RuggedException if intersection point cannot be computed
      */
     NormalizedGeodeticPoint cellIntersection(GeodeticPoint p, Vector3D los,
-                                              int latitudeIndex, int longitudeIndex)
-        throws RuggedException;
+                                              int latitudeIndex, int longitudeIndex);
 
     /** Check if a tile covers a ground point.
      * @param latitude ground point latitude

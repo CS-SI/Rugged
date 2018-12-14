@@ -57,10 +57,8 @@ public class TilesCache<T extends Tile> {
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return tile covering the ground point
-     * @exception RuggedException if newly created tile cannot be updated
      */
-    public T getTile(final double latitude, final double longitude)
-        throws RuggedException {
+    public T getTile(final double latitude, final double longitude) {
 
         for (int i = 0; i < tiles.length; ++i) {
             final T tile = tiles[i];

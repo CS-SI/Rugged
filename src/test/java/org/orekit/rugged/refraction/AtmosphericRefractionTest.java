@@ -16,7 +16,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 public class AtmosphericRefractionTest {
 
     @Test
-    public void testBadConfig() throws RuggedException {
+    public void testBadConfig() {
 
         int dimension = 400;
         

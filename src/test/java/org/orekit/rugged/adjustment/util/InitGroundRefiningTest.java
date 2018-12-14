@@ -25,7 +25,6 @@ import org.orekit.rugged.api.EllipsoidId;
 import org.orekit.rugged.api.InertialFrameId;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.time.AbsoluteDate;
@@ -65,9 +64,8 @@ public class InitGroundRefiningTest {
     
     /**
      * Initialize ground refining tests with default values for disruptions on sensors characteristics
-     * @throws RuggedException
      */
-    public void initGroundRefiningTest() throws RuggedException {
+    public void initGroundRefiningTest() {
         
         initGroundRefiningTest(defaultRollDisruption, defaultPitchDisruption, defaultFactorDisruption);
     }
@@ -76,9 +74,8 @@ public class InitGroundRefiningTest {
      * @param rollDisruption disruption to apply to roll angle for sensor (deg)
      * @param pitchDisruption disruption to apply to pitch angle for sensor (deg)
      * @param factorDisruption disruption to apply to homothety factor for sensor
-     * @throws RuggedException
      */
-    public void initGroundRefiningTest(double rollDisruption, double pitchDisruption, double factorDisruption) throws RuggedException {
+    public void initGroundRefiningTest(double rollDisruption, double pitchDisruption, double factorDisruption) {
         try {
             
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -177,9 +174,8 @@ public class InitGroundRefiningTest {
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
      * @param flag to tell if the Rugged name used is the default one (true) or not (false)
-     * @throws RuggedException
      */
-    public Observables generateNoisyPoints(final int lineSampling, final int pixelSampling, boolean defaultRuggedName) throws RuggedException {
+    public Observables generateNoisyPoints(final int lineSampling, final int pixelSampling, boolean defaultRuggedName) {
 
         // Generate reference mapping
         SensorToGroundMapping groundMapping;
