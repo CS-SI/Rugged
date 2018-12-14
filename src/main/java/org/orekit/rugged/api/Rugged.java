@@ -340,6 +340,7 @@ public class Rugged {
      * we consider each pixel to be at sensor position
      * @param pixelLOS pixel definition with normalized line-of-sight in spacecraft frame
      * @return ground position of intersection point between specified los and ground
+     * @since 2.1
      */
     public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final PixelLOS pixelLOS) {
 
@@ -642,7 +643,7 @@ public class Rugged {
      * @param sensor the line sensor
      * @param planeCrossing the sensor mean plane crossing
      * @return the sensor pixel crossing or null if cannot be found
-     * @since 3.0
+     * @since 2.1
      */
     private SensorPixel findSensorPixelWithoutAtmosphere(final GeodeticPoint point,
                                                          final LineSensor sensor, final SensorMeanPlaneCrossing planeCrossing) {
@@ -706,7 +707,7 @@ public class Rugged {
      * @param minLine minimum line number where the search will be performed
      * @param maxLine maximum line number where the search will be performed
      * @return the sensor pixel crossing or null if cannot be found
-     * @since 3.0
+     * @since 2.1
      */
     private SensorPixel findSensorPixelWithAtmosphere(final GeodeticPoint point,
                                                       final LineSensor sensor, final int minLine, final int maxLine) {
@@ -725,7 +726,7 @@ public class Rugged {
             // Definition of a regular grid (at sensor level)
             atmosphericRefraction.configureCorrectionGrid(sensor, minLine, maxLine);
 
-            // Get the grid knots
+            // Get the grid nodes
             final int nbPixelGrid = atmosphericRefraction.getComputationParameters().getNbPixelGrid();
             final int nbLineGrid = atmosphericRefraction.getComputationParameters().getNbLineGrid();
             final double[] pixelGrid = atmosphericRefraction.getComputationParameters().getUgrid();
@@ -735,9 +736,9 @@ public class Rugged {
             // (full computation)
             atmosphericRefraction.reactivateComputation();
             final GeodeticPoint[][] geodeticGridWithAtmosphere = computeDirectLocOnGridWithAtmosphere(pixelGrid, lineGrid, sensor);
-            // pixelGrid and lineGrid are the knots where the direct loc is computed WITH atmosphere
+            // pixelGrid and lineGrid are the nodes where the direct loc is computed WITH atmosphere
 
-            // Computation of the inverse location WITHOUT atmospheric refraction for the grid knots
+            // Computation of the inverse location WITHOUT atmospheric refraction for the grid nodes
             atmosphericRefraction.deactivateComputation();
             final SensorPixel[][] sensorPixelGridInverseWithout = computeInverseLocOnGridWithoutAtmosphere(geodeticGridWithAtmosphere,
                                                             nbPixelGrid, nbLineGrid, sensor, minLine, maxLine);
@@ -794,14 +795,15 @@ public class Rugged {
     }
 
     /** Compute the inverse location WITHOUT atmospheric refraction for the geodetic points
-     * associated to the sensor grid knots.
-     * @param groundGridWithAtmosphere ground grid found for sensor grid knots with atmosphere
+     * associated to the sensor grid nodes.
+     * @param groundGridWithAtmosphere ground grid found for sensor grid nodes with atmosphere
      * @param nbPixelGrid size of the pixel grid
      * @param nbLineGrid size of the line grid
      * @param sensor the line sensor
      * @param minLine minimum line number where the search will be performed
      * @param maxLine maximum line number where the search will be performed
      * @return the sensor pixel grid computed without atmosphere
+     * @since 2.1
      */
     private SensorPixel[][] computeInverseLocOnGridWithoutAtmosphere(final GeodeticPoint[][] groundGridWithAtmosphere,
                                                                      final int nbPixelGrid, final int nbLineGrid,
@@ -812,6 +814,7 @@ public class Rugged {
 
         for (int uIndex = 0; uIndex < nbPixelGrid; uIndex++) {
             for (int vIndex = 0; vIndex < nbLineGrid; vIndex++) {
+                
                 // Check if the geodetic point exists
                 if (groundGridWithAtmosphere[uIndex][vIndex] != null) {
                     final GeodeticPoint groundPoint = groundGridWithAtmosphere[uIndex][vIndex];
@@ -819,15 +822,16 @@ public class Rugged {
                     final double currentLon = groundPoint.getLongitude();
 
                     try {
+                        // Compute the inverse location for the current node
                         sensorPixelGrid[uIndex][vIndex] = inverseLocation(sensorName, currentLat, currentLon, minLine, maxLine);
 
-                        // Check if the pixel is inside the sensor
-                        if (sensorPixelGrid[uIndex][vIndex] != null &&
-                            (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < (-INVLOC_MARGIN) ||
-                            sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1))                                ) {
-                            // Impossible to find the point in the given min line and max line
-                            throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
-                        } else if (sensorPixelGrid[uIndex][vIndex] == null) {
+                        // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
+                        if ((sensorPixelGrid[uIndex][vIndex] != null &&
+                             (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < (-INVLOC_MARGIN) ||
+                              sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1)))
+                            || (sensorPixelGrid[uIndex][vIndex] == null) ) { 
+                            
+                            // Impossible to find the point in the given min line
                             throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
                         }
                     } catch (RuggedException re) { // This should never happen
@@ -835,10 +839,14 @@ public class Rugged {
                     }
 
                 } else { // groundGrid[uIndex][vIndex] == null: impossible to compute inverse loc because ground point not defined
+                    
                     sensorPixelGrid[uIndex][vIndex] = null;
+                    
                 } // groundGrid[uIndex][vIndex] != null
             } // end loop vIndex
         } // end loop uIndex
+        
+        // The sensor grid computed WITHOUT atmospheric refraction correction
         return sensorPixelGrid;
     }
 
@@ -848,6 +856,7 @@ public class Rugged {
      * @param lineGrid the line grid
      * @param sensor the line sensor
      * @return the ground grid computed with atmosphere
+     * @since 2.1
      */
     private GeodeticPoint[][] computeDirectLocOnGridWithAtmosphere(final double[] pixelGrid, final double[] lineGrid, 
                                                                    final LineSensor sensor) {
@@ -864,12 +873,16 @@ public class Rugged {
                 final AbsoluteDate date = sensor.getDate(lineNumber);
                 final Vector3D los = sensor.getLOS(date, pixelNumber);
                 try {
+                    // Compute the direct location for the current node
                     groundGridWithAtmosphere[uIndex][vIndex] = directLocation(date, sensorPosition, los);
+                    
                 } catch (RuggedException re) { // This should never happen
                     throw RuggedException.createInternalError(re);
                 }
             } // end loop vIndex
         } // end loop uIndex
+        
+        // The ground grid computed WITH atmospheric refraction correction 
         return groundGridWithAtmosphere;
     }
 

@@ -25,7 +25,7 @@ import org.orekit.rugged.utils.GridCreation;
  * Atmospheric refraction computation parameters.
  * Defines for inverse location a set of parameters in order to be able to perform the computation.
  * @author Guylaine Prat
- * @since 3.0
+ * @since 2.1
  */
 public class AtmosphericComputationParameters {
 

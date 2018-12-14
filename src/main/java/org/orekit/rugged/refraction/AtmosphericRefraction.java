@@ -35,28 +35,28 @@ public abstract class AtmosphericRefraction {
 
     /** Flag to tell if we must compute the correction.
      * By default: computation is set up.
-     * @since 3.0
+     * @since 2.1
      */
     private boolean mustBeComputed = true;
 
     /** Flag to tell if we must compute the correction (for direct location) with an optimization grid.
      * By default: optimization is not set up.
-     * @since 3.0
+     * @since 2.1
      */
     private boolean isOptimized = false;
 
     /** The current atmospheric parameters.
-     * @since 3.0
+     * @since 2.1
      */
     private AtmosphericComputationParameters atmosphericParams;
 
     /** Bilinear interpolating function for pixel (used by inverse location).
-     * @since 3.0
+     * @since 2.1
     */
     private BilinearInterpolatingFunction bifPixel = null;
 
     /** Bilinear interpolating function of line (used by inverse location).
-     * @since 3.0
+     * @since 2.1
     */
     private BilinearInterpolatingFunction bifLine = null;
 
@@ -91,21 +91,21 @@ public abstract class AtmosphericRefraction {
      * @return corrected point with the effect of atmospheric refraction
      * {@link org.orekit.rugged.utils.ExtendedEllipsoid#pointAtAltitude(Vector3D, Vector3D, double)} or see
      * {@link org.orekit.rugged.intersection.IntersectionAlgorithm#refineIntersection(org.orekit.rugged.utils.ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
-     * @since 3.0
+     * @since 2.1
      */
     public abstract NormalizedGeodeticPoint applyCorrection(LineSensor lineSensor, SensorPixel sensorPixel,
                                             Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
                                             IntersectionAlgorithm algorithm);
 
     /** Deactivate computation (needed for the inverse location computation).
-     * @since 3.0
+     * @since 2.1
      */
     public void deactivateComputation() {
         this.mustBeComputed = false;
     }
 
     /** Reactivate computation (needed for the inverse location computation).
-     * @since 3.0
+     * @since 2.1
      */
     public void reactivateComputation() {
         this.mustBeComputed = true;
@@ -113,7 +113,7 @@ public abstract class AtmosphericRefraction {
 
     /** Tell if the computation must be performed.
      * @return true if computation must be performed; false otherwise
-     * @since 3.0
+     * @since 2.1
      */
     public boolean mustBeComputed() {
         return mustBeComputed;
@@ -121,7 +121,7 @@ public abstract class AtmosphericRefraction {
 
     /** Tell if the computation (for direct location) must be optimized.
      * @return true if computation must be optimized; false otherwise
-     * @since 3.0
+     * @since 2.1
      */
     public boolean isOptimized() {
         return isOptimized;
@@ -132,6 +132,7 @@ public abstract class AtmosphericRefraction {
      * @param sensor line sensor
      * @param minLine min line defined for the inverse location
      * @param maxLine max line defined for the inverse location
+     * @since 2.1
      */
     public void configureCorrectionGrid(final LineSensor sensor, final int minLine, final int maxLine) {
 
@@ -143,6 +144,7 @@ public abstract class AtmosphericRefraction {
     * @param minLine the asked min line
     * @param maxLine the asked max line
     * @return true if same context; false otherwise
+    * @since 2.1
     */
     public Boolean isSameContext(final String sensorName, final int minLine, final int maxLine) {
 
@@ -153,6 +155,7 @@ public abstract class AtmosphericRefraction {
 
     /** Get the computation parameters.
      * @return the AtmosphericComputationParameters
+     * @since 2.1
      */
     public AtmosphericComputationParameters getComputationParameters() {
         return atmosphericParams;
@@ -162,6 +165,7 @@ public abstract class AtmosphericRefraction {
      * Overwrite the default values, for time optimization for instance.
      * @param pixelStep pixel step for the inverse location computation
      * @param lineStep line step for the inverse location computation
+     * @since 2.1
      */
     public void setGridSteps(final int pixelStep, final int lineStep) {
         atmosphericParams.setGridSteps(pixelStep, lineStep);
@@ -169,25 +173,25 @@ public abstract class AtmosphericRefraction {
 
     /** Compute the correction functions for pixel and lines.
      * The corrections are computed for pixels and lines, on a regular grid at sensor level.
-     * The corrections are based on the difference on grid knots (where direct loc is known with atmosphere refraction)
+     * The corrections are based on the difference on grid nodes (where direct loc is known with atmosphere refraction)
      * and the sensor pixel found by inverse loc without atmosphere refraction.
      * The bilinear interpolating functions are then computed for pixel and for line.
      * Need to be computed only once for a given sensor with the same minLine and maxLine.
      * @param sensorPixelGridInverseWithout inverse location grid WITHOUT atmospheric refraction
+     * @since 2.1
      */
     public void computeGridCorrectionFunctions(final SensorPixel[][] sensorPixelGridInverseWithout) {
 
-        // Compute for a sensor grid, the associated ground grid, WITH atmospheric effect
-        // (for interpolations we need a regular grid)
-        // ==================================================================================
         final int nbPixelGrid = atmosphericParams.getNbPixelGrid();
         final int nbLineGrid = atmosphericParams.getNbLineGrid();
         final double[] pixelGrid = atmosphericParams.getUgrid();
         final double[] lineGrid = atmosphericParams.getVgrid();
+        
+        // Initialize the needed diff functions
         final double[][] gridDiffPixel = new double[nbPixelGrid][nbLineGrid];
         final double[][] gridDiffLine = new double[nbPixelGrid][nbLineGrid];
 
-        // Compute the difference between grids knots WITH - without atmosphere
+        // Compute the difference between grids nodes WITH - without atmosphere
         for (int lineIndex = 0; lineIndex < nbLineGrid; lineIndex++) {
             for (int pixelIndex = 0; pixelIndex < nbPixelGrid; pixelIndex++) {
 
@@ -209,10 +213,16 @@ public abstract class AtmosphericRefraction {
         this.bifLine = new BilinearInterpolatingFunction(pixelGrid, lineGrid, gridDiffLine);
     }
 
+    /**
+     * @return the bilinear interpolating function for pixel correction
+     */
     public BilinearInterpolatingFunction getBifPixel() {
         return bifPixel;
     }
 
+    /**
+     * @return the bilinear interpolating function for line correction
+     */
     public BilinearInterpolatingFunction getBifLine() {
         return bifLine;
     }

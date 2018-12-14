@@ -18,7 +18,7 @@ package org.orekit.rugged.utils;
 
 /** Utility class for grids creation.
  * @author Guylaine Prat
- * @since 3.0
+ * @since 2.1
  */
 public final class GridCreation {
 

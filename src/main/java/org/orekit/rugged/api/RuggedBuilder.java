@@ -720,12 +720,12 @@ public class RuggedBuilder {
      * @return transforms interpolator
      */
     private static SpacecraftToObservedBody createInterpolator(final Frame inertialFrame, final Frame bodyFrame,
-            final AbsoluteDate minDate, final AbsoluteDate maxDate,
-            final double tStep, final double overshootTolerance,
-            final double interpolationStep, final int interpolationNumber,
-            final CartesianDerivativesFilter pvFilter,
-            final AngularDerivativesFilter aFilter,
-            final Propagator propagator) {
+                                                               final AbsoluteDate minDate, final AbsoluteDate maxDate,
+                                                               final double tStep, final double overshootTolerance,
+                                                               final double interpolationStep, final int interpolationNumber,
+                                                               final CartesianDerivativesFilter pvFilter,
+                                                               final AngularDerivativesFilter aFilter,
+                                                               final Propagator propagator) {
 
         // extract position/attitude samples from propagator
         final List<TimeStampedPVCoordinates> positionsVelocities =

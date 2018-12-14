@@ -107,7 +107,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
      * @param satLos satellite line of sight, in body frame
      * @param rawIntersection intersection point without refraction correction
      * @return the intersection position and LOS with the lowest atmospheric layer
-     * @since 3.0
+     * @since 2.1
      */
     private IntersectionLOS computeToLowestAtmosphereLayer(
                             final Vector3D satPos, final Vector3D satLos,
@@ -264,7 +264,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
 
 /** Container for the (position, LOS) of the intersection with the lowest atmospheric layer.
  * @author Guylaine Prat
- * @since 3.0
+ * @since 2.1
  */
 class IntersectionLOS {
 

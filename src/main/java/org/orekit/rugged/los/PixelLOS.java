@@ -23,7 +23,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 /** Container for pixel line-of-sight.
  * @author Guylaine Prat
- * @since 3.0
+ * @since 2.1
  */
 public class PixelLOS implements Serializable {
 
