@@ -188,7 +188,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      */
     public NormalizedGeodeticPoint pointOnGround(final Vector3D position, final Vector3D los,
                                                  final double centralLongitude) {
-        
+
         DumpManager.dumpEllipsoid(this);
         final GeodeticPoint gp =
                 getIntersectionPoint(new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12),

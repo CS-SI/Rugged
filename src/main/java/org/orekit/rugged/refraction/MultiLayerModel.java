@@ -236,8 +236,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
     @Override
     public NormalizedGeodeticPoint applyCorrection(final Vector3D satPos, final Vector3D satLos,
                                                    final NormalizedGeodeticPoint rawIntersection,
-                                                   final IntersectionAlgorithm algorithm)
-                                                   {
+                                                   final IntersectionAlgorithm algorithm) {
 
         final IntersectionLOS intersectionLOS = computeToLowestAtmosphereLayer(satPos, satLos, rawIntersection);
         final Vector3D pos = intersectionLOS.getIntersectionPos();

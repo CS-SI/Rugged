@@ -147,59 +147,59 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
         // model function
         final MultivariateJacobianFunction model = point -> {
 
-                // set the current parameters values
-                int i = 0;
-                for (final ParameterDriver driver : this.getDrivers()) {
-                    driver.setNormalizedValue(point.getEntry(i++));
-                }
+            // set the current parameters values
+            int i = 0;
+            for (final ParameterDriver driver : this.getDrivers()) {
+                driver.setNormalizedValue(point.getEntry(i++));
+            }
 
-                final double[] target = this.targetAndWeight.get(TARGET);
+            final double[] target = this.targetAndWeight.get(TARGET);
 
-                // compute inverse loc and its partial derivatives
-                final RealVector value = new ArrayRealVector(target.length);
-                final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, this.getNbParams());
-                int l = 0;
-                for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
-                    for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMapping()) {
-                        final GeodeticPoint gp = mapping.getValue();
-                        final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, this.getGenerator());
+            // compute inverse loc and its partial derivatives
+            final RealVector value = new ArrayRealVector(target.length);
+            final RealMatrix jacobian = new Array2DRowRealMatrix(target.length, this.getNbParams());
+            int l = 0;
+            for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
+                for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMapping()) {
+                    final GeodeticPoint gp = mapping.getValue();
+                    final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, this.getGenerator());
 
-                        if (ilResult == null) {
-                            value.setEntry(l, minLine - 100.0); // arbitrary
-                            // line far
-                            // away
-                            value.setEntry(l + 1, -100.0); // arbitrary
-                            // pixel far away
-                        } else {
-                            // extract the value
-                            value.setEntry(l, ilResult[0].getValue());
-                            value.setEntry(l + 1, ilResult[1].getValue());
+                    if (ilResult == null) {
+                        value.setEntry(l, minLine - 100.0); // arbitrary
+                        // line far
+                        // away
+                        value.setEntry(l + 1, -100.0); // arbitrary
+                        // pixel far away
+                    } else {
+                        // extract the value
+                        value.setEntry(l, ilResult[0].getValue());
+                        value.setEntry(l + 1, ilResult[1].getValue());
 
-                            // extract the Jacobian
-                            final int[] orders = new int[this.getNbParams()];
-                            int m = 0;
-                            for (final ParameterDriver driver : this.getDrivers()) {
-                                final double scale = driver.getScale();
-                                orders[m] = 1;
-                                jacobian.setEntry(l, m,
-                                                  ilResult[0]
-                                                                  .getPartialDerivative(orders) *
-                                                                  scale);
-                                jacobian.setEntry(l + 1, m,
-                                                  ilResult[1]
-                                                                  .getPartialDerivative(orders) *
-                                                                  scale);
-                                orders[m] = 0;
-                                m++;
-                            }
+                        // extract the Jacobian
+                        final int[] orders = new int[this.getNbParams()];
+                        int m = 0;
+                        for (final ParameterDriver driver : this.getDrivers()) {
+                            final double scale = driver.getScale();
+                            orders[m] = 1;
+                            jacobian.setEntry(l, m,
+                                    ilResult[0]
+                                            .getPartialDerivative(orders) *
+                                            scale);
+                            jacobian.setEntry(l + 1, m,
+                                    ilResult[1]
+                                            .getPartialDerivative(orders) *
+                                            scale);
+                            orders[m] = 0;
+                            m++;
                         }
-
-                        l += 2;
                     }
-                }
 
-                // inverse loc result with Jacobian for all reference points
-                return new Pair<RealVector, RealMatrix>(value, jacobian);
+                    l += 2;
+                }
+            }
+
+            // inverse loc result with Jacobian for all reference points
+            return new Pair<RealVector, RealMatrix>(value, jacobian);
         };
 
         return model;

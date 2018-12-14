@@ -60,7 +60,7 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
      * @param factorvalue homothety factor
      */
     public FixedZHomothety(final String name, final double factorvalue) {
-        
+
         this.factor   = factorvalue;
         this.factorDS = null;
         this.factorDriver = new ParameterDriver(name, factorvalue, SCALE, 0, Double.POSITIVE_INFINITY);

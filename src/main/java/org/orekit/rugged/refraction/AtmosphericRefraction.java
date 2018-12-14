@@ -186,7 +186,7 @@ public abstract class AtmosphericRefraction {
         final int nbLineGrid = atmosphericParams.getNbLineGrid();
         final double[] pixelGrid = atmosphericParams.getUgrid();
         final double[] lineGrid = atmosphericParams.getVgrid();
-        
+
         // Initialize the needed diff functions
         final double[][] gridDiffPixel = new double[nbPixelGrid][nbLineGrid];
         final double[][] gridDiffLine = new double[nbPixelGrid][nbLineGrid];

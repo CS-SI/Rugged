@@ -64,7 +64,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
      * @param angle rotation angle
      */
     public FixedRotation(final String name, final Vector3D axis, final double angle) {
-        
+
         this.axis     = axis;
         this.rotation = null;
         this.rDS      = null;

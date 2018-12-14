@@ -237,7 +237,7 @@ class Dump {
     /** Dump a sensor mean plane.
      * @param meanPlane mean plane associated with sensor
      */
-    public void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane){
+    public void dumpSensorMeanPlane(final SensorMeanPlaneCrossing meanPlane) {
         getSensorData(meanPlane.getSensor()).setMeanPlane(meanPlane);
     }
 
@@ -481,7 +481,7 @@ class Dump {
          * @param meanPlane mean plane finder
          */
         public void setMeanPlane(final SensorMeanPlaneCrossing meanPlane) {
-            
+
             if (this.meanPlane == null) {
                 this.meanPlane = meanPlane;
                 final long nbResults = meanPlane.getCachedResults().count();

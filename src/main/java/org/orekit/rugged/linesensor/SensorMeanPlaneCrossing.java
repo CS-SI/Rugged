@@ -516,7 +516,7 @@ public class SensorMeanPlaneCrossing {
      * or null if search interval does not bracket a solution
      */
     private CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess) {
-        
+
         try {
             // safety check
             final double startValue;

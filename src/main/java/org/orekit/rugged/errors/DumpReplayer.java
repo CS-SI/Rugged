@@ -529,41 +529,41 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                    if (fields.length < 14 ||
+                if (fields.length < 14 ||
                         !fields[0].equals(DATE) ||
                         !fields[2].equals(POSITION) || !fields[6].equals(LOS) ||
                         !fields[10].equals(LIGHT_TIME) || !fields[12].equals(ABERRATION)) {
-                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final AbsoluteDate date = new AbsoluteDate(fields[1], TimeScalesFactory.getUTC());
+                final Vector3D position = new Vector3D(Double.parseDouble(fields[3]),
+                        Double.parseDouble(fields[4]),
+                        Double.parseDouble(fields[5]));
+                final Vector3D los      = new Vector3D(Double.parseDouble(fields[7]),
+                        Double.parseDouble(fields[8]),
+                        Double.parseDouble(fields[9]));
+                if (global.calls.isEmpty()) {
+                    global.lightTimeCorrection         = Boolean.parseBoolean(fields[11]);
+                    global.aberrationOfLightCorrection = Boolean.parseBoolean(fields[13]);
+                } else {
+                    if (global.lightTimeCorrection != Boolean.parseBoolean(fields[11])) {
+                        throw new RuggedException(RuggedMessages.LIGHT_TIME_CORRECTION_REDEFINED,
+                                l, file.getAbsolutePath(), line);
                     }
-                    final AbsoluteDate date = new AbsoluteDate(fields[1], TimeScalesFactory.getUTC());
-                    final Vector3D position = new Vector3D(Double.parseDouble(fields[3]),
-                                                           Double.parseDouble(fields[4]),
-                                                           Double.parseDouble(fields[5]));
-                    final Vector3D los      = new Vector3D(Double.parseDouble(fields[7]),
-                                                           Double.parseDouble(fields[8]),
-                                                           Double.parseDouble(fields[9]));
-                    if (global.calls.isEmpty()) {
-                        global.lightTimeCorrection         = Boolean.parseBoolean(fields[11]);
-                        global.aberrationOfLightCorrection = Boolean.parseBoolean(fields[13]);
-                    } else {
-                        if (global.lightTimeCorrection != Boolean.parseBoolean(fields[11])) {
-                            throw new RuggedException(RuggedMessages.LIGHT_TIME_CORRECTION_REDEFINED,
-                                                      l, file.getAbsolutePath(), line);
-                        }
-                        if (global.aberrationOfLightCorrection != Boolean.parseBoolean(fields[13])) {
-                            throw new RuggedException(RuggedMessages.ABERRATION_OF_LIGHT_CORRECTION_REDEFINED,
-                                                      l, file.getAbsolutePath(), line);
-                        }
+                    if (global.aberrationOfLightCorrection != Boolean.parseBoolean(fields[13])) {
+                        throw new RuggedException(RuggedMessages.ABERRATION_OF_LIGHT_CORRECTION_REDEFINED,
+                                l, file.getAbsolutePath(), line);
                     }
-                    global.calls.add(new DumpedCall() {
+                }
+                global.calls.add(new DumpedCall() {
 
-                        /** {@inheritDoc} */
-                        @Override
-                        public Object execute(final Rugged rugged) {
-                            return rugged.directLocation(date, position, los);
-                        }
+                    /** {@inheritDoc} */
+                    @Override
+                    public Object execute(final Rugged rugged) {
+                        return rugged.directLocation(date, position, los);
+                    }
 
-                    });
+                });
             }
         },
 
@@ -592,22 +592,22 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                    if (fields.length < 10 ||
+                if (fields.length < 10 ||
                         !fields[0].equals(MIN_DATE)  || !fields[2].equals(MAX_DATE) || !fields[4].equals(T_STEP)   ||
                         !fields[6].equals(TOLERANCE) || !fields[8].equals(INERTIAL_FRAME)) {
-                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                    }
-                    global.minDate        = new AbsoluteDate(fields[1], TimeScalesFactory.getUTC());
-                    global.maxDate        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
-                    global.tStep          = Double.parseDouble(fields[5]);
-                    global.tolerance      = Double.parseDouble(fields[7]);
-                    global.bodyToInertial = new TreeMap<Integer, Transform>();
-                    global.scToInertial   = new TreeMap<Integer, Transform>();
-                    try {
-                        global.inertialFrame = FramesFactory.getFrame(Predefined.valueOf(fields[9]));
-                    } catch (IllegalArgumentException iae) {
-                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                    }
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                global.minDate        = new AbsoluteDate(fields[1], TimeScalesFactory.getUTC());
+                global.maxDate        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
+                global.tStep          = Double.parseDouble(fields[5]);
+                global.tolerance      = Double.parseDouble(fields[7]);
+                global.bodyToInertial = new TreeMap<Integer, Transform>();
+                global.scToInertial   = new TreeMap<Integer, Transform>();
+                try {
+                    global.inertialFrame = FramesFactory.getFrame(Predefined.valueOf(fields[9]));
+                } catch (IllegalArgumentException iae) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
             }
         },
 
@@ -814,44 +814,44 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                    if (fields.length < 16 || !fields[0].equals(SENSOR_NAME) ||
+                if (fields.length < 16 || !fields[0].equals(SENSOR_NAME) ||
                         !fields[2].equals(MIN_LINE) || !fields[4].equals(MAX_LINE) ||
                         !fields[6].equals(MAX_EVAL) || !fields[8].equals(ACCURACY) ||
                         !fields[10].equals(NORMAL)  || !fields[14].equals(CACHED_RESULTS)) {
-                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                    }
-                    final String   sensorName = fields[1];
-                    final int      minLine    = Integer.parseInt(fields[3]);
-                    final int      maxLine    = Integer.parseInt(fields[5]);
-                    final int      maxEval    = Integer.parseInt(fields[7]);
-                    final double   accuracy   = Double.parseDouble(fields[9]);
-                    final Vector3D normal     = new Vector3D(Double.parseDouble(fields[11]),
-                                                             Double.parseDouble(fields[12]),
-                                                             Double.parseDouble(fields[13]));
-                    final int      n          = Integer.parseInt(fields[15]);
-                    final CrossingResult[] cachedResults = new CrossingResult[n];
-                    int base = 16;
-                    for (int i = 0; i < n; ++i) {
-                        if (fields.length < base + 15 || !fields[base].equals(LINE_NUMBER) ||
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final String   sensorName = fields[1];
+                final int      minLine    = Integer.parseInt(fields[3]);
+                final int      maxLine    = Integer.parseInt(fields[5]);
+                final int      maxEval    = Integer.parseInt(fields[7]);
+                final double   accuracy   = Double.parseDouble(fields[9]);
+                final Vector3D normal     = new Vector3D(Double.parseDouble(fields[11]),
+                        Double.parseDouble(fields[12]),
+                        Double.parseDouble(fields[13]));
+                final int      n          = Integer.parseInt(fields[15]);
+                final CrossingResult[] cachedResults = new CrossingResult[n];
+                int base = 16;
+                for (int i = 0; i < n; ++i) {
+                    if (fields.length < base + 15 || !fields[base].equals(LINE_NUMBER) ||
                             !fields[base + 2].equals(DATE) || !fields[base + 4].equals(TARGET) ||
                             !fields[base + 8].equals(TARGET_DIRECTION)) {
-                            throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                        }
-                        final double       ln                    = Double.parseDouble(fields[base + 1]);
-                        final AbsoluteDate date                  = new AbsoluteDate(fields[base + 3], TimeScalesFactory.getUTC());
-                        final Vector3D     target                = new Vector3D(Double.parseDouble(fields[base +  5]),
-                                                                                Double.parseDouble(fields[base +  6]),
-                                                                                Double.parseDouble(fields[base +  7]));
-                        final Vector3D targetDirection           = new Vector3D(Double.parseDouble(fields[base +  9]),
-                                                                                Double.parseDouble(fields[base + 10]),
-                                                                                Double.parseDouble(fields[base + 11]));
-                        final Vector3D targetDirectionDerivative = new Vector3D(Double.parseDouble(fields[base + 12]),
-                                                                                Double.parseDouble(fields[base + 13]),
-                                                                                Double.parseDouble(fields[base + 14]));
-                        cachedResults[i] = new CrossingResult(date, ln, target, targetDirection, targetDirectionDerivative);
-                        base += 15;
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                     }
-                    global.getSensor(sensorName).setMeanPlane(new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal, cachedResults));
+                    final double       ln                    = Double.parseDouble(fields[base + 1]);
+                    final AbsoluteDate date                  = new AbsoluteDate(fields[base + 3], TimeScalesFactory.getUTC());
+                    final Vector3D     target                = new Vector3D(Double.parseDouble(fields[base +  5]),
+                            Double.parseDouble(fields[base +  6]),
+                            Double.parseDouble(fields[base +  7]));
+                    final Vector3D targetDirection           = new Vector3D(Double.parseDouble(fields[base +  9]),
+                            Double.parseDouble(fields[base + 10]),
+                            Double.parseDouble(fields[base + 11]));
+                    final Vector3D targetDirectionDerivative = new Vector3D(Double.parseDouble(fields[base + 12]),
+                            Double.parseDouble(fields[base + 13]),
+                            Double.parseDouble(fields[base + 14]));
+                    cachedResults[i] = new CrossingResult(date, ln, target, targetDirection, targetDirectionDerivative);
+                    base += 15;
+                }
+                global.getSensor(sensorName).setMeanPlane(new ParsedMeanPlane(minLine, maxLine, maxEval, accuracy, normal, cachedResults));
             }
         },
 
@@ -861,18 +861,18 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                    if (fields.length < 10 || !fields[0].equals(SENSOR_NAME) ||
-                            !fields[2].equals(DATE) || !fields[4].equals(PIXEL_NUMBER) ||
-                            !fields[6].equals(LOS)) {
-                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                    }
-                    final String       sensorName  = fields[1];
-                    final AbsoluteDate date        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
-                    final int          pixelNumber = Integer.parseInt(fields[5]);
-                    final Vector3D     los         = new Vector3D(Double.parseDouble(fields[7]),
-                                                                  Double.parseDouble(fields[8]),
-                                                                  Double.parseDouble(fields[9]));
-                    global.getSensor(sensorName).setLOS(date, pixelNumber, los);
+                if (fields.length < 10 || !fields[0].equals(SENSOR_NAME) ||
+                        !fields[2].equals(DATE) || !fields[4].equals(PIXEL_NUMBER) ||
+                        !fields[6].equals(LOS)) {
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final String       sensorName  = fields[1];
+                final AbsoluteDate date        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
+                final int          pixelNumber = Integer.parseInt(fields[5]);
+                final Vector3D     los         = new Vector3D(Double.parseDouble(fields[7]),
+                        Double.parseDouble(fields[8]),
+                        Double.parseDouble(fields[9]));
+                global.getSensor(sensorName).setLOS(date, pixelNumber, los);
             }
         },
 
@@ -882,14 +882,14 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                    if (fields.length < 6 || !fields[0].equals(SENSOR_NAME) ||
+                if (fields.length < 6 || !fields[0].equals(SENSOR_NAME) ||
                         !fields[2].equals(LINE_NUMBER) || !fields[4].equals(DATE)) {
-                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
-                    }
-                    final String       sensorName  = fields[1];
-                    final double       lineNumber  = Double.parseDouble(fields[3]);
-                    final AbsoluteDate date        = new AbsoluteDate(fields[5], TimeScalesFactory.getUTC());
-                    global.getSensor(sensorName).setDatation(lineNumber, date);
+                    throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                }
+                final String       sensorName  = fields[1];
+                final double       lineNumber  = Double.parseDouble(fields[3]);
+                final AbsoluteDate date        = new AbsoluteDate(fields[5], TimeScalesFactory.getUTC());
+                global.getSensor(sensorName).setDatation(lineNumber, date);
             }
         },
 

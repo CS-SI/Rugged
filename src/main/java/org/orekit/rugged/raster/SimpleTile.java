@@ -229,7 +229,7 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public void setElevation(final int latitudeIndex, final int longitudeIndex, final double elevation) {
-        
+
         if (latitudeIndex  < 0 || latitudeIndex  > (latitudeRows - 1) ||
             longitudeIndex < 0 || longitudeIndex > (longitudeColumns - 1)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
