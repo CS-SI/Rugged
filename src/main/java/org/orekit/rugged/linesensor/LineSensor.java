@@ -23,7 +23,6 @@ import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.DumpManager;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
@@ -101,7 +100,6 @@ public class LineSensor {
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @return pixel normalized line-of-sight
-     * @exception RuggedException if date cannot be handled
      * @since 2.0
      */
     public Vector3D getLOS(final AbsoluteDate date, final double i) {

@@ -38,8 +38,6 @@ import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.orekit.errors.OrekitException;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.PolynomialRotation;
 import org.orekit.rugged.los.TimeDependentLOS;

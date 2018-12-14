@@ -22,12 +22,11 @@ import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.api.Rugged;
-import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
+import org.orekit.rugged.api.Rugged;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.time.AbsoluteDate;
 
 /** Ground measurements generator (sensor to ground mapping).

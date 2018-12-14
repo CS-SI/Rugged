@@ -85,8 +85,8 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
         final int n = 1201;
         final double size = FastMath.toRadians(1.0);
         updater = new TileUpdater() {
-            public void updateTile(double latitude, double longitude, UpdatableTile tile)
-                throws RuggedException {
+            public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+                
                 double step = size / (n - 1);
                 // this geometry is incorrect:
                 // the specified latitude/longitude belong to rows/columns [1, n-1]

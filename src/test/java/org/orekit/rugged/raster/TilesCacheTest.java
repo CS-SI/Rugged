@@ -21,9 +21,6 @@ import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
-import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.raster.SimpleTile;
-import org.orekit.rugged.raster.TilesCache;
 
 public class TilesCacheTest {
 

@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,13 +16,12 @@
  */
 package org.orekit.rugged.utils;
 
-import org.hipparchus.util.FastMath;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.orekit.errors.OrekitException;
+import org.hipparchus.util.FastMath;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
@@ -253,30 +252,24 @@ public class SpacecraftToObservedBody implements Serializable {
     /** Get transform from spacecraft to inertial frame.
      * @param date date of the transform
      * @return transform from spacecraft to inertial frame
-     * @exception RuggedException if frames cannot be computed at date
      */
-    public Transform getScToInertial(final AbsoluteDate date)
-        throws RuggedException {
+    public Transform getScToInertial(final AbsoluteDate date) {
         return interpolate(date, scToInertial);
     }
 
     /** Get transform from inertial frame to observed body frame.
      * @param date date of the transform
      * @return transform from inertial frame to observed body frame
-     * @exception RuggedException if frames cannot be computed at date
      */
-    public Transform getInertialToBody(final AbsoluteDate date)
-        throws RuggedException {
+    public Transform getInertialToBody(final AbsoluteDate date) {
         return interpolate(date, inertialToBody);
     }
 
     /** Get transform from observed body frame to inertial frame.
      * @param date date of the transform
      * @return transform from observed body frame to inertial frame
-     * @exception RuggedException if frames cannot be computed at date
      */
-    public Transform getBodyToInertial(final AbsoluteDate date)
-        throws RuggedException {
+    public Transform getBodyToInertial(final AbsoluteDate date) {
         return interpolate(date, bodyToInertial);
     }
 
@@ -284,10 +277,8 @@ public class SpacecraftToObservedBody implements Serializable {
      * @param date date of the transform
      * @param list transforms list to interpolate from
      * @return interpolated transform
-     * @exception RuggedException if frames cannot be computed at date
      */
-    private Transform interpolate(final AbsoluteDate date, final List<Transform> list)
-        throws RuggedException {
+    private Transform interpolate(final AbsoluteDate date, final List<Transform> list) {
 
         // check date range
         if (!isInRange(date)) {

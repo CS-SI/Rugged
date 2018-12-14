@@ -31,7 +31,6 @@ import org.orekit.rugged.api.EllipsoidId;
 import org.orekit.rugged.api.InertialFrameId;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.DSGenerator;
@@ -86,9 +85,8 @@ public class InitInterRefiningTest {
     
     /**
      * Initialize refining tests with default values for disruptions on sensors characteristics
-     * @throws RuggedException
      */
-    public void initRefiningTest() throws RuggedException {
+    public void initRefiningTest() {
         
         initRefiningTest(defaultRollDisruptionA, defaultPitchDisruptionA, defaultFactorDisruptionA, 
                          defaultRollDisruptionB, defaultPitchDisruptionB);
@@ -100,10 +98,9 @@ public class InitInterRefiningTest {
      * @param factorDisruptionA disruption to apply to homothety factor for sensor A
      * @param rollDisruptionB disruption to apply to roll angle for sensor B (deg)
      * @param pitchDisruptionB disruption to apply to pitch angle for sensor B (deg)
-     * @throws RuggedException
      */
     public void initRefiningTest(double rollDisruptionA, double pitchDisruptionA, double factorDisruptionA, 
-                                 double rollDisruptionB, double pitchDisruptionB) throws RuggedException {
+                                 double rollDisruptionB, double pitchDisruptionB) {
         try {
             
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -251,9 +248,8 @@ public class InitInterRefiningTest {
      * @param realPixelA real pixel from sensor A
      * @param realPixelB real pixel from sensor B
      * @return the distances of two real pixels computed between LOS and to the ground
-     * @throws RuggedException
      */
-    public double[] computeDistancesBetweenLOS(final SensorPixel realPixelA, final SensorPixel realPixelB) throws RuggedException {
+    public double[] computeDistancesBetweenLOS(final SensorPixel realPixelA, final SensorPixel realPixelB) {
         
         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
@@ -272,16 +268,10 @@ public class InitInterRefiningTest {
      * @param realPixelA real pixel from sensor A
      * @param realPixelB real pixel from sensor B
      * @return the distances of two real pixels computed between LOS and to the ground
-     * @throws RuggedException
-     * @throws SecurityException 
-     * @throws NoSuchMethodException 
-     * @throws InvocationTargetException 
-     * @throws IllegalArgumentException 
-     * @throws IllegalAccessException 
      */
     public DerivativeStructure[] computeDistancesBetweenLOSDerivatives(final SensorPixel realPixelA, final SensorPixel realPixelB,
                                                                        double losDistance, double earthDistance) 
-        throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
@@ -327,9 +317,8 @@ public class InitInterRefiningTest {
      * @param pixelSampling pixel sampling
      * @param earthConstraintWeight the earth constrint weight
      * @param earthConstraintPostponed flag to tell if the earth constraint weight is set at construction (false) or after (true) - For JUnit coverage purpose
-     * @throws RuggedException
      */
-    public Observables generateNoisyPoints(final int lineSampling, final int pixelSampling, final double earthConstraintWeight, final boolean earthConstraintPostponed) throws RuggedException {
+    public Observables generateNoisyPoints(final int lineSampling, final int pixelSampling, final double earthConstraintWeight, final boolean earthConstraintPostponed) {
 
         // Outliers control
         final double outlierValue = 1.e+2;
@@ -437,9 +426,8 @@ public class InitInterRefiningTest {
      * @param pixelSampling pixel sampling
      * @param earthConstraintWeight the earth constrint weight
      * @param earthConstraintPostponed flag to tell if the earth constraint weight is set at construction (false) or after (true) - For JUnit coverage purpose
-     * @throws RuggedException
      */
-    public Observables generateSimpleInterMapping(final int lineSampling, final int pixelSampling, final double earthConstraintWeight, final boolean earthConstraintPostponed) throws RuggedException {
+    public Observables generateSimpleInterMapping(final int lineSampling, final int pixelSampling, final double earthConstraintWeight, final boolean earthConstraintPostponed) {
 
         // Outliers control
         final double outlierValue = 1.e+2;

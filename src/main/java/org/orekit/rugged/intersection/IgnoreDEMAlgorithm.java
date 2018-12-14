@@ -19,7 +19,6 @@ package org.orekit.rugged.intersection;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.errors.DumpManager;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 

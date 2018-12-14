@@ -74,13 +74,11 @@ public abstract class AtmosphericRefraction {
      * @param rawIntersection intersection point before refraction correction
      * @param algorithm intersection algorithm
      * @return corrected point with the effect of atmospheric refraction
-     * @throws RuggedException if there is no refraction data at altitude of rawIntersection or see
      * {@link org.orekit.rugged.utils.ExtendedEllipsoid#pointAtAltitude(Vector3D, Vector3D, double)} or see
      * {@link org.orekit.rugged.intersection.IntersectionAlgorithm#refineIntersection(org.orekit.rugged.utils.ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
      */
     public abstract NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
-                                            IntersectionAlgorithm algorithm)
-        throws RuggedException;
+                                            IntersectionAlgorithm algorithm);
 
     /** Apply correction to the intersected point with an atmospheric refraction model,
      * using a time optimized algorithm.
@@ -91,15 +89,13 @@ public abstract class AtmosphericRefraction {
      * @param rawIntersection intersection point before refraction correction
      * @param algorithm intersection algorithm
      * @return corrected point with the effect of atmospheric refraction
-     * @throws RuggedException if there is no refraction data at altitude of rawIntersection or see
      * {@link org.orekit.rugged.utils.ExtendedEllipsoid#pointAtAltitude(Vector3D, Vector3D, double)} or see
      * {@link org.orekit.rugged.intersection.IntersectionAlgorithm#refineIntersection(org.orekit.rugged.utils.ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
      * @since 3.0
      */
     public abstract NormalizedGeodeticPoint applyCorrection(LineSensor lineSensor, SensorPixel sensorPixel,
                                             Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
-                                            IntersectionAlgorithm algorithm)
-        throws RuggedException;
+                                            IntersectionAlgorithm algorithm);
 
     /** Deactivate computation (needed for the inverse location computation).
      * @since 3.0
@@ -136,9 +132,8 @@ public abstract class AtmosphericRefraction {
      * @param sensor line sensor
      * @param minLine min line defined for the inverse location
      * @param maxLine max line defined for the inverse location
-     * @throws RuggedException if invalid range for lines
      */
-    public void configureCorrectionGrid(final LineSensor sensor, final int minLine, final int maxLine) throws RuggedException {
+    public void configureCorrectionGrid(final LineSensor sensor, final int minLine, final int maxLine) {
 
         atmosphericParams.configureCorrectionGrid(sensor, minLine, maxLine);
     }
@@ -167,9 +162,8 @@ public abstract class AtmosphericRefraction {
      * Overwrite the default values, for time optimization for instance.
      * @param pixelStep pixel step for the inverse location computation
      * @param lineStep line step for the inverse location computation
-     * @throws RuggedException if invalid steps
      */
-    public void setGridSteps(final int pixelStep, final int lineStep) throws RuggedException {
+    public void setGridSteps(final int pixelStep, final int lineStep) {
         atmosphericParams.setGridSteps(pixelStep, lineStep);
     }
 
@@ -180,9 +174,8 @@ public abstract class AtmosphericRefraction {
      * The bilinear interpolating functions are then computed for pixel and for line.
      * Need to be computed only once for a given sensor with the same minLine and maxLine.
      * @param sensorPixelGridInverseWithout inverse location grid WITHOUT atmospheric refraction
-     * @throws RuggedException if invalid range for lines
      */
-    public void computeGridCorrectionFunctions(final SensorPixel[][] sensorPixelGridInverseWithout) throws RuggedException {
+    public void computeGridCorrectionFunctions(final SensorPixel[][] sensorPixelGridInverseWithout) {
 
         // Compute for a sensor grid, the associated ground grid, WITH atmospheric effect
         // (for interpolations we need a regular grid)

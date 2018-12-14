@@ -56,8 +56,6 @@ public class DumpManager {
 
     /** Activate debug dump.
      * @param file dump file
-     * @exception RuggedException if debug dump is already active for this thread
-     * or if debug file cannot be opened
      */
     public static void activate(final File file) {
         if (isActive()) {
@@ -73,7 +71,6 @@ public class DumpManager {
     }
 
     /** Deactivate debug dump.
-     * @exception RuggedException if debug dump is already active for this thread
      */
     public static void deactivate() {
         if (isActive()) {

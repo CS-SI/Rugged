@@ -64,7 +64,6 @@ import org.orekit.rugged.adjustment.GroundOptimizationProblemBuilder;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
@@ -388,7 +387,7 @@ public class RuggedTest {
         } // end loop on pixel i 
     }
 
-    private RuggedBuilder initRuggedForAtmosphericTests(final int dimension, final String sensorName) throws URISyntaxException, RuggedException {
+    private RuggedBuilder initRuggedForAtmosphericTests(final int dimension, final String sensorName) throws URISyntaxException {
         
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -817,7 +816,7 @@ public class RuggedTest {
 
 
     @Test
-    public void testInverseLocNearLineEnd() throws OrekitException, RuggedException, URISyntaxException {
+    public void testInverseLocNearLineEnd() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -919,7 +918,7 @@ public class RuggedTest {
     }
 
     @Test
-    public void testInverseLoc() throws OrekitException, RuggedException, URISyntaxException {
+    public void testInverseLoc() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -1309,52 +1308,36 @@ public class RuggedTest {
 
             UnivariateDifferentiableFunction lineVSroll =
                             differentiator.differentiate((double roll) -> {
-                                try {
-                                    rollDriver.setValue(roll);
-                                    pitchDriver.setValue(0);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(roll);
+                                pitchDriver.setValue(0);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
                             });
             double dLdR = lineVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdR, result[0].getPartialDerivative(1, 0), dLdR * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction lineVSpitch =
                             differentiator.differentiate((double pitch) -> {
-                                try {
-                                    rollDriver.setValue(0);
-                                    pitchDriver.setValue(pitch);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(0);
+                                pitchDriver.setValue(pitch);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
                             });
             double dLdP = lineVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdP, result[0].getPartialDerivative(0, 1), dLdP * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSroll =
                             differentiator.differentiate((double roll) -> {
-                                try {
-                                    rollDriver.setValue(roll);
-                                    pitchDriver.setValue(0);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(roll);
+                                pitchDriver.setValue(0);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
                             });
             double dXdR = pixelVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdR, result[1].getPartialDerivative(1, 0), dXdR * pixelDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSpitch =
                             differentiator.differentiate((double pitch) -> {
-                                try {
-                                    rollDriver.setValue(0);
-                                    pitchDriver.setValue(pitch);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(0);
+                                pitchDriver.setValue(pitch);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
                             });
             double dXdP = pixelVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
@@ -1362,7 +1345,7 @@ public class RuggedTest {
         } catch (InvocationTargetException | NoSuchMethodException |
                 SecurityException | IllegalAccessException |
                 IllegalArgumentException | URISyntaxException |
-                OrekitException | RuggedExceptionWrapper e) {
+                OrekitException | RuggedException e) {
             Assert.fail(e.getLocalizedMessage());
         }
     }
@@ -1542,7 +1525,7 @@ public class RuggedTest {
 
 
     @Before
-    public void setUp() throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
         TestUtils.clearFactories();
     }
 }

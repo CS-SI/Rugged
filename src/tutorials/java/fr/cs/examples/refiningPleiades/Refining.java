@@ -22,14 +22,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.adjustment.AdjustmentContext;
-import org.orekit.rugged.api.Rugged;
-import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
+import org.orekit.rugged.api.Rugged;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 
 import fr.cs.examples.refiningPleiades.generators.GroundMeasurementGenerator;
 import fr.cs.examples.refiningPleiades.generators.InterMeasurementGenerator;

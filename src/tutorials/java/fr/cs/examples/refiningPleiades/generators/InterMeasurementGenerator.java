@@ -22,7 +22,6 @@ import org.hipparchus.random.Well19937a;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;

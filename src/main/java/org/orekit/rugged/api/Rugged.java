@@ -1169,9 +1169,9 @@ public class Rugged {
     /** Get a sensor.
      * @param sensorName sensor name
      * @return selected sensor
-     * @exception RuggedException if sensor is not known
      */
     public LineSensor getLineSensor(final String sensorName) {
+        
         final LineSensor sensor = sensors.get(sensorName);
         if (sensor == null) {
             throw new RuggedException(RuggedMessages.UNKNOWN_SENSOR, sensorName);

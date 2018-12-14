@@ -18,7 +18,6 @@ package org.orekit.rugged.raster;
 
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.errors.RuggedException;
 
 public class CliffsElevationUpdater implements TileUpdater {
 

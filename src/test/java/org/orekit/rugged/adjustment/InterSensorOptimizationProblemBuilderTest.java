@@ -17,7 +17,6 @@
 package org.orekit.rugged.adjustment;
 
 import java.lang.reflect.Field;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -32,14 +31,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
 import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
@@ -66,7 +63,7 @@ public class InterSensorOptimizationProblemBuilderTest {
     }
 
     @Test
-    public void testEstimateFreeParameters() throws RuggedException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testEstimateFreeParameters() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
 
@@ -108,7 +105,7 @@ public class InterSensorOptimizationProblemBuilderTest {
     }
     
     @Test
-    public void testEarthConstraintPostponed() throws RuggedException {
+    public void testEarthConstraintPostponed() {
 
         // Get the measurements as computed in other tests
         Collection<SensorToSensorMapping> sensorToSensorMapping = measurements.getInterMappings();
@@ -190,7 +187,7 @@ public class InterSensorOptimizationProblemBuilderTest {
     } 
     
     @Test
-    public void testDefaultRuggedNames() throws RuggedException {
+    public void testDefaultRuggedNames() {
         
         // In that case there are no body distance set at construction
 
@@ -286,7 +283,7 @@ public class InterSensorOptimizationProblemBuilderTest {
     }
 
     @Test
-    public void testInvalidRuggedNames() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, RuggedException {
+    public void testInvalidRuggedNames() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
             final int maxIterations = 120;
             final double convergenceThreshold = 1.e-7;
@@ -314,8 +311,8 @@ public class InterSensorOptimizationProblemBuilderTest {
                 adjuster.optimize(theProblem);
                 Assert.fail("An exception should have been thrown");
 
-            } catch  (RuggedExceptionWrapper re) {
-                Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getException().getSpecifier());
+            } catch  (RuggedException re) {
+                Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
             }
             
             // Then set RuggedA to null to get the right exception ...
@@ -329,8 +326,8 @@ public class InterSensorOptimizationProblemBuilderTest {
                 adjuster.optimize(theProblem);
                 Assert.fail("An exception should have been thrown");
 
-            } catch  (RuggedExceptionWrapper re) {
-                Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getException().getSpecifier());
+            } catch  (RuggedException re) {
+                Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
             }
     }
 

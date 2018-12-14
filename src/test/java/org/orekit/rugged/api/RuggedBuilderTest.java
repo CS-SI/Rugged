@@ -17,12 +17,6 @@
 package org.orekit.rugged.api;
 
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.RotationConvention;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
-import org.hipparchus.util.FastMath;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -36,6 +30,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
+import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,7 +48,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
-import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
@@ -98,7 +96,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testSetContextWithEphemerides()
-        throws RuggedException, OrekitException, URISyntaxException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        throws URISyntaxException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -314,7 +312,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testSetContextWithPropagator()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -359,7 +357,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testOutOfTimeRange()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -461,7 +459,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testInterpolatorDump()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -530,7 +528,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testInterpolatorCannotDump()
-        throws RuggedException, OrekitException, URISyntaxException, IOException {
+        throws URISyntaxException, IOException {
 
         int dimension = 200;
 
@@ -580,7 +578,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testInterpolatorDumpWrongFrame()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -641,7 +639,7 @@ public class RuggedBuilderTest {
 
     @Test
     public void testInterpolatorNotADump()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -841,8 +839,8 @@ public class RuggedBuilderTest {
 
     private List<TimeStampedAngularCoordinates> orbitToQ(Orbit orbit, BodyShape earth,
                                                          AbsoluteDate minDate, AbsoluteDate maxDate,
-                                                         double step)
-        throws OrekitException {
+                                                         double step) {
+        
         Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);

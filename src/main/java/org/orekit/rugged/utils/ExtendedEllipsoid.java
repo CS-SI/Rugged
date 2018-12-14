@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,7 +22,6 @@ import org.hipparchus.util.FastMath;
 import org.hipparchus.util.MathArrays;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
@@ -68,8 +67,7 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
 
     /** {@inheritDoc} */
     @Override
-    public GeodeticPoint transform(final Vector3D point, final Frame frame, final AbsoluteDate date)
-        throws OrekitException {
+    public GeodeticPoint transform(final Vector3D point, final Frame frame, final AbsoluteDate date) {
         DumpManager.dumpEllipsoid(this);
         return super.transform(point, frame, date);
     }
@@ -82,11 +80,9 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * when there are two points at the desired latitude along the line, it should
      * be close to los surface intersection (m)
      * @return point at latitude (m)
-     * @exception RuggedException if no such point exists
      */
     public Vector3D pointAtLatitude(final Vector3D position, final Vector3D los,
-                                    final double latitude, final Vector3D closeReference)
-        throws RuggedException {
+                                    final double latitude, final Vector3D closeReference) {
 
         DumpManager.dumpEllipsoid(this);
 
@@ -165,10 +161,8 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param longitude longitude with respect to ellipsoid (rad)
      * @return point at longitude (m)
-     * @exception RuggedException if no such point exists
      */
-    public Vector3D pointAtLongitude(final Vector3D position, final Vector3D los, final double longitude)
-        throws RuggedException {
+    public Vector3D pointAtLongitude(final Vector3D position, final Vector3D los, final double longitude) {
 
         DumpManager.dumpEllipsoid(this);
 
@@ -307,11 +301,9 @@ public class ExtendedEllipsoid extends OneAxisEllipsoid {
      * @param centralLongitude reference longitude lc such that the point longitude will
      * be normalized between lc-π and lc+π (rad)
      * @return point at the same location but as a surface-relative point
-     * @exception OrekitException if point cannot be converted to body frame
      */
     public NormalizedGeodeticPoint transform(final Vector3D point, final Frame frame, final AbsoluteDate date,
-                                             final double centralLongitude)
-        throws OrekitException {
+                                             final double centralLongitude) {
         final GeodeticPoint gp = transform(point, frame, date);
         return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
                                            centralLongitude);

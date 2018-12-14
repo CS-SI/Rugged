@@ -36,7 +36,6 @@ import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.SensorPixel;
 

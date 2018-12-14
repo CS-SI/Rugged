@@ -31,7 +31,6 @@ import org.orekit.attitudes.TabulatedLofOffset;
 import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;

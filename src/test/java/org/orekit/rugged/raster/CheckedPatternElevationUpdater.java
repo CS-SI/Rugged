@@ -17,7 +17,6 @@
 package org.orekit.rugged.raster;
 
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.errors.RuggedException;
 
 public class CheckedPatternElevationUpdater implements TileUpdater {
 

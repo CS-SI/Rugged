@@ -23,12 +23,11 @@ import java.util.Set;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.api.Rugged;
-import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
+import org.orekit.rugged.api.Rugged;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 

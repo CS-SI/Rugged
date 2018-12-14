@@ -16,11 +16,6 @@
  */
 package org.orekit.rugged.linesensor;
 
-import org.hipparchus.geometry.euclidean.threed.Line;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.random.RandomGenerator;
-import org.hipparchus.random.Well19937a;
-import org.hipparchus.util.FastMath;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,6 +23,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hipparchus.geometry.euclidean.threed.Line;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.random.RandomGenerator;
+import org.hipparchus.random.Well19937a;
+import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
 import org.orekit.orbits.CircularOrbit;
@@ -49,7 +48,6 @@ import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.TestUtils;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;

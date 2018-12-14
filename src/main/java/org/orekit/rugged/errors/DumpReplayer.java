@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -45,7 +45,6 @@ import org.hipparchus.util.OpenIntToDoubleHashMap;
 import org.hipparchus.util.Pair;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Predefined;
@@ -271,7 +270,6 @@ public class DumpReplayer {
 
     /** Parse a dump file.
      * @param file dump file to parse
-     * @exception RuggedException if file cannot be parsed
      */
     public void parse(final File file) {
         try {
@@ -289,7 +287,6 @@ public class DumpReplayer {
 
     /** Create a Rugged instance from parsed data.
      * @return rugged instance
-     * @exception RuggedException if some data are inconsistent or incomplete
      */
     public Rugged createRugged() {
         try {

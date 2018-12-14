@@ -16,14 +16,13 @@
  */
 package org.orekit.rugged.intersection.duvenhage;
 
+import java.lang.reflect.Field;
+
 import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well1024a;
 import org.hipparchus.util.FastMath;
-import java.lang.reflect.Field;
-
 import org.junit.Assert;
 import org.junit.Test;
-import org.orekit.rugged.errors.RuggedException;
 
 public class MinMaxTreeTileTest {
 

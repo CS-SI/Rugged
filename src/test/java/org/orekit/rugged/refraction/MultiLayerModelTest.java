@@ -16,6 +16,11 @@
  */
 package org.orekit.rugged.refraction;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.hipparchus.analysis.UnivariateFunction;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
@@ -23,7 +28,6 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
@@ -31,11 +35,6 @@ import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class MultiLayerModelTest extends AbstractAlgorithmTest {
 

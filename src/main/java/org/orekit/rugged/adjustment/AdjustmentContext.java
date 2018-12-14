@@ -25,13 +25,11 @@ import java.util.Map;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
-import org.orekit.errors.OrekitException;
+import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.adjustment.measurements.Observables;
 
 /** Create adjustment context for viewing model refining.
  * @author Lucie LabatAllee

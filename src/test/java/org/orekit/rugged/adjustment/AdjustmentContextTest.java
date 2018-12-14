@@ -62,7 +62,7 @@ public class AdjustmentContextTest {
     }
 
     @Test
-    public void testAdjustmentContext() throws RuggedException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testAdjustmentContext() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         
         AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
         
@@ -86,7 +86,7 @@ public class AdjustmentContextTest {
     }
 
     @Test
-    public void testEstimateFreeParameters() throws RuggedException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testEstimateFreeParameters() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         
         AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
         

@@ -16,15 +16,16 @@
  */
 package fr.cs.examples.refiningPleiades.models;
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.RotationConvention;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-
-import org.hipparchus.util.FastMath;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
+import org.orekit.rugged.linesensor.LineDatation;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.LinearLineDatation;
 import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.FixedZHomothety;
 import org.orekit.rugged.los.LOSBuilder;
@@ -34,13 +35,6 @@ import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
 
 import fr.cs.examples.refiningPleiades.Refining;
-
-import org.orekit.rugged.linesensor.LinearLineDatation;
-import org.orekit.rugged.linesensor.LineDatation;
-import org.orekit.rugged.linesensor.LineSensor;
-
-import org.orekit.rugged.errors.RuggedException;
-import org.orekit.errors.OrekitException;
 
 /**
  * Pleiades viewing model class definition.

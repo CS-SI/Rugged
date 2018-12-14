@@ -29,7 +29,6 @@ import org.hipparchus.exception.LocalizedCoreFormats;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.propagation.Propagator;
@@ -575,8 +574,6 @@ public class RuggedBuilder {
      * @param storageStream stream from where to read previous instance {@link #storeInterpolator(OutputStream)
      * stored interpolator} (caller opened it and remains responsible for closing it)
      * @return the builder instance
-     * @exception RuggedException if storage stream cannot be parsed
-     * or if frames do not match the ones referenced in the storage stream
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(Frame, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
      * @see #setTrajectory(double, int, CartesianDerivativesFilter, AngularDerivativesFilter, Propagator)
@@ -625,7 +622,6 @@ public class RuggedBuilder {
      * </p>
      * @param storageStream stream where to store the interpolator
      * (caller opened it and remains responsible for closing it)
-     * @exception RuggedException if interpolator cannot be written to stream
      * @see #setEllipsoid(EllipsoidId, BodyRotatingFrameId)
      * @see #setEllipsoid(OneAxisEllipsoid)
      * @see #setTrajectory(InertialFrameId, List, int, CartesianDerivativesFilter, List, int, AngularDerivativesFilter)
@@ -643,21 +639,17 @@ public class RuggedBuilder {
     }
 
     /** Check frames consistency.
-     * @exception RuggedException if frames have been set both by direct calls and by
-     * deserializing an interpolator dump and a mismatch occurs
      */
     private void checkFramesConsistency() {
         if (ellipsoid != null && scToBody != null &&
             !ellipsoid.getBodyFrame().getName().equals(scToBody.getBodyFrame().getName())) {
+            // if frames have been set both by direct calls and by deserializing an interpolator dump and a mismatch occurs
             throw new RuggedException(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
                                       ellipsoid.getBodyFrame().getName(), scToBody.getBodyFrame().getName());
         }
     }
 
     /** Create a transform interpolator if needed.
-     * @exception RuggedException if data needed for some frame cannot be loaded or if position
-     * or attitude samples do not fully cover the [{@code minDate}, {@code maxDate}] search time span,
-     * or propagator fails.
      */
     private void createInterpolatorIfNeeded() {
 
@@ -972,8 +964,6 @@ public class RuggedBuilder {
 
     /** Build a {@link Rugged} instance.
      * @return built instance
-     * @exception RuggedException if the builder is not properly configured
-     * or if some internal elements cannot be built (frames, ephemerides, ...)
      */
     public Rugged build() {
         
