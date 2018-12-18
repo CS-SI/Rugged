@@ -1,5 +1,5 @@
-# internal error, please notify development team by creating an issue at {0}
-INTERNAL_ERROR = <MISSING TRANSLATION>
+﻿# internal error, please notify development team by creating an issue at {0}
+INTERNAL_ERROR = intern feil, kontakt utviklingerne ved å åpne en problemrapport på {0}
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
 OUT_OF_TILE_INDICES = ingen data funnet på [{0}, {1}], flisen dekker kun fra [0, 0] til [{2}, {3}] (inkludert)
@@ -8,7 +8,7 @@ OUT_OF_TILE_INDICES = ingen data funnet på [{0}, {1}], flisen dekker kun fra [0
 OUT_OF_TILE_ANGLES = ingen data på breddegrad {0} og lengdegrad {1}, flisen dekker kun breddegradene {2} til {3} og lengdegradene {4} til {5} 
 
 # no Digital Elevation Model data at latitude {0} and longitude {1}
-NO_DEM_DATA = <MISSING TRANSLATION>
+NO_DEM_DATA = ingen Digital Elevation Model data på breddegrad {0} og lengdegrad {1},
 
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = den valgte flisen for breddegrad {0} og lengdegrad {1} inneholder ikke nødvendig nabopunkt
@@ -47,49 +47,49 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = rammen {0} stemmer ikke med rammen {1} 
 NOT_INTERPOLATOR_DUMP_DATA = dataen er ikke en interpolar-dump
 
 # debug dump is already active for this thread
-DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_ALREADY_ACTIVE = debug dump er allerede aktiv for denne tråden
 
 # unable to active debug dump with file {0}: {1}
-DEBUG_DUMP_ACTIVATION_ERROR = <MISSING TRANSLATION>
+DEBUG_DUMP_ACTIVATION_ERROR = kan ikke aktivere debug dump med filen {0}: {1}
 
 # debug dump is not active for this thread
-DEBUG_DUMP_NOT_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_NOT_ACTIVE = debug dump er ikke aktiv for denne tråden
 
 # cannot parse line {0}, file {1}: {2}
-CANNOT_PARSE_LINE = <MISSING TRANSLATION>
+CANNOT_PARSE_LINE = kan ikke lese linje {0}, fil {1}: {2}
 
 # light time correction redefined, line {0}, file {1}: {2}
-LIGHT_TIME_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+LIGHT_TIME_CORRECTION_REDEFINED = redefinert lystidkorreksjon, linje {0}, fil {1}: {2}
 
 # aberration of light correction redefined, line {0}, file {1}: {2}
-ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = lyskorreksjons aberrasjonen redefinert, linje {0}, fil {1}: {2}
 
 # tile {0} already defined, line {1}, file {2}: {3}
-TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
+TILE_ALREADY_DEFINED = flis {0} er allerede definert, linje {1}, fil {2}: {3}
 
 # unknown tile {0}, line {1}, file {2}: {3}
-UNKNOWN_TILE = <MISSING TRANSLATION>
+UNKNOWN_TILE = ukjent flis {0}, linje {1}, fil {2}: {3}
 
 # no parameters have been selected for estimation
-NO_PARAMETERS_SELECTED = <MISSING TRANSLATION>
+NO_PARAMETERS_SELECTED = ingen parametere har blitt valgt til anslaget
 
 # no reference mappings for parameters estimation
-NO_REFERENCE_MAPPINGS = <MISSING TRANSLATION>
+NO_REFERENCE_MAPPINGS = ingen korrespondansereferanse for parameteranslaget
 
 # a different parameter with name {0} already exists
-DUPLICATED_PARAMETER_NAME = <MISSING TRANSLATION>
+DUPLICATED_PARAMETER_NAME = en annen parameter med navn {0} finnes allerede
 
 # rugged name is not found 
-INVALID_RUGGED_NAME = <MISSING TRANSLATION>
+INVALID_RUGGED_NAME = rugged navnet ble ikke funnet
 
 # refining using {0} rugged instance is not handled
-UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+UNSUPPORTED_REFINING_CONTEXT = raffinere med {0} rugged instanser er ikke støttet
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
-NO_LAYER_DATA = <MISSING TRANSLATION>
+NO_LAYER_DATA = ikke noe atmosfærisk lag definert ved {0} (laveste høyde: {1})
 
 # step {0} is not valid : {1}
-INVALID_STEP = <MISSING TRANSLATION>
+INVALID_STEP = steget {0} er ikke gyldig: {1}
 
 # range between min line {0} and max line {1} too small {2}
- INVALID_RANGE_FOR_LINES = <MISSING TRANSLATION>
+INVALID_RANGE_FOR_LINES = avstanden mellom min linje {0} og max linje {1} er for liten {2}
