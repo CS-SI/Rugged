@@ -12,6 +12,8 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 ## Design of the major functions
 
 
@@ -120,3 +122,5 @@ tiles that are used under the hood. Different DEM intersection algorithms can us
 any change to the mission specific interface. One example of this independence corresponds to the Duvenhage algorithm, has
 in addition to the raw elevation grid, the tile will also contain a min/max kd-tree, so there are both a dedicated specialized
 tile and a corresponding TileFactory in use when this algorithm is run.
+
+[Top of the page](#top)

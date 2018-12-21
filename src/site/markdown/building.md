@@ -12,6 +12,8 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Building Rugged
 
 Rugged can be built from source using several different tools.
@@ -22,7 +24,7 @@ distributions provide these tools in their packages repositories.
 
 ## Building with Maven 3
 
-[Maven](http://maven.apache.org/) is a build tool that goes far beyond
+[Maven](http://maven.apache.org/ "Maven homepage") is a build tool that goes far beyond
 simply compiling and packaging a product. It is also able to resolve
 dependencies (including downloading the appropriate versions from the public
 repositories), to run automated tests, to launch various checking tools and
@@ -55,14 +57,14 @@ with the following command:
     mvn install
 
 For other commands like generating the site, or generating the
-[checkstyle](http://checkstyle.sourceforge.net/),
-[spotbugs](https://spotbugs.github.io/) or
-[jacoco](http://www.eclemma.org/jacoco/) reports, see the maven
-plugins documentation at [maven site](http://maven.apache.org/plugins/index.html).
+[checkstyle](http://checkstyle.sourceforge.net/ "Checkstyle homepage"),
+[spotbugs](https://spotbugs.github.io/ "Spotbugs homepage") or
+[jacoco](http://www.eclemma.org/jacoco/ "Jacoco homepage") reports, see the maven
+plugins documentation at [maven site](http://maven.apache.org/plugins/index.html "Maven plugins homepage").
 
 ## Building with Eclipse
 
-[Eclipse](http://www.eclipse.org/) is a very rich Integrated Development
+[Eclipse](http://www.eclipse.org/  "Eclipse homepage") is a very rich Integrated Development
 Environment (IDE). It is a huge product and not a simple build tool.
 
 For systems not providing eclipse as a package, it can be downloaded from its
@@ -90,3 +92,5 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
     and Orekit (available at Orekit
     [download page](https://www.orekit.org/download.html))
     in the libraries tab of the Configure Build Path dialog
+
+[Top of the page](#top)

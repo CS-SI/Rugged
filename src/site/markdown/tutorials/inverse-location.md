@@ -12,6 +12,8 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Inverse Location
 
 The aim of this tutorial is to compute the inverse location of a point on Earth 
@@ -21,7 +23,7 @@ We will also explain how to find the date at which sensor sees a ground point,
 which is a kind of inverse location only focusing on date.
 
 ## Inverse location of a point on Earth
-The initialization of Rugged is similar as in the [Direct location](direct-location.md) tutorial up to rugged initialization..
+The initialization of Rugged is similar as in the [Direct location](./direct-location.html) tutorial up to rugged initialization..
 
 ### Point defined by its latitude, longitude and altitude
 Once Rugged initialized, one can compute the line number and the pixel number of a point defined by its Geodetic coordinates:
@@ -82,4 +84,6 @@ then one can compute the inverse location:
      SensorPixel sensorPixel = rugged.inverseLocation(sensorName, gp, minLineRough, maxLineRough);
 
 ## Source code
-The source code is available in [InverseLocation.java](src/tutorials/java/fr/cs/examples/InverseLocation.java) (package fr.cs.examples under src/tutorials)
+The source code is available in InverseLocation.java (package fr.cs.examples under src/tutorials)
+
+[Top of the page](#top)

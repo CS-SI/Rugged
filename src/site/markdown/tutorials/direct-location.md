@@ -12,6 +12,8 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Rugged initialization and direct location
 
 This tutorial explains how to initialize Rugged and use it to geolocate a satellite image.
@@ -21,7 +23,7 @@ list of positions, velocities and attitude quaternions recorded during the acqui
 passing all this information to Rugged, we will be able to precisely locate each point of
 the image on the Earth. Well, not exactly precise, as this first tutorial does not use a
 Digital Elevation Model, but considers the Earth as an ellipsoid. The DEM will be added in
-a second tutorial: [Direct location with a DEM](direct-location-with-DEM.md). The objective
+a second tutorial: [Direct location with a DEM](./direct-location-with-DEM.html). The objective
 here is limited to explain how to initialize everything Rugged needs to know about the sensor
 and the acquisition.   
 
@@ -127,9 +129,9 @@ which frames we are using and convert if necessary.
 
 Conversion from inertial to Earth-rotating frame is transparent to the user and is based on the most
 recent precession/nutation model on top of which corrections published by the IERS are applied. IERS
-bulletins and other physical data are provided within the orekit-data folder. There are several ways
+bulletins and other physical data are provided within the orekit data folder. There are several ways
 to configure Orekit to use this data. More information is given
-[here](https://gitlab.orekit.org/orekit/orekit/tree/master/src/site/markdown/configuration.md).
+[here](../configuration.html)
 
 In our application, we simply need to know the name of the frames we are working with. Positions and
 velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
@@ -164,7 +166,7 @@ where, for instance, gpsDateAsString is set to "2009-12-11T10:49:55.899994"
 ### Positions and velocities
 
 
-Similarly the positions and velocities will be set in a list of *TimeStampedPVCoordinates*. Before being
+Similarly the positions and velocities will be set in a list of `TimeStampedPVCoordinates`. Before being
 added to the list, they must be transformed to EME2000: 
 
     import org.orekit.utils.TimeStampedPVCoordinates;
@@ -217,17 +219,17 @@ returns the builder instance, and therefore another setter can be called directl
 
 The *setAlgorithm* setter specifies the intersection algorithm to use. As this tutorial is intended to be very
 simple for a beginning, we choose to use directly the ellipsoid and not a real Digital Elevation Model,
-so we can use *AlgorithmId.IGNORE_DEM_USE_ELLIPSOID* as the single parameter of this setter.
+so we can use `AlgorithmId.IGNORE_DEM_USE_ELLIPSOID` as the single parameter of this setter.
 
 The *setDigitalElevationModel* setter specifies the Digital Elevation Model. In fact, as we decided to ignore the Digital
 Elevation Model in this tutorial, we could have omitted this call and it would have worked correctly.
 We preferred to let it in so users do not forget to set the Digital Elevation Model for intersection
 algorithms that really use them. As the model will be ignored, we can put the parameters for this
-setter to *null* and *0*. Of course if another algorithm had been chosen,  null parameters would clearly
-not work, this is explained in another tutorial: [Direct location with a DEM](direct-location-with-DEM.md).
+setter to `null` and `0`. Of course if another algorithm had been chosen,  null parameters would clearly
+not work, this is explained in another tutorial: [Direct location with a DEM](./direct-location-with-DEM.html).
 
 The *setEllipsoid* setter defines the shape and orientation of the ellipsoid. We use simple predefined enumerates:
-*EllipsoidId.WGS84*, *InertialFrameId.EME2000*, but could also use a custom ellipsoid if needed.
+`EllipsoidId.WGS84`, `InertialFrameId.EME2000`, but could also use a custom ellipsoid if needed.
 
 The *setTimeSpan* setter is used to define the global time span of the search algorithms (direct and inverse
 location). Four parameters are used for this: acquisitionStartDate, acquisitionStopDate,
@@ -249,18 +251,18 @@ timeTolerance = 5 / lineSensor.getRate(0)).
 The *setTrajectory* setter defines the spacecraft evolution. The arguments are the list of time-stamped positions and
 velocities as well as the inertial frame with respect to which they are defined and options for interpolation:
 number of points to use and type of filter for derivatives. The interpolation polynomials for nbPVPoints
-without any derivatives (case of *CartesianDerivativesFilter.USE_P*: only positions are used, without velocities)
+without any derivatives (case of `CartesianDerivativesFilter.USE_P`: only positions are used, without velocities)
 have a degree nbPVPoints - 1. In case of computation with velocities included (case of
-*CartesianDerivativesFilter.USE_PV*), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the
+`CartesianDerivativesFilter.USE_PV`), the interpolation polynomials have a degree 2*nbPVPoints - 1. If the
 positions/velocities data are of good quality and separated by a few seconds, one may choose only a few points
 but interpolate with both positions and velocities; in other cases, one may choose more points but interpolate
 only with positions. We find similar arguments for the attitude quaternions. 
 
-The last setter used, *addLineSensor*, registers a line sensor. As can be deduced from its prefix (*add* instead of *set*), it
+The last setter used, *addLineSensor*, registers a line sensor. As can be deduced from its prefix (`add` instead of `set`), it
 can be called several time to register several sensors that will all be available in the built Rugged instance.
 We have called the method only once here, so we will use only one sensor.
 
-After the last setter has been called, we call the *build()* method which really build the Rugged instance
+After the last setter has been called, we call the `build()` method which really build the Rugged instance
 (and not a RuggedBuilder instance has the setter did).
 
 Rugged takes into account by default some corrections for more accurate locations: 
@@ -272,7 +274,7 @@ Not compensating the delay or the velocity composition are mainly useful for val
 that do not compensate it. When the pixels line of sight already includes the aberration of light correction,
 one must obviously deactivate the correction.
 
-If those corrections should be ignored, some other setters must be inserted before the call to *build()*:
+If those corrections should be ignored, some other setters must be inserted before the call to `build()`:
 
     setXxxx().
     setLightTimeCorrection(false).
@@ -280,9 +282,9 @@ If those corrections should be ignored, some other setters must be inserted befo
     build();
 
 The various setters can be called in any order. The only important thing is that once a Rugged instance
-has been created by calling the *build()* method, it is independent from the builder so later calls
+has been created by calling the `build()` method, it is independent from the builder so later calls
 to setters will not change the build instance. In fact, it is possible to create a builder, then
-call its *build()* method to create a first Rugged instance, and then to modify the builder configuration
+call its `build()` method to create a first Rugged instance, and then to modify the builder configuration
 by calling again some of the setters and building a second Rugged instance from the new configuration.
 This allows to perform comparisons between two different configurations in the same program and without
 having to recreate everything. For instance, one can procede in three steps like this:
@@ -320,4 +322,6 @@ Otherwise an ArrayIndexOutOfBoundsException will be thrown.
 
 ## Source code 
 
-The source code is available in [DirectLocation.java](src/tutorials/java/fr/cs/examples/DirectLocation.java) (package fr.cs.examples under src/tutorials)
+The source code is available in DirectLocation.java (package fr.cs.examples under src/tutorials)
+
+[Top of the page](#top)

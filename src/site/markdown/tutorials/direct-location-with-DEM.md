@@ -12,6 +12,8 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Direct Location with a DEM
 
 The aim of this tutorial is to compute a direct location grid by intersection of 
@@ -20,7 +22,7 @@ This algorithm is the most performant one in Rugged.
 
 The following figure shows the effects of taking into account the DEM in the computation of latitude, longitude and altitude:
 
-![RuggedExplained.png](src/site/resources/images/RuggedExplained.png)
+![RuggedExplained.png](../images/RuggedExplained.png)
 
 ## Feeding Rugged with DEM tiles
 
@@ -44,18 +46,18 @@ In this tutorial, we will not include real DEM data. Instead we are going to cre
 representing a volcano in a form of a perfect cone, similar to the Mayon volcano 
 in the Philippines, except that we will locate it somewhere just below our satellite. 
 This example is already part of Rugged tests cases, the source code is available 
-in the package *org.orekit.rugged.raster*, file VolcanicConeElevationUpdater.java. 
+in the package `org.orekit.rugged.raster`, file VolcanicConeElevationUpdater.java. 
 
-The class *VolcanicConeElevationUpdater* implements the interface *TileUpdater* with its method *updateTile*. 
+The class `VolcanicConeElevationUpdater` implements the interface `TileUpdater` with its method `updateTile`. 
 The method is in charge of loading a tile. The extent of the tile must be such that it covers 
 at least the ground point with coordinates (latitude, longitude) which are passed as arguments to the method. 
-The tile is an object of type *UpdatableTile* which has two methods :
+The tile is an object of type `UpdatableTile` which has two methods :
 
-* *setGeometry(minLatitude, minLongitude, latitudeStep, longitudeStep, latitudeRows, longitudeRows)* : initializes the extent of the new tile before loading
+* `setGeometry(minLatitude, minLongitude, latitudeStep, longitudeStep, latitudeRows, longitudeRows)` : initializes the extent of the new tile before loading
 
-* *setElevation(latIdx, longIdx, elevation)* : fills the tile buffer at indices (latIdx, lonIdx) with value elevation    
+* `setElevation(latIdx, longIdx, elevation)` : fills the tile buffer at indices (latIdx, lonIdx) with value elevation    
 
-Here's the source code of the class *VolcanicConeElevationUpdater* :
+Here's the source code of the class `VolcanicConeElevationUpdater` :
 
     import org.hipparchus.util.FastMath;
     import org.orekit.rugged.raster.TileUpdater;
@@ -106,21 +108,21 @@ Here's the source code of the class *VolcanicConeElevationUpdater* :
 
 ### Important notes on DEM tiles :
 
-* Ground point elevation are obtained by bilinear interpolation between 4 neighbouring cells. There is no specific algorithm for border management. As a consequence, a point falling on the border of the tile is considered outside. **DEM tiles must be overlapping by at least one line/column in all directions**, :interrobang: in a similar way as for the SRTM DEMs. :interrobang: 
+* Ground point elevation are obtained by bilinear interpolation between 4 neighbouring cells. There is no specific algorithm for border management. As a consequence, a point falling on the border of the tile is considered outside. **DEM tiles must be overlapping by at least one line/column in all directions**.
 
 * In Rugged terminology, the minimum latitude and longitude correspond to the centre of the farthest Southwest cell of the DEM. Be careful if using GDAL to pass the correct information as there is half a pixel shift with respect to the lower left corner coordinates in gdalinfo.
 
 The following diagram illustrates proper DEM tiling with one line/column overlaps between neighbouring tiles :
 
-![DEM-tiles-overlap.png](src/site/resources/images/DEM-tiles-overlap.png)
+![DEM-tiles-overlap.png](../images/DEM-tiles-overlap.png)
 
 This diagram tries to represent the meaning of the different parameters in the definition of a tile :
 
-![tile-description.png](src/site/resources/images/tile-description.png)
+![tile-description.png](../images/tile-description.png)
 
 ## Initializing Rugged with a DEM
 
-The initialization step differs slightly from the first tutorial [Direct location](direct-location.md), 
+The initialization step differs slightly from the first tutorial [Direct location](./direct-location.html), 
 as we need to pass the information about our TileUpdater.  
 
 Instantiate an object derived from TileUpdater :
@@ -146,7 +148,7 @@ Initialize Rugged with these parameters :
 
 ## Computing a direct location grid
 
-In a similar way as in the first tutorial [Direct Location](direct-location.md), 
+In a similar way as in the first tutorial [Direct Location](./direct-location.html), 
 we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk. 
 
     DataOutputStream dos = new DataOutputStream(new FileOutputStream("demDirectLoc.c1"));
@@ -189,4 +191,6 @@ we call Rugged direct location method. This time it is called in a loop so as to
     }
 
 ## Source code
-The source code is available in [DirectLocationWithDEM.java](src/tutorials/java/fr/cs/examples/DirectLocationWithDEM.java) (package fr.cs.examples under src/tutorials)
+The source code is available in DirectLocationWithDEM.java (package fr.cs.examples under src/tutorials)
+
+[Top of the page](#top)

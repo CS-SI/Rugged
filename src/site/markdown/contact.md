@@ -12,25 +12,24 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Contacts
 
-## Mailing lists
+## Forum
 
-Most discussions should occur on the public mailing lists.
+Most discussions should occur on the public forums [https://forum.orekit.org/](https://forum.orekit.org/).
+The main categories are:
 
-|     topic     |         post address         |                                            subscribe URL                                                           |                                               archive URL                                            |
-|---------------|------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-|  announces    | orekit-announces@orekit.org  |   [https://www.orekit.org/wws/subscribe/orekit-announces](https://www.orekit.org/wws/subscribe/orekit-announces)   | [https://www.orekit.org/wws/arc/orekit-announces](https://www.orekit.org/wws/arc/orekit-announces)   |
-|     users     |   rugged-users@orekit.org    |   [https://www.orekit.org/wws/subscribe/rugged-users](https://www.orekit.org/wws/subscribe/rugged-users)           | [https://www.orekit.org/wws/arc/rugged-users](https://www.orekit.org/wws/arc/rugged-users)           |
-|   developers  | rugged-developers@orekit.org |   [https://www.orekit.org/wws/subscribe/rugged-developers](https://www.orekit.org/wws/subscribe/rugged-developers) | [https://www.orekit.org/wws/arc/rugged-developers](https://www.orekit.org/wws/arc/rugged-developers) |
-
-Please register to these mailing lists before attempting to post!
-
-We're preventing unregistered members from posting in order to prevent spam. Thank you.
+|   category    |                                     URL                                                            |
+|---------------|----------------------------------------------------------------------------------------------------|
+|  announces    | [https://forum.orekit.org/c/rugged-announcements](https://forum.orekit.org/c/rugged-announcements) |
+|     users     | [https://forum.orekit.org/c/rugged-usage](https://forum.orekit.org/c/rugged-usage)                 |
+|   developers  | [https://forum.orekit.org/c/rugged-development](https://forum.orekit.org/c/rugged-development)    |
 
 ## Technical contact
 
-If for some reason you cannot use the public lists, you can reach the CS
+If for some reason you cannot use the public forums, you can reach the CS
 Systèmes d'Information Rugged team for any question (either technically
 oriented or administrative) at the following email address:
 [rugged@c-s.fr](mailto:rugged@c-s.fr)
@@ -49,3 +48,6 @@ please use the following address:
 
     phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Sébastien Harasse)
     fax:   +33 5-61-34-84-15
+
+[Top of the page](#top)
+    

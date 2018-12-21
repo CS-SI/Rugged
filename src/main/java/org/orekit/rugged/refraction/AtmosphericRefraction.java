@@ -26,7 +26,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /**
- * Interface for atmospheric refraction model.
+ * Base class for atmospheric refraction model.
  * @author Sergio Esteves
  * @author Guylaine Prat
  * @since 2.0

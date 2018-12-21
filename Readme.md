@@ -1,3 +1,17 @@
+<!--- Copyright 2013-2018 CS Systèmes d'Information
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
 <h1 style="color:blue;" align="center">
   Rugged
 </h1>
@@ -16,7 +30,7 @@
 </p>
 
 
-Rugged is an add-on for [Orekit](https://www.orekit.org/) handling Digital Elevation Models contribution to 
+Rugged is an add-on for [Orekit](https://www.orekit.org/ "Orekit homepage") handling Digital Elevation Models contribution to 
 line of sight computation. It is a free software intermediate-level library written in Java.
 
 It mainly provides direct and inverse location, i.e. it allows to compute accurately 
@@ -32,39 +46,4 @@ ground and sensor is computed with a viewing model taking into account:
 Direct and inverse location can be used to perform full ortho-rectification of 
 images and correlation between sensors observing the same area.
 
-Homepage: [www.orekit.org/rugged/](https://www.orekit.org/rugged/)
-
-
-
-## Introduction
-* [Overview](src/site/markdown/index.md)  
-* [Getting the sources](src/site/markdown/sources.md)
-* [Building](src/site/markdown/building.md)
-* [Configuration](src/site/markdown/configuration.md)
-* [FAQ](src/site/markdown/faq.md)
-* [License](LICENSE.txt)
-* [Downloads](src/site/markdown/downloads.md)
-* [`Changes`](src/site/xdoc/changes.xml)
-* [Contact](src/site/markdown/contact.md)
-
-## Design
-
-
-* [Overview](src/site/markdown/design/overview.md)
-* [Technical choices](src/site/markdown/design/technical-choices.md)
-* [Digital Elevation Model](src/site/markdown/design/digital-elevation-model.md)
-* [Design of major functions](src/site/markdown/design/design.md)
-
-## Tutorial
-
-* [Direct location (with Rugged initialization example)](src/site/markdown/tutorials/direct-location.md)
-* [Direct location with DEM](src/site/markdown/tutorials/direct-location-with-DEM.md)
-* [Inverse location](src/site/markdown/tutorials/inverse-location.md)
-* [Example in Matlab](src/site/markdown/tutorials/matlab-example.md)
-
-## Development
-
-* [Contributing](src/site/markdown/contributing.md)
-* [Guidelines](src/site/markdown/guidelines.md)
-* [`Javadoc, development`](https://www.orekit.org/site-rugged-development/apidocs/index.html)
-* [`SOCIS|Summer Of Code In Space (SOCIS)`]()
+Homepage: [www.orekit.org/rugged/](https://www.orekit.org/rugged/ "Rugged homepage")
