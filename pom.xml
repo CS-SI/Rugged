@@ -124,9 +124,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:https://www.orekit.org/git/rugged-main.git</connection>
-    <developerConnection>scm:git:ssh://git@www.orekit.org/rugged-main.git</developerConnection>
-    <url>https://www.orekit.org/forge/projects/rugged/repository</url>
+    <connection>scm:git:https://gitlab.orekit.org/orekit/rugged.git</connection>
+    <developerConnection>scm:git:ssh://git@gitlab.orekit.org:orekit/rugged.git</developerConnection>
+    <url>https://gitlab.orekit.org/orekit/rugged/tree/master</url>
   </scm>
 
   <issueManagement>
@@ -517,10 +517,9 @@
           <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="http://www.c-s.fr">CS Syst&egrave;mes d&apos;information</a>. All rights reserved.]]></bottom>
           <links>
             <link>http://docs.oracle.com/javase/8/docs/api/</link>
-            <link>http://hipparchus.org/apidocs/</link>
-            <link>http://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
+            <link>https://www.hipparchus.org/apidocs/</link>
+            <link>http://www.orekit.org/site-rugged-${rugged.orekit.version}/apidocs/</link>
           </links>
-          <charset>${project.reporting.outputEncoding}</charset>
         </configuration>
         <reportSets>
           <reportSet>
@@ -585,11 +584,10 @@
       <id>release</id>
       <build>
         <plugins>
-        <!-- 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>${orekit.maven-source-plugin.version}</version>
+            <version>${rugged.maven-source-plugin.version}</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -599,7 +597,6 @@
               </execution>
             </executions>
           </plugin>
-        -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
