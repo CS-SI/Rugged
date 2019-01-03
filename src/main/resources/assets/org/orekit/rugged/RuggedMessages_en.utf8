@@ -92,4 +92,4 @@ NO_LAYER_DATA = no atmospheric layer data at altitude {0} (lowest altitude: {1})
 INVALID_STEP = step {0} is not valid : {1}
 
 # range between min line {0} and max line {1} too small {2}
- INVALID_RANGE_FOR_LINES = range between min line {0} and max line {1} too small {2}
+INVALID_RANGE_FOR_LINES = range between min line {0} and max line {1} too small {2}
