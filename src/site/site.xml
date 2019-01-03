@@ -40,7 +40,7 @@
       <item name="Overview"                 href="/design/overview.html"                    />
       <item name="Technical choices"        href="/design/technical-choices.html"           />
       <item name="Digital Elevation Model"  href="/design/digital-elevation-model.html"     />
-      <item name="Preliminary design"       href="/design/preliminary-design.html"          />
+      <item name="Design"		    href="/design/design.html"          />
     </menu>
     <menu name="Tutorials">
       <item name="Direct location"          href="/tutorials/direct-location.html"          />
