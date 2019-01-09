@@ -83,9 +83,11 @@ needed for their computation.
 
   * Marshall Solar Activity Future Estimation from 1999,
 
-  * DE 430 planetary ephemerides from 1990 to 2069,
+  * JPL DE 430 planetary ephemerides from 1990 to 2069,
 
-  * Eigen 06S gravity field.
+  * Eigen 06S gravity field,
+
+  * FES 2004 ocean tides model.
 
 
 There are no guarantees that this file will be available indefinitely or that its

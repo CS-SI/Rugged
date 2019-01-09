@@ -32,7 +32,7 @@ first time):
 This is sufficient to start working.
 
 Note that some of the data in the orekit-data-master folder needs to be updated,
-typically the UTC-TAI.history file, which is updated about once every 18 months
+typically the UTC-TAI history file, which is updated about once every 18 months
 by IERS, and the files in the Earth-Orientation-Parameters folder which are updated
 regularly by IERS. The update frequency depends on which file you use.
 
