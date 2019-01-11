@@ -28,6 +28,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  * correspond to the <em>center</em> of the most North-East cell.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface Tile extends UpdatableTile {
 
@@ -116,14 +117,14 @@ public interface Tile extends UpdatableTile {
     void tileUpdateCompleted();
 
     /** Get minimum latitude of grid interpolation points.
-     * @return minimum latitude of grid interpolation points
+     * @return minimum latitude of grid interpolation points (rad)
      * (latitude of the center of the cells of South row)
      */
     double getMinimumLatitude();
 
     /** Get the latitude at some index.
      * @param latitudeIndex latitude index
-     * @return latitude at the specified index
+     * @return latitude at the specified index (rad)
      * (latitude of the center of the cells of specified row)
      */
     double getLatitudeAtIndex(int latitudeIndex);
@@ -137,20 +138,20 @@ public interface Tile extends UpdatableTile {
      * {@link Location#NORTH} or {@link Location#NORTH_EAST}, but can
      * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
      * </p>
-     * @return maximum latitude
+     * @return maximum latitude (rad)
      * (latitude of the center of the cells of North row)
      */
     double getMaximumLatitude();
 
     /** Get minimum longitude.
-     * @return minimum longitude
+     * @return minimum longitude (rad)
      * (longitude of the center of the cells of West column)
      */
     double getMinimumLongitude();
 
     /** Get the longitude at some index.
      * @param longitudeIndex longitude index
-     * @return longitude at the specified index
+     * @return longitude at the specified index (rad)
      * (longitude of the center of the cells of specified column)
      */
     double getLongitudeAtIndex(int longitudeIndex);
@@ -164,18 +165,18 @@ public interface Tile extends UpdatableTile {
      * {@link Location#EAST} or {@link Location#NORTH_EAST}, but can
      * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
      * </p>
-     * @return maximum longitude
+     * @return maximum longitude (rad)
      * (longitude of the center of the cells of East column)
      */
     double getMaximumLongitude();
 
     /** Get step in latitude (size of one raster element).
-     * @return step in latitude
+     * @return step in latitude (rad)
      */
     double getLatitudeStep();
 
     /** Get step in longitude (size of one raster element).
-     * @return step in longitude
+     * @return step in longitude (rad)
      */
     double getLongitudeStep();
 
@@ -208,7 +209,7 @@ public interface Tile extends UpdatableTile {
     int getFloorLongitudeIndex(double longitude);
 
     /** Get the minimum elevation in the tile.
-     * @return minimum elevation in the tile
+     * @return minimum elevation in the tile (m)
      */
     double getMinElevation();
 
@@ -221,7 +222,7 @@ public interface Tile extends UpdatableTile {
     int getMinElevationLongitudeIndex();
 
    /** Get the maximum elevation in the tile.
-     * @return maximum elevation in the tile
+     * @return maximum elevation in the tile (m)
      */
     double getMaxElevation();
 
@@ -236,7 +237,7 @@ public interface Tile extends UpdatableTile {
     /** Get the elevation of an exact grid point.
      * @param latitudeIndex grid point index along latitude
      * @param longitudeIndex grid point index along longitude
-     * @return elevation at grid point
+     * @return elevation at grid point (m)
      */
     double getElevationAtIndices(int latitudeIndex, int longitudeIndex);
 
@@ -251,7 +252,7 @@ public interface Tile extends UpdatableTile {
      * </p>
      * @param latitude ground point latitude
      * @param longitude ground point longitude
-     * @return interpolated elevation
+     * @return interpolated elevation (m)
      */
     double interpolateElevation(double latitude, double longitude);
 

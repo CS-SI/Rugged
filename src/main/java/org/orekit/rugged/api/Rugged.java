@@ -313,7 +313,7 @@ public class Rugged {
     }
 
     /** Direct location of a single line-of-sight.
-     * <br>
+     * <p>
      * NB: if (the optionnal) atmospheric refraction must be computed with the optimization algorithm,
      *     see {@link #directLocation(AbsoluteDate, Vector3D, PixelLOS)}.
      * @param date date of the location
@@ -332,7 +332,7 @@ public class Rugged {
 
 
     /** Direct location of a single line-of-sight.
-     *  <br>
+     *  <p>
      * NB: if the atmospheric refraction must be computed without the optimization algorithm,
      *     see {@link #directLocation(AbsoluteDate, Vector3D, Vector3D)}.
      * @param date date of the location

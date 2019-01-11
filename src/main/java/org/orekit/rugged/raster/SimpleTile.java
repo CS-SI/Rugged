@@ -33,6 +33,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 /** Simple implementation of a {@link Tile}.
  * @see SimpleTileFactory
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class SimpleTile implements Tile {
 
@@ -425,15 +426,15 @@ public class SimpleTile implements Tile {
     }
 
     /** Get the latitude index of a point.
-     * @param latitude geodetic latitude
-     * @return latitute index (it may lie outside of the tile!)
+     * @param latitude geodetic latitude (rad)
+     * @return latitude index (it may lie outside of the tile!)
      */
     private double getDoubleLatitudeIndex(final double latitude) {
         return (latitude  - minLatitude)  / latitudeStep;
     }
 
     /** Get the longitude index of a point.
-     * @param longitude geodetic latitude
+     * @param longitude geodetic longitude (rad)
      * @return longitude index (it may lie outside of the tile!)
      */
     private double getDoubleLontitudeIndex(final double longitude) {
