@@ -91,5 +91,5 @@ NO_LAYER_DATA = ikke noe atmosfærisk lag definert ved {0} (laveste høyde: {1})
 # step {0} is not valid : {1}
 INVALID_STEP = steget {0} er ikke gyldig: {1}
 
-# range between min line {0} and max line {1} too small {2}
+# range between min line {0} and max line {1} is invalid {2}
 INVALID_RANGE_FOR_LINES = avstanden mellom min linje {0} og max linje {1} er for liten {2}

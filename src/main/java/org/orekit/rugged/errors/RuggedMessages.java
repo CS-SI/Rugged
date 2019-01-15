@@ -82,7 +82,7 @@ public enum RuggedMessages implements Localizable {
     UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled"),
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})"),
     INVALID_STEP("step {0} is not valid : {1}"),
-    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} too small {2}");
+    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}");
 
     // CHECKSTYLE: resume JavadocVariable check
 
