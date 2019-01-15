@@ -34,7 +34,6 @@ import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
-import org.orekit.rugged.los.PixelLOS;
 import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
@@ -287,25 +286,16 @@ public class Rugged {
                 final Vector3D pBody = inertToBody.transformPosition(pInert);
                 final Vector3D lBody = inertToBody.transformVector(lInert);
                 gp[i] = algorithm.refineIntersection(ellipsoid, pBody, lBody,
-                        algorithm.intersection(ellipsoid, pBody, lBody));
+                                                     algorithm.intersection(ellipsoid, pBody, lBody));
             }
 
             // compute with atmospheric refraction correction if necessary
             if (atmosphericRefraction != null && atmosphericRefraction.mustBeComputed()) {
 
-                // Test if optimization is not required
-                if (!atmosphericRefraction.isOptimized()) {
-
-                    // apply atmospheric refraction correction
-                    final Vector3D pBody = inertToBody.transformPosition(pInert);
-                    final Vector3D lBody = inertToBody.transformVector(lInert);
-                    gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
-
-                } else { // Optimization is required
-
-                    // TODO algo with optimization
-                    throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "atmospheric optimization not defined");
-                }
+                // apply atmospheric refraction correction
+                final Vector3D pBody = inertToBody.transformPosition(pInert);
+                final Vector3D lBody = inertToBody.transformVector(lInert);
+                gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
             }
             DumpManager.dumpDirectLocationResult(gp[i]);
         }
@@ -313,9 +303,6 @@ public class Rugged {
     }
 
     /** Direct location of a single line-of-sight.
-     * <p>
-     * NB: if (the optionnal) atmospheric refraction must be computed with the optimization algorithm,
-     *     see {@link #directLocation(AbsoluteDate, Vector3D, PixelLOS)}.
      * @param date date of the location
      * @param sensorPosition sensor position in spacecraft frame. For simplicity, due to the size of sensor,
      * we consider each pixel to be at sensor position
@@ -324,28 +311,6 @@ public class Rugged {
      */
     public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final Vector3D los) {
 
-        // Set the pixel to null in order not to compute atmosphere with optimization
-        final PixelLOS pixelLOS = new PixelLOS(null, los);
-
-        return directLocation(date, sensorPosition, pixelLOS);
-    }
-
-
-    /** Direct location of a single line-of-sight.
-     *  <p>
-     * NB: if the atmospheric refraction must be computed without the optimization algorithm,
-     *     see {@link #directLocation(AbsoluteDate, Vector3D, Vector3D)}.
-     * @param date date of the location
-     * @param sensorPosition sensor position in spacecraft frame. For simplicity, due to the size of sensor,
-     * we consider each pixel to be at sensor position
-     * @param pixelLOS pixel definition with normalized line-of-sight in spacecraft frame
-     * @return ground position of intersection point between specified los and ground
-     * @since 2.1
-     */
-    public GeodeticPoint directLocation(final AbsoluteDate date, final Vector3D sensorPosition, final PixelLOS pixelLOS) {
-
-        final Vector3D los = pixelLOS.getLOS();
-        // TODO change dump to add sensorPixel
         DumpManager.dumpDirectLocation(date, sensorPosition, los, lightTimeCorrection, aberrationOfLightCorrection,
                                        atmosphericRefraction != null);
 
@@ -386,31 +351,19 @@ public class Rugged {
             final Vector3D pBody = inertToBody.transformPosition(pInert);
             final Vector3D lBody = inertToBody.transformVector(lInert);
             gp = algorithm.refineIntersection(ellipsoid, pBody, lBody,
-                    algorithm.intersection(ellipsoid, pBody, lBody));
+                                              algorithm.intersection(ellipsoid, pBody, lBody));
         }
 
         NormalizedGeodeticPoint result = gp;
 
         // compute the ground location with atmospheric correction if asked for
         if (atmosphericRefraction != null && atmosphericRefraction.mustBeComputed()) {
-            // TBN: two methods exist for computation of the atmospheric correction
-            //       * a full computation
-            //       * a time optimized computation based on an interpolation grid
 
-            // Test if optimization is not required or if sensor pixel is not defined (impossible to perform optimization)
-            if (!atmosphericRefraction.isOptimized() || pixelLOS.getSensorPixel() == null) {
+            // apply atmospheric refraction correction
+            final Vector3D pBody = inertToBody.transformPosition(pInert);
+            final Vector3D lBody = inertToBody.transformVector(lInert);
+            result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
 
-                // apply atmospheric refraction correction (full computation)
-                final Vector3D pBody = inertToBody.transformPosition(pInert);
-                final Vector3D lBody = inertToBody.transformVector(lInert);
-                result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
-
-            } else { // Optimization is required and sensor pixel is defined
-
-                // TODO to be done
-                throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "Atmospheric optimization for direct loc");
-
-            } // end test on optimization is required
         } // end test on atmosphericRefraction != null
 
         DumpManager.dumpDirectLocationResult(result);
