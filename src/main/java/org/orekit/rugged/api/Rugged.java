@@ -755,11 +755,12 @@ public class Rugged {
         // compute the sensor pixel on the desired ground point WITHOUT atmosphere
         atmosphericRefraction.deactivateComputation();
         final SensorPixel sp0 = inverseLocation(sensorName, point, minLine, maxLine);
+        atmosphericRefraction.reactivateComputation();
+        
         if (sp0 == null) {
-            // Impossible to find the point in the given min line and max line
+            // Impossible to find the point in the given min line and max line (without atmosphere)
             throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
         }
-        atmosphericRefraction.reactivateComputation();
 
         // set up the starting point of the fixed point method
         final double pixel0 = sp0.getPixelNumber();
