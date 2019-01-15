@@ -38,7 +38,6 @@ import org.hipparchus.util.FastMath;
 import org.hipparchus.util.Precision;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
@@ -103,15 +102,13 @@ public class SensorMeanPlaneCrossing {
      * @param aberrationOfLightCorrection flag for aberration of light correction.
      * @param maxEval maximum number of evaluations
      * @param accuracy accuracy to use for finding crossing line number
-     * @exception RuggedException if some frame conversion fails
      */
     public SensorMeanPlaneCrossing(final LineSensor sensor,
                                    final SpacecraftToObservedBody scToBody,
                                    final int minLine, final int maxLine,
                                    final boolean lightTimeCorrection,
                                    final boolean aberrationOfLightCorrection,
-                                   final int maxEval, final double accuracy)
-        throws RuggedException {
+                                   final int maxEval, final double accuracy) {
         this(sensor, scToBody, minLine, maxLine, lightTimeCorrection, aberrationOfLightCorrection,
              maxEval, accuracy, computeMeanPlaneNormal(sensor, minLine, maxLine),
              Stream.<CrossingResult>empty());
@@ -128,7 +125,6 @@ public class SensorMeanPlaneCrossing {
      * @param accuracy accuracy to use for finding crossing line number
      * @param meanPlaneNormal mean plane normal
      * @param cachedResults cached results
-     * @exception RuggedException if some frame conversion fails
      */
     public SensorMeanPlaneCrossing(final LineSensor sensor,
                                    final SpacecraftToObservedBody scToBody,
@@ -137,8 +133,7 @@ public class SensorMeanPlaneCrossing {
                                    final boolean aberrationOfLightCorrection,
                                    final int maxEval, final double accuracy,
                                    final Vector3D meanPlaneNormal,
-                                   final Stream<CrossingResult> cachedResults)
-        throws RuggedException {
+                                   final Stream<CrossingResult> cachedResults) {
 
         this.sensor                      = sensor;
         this.minLine                     = minLine;
@@ -174,10 +169,8 @@ public class SensorMeanPlaneCrossing {
      * order corresponds to trigonometric order (i.e. counterclockwise).
      * </p>
      * @return normal of the mean plane
-     * @exception RuggedException if mid date cannot be handled
      */
-    private static Vector3D computeMeanPlaneNormal(final LineSensor sensor, final int minLine, final int maxLine)
-        throws RuggedException {
+    private static Vector3D computeMeanPlaneNormal(final LineSensor sensor, final int minLine, final int maxLine) {
 
         final AbsoluteDate midDate = sensor.getDate(0.5 * (minLine + maxLine));
 
@@ -355,11 +348,8 @@ public class SensorMeanPlaneCrossing {
      * @param target target ground point
      * @return line number and target direction at mean plane crossing,
      * or null if search interval does not bracket a solution
-     * @exception RuggedException if geometry cannot be computed for some line or
-     * if the maximum number of evaluations is exceeded
      */
-    public CrossingResult find(final Vector3D target)
-        throws RuggedException {
+    public CrossingResult find(final Vector3D target) {
 
         double crossingLine     = midLine;
         Transform bodyToInert   = midBodyToInert;
@@ -524,13 +514,10 @@ public class SensorMeanPlaneCrossing {
      * @param initialGuess initial guess for the crossing line
      * @return line number and target direction at mean plane crossing,
      * or null if search interval does not bracket a solution
-     * @exception RuggedException if geometry cannot be computed for some line or
-     * if the maximum number of evaluations is exceeded
      */
-    private CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess)
-        throws RuggedException {
-        try {
+    private CrossingResult slowFind(final PVCoordinates targetPV, final double initialGuess) {
 
+        try {
             // safety check
             final double startValue;
             if (initialGuess < minLine || initialGuess > maxLine) {
@@ -543,14 +530,14 @@ public class SensorMeanPlaneCrossing {
             final double crossingLine = solver.solve(maxEval, new UnivariateFunction() {
                 /** {@inheritDoc} */
                 @Override
-                public double value(final double x) throws RuggedExceptionWrapper {
+                public double value(final double x) {
                     try {
                         final AbsoluteDate date = sensor.getDate(x);
                         final Vector3D[] targetDirection =
                                 evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
                         return 0.5 * FastMath.PI - FastMath.acos(Vector3D.dotProduct(targetDirection[0], meanPlaneNormal));
                     } catch (RuggedException re) {
-                        throw new RuggedExceptionWrapper(re);
+                        throw RuggedException.createInternalError(re);
                     }
                 }
             }, minLine, maxLine, startValue);
@@ -563,8 +550,6 @@ public class SensorMeanPlaneCrossing {
 
         } catch (MathIllegalArgumentException nbe) {
             return null;
-        } catch (RuggedExceptionWrapper rew) {
-            throw rew.getException();
         }
     }
 

@@ -62,7 +62,7 @@ CANNOT_PARSE_LINE = kan ikke fortolke linje {0}, fil {1}: {2}
 LIGHT_TIME_CORRECTION_REDEFINED = lystidskorrektion omdefineret, linje {0}, fil {1}: {2}
 
 # aberration of light correction redefined, line {0}, file {1}: {2}
-ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = aberrationskorrektion omdefineret, linje {0}, fil {1}: {2}
+ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = lysaberrationskorrektion omdefineret, linje {0}, fil {1}: {2}
 
 # tile {0} already defined, line {1}, file {2}: {3}
 TILE_ALREADY_DEFINED = flise {0} allerede defineret, linje {1}, fil {2}: {3}
@@ -83,8 +83,13 @@ DUPLICATED_PARAMETER_NAME =  en anden parameter ned navnet {0} findes allerede
 INVALID_RUGGED_NAME = rugged navn blev ikke fundet
 
 # refining using {0} rugged instance is not handled
-UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+UNSUPPORTED_REFINING_CONTEXT = raffinering med rugged instansen {0} blev ikke håndteret
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
-NO_LAYER_DATA = ingen atsmosfæriske lagdata ved højden {0} (laveste højde: {1})
+NO_LAYER_DATA = ingen atmosfæriske lagdata ved højden {0} (laveste højde: {1})
 
+# step {0} is not valid : {1}
+INVALID_STEP = skridt {0} er ikke gyldigt : {1}
+
+# range between min line {0} and max line {1} too small {2}
+INVALID_RANGE_FOR_LINES = interval mellem minimumslinje {0} og maksimumslinje {1} for lille {2}

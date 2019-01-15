@@ -37,9 +37,6 @@ import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
@@ -52,7 +49,7 @@ public class FixedRotationTest {
     private List<Vector3D> raw;
 
     @Test
-    public void testIdentity() throws RuggedException, OrekitException {
+    public void testIdentity() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xaba71348a77d77cbl));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -74,7 +71,7 @@ public class FixedRotationTest {
     }
 
     @Test
-    public void testCombination() throws RuggedException, OrekitException {
+    public void testCombination() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xefac03d9be4d24b9l));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -139,7 +136,7 @@ public class FixedRotationTest {
     }
 
     @Test
-    public void testDerivatives() throws RuggedException, OrekitException {
+    public void testDerivatives() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xddae2b46b2207e08l));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -199,20 +196,16 @@ public class FixedRotationTest {
                 int[] orders = new int[selected.size()];
                 orders[index] = 1;
                 UnivariateDifferentiableMatrixFunction f =
-                                differentiator.differentiate((UnivariateMatrixFunction) x -> {
-                                    try {
-                                        double oldX = driver.getValue();
-                                        double[][] matrix = new double[raw.size()][];
-                                        driver.setValue(x);
-                                        for (int i = 0 ; i < raw.size(); ++i) {
-                                            matrix[i] = tdl.getLOS(i, AbsoluteDate.J2000_EPOCH).toArray();
-                                        }
-                                        driver.setValue(oldX);
-                                        return matrix;
-                                    } catch (OrekitException oe) {
-                                        throw new OrekitExceptionWrapper(oe);
-                                    }
-                                });
+                        differentiator.differentiate((UnivariateMatrixFunction) x -> {
+                            double oldX = driver.getValue();
+                            double[][] matrix = new double[raw.size()][];
+                            driver.setValue(x);
+                            for (int i = 0 ; i < raw.size(); ++i) {
+                                matrix[i] = tdl.getLOS(i, AbsoluteDate.J2000_EPOCH).toArray();
+                            }
+                            driver.setValue(oldX);
+                            return matrix;
+                        });
                 DerivativeStructure[][] mDS = f.value(factory11.variable(0, driver.getValue()));
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, AbsoluteDate.J2000_EPOCH);
@@ -232,7 +225,7 @@ public class FixedRotationTest {
     }
 
     @Before
-    public void setUp() throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
 
         final Vector3D normal    = Vector3D.PLUS_I;
         final Vector3D fovCenter = Vector3D.PLUS_K;

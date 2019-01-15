@@ -65,7 +65,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testUpdate() throws RuggedException {
+    public void testUpdate() {
 
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
@@ -103,7 +103,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testOutOfBoundsIndices() throws RuggedException {
+    public void testOutOfBoundsIndices() {
 
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
@@ -116,7 +116,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testIndexShift() throws RuggedException {
+    public void testIndexShift() {
 
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
@@ -164,7 +164,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testInterpolation() throws RuggedException {
+    public void testInterpolation() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 1.0, 1.0, 50, 50);
         tile.setElevation(20, 14,  91.0);
@@ -179,7 +179,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testInterpolationWithinTolerance() throws RuggedException {
+    public void testInterpolationWithinTolerance() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 1.0, 1.0, 2, 2);
         tile.setElevation(0, 0,  91.0);
@@ -195,7 +195,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testInterpolationOutOfTolerance() throws RuggedException {
+    public void testInterpolationOutOfTolerance() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 1.0, 1.0, 2, 2);
         tile.setElevation(0, 0,  91.0);
@@ -211,7 +211,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testCellIntersection() throws RuggedException {
+    public void testCellIntersection() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(20, 14,  91.0);
@@ -239,7 +239,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testCellIntersection2Solutions() throws RuggedException {
+    public void testCellIntersection2Solutions() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(20, 14,  91.0);
@@ -270,7 +270,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testCellIntersectionNoSolutions() throws RuggedException {
+    public void testCellIntersectionNoSolutions() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(20, 14,  91.0);
@@ -290,7 +290,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testCellIntersectionLinearOnly() throws RuggedException {
+    public void testCellIntersectionLinearOnly() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -319,7 +319,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testCellIntersectionLinearIntersectionOutside() throws RuggedException {
+    public void testCellIntersectionLinearIntersectionOutside() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -339,7 +339,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testCellIntersectionLinearNoIntersection() throws RuggedException {
+    public void testCellIntersectionLinearNoIntersection() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -359,7 +359,7 @@ public class SimpleTileTest {
     }
 
     @Test
-    public void testCellIntersectionConstant0() throws RuggedException {
+    public void testCellIntersectionConstant0() {
         SimpleTile tile = new SimpleTileFactory().createTile();
         tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
         tile.setElevation(0, 0,  30.0);
@@ -440,11 +440,9 @@ public class SimpleTileTest {
 
     }
 
-    private void checkOnTile(Tile tile, GeodeticPoint gpI)
-        throws RuggedException {
+    private void checkOnTile(Tile tile, GeodeticPoint gpI) {
         Assert.assertEquals(gpI.getAltitude(),
                             tile.interpolateElevation(gpI.getLatitude(), gpI.getLongitude()),
                             1.0e-10);
     }
-
 }

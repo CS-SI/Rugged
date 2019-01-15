@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -32,10 +32,10 @@ import org.hipparchus.exception.LocalizedException;
  * </p>
  *
  * @author Luc Maisonobe
-
+ * @author Guylaine Prat
  */
 
-public class RuggedException extends Exception implements LocalizedException {
+public class RuggedException extends RuntimeException implements LocalizedException {
 
     /** Serializable UID. */
     private static final long serialVersionUID = 20140309L;
@@ -123,7 +123,7 @@ public class RuggedException extends Exception implements LocalizedException {
         final Localizable specifier = RuggedMessages.INTERNAL_ERROR;
 
         /** Parts to insert in the format (no translation). */
-        final String parts     = "rugged-developers@orekit.org";
+        final String parts     = "https://gitlab.orekit.org/orekit/rugged/issues";
 
         return new RuntimeException() {
 

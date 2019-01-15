@@ -71,7 +71,7 @@ public class SpacecraftToObservedBodyTest {
 
 	
     @Test
-    public void testIssue256() throws RuggedException, OrekitException {
+    public void testIssue256() {
         
         AbsoluteDate minSensorDate = sensor.getDate(0);
         AbsoluteDate maxSensorDate = sensor.getDate(2000);

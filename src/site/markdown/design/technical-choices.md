@@ -11,11 +11,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
+<a name="top"></a>
+
 # Technical choices 
 
 ## Earth frames
 
-As Rugged is built on top of Orekit and Hipparchus, all the flight dynamics and
+As Rugged is built on top of [Orekit](https://www.orekit.org/ "Orekit homepage") and [Hipparchus](https://hipparchus.org/ "Hipparchus homepage"), all the flight dynamics and
 mathematical computation are delegated to these two libraries and the full accuracy available
 is used. This implies for example that when computing frames conversions between the inertial
 frame and the Earth frame, the complete set of IERS Earth Orientation Parameters (EOP)
@@ -33,7 +36,7 @@ regular signal with several harmonics, which correspond to the nutation componen
 not in this older model. This error was small in the 80's but is much higher now (as of 2014,
 it is of the order of magnitude of 3 meters). The error is steadily increasing.
 
-![precession/nutation error](src/site/resources/images/ignoring-EOP-1996.png)
+![precession/nutation error](../images/ignoring-EOP-1996.png)
 
 Note that this error occurs when the initial data for spacecraft position is initially given in
 inertial frame and must be converted to Earth frame. This typically occurs in mission analysis
@@ -59,7 +62,7 @@ better than the former ones. The much better accuracy of these new models can be
 kind of plot as before, i.e. ignoring temporarily the IERS corrections. The following figure shows the
 result.
 
-![precession/nutation error](src/site/resources/images/ignoring-EOP-2010.png)
+![precession/nutation error](../images/ignoring-EOP-2010.png)
 
 The remaining error is very small, of the order of magnitude of 2 or 3 centimeters.  Rugged is not
 limited to the legacy MOD and TOD frames and can use the newer IERS recommended frames as well. From
@@ -158,7 +161,7 @@ time than the position of the spacecraft. The expected difference can be predict
 light travel time, it is about 1.2m at equator, in the East-West direction. This effect is compensated by applying the so-called
 light-time correction.
 
-![light-time correction](src/site/resources/images/light-time-correction.png)
+![light-time correction](../images/light-time-correction.png)
 
 The delay is computed for each pixel as the travel time is shorter for pixels looking in the nadir direction than for pixels
 looking at the edge of field of view. As Orekit frame transforms automatically include a local Taylor expansion of the transform,
@@ -175,7 +178,7 @@ This effect is a large one and can correspond to up to a 20m shift once projecte
 As shown in next figure, from spacecraft point of view, the light incoming from the ground point seems to come from a fictitious
 point “ahead” of the real point.
 
-![aberration of light correction](src/site/resources/images/aberration-of-light-correction.png)
+![aberration of light correction](../images/aberration-of-light-correction.png)
 
 As a side note, aberration of light and light time correction can be linked or considered to be two aspects of a similar phenomenon,
 even in classical (non-relativistic) physics. It depends on the frame in which we look at the various elements. If the source is
@@ -208,7 +211,7 @@ computing only two points10 introduces yet another error, which is transverse to
 at middle point. This assumption is a flat-body assumption, i.e. it correspond to locally approximating the ellipsoid to its tangential
 plane. The error is the sagitta due to the bending of the real line-of-sight in the geodetic space.
 
-![flat-body interpolation error](src/site/resources/images/flat-body-interpolation-error.png)
+![flat-body interpolation error](../images/flat-body-interpolation-error.png)
 
 This error depends on the diving angle of the line-of-sight with respect to local vertical. It is zero for a diving angle of 90 degrees
 (i.e. a pure nadir line-of-sight) and increases as the diving angle decreases. It can reach tremendous values (hundreds of meters or
@@ -235,3 +238,5 @@ The following table summarizes the error compensations performed in the Rugged l
 |                  aberration of light                       |           20m         |        along track      |depends on spacecraft velocity, can be switched off if compensated elsewhere in the processing chain
 |                    flat-body                               |          0.8m         |   across line-of-sight  |error increases a lot for large fields of view, can be switched off, but this is not recommended
 |                 atmospheric refraction                     |          < 2m         |     horizontal shift    |for multi-layer atmospheric model
+
+[Top of the page](#top)

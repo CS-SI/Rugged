@@ -35,7 +35,6 @@ import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
-import org.orekit.errors.OrekitException;
 import org.orekit.orbits.Orbit;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.api.AlgorithmId;
@@ -63,7 +62,7 @@ public class DumpManagerTest {
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
-    public void testDump() throws URISyntaxException, IOException, OrekitException, RuggedException {
+    public void testDump() throws URISyntaxException, IOException {
 
         File dump = tempFolder.newFile();
         DumpManager.activate(dump);
@@ -146,7 +145,7 @@ public class DumpManagerTest {
     }
 
    public void variousRuggedCalls()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
        int dimension = 200;
 
@@ -209,7 +208,7 @@ public class DumpManagerTest {
     }
 
    @Test
-   public void testAlreadyActive() throws URISyntaxException, IOException, OrekitException, RuggedException {
+   public void testAlreadyActive() throws URISyntaxException, IOException {
 
        DumpManager.activate(tempFolder.newFile());
        try {
@@ -223,7 +222,7 @@ public class DumpManagerTest {
    }
 
    @Test
-   public void testNotActive() throws URISyntaxException, IOException, OrekitException, RuggedException {
+   public void testNotActive() throws URISyntaxException, IOException {
        try {
            DumpManager.deactivate();
            Assert.fail("an exception should have been thrown");
@@ -233,7 +232,7 @@ public class DumpManagerTest {
    }
 
    @Test
-   public void testWriteError() throws URISyntaxException, IOException, OrekitException, RuggedException {
+   public void testWriteError() throws URISyntaxException, IOException {
        try {
            File dump = tempFolder.newFile();
            dump.setReadOnly();

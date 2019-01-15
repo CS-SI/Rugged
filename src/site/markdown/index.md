@@ -12,13 +12,15 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Overview
 
-  Rugged is  a sensor-to-terrain mapping tool which takes into account Digital Elevation Models (DEM)
+  Rugged is a sensor-to-terrain mapping tool which takes into account Digital Elevation Models (DEM)
   in its line of sight computation. It is a free software
-  intermediate-level library written in Java and implemented as an add-on for Orekit.
+  intermediate-level library written in Java and implemented as an add-on for [Orekit](https://www.orekit.org/ "Orekit homepage").
 
-  ![Earth_FlatVsRugged.gif](src/site/resources/images/Earth_FlatVsRugged.gif)
+  ![Earth_FlatVsRugged.gif](./images/Earth_FlatVsRugged.gif)
 
   It mainly provides direct and inverse location, i.e. it allows
   to compute accurately which ground point is looked at from a specific
@@ -29,7 +31,7 @@
   on-board sensor pixels individual line-of-sights, spacecraft motion and
   attitude and several physical effects.
 
-![RuggedExplained.png](src/site/resources/images/RuggedExplained.png)
+![RuggedExplained.png](./images/RuggedExplained.png)
  *Effects of taking into account the DEM in the computation of latitude, longitude and altitude*
 
   Direct and inverse location can be used to perform full ortho-rectification
@@ -41,13 +43,13 @@
 
   * Refinement
 
-  * can support several types of Digital Elevation Models, including user-provided models
+  * Can support several types of Digital Elevation Models, including user-provided models
 
-  * several intersection models algorithms available
+  * Several intersection models algorithms available
 
-  * can propagate orbit by itself for preliminary mission analysis or data generation
+  * Can propagate orbit by itself for preliminary mission analysis or data generation
 
-  * can propagate attitude by itself for preliminary mission analysis or data generation
+  * Can propagate attitude by itself for preliminary mission analysis or data generation
 
   * *very* fast
 
@@ -56,7 +58,7 @@
     * Mathews, Herring, Buffett (2002)
     * Capitaine (2006)
 
-  * complete set of corrections applied for greater accuracy
+  * Complete set of corrections applied for greater accuracy
     * δΔψ, δΔε on precession nutation (about 3m correction since 2013, steadily increasing)
     * ΔUT₁, lod on proper rotation (can theoretically reach up to 400m)
     * u, v pole wander (polhody), (about 15m correction)
@@ -66,9 +68,9 @@
       (0m at nadir, 10m at 30° dive angle, hundreds of meters for skimming los)
     * atmospheric refraction
 
-  * not limited to Earth
+  * Not limited to Earth
 
-  * highly portable (Linux, Windows, MacOSX, ...)
+  * Highly portable (Linux, Windows, MacOSX, ...)
 
   * Localized in several languages
 
@@ -87,7 +89,7 @@
 Rugged is freely available both in source and binary formats, with all related
 documentation and tests.
 
-It is distributed under the [Apache License Version 2.0](LICENSE.txt). This
+It is distributed under the [Apache License Version 2.0](./license.html). This
 is a well known business-friendly license. This means anybody can use it to build
 any application, free or not. There are no strings attached to your own code.
 
@@ -96,9 +98,15 @@ interoperability in space systems.
 
 ## Maintained library
 
-Rugged has been in development since 2014 inside [CS Systèmes
-d'Information](http://www.c-s.fr/) and is still used and maintained by its dual teams
+Rugged has been in development since 2014 inside [CS Systèmes d'Information](http://www.c-s.fr/ "CS SI homepage") 
+and is still used and maintained by its dual teams
 of space dynamics and image processing experts.
 
 Rugged is used for image processing of the Sentinel 2 mission at European Space
-Agency (ESA).
+Agency (ESA), as well as in the frame of ESA Scientific Exploitation of Operational Missions (SEOM), 
+to calculate topographic shadow masks for Sentinel 2 products.
+
+Rugged has been also used as a Research Library by the French Space Agency (CNES) for
+study on refining for VHR push broom sensors (Pleiades).
+
+[Top of the page](#top)

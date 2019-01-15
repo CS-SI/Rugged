@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2018 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,8 +22,6 @@ import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.orekit.errors.OrekitException;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
@@ -62,22 +60,18 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
      * @param factorvalue homothety factor
      */
     public FixedZHomothety(final String name, final double factorvalue) {
+
         this.factor   = factorvalue;
         this.factorDS = null;
-        try {
-            this.factorDriver = new ParameterDriver(name, factorvalue, SCALE, 0, Double.POSITIVE_INFINITY);
-            factorDriver.addObserver(new ParameterObserver() {
-                @Override
-                public void valueChanged(final double previousValue, final ParameterDriver driver) {
-                    // reset factor to zero, they will be evaluated lazily if needed
-                    factor = 0.0;
-                    factorDS = null;
-                }
-            });
-        } catch (OrekitException oe) {
-            // this should never happen
-            throw RuggedException.createInternalError(oe);
-        }
+        this.factorDriver = new ParameterDriver(name, factorvalue, SCALE, 0, Double.POSITIVE_INFINITY);
+        factorDriver.addObserver(new ParameterObserver() {
+            @Override
+            public void valueChanged(final double previousValue, final ParameterDriver driver) {
+                // reset factor to zero, they will be evaluated lazily if needed
+                factor = 0.0;
+                factorDS = null;
+            }
+        });
     }
 
     /** {@inheritDoc} */

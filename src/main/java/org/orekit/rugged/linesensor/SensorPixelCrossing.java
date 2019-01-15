@@ -23,7 +23,6 @@ import org.hipparchus.exception.MathIllegalArgumentException;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.time.AbsoluteDate;
 
 /** Class devoted to locate where ground point crosses a sensor line.
@@ -69,20 +68,19 @@ public class SensorPixelCrossing {
      * @param date current date
      * @return pixel location ({@code Double.NaN} if the first and last
      * pixels of the line do not bracket a location)
-     * @exception RuggedException if the maximum number of evaluations is exceeded
      */
-    public double locatePixel(final AbsoluteDate date) throws RuggedException {
+    public double locatePixel(final AbsoluteDate date) {
         try {
 
             // set up function evaluating to 0.0 where target matches pixel
             final UnivariateFunction f = new UnivariateFunction() {
                 /** {@inheritDoc} */
                 @Override
-                public double value(final double x) throws RuggedExceptionWrapper {
+                public double value(final double x) {
                     try {
                         return Vector3D.angle(cross, getLOS(date, x)) - 0.5 * FastMath.PI;
                     } catch (RuggedException re) {
-                        throw new RuggedExceptionWrapper(re);
+                        throw RuggedException.createInternalError(re);
                     }
                 }
             };
@@ -95,8 +93,6 @@ public class SensorPixelCrossing {
         } catch (MathIllegalArgumentException nbe) {
             // there are no solutions in the search interval
             return Double.NaN;
-        } catch (RuggedExceptionWrapper rew) {
-            throw rew.getException();
         }
     }
 
@@ -104,10 +100,8 @@ public class SensorPixelCrossing {
      * @param date current date
      * @param x pixel index
      * @return interpolated direction for specified index
-     * @exception RuggedException if date cannot be handled
      */
-    private Vector3D getLOS(final AbsoluteDate date, final double x)
-        throws RuggedException {
+    private Vector3D getLOS(final AbsoluteDate date, final double x) {
 
         // find surrounding pixels
         final int iInf = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(x)));

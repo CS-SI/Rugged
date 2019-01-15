@@ -1,5 +1,5 @@
-# internal error, contact maintenance at {0}
-INTERNAL_ERROR = eroare internă, contactați echipa de întrținere la {0}
+# internal error, please notify development team by creating an issue at {0}
+INTERNAL_ERROR = <MISSING TRANSLATION>
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
 OUT_OF_TILE_INDICES = date inexistente pentru indicii [{0}, {1}], regiunea oferă acoperire doar pentru intervalul de la [0, 0] la [{2}, {3}] (inclusiv)
@@ -87,3 +87,9 @@ UNSUPPORTED_REFINING_CONTEXT = Estimarea realizată folosind {0} instanțe Rugge
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = nu există informații referitoare la atmosferă pentru altitudinea {0} (altitudinea minimă: {1})
+
+# step {0} is not valid : {1}
+INVALID_STEP = <MISSING TRANSLATION>
+
+# range between min line {0} and max line {1} is invalid {2}
+INVALID_RANGE_FOR_LINES = <MISSING TRANSLATION>

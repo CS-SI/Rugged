@@ -12,11 +12,13 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Digital Elevation Model 
 
 ## DEM intersection
 
-The page [technical choices](./technical-choices.md) explain how Rugged goes from an on-board pixel
+The page [technical choices](./technical-choices.html) explain how Rugged goes from an on-board pixel
 line-of-sight to a ground-based line-of-sight arrival in the vicinity of the ellipsoid entry point. At
 this step, we have a 3D line defined near the surface and want to compute where it exactly traverses the
 Digital Elevation Model surface. There is no support for this computation at Orekit library level,
@@ -55,3 +57,5 @@ On the other hand, Rugged is not expected to parsed DEM files, so the algorithm 
 layer. In order to pass these data, a specific callback function is implemented in the mission specific interface layer and
 registered to Rugged, which can call it to retrieve parts of the DEM, in the form of small cells. The implicit KD-tree is then
 built from leafs to root and cached.
+
+[Top of the page](#top)

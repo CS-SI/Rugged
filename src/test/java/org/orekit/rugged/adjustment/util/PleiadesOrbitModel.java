@@ -14,7 +14,6 @@ import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.TabulatedLofOffset;
 import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.LOFType;
@@ -57,7 +56,7 @@ public class PleiadesOrbitModel {
 
     /** Create a circular orbit.
      */
-    public Orbit createOrbit(final double mu, final AbsoluteDate date) throws OrekitException {
+    public Orbit createOrbit(final double mu, final AbsoluteDate date) {
         
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
@@ -109,8 +108,7 @@ public class PleiadesOrbitModel {
 
     /** Get the offset.
      */
-   private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift)
-        throws OrekitException {
+   private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift) {
         
         final LOFType type = LOFType.VVLH;
         final double roll = getPoly(lofTransformRollPoly, shift);
@@ -133,8 +131,7 @@ public class PleiadesOrbitModel {
 
    /** Create the attitude provider.
     */
-    public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit)
-        throws OrekitException {
+    public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit) {
 
         if (userDefinedLOFTransform) {
             final LOFType type = LOFType.VVLH;
@@ -161,8 +158,7 @@ public class PleiadesOrbitModel {
     */
    public List<TimeStampedPVCoordinates> orbitToPV(final Orbit orbit, final BodyShape earth,
                                                     final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                                    final double step)
-        throws OrekitException {
+                                                    final double step) {
         
         final Propagator propagator = new KeplerianPropagator(orbit);
 
@@ -185,8 +181,7 @@ public class PleiadesOrbitModel {
     */
    public List<TimeStampedAngularCoordinates> orbitToQ(final Orbit orbit, final BodyShape earth,
                                                         final AbsoluteDate minDate, final AbsoluteDate maxDate,
-                                                        final double step)
-        throws OrekitException {
+                                                        final double step) {
         
         final Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(createAttitudeProvider(earth, orbit));
