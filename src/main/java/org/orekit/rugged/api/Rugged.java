@@ -709,7 +709,7 @@ public class Rugged {
         atmosphericRefraction.deactivateComputation();
         final SensorPixel sp0 = inverseLocation(sensorName, point, minLine, maxLine);
         atmosphericRefraction.reactivateComputation();
-        
+
         if (sp0 == null) {
             // Impossible to find the point in the given min line and max line (without atmosphere)
             throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");

@@ -18,6 +18,7 @@ package org.orekit.rugged.api;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -65,6 +66,7 @@ import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
+import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
@@ -344,6 +346,10 @@ public class RuggedTest {
         builder.setRefractionCorrection(atmosphericRefraction);
         Rugged ruggedWith = builder.build();
         
+        // For test coverage
+        assertTrue(ruggedWith.getRefractionCorrection().getClass().isInstance(new MultiLayerModel(ruggedWith.getEllipsoid())));
+
+        
         LineSensor lineSensor = ruggedWithout.getLineSensor(sensorName);
         int minLine = (int) FastMath.floor(lineSensor.getLine(ruggedWithout.getMinDate()));
         int maxLine = (int) FastMath.ceil(lineSensor.getLine(ruggedWithout.getMaxDate()));
@@ -385,6 +391,17 @@ public class RuggedTest {
                 fail("Inverse location failed for pixel " + i + " with atmospheric refraction correction for geodetic point computed with" );
             }
         } // end loop on pixel i 
+        
+        
+        // For test coverage 
+        double dummyLat = gpWithAtmosphericRefractionCorrection[0].getLatitude() + FastMath.PI/4.;
+        double dummyLon = gpWithAtmosphericRefractionCorrection[0].getLongitude() - FastMath.PI/4.;
+        GeodeticPoint dummyGP = new GeodeticPoint(dummyLat, dummyLon, 0.);
+        try {
+            SensorPixel dummySensorPixel = ruggedWith.inverseLocation(sensorName, dummyGP, minLine, maxLine);
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.INVALID_RANGE_FOR_LINES, re.getSpecifier());
+        }
     }
 
     private RuggedBuilder initRuggedForAtmosphericTests(final int dimension, final String sensorName) throws URISyntaxException {
@@ -1523,7 +1540,77 @@ public class RuggedTest {
         }
     }
 
+    @Test
+    public void testForCoverage() throws URISyntaxException {
 
+        int dimension = 400;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:21:15.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                              FastMath.toRadians(10.0), dimension).build();
+
+        // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine);
+
+        RuggedBuilder builder = new RuggedBuilder().
+                setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
+                setEllipsoid(EllipsoidId.IERS2003, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor);
+
+        Rugged rugged = builder.build();
+        
+        
+        // Check builder 
+        assertTrue(builder.getName().equalsIgnoreCase("Rugged"));
+        
+        // Check a date in the range of minDate - maxDate
+        AbsoluteDate midddleDate = lineSensor.getDate((firstLine+lastLine)/2.);
+
+        assertTrue(rugged.isInRange(midddleDate));
+        
+        // Get the algorithm
+        assertTrue(rugged.getAlgorithm().getClass().isInstance(new IgnoreDEMAlgorithm()));
+        
+        // Change the min and max line in inverse location to update the SensorMeanPlaneCrossing when the planeCrossing is not null
+        int minLine = firstLine;
+        int maxLine = lastLine;
+        double line = (firstLine + lastLine)/2.;
+        double pixel = dimension/2.;
+        AbsoluteDate date = lineSensor.getDate(line);
+        Vector3D pixelLos = lineSensor.getLOS(date, pixel);
+        GeodeticPoint gp = rugged.directLocation(date, position, pixelLos);
+        
+        SensorPixel sp = rugged.inverseLocation("line", gp, minLine, maxLine);
+        int minLineNew = minLine + 10;
+        int maxLineNew = maxLine - 10;
+        SensorPixel spChangeLines = rugged.inverseLocation("line", gp, minLineNew, maxLineNew);
+        
+        assertEquals(sp.getPixelNumber(), spChangeLines.getPixelNumber(), 1.e-9);
+        assertEquals(sp.getLineNumber(), spChangeLines.getLineNumber(), 1.e-9);
+    }
+    
+    
     @Before
     public void setUp() throws URISyntaxException {
         TestUtils.clearFactories();

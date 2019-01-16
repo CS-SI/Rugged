@@ -27,7 +27,7 @@ package org.orekit.rugged.errors;
  * </p>
  * @author Luc Maisonobe
  * @author Guylaine Prat
- * @deprecated as of 3.0, this class is not used anymore, as {@link RuggedException}
+ * @deprecated as of 2.1, this class is not used anymore, as {@link RuggedException}
  * is now an unchecked exception
  */
 @Deprecated
