@@ -21,25 +21,50 @@
   </properties>
   <body>
      <release version="2.1-SNAPSHOT" date="TBD" description="TTBD">
+      <action dev="guylaine" type="update">
+        Updated dependencies to Orekit 9.3 and Hipparchus 1.4.
+      </action>
+      <action dev="guylaine" type="fix" issue="373">
+        Changed RuggedException from checked to unchecked exception.
+        Most functions do throw such exceptions. As they are unchecked, they are
+        not advertised in either `throws` statements in the function signature or
+        in the javadoc. So users must consider that as soon as they use any Rugged
+        feature, an unchecked `RuggedException` may be thrown. In most cases, users
+        will not attempt to recover for this but will only use them to display or
+        log a meaningful error message.
+      </action>
+      <action dev="guylaine" type="fix" issue="372">
+        Add (optional) atmospheric refraction for inverse location. 
+        In Rugged 2.0, only the direct location can take into account the atmospheric refraction.
+      </action>
       <action dev="guylaine" type="add" due-to="Issam Boukerch">
         Changed terms for refining tutorials.
         The "fulcrum points" term is changed into "Ground Control Points (GCP)" and 
         the "liaison points" term into "tie points".
       </action>
-      <action dev="guylaine" type="add" due-to="Roberto Alacevich">
-        Added Italian translations of error messages.
+       <action dev="luc" type="fix" issue="371">
+        For refining computation, correct the constructor of the class 
+        adjustment.measurements.SensorToGroundMapping due to a parameters reversal error.
+      </action>
+      <action dev="guylaine" type="fix" issue="256">
+      Bad check of maxDate validity in utils.SpacecraftToObservedBody.SpacecraftToObservedBody method.
+      </action>
+           
+      <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
+        Updated Danish translations of error messages.
+      </action>
+      <action dev="luc" type="add" due-to="Roberto Alacevich">
+        Updated Italian translations of error messages.
+      </action>
+      <action dev="guylaine" type="add" due-to="Espen Bjørntvedt">
+        Updated Norwegian translations of error messages.
       </action>
       <action dev="luc" type="add" due-to="Beatriz Salazar García">
         Updated Spanish translations of error messages.
       </action>
-      <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
-        Updated Danish translations of error messages.
-      </action>
-      <action dev="luc" type="fix">
-        Fixed a parameters reversal error.
-        Fixes issue #371.
-      </action>
-      </release>
+      
+    </release>
+      
     <release version="2.0" date="2017-12-19" description="This is a major release.
       It mainly provides a refinement feature (i.e. adjusting the viewing model
       parameters to match ground control points.">

@@ -23,7 +23,6 @@ import java.io.Serializable;
  * Instances of this class are guaranteed to be immutable.
  * </p>
  * @author Luc Maisonobe
- * @author Guylaine Prat
  */
 public class SensorPixel implements Serializable {
 
@@ -60,4 +59,5 @@ public class SensorPixel implements Serializable {
     public double getPixelNumber() {
         return pixelNumber;
     }
+
 }
