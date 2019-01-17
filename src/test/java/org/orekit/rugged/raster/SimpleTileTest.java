@@ -101,6 +101,42 @@ public class SimpleTileTest {
         }
 
     }
+    
+    @Test
+    public void testZipper() {
+
+        SimpleTile tile0 = new SimpleTileFactory().createTile();
+        tile0.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
+        for (int i = 0; i < tile0.getLatitudeRows(); ++i) {
+            for (int j = 0; j < tile0.getLongitudeColumns(); ++j) {
+                tile0.setElevation(i, j, 1000 * i + j);
+            }
+        }
+        tile0.tileUpdateCompleted();
+
+        // Tile North of tile0
+        SimpleTile tileNorth = new SimpleTileFactory().createTile();
+        tileNorth.setGeometry(10.9, 2.0, 0.1, 0.2, 100, 200);
+        for (int i = 0; i < tileNorth.getLatitudeRows(); ++i) {
+            for (int j = 0; j < tileNorth.getLongitudeColumns(); ++j) {
+                tileNorth.setElevation(i, j, 1000 * i + j);
+            }
+        }
+        tileNorth.tileUpdateCompleted();
+
+      
+
+//        Assert.assertEquals(Location.SOUTH_WEST, tile0.getLocation( 0.0,  1.0));
+//        Assert.assertEquals(Location.WEST,       tile0.getLocation( 6.0,  1.0));
+//        Assert.assertEquals(Location.NORTH_WEST, tile0.getLocation(12.0,  1.0));
+//        Assert.assertEquals(Location.SOUTH,      tile0.getLocation( 0.0, 22.0));
+//        Assert.assertEquals(Location.HAS_INTERPOLATION_NEIGHBORS,    tile0.getLocation( 6.0, 22.0));
+//        Assert.assertEquals(Location.NORTH,      tile0.getLocation(12.0, 22.0));
+//        Assert.assertEquals(Location.SOUTH_EAST, tile0.getLocation( 0.0, 43.0));
+//        Assert.assertEquals(Location.EAST,       tile0.getLocation( 6.0, 43.0));
+//        Assert.assertEquals(Location.NORTH_EAST, tile0.getLocation(12.0, 43.0));
+
+    }
 
     @Test
     public void testOutOfBoundsIndices() {

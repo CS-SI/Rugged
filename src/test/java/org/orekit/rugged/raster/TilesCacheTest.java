@@ -16,11 +16,26 @@
  */
 package org.orekit.rugged.raster;
 
+import java.io.File;
+import java.net.URISyntaxException;
+
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
+import org.orekit.bodies.GeodeticPoint;
+import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DirectoryCrawler;
+import org.orekit.frames.FramesFactory;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
+import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
+import org.orekit.utils.Constants;
+import org.orekit.utils.IERSConventions;
 
 public class TilesCacheTest {
 
@@ -159,4 +174,46 @@ public class TilesCacheTest {
 
     }
 
+    @Test
+    public void testZipperTileCreation() throws URISyntaxException {
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        ExtendedEllipsoid earth = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                                      Constants.WGS84_EARTH_FLATTENING,
+                                      FramesFactory.getITRF(IERSConventions.IERS_2010, true));
+
+        final int n = 1201;
+        final double size = FastMath.toRadians(1.0);
+        TileUpdater updater = new TileUpdater() {
+            public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+                
+                double step = size / (n - 1);
+                // this geometry is incorrect:
+                // the specified latitude/longitude belong to rows/columns [1, n-1]
+                // and not [0, n-2].
+                tile.setGeometry(size * FastMath.floor(latitude / size) - 0.5 * step,
+                                 size * FastMath.floor(longitude / size) - 0.5 * step,
+                                 step, step, n, n);
+                for (int i = 0; i < n; ++i) {
+                    for (int j = 0; j < n; ++j) {
+                        tile.setElevation(i, j, ((i + j) % 2 == 0) ? (-7.0 - j*Math.random()) : (224 + i*Math.random()));
+                    }
+                }
+            }
+        };
+        final IntersectionAlgorithm algorithm = new DuvenhageAlgorithm(updater, 8, false);
+        try {
+//            GeodeticPoint gp = algorithm.intersection(earth,
+//                    new Vector3D(-3010311.9672771087, 5307094.8081077365, 1852867.7919871407),
+//                    new Vector3D(-0.3953329359154183, +0.8654901360032332, +0.30763402650162286));
+           GeodeticPoint gp =  algorithm.intersection(earth,
+                    new Vector3D(-3010311.9672771087, 5307094.8081077365, 1852867.7919871407),
+                    new Vector3D(0.3953329359154183, -0.8654901360032332, -0.30763402650162286));
+            System.out.println(gp.toString());
+
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED, re.getSpecifier());
+        }
+    }
 }
