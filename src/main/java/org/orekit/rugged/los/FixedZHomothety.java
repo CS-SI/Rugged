@@ -27,7 +27,6 @@ import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
 
 /** {@link TimeIndependentLOSTransform LOS transform} based on a homothety along the Z axis.
- * inspired from FixedZHomothety / s2geolib
  * @author Lucie Labatallee
  * @author Guylaine Prat
  * @see LOSBuilder

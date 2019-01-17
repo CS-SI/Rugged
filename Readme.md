@@ -22,14 +22,6 @@
 
 <h4 align="center">Rugged is a free java library for geolocation and used for satellite imagery.</h4>
 
-<p align="center">
-  <a href="#introduction">Introduction</a> •
-  <a href="#design">Design</a> •
-  <a href="#tutorial">Tutorial</a> •
-  <a href="#development">Development</a>
-</p>
-
-
 Rugged is an add-on for [Orekit](https://www.orekit.org/ "Orekit homepage") handling Digital Elevation Models contribution to 
 line of sight computation. It is a free software intermediate-level library written in Java.
 
