@@ -90,7 +90,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * Creates an empty tile.
      * </p>
      */
-    protected MinMaxTreeTile() {
+    MinMaxTreeTile() {
     }
 
     /** {@inheritDoc} */

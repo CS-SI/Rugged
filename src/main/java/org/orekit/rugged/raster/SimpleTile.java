@@ -268,7 +268,7 @@ public class SimpleTile implements Tile {
     public double interpolateElevation(final double latitude, final double longitude) {
 
         final double doubleLatitudeIndex  = getDoubleLatitudeIndex(latitude);
-        final double doubleLongitudeIndex = getDoubleLongitudeIndex(longitude);
+        final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
         if (doubleLatitudeIndex  < -TOLERANCE || doubleLatitudeIndex  >= (latitudeRows - 1 + TOLERANCE) ||
             doubleLongitudeIndex < -TOLERANCE || doubleLongitudeIndex >= (longitudeColumns - 1 + TOLERANCE)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES,
@@ -422,7 +422,7 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public int getFloorLongitudeIndex(final double longitude) {
-        return (int) FastMath.floor(getDoubleLongitudeIndex(longitude));
+        return (int) FastMath.floor(getDoubleLontitudeIndex(longitude));
     }
 
     /** Get the latitude index of a point.
@@ -437,7 +437,7 @@ public class SimpleTile implements Tile {
      * @param longitude geodetic longitude (rad)
      * @return longitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLongitudeIndex(final double longitude) {
+    private double getDoubleLontitudeIndex(final double longitude) {
         return (longitude - minLongitude) / longitudeStep;
     }
 
