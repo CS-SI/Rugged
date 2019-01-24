@@ -131,7 +131,7 @@
 
   <scm>
     <connection>scm:git:https://gitlab.orekit.org/orekit/rugged.git</connection>
-    <developerConnection>scm:git:ssh://git@gitlab.orekit.org:orekit/rugged.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@gitlab.orekit.org/orekit/rugged.git</developerConnection>
     <url>https://gitlab.orekit.org/orekit/rugged/tree/master</url>
   </scm>
 
