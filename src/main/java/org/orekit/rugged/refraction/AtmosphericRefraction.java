@@ -39,12 +39,6 @@ public abstract class AtmosphericRefraction {
      */
     private boolean mustBeComputed = true;
 
-    /** Flag to tell if we must compute the correction (for direct location) with an optimization grid.
-     * By default: optimization is not set up.
-     * @since 2.1
-     */
-    private boolean isOptimized = false;
-
     /** The current atmospheric parameters.
      * @since 2.1
      */
@@ -117,14 +111,6 @@ public abstract class AtmosphericRefraction {
      */
     public boolean mustBeComputed() {
         return mustBeComputed;
-    }
-
-    /** Tell if the computation (for direct location) must be optimized.
-     * @return true if computation must be optimized; false otherwise
-     * @since 2.1
-     */
-    public boolean isOptimized() {
-        return isOptimized;
     }
 
     /** Configuration of the interpolation grid. This grid is associated to the given sensor,
