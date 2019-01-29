@@ -23,10 +23,12 @@
 Yes, it has been used in successful operational missions. 
 
 Rugged is used operationally in the Image Processing Facility
-of the Sentinel 2 ESA mission, which was launched in June 2015.
+of the Sentinel 2 European Space Agency (ESA) mission, which was launched in June 2015.
 
 Rugged is used in the frame of ESA Scientific Exploitation of Operational Missions (SEOM), 
 to calculate topographic shadow masks for Sentinel 2 products.
+
+Rugged has been used to validate Airbus Defence and Space (ADS) geolocation library.
 
 Rugged has been used as a Research Library by the French Space Agency (CNES) for
 study on refining for VHR push broom sensors (Pleiades).
