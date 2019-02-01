@@ -31,7 +31,7 @@ to calculate topographic shadow masks for Sentinel 2 products.
 Rugged has been used to validate Airbus Defence and Space (ADS) geolocation library.
 
 Rugged has been used as a Research Library by the French Space Agency (CNES) for
-study on refining for VHR push broom sensors (Pleiades).
+refinement studies for VHR push broom sensors (Pleiades).
 
 ### Is Rugged validated?
 
