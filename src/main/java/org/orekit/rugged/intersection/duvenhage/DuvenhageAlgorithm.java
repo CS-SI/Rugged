@@ -175,58 +175,57 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         NormalizedGeodeticPoint currentGuess = closeGuess;
         NormalizedGeodeticPoint foundIntersection = null;
-        
-        
-            if (flatBody) {
-                // under the (bad) flat-body assumption, the reference point must remain
-                // at DEM entry and exit, even if we already have a much better close guess :-(
-                // this is in order to remain consistent with other systems
-                final Tile tile = cache.getTile(currentGuess.getLatitude(), currentGuess.getLongitude());
-                final Vector3D      exitP  = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
-                final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
-                final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
-                        tile.getMinimumLongitude());
-                foundIntersection = tile.cellIntersection(entry, ellipsoid.convertLos(entryP, exitP),
-                        tile.getFloorLatitudeIndex(currentGuess.getLatitude()),
-                        tile.getFloorLongitudeIndex(currentGuess.getLongitude()));
 
-            } else { // with a DEM
+        if (flatBody) {
+            // under the (bad) flat-body assumption, the reference point must remain
+            // at DEM entry and exit, even if we already have a much better close guess :-(
+            // this is in order to remain consistent with other systems
+            final Tile tile = cache.getTile(currentGuess.getLatitude(), currentGuess.getLongitude());
+            final Vector3D      exitP  = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
+            final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
+            final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
+                    tile.getMinimumLongitude());
+            foundIntersection = tile.cellIntersection(entry, ellipsoid.convertLos(entryP, exitP),
+                    tile.getFloorLatitudeIndex(currentGuess.getLatitude()),
+                    tile.getFloorLongitudeIndex(currentGuess.getLongitude()));
 
-                while (foundIntersection == null && (nbCall < NB_TIME_CELL_INTERSECTION)) {
+        } else { // with a DEM
 
-                    final Vector3D      delta     = ellipsoid.transform(currentGuess).subtract(position);
-                    final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
-                    final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                        ellipsoid.getBodyFrame(), null);
-                    final NormalizedGeodeticPoint normalizedProjected = 
-                                                  new NormalizedGeodeticPoint(projected.getLatitude(),
-                                                                              projected.getLongitude(),
-                                                                              projected.getAltitude(),
-                                                                              currentGuess.getLongitude());
-                    final Tile tile = cache.getTile(normalizedProjected.getLatitude(), normalizedProjected.getLongitude());
+            while (foundIntersection == null && (nbCall < NB_TIME_CELL_INTERSECTION)) {
 
-                    foundIntersection = tile.cellIntersection(normalizedProjected, 
-                                                              ellipsoid.convertLos(normalizedProjected, los),
-                                                              tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
-                                                              tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
+                final Vector3D      delta     = ellipsoid.transform(currentGuess).subtract(position);
+                final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                        ellipsoid.getBodyFrame(), null);
+                final NormalizedGeodeticPoint normalizedProjected =
+                        new NormalizedGeodeticPoint(projected.getLatitude(),
+                                projected.getLongitude(),
+                                projected.getAltitude(),
+                                currentGuess.getLongitude());
+                final Tile tile = cache.getTile(normalizedProjected.getLatitude(), normalizedProjected.getLongitude());
 
-                    // For extremely rare case : the cell intersection gave no results ...
-                    // We use as a new guess a slightly modified projected geodetic point (which is on the LOS line)
-                    if (foundIntersection == null) {
-                        double shiftedS = s - 1;
-                        GeodeticPoint currentGuessGP = ellipsoid.transform(new Vector3D(1, position, shiftedS, los),
-                                ellipsoid.getBodyFrame(), null);
-                        currentGuess = new NormalizedGeodeticPoint(currentGuessGP.getLatitude(),
-                                currentGuessGP.getLongitude(),
-                                currentGuessGP.getAltitude(),
-                                projected.getLongitude());
-                        // to avoid infinite loop ...
-                        nbCall++;
-                    } 
-                } // end while foundIntersection = null            
-            } // end test on flatbody
+                foundIntersection = tile.cellIntersection(normalizedProjected,
+                        ellipsoid.convertLos(normalizedProjected, los),
+                        tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
+                        tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
 
-            return foundIntersection;
+                // For extremely rare case : the cell intersection gave no results ...
+                // We use as a new guess a slightly modified projected geodetic point (which is on the LOS line)
+                if (foundIntersection == null) {
+                    final double shiftedS = s - 1;
+                    final GeodeticPoint currentGuessGP = ellipsoid.transform(new Vector3D(1, position, shiftedS, los),
+                            ellipsoid.getBodyFrame(), null);
+                    currentGuess = new NormalizedGeodeticPoint(currentGuessGP.getLatitude(),
+                            currentGuessGP.getLongitude(),
+                            currentGuessGP.getAltitude(),
+                            projected.getLongitude());
+                    // to avoid infinite loop ...
+                    nbCall++;
+                }
+            } // end while foundIntersection = null
+        } // end test on flatbody
+
+        return foundIntersection;
     }
 
     /** {@inheritDoc} */
