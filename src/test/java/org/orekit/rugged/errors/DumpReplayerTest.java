@@ -260,5 +260,44 @@ public class DumpReplayerTest {
         }
 
     }
+    
+    @Test
+    public void testDirectLocIssue376_01() throws URISyntaxException, IOException {
 
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-Issue376-01.txt").toURI().getPath();
+
+        DumpReplayer replayer = new DumpReplayer();
+        replayer.parse(new File(dumpPath));
+        Rugged rugged = replayer.createRugged();
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+
+        GeodeticPoint expectedGP = (GeodeticPoint) results[0].getExpected();
+        GeodeticPoint replayedGP = (GeodeticPoint) results[0].getReplayed();
+        double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
+                                            rugged.getEllipsoid().transform(replayedGP));
+        Assert.assertEquals(0.0, distance, 1.0e-8);
+    }
+    
+    @Test
+    public void testDirectLocIssue376_02() throws URISyntaxException, IOException {
+
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-Issue376-02.txt").toURI().getPath();
+
+        DumpReplayer replayer = new DumpReplayer();
+        replayer.parse(new File(dumpPath));
+        Rugged rugged = replayer.createRugged();
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+
+        GeodeticPoint expectedGP = (GeodeticPoint) results[0].getExpected();
+        GeodeticPoint replayedGP = (GeodeticPoint) results[0].getReplayed();
+        double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
+                                            rugged.getEllipsoid().transform(replayedGP));
+        Assert.assertEquals(0.0, distance, 1.0e-8);
+    }
 }
