@@ -179,17 +179,19 @@ class Dump {
      * @param maxLine maximum line number
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
+     * @param refractionCorrection flag for refraction correction
      */
     public void dumpInverseLocation(final LineSensor sensor, final GeodeticPoint point,
                                     final int minLine, final int maxLine,
-                                    final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection) {
+                                    final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
+                                    final boolean refractionCorrection) {
         final DumpedSensorData ds = getSensorData(sensor);
         writer.format(Locale.US,
-                      "inverse location: sensorName %s latitude %22.15e longitude %22.15e elevation %22.15e minLine %d maxLine %d lightTime %b aberration %b%n",
+                      "inverse location: sensorName %s latitude %22.15e longitude %22.15e elevation %22.15e minLine %d maxLine %d lightTime %b aberration %b refraction %b %n",
                       ds.getDumpName(),
                       point.getLatitude(), point.getLongitude(), point.getAltitude(),
                       minLine, maxLine,
-                      lightTimeCorrection, aberrationOfLightCorrection);
+                      lightTimeCorrection, aberrationOfLightCorrection, refractionCorrection);
     }
 
     /** Dump an inverse location result.

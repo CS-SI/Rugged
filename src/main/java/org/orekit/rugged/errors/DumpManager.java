@@ -158,7 +158,7 @@ public class DumpManager {
                                           final boolean refractionCorrection) {
         if (isActive()) {
             DUMP.get().dumpDirectLocation(date, sensorPosition, los, lightTimeCorrection, aberrationOfLightCorrection,
-                    refractionCorrection);
+                                          refractionCorrection);
         }
     }
 
@@ -178,13 +178,15 @@ public class DumpManager {
      * @param maxLine maximum line number
      * @param lightTimeCorrection flag for light time correction
      * @param aberrationOfLightCorrection flag for aberration of light correction
+     * @param refractionCorrection flag for refraction correction
      */
     public static void dumpInverseLocation(final LineSensor sensor, final GeodeticPoint point,
                                            final int minLine, final int maxLine,
-                                           final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection) {
+                                           final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
+                                           final boolean refractionCorrection) {
         if (isActive()) {
             DUMP.get().dumpInverseLocation(sensor, point, minLine, maxLine,
-                                           lightTimeCorrection, aberrationOfLightCorrection);
+                                           lightTimeCorrection, aberrationOfLightCorrection, refractionCorrection);
         }
     }
 

@@ -514,7 +514,8 @@ public class Rugged {
                                        final int minLine, final int maxLine) {
 
         final LineSensor sensor = getLineSensor(sensorName);
-        DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine, lightTimeCorrection, aberrationOfLightCorrection);
+        DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine, lightTimeCorrection,
+                                        aberrationOfLightCorrection, atmosphericRefraction != null);
 
         final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
         DumpManager.dumpSensorMeanPlane(planeCrossing);
