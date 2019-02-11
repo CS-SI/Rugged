@@ -48,6 +48,9 @@ public class DumpManager {
     /** Dump file (default initial value is null, i.e. nothing is dumped). */
     private static final ThreadLocal<Dump> DUMP = new ThreadLocal<Dump>();
 
+    /** Boolean to check if the dump is suspended. */
+    private static boolean isSuspended = false;
+
     /** Private constructor for utility class.
      */
     private DumpManager() {
@@ -81,11 +84,23 @@ public class DumpManager {
         }
     }
 
+    /** Suspend the dump.
+     */
+    public static void suspend() {
+        isSuspended = true;
+    }
+
+    /** Resume the dump.
+     */
+    public static void resume() {
+        isSuspended = false;
+    }
+
     /** Check if dump is active for this thread.
      * @return true if dump is active for this thread
      */
     public static boolean isActive() {
-        return DUMP.get() != null;
+        return DUMP.get() != null && !isSuspended;
     }
 
     /** Dump DEM cell data.
