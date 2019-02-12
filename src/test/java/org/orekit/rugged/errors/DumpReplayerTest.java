@@ -255,6 +255,7 @@ public class DumpReplayerTest {
                         Assert.assertEquals(i + 1, ((Integer) re.getParts()[0]).intValue());
                         Assert.assertEquals(corrupted, re.getParts()[1]);
                     }
+                    corrupted.delete();
                 }
             }
         }
