@@ -48,6 +48,7 @@ import org.orekit.time.TimeScalesFactory;
 /**
  * Dump data class.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 class Dump {
 

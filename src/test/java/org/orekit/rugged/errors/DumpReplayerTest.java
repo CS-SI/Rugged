@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -211,7 +210,6 @@ public class DumpReplayerTest {
 
     }
 
-   @Ignore
    @Test
     public void testCorruptedFiles() throws URISyntaxException, IOException {
 
@@ -302,4 +300,27 @@ public class DumpReplayerTest {
                                             rugged.getEllipsoid().transform(replayedGP));
         Assert.assertEquals(0.0, distance, 1.0e-8);
     }
+    
+    @Test
+    public void testDirectLocIssue376_03() throws URISyntaxException, IOException {
+
+        String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+
+        String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-Issue376-03.txt").toURI().getPath();
+
+        DumpReplayer replayer = new DumpReplayer();
+        replayer.parse(new File(dumpPath));
+        Rugged rugged = replayer.createRugged();
+        DumpReplayer.Result[] results = replayer.execute(rugged);
+
+        for (int i= 0; i < results.length; i++) {
+            GeodeticPoint expectedGP = (GeodeticPoint) results[i].getExpected();
+            GeodeticPoint replayedGP = (GeodeticPoint) results[i].getReplayed();
+            double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
+                    rugged.getEllipsoid().transform(replayedGP));
+            Assert.assertEquals(0.0, distance, 5.0e-8);
+        }
+    }
+
 }

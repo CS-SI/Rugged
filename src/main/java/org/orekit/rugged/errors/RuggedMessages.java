@@ -73,6 +73,7 @@ public enum RuggedMessages implements Localizable {
     CANNOT_PARSE_LINE("cannot parse line {0}, file {1}: {2}"),
     LIGHT_TIME_CORRECTION_REDEFINED("light time correction redefined, line {0}, file {1}: {2}"),
     ABERRATION_OF_LIGHT_CORRECTION_REDEFINED("aberration of light correction redefined, line {0}, file {1}: {2}"),
+    ATMOSPHERIC_REFRACTION_REDEFINED("atmospheric refraction correction redefined, line {0}, file {1}: {2}"),
     TILE_ALREADY_DEFINED("tile {0} already defined, line {1}, file {2}: {3}"),
     UNKNOWN_TILE("unknown tile {0}, line {1}, file {2}: {3}"),
     NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),

@@ -60,7 +60,10 @@ import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
+import org.orekit.rugged.refraction.MultiLayerModel;
 import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -109,6 +112,9 @@ public class DumpReplayer {
 
     /** Keyword for aberration of light correction fields. */
     private static final String ABERRATION = "aberration";
+
+    /** Keyword for atmospheric refraction correction fields. */
+    private static final String REFRACTION = "refraction";
 
     /** Keyword for min date fields. */
     private static final String MIN_DATE = "minDate";
@@ -257,6 +263,9 @@ public class DumpReplayer {
     /** Flag for aberration of light correction. */
     private boolean aberrationOfLightCorrection;
 
+    /** Flag for atmospheric refraction. */
+    private boolean atmosphericRefraction;
+
     /** Dumped calls. */
     private final List<DumpedCall> calls;
 
@@ -316,10 +325,17 @@ public class DumpReplayer {
                 }, 8);
             }
 
+            builder.setEllipsoid(ellipsoid);
+
             builder.setLightTimeCorrection(lightTimeCorrection);
             builder.setAberrationOfLightCorrection(aberrationOfLightCorrection);
+            if (atmosphericRefraction) { // Use the default model with the default configuration values
+                final ExtendedEllipsoid extendedEllipsoid = builder.getEllipsoid();
+                final AtmosphericRefraction atmosphericModel = new MultiLayerModel(extendedEllipsoid);
+                // Build Rugged with atmospheric refraction model
+                builder.setRefractionCorrection(atmosphericModel);
+            }
 
-            builder.setEllipsoid(ellipsoid);
 
             // build missing transforms by extrapolating the parsed ones
             final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
@@ -529,10 +545,11 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                if (fields.length < 14 ||
+                if (fields.length < 16 ||
                         !fields[0].equals(DATE) ||
                         !fields[2].equals(POSITION) || !fields[6].equals(LOS) ||
-                        !fields[10].equals(LIGHT_TIME) || !fields[12].equals(ABERRATION)) {
+                        !fields[10].equals(LIGHT_TIME) || !fields[12].equals(ABERRATION) ||
+                        !fields[14].equals(REFRACTION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
                 final AbsoluteDate date = new AbsoluteDate(fields[1], TimeScalesFactory.getUTC());
@@ -545,6 +562,7 @@ public class DumpReplayer {
                 if (global.calls.isEmpty()) {
                     global.lightTimeCorrection         = Boolean.parseBoolean(fields[11]);
                     global.aberrationOfLightCorrection = Boolean.parseBoolean(fields[13]);
+                    global.atmosphericRefraction       = Boolean.parseBoolean(fields[15]);
                 } else {
                     if (global.lightTimeCorrection != Boolean.parseBoolean(fields[11])) {
                         throw new RuggedException(RuggedMessages.LIGHT_TIME_CORRECTION_REDEFINED,
@@ -552,6 +570,10 @@ public class DumpReplayer {
                     }
                     if (global.aberrationOfLightCorrection != Boolean.parseBoolean(fields[13])) {
                         throw new RuggedException(RuggedMessages.ABERRATION_OF_LIGHT_CORRECTION_REDEFINED,
+                                l, file.getAbsolutePath(), line);
+                    }
+                    if (global.atmosphericRefraction != Boolean.parseBoolean(fields[15])) {
+                        throw new RuggedException(RuggedMessages.ATMOSPHERIC_REFRACTION_REDEFINED,
                                 l, file.getAbsolutePath(), line);
                     }
                 }
@@ -733,11 +755,12 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                if (fields.length < 16 ||
+                if (fields.length < 18 ||
                         !fields[0].equals(SENSOR_NAME) ||
                         !fields[2].equals(LATITUDE) || !fields[4].equals(LONGITUDE) || !fields[6].equals(ELEVATION) ||
                         !fields[8].equals(MIN_LINE) || !fields[10].equals(MAX_LINE) ||
-                        !fields[12].equals(LIGHT_TIME) || !fields[14].equals(ABERRATION)) {
+                        !fields[12].equals(LIGHT_TIME) || !fields[14].equals(ABERRATION) ||
+                        !fields[16].equals(REFRACTION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
                 }
                 final String sensorName = fields[1];
@@ -749,6 +772,7 @@ public class DumpReplayer {
                 if (global.calls.isEmpty()) {
                     global.lightTimeCorrection         = Boolean.parseBoolean(fields[13]);
                     global.aberrationOfLightCorrection = Boolean.parseBoolean(fields[15]);
+                    global.atmosphericRefraction       = Boolean.parseBoolean(fields[17]);
                 } else {
                     if (global.lightTimeCorrection != Boolean.parseBoolean(fields[13])) {
                         throw new RuggedException(RuggedMessages.LIGHT_TIME_CORRECTION_REDEFINED,
@@ -756,6 +780,10 @@ public class DumpReplayer {
                     }
                     if (global.aberrationOfLightCorrection != Boolean.parseBoolean(fields[15])) {
                         throw new RuggedException(RuggedMessages.ABERRATION_OF_LIGHT_CORRECTION_REDEFINED,
+                                                  l, file.getAbsolutePath(), line);
+                    }
+                    if (global.atmosphericRefraction != Boolean.parseBoolean(fields[17])) {
+                        throw new RuggedException(RuggedMessages.ATMOSPHERIC_REFRACTION_REDEFINED,
                                                   l, file.getAbsolutePath(), line);
                     }
                 }

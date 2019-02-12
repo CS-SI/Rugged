@@ -64,6 +64,9 @@ LIGHT_TIME_CORRECTION_REDEFINED = Correzione luce-tempo ridefinita, linea {0} de
 # aberration of light correction redefined, line {0}, file {1}: {2}
 ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = Correzione dell''aberrazione stellare ridefinita, linea {0} del file {1}: {2}
 
+# atmospheric refraction correction redefined, line {0}, file {1}: {2}
+ATMOSPHERIC_REFRACTION_REDEFINED = <MISSING TRANSLATION>
+
 # tile {0} already defined, line {1}, file {2}: {3}
 TILE_ALREADY_DEFINED = quadrante {0} già definito, linea {1}, file {2}: {3}
 

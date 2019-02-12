@@ -64,6 +64,9 @@ LIGHT_TIME_CORRECTION_REDEFINED = la corrección luz-tiempo ha sido redefinida, 
 # aberration of light correction redefined, line {0}, file {1}: {2}
 ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = la aberración de la corrección luz ha sido redefinida, línea {0}, fichero {1}: {2}
 
+# atmospheric refraction correction redefined, line {0}, file {1}: {2}
+ATMOSPHERIC_REFRACTION_REDEFINED = <MISSING TRANSLATION>
+
 # tile {0} already defined, line {1}, file {2}: {3}
 TILE_ALREADY_DEFINED = la faceta {0} ya está definida, línea {1}, fichero {2}: {3}
 
