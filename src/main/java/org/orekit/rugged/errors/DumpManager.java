@@ -42,6 +42,7 @@ import org.orekit.time.AbsoluteDate;
  * time, so user code should not rely on it.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class DumpManager {
 
