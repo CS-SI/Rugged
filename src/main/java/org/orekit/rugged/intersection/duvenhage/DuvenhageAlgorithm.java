@@ -54,9 +54,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     /** Flag for flat-body hypothesis. */
     private final boolean flatBody;
 
-    /** Nb times cell intersection (with DEM) is performed for null intersection (used to avoid infinite loop). */
-    private int nbCall = 0;
-
     /** Simple constructor.
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
@@ -191,8 +188,14 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         } else { // with a DEM
 
-            final NormalizedGeodeticPoint currentGuess0 = currentGuess;
+            // Keep the initial guess
+            final NormalizedGeodeticPoint currentGuess0 = closeGuess;
+
+            // number of times cell intersection (with DEM) is performed for null intersection (used to avoid infinite loop)
+            int nbCall = 0;
+            // Shift for s to find the solution if foundIntersection is null
             double deltaS = -1.;
+            // if the shifts in one way was not successful, try the other way
             boolean secondChance = false;
 
             while (foundIntersection == null && (nbCall < NB_TIME_CELL_INTERSECTION)) {
