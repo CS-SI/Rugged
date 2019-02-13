@@ -232,7 +232,7 @@ public class GroundRefining extends Refining {
     }
 
     /** Constructor */
-    public GroundRefining() {
+    private GroundRefining() {
 
         sensorName = "line";
         pleiadesViewingModel = new PleiadesViewingModel(sensorName);

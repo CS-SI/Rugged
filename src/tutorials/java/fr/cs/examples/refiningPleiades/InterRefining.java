@@ -302,7 +302,7 @@ public class InterRefining extends Refining {
     }
 
 	/** Constructor */
-	public InterRefining() {
+	private InterRefining() {
 
 		sensorNameA = "SensorA";
 		final double incidenceAngleA = -5.0;

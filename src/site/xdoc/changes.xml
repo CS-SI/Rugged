@@ -24,6 +24,22 @@
       <action dev="guylaine" type="update">
         Updated dependencies to Orekit 9.3 and Hipparchus 1.4.
       </action>
+      <action dev="guylaine" type="fix" issue="376">
+        Direct location may result to a null result in some very rugged region.
+        In Duvenhage algorithm, in the refineIntersection method for the DEM, 
+        some rare cases led to no intersection (as a result from SimpleTile.cellIntersection) 
+        with the closeGuess given as input of refineIntersection.By shifting the solution 
+        along the LOS direction, with an iterative process, we are able to find the intersection.
+      </action>
+      <action dev="guylaine" type="fix" issue="377">
+        Add the possibilty to suspend and resume the dump.
+        When performing a dump, in some cases, some extra informations are dumped 
+        but are not relevant. 
+        For instance when updating a tile for a SRTM tile, we need to add the geoid
+        value of the current point. In the dump file, the geoid tile is also dumped
+        and it leds to bad results when performing the DumpReplayer, as the geoid 
+        elevations are read instead of the real elevations.
+      </action>
       <action dev="guylaine" type="fix" issue="373">
         Changed RuggedException from checked to unchecked exception.
         Most functions do throw such exceptions. As they are unchecked, they are
