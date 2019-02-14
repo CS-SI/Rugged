@@ -64,7 +64,7 @@ public class Rugged {
     private static final int MAX_EVAL = 50;
 
     /** Margin for computation of inverse location with atmospheric refraction correction. */
-    private static final double INVLOC_MARGIN = 0.5;
+    private static final double INVLOC_MARGIN = 0.8;
 
     /** Threshold for pixel convergence in fixed point method
      * (for inverse location with atmospheric refraction correction). */
@@ -780,17 +780,18 @@ public class Rugged {
                         // Compute the inverse location for the current node
                         sensorPixelGrid[uIndex][vIndex] = inverseLocation(sensorName, currentLat, currentLon, minLine, maxLine);
 
-                        // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
-                        if ((sensorPixelGrid[uIndex][vIndex] != null &&
-                             (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < (-INVLOC_MARGIN) ||
-                              sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1))) ||
-                            (sensorPixelGrid[uIndex][vIndex] == null) ) {
-
-                            // Impossible to find the point in the given min line
-                            throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
-                        }
                     } catch (RuggedException re) { // This should never happen
                         throw RuggedException.createInternalError(re);
+                    }
+
+                    // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
+                    if ((sensorPixelGrid[uIndex][vIndex] != null &&
+                           (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < (-INVLOC_MARGIN) ||
+                            sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1))) ||
+                        (sensorPixelGrid[uIndex][vIndex] == null) ) {
+
+                        // Impossible to find the point in the given min line
+                        throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
                     }
 
                 } else { // groundGrid[uIndex][vIndex] == null: impossible to compute inverse loc because ground point not defined
