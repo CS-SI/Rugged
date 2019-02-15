@@ -746,6 +746,8 @@ public class Rugged {
         }
         // The sensor pixel is found !
         final SensorPixel sensorPixelWithAtmosphere = new SensorPixel(corrLinePrevious, corrPixelPrevious);
+        DumpManager.dumpInverseLocationResult(sensorPixelWithAtmosphere);
+
         return sensorPixelWithAtmosphere;
     }
 
