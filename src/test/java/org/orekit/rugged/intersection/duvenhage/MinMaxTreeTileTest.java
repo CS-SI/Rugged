@@ -16,13 +16,17 @@
  */
 package org.orekit.rugged.intersection.duvenhage;
 
-import java.lang.reflect.Field;
-
 import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well1024a;
 import org.hipparchus.util.FastMath;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class MinMaxTreeTileTest {
 
@@ -264,6 +268,17 @@ public class MinMaxTreeTileTest {
         }
     }
 
+    @Test
+    public void testForCoverage() throws IOException {
+        
+        org.orekit.rugged.errors.DumpManager.activate(tempFolder.newFile());
+
+        MinMaxTreeTile tile = createTile(1201, 1201);
+        tile.getMinElevation(100, 100, 0);
+        
+        org.orekit.rugged.errors.DumpManager.deactivate();
+    }
+    
     private int[] neighbors(int row, int column, int nbRows, int nbColumns, int stages) {
 
         // poor man identification of neighbors cells merged together with specified cell
@@ -345,5 +360,8 @@ public class MinMaxTreeTileTest {
         tile.tileUpdateCompleted();
         return tile;
     }
+    
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
 }

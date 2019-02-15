@@ -18,6 +18,7 @@ package org.orekit.rugged.api;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -1479,6 +1480,34 @@ public class RuggedTest {
         
         assertEquals(sp.getPixelNumber(), spChangeLines.getPixelNumber(), 1.e-9);
         assertEquals(sp.getLineNumber(), spChangeLines.getLineNumber(), 1.e-9);
+        
+        // For computeInverseLocOnGridWithoutAtmosphere special cases
+        try {
+            java.lang.reflect.Method computeWithoutAtmosphere = 
+                    rugged.getClass().getDeclaredMethod("computeInverseLocOnGridWithoutAtmosphere",
+                                                        GeodeticPoint[][].class,
+                                                        Integer.TYPE, Integer.TYPE,
+                                                        LineSensor.class, Integer.TYPE, Integer.TYPE);
+            computeWithoutAtmosphere.setAccessible(true);
+            final int nbPixelGrid = 2; 
+            final int nbLineGrid = 2;
+            GeodeticPoint[][] groundGridWithAtmosphere = new GeodeticPoint[nbPixelGrid][nbLineGrid];
+            for (int i = 0; i < nbPixelGrid; i++) {
+                for (int j = 0; j < nbLineGrid; j++) {
+                    groundGridWithAtmosphere[i][j] = null;
+                }
+            }
+             
+            SensorPixel[][] spNull = (SensorPixel[][]) computeWithoutAtmosphere.invoke(rugged, groundGridWithAtmosphere, nbPixelGrid, nbLineGrid, lineSensor, minLine, maxLine);
+            for (int i = 0; i < nbPixelGrid; i++) {
+                for (int j = 0; j < nbLineGrid; j++) {
+                    assertNull(spNull[i][j]);
+                }
+            }
+        } catch (NoSuchMethodException | SecurityException | 
+                IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            Assert.fail(e.getLocalizedMessage());
+        }
     }
     
     
