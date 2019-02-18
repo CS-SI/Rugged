@@ -86,15 +86,25 @@ public class DumpManager {
     }
 
     /** Suspend the dump.
+     * In case the dump is already suspended, keep the previous status in order to 
+     * correctly deal the resume stage.
      */
-    public static void suspend() {
-        isSuspended = true;
+    public static Boolean suspend() {
+        // Check if the dump is already suspended
+        if (isSuspended) {
+            return isSuspended;
+        } else {
+            isSuspended = true;
+            return false;
+        }
     }
 
-    /** Resume the dump.
+    /** Resume the dump, only if it was not already suspended.
      */
-    public static void resume() {
-        isSuspended = false;
+    public static void resume(Boolean wasSuspended) {
+        if (!wasSuspended) {
+            isSuspended = false;
+        }
     }
 
     /** Check if dump is active for this thread.

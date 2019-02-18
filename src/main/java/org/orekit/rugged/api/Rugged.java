@@ -706,10 +706,16 @@ public class Rugged {
         // ==================
         // Initialization
         // --------------
+        // Deactivate the dump because no need to keep intermediate computations of inverse loc (can be regenerate)
+        final Boolean wasSuspended = DumpManager.suspend();
+
         // compute the sensor pixel on the desired ground point WITHOUT atmosphere
         atmosphericRefraction.deactivateComputation();
         final SensorPixel sp0 = inverseLocation(sensorName, point, minLine, maxLine);
         atmosphericRefraction.reactivateComputation();
+
+        // Reactivate the dump
+        DumpManager.resume(wasSuspended);
 
         if (sp0 == null) {
             // Impossible to find the point in the given min line and max line (without atmosphere)
@@ -746,6 +752,8 @@ public class Rugged {
         }
         // The sensor pixel is found !
         final SensorPixel sensorPixelWithAtmosphere = new SensorPixel(corrLinePrevious, corrPixelPrevious);
+
+        // Dump the found sensorPixel
         DumpManager.dumpInverseLocationResult(sensorPixelWithAtmosphere);
 
         return sensorPixelWithAtmosphere;
@@ -765,6 +773,9 @@ public class Rugged {
     private SensorPixel[][] computeInverseLocOnGridWithoutAtmosphere(final GeodeticPoint[][] groundGridWithAtmosphere,
                                                                      final int nbPixelGrid, final int nbLineGrid,
                                                                      final LineSensor sensor, final int minLine, final int maxLine) {
+
+        // Deactivate the dump because no need to keep intermediate computations of inverse loc (can be regenerate)
+        final Boolean wasSuspended = DumpManager.suspend();
 
         final SensorPixel[][] sensorPixelGrid = new SensorPixel[nbPixelGrid][nbLineGrid];
         final String sensorName = sensor.getName();
@@ -804,6 +815,9 @@ public class Rugged {
             } // end loop vIndex
         } // end loop uIndex
 
+        // Reactivate the dump
+        DumpManager.resume(wasSuspended);
+
         // The sensor grid computed WITHOUT atmospheric refraction correction
         return sensorPixelGrid;
     }
@@ -818,6 +832,9 @@ public class Rugged {
      */
     private GeodeticPoint[][] computeDirectLocOnGridWithAtmosphere(final double[] pixelGrid, final double[] lineGrid,
                                                                    final LineSensor sensor) {
+
+        // Deactivate the dump because no need to keep intermediate computations of direct loc (can be regenerate)
+        final Boolean wasSuspended = DumpManager.suspend();
 
         final int nbPixelGrid = pixelGrid.length;
         final int nbLineGrid = lineGrid.length;
@@ -839,6 +856,9 @@ public class Rugged {
                 }
             } // end loop vIndex
         } // end loop uIndex
+
+        // Reactivate the dump
+        DumpManager.resume(wasSuspended);
 
         // The ground grid computed WITH atmospheric refraction correction
         return groundGridWithAtmosphere;
