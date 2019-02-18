@@ -86,8 +86,9 @@ public class DumpManager {
     }
 
     /** Suspend the dump.
-     * In case the dump is already suspended, keep the previous status in order to 
+     * In case the dump is already suspended, keep the previous status in order to
      * correctly deal the resume stage.
+     * @return a flag to tell if the dump is already suspended (true; false otherwise)
      */
     public static Boolean suspend() {
         // Check if the dump is already suspended
@@ -100,8 +101,9 @@ public class DumpManager {
     }
 
     /** Resume the dump, only if it was not already suspended.
+     * @param wasSuspended flag to tell if the dump was already suspended (true; false otherwise)
      */
-    public static void resume(Boolean wasSuspended) {
+    public static void resume(final Boolean wasSuspended) {
         if (!wasSuspended) {
             isSuspended = false;
         }
