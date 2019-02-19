@@ -108,6 +108,15 @@ public class DumpManager {
             isSuspended = false;
         }
     }
+    
+    /** In case dump is suspended and an exception is thrown, 
+     * allow the dump to end nicely.
+     */
+    public static void endNicely() {
+        isSuspended = false;
+        if (isActive()) deactivate();
+
+    }
 
     /** Check if dump is active for this thread.
      * @return true if dump is active for this thread
@@ -187,6 +196,7 @@ public class DumpManager {
     /** Dump an inverse location computation.
      * @param sensor sensor
      * @param point point to localize
+     * @param ellipsoid the used ellipsoid
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @param lightTimeCorrection flag for light time correction
@@ -194,12 +204,14 @@ public class DumpManager {
      * @param refractionCorrection flag for refraction correction
      */
     public static void dumpInverseLocation(final LineSensor sensor, final GeodeticPoint point,
+                                           final ExtendedEllipsoid ellipsoid,
                                            final int minLine, final int maxLine,
                                            final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
                                            final boolean refractionCorrection) {
         if (isActive()) {
             DUMP.get().dumpInverseLocation(sensor, point, minLine, maxLine,
                                            lightTimeCorrection, aberrationOfLightCorrection, refractionCorrection);
+            DUMP.get().dumpEllipsoid(ellipsoid);
         }
     }
 

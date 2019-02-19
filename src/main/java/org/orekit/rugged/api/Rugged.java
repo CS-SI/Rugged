@@ -514,7 +514,7 @@ public class Rugged {
                                        final int minLine, final int maxLine) {
 
         final LineSensor sensor = getLineSensor(sensorName);
-        DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine, lightTimeCorrection,
+        DumpManager.dumpInverseLocation(sensor, point, ellipsoid, minLine, maxLine, lightTimeCorrection,
                                         aberrationOfLightCorrection, atmosphericRefraction != null);
 
         final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
@@ -713,11 +713,12 @@ public class Rugged {
         atmosphericRefraction.deactivateComputation();
         final SensorPixel sp0 = inverseLocation(sensorName, point, minLine, maxLine);
         atmosphericRefraction.reactivateComputation();
-
         // Reactivate the dump
         DumpManager.resume(wasSuspended);
 
         if (sp0 == null) {
+            // In order for the dump to end nicely
+            DumpManager.endNicely();
             // Impossible to find the point in the given min line and max line (without atmosphere)
             throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
         }
@@ -725,6 +726,8 @@ public class Rugged {
         // set up the starting point of the fixed point method
         final double pixel0 = sp0.getPixelNumber();
         final double line0 = sp0.getLineNumber();
+        // Needed data for the dump 
+        sensor.dumpRate(line0);
 
         // Apply fixed point method until convergence in pixel and line
         // ------------------------------------------------------------
@@ -794,6 +797,8 @@ public class Rugged {
                         sensorPixelGrid[uIndex][vIndex] = inverseLocation(sensorName, currentLat, currentLon, minLine, maxLine);
 
                     } catch (RuggedException re) { // This should never happen
+                        // In order for the dump to end nicely
+                        DumpManager.endNicely();
                         throw RuggedException.createInternalError(re);
                     }
 
@@ -802,7 +807,8 @@ public class Rugged {
                            (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < (-INVLOC_MARGIN) ||
                             sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1))) ||
                         (sensorPixelGrid[uIndex][vIndex] == null) ) {
-
+                        // In order for the dump to end nicely
+                        DumpManager.endNicely();
                         // Impossible to find the point in the given min line
                         throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
                     }
@@ -852,6 +858,8 @@ public class Rugged {
                     groundGridWithAtmosphere[uIndex][vIndex] = directLocation(date, sensorPosition, los);
 
                 } catch (RuggedException re) { // This should never happen
+                    // In order for the dump to end nicely
+                    DumpManager.endNicely();
                     throw RuggedException.createInternalError(re);
                 }
             } // end loop vIndex
