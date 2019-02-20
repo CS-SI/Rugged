@@ -108,9 +108,9 @@ public class DumpManager {
             isSuspended = false;
         }
     }
-    
-    /** In case dump is suspended and an exception is thrown, 
-     * allow the dump to end nicely.
+
+    /** In case dump is suspended and an exception is thrown,
+     * allows the dump to end nicely.
      */
     public static void endNicely() {
         isSuspended = false;

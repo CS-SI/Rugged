@@ -183,8 +183,8 @@ public class LineSensor {
     public Vector3D getPosition() {
         return position;
     }
-    
-    /** Dump the rate for the current line number
+
+    /** Dump the rate for the current line number.
      * @param lineNumber line number
      */
     public void dumpRate(final double lineNumber) {

@@ -726,7 +726,7 @@ public class Rugged {
         // set up the starting point of the fixed point method
         final double pixel0 = sp0.getPixelNumber();
         final double line0 = sp0.getLineNumber();
-        // Needed data for the dump 
+        // Needed data for the dump
         sensor.dumpRate(line0);
 
         // Apply fixed point method until convergence in pixel and line

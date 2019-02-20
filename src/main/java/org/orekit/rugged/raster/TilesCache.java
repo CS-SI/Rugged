@@ -19,6 +19,7 @@ package org.orekit.rugged.raster;
 import org.hipparchus.util.FastMath;
 import java.lang.reflect.Array;
 
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 
@@ -86,7 +87,16 @@ public class TilesCache<T extends Tile> {
 
         // create the tile and retrieve its data
         final T tile = factory.createTile();
+
+        // In case dump is asked for, suspend the dump manager as we don't need to dump anything here
+        // For instance for SRTM DEM, the user needs to read Geoid data that are not useful in the dump
+        final Boolean wasSuspended = DumpManager.suspend();
+
         updater.updateTile(latitude, longitude, tile);
+
+        // Resume the dump manager if necessary
+        DumpManager.resume(wasSuspended);
+
         tile.tileUpdateCompleted();
 
         if (tile.getLocation(latitude, longitude) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
