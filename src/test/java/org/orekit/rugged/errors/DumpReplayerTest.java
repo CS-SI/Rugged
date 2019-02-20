@@ -261,7 +261,7 @@ public class DumpReplayerTest {
         }
 
     }
-    
+
     @Test
     public void testDirectLocIssue376_01() throws URISyntaxException, IOException {
 
@@ -281,7 +281,7 @@ public class DumpReplayerTest {
                                             rugged.getEllipsoid().transform(replayedGP));
         Assert.assertEquals(0.0, distance, 1.0e-8);
     }
-    
+
     @Test
     public void testDirectLocIssue376_02() throws URISyntaxException, IOException {
 
@@ -301,7 +301,7 @@ public class DumpReplayerTest {
                                             rugged.getEllipsoid().transform(replayedGP));
         Assert.assertEquals(0.0, distance, 1.0e-8);
     }
-    
+
     @Test
     public void testDirectLocIssue376_03() throws URISyntaxException, IOException {
 
