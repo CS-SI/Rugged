@@ -242,13 +242,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 } else {
                     // extremely rare case: we have lost the intersection
 
-                    // safety check, which should never be triggered...
-                    if (currentGuess.getAltitude() <
-                        tile.interpolateElevation(currentGuess.getLatitude(), currentGuess.getLongitude())) {
-                        // this should never happen, we are below the DEM
-                        throw RuggedException.createInternalError(null);
-                    }
-
                     // find a start point for new search, leaving the current cell behind
                     final double cellBoundaryLatitude  = tile.getLatitudeAtIndex(topoLOS.getY()  <= 0 ? iLat : iLat + 1);
                     final double cellBoundaryLongitude = tile.getLongitudeAtIndex(topoLOS.getX() <= 0 ? iLon : iLon + 1);
@@ -256,6 +249,18 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                                             longitudeCrossing(ellipsoid, projectedP, los, cellBoundaryLongitude, projectedP),
                                                                             projectedP),
                                                            STEP, los);
+                    final GeodeticPoint egp = ellipsoid.transform(cellExit, ellipsoid.getBodyFrame(), null);
+                    final NormalizedGeodeticPoint cellExitGP = new NormalizedGeodeticPoint(egp.getLatitude(),
+                                                                                           egp.getLongitude(),
+                                                                                           egp.getAltitude(),
+                                                                                           currentGuess.getLongitude());
+                    if (tile.interpolateElevation(cellExitGP.getLatitude(), cellExitGP.getLongitude()) >= cellExitGP.getAltitude()) {
+                        // extremely rare case! The line-of-sight traversed the Digital Elevation Model
+                        // during the very short forward step we used to move to next cell
+                        // we consider this point to be OK
+                        return cellExitGP;
+                    }
+
 
                     // We recompute fully a new guess, starting from the point after current cell
                     final GeodeticPoint currentGuessGP = intersection(ellipsoid, cellExit, los);
