@@ -501,7 +501,7 @@
           <links>
             <link>https://docs.oracle.com/javase/8/docs/api/</link>
             <link>https://www.hipparchus.org/apidocs/</link>
-            <link>http://www.orekit.org/site-rugged-${rugged.orekit.version}/apidocs/</link>
+            <link>https://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
           </links>
         </configuration>
         <reportSets>
