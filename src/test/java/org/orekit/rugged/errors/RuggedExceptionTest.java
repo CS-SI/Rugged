@@ -69,4 +69,11 @@ public class RuggedExceptionTest {
         Assert.assertTrue(rte.getMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
     }
 
+    @Test
+    public void testCoverage() {
+        RuggedExceptionWrapper rew = new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy"));
+        RuggedException re = rew.getException();
+        Assert.assertEquals(RuggedMessages.DUPLICATED_PARAMETER_NAME, re.getSpecifier());
+        Assert.assertEquals("dummy", re.getParts()[0]);
+    }
 }
