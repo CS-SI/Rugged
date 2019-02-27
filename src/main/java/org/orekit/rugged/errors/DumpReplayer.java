@@ -221,6 +221,9 @@ public class DumpReplayer {
     /** Keyword for target direction. */
     private static final String TARGET_DIRECTION = "targetDirection";
 
+    /** Keyword for null result. */
+    private static final String NULL_RESULT = "NULL";
+
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
 
@@ -595,15 +598,24 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                if (fields.length < 6 || !fields[0].equals(LATITUDE) ||
-                    !fields[2].equals(LONGITUDE) || !fields[4].equals(ELEVATION)) {
+                if (fields.length == 1) {
+                    if (fields[0].equals(NULL_RESULT)) {
+                        final GeodeticPoint gp = null;
+                        final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                        last.expected = gp;
+                    } else {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                } else if (fields.length < 6 || !fields[0].equals(LATITUDE) ||
+                           !fields[2].equals(LONGITUDE) || !fields[4].equals(ELEVATION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                } else {
+                    final GeodeticPoint gp = new GeodeticPoint(Double.parseDouble(fields[1]),
+                                                               Double.parseDouble(fields[3]),
+                                                               Double.parseDouble(fields[5]));
+                    final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                    last.expected = gp;
                 }
-                final GeodeticPoint gp = new GeodeticPoint(Double.parseDouble(fields[1]),
-                                                           Double.parseDouble(fields[3]),
-                                                           Double.parseDouble(fields[5]));
-                final DumpedCall last = global.calls.get(global.calls.size() - 1);
-                last.expected = gp;
             }
 
         },
@@ -806,13 +818,22 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                if (fields.length < 4 || !fields[0].equals(LINE_NUMBER) || !fields[2].equals(PIXEL_NUMBER)) {
+                if (fields.length == 1) {
+                    if (fields[0].equals(NULL_RESULT)) {
+                        final SensorPixel sp = null;
+                        final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                        last.expected = sp;
+                    } else {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                } else if (fields.length < 4 || !fields[0].equals(LINE_NUMBER) || !fields[2].equals(PIXEL_NUMBER)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                } else {
+                    final SensorPixel sp = new SensorPixel(Double.parseDouble(fields[1]),
+                                                           Double.parseDouble(fields[3]));
+                    final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                    last.expected = sp;
                 }
-                final SensorPixel sp = new SensorPixel(Double.parseDouble(fields[1]),
-                                                       Double.parseDouble(fields[3]));
-                final DumpedCall last = global.calls.get(global.calls.size() - 1);
-                last.expected = sp;
             }
 
         },

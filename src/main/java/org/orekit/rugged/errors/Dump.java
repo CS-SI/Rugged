@@ -170,6 +170,8 @@ class Dump {
             writer.format(Locale.US,
                           "direct location result: latitude %22.15e longitude %22.15e elevation %22.15e%n",
                           gp.getLatitude(), gp.getLongitude(), gp.getAltitude());
+        } else {
+            writer.format(Locale.US, "direct location result: NULL");
         }
     }
 
@@ -203,6 +205,8 @@ class Dump {
             writer.format(Locale.US,
                           "inverse location result: lineNumber %22.15e pixelNumber %22.15e%n",
                           pixel.getLineNumber(), pixel.getPixelNumber());
+        } else {
+            writer.format(Locale.US, "inverse location result: NULL");
         }
     }
 
