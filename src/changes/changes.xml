@@ -32,13 +32,20 @@
         along the LOS direction, with an iterative process, we are able to find the intersection.
       </action>
       <action dev="guylaine" type="fix" issue="377">
-        Add the possibilty to suspend and resume the dump.
+        Add the possibility to suspend and resume the dump.
         When performing a dump, in some cases, some extra informations are dumped 
         but are not relevant. 
         For instance when updating a tile for a SRTM tile, we need to add the geoid
         value of the current point. In the dump file, the geoid tile is also dumped
-        and it leds to bad results when performing the DumpReplayer, as the geoid 
+        and it leads to bad results when performing the DumpReplayer, as the geoid 
         elevations are read instead of the real elevations.
+      </action>
+      <action dev="guylaine" type="update">
+        Enable null in dump of direct or inverse location results.
+        If direct or inverse location gave "null" as a result, it was not dumped.
+      </action>
+      <action dev="guylaine" type="update">
+        Improve test coverage of classes related to dump (org.orekit.rugged.errors).
       </action>
       <action dev="guylaine" type="fix" issue="373">
         Changed RuggedException from checked to unchecked exception.
@@ -63,7 +70,8 @@
         adjustment.measurements.SensorToGroundMapping due to a parameters reversal error.
       </action>
       <action dev="guylaine" type="fix" issue="256">
-      Bad check of maxDate validity in utils.SpacecraftToObservedBody.SpacecraftToObservedBody method.
+        Bad check of maxDate validity in utils.SpacecraftToObservedBody.SpacecraftToObservedBody
+        method.
       </action>
            
       <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
