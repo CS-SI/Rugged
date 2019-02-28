@@ -46,7 +46,7 @@ please use the following address:
     31506 Toulouse CEDEX 5
     FRANCE
 
-    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Sébastien Harasse)
+    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Jonathan Guinet)
     fax:   +33 5-61-34-84-15
 
 [Top of the page](#top)
