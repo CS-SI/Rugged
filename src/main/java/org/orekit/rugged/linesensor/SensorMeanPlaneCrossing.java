@@ -38,6 +38,7 @@ import org.hipparchus.util.FastMath;
 import org.hipparchus.util.Precision;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
@@ -537,7 +538,7 @@ public class SensorMeanPlaneCrossing {
                                 evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
                         return 0.5 * FastMath.PI - FastMath.acos(Vector3D.dotProduct(targetDirection[0], meanPlaneNormal));
                     } catch (RuggedException re) {
-                        throw RuggedException.createInternalError(re);
+                        throw new RuggedInternalError(re);
                     }
                 }
             }, minLine, maxLine, startValue);

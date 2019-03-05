@@ -35,6 +35,7 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.BasicScanAlgorithm;
 import org.orekit.rugged.intersection.ConstantElevationAlgorithm;
@@ -883,7 +884,7 @@ public class RuggedBuilder {
                 return FramesFactory.getVeis1950();
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
     }
 
@@ -903,7 +904,7 @@ public class RuggedBuilder {
                 return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
     }
 
@@ -928,7 +929,7 @@ public class RuggedBuilder {
                 return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
 
     }
@@ -958,7 +959,7 @@ public class RuggedBuilder {
                 return new IgnoreDEMAlgorithm();
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
     }
 

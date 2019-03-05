@@ -63,12 +63,13 @@ public class RuggedExceptionTest {
     @Test
     public void testInternalError() {
         RuggedException re = new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy");
-        RuntimeException rte = RuggedException.createInternalError(re);
+        RuntimeException rte = new RuggedInternalError(re);
         Assert.assertFalse(re.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
         Assert.assertTrue(rte.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
         Assert.assertTrue(rte.getMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
     }
 
+    @Deprecated
     @Test
     public void testCoverage() {
         RuggedExceptionWrapper rew = new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy"));

@@ -23,6 +23,7 @@ import org.hipparchus.exception.MathIllegalArgumentException;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.time.AbsoluteDate;
 
 /** Class devoted to locate where ground point crosses a sensor line.
@@ -80,7 +81,7 @@ public class SensorPixelCrossing {
                     try {
                         return Vector3D.angle(cross, getLOS(date, x)) - 0.5 * FastMath.PI;
                     } catch (RuggedException re) {
-                        throw RuggedException.createInternalError(re);
+                        throw new RuggedInternalError(re);
                     }
                 }
             };

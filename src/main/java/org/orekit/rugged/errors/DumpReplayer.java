@@ -411,19 +411,19 @@ public class DumpReplayer {
             throw new RuggedException(ioe, LocalizedCoreFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
         } catch (SecurityException e) {
             // this should never happen
-            throw RuggedException.createInternalError(e);
+            throw new RuggedInternalError(e);
         } catch (NoSuchMethodException e) {
             // this should never happen
-            throw RuggedException.createInternalError(e);
+            throw new RuggedInternalError(e);
         } catch (IllegalArgumentException e) {
             // this should never happen
-            throw RuggedException.createInternalError(e);
+            throw new RuggedInternalError(e);
         } catch (IllegalAccessException e) {
             // this should never happen
-            throw RuggedException.createInternalError(e);
+            throw new RuggedInternalError(e);
         } catch (InvocationTargetException e) {
             // this should never happen
-            throw RuggedException.createInternalError(e);
+            throw new RuggedInternalError(e);
         }
     }
 
@@ -1179,7 +1179,7 @@ public class DumpReplayer {
         public Vector3D getLOS(final int index, final AbsoluteDate date) {
             final List<Pair<AbsoluteDate, Vector3D>> list = losMap.get(index);
             if (list == null) {
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
             }
 
             if (list.size() < 2) {

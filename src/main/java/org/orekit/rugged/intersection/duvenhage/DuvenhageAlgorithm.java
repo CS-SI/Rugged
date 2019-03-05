@@ -22,6 +22,7 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.raster.Tile;
@@ -181,7 +182,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (intersection != null) {
                     return intersection;
                 } else {
-                    throw RuggedException.createInternalError(null);
+                    throw new RuggedInternalError(null);
                 }
             }
         }
@@ -311,7 +312,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         if (depth > 30) {
             // this should never happen
-            throw RuggedException.createInternalError(null);
+            throw new RuggedInternalError(null);
         }
 
         if (searchDomainSize(entryLat, entryLon, exitLat, exitLon) < 4) {
@@ -635,7 +636,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
 
     }

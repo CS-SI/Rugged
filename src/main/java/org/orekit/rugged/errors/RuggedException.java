@@ -113,37 +113,4 @@ public class RuggedException extends RuntimeException implements LocalizedExcept
         return (specifier == null) ? "" : new MessageFormat(specifier.getLocalizedString(locale), locale).format(parts);
     }
 
-    /** Create an {@link java.lang.RuntimeException} for an internal error.
-     * @param cause underlying cause
-     * @return an {@link java.lang.RuntimeException} for an internal error
-     */
-    public static RuntimeException createInternalError(final Throwable cause) {
-
-        /** Format specifier (to be translated). */
-        final Localizable specifier = RuggedMessages.INTERNAL_ERROR;
-
-        /** Parts to insert in the format (no translation). */
-        final String parts     = "https://gitlab.orekit.org/orekit/rugged/issues";
-
-        return new RuntimeException() {
-
-            /** Serializable UID. */
-            private static final long serialVersionUID = 20140309L;
-
-            /** {@inheritDoc} */
-            @Override
-            public String getMessage() {
-                return buildMessage(Locale.US, specifier, parts);
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public String getLocalizedMessage() {
-                return buildMessage(Locale.getDefault(), specifier, parts);
-            }
-
-        };
-
-    }
-
 }

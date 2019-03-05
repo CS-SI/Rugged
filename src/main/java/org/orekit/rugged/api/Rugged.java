@@ -28,6 +28,7 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.linesensor.LineSensor;
@@ -799,7 +800,7 @@ public class Rugged {
                     } catch (RuggedException re) { // This should never happen
                         // In order for the dump to end nicely
                         DumpManager.endNicely();
-                        throw RuggedException.createInternalError(re);
+                        throw new RuggedInternalError(re);
                     }
 
                     // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
@@ -860,7 +861,7 @@ public class Rugged {
                 } catch (RuggedException re) { // This should never happen
                     // In order for the dump to end nicely
                     DumpManager.endNicely();
-                    throw RuggedException.createInternalError(re);
+                    throw new RuggedInternalError(re);
                 }
             } // end loop vIndex
         } // end loop uIndex

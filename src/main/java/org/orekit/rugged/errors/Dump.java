@@ -512,7 +512,7 @@ class Dump {
                                 result.getTargetDirectionDerivative().getY(),
                                 result.getTargetDirectionDerivative().getZ());
                     } catch (RuggedException re) {
-                        throw RuggedException.createInternalError(re);
+                        throw new RuggedInternalError(re);
                     }
                 });
                 writer.format(Locale.US, "%n");

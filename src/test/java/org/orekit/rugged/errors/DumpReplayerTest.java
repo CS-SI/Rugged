@@ -605,8 +605,9 @@ public class DumpReplayerTest {
         try {
             getLos.invoke(parsedSensor, 1, date);
             Assert.fail("an exception should have been thrown");
-        } catch (Exception re) {
-            assertTrue(re.getCause().toString().contains("internal error"));
+        } catch (InvocationTargetException ite) {
+            RuggedInternalError rie = (RuggedInternalError) ite.getTargetException();
+            assertEquals(RuggedMessages.INTERNAL_ERROR, rie.getSpecifier());
         }
     }
     
@@ -657,6 +658,7 @@ public class DumpReplayerTest {
                 return null;
             }
         };
+        @SuppressWarnings("unchecked")
         FieldVector3D<DerivativeStructure> fv= (FieldVector3D<DerivativeStructure>) getLOSDerivatives.invoke(parsedSensor, 1, date, generator);
         assertEquals(0., fv.getX().getValue(), 1.e-15);
         assertEquals(0., fv.getY().getValue(), 1.e-15);
