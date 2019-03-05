@@ -16,7 +16,7 @@
   Rugged
 </h1>
 <h1>
-  <img src="src/site/resources/images/rugged-logo.png" alt="Rugged"/>
+  <img src="src/site/resources/images/rugged-logo-small.jpg" alt="Rugged"/>
   A sensor-to-terrain mapping tool
 </h1>
 

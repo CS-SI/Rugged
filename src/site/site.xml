@@ -17,11 +17,12 @@
   <bannerLeft>
     <name>CS Syst&#232;mes d&#039;Information</name>
     <src>/images/logo_cs_2008_baseline_ang.jpg</src>
+    <height>180</height>
     <href>http://www.c-s.fr/</href>
   </bannerLeft>
   <bannerRight>
     <name>Rugged</name>
-    <src>/images/rugged-logo.png</src>
+    <src>/images/rugged-logo-small.jpg</src>
     <href>/index.html</href>
   </bannerRight>
   <body>
