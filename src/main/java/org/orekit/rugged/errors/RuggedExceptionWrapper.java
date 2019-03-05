@@ -22,7 +22,7 @@ package org.orekit.rugged.errors;
  * this exception. Typical examples are propagation methods that are used inside Hipparchus
  * optimizers, integrators or solvers.</p>
  * <p>
- * This class is heavily based on Orekit {@link org.orekit.errors.OrekitException},
+ * This class is heavily based on {@code OrekitException},
  * which is distributed under the terms of the Apache License V2.
  * </p>
  * @author Luc Maisonobe

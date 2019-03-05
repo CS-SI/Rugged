@@ -43,7 +43,7 @@ import org.hipparchus.exception.Localizable;
  * translation is missing.
  * </p>
  * <p>
- * This class is heavily based on Orekit {@link org.orekit.errors.OrekitMessages},
+ * This class is heavily based on {@code OrekitMessages},
  * which is distributed under the terms of the Apache License V2.
  * </p>
  */

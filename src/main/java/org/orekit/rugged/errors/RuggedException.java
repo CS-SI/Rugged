@@ -27,7 +27,7 @@ import org.hipparchus.exception.LocalizedException;
  * the rugged library classes.
 
  * <p>
- * This class is heavily based on Orekit {@link org.orekit.errors.OrekitException},
+ * This class is heavily based on {@code OrekitException},
  * which is distributed under the terms of the Apache License V2.
  * </p>
  *
