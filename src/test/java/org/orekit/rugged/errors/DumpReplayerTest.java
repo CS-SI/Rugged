@@ -37,6 +37,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
@@ -608,6 +609,8 @@ public class DumpReplayerTest {
         } catch (InvocationTargetException ite) {
             RuggedInternalError rie = (RuggedInternalError) ite.getTargetException();
             assertEquals(RuggedMessages.INTERNAL_ERROR, rie.getSpecifier());
+            assertEquals("https://gitlab.orekit.org/orekit/rugged/issues", rie.getParts()[0]);
+            assertTrue(rie.getMessage(Locale.FRENCH).startsWith("erreur interne"));
         }
     }
     
