@@ -20,11 +20,13 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-     <release version="2.1-SNAPSHOT" date="TBD" description="TTBD">
+     <release version="2.1" date="2019-03-14" description="This is a minor release.
+     It adds refraction in inverse location and fixes a few bugs. This version depends
+     on Orekit 9.3 and Hipparchus 1.4.">
       <action dev="guylaine" type="update">
         Updated dependencies to Orekit 9.3 and Hipparchus 1.4.
       </action>
-      <action dev="guylaine" type="fix" issue="376">
+      <action dev="luc" type="fix" issue="376">
         Direct location may result to a null result in some very rugged region.
         In Duvenhage algorithm, in the refineIntersection method for the DEM, 
         some rare cases led to no intersection (as a result from SimpleTile.cellIntersection) 
