@@ -130,6 +130,8 @@ public abstract class AbstractAlgorithmTest {
         Vector3D groundP = earth.transform(groundGP);
 
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        Assert.assertEquals(  0.0, algorithm.getElevation(latitude, longitude - 2.0e-5), 1.0e-6);
+        Assert.assertEquals(120.0, algorithm.getElevation(latitude, longitude + 2.0e-5), 1.0e-6);
 
         // preliminary check: the point has been chosen in the spacecraft (YZ) plane
         Transform earthToSpacecraft = new Transform(state.getDate(),
