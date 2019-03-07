@@ -26,8 +26,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
-import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
@@ -246,17 +244,6 @@ public class MultiLayerModel extends AtmosphericRefraction {
         // We can compute the intersection of line of sight (los) with Digital Elevation Model
         // as usual (without atmospheric refraction).
         return algorithm.refineIntersection(ellipsoid, pos, los, rawIntersection);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public NormalizedGeodeticPoint applyCorrection(final LineSensor lineSensor, final SensorPixel sensorPixel,
-                                                   final Vector3D satPos, final Vector3D satLos,
-                                                   final NormalizedGeodeticPoint rawIntersection,
-                                                   final IntersectionAlgorithm algorithm) {
-
-        // TODO to be done
-        throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "Atmospheric optimization for direct loc");
     }
 
 } // end of class MultiLayerModel
