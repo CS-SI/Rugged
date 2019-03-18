@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.orekit</groupId>
   <artifactId>rugged</artifactId>
-  <version>2.1-SNAPSHOT</version>
+  <version>2.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Rugged</name>
   <url>https://www.orekit.org/rugged</url>
@@ -19,7 +19,7 @@
 
     
     <!-- COTS version -->
-    <rugged.orekit.version>9.3</rugged.orekit.version>
+    <rugged.orekit.version>9.3.1</rugged.orekit.version>
     <rugged.hipparchus.version>1.4</rugged.hipparchus.version>
     <rugged.junit.version>4.12</rugged.junit.version>
     
