@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -35,10 +35,10 @@ public class Observables {
     /** Separator between sensors. */
     private static final String SENSORS_SEPARATOR = "__";
 
-    /** Sensor to ground mapping structure (example: for GCP points).*/
+    /** Sensor to ground mapping structure (example: for Ground Control Points GCP points).*/
     private final Map<String, SensorToGroundMapping> groundMappings;
 
-    /** Sensor to sensor mappings structure (liaison points). */
+    /** Sensor to sensor mappings structure (Tie points). */
     private final Map<String, SensorToSensorMapping> interMappings;
 
     /** Number of viewing models to map.*/

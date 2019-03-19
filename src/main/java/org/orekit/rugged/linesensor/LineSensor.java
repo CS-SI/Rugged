@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -23,7 +23,6 @@ import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.DumpManager;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.utils.DSGenerator;
 import org.orekit.time.AbsoluteDate;
@@ -90,10 +89,8 @@ public class LineSensor {
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @return pixel normalized line-of-sight
-     * @exception RuggedException if date cannot be handled
      */
-    public Vector3D getLOS(final AbsoluteDate date, final int i)
-        throws RuggedException {
+    public Vector3D getLOS(final AbsoluteDate date, final int i) {
         final Vector3D l = los.getLOS(i, date);
         DumpManager.dumpSensorLOS(this, date, i, l);
         return l;
@@ -103,11 +100,9 @@ public class LineSensor {
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
      * @return pixel normalized line-of-sight
-     * @exception RuggedException if date cannot be handled
      * @since 2.0
      */
-    public Vector3D getLOS(final AbsoluteDate date, final double i)
-        throws RuggedException {
+    public Vector3D getLOS(final AbsoluteDate date, final double i) {
 
         final int iInf = FastMath.max(0, FastMath.min(getNbPixels() - 2, (int) FastMath.floor(i)));
         final int iSup = iInf + 1;
@@ -155,10 +150,8 @@ public class LineSensor {
     /** Get the date.
      * @param lineNumber line number
      * @return date corresponding to line number
-     * @exception RuggedException if date cannot be handled
      */
-    public AbsoluteDate getDate(final double lineNumber)
-        throws RuggedException {
+    public AbsoluteDate getDate(final double lineNumber) {
         final AbsoluteDate date = datationModel.getDate(lineNumber);
         DumpManager.dumpSensorDatation(this, lineNumber, date);
         return date;
@@ -167,10 +160,8 @@ public class LineSensor {
     /** Get the line number.
      * @param date date
      * @return line number corresponding to date
-     * @exception RuggedException if date cannot be handled
      */
-    public double getLine(final AbsoluteDate date)
-        throws RuggedException {
+    public double getLine(final AbsoluteDate date) {
         final double lineNumber = datationModel.getLine(date);
         DumpManager.dumpSensorDatation(this, lineNumber, date);
         return lineNumber;
@@ -193,4 +184,11 @@ public class LineSensor {
         return position;
     }
 
+    /** Dump the rate for the current line number.
+     * @param lineNumber line number
+     */
+    public void dumpRate(final double lineNumber) {
+        final double rate = datationModel.getRate(lineNumber);
+        DumpManager.dumpSensorRate(this, lineNumber, rate);
+    }
 }

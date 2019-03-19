@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,15 +16,16 @@
  */
 package fr.cs.examples.refiningPleiades.models;
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.RotationConvention;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-
-import org.hipparchus.util.FastMath;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
+import org.orekit.rugged.linesensor.LineDatation;
+import org.orekit.rugged.linesensor.LineSensor;
+import org.orekit.rugged.linesensor.LinearLineDatation;
 import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.FixedZHomothety;
 import org.orekit.rugged.los.LOSBuilder;
@@ -34,13 +35,6 @@ import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
 
 import fr.cs.examples.refiningPleiades.Refining;
-
-import org.orekit.rugged.linesensor.LinearLineDatation;
-import org.orekit.rugged.linesensor.LineDatation;
-import org.orekit.rugged.linesensor.LineSensor;
-
-import org.orekit.rugged.errors.RuggedException;
-import org.orekit.errors.OrekitException;
 
 /**
  * Pleiades viewing model class definition.
@@ -71,7 +65,7 @@ public class PleiadesViewingModel {
      *  sensorName="line", incidenceAngle = 0.0, date = "2016-01-01T12:00:00.0"
      * </p>
      */
-    public PleiadesViewingModel(final String sensorName) throws RuggedException, OrekitException {
+    public PleiadesViewingModel(final String sensorName) {
     	
         this(sensorName, 0.0, "2016-01-01T12:00:00.0");
     }
@@ -80,11 +74,8 @@ public class PleiadesViewingModel {
      * @param sensorName sensor name
      * @param incidenceAngle incidence angle
      * @param referenceDate reference date
-     * @throws RuggedException
-     * @throws OrekitException
      */
-    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate)
-        throws RuggedException, OrekitException {
+    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate) {
     	
         this.sensorName = sensorName;
         this.date = referenceDate;
@@ -126,7 +117,7 @@ public class PleiadesViewingModel {
 
     /** Get the reference date.
      */
-    public AbsoluteDate getDatationReference() throws OrekitException {
+    public AbsoluteDate getDatationReference() {
 
     	// We use Orekit for handling time and dates, and Rugged for defining the datation model:
     	final TimeScale utc = TimeScalesFactory.getUTC();
@@ -136,13 +127,13 @@ public class PleiadesViewingModel {
 
     /** Get the min date.
      */
-   public  AbsoluteDate getMinDate() throws RuggedException {
+   public  AbsoluteDate getMinDate() {
         return lineSensor.getDate(0);
     }
 
    /** Get the max date.
     */
-   public  AbsoluteDate  getMaxDate() throws RuggedException {
+   public  AbsoluteDate  getMaxDate() {
         return lineSensor.getDate(DIMENSION);
     }
 
@@ -167,7 +158,7 @@ public int getDimension() {
 
    /** Create the line sensor
     */
-   private void createLineSensor() throws RuggedException, OrekitException {
+   private void createLineSensor() {
 
         // Offset of the MSI from center of mass of satellite
         // one line sensor

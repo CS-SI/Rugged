@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,8 +16,6 @@
  */
 package org.orekit.rugged.raster;
 
-import org.orekit.rugged.errors.RuggedException;
-
 /** Interface representing one tile of a raster Digital Elevation Model.
  * @author Luc Maisonobe
  * @author Guylaine Prat
@@ -31,12 +29,10 @@ public interface UpdatableTile {
      * @param longitudeStep step in longitude (size of one raster element) (rad)
      * @param latitudeRows number of latitude rows
      * @param longitudeColumns number of longitude columns
-     * @exception RuggedException if tile is empty (zero rows or columns)
      */
     void setGeometry(double minLatitude, double minLongitude,
                      double latitudeStep, double longitudeStep,
-                     int latitudeRows, int longitudeColumns)
-        throws RuggedException;
+                     int latitudeRows, int longitudeColumns);
 
     /** Set the elevation for one raster element.
      * <p>
@@ -52,9 +48,7 @@ public interface UpdatableTile {
      * @param latitudeIndex index of latitude (row index)
      * @param longitudeIndex index of longitude (column index)
      * @param elevation elevation (m)
-     * @exception RuggedException if indices are out of bound
      */
-    void setElevation(int latitudeIndex, int longitudeIndex, double elevation)
-        throws RuggedException;
+    void setElevation(int latitudeIndex, int longitudeIndex, double elevation);
 
 }

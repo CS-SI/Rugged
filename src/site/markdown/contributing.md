@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2019 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,15 +12,14 @@
   limitations under the License.
 -->
 
-Contributing to Ruggged
-=======================
+# Contributing to Ruggged
 
 Rugged is free software, which means you can use the source code as you wish,
 without charges, in your applications, and that you can improve it and have
 your improvements included in the next mainstream release.
 
 If you are interested in participating in the development effort,
-subscribe to the mailing lists and step up to discuss it. The
-larger the community is, the better Rugged will be. The main
+subscribe to the forums (as described in the [Contact page](./contact.html)) and step up to discuss it. 
+The larger the community is, the better Rugged will be. The main
 rule is that everything intended to be included in Rugged core must
 be distributed under the Apache License Version 2.0.

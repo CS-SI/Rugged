@@ -1,5 +1,5 @@
-# internal error, contact maintenance at {0}
-INTERNAL_ERROR = Interner Fehler, wenden Sie sich bitte an die Software-Wartung, Adresse {0}
+# internal error, please notify development team by creating an issue at {0}
+INTERNAL_ERROR = <MISSING TRANSLATION>
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
 OUT_OF_TILE_INDICES = Keine Angaben im Index, die Ziegel nimmt nur Bezug auf [0, 0] bis [{2}, {3}] (inklusive)
@@ -64,6 +64,9 @@ LIGHT_TIME_CORRECTION_REDEFINED = <MISSING TRANSLATION>
 # aberration of light correction redefined, line {0}, file {1}: {2}
 ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = <MISSING TRANSLATION>
 
+# atmospheric refraction correction redefined, line {0}, file {1}: {2}
+ATMOSPHERIC_REFRACTION_REDEFINED = <MISSING TRANSLATION>
+
 # tile {0} already defined, line {1}, file {2}: {3}
 TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
 
@@ -87,3 +90,9 @@ UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = <MISSING TRANSLATION>
+
+# step {0} is not valid : {1}
+INVALID_STEP = <MISSING TRANSLATION>
+
+# range between min line {0} and max line {1} is invalid {2}
+INVALID_RANGE_FOR_LINES = <MISSING TRANSLATION>

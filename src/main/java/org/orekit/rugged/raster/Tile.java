@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -18,7 +18,6 @@ package org.orekit.rugged.raster;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface representing a raster tile.
@@ -29,6 +28,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  * correspond to the <em>center</em> of the most North-East cell.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface Tile extends UpdatableTile {
 
@@ -113,20 +113,18 @@ public interface Tile extends UpdatableTile {
     }
 
     /** Hook called at the end of tile update completion.
-     * @exception RuggedException if something wrong occurs
-     * (missing data ...)
      */
-    void tileUpdateCompleted() throws RuggedException;
+    void tileUpdateCompleted();
 
     /** Get minimum latitude of grid interpolation points.
-     * @return minimum latitude of grid interpolation points
+     * @return minimum latitude of grid interpolation points (rad)
      * (latitude of the center of the cells of South row)
      */
     double getMinimumLatitude();
 
     /** Get the latitude at some index.
      * @param latitudeIndex latitude index
-     * @return latitude at the specified index
+     * @return latitude at the specified index (rad)
      * (latitude of the center of the cells of specified row)
      */
     double getLatitudeAtIndex(int latitudeIndex);
@@ -140,20 +138,20 @@ public interface Tile extends UpdatableTile {
      * {@link Location#NORTH} or {@link Location#NORTH_EAST}, but can
      * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
      * </p>
-     * @return maximum latitude
+     * @return maximum latitude (rad)
      * (latitude of the center of the cells of North row)
      */
     double getMaximumLatitude();
 
     /** Get minimum longitude.
-     * @return minimum longitude
+     * @return minimum longitude (rad)
      * (longitude of the center of the cells of West column)
      */
     double getMinimumLongitude();
 
     /** Get the longitude at some index.
      * @param longitudeIndex longitude index
-     * @return longitude at the specified index
+     * @return longitude at the specified index (rad)
      * (longitude of the center of the cells of specified column)
      */
     double getLongitudeAtIndex(int longitudeIndex);
@@ -167,18 +165,18 @@ public interface Tile extends UpdatableTile {
      * {@link Location#EAST} or {@link Location#NORTH_EAST}, but can
      * <em>never</em> return {@link Location#HAS_INTERPOLATION_NEIGHBORS}!
      * </p>
-     * @return maximum longitude
+     * @return maximum longitude (rad)
      * (longitude of the center of the cells of East column)
      */
     double getMaximumLongitude();
 
     /** Get step in latitude (size of one raster element).
-     * @return step in latitude
+     * @return step in latitude (rad)
      */
     double getLatitudeStep();
 
     /** Get step in longitude (size of one raster element).
-     * @return step in longitude
+     * @return step in longitude (rad)
      */
     double getLongitudeStep();
 
@@ -211,7 +209,7 @@ public interface Tile extends UpdatableTile {
     int getFloorLongitudeIndex(double longitude);
 
     /** Get the minimum elevation in the tile.
-     * @return minimum elevation in the tile
+     * @return minimum elevation in the tile (m)
      */
     double getMinElevation();
 
@@ -224,7 +222,7 @@ public interface Tile extends UpdatableTile {
     int getMinElevationLongitudeIndex();
 
    /** Get the maximum elevation in the tile.
-     * @return maximum elevation in the tile
+     * @return maximum elevation in the tile (m)
      */
     double getMaxElevation();
 
@@ -239,11 +237,9 @@ public interface Tile extends UpdatableTile {
     /** Get the elevation of an exact grid point.
      * @param latitudeIndex grid point index along latitude
      * @param longitudeIndex grid point index along longitude
-     * @return elevation at grid point
-     * @exception RuggedException if indices are out of bound
+     * @return elevation at grid point (m)
      */
-    double getElevationAtIndices(int latitudeIndex, int longitudeIndex)
-        throws RuggedException;
+    double getElevationAtIndices(int latitudeIndex, int longitudeIndex);
 
     /** Interpolate elevation.
      * <p>
@@ -256,11 +252,9 @@ public interface Tile extends UpdatableTile {
      * </p>
      * @param latitude ground point latitude
      * @param longitude ground point longitude
-     * @return interpolated elevation
-     * @exception RuggedException if point is farthest from the tile than the tolerance
+     * @return interpolated elevation (m)
      */
-    double interpolateElevation(double latitude, double longitude)
-        throws RuggedException;
+    double interpolateElevation(double latitude, double longitude);
 
     /** Find the intersection of a line-of-sight and a Digital Elevation Model cell.
      * @param p point on the line
@@ -270,11 +264,9 @@ public interface Tile extends UpdatableTile {
      * @param longitudeIndex longitude index of the Digital Elevation Model cell
      * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
      * if it lies within the cell, null otherwise
-     * @exception RuggedException if intersection point cannot be computed
      */
     NormalizedGeodeticPoint cellIntersection(GeodeticPoint p, Vector3D los,
-                                              int latitudeIndex, int longitudeIndex)
-        throws RuggedException;
+                                              int latitudeIndex, int longitudeIndex);
 
     /** Check if a tile covers a ground point.
      * @param latitude ground point latitude

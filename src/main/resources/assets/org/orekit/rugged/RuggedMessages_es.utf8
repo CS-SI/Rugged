@@ -1,5 +1,5 @@
-# internal error, contact maintenance at {0}
-INTERNAL_ERROR = error interno, contacte al soporte técnico en {0}
+# internal error, please notify development team by creating an issue at {0}
+INTERNAL_ERROR = <MISSING TRANSLATION>
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
 OUT_OF_TILE_INDICES = no hay datos en los índices [{0}, {1}], la faceta sólo cubre desde [0, 0] a [{2}, {3}] (inclusive)
@@ -8,7 +8,7 @@ OUT_OF_TILE_INDICES = no hay datos en los índices [{0}, {1}], la faceta sólo c
 OUT_OF_TILE_ANGLES = no hay datos para la latitud {0} y la longitud {1}, la faceta sólo cubre las latitudes de {2} a {3} y las longitudes de {4} a {5}
 
 # no Digital Elevation Model data at latitude {0} and longitude {1}
-NO_DEM_DATA = <MISSING TRANSLATION>
+NO_DEM_DATA = ho hay datos del Modelo Digital del Terreno para la latitud {0} y longitud {1}
 
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = la faceta seleccionada para la latitud {0} y longitud {1} no cumple el requisito de vecindad
@@ -47,43 +47,52 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = el sistema de referencia {0} no corresp
 NOT_INTERPOLATOR_DUMP_DATA = los datos no están en el volcado de datos del interpolador
 
 # debug dump is already active for this thread
-DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_ALREADY_ACTIVE = el volcado de datos en modo depuración ya está activo para este hilo
 
 # unable to active debug dump with file {0}: {1}
-DEBUG_DUMP_ACTIVATION_ERROR = <MISSING TRANSLATION>
+DEBUG_DUMP_ACTIVATION_ERROR = no se puede activar el volcado de datos en modo depuración con los ficheros {0}: {1}
 
 # debug dump is not active for this thread
-DEBUG_DUMP_NOT_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_NOT_ACTIVE = el volcado de datos en modo depuración no está activo para este hilo
 
 # cannot parse line {0}, file {1}: {2}
-CANNOT_PARSE_LINE = <MISSING TRANSLATION>
+CANNOT_PARSE_LINE = no se puede leer la línea {0}, fichero {1}: {2}
 
 # light time correction redefined, line {0}, file {1}: {2}
-LIGHT_TIME_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+LIGHT_TIME_CORRECTION_REDEFINED = la corrección luz-tiempo ha sido redefinida, línea {0}, fichero {1}: {2}
 
 # aberration of light correction redefined, line {0}, file {1}: {2}
-ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = la aberración de la corrección luz ha sido redefinida, línea {0}, fichero {1}: {2}
+
+# atmospheric refraction correction redefined, line {0}, file {1}: {2}
+ATMOSPHERIC_REFRACTION_REDEFINED = <MISSING TRANSLATION>
 
 # tile {0} already defined, line {1}, file {2}: {3}
-TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
+TILE_ALREADY_DEFINED = la faceta {0} ya está definida, línea {1}, fichero {2}: {3}
 
 # unknown tile {0}, line {1}, file {2}: {3}
-UNKNOWN_TILE = <MISSING TRANSLATION>
+UNKNOWN_TILE = faceta {0} desconocida, línea {1}, fichero {2}: {3}
 
 # no parameters have been selected for estimation
-NO_PARAMETERS_SELECTED = <MISSING TRANSLATION>
+NO_PARAMETERS_SELECTED = no se ha seleccionado ningún parámetro que estimar
 
 # no reference mappings for parameters estimation
-NO_REFERENCE_MAPPINGS = <MISSING TRANSLATION>
+NO_REFERENCE_MAPPINGS = no hay mapeados de referencia para estimar los parámetros
 
 # a different parameter with name {0} already exists
-DUPLICATED_PARAMETER_NAME = <MISSING TRANSLATION>
+DUPLICATED_PARAMETER_NAME = ya existe un parámetro con el nombre {0}
 
 # rugged name is not found 
-INVALID_RUGGED_NAME = <MISSING TRANSLATION>
+INVALID_RUGGED_NAME = el nombre no se considera válido para Rugged
 
 # refining using {0} rugged instance is not handled
-UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+UNSUPPORTED_REFINING_CONTEXT = no se puede refinar usando {0} instancias rugged
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
-NO_LAYER_DATA = <MISSING TRANSLATION>
+NO_LAYER_DATA = no hay datos de atmósfera para la altitud {0} (altitud mínima: {1})
+
+# step {0} is not valid : {1}
+INVALID_STEP = <MISSING TRANSLATION>
+
+# range between min line {0} and max line {1} is invalid {2}
+INVALID_RANGE_FOR_LINES = <MISSING TRANSLATION>

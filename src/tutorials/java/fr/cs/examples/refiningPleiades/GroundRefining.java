@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -52,7 +52,7 @@ import fr.cs.examples.refiningPleiades.models.OrbitModel;
 import fr.cs.examples.refiningPleiades.models.PleiadesViewingModel;
 
 /**
- * Class for testing refining (fulcrum points study)
+ * Class for testing refining (Ground Control Points GCP study)
  * with or without noisy measurements
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
@@ -232,7 +232,7 @@ public class GroundRefining extends Refining {
     }
 
     /** Constructor */
-    public GroundRefining() throws RuggedException, OrekitException {
+    private GroundRefining() {
 
         sensorName = "line";
         pleiadesViewingModel = new PleiadesViewingModel(sensorName);
@@ -243,7 +243,7 @@ public class GroundRefining extends Refining {
      * @param LineSensor line sensor
      * @return the GSD
      */
-    private double[] computeGSD(final Rugged rugged, final LineSensor lineSensor) throws RuggedException {
+    private double[] computeGSD(final Rugged rugged, final LineSensor lineSensor) {
 
     	// Get number of line
     	int dimension = pleiadesViewingModel.getDimension();

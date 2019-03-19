@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -45,7 +45,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testNumericalIssueAtTileExit() throws RuggedException, OrekitException {
+    public void testNumericalIssueAtTileExit() {
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
         Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
@@ -56,7 +56,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testCrossingBeforeLineSegmentStart() throws RuggedException, OrekitException {
+    public void testCrossingBeforeLineSegmentStart() {
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
         Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
@@ -67,7 +67,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testWrongPositionMissesGround() throws RuggedException, OrekitException {
+    public void testWrongPositionMissesGround() {
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
         Vector3D position = new Vector3D(7.551889113912788E9, -3.173692685491814E10, 1.5727517321541348E9);
@@ -81,12 +81,12 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testInconsistentTileUpdater() throws RuggedException, OrekitException {
+    public void testInconsistentTileUpdater() {
         final int n = 1201;
         final double size = FastMath.toRadians(1.0);
         updater = new TileUpdater() {
-            public void updateTile(double latitude, double longitude, UpdatableTile tile)
-                throws RuggedException {
+            public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+                
                 double step = size / (n - 1);
                 // this geometry is incorrect:
                 // the specified latitude/longitude belong to rows/columns [1, n-1]
@@ -112,7 +112,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testPureEastWestLOS() throws RuggedException, OrekitException {
+    public void testPureEastWestLOS() {
         updater = new CheckedPatternElevationUpdater(FastMath.toRadians(1.0),1201, 41.0, 1563.0);
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
         NormalizedGeodeticPoint gp =
@@ -123,7 +123,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testParallelLOS() throws RuggedException, OrekitException {
+    public void testParallelLOS() {
         double size       = 0.125;
         int    n          = 129;
         double elevation1 = 0.0;
@@ -192,8 +192,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 
     }
 
-    private NormalizedGeodeticPoint findExit(IntersectionAlgorithm algorithm, Tile tile, Vector3D position, Vector3D los)
-        throws RuggedException, OrekitException {
+    private NormalizedGeodeticPoint findExit(IntersectionAlgorithm algorithm, Tile tile, Vector3D position, Vector3D los) {
 
         try {
             Method findExit = DuvenhageAlgorithm.class.getDeclaredMethod("findExit",

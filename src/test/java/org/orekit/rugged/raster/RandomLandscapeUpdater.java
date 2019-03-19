@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,7 +22,6 @@ import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.ArithmeticUtils;
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.errors.RuggedException;
 
 public class RandomLandscapeUpdater implements TileUpdater {
 
@@ -30,9 +29,16 @@ public class RandomLandscapeUpdater implements TileUpdater {
     private int    n;
     private double[][] heightMap;
 
+    /**
+     * @param baseH elevation of the base of DEM; unit = m
+     * @param initialScale
+     * @param reductionFactor for smoothing for low value (0.1) or not (0.5 for instance) the landscape
+     * @param seed
+     * @param size size in latitude / size in longitude (rad)
+     * @param n number of latitude / number of longitude
+     */
     public RandomLandscapeUpdater(double baseH, double initialScale, double reductionFactor,
-                                  long seed, double size, int n)
-                                                  throws MathIllegalArgumentException {
+                                  long seed, double size, int n) {
 
         if (!ArithmeticUtils.isPowerOfTwo(n - 1)) {
             throw new MathIllegalArgumentException(LocalizedCoreFormats.SIMPLE_MESSAGE,
@@ -98,9 +104,8 @@ public class RandomLandscapeUpdater implements TileUpdater {
     }
 
     @Override
-    public void updateTile(double latitude, double longitude, UpdatableTile tile)
-                    throws RuggedException {
-
+    public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+                
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
         double minLongitude = size * FastMath.floor(longitude / size);
@@ -110,7 +115,6 @@ public class RandomLandscapeUpdater implements TileUpdater {
                 tile.setElevation(i, j, heightMap[i][j]);
             }
         }
-
     }
 
     private double mean(int i1, int j1, int i2, int j2, int i3, int j3, int i4, int j4) {

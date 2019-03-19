@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,48 +16,40 @@
  */
 package fr.cs.examples.refiningPleiades.models;
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.RotationOrder;
-import org.hipparchus.geometry.euclidean.threed.RotationConvention;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
-import org.hipparchus.util.FastMath;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.RotationOrder;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.attitudes.AttitudeProvider;
-import org.orekit.attitudes.NadirPointing;
-import org.orekit.attitudes.YawCompensation;
 import org.orekit.attitudes.LofOffset;
+import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.TabulatedLofOffset;
+import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
-import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.errors.OrekitException;
-import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
-import org.orekit.forces.gravity.ThirdBodyAttraction;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
-import org.orekit.frames.Transform;
 import org.orekit.frames.LOFType;
+import org.orekit.frames.Transform;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
-import org.orekit.orbits.OrbitType;
 import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
-import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.time.AbsoluteDate;
-
 import org.orekit.time.TimeScale;
+import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
 import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
-import org.orekit.utils.AngularDerivativesFilter;
 
 /**
  * Orbit Model class to generate positions-velocities and attitude quaternions.
@@ -98,8 +90,7 @@ public class OrbitModel {
                                       final List<TimeStampedPVCoordinates> satellitePVList,
                                       final String absDate,
                                       final double px, final double py, final double pz,
-                                      final double vx, final double vy, final double vz)
-        throws OrekitException {
+                                      final double vx, final double vy, final double vz) {
     	
         final AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
         final Vector3D position = new Vector3D(px, py, pz);
@@ -127,9 +118,8 @@ public class OrbitModel {
 
     /** Create an Earth.
      * @return the Earth as the WGS84 ellipsoid
-     * @throws OrekitException
      */
-    public BodyShape createEarth() throws OrekitException {
+    public BodyShape createEarth() {
     	
         return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                     Constants.WGS84_EARTH_FLATTENING,
@@ -138,9 +128,8 @@ public class OrbitModel {
 
     /** Created a gravity field.
      * @return normalized spherical harmonics coefficients
-     * @throws OrekitException
      */
-    public NormalizedSphericalHarmonicsProvider createGravityField() throws OrekitException {
+    public NormalizedSphericalHarmonicsProvider createGravityField() {
     	
         return GravityFieldFactory.getNormalizedProvider(12, 12);
     }
@@ -148,9 +137,8 @@ public class OrbitModel {
     /** Create an orbit at a chosen date.
      * @param mu Earth gravitational constant
      * @return the orbit
-     * @throws OrekitException
      */
-    public Orbit createOrbit(final double mu, final AbsoluteDate date) throws OrekitException {
+    public Orbit createOrbit(final double mu, final AbsoluteDate date) {
     	
         // the following orbital parameters have been computed using
         // Orekit tutorial about phasing, using the following configuration:
@@ -202,8 +190,7 @@ public class OrbitModel {
 
     /** Get the offset.
      */
-   private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift)
-        throws OrekitException {
+   private Rotation getOffset(final BodyShape earth, final Orbit orbit, final double shift){
     	
         final LOFType type = LOFType.VVLH;
         final double roll = getPoly(lofTransformRollPoly, shift);
@@ -226,8 +213,7 @@ public class OrbitModel {
 
    /** Create the attitude provider.
     */
-    public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit)
-        throws OrekitException {
+    public AttitudeProvider createAttitudeProvider(final BodyShape earth, final Orbit orbit) {
 
         if (userDefinedLOFTransform) {
             final LOFType type = LOFType.VVLH;
@@ -250,46 +236,11 @@ public class OrbitModel {
         }
     }
 
-    /** Create the orbit propagator.
-     */
-   public Propagator createPropagator(final BodyShape earth,
-                                       final NormalizedSphericalHarmonicsProvider gravityField,
-                                       final Orbit orbit)
-        throws OrekitException {
-
-        final AttitudeProvider attitudeProvider = createAttitudeProvider(earth, orbit);
-
-        final SpacecraftState state =
-        		new SpacecraftState(orbit,
-        				            attitudeProvider.getAttitude(orbit, orbit.getDate(), orbit.getFrame()), 1180.0);
-
-        // numerical model for improving orbit
-        final OrbitType type = OrbitType.CIRCULAR;
-        final double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit, type);
-        final DormandPrince853Integrator integrator =
-        		     new DormandPrince853Integrator(1.0e-4 * orbit.getKeplerianPeriod(),
-        				                            1.0e-1 * orbit.getKeplerianPeriod(),
-        				                            tolerances[0],
-        				                            tolerances[1]);
-        integrator.setInitialStepSize(1.0e-2 * orbit.getKeplerianPeriod());
-
-        final NumericalPropagator numericalPropagator = new NumericalPropagator(integrator);
-        numericalPropagator.addForceModel(new HolmesFeatherstoneAttractionModel(earth.getBodyFrame(), gravityField));
-        numericalPropagator .addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getSun()));
-        numericalPropagator .addForceModel(new ThirdBodyAttraction(CelestialBodyFactory.getMoon()));
-        numericalPropagator.setOrbitType(type);
-        numericalPropagator.setInitialState(state);
-        numericalPropagator.setAttitudeProvider(attitudeProvider);
-
-        return numericalPropagator;
-    }
-
    /** Generate the orbit.
     */
    public List<TimeStampedPVCoordinates> orbitToPV(final Orbit orbit, final BodyShape earth,
     		                                        final AbsoluteDate minDate, final AbsoluteDate maxDate,
-    		                                        final double step)
-        throws OrekitException {
+    		                                        final double step) {
     	
         final Propagator propagator = new KeplerianPropagator(orbit);
 
@@ -312,8 +263,7 @@ public class OrbitModel {
     */
    public List<TimeStampedAngularCoordinates> orbitToQ(final Orbit orbit, final BodyShape earth,
     		                                            final AbsoluteDate minDate, final AbsoluteDate maxDate,
-    		                                            final double step)
-        throws OrekitException {
+    		                                            final double step) {
     	
         final Propagator propagator = new KeplerianPropagator(orbit);
         propagator.setAttitudeProvider(createAttitudeProvider(earth, orbit));

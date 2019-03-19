@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -38,9 +38,6 @@ import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.PolynomialRotation;
 import org.orekit.rugged.los.TimeDependentLOS;
@@ -53,7 +50,7 @@ public class PolynomialRotationTest {
     private List<Vector3D> raw;
 
     @Test
-    public void testIdentity() throws RuggedException, OrekitException {
+    public void testIdentity() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xbe0d9b530fe7f53cl));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -75,7 +72,7 @@ public class PolynomialRotationTest {
     }
 
     @Test
-    public void testFixedCombination() throws RuggedException, OrekitException {
+    public void testFixedCombination() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xdc4cfdea38edd2bbl));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -146,7 +143,7 @@ public class PolynomialRotationTest {
     }
 
     @Test
-    public void testDerivatives() throws RuggedException, OrekitException {
+    public void testDerivatives() {
         UniformRandomGenerator            rng = new UniformRandomGenerator(new Well19937a(0xc60acfc04eb27935l));
         UncorrelatedRandomVectorGenerator rvg = new UncorrelatedRandomVectorGenerator(3, rng);
         for (int k = 0; k < 20; ++k) {
@@ -216,20 +213,16 @@ public class PolynomialRotationTest {
                 int[] orders = new int[selected.size()];
                 orders[index] = 1;
                 UnivariateDifferentiableMatrixFunction f =
-                                differentiator.differentiate((UnivariateMatrixFunction) x -> {
-                                    try {
-                                        double oldX = driver.getValue();
-                                        double[][] matrix = new double[raw.size()][];
-                                        driver.setValue(x);
-                                        for (int i = 0 ; i < raw.size(); ++i) {
-                                            matrix[i] = tdl.getLOS(i, date).toArray();
-                                        }
-                                        driver.setValue(oldX);
-                                        return matrix;
-                                    } catch (OrekitException oe) {
-                                        throw new OrekitExceptionWrapper(oe);
-                                    }
-                                });
+                        differentiator.differentiate((UnivariateMatrixFunction) x -> {
+                            double oldX = driver.getValue();
+                            double[][] matrix = new double[raw.size()][];
+                            driver.setValue(x);
+                            for (int i = 0 ; i < raw.size(); ++i) {
+                                matrix[i] = tdl.getLOS(i, date).toArray();
+                            }
+                            driver.setValue(oldX);
+                            return matrix;
+                        });
                 DerivativeStructure[][] mDS = f.value(factory11.variable(0, driver.getValue()));
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, date);
@@ -248,7 +241,7 @@ public class PolynomialRotationTest {
     }
 
     @Before
-    public void setUp() throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
 
         final Vector3D normal    = Vector3D.PLUS_I;
         final Vector3D fovCenter = Vector3D.PLUS_K;

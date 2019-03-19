@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- Copyright 2013-2017 CS Systèmes d'Information
+<!-- Copyright 2013-2019 CS Systèmes d'Information
   Licensed to CS Systèmes d'Information (CS) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -20,7 +20,78 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="2.0" date="2017-12-22" description="This is a major release.
+     <release version="2.1" date="2019-03-14" description="This is a minor release.
+     It adds refraction in inverse location and fixes a few bugs. This version depends
+     on Orekit 9.3 and Hipparchus 1.4.">
+      <action dev="guylaine" type="update">
+        Updated dependencies to Orekit 9.3 and Hipparchus 1.4.
+      </action>
+      <action dev="luc" type="fix" issue="376">
+        Direct location may result to a null result in some very rugged region.
+        In Duvenhage algorithm, in the refineIntersection method for the DEM, 
+        some rare cases led to no intersection (as a result from SimpleTile.cellIntersection) 
+        with the closeGuess given as input of refineIntersection.By shifting the solution 
+        along the LOS direction, with an iterative process, we are able to find the intersection.
+      </action>
+      <action dev="guylaine" type="fix" issue="377">
+        Add the possibility to suspend and resume the dump.
+        When performing a dump, in some cases, some extra informations are dumped 
+        but are not relevant. 
+        For instance when updating a tile for a SRTM tile, we need to add the geoid
+        value of the current point. In the dump file, the geoid tile is also dumped
+        and it leads to bad results when performing the DumpReplayer, as the geoid 
+        elevations are read instead of the real elevations.
+      </action>
+      <action dev="guylaine" type="update">
+        Enable null in dump of direct or inverse location results.
+        If direct or inverse location gave "null" as a result, it was not dumped.
+      </action>
+      <action dev="guylaine" type="update">
+        Improve test coverage of classes related to dump (org.orekit.rugged.errors).
+      </action>
+      <action dev="guylaine" type="fix" issue="373">
+        Changed RuggedException from checked to unchecked exception.
+        Most functions do throw such exceptions. As they are unchecked, they are
+        not advertised in either `throws` statements in the function signature or
+        in the javadoc. So users must consider that as soon as they use any Rugged
+        feature, an unchecked `RuggedException` may be thrown. In most cases, users
+        will not attempt to recover for this but will only use them to display or
+        log a meaningful error message.
+      </action>
+      <action dev="guylaine" type="fix" issue="372">
+        Add (optional) atmospheric refraction for inverse location. 
+        In Rugged 2.0, only the direct location can take into account the atmospheric refraction.
+      </action>
+      <action dev="guylaine" type="add" due-to="Issam Boukerch">
+        Changed terms for refining tutorials.
+        The "fulcrum points" term is changed into "Ground Control Points (GCP)" and 
+        the "liaison points" term into "tie points".
+      </action>
+       <action dev="luc" type="fix" issue="371">
+        For refining computation, correct the constructor of the class 
+        adjustment.measurements.SensorToGroundMapping due to a parameters reversal error.
+      </action>
+      <action dev="guylaine" type="fix" issue="256">
+        Bad check of maxDate validity in utils.SpacecraftToObservedBody.SpacecraftToObservedBody
+        method.
+      </action>
+           
+      <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
+        Updated Danish translations of error messages.
+      </action>
+      <action dev="luc" type="add" due-to="Roberto Alacevich">
+        Updated Italian translations of error messages.
+      </action>
+      <action dev="guylaine" type="add" due-to="Espen Bjørntvedt">
+        Updated Norwegian translations of error messages.
+      </action>
+      <action dev="luc" type="add" due-to="Beatriz Salazar García">
+        Updated Spanish translations of error messages.
+      </action>
+      
+    </release>
+      
+    <release version="2.0" date="2017-12-19" description="This is a major release.
       It mainly provides a refinement feature (i.e. adjusting the viewing model
       parameters to match ground control points.">
       <action dev="guylaine" type="update">

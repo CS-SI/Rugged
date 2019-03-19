@@ -1,5 +1,5 @@
-# internal error, contact maintenance at {0}
-INTERNAL_ERROR = erreur interne, contactez la maintenance à {0}
+# internal error, please notify development team by creating an issue at {0}
+INTERNAL_ERROR = erreur interne, merci de signaler le problème en ouvrant une fiche d''anomalie sur {0}
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
 OUT_OF_TILE_INDICES = aucune donnée aux indices [{0}, {1}], la tuile ne couvre que de [0, 0] à [{2}, {3}] inclus
@@ -64,6 +64,9 @@ LIGHT_TIME_CORRECTION_REDEFINED = correction de la durée lumière redéfinie li
 # aberration of light correction redefined, line {0}, file {1}: {2}
 ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = correction de l''aberration de la lumière redéfinie ligne {0} du fichier {1}: {2}
 
+# atmospheric refraction correction redefined, line {0}, file {1}: {2}
+ATMOSPHERIC_REFRACTION_REDEFINED = correction de la refraction atmosphérique redéfinie ligne {0} du fichier {1}: {2}
+
 # tile {0} already defined, line {1}, file {2}: {3}
 TILE_ALREADY_DEFINED = tuile {0} déjà définie ligne {1} du fichier {2}: {3}
 
@@ -87,3 +90,9 @@ UNSUPPORTED_REFINING_CONTEXT = le cas d''affinage utilisant {0} instances de rug
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = pas de couche atmosphérique définie pour l''altitude {0} (altitude la plus basse : {1})
+
+# step {0} is not valid : {1}
+INVALID_STEP = le pas {0} n''est pas valable : {1}
+
+# range between min line {0} and max line {1} is invalid {2}
+INVALID_RANGE_FOR_LINES = l''écart entre la ligne min {0} et la ligne max {1} est non valide {2}

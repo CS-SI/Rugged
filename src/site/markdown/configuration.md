@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2019 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,31 +12,32 @@
   limitations under the License.
 -->
 
-Configuration
-=============
+<a name="top"></a>
 
-As Rugged relied on Orekit for the frames computation, Orekit
+# Configuration
+
+As Rugged relied on [Orekit](https://www.orekit.org/ "Orekit homepage") for the frames computation, Orekit
 must be properly initialized for Rugged to run.
 
-The simplest way to configure is to first retrieve the example orekit-data.zip
-file from Orekit [files](https://www.orekit.org/forge/projects/orekit/files) section
-and to unzip it in a known fixed location on your computer (let's assume it is on
-your home folder, and it creates an orekit-data subfolder there).
+The simplest way to configure is to first retrieve the example `orekit-data-master.zip`
+file from Rugged download page, available in the [Rugged project download page](https://www.orekit.org/rugged/download.html) 
+(Get the physical data)
+and to unzip it anywhere you want, rename the `orekit-data-master` folder that will be created
+into `orekit-data` and add the following lines at the start of your program (before Orekit is called for the
+first time):
 
-Then near the start of your main program, and before Orekit is called for the
-first time, you will add the following code snippet:
-
-    File home       = new File(System.getProperty("user.home"));
-    File orekitData = new File(home, "orekit-data");
+    File orekitData = new File("/path/to/the/folder/orekit-data");
     DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
 
 This is sufficient to start working.
 
-Note that some of the data in the orekit-data folder needs to be updated,
-typically the UTC-TAI.history file, which is updated about once every 18 months
+Note that some of the data in the orekit-data-master folder needs to be updated,
+typically the UTC-TAI history file, which is updated about once every 18 months
 by IERS, and the files in the Earth-Orientation-Parameters folder which are updated
 regularly by IERS. The update frequency depends on which file you use.
 
-The data provided in the example archive from Orekit site are example only and are
+The data provided in the example archive from Rugged site are example only and are
 not kept up to date. The real operational data are live, and remain under the
 responsibility of the user.
+
+[Top of the page](#top)

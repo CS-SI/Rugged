@@ -2,13 +2,13 @@
 INTERNAL_ERROR = errore interno, contattare l''assistenza a {0}
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
-OUT_OF_TILE_INDICES = nessun dato agli indici [{0}, {1}], il quadrante non copre che da [0, 0] a [{2}, {3}] inclus
+OUT_OF_TILE_INDICES = nessun dato agli indici [{0}, {1}], il quadrante non copre che da [0, 0] a [{2}, {3}] inclusi
 
 # no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}
-OUT_OF_TILE_ANGLES = nessun dato alla latitudine {0} e alla longitudine {1}, il quadrante non copre che le latitudini da {2} a {3} et les longitudes de {4} à {5}
+OUT_OF_TILE_ANGLES = nessun dato alla latitudine {0} e alla longitudine {1}, il quadrante non copre che le latitudini da {2} a {3} et le longitudini da {4} a {5}
 
 # no Digital Elevation Model data at latitude {0} and longitude {1}
-NO_DEM_DATA = <MISSING TRANSLATION>
+NO_DEM_DATA = nessun dato nel Modello Digitale di Elevazione alla latitudine {0} e alla longitudine {1}
 
 # the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood
 TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED = il quadrante selezionato per la latitudine {0} e la longitudine {1} non contiene i punti dei dintorni richiesti
@@ -35,10 +35,10 @@ LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE = la linea di visibilità non attraversa ma
 LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE = la linea di visibilità non attraversa mai la longitudine {0}
 
 # line never crosses altitude {0}
-LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = la linea di visibilità non attraversa mai la altitudine {0}
+LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE = la linea di visibilità non attraversa mai l''altitudine {0}
 
 # line-of-sight enters the Digital Elevation Model behind spacecraft!
-DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = la linea di visibilità entra nel Modello Digitale di Suolo dietro il satellite!
+DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT = la linea di visibilità entra nel Modello Digitale di Elevazione dietro il satellite!
 
 # frame {0} does not match frame {1} from interpolator dump
 FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = il riferimento {0} non corrisponde al riferimento {1} dell''interpolatore salvato
@@ -47,43 +47,52 @@ FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP = il riferimento {0} non corrisponde al r
 NOT_INTERPOLATOR_DUMP_DATA = i dati non corrispondono a un salvatagggio d''interpolatore
 
 # debug dump is already active for this thread
-DEBUG_DUMP_ALREADY_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_ALREADY_ACTIVE = dump di debug già attivo per questo thread
 
 # unable to active debug dump with file {0}: {1}
-DEBUG_DUMP_ACTIVATION_ERROR = <MISSING TRANSLATION>
+DEBUG_DUMP_ACTIVATION_ERROR = impossibile attivare il dump di debug con il file {0}: {1}
 
 # debug dump is not active for this thread
-DEBUG_DUMP_NOT_ACTIVE = <MISSING TRANSLATION>
+DEBUG_DUMP_NOT_ACTIVE = dump di debug non attivo per questo thread
 
 # cannot parse line {0}, file {1}: {2}
-CANNOT_PARSE_LINE = <MISSING TRANSLATION>
+CANNOT_PARSE_LINE = impossibile analizzare la linea {0}, file{1}: {2}
 
 # light time correction redefined, line {0}, file {1}: {2}
-LIGHT_TIME_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+LIGHT_TIME_CORRECTION_REDEFINED = Correzione luce-tempo ridefinita, linea {0} del file {1}: {2}
 
 # aberration of light correction redefined, line {0}, file {1}: {2}
-ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = <MISSING TRANSLATION>
+ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = Correzione dell''aberrazione stellare ridefinita, linea {0} del file {1}: {2}
+
+# atmospheric refraction correction redefined, line {0}, file {1}: {2}
+ATMOSPHERIC_REFRACTION_REDEFINED = <MISSING TRANSLATION>
 
 # tile {0} already defined, line {1}, file {2}: {3}
-TILE_ALREADY_DEFINED = <MISSING TRANSLATION>
+TILE_ALREADY_DEFINED = quadrante {0} già definito, linea {1}, file {2}: {3}
 
 # unknown tile {0}, line {1}, file {2}: {3}
-UNKNOWN_TILE = <MISSING TRANSLATION>
+UNKNOWN_TILE = quadrante {0} sconosciuto, linea {1}, file {2}: {3}
 
 # no parameters have been selected for estimation
-NO_PARAMETERS_SELECTED = <MISSING TRANSLATION>
+NO_PARAMETERS_SELECTED = nessun parametro è stato selezionato per essere stimato
 
 # no reference mappings for parameters estimation
-NO_REFERENCE_MAPPINGS = <MISSING TRANSLATION>
+NO_REFERENCE_MAPPINGS = nessun mapping di riferimento per la stima dei parametri
 
 # a different parameter with name {0} already exists
-DUPLICATED_PARAMETER_NAME = <MISSING TRANSLATION>
+DUPLICATED_PARAMETER_NAME = un altro parametro chiamato {0} esiste già
 
 # rugged name is not found 
-INVALID_RUGGED_NAME = <MISSING TRANSLATION>
+INVALID_RUGGED_NAME = nome non valido per Rugged
 
-# refining using {0} rugged instance is not handled
-UNSUPPORTED_REFINING_CONTEXT = <MISSING TRANSLATION>
+# refining context is only handled for limited number of configurations
+UNSUPPORTED_REFINING_CONTEXT = il refining che usa {0} istanze rugged non è gestito
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
-NO_LAYER_DATA = <MISSING TRANSLATION>
+NO_LAYER_DATA = nessun dato atmosferico all''altitudine {0} (altitudine più bassa: {1})
+
+# step {0} is not valid : {1}
+INVALID_STEP = Step {0} non valido: {1}
+
+# range between min line {0} and max line {1} too small {2}
+ INVALID_RANGE_FOR_LINES = Scarto fra la linea min {0} e la linea max {1} troppo piccolo {2}

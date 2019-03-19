@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,6 +19,7 @@ package org.orekit.rugged.raster;
 import org.hipparchus.util.FastMath;
 import java.lang.reflect.Array;
 
+import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 
@@ -57,10 +58,8 @@ public class TilesCache<T extends Tile> {
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return tile covering the ground point
-     * @exception RuggedException if newly created tile cannot be updated
      */
-    public T getTile(final double latitude, final double longitude)
-        throws RuggedException {
+    public T getTile(final double latitude, final double longitude) {
 
         for (int i = 0; i < tiles.length; ++i) {
             final T tile = tiles[i];
@@ -88,7 +87,16 @@ public class TilesCache<T extends Tile> {
 
         // create the tile and retrieve its data
         final T tile = factory.createTile();
+
+        // In case dump is asked for, suspend the dump manager as we don't need to dump anything here
+        // For instance for SRTM DEM, the user needs to read Geoid data that are not useful in the dump
+        final Boolean wasSuspended = DumpManager.suspend();
+
         updater.updateTile(latitude, longitude, tile);
+
+        // Resume the dump manager if necessary
+        DumpManager.resume(wasSuspended);
+
         tile.tileUpdateCompleted();
 
         if (tile.getLocation(latitude, longitude) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {

@@ -1,0 +1,50 @@
+# Rugged library dump file, created on 2019-02-12T13:32:28Z
+# all units are SI units (m, m/s, rad ...)
+sensor: sensorName s0 nbPixels 6992 position  0.000000000000000e+00  0.000000000000000e+00  0.000000000000000e+00
+sensor datation: sensorName s0 lineNumber  1.555651300000000e+04 date 2018-11-17T09:28:15.00578210106806Z
+direct location: date 2018-11-17T09:28:15.00578210106806Z position  0.000000000000000e+00  0.000000000000000e+00  0.000000000000000e+00 los  1.630437590029585e-03 -1.988452149915022e-02  9.998009539287460e-01 lightTime false aberration true refraction false 
+span: minDate 2018-11-17T09:28:09.75815400000000Z maxDate 2018-11-17T09:28:24.37500000000000Z tStep  1.000000000000000e-03 tolerance  1.000000000000000e+00 inertialFrame EME2000
+transform: index 5248 body r -1.582959385747423e-01 -8.877789928041023e-04  1.557391550098440e-04 -9.873913020806478e-01 Ω -1.314379578439253e-07  1.929883497315641e-09 -7.292103298515672e-05 ΩDot -1.238198063406674e-16 -4.429504278953000e-17  2.220223692809437e-19 spacecraft p -2.031142024066962e+06  2.632378682422574e+06 -6.241283006704280e+06 v  8.397013991525502e+03 -1.122240538848754e+04 -7.476888804772309e+03 a -5.680029219465155e+02 -2.953217064872529e+02  9.484900057803327e+01 r -4.473594211185816e-01 -2.560156449934148e-01  7.879614096264105e-01  3.368120466886735e-01 Ω  1.874199110824172e-03  6.297218887138226e-04  6.941311311658171e-04 ΩDot  2.110863271348145e-05  1.094333236463635e-04 -6.188132051280828e-06
+algorithm: DUVENHAGE
+ellipsoid: ae  6.378137000000000e+06 f  3.352810664747481e-03 frame ITRF_CIO_CONV_2010_SIMPLE_EOP
+DEM tile: t0 latMin  7.854054356026650e-01 latStep  1.454441043328608e-05 latRows 1850 lonMin  1.745401974046496e-01 lonStep  1.454441043328608e-05 lonCols 2950
+DEM cell: t0 latIndex 1051 lonIndex 2937 elevation  1.309400956268308e+01
+DEM cell: t0 latIndex 1809 lonIndex 653 elevation  3.915338283287048e+03
+DEM cell: t0 latIndex 1611 lonIndex 2905 elevation  2.683570229905023e+03
+DEM cell: t0 latIndex 1612 lonIndex 2905 elevation  2.659575158110089e+03
+DEM cell: t0 latIndex 1611 lonIndex 2906 elevation  2.640567641818916e+03
+DEM cell: t0 latIndex 1612 lonIndex 2906 elevation  2.617572573031192e+03
+DEM cell: t0 latIndex 1595 lonIndex 2880 elevation  2.623557283660889e+03
+DEM cell: t0 latIndex 1596 lonIndex 2880 elevation  2.576562136685689e+03
+DEM cell: t0 latIndex 1595 lonIndex 2881 elevation  2.647554647459412e+03
+DEM cell: t0 latIndex 1596 lonIndex 2881 elevation  2.594559503491423e+03
+DEM cell: t0 latIndex 1592 lonIndex 2872 elevation  2.390563886371358e+03
+DEM cell: t0 latIndex 1593 lonIndex 2872 elevation  2.289568715338474e+03
+DEM cell: t0 latIndex 1592 lonIndex 2873 elevation  2.342561241148249e+03
+DEM cell: t0 latIndex 1593 lonIndex 2873 elevation  2.331566073122576e+03
+DEM cell: t0 latIndex 1594 lonIndex 2876 elevation  2.458562987470839e+03
+DEM cell: t0 latIndex 1595 lonIndex 2876 elevation  2.494567828466797e+03
+DEM cell: t0 latIndex 1594 lonIndex 2877 elevation  2.475560348262151e+03
+DEM cell: t0 latIndex 1595 lonIndex 2877 elevation  2.528565192265320e+03
+DEM cell: t0 latIndex 1596 lonIndex 2872 elevation  2.190583202239821e+03
+DEM cell: t0 latIndex 1597 lonIndex 2872 elevation  2.147588031206936e+03
+DEM cell: t0 latIndex 1596 lonIndex 2873 elevation  2.264580569045554e+03
+DEM cell: t0 latIndex 1597 lonIndex 2873 elevation  2.203585401019881e+03
+DEM cell: t0 latIndex 1596 lonIndex 2868 elevation  2.121593735016887e+03
+DEM cell: t0 latIndex 1597 lonIndex 2868 elevation  2.114598551955160e+03
+DEM cell: t0 latIndex 1596 lonIndex 2869 elevation  2.106591101822620e+03
+DEM cell: t0 latIndex 1597 lonIndex 2869 elevation  2.110595921768104e+03
+DEM cell: t0 latIndex 1596 lonIndex 2864 elevation  2.166604267793952e+03
+DEM cell: t0 latIndex 1597 lonIndex 2864 elevation  2.083609072703383e+03
+DEM cell: t0 latIndex 1596 lonIndex 2865 elevation  2.144601634599685e+03
+DEM cell: t0 latIndex 1597 lonIndex 2865 elevation  2.076606442516327e+03
+DEM cell: t0 latIndex 1596 lonIndex 2867 elevation  2.148596368211153e+03
+DEM cell: t0 latIndex 1597 lonIndex 2867 elevation  2.111601182142215e+03
+DEM cell: t0 latIndex 1598 lonIndex 2865 elevation  2.042611250432968e+03
+DEM cell: t0 latIndex 1597 lonIndex 2866 elevation  2.091603812329271e+03
+DEM cell: t0 latIndex 1598 lonIndex 2866 elevation  2.054608623253123e+03
+DEM cell: t0 latIndex 1599 lonIndex 2865 elevation  1.847616058349609e+03
+DEM cell: t0 latIndex 1599 lonIndex 2866 elevation  1.838613434176975e+03
+DEM cell: t0 latIndex 1598 lonIndex 2864 elevation  1.985613877612813e+03
+DEM cell: t0 latIndex 1599 lonIndex 2864 elevation  1.872618682522244e+03
+direct location result: latitude  8.086569515781713e-01 longitude  2.161986944259714e-01 elevation  1.912154442728379e+03

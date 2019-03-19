@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -33,6 +33,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 /** Simple implementation of a {@link Tile}.
  * @see SimpleTileFactory
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class SimpleTile implements Tile {
 
@@ -90,8 +91,7 @@ public class SimpleTile implements Tile {
     @Override
     public void setGeometry(final double newMinLatitude, final double newMinLongitude,
                             final double newLatitudeStep, final double newLongitudeStep,
-                            final int newLatitudeRows, final int newLongitudeColumns)
-        throws RuggedException {
+                            final int newLatitudeRows, final int newLongitudeColumns) {
         this.minLatitude                = newMinLatitude;
         this.minLongitude               = newMinLongitude;
         this.latitudeStep               = newLatitudeStep;
@@ -115,7 +115,7 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public void tileUpdateCompleted() throws RuggedException {
+    public void tileUpdateCompleted() {
         processUpdatedElevation(elevations);
     }
 
@@ -229,8 +229,8 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public void setElevation(final int latitudeIndex, final int longitudeIndex, final double elevation)
-        throws RuggedException {
+    public void setElevation(final int latitudeIndex, final int longitudeIndex, final double elevation) {
+
         if (latitudeIndex  < 0 || latitudeIndex  > (latitudeRows - 1) ||
             longitudeIndex < 0 || longitudeIndex > (longitudeColumns - 1)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_INDICES,
@@ -265,8 +265,7 @@ public class SimpleTile implements Tile {
      * </p>
      */
     @Override
-    public double interpolateElevation(final double latitude, final double longitude)
-        throws RuggedException {
+    public double interpolateElevation(final double latitude, final double longitude) {
 
         final double doubleLatitudeIndex  = getDoubleLatitudeIndex(latitude);
         final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
@@ -304,8 +303,7 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint cellIntersection(final GeodeticPoint p, final Vector3D los,
-                                                    final int latitudeIndex, final int longitudeIndex)
-        throws RuggedException {
+                                                    final int latitudeIndex, final int longitudeIndex) {
 
         // ensure neighboring cells to not fall out of tile
         final int iLat  = FastMath.max(0, FastMath.min(latitudeRows     - 2, latitudeIndex));
@@ -428,15 +426,15 @@ public class SimpleTile implements Tile {
     }
 
     /** Get the latitude index of a point.
-     * @param latitude geodetic latitude
-     * @return latitute index (it may lie outside of the tile!)
+     * @param latitude geodetic latitude (rad)
+     * @return latitude index (it may lie outside of the tile!)
      */
     private double getDoubleLatitudeIndex(final double latitude) {
         return (latitude  - minLatitude)  / latitudeStep;
     }
 
     /** Get the longitude index of a point.
-     * @param longitude geodetic latitude
+     * @param longitude geodetic longitude (rad)
      * @return longitude index (it may lie outside of the tile!)
      */
     private double getDoubleLontitudeIndex(final double longitude) {

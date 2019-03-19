@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2019 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,34 +12,29 @@
   limitations under the License.
 -->
 
-Contacts
-========
+<a name="top"></a>
 
-Mailing lists
--------------
+# Contacts
 
-Most discussions should occur on the public mailing lists.
+## Forum
 
-|     topic     |         post address         |                                            subscribe URL                                                           |                                               archive URL                                            |
-|---------------|------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-|  announces    | orekit-announces@orekit.org  |   [https://www.orekit.org/wws/subscribe/orekit-announces](https://www.orekit.org/wws/subscribe/orekit-announces)   | [https://www.orekit.org/wws/arc/orekit-announces](https://www.orekit.org/wws/arc/orekit-announces)   |
-|     users     |   rugged-users@orekit.org    |   [https://www.orekit.org/wws/subscribe/rugged-users](https://www.orekit.org/wws/subscribe/rugged-users)           | [https://www.orekit.org/wws/arc/rugged-users](https://www.orekit.org/wws/arc/rugged-users)           |
-|   developers  | rugged-developers@orekit.org |   [https://www.orekit.org/wws/subscribe/rugged-developers](https://www.orekit.org/wws/subscribe/rugged-developers) | [https://www.orekit.org/wws/arc/rugged-developers](https://www.orekit.org/wws/arc/rugged-developers) |
+Most discussions should occur on the public forums [https://forum.orekit.org/](https://forum.orekit.org/).
+The main categories are:
 
-Please register to these mailing lists before attempting to post!
+|   category    |                                     URL                                                            |
+|---------------|----------------------------------------------------------------------------------------------------|
+|  announces    | [https://forum.orekit.org/c/rugged-announcements](https://forum.orekit.org/c/rugged-announcements) |
+|     users     | [https://forum.orekit.org/c/rugged-usage](https://forum.orekit.org/c/rugged-usage)                 |
+|   developers  | [https://forum.orekit.org/c/rugged-development](https://forum.orekit.org/c/rugged-development)    |
 
-We're preventing unregistered members from posting in order to prevent spam. Thank you.
+## Technical contact
 
-Technical contact
------------------
-
-If for some reason you cannot use the public lists, you can reach the CS
+If for some reason you cannot use the public forums, you can reach the CS
 Systèmes d'Information Rugged team for any question (either technically
 oriented or administrative) at the following email address:
 [rugged@c-s.fr](mailto:rugged@c-s.fr)
 
-Administrative contact
-----------------------
+## Administrative contact
 
 If you want to discuss with the space division staff at CS Systèmes d'Information,
 please use the following address:
@@ -51,5 +46,8 @@ please use the following address:
     31506 Toulouse CEDEX 5
     FRANCE
 
-    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Sébastien Harasse)
+    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Jonathan Guinet)
     fax:   +33 5-61-34-84-15
+
+[Top of the page](#top)
+    

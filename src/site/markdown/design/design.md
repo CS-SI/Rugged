@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2019 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,14 +12,15 @@
   limitations under the License.
 -->
 
-Overview
---------
+<a name="top"></a>
+
+## Design of the major functions
 
 The top level design describes the various libraries and their interactions. The lowest level
 corresponding to the Hipparchus library is not shown here for clarity.
 
 The following sequence and class diagrams show the three most important functions: initialization
-of the libraries, direct location and inverse location.
+of the libraries, direct location and inverse location. The last class diagram is a focus on Digital Elevation Model loading.
 
 ### Initialization
 
@@ -30,6 +31,7 @@ an instance of the top-level Rugged class and provides it the created objects as
 of options for algorithm, ellipsoid and frame choices.
 
 ![initialization class diagram](../images/design/initialization-class-diagram.png)
+
 
 The Rugged instance will store everything and create the various objects defining the configuration
 (creating the algorithm, ellipsoid and frames from the identifiers provided by the user. Using simple
@@ -98,8 +100,7 @@ were done using a mean plane do not represent reality. These final fixes are sim
 simple values as results, the first step in fact provided a Taylor expansion, thus allowing to slightly shift the result
 at will.
 
-Focus point on Digital Elevation Model loading
-----------------------------------------------
+## Focus point on Digital Elevation Model loading
 
 The Digital Elevation Model is used at a very low level in the Rugged library, but read at a high level in the mission
 specific interface library. The following design has been selected in order to allow the lower layer to delegate the
@@ -120,3 +121,5 @@ tiles that are used under the hood. Different DEM intersection algorithms can us
 any change to the mission specific interface. One example of this independence corresponds to the Duvenhage algorithm, has
 in addition to the raw elevation grid, the tile will also contain a min/max kd-tree, so there are both a dedicated specialized
 tile and a corresponding TileFactory in use when this algorithm is run.
+
+[Top of the page](#top)

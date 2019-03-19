@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -28,7 +28,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
-import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.orbits.Orbit;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.api.BodyRotatingFrameId;
@@ -42,6 +41,7 @@ import org.orekit.rugged.adjustment.measurements.SensorToGroundMapping;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
+import org.orekit.utils.Constants;
 import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
@@ -54,7 +54,7 @@ import fr.cs.examples.refiningPleiades.models.OrbitModel;
 import fr.cs.examples.refiningPleiades.models.PleiadesViewingModel;
 
 /**
- * Class for testing refining (liaison points study)
+ * Class for testing refining (tie points study)
  * with or without noisy measurements
  * @author Jonathan Guinet
  * @author Lucie Labat-Allee
@@ -108,8 +108,7 @@ public class InterRefining extends Refining {
             // ----Satellite position, velocity and attitude: create orbit model A
             OrbitModel orbitmodelA = new OrbitModel();
             BodyShape earthA = orbitmodelA.createEarth();
-            NormalizedSphericalHarmonicsProvider gravityFieldA = orbitmodelA.createGravityField();
-            Orbit orbitA = orbitmodelA.createOrbit(gravityFieldA.getMu(), refDateA);
+            Orbit orbitA = orbitmodelA.createOrbit(Constants.EIGEN5C_EARTH_MU, refDateA);
 
             // ----If no LOF Transform Attitude Provider is Nadir Pointing Yaw Compensation
             final double [] rollPoly = {0.0,0.0,0.0};
@@ -166,8 +165,7 @@ public class InterRefining extends Refining {
             // ----Satellite position, velocity and attitude: create orbit model B
             OrbitModel orbitmodelB =  new OrbitModel();
             BodyShape earthB = orbitmodelB.createEarth();
-            NormalizedSphericalHarmonicsProvider gravityFieldB = orbitmodelB.createGravityField();
-            Orbit orbitB = orbitmodelB.createOrbit(gravityFieldB.getMu(), refDateB);
+            Orbit orbitB = orbitmodelB.createOrbit(Constants.EIGEN5C_EARTH_MU, refDateB);
 
             // ----Satellite attitude
             List<TimeStampedAngularCoordinates> satelliteQListB = orbitmodelB.orbitToQ(orbitB, earthB, minDateB.shiftedBy(-0.0), maxDateB.shiftedBy(+0.0), 0.25);
@@ -292,6 +290,7 @@ public class InterRefining extends Refining {
             // ------------------
             System.out.format("\n**** Compute Statistics **** %n");
             refining.computeMetrics(measurements.getInterMapping(), ruggedA, ruggedB, false);
+            
 
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
@@ -303,7 +302,7 @@ public class InterRefining extends Refining {
     }
 
 	/** Constructor */
-	public InterRefining() throws RuggedException, OrekitException {
+	private InterRefining() {
 
 		sensorNameA = "SensorA";
 		final double incidenceAngleA = -5.0;
@@ -325,7 +324,7 @@ public class InterRefining extends Refining {
      * @return GSD
      */
     private double computeDistanceBetweenLOS(final Rugged ruggedA, final LineSensor lineSensorA, 
-                                             final Rugged ruggedB, final LineSensor lineSensorB) throws RuggedException {
+                                             final Rugged ruggedB, final LineSensor lineSensorB) {
 
     	// Get number of line of sensors
     	int dimensionA = pleiadesViewingModelA.getDimension();

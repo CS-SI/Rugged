@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -30,7 +30,7 @@ public class RuggedMessagesTest {
     private final String[] LANGUAGES_LIST = { "da", "de", "en", "es", "fr", "gl", "it", "no", "ro" } ;
     @Test
     public void testMessageNumber() {
-        Assert.assertEquals(30, RuggedMessages.values().length);
+        Assert.assertEquals(33, RuggedMessages.values().length);
     }
 
     @Test

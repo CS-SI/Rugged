@@ -8,7 +8,7 @@ DEM cell: t0 latIndex 122 lonIndex 99 elevation  1.778606495649060e+03
 DEM cell: t0 latIndex 122 lonIndex 100 elevation  1.809481571226391e+03
 DEM cell: t0 latIndex 123 lonIndex 99 elevation  1.772149770526270e+03
 DEM cell: t0 latIndex 123 lonIndex 100 elevation  1.804520334312959e+03
-inverse location: sensorName s0 latitude -3.930524233859007e-01 longitude  2.502596047891660e+00 elevation  1.785429914217195e+03 minLine 0 maxLine 2000 lightTime true aberration true
+inverse location: sensorName s0 latitude -3.930524233859007e-01 longitude  2.502596047891660e+00 elevation  1.785429914217195e+03 minLine 0 maxLine 2000 lightTime true aberration true refraction false
 sensor: sensorName s0 nbPixels 2000 position  1.500000000000000e+00  0.000000000000000e+00 -2.000000000000000e-01
 sensor mean plane: sensorName s0 minLine 0 maxLine 2000 maxEval 50 accuracy  1.000000000000000e-02 normal  1.000000000000000e+00  0.000000000000000e+00  0.000000000000000e+00 cachedResults 0
 sensor datation: sensorName s0 lineNumber  1.000000000000000e+03 date 2012-01-01T12:30:00.00000000000000Z

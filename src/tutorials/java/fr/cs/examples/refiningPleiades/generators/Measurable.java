@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,8 +16,6 @@
  */
 package fr.cs.examples.refiningPleiades.generators;
 
-import org.orekit.rugged.errors.RuggedException;
-
 /** For measurements generator.
  * @author Lucie Labat-Allee
  * @author Guylaine Prat
@@ -27,23 +25,20 @@ public interface Measurable {
 	
     /** Get the number of measurements
      * @return the number of measurements
-     * @throws RuggedException
      */
-    int  getMeasurementCount() throws RuggedException;
+    int  getMeasurementCount();
 
     /** Create measurements (without noise)
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
-     * @throws RuggedException
      */
-    void createMeasurement(int lineSampling, int pixelSampling)  throws RuggedException;
+    void createMeasurement(int lineSampling, int pixelSampling);
 
     /** Create noisy measurements
      * @param lineSampling line sampling
      * @param pixelSampling pixel sampling
      * @param noise the noise to add to the measurements
-     * @throws RuggedException
      */
-    void createNoisyMeasurement(int lineSampling, int pixelSampling, Noise noise) throws RuggedException;
+    void createNoisyMeasurement(int lineSampling, int pixelSampling, Noise noise);
 
 }

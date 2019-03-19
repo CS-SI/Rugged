@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,6 +16,11 @@
  */
 package org.orekit.rugged.refraction;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.hipparchus.analysis.UnivariateFunction;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
@@ -23,7 +28,6 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
@@ -32,15 +36,10 @@ import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
     @Test
-    public void testAlmostNadir() throws OrekitException, RuggedException {
+    public void testAlmostNadir() {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
@@ -61,7 +60,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testNoOpRefraction() throws OrekitException, RuggedException {
+    public void testNoOpRefraction() {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
@@ -89,8 +88,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
     @Test
     public void testReversedAtmosphere()
-        throws OrekitException, RuggedException, IllegalArgumentException,
-               IllegalAccessException, NoSuchFieldException, SecurityException {
+        throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
@@ -138,8 +136,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
     @Test
     public void testTwoAtmospheres()
-        throws OrekitException, RuggedException, IllegalArgumentException,
-               IllegalAccessException, NoSuchFieldException, SecurityException {
+        throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
@@ -181,7 +178,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testMissingLayers() throws OrekitException, RuggedException {
+    public void testMissingLayers() {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
@@ -206,7 +203,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testLayersBelowDEM() throws OrekitException, RuggedException {
+    public void testLayersBelowDEM() {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
@@ -225,7 +222,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     }
 
     @Test
-    public void testDivingAngleChange() throws OrekitException, RuggedException {
+    public void testDivingAngleChange() {
 
         setUpMayonVolcanoContext();
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
@@ -251,8 +248,8 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
     }
 
-    private Vector3D los(final Vector3D position, final double angleFromNadir)
-        throws OrekitException {
+    private Vector3D los(final Vector3D position, final double angleFromNadir) {
+        
         final Vector3D nadir       = earth.transform(position, earth.getBodyFrame(), null).getNadir();
         final Rotation losRotation = new Rotation(nadir.orthogonal(), angleFromNadir,
                                                   RotationConvention.VECTOR_OPERATOR);

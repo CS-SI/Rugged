@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -43,7 +43,7 @@ import org.hipparchus.exception.Localizable;
  * translation is missing.
  * </p>
  * <p>
- * This class is heavily based on Orekit {@link org.orekit.errors.OrekitMessages},
+ * This class is heavily based on {@code OrekitMessages},
  * which is distributed under the terms of the Apache License V2.
  * </p>
  */
@@ -51,7 +51,7 @@ public enum RuggedMessages implements Localizable {
 
     // CHECKSTYLE: stop JavadocVariable check
 
-    INTERNAL_ERROR("internal error, contact maintenance at {0}"),
+    INTERNAL_ERROR("internal error, please notify development team by creating an issue at {0}"),
     OUT_OF_TILE_INDICES("no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)"),
     OUT_OF_TILE_ANGLES("no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}"),
     NO_DEM_DATA("no Digital Elevation Model data at latitude {0} and longitude {1}"),
@@ -73,6 +73,7 @@ public enum RuggedMessages implements Localizable {
     CANNOT_PARSE_LINE("cannot parse line {0}, file {1}: {2}"),
     LIGHT_TIME_CORRECTION_REDEFINED("light time correction redefined, line {0}, file {1}: {2}"),
     ABERRATION_OF_LIGHT_CORRECTION_REDEFINED("aberration of light correction redefined, line {0}, file {1}: {2}"),
+    ATMOSPHERIC_REFRACTION_REDEFINED("atmospheric refraction correction redefined, line {0}, file {1}: {2}"),
     TILE_ALREADY_DEFINED("tile {0} already defined, line {1}, file {2}: {3}"),
     UNKNOWN_TILE("unknown tile {0}, line {1}, file {2}: {3}"),
     NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),
@@ -80,7 +81,9 @@ public enum RuggedMessages implements Localizable {
     DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
     INVALID_RUGGED_NAME("invalid rugged name"),
     UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled"),
-    NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})");
+    NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})"),
+    INVALID_STEP("step {0} is not valid : {1}"),
+    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}");
 
     // CHECKSTYLE: resume JavadocVariable check
 
@@ -114,7 +117,7 @@ public enum RuggedMessages implements Localizable {
                 final String translated = bundle.getString(name());
                 if ((translated != null) &&
                     (translated.length() > 0) &&
-                    (!translated.toLowerCase().contains("missing translation"))) {
+                    (!translated.toLowerCase(locale).contains("missing translation"))) {
                     // the value of the resource is the translated format
                     return translated;
                 }
@@ -142,8 +145,7 @@ public enum RuggedMessages implements Localizable {
         /** {@inheritDoc} */
         @Override
         public ResourceBundle newBundle(final String baseName, final Locale locale, final String format,
-                                        final ClassLoader loader, final boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException {
+                                        final ClassLoader loader, final boolean reload) throws IOException {
             // The below is a copy of the default implementation.
             final String bundleName = toBundleName(baseName, locale);
             final String resourceName = toResourceName(bundleName, "utf8");

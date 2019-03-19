@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -18,10 +18,8 @@ package org.orekit.rugged.intersection;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.errors.DumpManager;
-import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
@@ -46,33 +44,23 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
-                                                final Vector3D position, final Vector3D los)
-        throws RuggedException {
-        try {
-            DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
-            final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
-            final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
-            return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(), 0.0);
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
+                                                final Vector3D position, final Vector3D los) {
+        DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
+        final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
+        final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
+        return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(), 0.0);
     }
 
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
                                                       final Vector3D position, final Vector3D los,
-                                                      final NormalizedGeodeticPoint closeGuess)
-        throws RuggedException {
-        try {
-            DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
-            final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
-            final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
-            return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
-                                               closeGuess.getLongitude());
-        } catch (OrekitException oe) {
-            throw new RuggedException(oe, oe.getSpecifier(), oe.getParts());
-        }
+                                                      final NormalizedGeodeticPoint closeGuess) {
+        DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
+        final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
+        final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
+        return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
+                closeGuess.getLongitude());
     }
 
     /** {@inheritDoc}

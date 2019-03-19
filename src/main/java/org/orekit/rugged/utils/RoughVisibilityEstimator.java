@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,14 +16,13 @@
  */
 package org.orekit.rugged.utils;
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.Transform;
 import org.orekit.time.AbsoluteDate;
@@ -64,11 +63,9 @@ public class RoughVisibilityEstimator {
      * @param ellipsoid ground ellipsoid
      * @param frame frame in which position and velocity are defined (may be inertial or body frame)
      * @param positionsVelocities satellite position and velocity (m and m/s in specified frame)
-     * @exception OrekitException if position-velocity cannot be converted to body frame
      */
     public RoughVisibilityEstimator(final OneAxisEllipsoid ellipsoid, final Frame frame,
-                                    final List<TimeStampedPVCoordinates> positionsVelocities)
-        throws OrekitException {
+                                    final List<TimeStampedPVCoordinates> positionsVelocities) {
 
         this.ellipsoid = ellipsoid;
 

@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2019 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,8 +12,9 @@
   limitations under the License.
 -->
 
-Building Rugged
-===============
+<a name="top"></a>
+
+# Building Rugged
 
 Rugged can be built from source using several different tools.
   
@@ -21,10 +22,9 @@ All these tools are Java based and can run on many different operating
 systems, including Unix, GNU/Linux, Windows and Mac OS X. Some GNU/Linux
 distributions provide these tools in their packages repositories.
 
-Building with Maven 3
----------------------
+## Building with Maven 3
 
-[Maven](http://maven.apache.org/) is a build tool that goes far beyond
+[Maven](http://maven.apache.org/ "Maven homepage") is a build tool that goes far beyond
 simply compiling and packaging a product. It is also able to resolve
 dependencies (including downloading the appropriate versions from the public
 repositories), to run automated tests, to launch various checking tools and
@@ -57,15 +57,14 @@ with the following command:
     mvn install
 
 For other commands like generating the site, or generating the
-[checkstyle](http://checkstyle.sourceforge.net/),
-[findbugs](http://findbugs.sourceforge.net/) or
-[jacoco](http://www.eclemma.org/jacoco/) reports, see the maven
-plugins documentation at [maven site](http://maven.apache.org/plugins/index.html).
+[checkstyle](http://checkstyle.sourceforge.net/ "Checkstyle homepage"),
+[spotbugs](https://spotbugs.github.io/ "Spotbugs homepage") or
+[jacoco](http://www.eclemma.org/jacoco/ "Jacoco homepage") reports, see the maven
+plugins documentation at [maven site](http://maven.apache.org/plugins/index.html "Maven plugins homepage").
 
-Building with Eclipse
----------------------
+## Building with Eclipse
 
-[Eclipse](http://www.eclipse.org/) is a very rich Integrated Development
+[Eclipse](http://www.eclipse.org/  "Eclipse homepage") is a very rich Integrated Development
 Environment (IDE). It is a huge product and not a simple build tool.
 
 For systems not providing eclipse as a package, it can be downloaded from its
@@ -89,7 +88,9 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
   * set the external libraries to JRE system library (provided by Eclipse),
     Junit 4.x (provided by Eclipse), Hipparchus (available at
     Hipparchus project
-    [downloads page](https://www.hipparchus.org/downloads.html),
+    [downloads page](https://www.hipparchus.org/downloads.html)),
     and Orekit (available at Orekit
-    [downloads page](https://www.orekit.org/forge/projects/orekit/files)
+    [download page](https://www.orekit.org/download.html))
     in the libraries tab of the Configure Build Path dialog
+
+[Top of the page](#top)

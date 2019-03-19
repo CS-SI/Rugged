@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -41,7 +41,7 @@ import org.orekit.utils.IERSConventions;
 public class ExtendedEllipsoidTest {
 
     @Test
-    public void testPointAtLongitude() throws RuggedException, OrekitException {
+    public void testPointAtLongitude() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
@@ -55,7 +55,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLongitudeError() throws RuggedException, OrekitException {
+    public void testPointAtLongitudeError() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         double longitude = 1.25;
@@ -73,7 +73,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitude() throws RuggedException, OrekitException {
+    public void testPointAtLatitude() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
@@ -88,7 +88,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeTwoPointsSameSide() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeTwoPointsSameSide() {
 
         // the line of sight is almost parallel an iso-latitude cone generatrix
         // the spacecraft is at latitude lTarget - 0.951", and altitude 794.6km
@@ -124,7 +124,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeTwoPointsOppositeSides() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeTwoPointsOppositeSides() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 0.1);
@@ -143,7 +143,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeAlmostEquator() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeAlmostEquator() {
         Vector3D      p              = new Vector3D(5767483.098580201, 4259689.325372237, -41553.67750784925);
         Vector3D      d              = new Vector3D(-0.7403523952347795, -0.6701811835520302, 0.05230212180799747);
         double        latitude       = -3.469446951953614E-18;
@@ -155,7 +155,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeErrorQuadraticEquation() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeErrorQuadraticEquation() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
@@ -172,7 +172,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeErrorNappe() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeErrorNappe() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 0.1);
@@ -189,7 +189,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtAltitude() throws RuggedException, OrekitException {
+    public void testPointAtAltitude() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
@@ -202,7 +202,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtAltitudeStartInside() throws RuggedException, OrekitException {
+    public void testPointAtAltitudeStartInside() {
 
         Vector3D p = new Vector3D(322010.30, 6962.30, -644982.20);
         Vector3D d = new Vector3D(-1.0, -2.0, -3.0);
@@ -215,7 +215,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtAltitudeError() throws RuggedException, OrekitException {
+    public void testPointAtAltitudeError() {
 
         Vector3D p = new Vector3D(3220103.0, 69623.0, -6449822.0);
         Vector3D d = new Vector3D(1.0, 2.0, 3.0);
@@ -231,7 +231,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testConvertLOS() throws RuggedException, OrekitException {
+    public void testConvertLOS() {
 
         GeodeticPoint gp   = new GeodeticPoint(-0.2, 1.8, 2400.0);
         Vector3D p         = ellipsoid.transform(gp);
@@ -251,7 +251,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeError() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeError() {
 
         Vector3D p = new Vector3D(-3052690.88784496, 6481300.309857268, 25258.7478104745);
         Vector3D d = new Vector3D(0.6, -0.8, 0.0);
@@ -269,7 +269,7 @@ public class ExtendedEllipsoidTest {
     }
 
     @Test
-    public void testPointAtLatitudeIssue1() throws RuggedException, OrekitException {
+    public void testPointAtLatitudeIssue1() {
 
         Vector3D position = new Vector3D(-1988136.619268088, -2905373.394638188, 6231185.484365295);
         Vector3D los = new Vector3D(0.3489121277213534, 0.3447806500507106, -0.8714279261531437);

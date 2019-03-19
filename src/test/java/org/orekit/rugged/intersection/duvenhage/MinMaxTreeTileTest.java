@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,17 +19,20 @@ package org.orekit.rugged.intersection.duvenhage;
 import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well1024a;
 import org.hipparchus.util.FastMath;
+
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
-import org.orekit.rugged.errors.RuggedException;
+import org.junit.rules.TemporaryFolder;
 
 public class MinMaxTreeTileTest {
 
     @Test
     public void testSizeTall()
-        throws RuggedException, SecurityException, NoSuchFieldException,
+        throws SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
         MinMaxTreeTile tile = createTile(107, 19);
         Assert.assertEquals(9, tile.getLevels());
@@ -68,7 +71,7 @@ public class MinMaxTreeTileTest {
 
     @Test
     public void testSizeFat()
-        throws RuggedException, SecurityException, NoSuchFieldException,
+        throws SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
         MinMaxTreeTile tile = createTile(4, 7);
         Assert.assertEquals(4, tile.getLevels());
@@ -96,12 +99,12 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testSinglePixel() throws RuggedException {
+    public void testSinglePixel() {
         Assert.assertEquals(0, createTile(1, 1).getLevels());
     }
 
     @Test
-    public void testMinMax() throws RuggedException {
+    public void testMinMax() {
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
 
@@ -133,7 +136,7 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testLocateMinMax() throws RuggedException {
+    public void testLocateMinMax() {
         RandomGenerator random = new Well1024a(0xca9883209c6e740cl);
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
@@ -167,7 +170,7 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testIssue189() throws RuggedException {
+    public void testIssue189() {
         MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, 2, 2);
         tile.setElevation(0, 0, 1.0);
@@ -182,14 +185,14 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testMergeLarge() throws RuggedException {
+    public void testMergeLarge() {
         MinMaxTreeTile tile = createTile(1201, 1201);
         Assert.assertEquals(21, tile.getLevels());
         Assert.assertEquals( 7, tile.getMergeLevel(703, 97, 765, 59));
     }
 
     @Test
-    public void testMergeLevel() throws RuggedException {
+    public void testMergeLevel() {
         for (int nbRows = 1; nbRows < 20; nbRows++) {
             for (int nbColumns = 1; nbColumns < 20; nbColumns++) {
 
@@ -236,7 +239,7 @@ public class MinMaxTreeTileTest {
     }
 
     @Test
-    public void testSubTilesLimits() throws RuggedException {
+    public void testSubTilesLimits() {
         for (int nbRows = 1; nbRows < 25; nbRows++) {
             for (int nbColumns = 1; nbColumns < 25; nbColumns++) {
 
@@ -265,6 +268,17 @@ public class MinMaxTreeTileTest {
         }
     }
 
+    @Test
+    public void testForCoverage() throws IOException {
+        
+        org.orekit.rugged.errors.DumpManager.activate(tempFolder.newFile());
+
+        MinMaxTreeTile tile = createTile(1201, 1201);
+        tile.getMinElevation(100, 100, 0);
+        
+        org.orekit.rugged.errors.DumpManager.deactivate();
+    }
+    
     private int[] neighbors(int row, int column, int nbRows, int nbColumns, int stages) {
 
         // poor man identification of neighbors cells merged together with specified cell
@@ -335,7 +349,7 @@ public class MinMaxTreeTileTest {
 
     }
 
-    private MinMaxTreeTile createTile(int nbRows, int nbColumns) throws RuggedException {
+    private MinMaxTreeTile createTile(int nbRows, int nbColumns) {
         MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
         tile.setGeometry(1.0, 2.0, 0.1, 0.2, nbRows, nbColumns);
         for (int i = 0; i < nbRows; ++i) {
@@ -346,5 +360,8 @@ public class MinMaxTreeTileTest {
         tile.tileUpdateCompleted();
         return tile;
     }
+    
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
 }

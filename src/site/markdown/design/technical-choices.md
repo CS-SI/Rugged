@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2019 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,10 +12,13 @@
   limitations under the License.
 -->
 
-Earth frames
-------------
+<a name="top"></a>
 
-As Rugged is built on top of Orekit and Hipparchus, all the flight dynamics and
+# Technical choices 
+
+## Earth frames
+
+As Rugged is built on top of [Orekit](https://www.orekit.org/ "Orekit homepage") and [Hipparchus](https://hipparchus.org/ "Hipparchus homepage"), all the flight dynamics and
 mathematical computation are delegated to these two libraries and the full accuracy available
 is used. This implies for example that when computing frames conversions between the inertial
 frame and the Earth frame, the complete set of IERS Earth Orientation Parameters (EOP)
@@ -77,8 +80,7 @@ it is still possible to compute very accurately the geometry of the image.
 As a summary, Rugged may give results slightly more accurate than other geometric correction
 libraries, and is compatible with both the legacy frames and the newer frames.
 
-Position and attitude
----------------------
+## Position and attitude
 
 The global geometry of the image depends on the spacecraft position and attitude. Both are obtained using any
 Orekit provided propagators. Thanks to the architecture of the Orekit propagation framework, propagation can
@@ -103,7 +105,7 @@ components between Q1 and Q2 or -Q1 and Q2 leads to completely different rotatio
 will typically have one sign change per orbit at some random point. The third reason is that instead of doing an
 interpolation that respect quaternions constraint, the interpolation departs from the constraint first and attempts to
 recover afterwards in a normalization step. Orekit uses a method based on Sergeï Tanygin's paper
-[Attitude interpolation](http://www.agi.com/downloads/resources/white-papers/Attitude-interpolation.pdf) with slight
+[Attitude interpolation](http://www.agi.com/resources/white-papers/attitude-interpolation) with slight
 changes to use modified Rodrigues vectors as defined in Malcolm D Shuster's
 [A Survey of Attitude Representations](http://www.ladispe.polito.it/corsi/Meccatronica/02JHCOR/2011-12/Slides/Shuster_Pub_1993h_J_Repsurv_scan.pdf),
 despite attitude is still represented by quaternions in Orekit (Rodrigues vectors are used only for interpolation).
@@ -122,8 +124,8 @@ As a summary, Rugged relies on either propagation or interpolation at user choic
 more sophisticated than linear interpolation of quaternion components, but no differences are expect at this level,
 except for simpler development and validation as everything is readily implemented and validated in Orekit.
 
-Optical path
-------------
+## Optical path
+
 
 ### Inside spacecraft
 
@@ -198,8 +200,7 @@ when the effect is explicitly expected to be compensated at a later stage in the
 posteriori polynomial models. This use case can occur in operational products. It seems however better to compensate these effects early
 as they can be computed to full accuracy with a negligible computation overhead.
 
-Arrival on ellipsoid
---------------------
+## Arrival on ellipsoid
 
 Once a pixel line-of-sight is known in Earth frame, computing its intersection with a reference ellipsoid is straightforward using an
 instance of OneAxisEllipsoid. The Orekit library computes this intersection as a NormalizedGeodeticPoint instance on the ellipsoid surface.
@@ -224,8 +225,7 @@ hypothesis is also available (i.e. it consider the line-of-sight is a straight l
 is not recommended. The computing overhead due to properly using ellipsoid shape is of the order of magnitude of 3%, so ignoring this on the
 sake of performances is irrelevant.
 
-Errors compensation summary
----------------------------
+## Errors compensation summary
 
 The following table summarizes the error compensations performed in the Rugged library which are not present in some other geometry correction libraries:
 
@@ -237,3 +237,6 @@ The following table summarizes the error compensations performed in the Rugged l
 |                light time correction                       |          1.2m         |         East-West       |pixel-dependent, can be switched off if compensated elsewhere in the processing chain
 |                  aberration of light                       |           20m         |        along track      |depends on spacecraft velocity, can be switched off if compensated elsewhere in the processing chain
 |                    flat-body                               |          0.8m         |   across line-of-sight  |error increases a lot for large fields of view, can be switched off, but this is not recommended
+|                 atmospheric refraction                     |          < 2m         |     horizontal shift    |for multi-layer atmospheric model
+
+[Top of the page](#top)

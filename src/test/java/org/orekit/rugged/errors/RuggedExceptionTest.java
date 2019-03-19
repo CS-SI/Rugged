@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -63,10 +63,18 @@ public class RuggedExceptionTest {
     @Test
     public void testInternalError() {
         RuggedException re = new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy");
-        RuntimeException rte = RuggedException.createInternalError(re);
-        Assert.assertFalse(re.getLocalizedMessage().contains("rugged-developers@orekit.org"));
-        Assert.assertTrue(rte.getLocalizedMessage().contains("rugged-developers@orekit.org"));
-        Assert.assertTrue(rte.getMessage().contains("rugged-developers@orekit.org"));
+        RuntimeException rte = new RuggedInternalError(re);
+        Assert.assertFalse(re.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
+        Assert.assertTrue(rte.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
+        Assert.assertTrue(rte.getMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
     }
 
+    @Deprecated
+    @Test
+    public void testCoverage() {
+        RuggedExceptionWrapper rew = new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy"));
+        RuggedException re = rew.getException();
+        Assert.assertEquals(RuggedMessages.DUPLICATED_PARAMETER_NAME, re.getSpecifier());
+        Assert.assertEquals("dummy", re.getParts()[0]);
+    }
 }

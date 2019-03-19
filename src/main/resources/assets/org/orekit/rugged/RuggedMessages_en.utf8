@@ -1,5 +1,5 @@
-# internal error, contact maintenance at {0}
-INTERNAL_ERROR = internal error, contact maintenance at {0}
+# internal error, please notify development team by creating an issue at {0}
+INTERNAL_ERROR = internal error, please notify development team by creating an issue at {0}
 
 # no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
 OUT_OF_TILE_INDICES = no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)
@@ -64,6 +64,9 @@ LIGHT_TIME_CORRECTION_REDEFINED = light time correction redefined, line {0}, fil
 # aberration of light correction redefined, line {0}, file {1}: {2}
 ABERRATION_OF_LIGHT_CORRECTION_REDEFINED = aberration of light correction redefined, line {0}, file {1}: {2}
 
+# atmospheric refraction correction redefined, line {0}, file {1}: {2}
+ATMOSPHERIC_REFRACTION_REDEFINED = atmospheric refraction correction redefined, line {0}, file {1}: {2}
+
 # tile {0} already defined, line {1}, file {2}: {3}
 TILE_ALREADY_DEFINED = tile {0} already defined, line {1}, file {2}: {3}
 
@@ -87,3 +90,9 @@ UNSUPPORTED_REFINING_CONTEXT = refining using {0} rugged instance is not handled
 
 # no atmospheric layer data at altitude {0} (lowest altitude: {1})
 NO_LAYER_DATA = no atmospheric layer data at altitude {0} (lowest altitude: {1})
+
+# step {0} is not valid : {1}
+INVALID_STEP = step {0} is not valid : {1}
+
+# range between min line {0} and max line {1} is invalid {2}
+INVALID_RANGE_FOR_LINES = range between min line {0} and max line {1} is invalid {2}

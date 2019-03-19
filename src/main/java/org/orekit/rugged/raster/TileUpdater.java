@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 package org.orekit.rugged.raster;
-
-import org.orekit.rugged.errors.RuggedException;
 
 /** Interface used to update Digital Elevation Model tiles.
  * <p>
@@ -80,9 +78,7 @@ public interface TileUpdater {
      * @param latitude latitude that must be covered by the tile (rad)
      * @param longitude longitude that must be covered by the tile (rad)
      * @param tile to update
-     * @exception RuggedException if tile cannot be updated
      */
-    void updateTile(double latitude, double longitude, UpdatableTile tile)
-        throws RuggedException;
+    void updateTile(double latitude, double longitude, UpdatableTile tile);
 
 }

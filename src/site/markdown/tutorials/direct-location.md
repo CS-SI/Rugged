@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2017 CS Systèmes d'Information
+<!--- Copyright 2013-2019 CS Systèmes d'Information
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -12,6 +12,8 @@
   limitations under the License.
 -->
 
+<a name="top"></a>
+
 # Rugged initialization and direct location
 
 This tutorial explains how to initialize Rugged and use it to geolocate a satellite image.
@@ -21,7 +23,7 @@ list of positions, velocities and attitude quaternions recorded during the acqui
 passing all this information to Rugged, we will be able to precisely locate each point of
 the image on the Earth. Well, not exactly precise, as this first tutorial does not use a
 Digital Elevation Model, but considers the Earth as an ellipsoid. The DEM will be added in
-a second tutorial: [Direct location with a DEM](direct-location-with-DEM.html). The objective
+a second tutorial: [Direct location with a DEM](./direct-location-with-DEM.html). The objective
 here is limited to explain how to initialize everything Rugged needs to know about the sensor
 and the acquisition.   
 
@@ -127,9 +129,9 @@ which frames we are using and convert if necessary.
 
 Conversion from inertial to Earth-rotating frame is transparent to the user and is based on the most
 recent precession/nutation model on top of which corrections published by the IERS are applied. IERS
-bulletins and other physical data are provided within the orekit-data folder. There are several ways
+bulletins and other physical data are provided within the orekit data folder. There are several ways
 to configure Orekit to use this data. More information is given
-[here](https://www.orekit.org/forge/projects/orekit/wiki/Configuration).
+[here](../configuration.html)
 
 In our application, we simply need to know the name of the frames we are working with. Positions and
 velocities are given in the ITRF terrestrial frame, while the quaternions are given in EME2000
@@ -224,7 +226,7 @@ Elevation Model in this tutorial, we could have omitted this call and it would h
 We preferred to let it in so users do not forget to set the Digital Elevation Model for intersection
 algorithms that really use them. As the model will be ignored, we can put the parameters for this
 setter to `null` and `0`. Of course if another algorithm had been chosen,  null parameters would clearly
-not work, this is explained in another tutorial: [Direct location with a DEM](direct-location-with-DEM.html).
+not work, this is explained in another tutorial: [Direct location with a DEM](./direct-location-with-DEM.html).
 
 The *setEllipsoid* setter defines the shape and orientation of the ellipsoid. We use simple predefined enumerates:
 `EllipsoidId.WGS84`, `InertialFrameId.EME2000`, but could also use a custom ellipsoid if needed.
@@ -321,3 +323,5 @@ Otherwise an ArrayIndexOutOfBoundsException will be thrown.
 ## Source code 
 
 The source code is available in DirectLocation.java (package fr.cs.examples under src/tutorials)
+
+[Top of the page](#top)

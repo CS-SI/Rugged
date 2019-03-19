@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,12 +17,14 @@
 
 package org.orekit.rugged.adjustment;
 
+import org.hipparchus.linear.LUDecomposer;
+import org.hipparchus.linear.QRDecomposer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.GaussNewtonOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LevenbergMarquardtOptimizer;
-import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 
 /** LeastSquareAdjuster
  * Class for setting least square algorithm chosen for solving optimization problem.
@@ -75,14 +77,14 @@ public class LeastSquareAdjuster {
                 return new LevenbergMarquardtOptimizer();
 
             case GAUSS_NEWTON_LU :
-                return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.LU);
+                return new GaussNewtonOptimizer(new LUDecomposer(1e-11), true);
 
             case GAUSS_NEWTON_QR :
-                return new GaussNewtonOptimizer().withDecomposition(GaussNewtonOptimizer.Decomposition.QR);
+                return new GaussNewtonOptimizer(new QRDecomposer(1e-11), false);
 
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
     }
 }

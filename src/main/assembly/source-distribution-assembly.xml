@@ -12,7 +12,7 @@
        <include>BUILDING.txt</include>
        <include>pom.xml</include>
        <include>checkstyle.xml</include>
-       <include>findbugs-exclude-filter.xml</include>
+       <include>spotbugs-exclude-filter.xml</include>
        <include>license-header.txt</include>
       </includes>
       <useDefaultExcludes>true</useDefaultExcludes>

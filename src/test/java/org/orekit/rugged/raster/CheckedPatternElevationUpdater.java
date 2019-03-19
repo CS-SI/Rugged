@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,7 +17,6 @@
 package org.orekit.rugged.raster;
 
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.errors.RuggedException;
 
 public class CheckedPatternElevationUpdater implements TileUpdater {
 
@@ -33,8 +32,8 @@ public class CheckedPatternElevationUpdater implements TileUpdater {
         this.elevation2 = elevation2;
     }
 
-    public void updateTile(double latitude, double longitude, UpdatableTile tile)
-        throws RuggedException {
+    public void updateTile(double latitude, double longitude, UpdatableTile tile) {
+        
         double step         = size / (n - 1);
         double minLatitude  = size * FastMath.floor(latitude  / size);
         double minLongitude = size * FastMath.floor(longitude / size);

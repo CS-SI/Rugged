@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 CS Systèmes d'Information
+/* Copyright 2013-2019 CS Systèmes d'Information
  * Licensed to CS Systèmes d'Information (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,6 +16,10 @@
  */
 package org.orekit.rugged.api;
 
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +55,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
-import org.orekit.errors.OrekitExceptionWrapper;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
@@ -59,9 +62,11 @@ import org.orekit.orbits.Orbit;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.GroundOptimizationProblemBuilder;
+import org.orekit.rugged.adjustment.measurements.Observables;
+import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.errors.RuggedException;
-import org.orekit.rugged.errors.RuggedExceptionWrapper;
 import org.orekit.rugged.errors.RuggedMessages;
+import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
@@ -72,9 +77,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
-import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.utils.DSGenerator;
-import org.orekit.rugged.utils.RefiningTest;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -97,7 +100,7 @@ public class RuggedTest {
     @Ignore
     @Test
     public void testMayonVolcanoTiming()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         long t0 = System.currentTimeMillis();
         int dimension = 2000;
@@ -122,7 +125,8 @@ public class RuggedTest {
         // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                              FastMath.toRadians(10.0), dimension).build();
+                                                              FastMath.toRadians(10.0), dimension).
+                                                              build();
 
         // linear datation model: at reference time we get line 1000, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -187,7 +191,7 @@ public class RuggedTest {
 
     @Test
     public void testLightTimeCorrection()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 400;
 
@@ -265,7 +269,7 @@ public class RuggedTest {
 
     @Test
     public void testAberrationOfLightCorrection()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 400;
 
@@ -318,12 +322,11 @@ public class RuggedTest {
             Assert.assertTrue(Vector3D.distance(pWith, pWithout) > 20.0);
             Assert.assertTrue(Vector3D.distance(pWith, pWithout) < 20.5);
         }
-
     }
-
+    
     @Test
     public void testFlatBodyCorrection()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -384,8 +387,8 @@ public class RuggedTest {
     }
 
     @Test
-    public void testLocationsinglePoint()
-        throws RuggedException, OrekitException, URISyntaxException {
+    public void testLocationSinglePoint()
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -443,7 +446,7 @@ public class RuggedTest {
 
     @Test
     public void testLocationsinglePointNoCorrections()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -504,7 +507,7 @@ public class RuggedTest {
 
     @Test
     public void testBasicScan()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         int dimension = 200;
 
@@ -567,7 +570,7 @@ public class RuggedTest {
     @Ignore
     @Test
     public void testInverseLocationTiming()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         long t0       = System.currentTimeMillis();
         int dimension = 2000;
@@ -584,12 +587,12 @@ public class RuggedTest {
         for (int i = 0; i < nbSensors; ++i) {
             // one line sensor
             // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-            // los: swath in the (YZ) plane, looking roughly at 50° roll (sensor-dependent), 2.6" per pixel
+            // los: swath in the (YZ) plane, looking roughly at 50° roll (sensor-dependent), 5.2" per pixel
             Vector3D position = new Vector3D(1.5, 0, -0.2);
             TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                                FastMath.toRadians(50.0 - 0.001 * i),
                                                                                RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                                                                  Vector3D.PLUS_I, FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
+                                                                  Vector3D.PLUS_I, FastMath.toRadians((dimension/2.) * 5.2 / 3600.0), dimension).build();
 
             // linear datation model: at reference time we get roughly middle line, and the rate is one line every 1.5ms
             LineDatation lineDatation = new LinearLineDatation(crossing, i + dimension / 2, 1.0 / 1.5e-3);
@@ -677,7 +680,7 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocation()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
         checkInverseLocation(2000, false, false, 4.0e-7, 5.0e-6);
         checkInverseLocation(2000, false, true,  1.0e-5, 2.0e-7);
         checkInverseLocation(2000, true,  false, 4.0e-7, 4.0e-7);
@@ -686,7 +689,7 @@ public class RuggedTest {
 
     @Test
     public void testDateLocation()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
         checkDateLocation(2000, false, false, 7.0e-7);
         checkDateLocation(2000, false, true,  2.0e-5);
         checkDateLocation(2000, true,  false, 8.0e-7);
@@ -695,14 +698,14 @@ public class RuggedTest {
     
     @Test
     public void testLineDatation()
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
         checkLineDatation(2000, 7.0e-7);
         checkLineDatation(10000, 8.0e-7);
     }
 
 
     @Test
-    public void testInverseLocNearLineEnd() throws OrekitException, RuggedException, URISyntaxException {
+    public void testInverseLocNearLineEnd() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -804,7 +807,7 @@ public class RuggedTest {
     }
 
     @Test
-    public void testInverseLoc() throws OrekitException, RuggedException, URISyntaxException {
+    public void testInverseLoc() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -905,7 +908,7 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocCurvedLine()
-        throws RuggedException, URISyntaxException, OrekitException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -917,10 +920,10 @@ public class RuggedTest {
 
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-        // los: swath in the (YZ) plane, looking at nadir, 2.6" per pixel, 3" sagitta
+        // los: swath in the (YZ) plane, looking at nadir, 5.2" per pixel, 3" sagitta
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSCurvedLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
-                                                             FastMath.toRadians(dimension * 2.6 / 3600.0),
+                                                             FastMath.toRadians((dimension/2.) * 5.2 / 3600.0),
                                                              FastMath.toRadians(3.0 / 3600.0),
                                                              dimension);
 
@@ -961,7 +964,7 @@ public class RuggedTest {
 
     private void checkInverseLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                       double maxLineError, double maxPixelError)
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -972,13 +975,14 @@ public class RuggedTest {
 
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-        // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+        // los: swath in the (YZ) plane, looking at 50° roll, 5.2" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
-                                                                           FastMath.toRadians(50.0),
+                                                                           FastMath.toRadians(5.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                               Vector3D.PLUS_I,
-                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
+                                                              FastMath.toRadians((dimension/2.) * 5.2 / 3600.0), dimension).build();
+        // In fact the pixel size = 5.2" as we construct the LOS with the full line (dimension) instead of dimension/2
 
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -1017,6 +1021,7 @@ public class RuggedTest {
                                                         (1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
                                                         (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
                                                         0, dimension);
+
             Assert.assertEquals(referenceLine, sp.getLineNumber(),  maxLineError);
             Assert.assertEquals(p,             sp.getPixelNumber(), maxPixelError);
         }
@@ -1053,28 +1058,28 @@ public class RuggedTest {
 
     @Test
     public void testInverseLocationDerivativesWithoutCorrections()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, false, false,
                                          8.0e-9, 3.0e-10, 5.0e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithLightTimeCorrection()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, true, false,
                                          3.0e-9, 9.0e-9, 2.1e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, false, true,
                                          4.2e-10, 3.0e-10, 3.4e-12, 7.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithAllCorrections()
-        throws RuggedException, OrekitException {
+        {
         doTestInverseLocationDerivatives(2000, true, true,
                                          3.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
     }
@@ -1087,8 +1092,6 @@ public class RuggedTest {
      * @param pixelTolerance
      * @param lineDerivativeRelativeTolerance
      * @param pixelDerivativeRelativeTolerance
-     * @throws RuggedException
-     * @throws OrekitException
      */
     private void doTestInverseLocationDerivatives(int dimension,
                                                   boolean lightTimeCorrection,
@@ -1097,7 +1100,7 @@ public class RuggedTest {
                                                   double pixelTolerance,
                                                   double lineDerivativeRelativeTolerance,
                                                   double pixelDerivativeRelativeTolerance)
-        throws RuggedException, OrekitException {
+        {
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -1109,17 +1112,18 @@ public class RuggedTest {
 
             // one line sensor
             // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-            // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+            // los: swath in the (YZ) plane, looking at 50° roll, 5.2" per pixel
             Vector3D position = new Vector3D(1.5, 0, -0.2);
             LOSBuilder losBuilder =
              TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                          FastMath.toRadians(50.0),
                                                          RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                             Vector3D.PLUS_I,
-                                            FastMath.toRadians(dimension * 2.6 / 3600.0), dimension);
+                                            FastMath.toRadians((dimension/2.) * 5.2 / 3600.0), dimension);
             losBuilder.addTransform(new FixedRotation("roll",  Vector3D.MINUS_I, 0.0));
             losBuilder.addTransform(new FixedRotation("pitch", Vector3D.MINUS_J, 0.0));
             TimeDependentLOS los = losBuilder.build();
+            // In fact the pixel size = 5.2" as we construct the LOS with the full line (dimension) instead of dimension/2
 
             // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
             LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -1165,7 +1169,7 @@ public class RuggedTest {
             
             java.lang.reflect.Method getGenerator = GroundOptimizationProblemBuilder.class.getSuperclass().getDeclaredMethod("getGenerator");
             getGenerator.setAccessible(true);
-            
+
             DSGenerator generator = (DSGenerator) getGenerator.invoke(optimizationPbBuilder);
 
             double referenceLine = 0.87654 * dimension;
@@ -1193,60 +1197,36 @@ public class RuggedTest {
 
             UnivariateDifferentiableFunction lineVSroll =
                             differentiator.differentiate((double roll) -> {
-                                try {
-                                    rollDriver.setValue(roll);
-                                    pitchDriver.setValue(0);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(roll);
+                                pitchDriver.setValue(0);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
                             });
             double dLdR = lineVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdR, result[0].getPartialDerivative(1, 0), dLdR * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction lineVSpitch =
                             differentiator.differentiate((double pitch) -> {
-                                try {
-                                    rollDriver.setValue(0);
-                                    pitchDriver.setValue(pitch);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(0);
+                                pitchDriver.setValue(pitch);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
                             });
             double dLdP = lineVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dLdP, result[0].getPartialDerivative(0, 1), dLdP * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSroll =
                             differentiator.differentiate((double roll) -> {
-                                try {
-                                    rollDriver.setValue(roll);
-                                    pitchDriver.setValue(0);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(roll);
+                                pitchDriver.setValue(0);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
                             });
             double dXdR = pixelVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdR, result[1].getPartialDerivative(1, 0), dXdR * pixelDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSpitch =
                             differentiator.differentiate((double pitch) -> {
-                                try {
-                                    rollDriver.setValue(0);
-                                    pitchDriver.setValue(pitch);
-                                    return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
-                                } catch (OrekitException e) {
-                                    throw new OrekitExceptionWrapper(e);
-                                } catch (RuggedException e) {
-                                    throw new RuggedExceptionWrapper(e);
-                                }
+                                rollDriver.setValue(0);
+                                pitchDriver.setValue(pitch);
+                                return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
                             });
             double dXdP = pixelVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
             Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
@@ -1254,7 +1234,7 @@ public class RuggedTest {
         } catch (InvocationTargetException | NoSuchMethodException |
                 SecurityException | IllegalAccessException |
                 IllegalArgumentException | URISyntaxException |
-                OrekitExceptionWrapper | RuggedExceptionWrapper e) {
+                OrekitException | RuggedException e) {
             Assert.fail(e.getLocalizedMessage());
         }
     }
@@ -1262,7 +1242,7 @@ public class RuggedTest {
 
     private void checkDateLocation(int dimension, boolean lightTimeCorrection, boolean aberrationOfLightCorrection,
                                        double maxDateError)
-        throws RuggedException, OrekitException, URISyntaxException {
+        throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
@@ -1273,13 +1253,14 @@ public class RuggedTest {
 
         // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
-        // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
+        // los: swath in the (YZ) plane, looking at 50° roll, 5.2" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                                                                            FastMath.toRadians(50.0),
                                                                            RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                                               Vector3D.PLUS_I,
-                                                              FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
+                                                              FastMath.toRadians((dimension/2.) * 5.2 / 3600.0), dimension).build();
+        // In fact the pixel size = 5.2" as we construct the LOS with the full line (dimension) instead of dimension/2
 
         // linear datation model: at reference time we get line 100, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -1340,22 +1321,23 @@ public class RuggedTest {
     }
 
     private void checkLineDatation(int dimension, double maxLineError)
-    				throws RuggedException, OrekitException, URISyntaxException {
+                    throws URISyntaxException {
 
-    	String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-    	DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
 
-    	AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
-    	// one line sensor
+        // one line sensor
         // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
         // los: swath in the (YZ) plane, looking at 50° roll, 2.6" per pixel
         Vector3D position = new Vector3D(1.5, 0, -0.2);
         TimeDependentLOS los = TestUtils.createLOSPerfectLine(new Rotation(Vector3D.PLUS_I,
                 FastMath.toRadians(50.0),
                 RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-        		Vector3D.PLUS_I,
-        		FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
+                Vector3D.PLUS_I,
+                FastMath.toRadians(dimension * 2.6 / 3600.0), dimension).build();
+        // In fact the pixel size = 5.2" as we construct the LOS with the full line (dimension) instead of dimension/2
 
         // linear datation model: at reference time we get the middle line, and the rate is one line every 1.5ms
         LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
@@ -1372,55 +1354,43 @@ public class RuggedTest {
         Assert.assertEquals(firstLine, recomputedFirstLine, maxLineError);
         Assert.assertEquals(lastLine, recomputedLastLine, maxLineError);
     }
-    
+
     @Test
-    public void testDistanceBetweenLOS() throws RuggedException {
+    public void testDistanceBetweenLOS() {
         
-        // Disruption to apply to roll, pitch (deg) and factor 
-        final double rollValueA =  0.004;
-        final double pitchValueA = 0.0008;
-        final double factorValueA = 1.000000001;
-        final double pitchValueB = -0.0008;
-        
-        RefiningTest refiningTest = new RefiningTest();
-        refiningTest.InitRefiningTest(rollValueA, pitchValueA, factorValueA, pitchValueB);
-        
+        InitInterRefiningTest refiningTest = new InitInterRefiningTest();
+        refiningTest.initRefiningTest();
+
         final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
         final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
         double[] distancesBetweenLOS = refiningTest.computeDistancesBetweenLOS(realPixelA, realPixelB);
         
-        double expectedDistanceBetweenLOS = 1.4324023534834665;
-        double expectedDistanceToTheGround = 6367488.110062852;
+        double expectedDistanceBetweenLOS = 3.88800245;
+        double expectedDistanceToTheGround = 6368020.559109;
 
-        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-10);
+        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 1.e-8);
         Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 1.e-5);
      }
-    
+
     @Test
-    public void testDistanceBetweenLOSDerivatives() throws RuggedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public void testDistanceBetweenLOSDerivatives() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         
-        // Disruption to apply to roll, pitch (deg) and factor 
-        final double rollValueA =  0.004;
-        final double pitchValueA = 0.0008;
-        final double factorValueA = 1.000000001;
-        final double pitchValueB = -0.0008;
-        
-        RefiningTest refiningTest = new RefiningTest();
-        refiningTest.InitRefiningTest(rollValueA, pitchValueA, factorValueA, pitchValueB);
+        InitInterRefiningTest refiningTest = new InitInterRefiningTest();
+        refiningTest.initRefiningTest();
 
         final SensorPixel realPixelA = new SensorPixel(2005.015883575199, 18004.968656395424);
         final SensorPixel realPixelB = new SensorPixel(4798.487736488162, 13952.2195710654);
 
         // Expected distances between LOS and to the ground
-        double expectedDistanceBetweenLOS = 1.4324023534834665;
-        double expectedDistanceToTheGround = 6367488.110062852;
+        double expectedDistanceBetweenLOS = 3.88800245;
+        double expectedDistanceToTheGround = 6368020.559109;
 
         // Expected derivatives for
         // minimum distance between LOS
-        double[] expectedDminDerivatives = {1.4324023534834665, 153938.2318141503, 679398.14124085, -12779.33148208561, -191388.29547926865, -669127.0811123198} ;
+        double[] expectedDminDerivatives = {3.88800245, -153874.01319097, -678866.03112033, 191294.06938169, 668600.16715270} ;
         // minimum distance to the ground
-        double[] expectedDcentralBodyDerivatives = {6367488.110062852, 7018752.447074092, -1578384.972353925, -589929.2355500134, -6850070.113251391, 1958371.974455633};
+        double[] expectedDcentralBodyDerivatives = {6368020.55910153, 7007767.46926062, -1577060.82402054, -6839286.39593802, 1956452.66636262};
 
         DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
 
@@ -1429,22 +1399,120 @@ public class RuggedTest {
         // Minimum distance to the ground
         DerivativeStructure dCentralBody = distancesBetweenLOSwithDS[1];
 
-        Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 1.e-10);
+        Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 1.e-8);
         Assert.assertEquals(expectedDistanceToTheGround, dCentralBody.getValue() , 1.e-5);
 
 
         for (int i = 0; i < dMin.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDminDerivatives[i], dMin.getAllDerivatives()[i], 1.e-10);
+            Assert.assertEquals(expectedDminDerivatives[i], dMin.getAllDerivatives()[i], 1.e-8);
         }
 
         for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 1.e-10);
+            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 1.e-8);
         }
     }
 
+    @Test
+    public void testForCoverage() throws URISyntaxException {
+
+        int dimension = 400;
+
+        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
+        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        final BodyShape  earth = TestUtils.createEarth();
+        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
+
+        AbsoluteDate crossing = new AbsoluteDate("2012-01-07T11:21:15.000", TimeScalesFactory.getUTC());
+
+        // one line sensor
+        // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
+        // los: swath in the (YZ) plane, centered at +Z, ±10° aperture, 960 pixels
+        Vector3D position = new Vector3D(1.5, 0, -0.2);
+        TimeDependentLOS los = TestUtils.createLOSPerfectLine(Vector3D.PLUS_K, Vector3D.PLUS_I,
+                                                              FastMath.toRadians(10.0), dimension).build();
+
+        // linear datation model: at reference time we get line 200, and the rate is one line every 1.5ms
+        LineDatation lineDatation = new LinearLineDatation(crossing, dimension / 2, 1.0 / 1.5e-3);
+        int firstLine = 0;
+        int lastLine  = dimension;
+        LineSensor lineSensor = new LineSensor("line", lineDatation, position, los);
+        AbsoluteDate minDate = lineSensor.getDate(firstLine);
+        AbsoluteDate maxDate = lineSensor.getDate(lastLine);
+
+        RuggedBuilder builder = new RuggedBuilder().
+                setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
+                setEllipsoid(EllipsoidId.IERS2003, BodyRotatingFrameId.ITRF).
+                setTimeSpan(minDate, maxDate, 0.001, 5.0).
+                setTrajectory(InertialFrameId.EME2000,
+                              TestUtils.orbitToPV(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              8, CartesianDerivativesFilter.USE_PV,
+                              TestUtils.orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
+                              2, AngularDerivativesFilter.USE_R).
+                addLineSensor(lineSensor);
+
+        Rugged rugged = builder.build();
+        
+        
+        // Check builder 
+        assertTrue(builder.getName().equalsIgnoreCase("Rugged"));
+        
+        // Check a date in the range of minDate - maxDate
+        AbsoluteDate midddleDate = lineSensor.getDate((firstLine+lastLine)/2.);
+
+        assertTrue(rugged.isInRange(midddleDate));
+        
+        // Get the algorithm
+        assertTrue(rugged.getAlgorithm().getClass().isInstance(new IgnoreDEMAlgorithm()));
+        
+        // Change the min and max line in inverse location to update the SensorMeanPlaneCrossing when the planeCrossing is not null
+        int minLine = firstLine;
+        int maxLine = lastLine;
+        double line = (firstLine + lastLine)/2.;
+        double pixel = dimension/2.;
+        AbsoluteDate date = lineSensor.getDate(line);
+        Vector3D pixelLos = lineSensor.getLOS(date, pixel);
+        GeodeticPoint gp = rugged.directLocation(date, position, pixelLos);
+        
+        SensorPixel sp = rugged.inverseLocation("line", gp, minLine, maxLine);
+        int minLineNew = minLine + 10;
+        int maxLineNew = maxLine - 10;
+        SensorPixel spChangeLines = rugged.inverseLocation("line", gp, minLineNew, maxLineNew);
+        
+        assertEquals(sp.getPixelNumber(), spChangeLines.getPixelNumber(), 1.e-9);
+        assertEquals(sp.getLineNumber(), spChangeLines.getLineNumber(), 1.e-9);
+        
+        // For computeInverseLocOnGridWithoutAtmosphere special cases
+        try {
+            java.lang.reflect.Method computeWithoutAtmosphere = 
+                    rugged.getClass().getDeclaredMethod("computeInverseLocOnGridWithoutAtmosphere",
+                                                        GeodeticPoint[][].class,
+                                                        Integer.TYPE, Integer.TYPE,
+                                                        LineSensor.class, Integer.TYPE, Integer.TYPE);
+            computeWithoutAtmosphere.setAccessible(true);
+            final int nbPixelGrid = 2; 
+            final int nbLineGrid = 2;
+            GeodeticPoint[][] groundGridWithAtmosphere = new GeodeticPoint[nbPixelGrid][nbLineGrid];
+            for (int i = 0; i < nbPixelGrid; i++) {
+                for (int j = 0; j < nbLineGrid; j++) {
+                    groundGridWithAtmosphere[i][j] = null;
+                }
+            }
+             
+            SensorPixel[][] spNull = (SensorPixel[][]) computeWithoutAtmosphere.invoke(rugged, groundGridWithAtmosphere, nbPixelGrid, nbLineGrid, lineSensor, minLine, maxLine);
+            for (int i = 0; i < nbPixelGrid; i++) {
+                for (int j = 0; j < nbLineGrid; j++) {
+                    assertNull(spNull[i][j]);
+                }
+            }
+        } catch (NoSuchMethodException | SecurityException | 
+                IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            Assert.fail(e.getLocalizedMessage());
+        }
+    }
+    
     
     @Before
-    public void setUp() throws OrekitException, URISyntaxException {
+    public void setUp() throws URISyntaxException {
         TestUtils.clearFactories();
     }
 }
