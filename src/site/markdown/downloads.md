@@ -46,9 +46,8 @@ as required.
 
 |  package |                                              link                                                         |
 |----------|-----------------------------------------------------------------------------------------------------------|
-|  source  | rugged-2.1-sources.zip (URL to be defined after official release)                                         |
-|  binary  | rugged-2.1.jar (URL to be defined after official release)                                                 |
-|  javadoc | rugged-2.1-javadoc.jar (URL to be defined after official release)                                         |
+|  source  | [`rugged-2.1-sources.zip`](https://gitlab.orekit.org/orekit/rugged/uploads/a8ed096b6e9b5d1088ad135ac29fce9d/rugged-2.1-sources.zip)    |
+|  binary  | [`rugged-2.1.jar`](https://gitlab.orekit.org/orekit/rugged/uploads/4b9041f962ed8cd3b55164873bb5c861/rugged-2.1.jar)                    |
 version 2.1 downloads (release date: 2019-03-14)
 
 |  package |                                              link                                                         |
