@@ -106,7 +106,10 @@ Rugged is used for image processing of the Sentinel 2 mission at European Space
 Agency (ESA), as well as in the frame of ESA Scientific Exploitation of Operational Missions (SEOM), 
 to calculate topographic shadow masks for Sentinel 2 products.
 
-Rugged has been also used as a Research Library by the French Space Agency (CNES) for
-study on refining for VHR push broom sensors (Pleiades).
+Rugged has been used to validate Airbus Defence and Space (ADS) geolocation library.
+
+Rugged has been also used as a Research Library by the French Space Agency (CNES) for refinement studies for VHR push broom sensors (Pleiades).
+
+Rugged is used for study purposes inside CS Systèmes d'Information.
 
 [Top of the page](#top)
