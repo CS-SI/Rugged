@@ -918,15 +918,21 @@ public class RuggedBuilder {
         // set up the ellipsoid
         switch (ellipsoidID) {
             case GRS80 :
-                return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
+                return new OneAxisEllipsoid(Constants.GRS80_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.GRS80_EARTH_FLATTENING, 
+                                            bodyFrame);
             case WGS84 :
                 return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                             Constants.WGS84_EARTH_FLATTENING,
                                             bodyFrame);
             case IERS96 :
-                return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
+                return new OneAxisEllipsoid(Constants.IERS96_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.IERS96_EARTH_FLATTENING,
+                                            bodyFrame);
             case IERS2003 :
-                return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
+                return new OneAxisEllipsoid(Constants.IERS2003_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.IERS2003_EARTH_FLATTENING,
+                                            bodyFrame);
             default :
                 // this should never happen
                 throw new RuggedInternalError(null);
