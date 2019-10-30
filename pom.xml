@@ -20,7 +20,7 @@
     
     <!-- COTS version -->
     <rugged.orekit.version>10.1-SNAPSHOT</rugged.orekit.version>
-    <rugged.hipparchus.version>1.6-SNAPSHOT</rugged.hipparchus.version>
+    <rugged.hipparchus.version>1.6</rugged.hipparchus.version>
     <rugged.junit.version>4.12</rugged.junit.version>
     
     <!-- Compilers and Tools version -->
