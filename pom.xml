@@ -390,7 +390,7 @@
           </archive>
           <manifestLocation>${project.build.directory}/osgi</manifestLocation>
           <instructions>
-            <Export-Package>org.orekit.rugged.api.*;version=${project.version};-noimport:=true</Export-Package>
+            <Export-Package>org.orekit.rugged.*;version=${project.version};-noimport:=true</Export-Package>
             <Bundle-DocURL>${project.url}</Bundle-DocURL>
           </instructions>
         </configuration>
