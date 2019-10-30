@@ -1408,7 +1408,7 @@ public class RuggedTest {
         }
 
         for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 1.e-8);
+            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 3.e-8);
         }
     }
 
