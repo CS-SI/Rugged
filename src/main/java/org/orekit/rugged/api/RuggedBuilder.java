@@ -919,7 +919,7 @@ public class RuggedBuilder {
         switch (ellipsoidID) {
             case GRS80 :
                 return new OneAxisEllipsoid(Constants.GRS80_EARTH_EQUATORIAL_RADIUS,
-                                            Constants.GRS80_EARTH_FLATTENING, 
+                                            Constants.GRS80_EARTH_FLATTENING,
                                             bodyFrame);
             case WGS84 :
                 return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
