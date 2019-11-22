@@ -20,7 +20,6 @@
     
     <!-- COTS version -->
     <rugged.orekit.version>10.1-SNAPSHOT</rugged.orekit.version>
-    <rugged.hipparchus.version>1.6</rugged.hipparchus.version>
     <rugged.junit.version>4.12</rugged.junit.version>
     
     <!-- Compilers and Tools version -->
@@ -156,28 +155,6 @@
         <type>jar</type>
         <optional>false</optional>
     </dependency>
-    <dependency>
-  	  <groupId>org.hipparchus</groupId>
-	    <artifactId>hipparchus-core</artifactId>
-	    <version>${rugged.hipparchus.version}</version>
-  	    <type>jar</type>
-	    <optional>false</optional>
-    </dependency>
-    <dependency>
-        <groupId>org.hipparchus</groupId>
-        <artifactId>hipparchus-geometry</artifactId>
-        <version>${rugged.hipparchus.version}</version>
-        <type>jar</type>
-        <optional>false</optional>
-    </dependency>
-    <dependency>
-        <groupId>org.hipparchus</groupId>
-        <artifactId>hipparchus-stat</artifactId>
-        <version>${rugged.hipparchus.version}</version>
-        <type>jar</type>
-        <optional>false</optional>
-    </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
