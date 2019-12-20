@@ -54,9 +54,11 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     /** Simple constructor.
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
+     * @param isOvelappingTiles flag to tell if the DEM tiles are overlapping: 
+     *                          true if overlapping; false otherwise.
      */
-    public BasicScanAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        cache = new TilesCache<SimpleTile>(new SimpleTileFactory(), updater, maxCachedTiles);
+    public BasicScanAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOvelappingTiles) {
+        cache = new TilesCache<SimpleTile>(new SimpleTileFactory(), updater, maxCachedTiles, isOvelappingTiles);
         hMin  = Double.POSITIVE_INFINITY;
         hMax  = Double.NEGATIVE_INFINITY;
     }

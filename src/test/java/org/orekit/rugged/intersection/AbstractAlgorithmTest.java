@@ -50,7 +50,7 @@ import org.orekit.utils.PVCoordinates;
 
 public abstract class AbstractAlgorithmTest {
 
-    protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles);
+    protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOvelappingTiles);
 
     @Test
     public void testMayonVolcanoOnSubTileCorner() {
@@ -68,7 +68,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
 
         // preliminary check: the point has been chosen in the spacecraft (YZ) plane
         Transform earthToSpacecraft = new Transform(state.getDate(),
@@ -102,7 +102,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
 
         // test direct location
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
@@ -129,7 +129,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         Assert.assertEquals(  0.0, algorithm.getElevation(latitude, longitude - 2.0e-5), 1.0e-6);
         Assert.assertEquals(120.0, algorithm.getElevation(latitude, longitude + 2.0e-5), 1.0e-6);
 
