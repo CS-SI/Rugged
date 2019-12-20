@@ -268,7 +268,7 @@ public class SimpleTile implements Tile {
     public double interpolateElevation(final double latitude, final double longitude) {
 
         final double doubleLatitudeIndex  = getDoubleLatitudeIndex(latitude);
-        final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
+        final double doubleLongitudeIndex = getDoubleLongitudeIndex(longitude);
         if (doubleLatitudeIndex  < -TOLERANCE || doubleLatitudeIndex  >= (latitudeRows - 1 + TOLERANCE) ||
             doubleLongitudeIndex < -TOLERANCE || doubleLongitudeIndex >= (longitudeColumns - 1 + TOLERANCE)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES,
@@ -422,7 +422,7 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public int getFloorLongitudeIndex(final double longitude) {
-        return (int) FastMath.floor(getDoubleLontitudeIndex(longitude));
+        return (int) FastMath.floor(getDoubleLongitudeIndex(longitude));
     }
 
     /** Get the latitude index of a point.
@@ -437,7 +437,7 @@ public class SimpleTile implements Tile {
      * @param longitude geodetic longitude (rad)
      * @return longitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLontitudeIndex(final double longitude) {
+    private double getDoubleLongitudeIndex(final double longitude) {
         return (longitude - minLongitude) / longitudeStep;
     }
 
@@ -468,6 +468,53 @@ public class SimpleTile implements Tile {
             } else if (latitudeIndex <= (latitudeRows - 2)) {
                 return Location.EAST;
             } else {
+                return Location.NORTH_EAST;
+            }
+        }
+    }
+
+    /** {@inheritDoc} 
+     * @sinceX.x
+     */
+    @Override
+    public Location checkNeighborhood(double latitude, double longitude) {
+        
+// TODO GP check if useful ...
+        
+        final int latitudeIndex  = getFloorLatitudeIndex(latitude);
+        final int longitudeIndex = getFloorLongitudeIndex(longitude);
+        System.out.format(">>> Index lat = " + latitudeIndex + " long = " + longitudeIndex + " ");
+        if (longitudeIndex < 1) {
+            if (latitudeIndex < 1) {
+                System.out.println(Location.SOUTH_WEST + "\n");
+                return Location.SOUTH_WEST;
+            } else if (latitudeIndex <= (latitudeRows - 2)) {
+                System.out.println(Location.WEST + "\n");
+                return Location.WEST;
+            } else {
+                System.out.println(Location.NORTH_WEST + "\n");
+                return Location.NORTH_WEST;
+            }
+        } else if (longitudeIndex <= (longitudeColumns - 2)) {
+            if (latitudeIndex < 1) {
+                System.out.println(Location.SOUTH + "\n");
+                return Location.SOUTH;
+            } else if (latitudeIndex <= (latitudeRows - 2)) {
+                System.out.println(Location.HAS_INTERPOLATION_NEIGHBORS + "\n");
+                return Location.HAS_INTERPOLATION_NEIGHBORS;
+            } else {
+                System.out.println(Location.NORTH + "\n");
+                return Location.NORTH;
+            }
+        } else {
+            if (latitudeIndex < 1) {
+                System.out.println(Location.SOUTH_EAST + "\n");
+                return Location.SOUTH_EAST;
+            } else if (latitudeIndex <= (latitudeRows - 2)) {
+                System.out.println(Location.EAST + "\n");
+                return Location.EAST;
+            } else {
+                System.out.println(Location.NORTH_EAST + "\n");
                 return Location.NORTH_EAST;
             }
         }

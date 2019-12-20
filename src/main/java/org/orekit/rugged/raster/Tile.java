@@ -44,7 +44,7 @@ public interface Tile extends UpdatableTile {
      * <p>
      * This enumerate represent the position of a point taking this off-by-one property
      * into account, the value {@link #HAS_INTERPOLATION_NEIGHBORS} correspond to points that
-     * do have the necessary four neightbors, whereas the other values correspond to points
+     * do have the necessary four neighbors, whereas the other values correspond to points
      * that are either completely outside of the tile or within the tile but in either the
      * northernmost row or easternmost column.
      * </p>
@@ -269,10 +269,23 @@ public interface Tile extends UpdatableTile {
                                               int latitudeIndex, int longitudeIndex);
 
     /** Check if a tile covers a ground point.
+     * <p>
+     * TBN: used by intersection algorithms. Supposed tiles are overlapping.
+     * </p>
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return location of the ground point with respect to tile
      */
     Location getLocation(double latitude, double longitude);
 
+    /** Get tile neighborhood (in case the DEM tiles are not overlapping).
+     * <p>
+     * TBN: used to create zipper tiles in case of DEM with tiles not overlapping.
+     * </p>
+     * @param latitude ground point latitude
+     * @param longitude ground point longitude
+     * @return location of the tile vs the neighborhood
+     * @since X.x
+     */
+    Location checkNeighborhood(double latitude, double longitude);
 }
