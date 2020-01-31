@@ -36,7 +36,7 @@
     <rugged.maven-bundle-plugin.version>4.1.0</rugged.maven-bundle-plugin.version>
     <rugged.maven-changes-plugin.version>2.12.1</rugged.maven-changes-plugin.version>
     <rugged.maven-checkstyle-plugin.version>3.0.0</rugged.maven-checkstyle-plugin.version>
-    <rugged.checkstyle.version>8.14</rugged.checkstyle.version>
+    <rugged.checkstyle.version>8.29</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.1.0</rugged.maven-clean-plugin.version>
     <rugged.maven-compiler-plugin.version>3.8.0</rugged.maven-compiler-plugin.version>
     <rugged.maven-javadoc-plugin.version>3.0.1</rugged.maven-javadoc-plugin.version>
