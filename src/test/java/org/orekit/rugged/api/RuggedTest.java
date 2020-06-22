@@ -52,7 +52,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
@@ -106,7 +106,7 @@ public class RuggedTest {
         int dimension = 2000;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = TestUtils.createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = TestUtils.createGravityField();
         Orbit      orbit                                  = TestUtils.createOrbit(gravityField.getMu());
@@ -196,7 +196,7 @@ public class RuggedTest {
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -274,7 +274,7 @@ public class RuggedTest {
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -331,7 +331,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -393,7 +393,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -451,7 +451,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -512,7 +512,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -577,7 +577,7 @@ public class RuggedTest {
         int nbSensors = 3;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -708,7 +708,7 @@ public class RuggedTest {
     public void testInverseLocNearLineEnd() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         Vector3D offset = Vector3D.ZERO;
         TimeScale gps = TimeScalesFactory.getGPS();
         Frame eme2000 = FramesFactory.getEME2000();
@@ -810,7 +810,7 @@ public class RuggedTest {
     public void testInverseLoc() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         Vector3D offset = Vector3D.ZERO;
         TimeScale gps = TimeScalesFactory.getGPS();
         Frame eme2000 = FramesFactory.getEME2000();
@@ -911,7 +911,7 @@ public class RuggedTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -967,7 +967,7 @@ public class RuggedTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -1104,7 +1104,7 @@ public class RuggedTest {
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
             final BodyShape  earth = TestUtils.createEarth();
             final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -1245,7 +1245,7 @@ public class RuggedTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -1324,7 +1324,7 @@ public class RuggedTest {
                     throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -1418,7 +1418,7 @@ public class RuggedTest {
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 

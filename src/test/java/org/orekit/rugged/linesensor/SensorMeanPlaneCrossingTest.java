@@ -36,7 +36,7 @@ import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
@@ -351,7 +351,7 @@ public class SensorMeanPlaneCrossingTest {
     public void setUp() throws URISyntaxException {
         TestUtils.clearFactories();
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
     }
 
 }

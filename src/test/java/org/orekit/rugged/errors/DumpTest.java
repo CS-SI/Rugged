@@ -33,7 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
@@ -126,7 +126,7 @@ public class DumpTest {
                                             IllegalArgumentException, InvocationTargetException, IOException, URISyntaxException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-02.txt").toURI().getPath();
         

@@ -38,7 +38,7 @@ import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
@@ -107,8 +107,8 @@ public class TestUtils {
         TimeScalesFactory.clearUTCTAIOffsetsLoaders();
         GravityFieldFactory.clearPotentialCoefficientsReaders();
         GravityFieldFactory.clearOceanTidesReaders();
-        DataProvidersManager.getInstance().clearProviders();
-        DataProvidersManager.getInstance().clearLoadedDataNames();
+        DataContext.getDefault().getDataProvidersManager().clearProviders();
+        DataContext.getDefault().getDataProvidersManager().clearLoadedDataNames();
     }
 
     /** Clean up of factory map

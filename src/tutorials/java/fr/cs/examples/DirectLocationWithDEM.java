@@ -25,7 +25,7 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -65,7 +65,7 @@ public class DirectLocationWithDEM {
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
             File orekitData = new File(home, "orekit-data");
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(orekitData));
 
             // Sensor's definition
             // ===================

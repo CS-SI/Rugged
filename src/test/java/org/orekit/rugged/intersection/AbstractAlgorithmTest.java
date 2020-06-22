@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.orekit.attitudes.Attitude;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
@@ -271,7 +271,7 @@ public abstract class AbstractAlgorithmTest {
     public void setUp() throws URISyntaxException {
         
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         earth = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                       Constants.WGS84_EARTH_FLATTENING,
                                       FramesFactory.getITRF(IERSConventions.IERS_2010, true));

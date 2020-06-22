@@ -16,16 +16,16 @@
  */
 package fr.cs.examples;
 
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.util.FastMath;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -40,8 +40,8 @@ import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
-import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.FixedRotation;
+import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
@@ -62,7 +62,7 @@ public class DirectLocation {
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
             File orekitData = new File(home, "orekit-data");
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(orekitData));
 
             // Sensor's definition
             // ===================

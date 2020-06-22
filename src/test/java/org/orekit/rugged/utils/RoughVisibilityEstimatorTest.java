@@ -34,7 +34,7 @@ import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
@@ -63,7 +63,7 @@ public class RoughVisibilityEstimatorTest {
     public void testThreeOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
@@ -88,7 +88,7 @@ public class RoughVisibilityEstimatorTest {
     public void testOneOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
@@ -176,7 +176,7 @@ public class RoughVisibilityEstimatorTest {
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
 
             Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
             ellipsoid = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
