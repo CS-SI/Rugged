@@ -202,8 +202,8 @@ public class SensorMeanPlaneCrossingTest {
             Assert.assertTrue(result.getLine() - refLine > 1.9);
         } else {
             // the simple model from which reference results have been compute applies here
-            Assert.assertEquals(refLine, result.getLine(), 7.0e-14 * refLine);
-            Assert.assertEquals(0.0, result.getDate().durationFrom(refDate), 2.0e-13);
+            Assert.assertEquals(refLine, result.getLine(), 5.0e-11* refLine);
+            Assert.assertEquals(0.0, result.getDate().durationFrom(refDate), 1.0e-9);
             Assert.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 5.4e-15);
         }
 
