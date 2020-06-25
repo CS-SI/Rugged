@@ -48,7 +48,7 @@
     <rugged.maven-resources-plugin.version>3.1.0</rugged.maven-resources-plugin.version>
     <rugged.maven-site-plugin.version>3.8.2</rugged.maven-site-plugin.version>
     <rugged.maven-source-plugin.version>3.2.1</rugged.maven-source-plugin.version>
-    <rugged.maven-surefire-plugin.version>3.0.0-M42</rugged.maven-surefire-plugin.version>
+    <rugged.maven-surefire-plugin.version>3.0.0-M4</rugged.maven-surefire-plugin.version>
     <rugged.maven-surefire-report-plugin.version>3.0.0-M4</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.10</rugged.jgit.buildnumber.version>
     <rugged.build-helper-maven-plugin.version>3.0.0</rugged.build-helper-maven-plugin.version>
