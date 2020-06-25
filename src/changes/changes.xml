@@ -20,6 +20,12 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
+     <release version="2.2-SNAPSHOT" date="TBD" description="TBD">
+      <action dev="guylaine" type="update">
+        Updated dependencies to Orekit 10.1 (and Hipparchus 1.6).
+      </action>
+     </release>
+     
      <release version="2.1" date="2019-03-14" description="This is a minor release.
      It adds refraction in inverse location and fixes a few bugs. This version depends
      on Orekit 9.3.1 and Hipparchus 1.4.">
