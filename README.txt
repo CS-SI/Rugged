@@ -1,7 +1,7 @@
 Rugged, a sensor-to-terrain mapping tool, is a free java library
 for geolocation and used for satellite imagery.
 
-It is licensed by CS Systèmes d'Information under the
+It is licensed by CS GROUP under the
 Apache License Version 2.0. A copy of this license is
 provided in the LICENSE.txt file.
 
@@ -19,7 +19,7 @@ business friendly free licenses.
 
 compile-time/run-time dependency:
 
-  - Orekit from CS Systèmes d'Information
+  - Orekit from CS GROUP
     https://www.orekit.org/
     released under the Apache Software License, version 2
 

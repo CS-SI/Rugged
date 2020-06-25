@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2019 CS Systèmes d'Information
+<!--- Copyright 2013-2020 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -98,7 +98,7 @@ interoperability in space systems.
 
 ## Maintained library
 
-Rugged has been in development since 2014 inside [CS Systèmes d'Information](http://www.c-s.fr/ "CS SI homepage") 
+Rugged has been in development since 2014 inside [CS GROUP](http://www.c-s.fr/ "CS GROUP homepage")
 and is still used and maintained by its dual teams
 of space dynamics and image processing experts.
 
@@ -110,6 +110,6 @@ Rugged has been used to validate Airbus Defence and Space (ADS) geolocation libr
 
 Rugged has been also used as a Research Library by the French Space Agency (CNES) for refinement studies for VHR push broom sensors (Pleiades).
 
-Rugged is used for study purposes inside CS Systèmes d'Information.
+Rugged is used for study purposes inside CS GROUP.
 
 [Top of the page](#top)
