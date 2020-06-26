@@ -104,5 +104,7 @@
       <property name="headerFile" value="${checkstyle.header.file}" />
     </module>
     <module name="FileTabCharacter"/>
-    <module name="NewlineAtEndOfFile"/>
+    <module name="NewlineAtEndOfFile">
+	  <property name="lineSeparator" value="LF_CR_CRLF"/>
+	</module>
 </module>
