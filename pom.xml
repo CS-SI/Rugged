@@ -19,7 +19,7 @@
 
     
     <!-- COTS version -->
-    <rugged.orekit.version>10.1</rugged.orekit.version>
+    <rugged.orekit.version>10.2-SNAPSHOT</rugged.orekit.version>
     <rugged.junit.version>4.12</rugged.junit.version>
     
     <!-- Compilers and Tools version -->
@@ -31,11 +31,10 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rugged.spotbugs-maven-plugin.version>3.1.12.2</rugged.spotbugs-maven-plugin.version>
     <rugged.jacoco-maven-plugin.version>0.8.5</rugged.jacoco-maven-plugin.version>
-    <!-- TODO remove assembly plugin ? -->
     <rugged.maven-assembly-plugin.version>3.1.1</rugged.maven-assembly-plugin.version>
     <rugged.maven-bundle-plugin.version>4.2.1</rugged.maven-bundle-plugin.version>
     <rugged.maven-changes-plugin.version>2.12.1</rugged.maven-changes-plugin.version>
-    <rugged.maven-checkstyle-plugin.version>3.1.0</rugged.maven-checkstyle-plugin.version>
+    <rugged.maven-checkstyle-plugin.version>3.1.1</rugged.maven-checkstyle-plugin.version>
     <rugged.checkstyle.version>8.29</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.1.0</rugged.maven-clean-plugin.version>
     <rugged.maven-compiler-plugin.version>3.8.1</rugged.maven-compiler-plugin.version>
@@ -48,7 +47,9 @@
     <rugged.maven-resources-plugin.version>3.1.0</rugged.maven-resources-plugin.version>
     <rugged.maven-site-plugin.version>3.8.2</rugged.maven-site-plugin.version>
     <rugged.maven-source-plugin.version>3.2.1</rugged.maven-source-plugin.version>
-    <rugged.maven-surefire-plugin.version>3.0.0-M4</rugged.maven-surefire-plugin.version>
+    <!-- Surefire 2.22.2 is the last to support CentOS/RedHat 7 due to
+         https://issues.apache.org/jira/browse/SUREFIRE-1628 -->
+    <rugged.maven-surefire-plugin.version>2.22.2</rugged.maven-surefire-plugin.version>
     <rugged.maven-surefire-report-plugin.version>3.0.0-M4</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.10</rugged.jgit.buildnumber.version>
     <rugged.build-helper-maven-plugin.version>3.0.0</rugged.build-helper-maven-plugin.version>
