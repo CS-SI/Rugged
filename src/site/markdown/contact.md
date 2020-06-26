@@ -40,7 +40,7 @@ If you want to discuss with the space division staff at CS GROUP,
 please use the following address:
 
     CS GROUP
-    BU E-space & Geoinformation
+    Space Business Unit
     Parc de la Plaine - 6 rue Brindejonc des Moulinais
     BP 15872
     31506 Toulouse Cedex 5
