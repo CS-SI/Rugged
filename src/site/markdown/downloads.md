@@ -76,7 +76,7 @@ file from the forge, to unzip it anywhere you want, rename the `orekit-data-mast
 into `orekit-data` and add the following lines at the start of your program:
 
     File orekitData = new File("/path/to/the/folder/orekit-data");
-    DataProvidersManager manager = DataProvidersManager.getInstance();
+    DataProvidersManager manager = DataContext.getDefault().getDataProvidersManager();
     manager.addProvider(new DirectoryCrawler(orekitData));
 
 This file contains the following data sets. Note that the data is updated only

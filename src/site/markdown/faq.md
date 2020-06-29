@@ -85,7 +85,7 @@ file from the forge, to unzip it anywhere you want, rename the `orekit-data-mast
 into `orekit-data` and add the following lines at the start of your program:
 
     File orekitData = new File("/path/to/the/folder/orekit-data");
-    DataProvidersManager manager = DataProvidersManager.getInstance();
+    DataProvidersManager manager = DataContext.getDefault().getDataProvidersManager();
     manager.addProvider(new DirectoryCrawler(orekitData));
 
 Using a folder allows one to change the data in it after the initial download, e.g., adding new EOP files as they

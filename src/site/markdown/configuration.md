@@ -27,7 +27,7 @@ into `orekit-data` and add the following lines at the start of your program (bef
 first time):
 
     File orekitData = new File("/path/to/the/folder/orekit-data");
-    DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
+    DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(orekitData));
 
 This is sufficient to start working.
 
