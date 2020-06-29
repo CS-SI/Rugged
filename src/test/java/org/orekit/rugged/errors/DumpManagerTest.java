@@ -235,7 +235,8 @@ public class DumpManagerTest {
    public void testWriteError() throws URISyntaxException, IOException {
        try {
            File dump = tempFolder.newFile();
-           dump.setReadOnly();
+           boolean isSuccess = dump.setReadOnly();
+           System.out.println("##### File created in read only success= " + isSuccess);
            DumpManager.activate(dump);
            Assert.fail("an exception should have been thrown");
        } catch (RuggedException re) {
