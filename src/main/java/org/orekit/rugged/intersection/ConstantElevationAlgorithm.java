@@ -25,7 +25,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Intersection ignoring Digital Elevation Model.
  * <p>
- * This dummy implementation simply uses the ellipsoid itself.
+ * This implementation uses a constant elevation over the ellipsoid.
  * </p>
  * @author Luc Maisonobe
  */

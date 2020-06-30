@@ -18,7 +18,7 @@ package org.orekit.rugged.raster;
 
 /** Interface used to update Digital Elevation Model tiles.
  * <p>
- * Implementations of this interface are must be provided by
+ * Implementations of this interface must be provided by
  * the image processing mission-specific layer, thus allowing
  * the Rugged library to access the Digital Elevation Model data.
  * </p>
