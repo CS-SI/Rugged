@@ -27,6 +27,9 @@
     <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
 
+    <!-- sonar related properties -->
+    <sonar.host.url>https://sonar.orekit.org/</sonar.host.url>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rugged.spotbugs-maven-plugin.version>4.0.4</rugged.spotbugs-maven-plugin.version>
