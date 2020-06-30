@@ -18,10 +18,8 @@ package org.orekit.rugged.errors;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
@@ -69,13 +67,9 @@ public class DumpManager {
         } else {
             try {
                 DUMP.set(new Dump(new PrintWriter(file, "UTF-8")));
-            } catch (FileNotFoundException ioe) {
-            	System.out.println("###### FileNotFoundException ");
+            } catch (IOException ioe) {
                 throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR,
                                           file.getAbsolutePath(), ioe.getLocalizedMessage());
-            } catch (IOException ioe) {
-            throw new RuggedException(ioe, RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR,
-                                      file.getAbsolutePath(), ioe.getLocalizedMessage());
             }
         }
     }
