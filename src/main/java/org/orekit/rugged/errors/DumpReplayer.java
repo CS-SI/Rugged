@@ -225,6 +225,12 @@ public class DumpReplayer {
     /** Keyword for null result. */
     private static final String NULL_RESULT = "NULL";
 
+    /** Pattern for delimiting regular expressions. */
+    private static final Pattern SEPARATOR = Pattern.compile("\\s+");
+
+    /** Empty pattern. */
+    private static final Pattern PATTERN = Pattern.compile(" ");
+
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
 
@@ -272,12 +278,6 @@ public class DumpReplayer {
 
     /** Dumped calls. */
     private final List<DumpedCall> calls;
-
-    /** Pattern for delimiting regular expressions. */
-    private static final Pattern SEPARATOR = Pattern.compile("\\s+");
-
-    /** Empty pattern. */
-    private static final Pattern PATTERN = Pattern.compile(" ");
 
 
     /** Simple constructor.
