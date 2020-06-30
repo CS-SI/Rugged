@@ -16,10 +16,10 @@
  */
 /**
  *
- * This package provides the interface used to update Digital Elevation 
+ * This package provides the interface used to update Digital Elevation
  * Model tiles to be implemented by the user,
- * the interface representing a raster tile, as well as a simple model. 
- * It provides also the interface representing a factory for raster tile, 
+ * the interface representing a raster tile, as well as a simple model.
+ * It provides also the interface representing a factory for raster tile,
  * as well as a simple implementation.
  *
  * @author Luc Maisonobe

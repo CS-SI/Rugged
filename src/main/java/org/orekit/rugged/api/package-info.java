@@ -16,7 +16,7 @@
  */
 /**
  *
- * This package provides the principal class of Rugged library API, as well as 
+ * This package provides the principal class of Rugged library API, as well as
  * the builder for Rugged instances.
  *
  * @author Luc Maisonobe

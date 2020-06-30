@@ -16,9 +16,9 @@
  */
 /**
  *
- * This package provides the interface for Digital Elevation Model intersection 
+ * This package provides the interface for Digital Elevation Model intersection
  * algorithm, as well as some simple implementations.
- * 
+ *
  *
  * @author Luc Maisonobe
  * @author Guylaine Prat

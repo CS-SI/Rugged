@@ -16,7 +16,8 @@
  */
 /**
  *
- * This package provides the Digital Elevation Model intersection using Bernardt Duvenhage's algorithm.
+ * This package provides the Digital Elevation Model intersection using
+ * Bernardt Duvenhage's algorithm.
  *
  * @author Luc Maisonobe
  * @author Guylaine Prat
