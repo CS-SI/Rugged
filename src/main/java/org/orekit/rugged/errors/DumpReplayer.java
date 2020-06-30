@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
@@ -271,6 +272,13 @@ public class DumpReplayer {
 
     /** Dumped calls. */
     private final List<DumpedCall> calls;
+
+    /** Pattern for delimiting regular expressions. */
+    private static final Pattern SEPARATOR = Pattern.compile("\\s+");
+
+    /** Empty pattern. */
+    private static final Pattern PATTERN = Pattern.compile(" ");
+
 
     /** Simple constructor.
      */
@@ -976,14 +984,14 @@ public class DumpReplayer {
 
             final int colon = line.indexOf(':');
             if (colon > 0) {
-                final String parsedKey = line.substring(0, colon).trim().replaceAll(" ", "_").toUpperCase();
+                final String parsedKey = PATTERN.matcher(line.substring(0, colon).trim()).replaceAll("_").toUpperCase();
                 try {
                     final LineParser parser = LineParser.valueOf(parsedKey);
                     final String[] fields;
                     if (colon + 1 >= line.length()) {
                         fields = new String[0];
                     } else {
-                        fields = line.substring(colon + 1).trim().split("\\s+");
+                        fields = SEPARATOR.split(line.substring(colon + 1).trim());
                     }
                     parser.parse(l, file, line, fields, global);
                 } catch (IllegalArgumentException iae) {
