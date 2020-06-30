@@ -146,9 +146,9 @@
 
   <distributionManagement>
     <site>
-      <id>rugged.website</id>
+      <id>website</id>
       <name>Rugged Website</name>
-      <url>https://www.orekit.org/rugged/</url>
+      <url>scp://cochise@spoutnik.orekit.org/var/www/mvn-sites/site-rugged-${project.version}</url>
     </site>
   </distributionManagement>
 
@@ -321,6 +321,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${rugged.maven-site-plugin.version}</version>
+          <dependencies>
+            <dependency><!-- add support for ssh/scp -->
+              <groupId>org.apache.maven.wagon</groupId>
+              <artifactId>wagon-ssh</artifactId>
+              <version>3.3.4</version>
+            </dependency>
+          </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
