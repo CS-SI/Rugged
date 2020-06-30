@@ -146,7 +146,7 @@
 
   <distributionManagement>
     <site>
-      <id>rugged.website</id>
+      <id>website</id>
       <name>Rugged Website</name>
       <url>scp://cochise@spoutnik.orekit.org/var/www/mvn-sites/site-rugged-${project.version}</url>
     </site>
