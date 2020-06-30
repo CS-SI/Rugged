@@ -94,13 +94,9 @@ public class AtmosphericComputationParameters {
         }
         this.nbLineGrid = (maxLine - minLine + 1 - 2 * MARGIN_LINE) / this.lineStep;
 
-        // CHECKSTYLE: stop UnnecessaryParentheses check
-
         // Compute the linear grids in pixel (u index) and line (v index)
-        this.uGrid = GridCreation.createLinearGrid(0, (sensorNbPxs - 1), this.nbPixelGrid);
-        this.vGrid = GridCreation.createLinearGrid((minLine + MARGIN_LINE), (maxLine - MARGIN_LINE), this.nbLineGrid);
-
-        // CHECKSTYLE: resume UnnecessaryParentheses check
+        this.uGrid = GridCreation.createLinearGrid(0, sensorNbPxs - 1, this.nbPixelGrid);
+        this.vGrid = GridCreation.createLinearGrid(minLine + MARGIN_LINE, maxLine - MARGIN_LINE, this.nbLineGrid);
 
     }
 

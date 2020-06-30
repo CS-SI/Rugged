@@ -94,11 +94,6 @@
           <property name="onCommentFormat" value="CHECKSTYLE\: resume MultipleStringLiterals check"/>
           <property name="checkFormat" value="MultipleStringLiteralsCheck"/>
         </module>
-        <module name="SuppressionCommentFilter">
-          <property name="offCommentFormat" value="CHECKSTYLE\: stop UnnecessaryParentheses check"/>
-          <property name="onCommentFormat" value="CHECKSTYLE\: resume UnnecessaryParentheses check"/>
-          <property name="checkFormat" value="UnnecessaryParentheses"/>
-        </module>
     </module>
     <module name="RegexpHeader">
       <property name="headerFile" value="${checkstyle.header.file}" />
