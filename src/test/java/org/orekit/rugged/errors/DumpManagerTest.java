@@ -233,12 +233,12 @@ public class DumpManagerTest {
    }
 
    @Test
-   @Ignore
    public void testWriteError() throws URISyntaxException, IOException {
        try {
            File dump = tempFolder.newFile();
            dump.setReadOnly();
            DumpManager.activate(dump);
+           variousRuggedCalls();
            Assert.fail("an exception should have been thrown");
        } catch (RuggedException re) {
            Assert.assertEquals(RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, re.getSpecifier());
