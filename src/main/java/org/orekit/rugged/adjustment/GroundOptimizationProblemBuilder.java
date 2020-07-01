@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Gradient;
 import org.hipparchus.linear.Array2DRowRealMatrix;
 import org.hipparchus.linear.ArrayRealVector;
 import org.hipparchus.linear.RealMatrix;
@@ -162,7 +162,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
             for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
                 for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMapping()) {
                     final GeodeticPoint gp = mapping.getValue();
-                    final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, this.getGenerator());
+                    final Gradient[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, this.getGenerator());
 
                     if (ilResult == null) {
                         value.setEntry(l, minLine - 100.0); // arbitrary

@@ -24,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Gradient;
 import org.hipparchus.linear.Array2DRowRealMatrix;
 import org.hipparchus.linear.ArrayRealVector;
 import org.hipparchus.linear.RealMatrix;
@@ -207,7 +207,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
 
                     final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
-                    final DerivativeStructure[] ilResult =
+                    final Gradient[] ilResult =
                             ruggedB.distanceBetweenLOSderivatives(lineSensorA, dateA, pixelA, scToBodyA,
                                     lineSensorB, dateB, pixelB, this.getGenerator());
 

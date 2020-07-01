@@ -36,7 +36,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.exception.LocalizedCoreFormats;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
@@ -63,7 +63,7 @@ import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
 import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.refraction.MultiLayerModel;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -1215,12 +1215,12 @@ public class DumpReplayer {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date,
-                                                                    final DSGenerator generator) {
+        public <T extends Derivative<T>> FieldVector3D<T> getLOSDerivatives(final int index, final AbsoluteDate date,
+                                                                            final DerivativeGenerator<T> generator) {
             final Vector3D los = getLOS(index, date);
-            return new FieldVector3D<DerivativeStructure>(generator.constant(los.getX()),
-                                                          generator.constant(los.getY()),
-                                                          generator.constant(los.getZ()));
+            return new FieldVector3D<>(generator.constant(los.getX()),
+                                       generator.constant(los.getY()),
+                                       generator.constant(los.getZ()));
         }
 
         /** Set a datation pair.

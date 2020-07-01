@@ -18,14 +18,14 @@ package org.orekit.rugged.los;
 
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.geometry.euclidean.threed.FieldRotation;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
 
@@ -50,7 +50,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
     private Rotation rotation;
 
     /** Underlying rotation with derivatives. */
-    private FieldRotation<DerivativeStructure> rDS;
+    private FieldRotation<?> rDS;
 
     /** Driver for rotation angle. */
     private final ParameterDriver angleDriver;
@@ -96,19 +96,31 @@ public class FixedRotation implements TimeIndependentLOSTransform {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     @Override
-    public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
-                                                           final DSGenerator generator) {
-        if (rDS == null) {
+    public <T extends Derivative<T>> FieldVector3D<T> transformLOS(final int i, final FieldVector3D<T> los,
+                                                                   final DerivativeGenerator<T> generator) {
+        final FieldRotation<T> rD;
+        if (rDS == null || !rDS.getQ0().getField().equals(generator.getField())) {
+
             // lazy evaluation of the rotation
-            final FieldVector3D<DerivativeStructure> axisDS =
-                            new FieldVector3D<DerivativeStructure>(generator.constant(axis.getX()),
-                                                                   generator.constant(axis.getY()),
-                                                                   generator.constant(axis.getZ()));
-            final DerivativeStructure angleDS = generator.variable(angleDriver);
-            rDS = new FieldRotation<DerivativeStructure>(axisDS, angleDS, RotationConvention.VECTOR_OPERATOR);
+            final FieldVector3D<T> axisDS =
+                            new FieldVector3D<>(generator.constant(axis.getX()),
+                                                generator.constant(axis.getY()),
+                                                generator.constant(axis.getZ()));
+            final T angleDS = generator.variable(angleDriver);
+            rD = new FieldRotation<>(axisDS, angleDS, RotationConvention.VECTOR_OPERATOR);
+
+            // cache evaluated rotation
+            rDS = rD;
+
+        } else {
+            // reuse cached value
+            rD  = (FieldRotation<T>) rDS;
         }
-        return rDS.applyTo(los);
+
+        return rD.applyTo(los);
+
     }
 
 }
