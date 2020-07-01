@@ -22,11 +22,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.PosixFileAttributeView;
-import java.nio.file.attribute.PosixFileAttributes;
-import java.nio.file.attribute.PosixFilePermissions;
 
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
@@ -239,16 +234,7 @@ public class DumpManagerTest {
    @Test
    public void testWriteError() throws URISyntaxException, IOException {
        try {
-           File dump = tempFolder.newFile();
-           dump.setReadOnly();
-           Path path = dump.toPath();
-           PosixFileAttributes attributes = Files.getFileAttributeView(path, PosixFileAttributeView.class).readAttributes();
-           System.out.println(PosixFilePermissions.toString(attributes.permissions()) + " " +
-                              attributes.group().getName() + " " + attributes.owner().getName() + " " +
-                              path);
-           DumpManager.activate(dump);
-           variousRuggedCalls();
-           DumpManager.deactivate();
+           DumpManager.activate(tempFolder.getRoot());
            Assert.fail("an exception should have been thrown");
        } catch (RuggedException re) {
            Assert.assertEquals(RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, re.getSpecifier());
