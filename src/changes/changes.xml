@@ -21,8 +21,33 @@
   </properties>
   <body>
      <release version="2.2-SNAPSHOT" date="TBD" description="TBD">
-      <action dev="guylaine" type="update">
+      <action dev="guylaine" type="update" issue="383">
         Updated dependencies to Orekit 10.2 (and Hipparchus 1.7).
+      </action>
+      <action dev="guylaine" type="fix" issue="384">
+        Add connection with Gitlab CI to allow automatic building and release,
+        as well as automatic code analysis.
+      </action>
+      <action dev="luc" type="fix" issue="386">
+        Fix a unit test due to CI specificity.
+      </action>
+      <action dev="guylaine" type="update">
+        Update building explanations (.md) and remove redundant BUILDING.txt
+      </action>
+      <action dev="guylaine" type="update">
+        Update deprecated method of Orekit DataProvidersManager class.
+      </action>
+       <action dev="guylaine" type="update" issue="382">
+        Remove explicit dependency to Hipparchus library.
+      </action>
+       <action dev="guylaine" type="fix" issue="379">
+        Correct erroneous Earth flattening for model IERS96 in RuggedBuilder.
+      </action>
+      <action dev="guylaine" type="update" issue="378">
+        Replace in RuggedBuilder hard-coded constants by Orekit Earth constants.
+      </action>
+      <action dev="guylaine" type="add">
+        Add package-info documentation.
       </action>
      </release>
      
