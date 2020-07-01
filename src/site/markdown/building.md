@@ -35,8 +35,9 @@ For systems not providing maven as a package, maven can be
 Apache Software Foundation. This site also explains the
 installation procedure.
 
-As with all maven enabled projects, building Rugged is straightforward, simply
-run:
+As with all maven enabled projects, building official released versions of
+Rugged is straightforward (see below for the special case of development versions),
+simply run:
 
     mvn package
 
@@ -46,12 +47,39 @@ the target directory, including one file named rugged-x.y.jar where x.y is
 the version number. This is the jar file you can use in your project using
 Rugged.
 
+This command should always work for released Rugged versions as they
+always depend only on released Orekit versions. Maven knows how
+to download the pre-built binary for released Orekit versions.
+The previous command may not work for development Rugged versions as they
+may depend on unreleased Orekit versions. Maven cannot download
+pre-built binaries for unreleased Orekit versions as none are
+publicly available. In this case the command above will end with an error message
+like:
+
+    [ERROR] Failed to execute goal on project rugged: Could not resolve dependencies for project org.orekit:rugged:jar:X.x-SNAPSHOT: Could not find artifact org.orekit:orekit:jar:Y.y-SNAPSHOT
+
+In this case, you should build the missing Orekit artifact and
+install it in your local maven repository beforehand. This is done by cloning
+the Orekit source from Orekit git repository at Gitlab in some
+temporary folder and install it with maven. This is done by
+running the commands below (using Linux command syntax):
+
+    git clone https://gitlab.orekit.org/orekit/orekit.git
+    cd orekit
+    git checkout -b develop origin/develop
+    mvn install
+
+Once the Orekit development version has been installed locally using
+the previous commands, you can delete the cloned folder if you want. You can then
+attempt again the mvn command at Rugged level, this time it should succeed as the
+necessary artifact is now locally available.
+
 If you need to configure a proxy server for dependencies retrieval, see
 the [Guide to using proxies](http://maven.apache.org/guides/mini/guide-proxies.html)
 page at the maven site.
 
 If you already use maven for your own projects (or simply eclipse, see
-below), you may want to install rugged in your local repository. This is done
+below), you may want to install rugged in your local maven repository. This is done
 with the following command:
 
     mvn install
@@ -72,25 +100,27 @@ site at the [Eclipse Foundation](http://www.eclipse.org/downloads/).
 
 The simplest way to use Rugged with Eclipse is to follow these steps:
 
-  * unpack the distribution inside your Eclipse workspace
+  * using your operating system tools, unpack the source distribution directly
+  inside your Eclipse workspace. The source distribution file name has a name
+  of the form rugged-x.y-sources.zip where x.y is the version number. Unpacking
+  this zip file should create a folder of the form rugged-x.y in your workspace.
+  
 
-  * create a new java project from existing sources and direct Eclipse to the
-     directory where you unpacked Rugged
+  * using Eclipse, import the project by selecting in the top level "File" menu
+    the entry "Import..."
 
-  * set the source folders to
-    * src/main/java
-    * src/test/java
-    * src/main/resources
-    * src/test/resources
+  * in the wizard that should appear, select "Maven -> Existing Maven Projects"
 
-    in the source tab of the Configure Build Path dialog
+  * select the folder you just created in your workspace by unpacking the
+    source distribution. The "pom.xml" file describing the project will be
+    automatically selected. Click finish
 
-  * set the external libraries to JRE system library (provided by Eclipse),
-    Junit 4.x (provided by Eclipse), Hipparchus (available at
-    Hipparchus project
-    [downloads page](https://www.hipparchus.org/downloads.html)),
-    and Orekit (available at Orekit
-    [download page](https://www.orekit.org/download.html))
-    in the libraries tab of the Configure Build Path dialog
+The Rugged library should be configured automatically, including the dependency
+to the underlying Orekit library.
+
+Now you have an rugged-x.y project in you workspace, and you can create your
+own application projects that will depend on the Rugged project.
+
+You can also check everything works correctly by running the junit tests.
 
 [Top of the page](#top)
