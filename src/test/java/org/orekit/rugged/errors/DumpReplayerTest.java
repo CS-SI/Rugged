@@ -53,7 +53,7 @@ import org.orekit.data.DirectoryCrawler;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.refraction.MultiLayerModel;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.ParameterDriver;
@@ -643,11 +643,11 @@ public class DumpReplayerTest {
  
         // ParsedSensor.getLOSDerivatives
         // Needs some LOS to be set
-        Method getLOSDerivatives = innerClass.getDeclaredMethod("getLOSDerivatives", int.class, AbsoluteDate.class, DSGenerator.class);
+        Method getLOSDerivatives = innerClass.getDeclaredMethod("getLOSDerivatives", int.class, AbsoluteDate.class, DerivativeGenerator.class);
         getLOSDerivatives.setAccessible(true);
 
         final DSFactory factory = new DSFactory(1, 1);
-        DSGenerator generator = new DSGenerator() {
+        DerivativeGenerator<DerivativeStructure> generator = new DerivativeGenerator<DerivativeStructure>() {
             @Override
             public List<ParameterDriver> getSelected() {
                 return null;

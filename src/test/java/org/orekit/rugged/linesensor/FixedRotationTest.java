@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
@@ -158,7 +158,7 @@ public class FixedRotationTest {
                 driver.setSelected(true);
             }
             final DSFactory factoryS = new DSFactory(selected.size(), 1);
-            DSGenerator generator = new DSGenerator() {
+            DerivativeGenerator<DerivativeStructure> generator = new DerivativeGenerator<DerivativeStructure>() {
 
                 /** {@inheritDoc} */
                 @Override

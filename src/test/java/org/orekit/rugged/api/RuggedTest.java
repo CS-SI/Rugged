@@ -37,6 +37,7 @@ import java.util.Locale;
 import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
+import org.hipparchus.analysis.differentiation.Gradient;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
@@ -77,7 +78,7 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -1170,7 +1171,8 @@ public class RuggedTest {
             java.lang.reflect.Method getGenerator = GroundOptimizationProblemBuilder.class.getSuperclass().getDeclaredMethod("getGenerator");
             getGenerator.setAccessible(true);
 
-            DSGenerator generator = (DSGenerator) getGenerator.invoke(optimizationPbBuilder);
+            @SuppressWarnings("unchecked")
+            DerivativeGenerator<Gradient> generator = (DerivativeGenerator<Gradient>) getGenerator.invoke(optimizationPbBuilder);
 
             double referenceLine = 0.87654 * dimension;
             GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
@@ -1178,13 +1180,13 @@ public class RuggedTest {
             Method inverseLoc = Rugged.class.getDeclaredMethod("inverseLocationDerivatives",
                                                                String.class, GeodeticPoint.class,
                                                                Integer.TYPE, Integer.TYPE,
-                                                               DSGenerator.class);
+                                                               DerivativeGenerator.class);
             inverseLoc.setAccessible(true);
             int referencePixel = (3 * dimension) / 4;
-            DerivativeStructure[] result = 
-                            (DerivativeStructure[]) inverseLoc.invoke(rugged,
-                                                                      "line", gp[referencePixel], 0, dimension,
-                                                                      generator);
+            Gradient[] result = 
+                            (Gradient[]) inverseLoc.invoke(rugged,
+                                                           "line", gp[referencePixel], 0, dimension,
+                                                           generator);
             Assert.assertEquals(referenceLine,  result[0].getValue(), lineTolerance);
             Assert.assertEquals(referencePixel, result[1].getValue(), pixelTolerance);
             Assert.assertEquals(2, result[0].getFreeParameters());

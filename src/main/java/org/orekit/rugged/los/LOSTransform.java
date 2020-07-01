@@ -18,10 +18,11 @@ package org.orekit.rugged.los;
 
 import java.util.stream.Stream;
 
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
@@ -46,14 +47,15 @@ public interface LOSTransform {
      * are typically polynomials coefficients representing rotation angles.
      * These polynomials can be used for example to model thermo-elastic effects.
      * </p>
+     * @param <T> derivative type
      * @param index los pixel index
      * @param los line-of-sight to transform
      * @param date date
      * @param generator generator to use for building {@link DerivativeStructure} instances
      * @return line of sight, and its first partial derivatives with respect to the parameters
      */
-    FieldVector3D<DerivativeStructure> transformLOS(int index, FieldVector3D<DerivativeStructure> los,
-                                                    AbsoluteDate date, DSGenerator generator);
+    <T extends Derivative<T>> FieldVector3D<T> transformLOS(int index, FieldVector3D<T> los,
+                                                            AbsoluteDate date, DerivativeGenerator<T> generator);
 
     /** Get the drivers for LOS parameters.
      * @return drivers for LOS parameters

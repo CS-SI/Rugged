@@ -20,10 +20,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
+import org.hipparchus.util.MathArrays;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
@@ -36,7 +38,7 @@ import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
 import org.orekit.rugged.refraction.AtmosphericRefraction;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -944,6 +946,7 @@ public class Rugged {
     }
 
     /** Compute distances between two line sensors with derivatives.
+     * @param <T> derivative type
      * @param sensorA line sensor A
      * @param dateA current date for sensor A
      * @param pixelA pixel index for sensor A
@@ -955,11 +958,11 @@ public class Rugged {
      * @return distances computed, with derivatives, between LOS and to the ground
      * @see #distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)
      */
-    public DerivativeStructure[] distanceBetweenLOSderivatives(
+    public <T extends Derivative<T>> T[] distanceBetweenLOSderivatives(
                                  final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
                                  final SpacecraftToObservedBody scToBodyA,
                                  final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB,
-                                 final DSGenerator generator) {
+                                 final DerivativeGenerator<T> generator) {
 
         // Compute the approximate transforms between spacecraft and observed body
         // from Rugged instance A
@@ -973,59 +976,63 @@ public class Rugged {
         final Transform transformScToBodyB = new Transform(dateB, scToInertB, inertToBodyB);
 
         // Get sensors LOS into local frame
-        final FieldVector3D<DerivativeStructure> vALocal = sensorA.getLOSDerivatives(dateA, pixelA, generator);
-        final FieldVector3D<DerivativeStructure> vBLocal = sensorB.getLOSDerivatives(dateB, pixelB, generator);
+        final FieldVector3D<T> vALocal = sensorA.getLOSDerivatives(dateA, pixelA, generator);
+        final FieldVector3D<T> vBLocal = sensorB.getLOSDerivatives(dateB, pixelB, generator);
 
         // Get sensors LOS into body frame
-        final FieldVector3D<DerivativeStructure> vA = transformScToBodyA.transformVector(vALocal); // V_a : line of sight's vectorA
-        final FieldVector3D<DerivativeStructure> vB = transformScToBodyB.transformVector(vBLocal); // V_b : line of sight's vectorB
+        final FieldVector3D<T> vA = transformScToBodyA.transformVector(vALocal); // V_a : line of sight's vectorA
+        final FieldVector3D<T> vB = transformScToBodyB.transformVector(vBLocal); // V_b : line of sight's vectorB
 
         // Position of sensors into local frame
         final Vector3D sAtmp = sensorA.getPosition();
         final Vector3D sBtmp = sensorB.getPosition();
 
-        final DerivativeStructure scaleFactor = FieldVector3D.dotProduct(vA.normalize(), vA.normalize()); // V_a.V_a=1
+        final T scaleFactor = FieldVector3D.dotProduct(vA.normalize(), vA.normalize()); // V_a.V_a=1
 
         // Build a vector from the position and a scale factor (equals to 1).
         // The vector built will be scaleFactor * sAtmp for example.
-        final FieldVector3D<DerivativeStructure> sALocal = new FieldVector3D<DerivativeStructure>(scaleFactor, sAtmp);
-        final FieldVector3D<DerivativeStructure> sBLocal = new FieldVector3D<DerivativeStructure>(scaleFactor, sBtmp);
+        final FieldVector3D<T> sALocal = new FieldVector3D<>(scaleFactor, sAtmp);
+        final FieldVector3D<T> sBLocal = new FieldVector3D<>(scaleFactor, sBtmp);
 
         // Get sensors position into body frame
-        final FieldVector3D<DerivativeStructure> sA = transformScToBodyA.transformPosition(sALocal); // S_a : sensorA 's position
-        final FieldVector3D<DerivativeStructure> sB = transformScToBodyB.transformPosition(sBLocal); // S_b : sensorB 's position
+        final FieldVector3D<T> sA = transformScToBodyA.transformPosition(sALocal); // S_a : sensorA 's position
+        final FieldVector3D<T> sB = transformScToBodyB.transformPosition(sBLocal); // S_b : sensorB 's position
 
         // Compute distance
-        final FieldVector3D<DerivativeStructure> vBase = sB.subtract(sA);    // S_b - S_a
-        final DerivativeStructure svA = FieldVector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
-        final DerivativeStructure svB = FieldVector3D.dotProduct(vBase, vB); // SV_b = (S_b - S_a).V_b
+        final FieldVector3D<T> vBase = sB.subtract(sA);    // S_b - S_a
+        final T svA = FieldVector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
+        final T svB = FieldVector3D.dotProduct(vBase, vB); // SV_b = (S_b - S_a).V_b
 
-        final DerivativeStructure vAvB = FieldVector3D.dotProduct(vA, vB); // V_a.V_b
+        final T vAvB = FieldVector3D.dotProduct(vA, vB); // V_a.V_b
 
         // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 - (V_a.V_b)²)
-        final DerivativeStructure lambdaB = (svA.multiply(vAvB).subtract(svB)).divide(vAvB.multiply(vAvB).subtract(1).negate());
+        final T lambdaB = (svA.multiply(vAvB).subtract(svB)).divide(vAvB.multiply(vAvB).subtract(1).negate());
 
         // Compute lambda_a = SV_a + lambdaB * V_a.V_b
-        final DerivativeStructure lambdaA = vAvB.multiply(lambdaB).add(svA);
+        final T lambdaA = vAvB.multiply(lambdaB).add(svA);
 
         // Compute vector M_a:
-        final FieldVector3D<DerivativeStructure> mA = sA.add(vA.scalarMultiply(lambdaA)); // M_a = S_a + lambda_a * V_a
+        final FieldVector3D<T> mA = sA.add(vA.scalarMultiply(lambdaA)); // M_a = S_a + lambda_a * V_a
         // Compute vector M_b
-        final FieldVector3D<DerivativeStructure> mB = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
+        final FieldVector3D<T> mB = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
 
         // Compute vector M_a -> M_B for which distance between LOS is minimum
-        final FieldVector3D<DerivativeStructure> vDistanceMin = mB.subtract(mA); // M_b - M_a
+        final FieldVector3D<T> vDistanceMin = mB.subtract(mA); // M_b - M_a
 
         // Compute vector from mid point of vector M_a -> M_B to the ground (corresponds to minimum elevation)
-        final FieldVector3D<DerivativeStructure> midPoint = (mB.add(mA)).scalarMultiply(0.5);
+        final FieldVector3D<T> midPoint = (mB.add(mA)).scalarMultiply(0.5);
 
         // Get the euclidean norms to compute the minimum distances:
         // between LOS
-        final DerivativeStructure dMin = vDistanceMin.getNorm();
+        final T dMin = vDistanceMin.getNorm();
         // to the ground
-        final DerivativeStructure dCentralBody = midPoint.getNorm();
+        final T dCentralBody = midPoint.getNorm();
 
-        return new DerivativeStructure[] {dMin, dCentralBody};
+        final T[] ret = MathArrays.buildArray(dMin.getField(), 2);
+        ret[0] = dMin;
+        ret[1] = dCentralBody;
+        return ret;
+
     }
 
 
@@ -1066,22 +1073,22 @@ public class Rugged {
     }
 
     /** Inverse location of a point with derivatives.
+     * @param <T> derivative type
      * @param sensorName name of the line sensor
      * @param point point to localize
      * @param minLine minimum line number
      * @param maxLine maximum line number
-     * @param generator generator to use for building {@link DerivativeStructure} instances
+     * @param generator generator to use for building {@link Derivative} instances
      * @return sensor pixel seeing point with derivatives, or null if point cannot be seen between the
      * prescribed line numbers
      * @see #inverseLocation(String, GeodeticPoint, int, int)
      * @since 2.0
      */
-
-    public DerivativeStructure[] inverseLocationDerivatives(final String sensorName,
-                                                            final GeodeticPoint point,
-                                                            final int minLine,
-                                                            final int maxLine,
-                                                            final DSGenerator generator) {
+    public <T extends Derivative<T>> T[] inverseLocationDerivatives(final String sensorName,
+                                                                    final GeodeticPoint point,
+                                                                    final int minLine,
+                                                                    final int maxLine,
+                                                                    final DerivativeGenerator<T> generator) {
 
         final LineSensor sensor = getLineSensor(sensorName);
 
@@ -1109,37 +1116,39 @@ public class Rugged {
         // fix line by considering the closest pixel exact position and line-of-sight
         // (this pixel might point towards a direction slightly above or below the mean sensor plane)
         final int lowIndex = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
-        final FieldVector3D<DerivativeStructure> lowLOS =
+        final FieldVector3D<T> lowLOS =
                         sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex, generator);
-        final FieldVector3D<DerivativeStructure> highLOS = sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex + 1, generator);
-        final FieldVector3D<DerivativeStructure> localZ = FieldVector3D.crossProduct(lowLOS, highLOS).normalize();
-        final DerivativeStructure beta         = FieldVector3D.dotProduct(crossingResult.getTargetDirection(), localZ).acos();
-        final DerivativeStructure s            = FieldVector3D.dotProduct(crossingResult.getTargetDirectionDerivative(), localZ);
-        final DerivativeStructure minusBetaDer = s.divide(s.multiply(s).subtract(1).negate().sqrt());
-        final DerivativeStructure deltaL       = beta.subtract(0.5 * FastMath.PI) .divide(minusBetaDer);
-        final DerivativeStructure fixedLine    = deltaL.add(crossingResult.getLine());
-        final FieldVector3D<DerivativeStructure> fixedDirection =
-                        new FieldVector3D<DerivativeStructure>(deltaL.getField().getOne(), crossingResult.getTargetDirection(),
-                                                               deltaL, crossingResult.getTargetDirectionDerivative()).normalize();
+        final FieldVector3D<T> highLOS = sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex + 1, generator);
+        final FieldVector3D<T> localZ = FieldVector3D.crossProduct(lowLOS, highLOS).normalize();
+        final T beta         = FieldVector3D.dotProduct(crossingResult.getTargetDirection(), localZ).acos();
+        final T s            = FieldVector3D.dotProduct(crossingResult.getTargetDirectionDerivative(), localZ);
+        final T minusBetaDer = s.divide(s.multiply(s).subtract(1).negate().sqrt());
+        final T deltaL       = beta.subtract(0.5 * FastMath.PI) .divide(minusBetaDer);
+        final T fixedLine    = deltaL.add(crossingResult.getLine());
+        final FieldVector3D<T> fixedDirection =
+                        new FieldVector3D<>(deltaL.getField().getOne(), crossingResult.getTargetDirection(),
+                                            deltaL, crossingResult.getTargetDirectionDerivative()).normalize();
 
         // fix neighbouring pixels
         final AbsoluteDate fixedDate  = sensor.getDate(fixedLine.getValue());
-        final FieldVector3D<DerivativeStructure> fixedX = sensor.getLOSDerivatives(fixedDate, lowIndex, generator);
-        final FieldVector3D<DerivativeStructure> fixedZ = FieldVector3D.crossProduct(fixedX, sensor.getLOSDerivatives(fixedDate, lowIndex + 1, generator));
-        final FieldVector3D<DerivativeStructure> fixedY = FieldVector3D.crossProduct(fixedZ, fixedX);
+        final FieldVector3D<T> fixedX = sensor.getLOSDerivatives(fixedDate, lowIndex, generator);
+        final FieldVector3D<T> fixedZ = FieldVector3D.crossProduct(fixedX, sensor.getLOSDerivatives(fixedDate, lowIndex + 1, generator));
+        final FieldVector3D<T> fixedY = FieldVector3D.crossProduct(fixedZ, fixedX);
 
         // fix pixel
-        final DerivativeStructure hY         = FieldVector3D.dotProduct(highLOS, fixedY);
-        final DerivativeStructure hX         = FieldVector3D.dotProduct(highLOS, fixedX);
-        final DerivativeStructure pixelWidth = hY.atan2(hX);
-        final DerivativeStructure fY         = FieldVector3D.dotProduct(fixedDirection, fixedY);
-        final DerivativeStructure fX         = FieldVector3D.dotProduct(fixedDirection, fixedX);
-        final DerivativeStructure alpha      = fY.atan2(fX);
-        final DerivativeStructure fixedPixel = alpha.divide(pixelWidth).add(lowIndex);
+        final T hY         = FieldVector3D.dotProduct(highLOS, fixedY);
+        final T hX         = FieldVector3D.dotProduct(highLOS, fixedX);
+        final T pixelWidth = hY.atan2(hX);
+        final T fY         = FieldVector3D.dotProduct(fixedDirection, fixedY);
+        final T fX         = FieldVector3D.dotProduct(fixedDirection, fixedX);
+        final T alpha      = fY.atan2(fX);
+        final T fixedPixel = alpha.divide(pixelWidth).add(lowIndex);
 
-        return new DerivativeStructure[] {
-            fixedLine, fixedPixel
-        };
+        final T[] ret = MathArrays.buildArray(fixedPixel.getField(), 2);
+        ret[0] = fixedLine;
+        ret[1] = fixedPixel;
+        return ret;
+
     }
 
     /** Get transform from spacecraft to inertial frame.
