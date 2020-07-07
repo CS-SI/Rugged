@@ -18,11 +18,13 @@ package org.orekit.rugged.intersection;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.bodies.GeodeticPoint;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface for Digital Elevation Model intersection algorithm.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface IntersectionAlgorithm {
 
@@ -58,4 +60,9 @@ public interface IntersectionAlgorithm {
      */
     double getElevation(double latitude, double longitude);
 
+    /** Get the algorithmId.
+     * @return the algorithmId
+     * @since 2.2
+     */
+    AlgorithmId getAlgorithmId();
 }

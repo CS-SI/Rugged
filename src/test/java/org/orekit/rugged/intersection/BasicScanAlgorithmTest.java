@@ -17,8 +17,10 @@
 package org.orekit.rugged.intersection;
 
 
-import org.orekit.rugged.intersection.BasicScanAlgorithm;
-import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.TileUpdater;
 
 public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
@@ -27,4 +29,10 @@ public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
         return new BasicScanAlgorithm(updater, maxCachedTiles);
     }
 
+    @Test
+    public void testAlgorithmId() {
+        setUpMayonVolcanoContext();
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        assertEquals(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY, algorithm.getAlgorithmId());
+    }
 }

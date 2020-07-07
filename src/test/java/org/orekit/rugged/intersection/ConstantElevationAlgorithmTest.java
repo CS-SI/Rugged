@@ -17,6 +17,8 @@
 package org.orekit.rugged.intersection;
 
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.net.URISyntaxException;
 
@@ -33,6 +35,7 @@ import org.orekit.data.DirectoryCrawler;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.raster.CheckedPatternElevationUpdater;
 import org.orekit.rugged.raster.TileUpdater;
@@ -95,6 +98,15 @@ public class ConstantElevationAlgorithmTest {
         // Simple test for test coverage purpose
         double elevation0 = ignore.getElevation(gpRef.getLatitude(), gpConst.getLatitude());
         Assert.assertEquals(elevation0, 0.0, 1.e-15);
+    }
+    
+    @Test
+    public void testAlgorithmId() {
+        IntersectionAlgorithm constantElevation = new ConstantElevationAlgorithm(0.0);
+        assertEquals(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation.getAlgorithmId());
+
+        IntersectionAlgorithm ignore = new IgnoreDEMAlgorithm();
+        assertEquals(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID, ignore.getAlgorithmId());
     }
 
     @Before
