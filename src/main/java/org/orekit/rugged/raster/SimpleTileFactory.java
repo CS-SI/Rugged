@@ -16,8 +16,6 @@
  */
 package org.orekit.rugged.raster;
 
-import org.orekit.rugged.raster.TileFactory;
-
 /** Simple implementation of a {@link TileFactory} for {@link SimpleTile}.
  * @author Luc Maisonobe
  */

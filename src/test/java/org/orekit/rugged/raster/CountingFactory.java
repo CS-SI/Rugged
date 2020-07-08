@@ -16,10 +16,6 @@
  */
 package org.orekit.rugged.raster;
 
-import org.orekit.rugged.raster.SimpleTile;
-import org.orekit.rugged.raster.SimpleTileFactory;
-import org.orekit.rugged.raster.TileFactory;
-
 public class CountingFactory implements TileFactory<SimpleTile> {
 
     private int count;

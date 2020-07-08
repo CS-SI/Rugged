@@ -23,9 +23,6 @@ import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.raster.SimpleTile;
-import org.orekit.rugged.raster.SimpleTileFactory;
-import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.Tile.Location;
 
 public class SimpleTileTest {
