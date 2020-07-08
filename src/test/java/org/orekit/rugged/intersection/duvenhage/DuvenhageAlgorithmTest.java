@@ -19,6 +19,9 @@ package org.orekit.rugged.intersection.duvenhage;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
+
+import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
@@ -190,6 +194,17 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
                                      new Vector3D(-0.15561499277355603, 0.9878177838164719, 0.0)).getLatitude(),
                                      1.0e-6);
 
+    }
+    
+    @Test
+    public void testAlgorithmId() {
+        setUpMayonVolcanoContext();
+ 
+        final IntersectionAlgorithm algorithm = new DuvenhageAlgorithm(updater, 8, false);
+        assertEquals(AlgorithmId.DUVENHAGE, algorithm.getAlgorithmId());
+        
+        final IntersectionAlgorithm algorithmFlatBody = new DuvenhageAlgorithm(updater, 8, true);
+        assertEquals(AlgorithmId.DUVENHAGE_FLAT_BODY, algorithmFlatBody.getAlgorithmId());
     }
 
     private NormalizedGeodeticPoint findExit(IntersectionAlgorithm algorithm, Tile tile, Vector3D position, Vector3D los) {

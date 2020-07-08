@@ -58,6 +58,10 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     /** Flag for flat-body hypothesis. */
     private final boolean flatBody;
 
+    /** Algorithm Id.
+     * @since 2.2 */
+    private final AlgorithmId algorithmId;
+
     /** Simple constructor.
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
@@ -72,6 +76,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                               final boolean flatBody) {
         this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
         this.flatBody = flatBody;
+        this.algorithmId = flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE;
     }
 
     /** {@inheritDoc} */
@@ -79,7 +84,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
                                                 final Vector3D position, final Vector3D los) {
 
-        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+        DumpManager.dumpAlgorithm(this.algorithmId);
 
         // compute intersection with ellipsoid
         final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
@@ -194,7 +199,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                       final Vector3D position, final Vector3D los,
                                                       final NormalizedGeodeticPoint closeGuess) {
 
-        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+        DumpManager.dumpAlgorithm(this.algorithmId);
 
         if (flatBody) {
             // under the (bad) flat-body assumption, the reference point must remain
@@ -284,9 +289,15 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     @Override
     public double getElevation(final double latitude, final double longitude) {
 
-        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+        DumpManager.dumpAlgorithm(this.algorithmId);
         final Tile tile = cache.getTile(latitude, longitude);
         return tile.interpolateElevation(latitude, longitude);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public AlgorithmId getAlgorithmId() {
+        return this.algorithmId;
     }
 
     /** Compute intersection of line with Digital Elevation Model in a sub-tile.
@@ -737,5 +748,4 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         }
 
     }
-
 }

@@ -168,6 +168,14 @@ public class Rugged {
         return algorithm;
     }
 
+    /** Get the DEM intersection algorithm identifier.
+     * @return DEM intersection algorithm Id
+     * @since 2.2
+     */
+    public AlgorithmId getAlgorithmId() {
+        return algorithm.getAlgorithmId();
+    }
+
     /** Get flag for light time correction.
      * @return true if the light time between ground and spacecraft is
      * compensated for more accurate location

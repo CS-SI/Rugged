@@ -1465,6 +1465,9 @@ public class RuggedTest {
         // Get the algorithm
         assertTrue(rugged.getAlgorithm().getClass().isInstance(new IgnoreDEMAlgorithm()));
         
+        // Get the algorithm Id
+        assertEquals(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID, rugged.getAlgorithmId());
+        
         // Change the min and max line in inverse location to update the SensorMeanPlaneCrossing when the planeCrossing is not null
         int minLine = firstLine;
         int maxLine = lastLine;

@@ -39,6 +39,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  * corner points. It is not designed for operational use.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class BasicScanAlgorithm implements IntersectionAlgorithm {
 
@@ -51,14 +52,19 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     /** Maximum altitude encountered. */
     private double hMax;
 
+    /** Algorithm Id.
+     * @since 2.2 */
+    private final AlgorithmId algorithmId;
+
     /** Simple constructor.
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      */
     public BasicScanAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        cache = new TilesCache<SimpleTile>(new SimpleTileFactory(), updater, maxCachedTiles);
-        hMin  = Double.POSITIVE_INFINITY;
-        hMax  = Double.NEGATIVE_INFINITY;
+        this.cache = new TilesCache<SimpleTile>(new SimpleTileFactory(), updater, maxCachedTiles);
+        this.hMin  = Double.POSITIVE_INFINITY;
+        this.hMax  = Double.NEGATIVE_INFINITY;
+        this.algorithmId = AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY;
     }
 
     /** {@inheritDoc} */
@@ -66,7 +72,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
             final Vector3D position, final Vector3D los) {
 
-        DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
+        DumpManager.dumpAlgorithm(this.algorithmId);
 
         // find the tiles between the entry and exit point in the Digital Elevation Model
         NormalizedGeodeticPoint entryPoint = null;
@@ -162,7 +168,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
                                                       final Vector3D position, final Vector3D los,
                                                       final NormalizedGeodeticPoint closeGuess) {
-        DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
+        DumpManager.dumpAlgorithm(this.algorithmId);
         final Vector3D      delta     = ellipsoid.transform(closeGuess).subtract(position);
         final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
         final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
@@ -182,9 +188,15 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     /** {@inheritDoc} */
     @Override
     public double getElevation(final double latitude, final double longitude) {
-        DumpManager.dumpAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
+        DumpManager.dumpAlgorithm(this.algorithmId);
         final Tile tile = cache.getTile(latitude, longitude);
         return tile.interpolateElevation(latitude, longitude);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public AlgorithmId getAlgorithmId() {
+        return this.algorithmId;
     }
 
     /** Check the overall min and max altitudes.
@@ -252,5 +264,4 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
         final int rawIndex = tile.getFloorLongitudeIndex(longitude);
         return FastMath.min(FastMath.max(0, rawIndex), tile.getLongitudeColumns());
     }
-
 }
