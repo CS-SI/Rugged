@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hipparchus.analysis.differentiation.DSFactory;
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
 import org.hipparchus.analysis.differentiation.Gradient;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableFunction;
@@ -1390,27 +1389,27 @@ public class RuggedTest {
 
         // Expected derivatives for
         // minimum distance between LOS
-        double[] expectedDminDerivatives = {3.88800245, -153874.01319097, -678866.03112033, 191294.06938169, 668600.16715270} ;
+        double[] expectedDminDerivatives = {-153874.01319097, -678866.03112033, 191294.06938169, 668600.16715270} ;
         // minimum distance to the ground
-        double[] expectedDcentralBodyDerivatives = {6368020.55910153, 7007767.46926062, -1577060.82402054, -6839286.39593802, 1956452.66636262};
+        double[] expectedDcentralBodyDerivatives = {7007767.46926062, -1577060.82402054, -6839286.39593802, 1956452.66636262};
 
-        DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
+        Gradient[] distancesBetweenLOSGradient = refiningTest.computeDistancesBetweenLOSGradient(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
 
         // Minimum distance between LOS
-        DerivativeStructure dMin = distancesBetweenLOSwithDS[0];
+        Gradient dMin = distancesBetweenLOSGradient[0];
         // Minimum distance to the ground
-        DerivativeStructure dCentralBody = distancesBetweenLOSwithDS[1];
+        Gradient dCentralBody = distancesBetweenLOSGradient[1];
 
         Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 1.e-8);
         Assert.assertEquals(expectedDistanceToTheGround, dCentralBody.getValue() , 1.e-5);
 
 
-        for (int i = 0; i < dMin.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDminDerivatives[i], dMin.getAllDerivatives()[i], 1.e-8);
+        for (int i = 0; i < dMin.getFreeParameters(); i++) {
+            Assert.assertEquals(expectedDminDerivatives[i], dMin.getPartialDerivative(i), 1.e-8);
         }
 
-        for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 3.e-8);
+        for (int i = 0; i < dCentralBody.getFreeParameters(); i++) {
+            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getPartialDerivative(i), 3.e-8);
         }
     }
 
