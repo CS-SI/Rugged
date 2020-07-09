@@ -26,13 +26,20 @@
       </action>
       <action dev="guylaine" type="fix" issue="384">
         Add connection with Gitlab CI to allow automatic building and release,
-        as well as automatic code analysis.
+        as well as automatic code analysis (https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged).
       </action>
       <action dev="luc" type="fix" issue="386">
         Fix a unit test due to CI specificity.
       </action>
       <action dev="guylaine" type="update">
-        Update building explanations (.md) and remove redundant BUILDING.txt
+        Update building explanations in static site and remove redundant BUILDING.txt.
+      </action>
+      <action dev="guylaine" type="update"  issue="381">
+        Give access to algorithm identifier (DUVENHAGE,
+        CONSTANT_ELEVATION_OVER_ELLIPSOID, ...) with the new method getAlgorithmId().
+      </action>
+      <action dev="guylaine" type="update"  issue="385">
+        Use the new Derivative&lt;T&gt; interface from Hipparchus.
       </action>
       <action dev="guylaine" type="update">
         Update deprecated method of Orekit DataProvidersManager class.
