@@ -1,29 +1,12 @@
-<!--- Copyright 2013-2020 CS GROUP
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-  
-    http://www.apache.org/licenses/LICENSE-2.0
-  
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
+![Rugged logo](https://www.orekit.org/rugged/img/rugged-logo-small.jpg)
 
-<h1 style="color:blue;" align="center">
-  Rugged
-</h1>
-<h1>
-  <img src="src/site/resources/images/rugged-logo-small.jpg" alt="Rugged"/>
-  A sensor-to-terrain mapping tool
-</h1>
+# Rugged
 
-<h4 align="center">Rugged is a free java library for geolocation and used for satellite imagery.</h4>
+> A sensor-to-terrain mapping tool
 
-Rugged is an add-on for [Orekit](https://www.orekit.org/ "Orekit homepage") handling Digital Elevation Models contribution to 
-line of sight computation. It is a free software intermediate-level library written in Java.
+[Rugged](www.orekit.org/rugged/  "Rugged homepage") is a free java library for geolocation and used for satellite imagery.
+
+Rugged is an add-on for [Orekit](https://www.orekit.org/ "Orekit homepage") handling Digital Elevation Models contribution to line of sight computation. It is a free software intermediate-level library written in Java.
 
 It mainly provides direct and inverse location, i.e. it allows to compute accurately 
 which ground point is looked at from a specific pixel in a spacecraft instrument, 
@@ -38,4 +21,78 @@ ground and sensor is computed with a viewing model taking into account:
 Direct and inverse location can be used to perform full ortho-rectification of 
 images and correlation between sensors observing the same area.
 
-Homepage: [www.orekit.org/rugged/](https://www.orekit.org/rugged/ "Rugged homepage")
+
+[![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=alert_status)](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged)
+[![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=coverage)](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged)
+
+## Download
+
+### Official releases
+
+[Official Rugged releases](https://gitlab.orekit.org/orekit/rugged/-/releases)
+are available on our [Gitlab instance](https://gitlab.orekit.org/). They are
+also available in the
+[Maven repository](https://mvnrepository.com/artifact/org.orekit/rugged).
+
+### Development version
+
+To get the latest development version, please clone our official repository
+and checkout the `develop` branch:
+
+```bash
+git clone -b develop https://gitlab.orekit.org/orekit/rugged.git
+```
+__Note:__ Our official repository is
+[mirrored on Github](https://github.com/CS-SI/Rugged).
+
+## Documentation
+
+Project overview, architecture and development, detailed features list,
+Javadoc and a lot of other information is available on the
+[Maven site](https://www.orekit.org/site-rugged-development/).
+
+## Getting help
+
+The main communication channel is our [forum](https://forum.orekit.org/). You
+can report bugs and suggest new features in our
+[issues tracking system](https://gitlab.orekit.org/orekit/rugged/-/issues). When
+reporting security issues check the "This issue is confidential" box.
+
+## Contributing
+
+Please take a look at our
+[contributing guidelines](https://www.orekit.org/site-rugged-latest/contributing.html) if you're
+interested in helping!
+
+## Building
+
+Detailed information on how to build Rugged from source either using Maven or
+Eclipse is provided in [building](https://www.orekit.org/site-rugged-latest/building.html) explanations.
+
+## Dependencies
+
+Rugged relies on the following
+[FOSS](https://en.wikipedia.org/wiki/Free_and_open-source_software) libraries,
+all released under business friendly FOSS licenses.
+
+### Compile-time/run-time dependencies
+
+* [Orekit](https://www.orekit.org/), a low level space dynamics library released under
+  the Apache License, version 2.0.
+
+* [Hipparchus](https://hipparchus.org/), a mathematics library released under
+  the Apache License, version 2.0.
+
+### Test-time dependencies
+
+* [JUnit 4](http://www.junit.org/), a widely used unit test framework released
+  under the Eclipse Public License, version 1.0.
+
+More detailed information is available in the
+[Maven site](https://www.orekit.org/site-rugged-development/dependencies.html).
+
+## License
+
+Rugged is licensed by [CS GROUP](https://www.c-s.fr/) under
+the [Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+A copy of this license is provided in the [LICENSE.txt](LICENSE.txt) file.
