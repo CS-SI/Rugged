@@ -48,7 +48,7 @@ as required.
 
 |  package |                                              link                                                                                     |
 |----------|---------------------------------------------------------------------------------------------------------------------------------------|
-|  source  | [rugged-${version.key}-sources.zip](https://search.maven.org/remotecontent?filepath=org/orekit/rugged/${version.key}/rugged-${version.key}-sources.zip) |
+|  source  | [rugged-${version.key}-sources.jar](https://search.maven.org/remotecontent?filepath=org/orekit/rugged/${version.key}/rugged-${version.key}-sources.jar) |
 |  binary  | [rugged-${version.key}.jar](https://search.maven.org/remotecontent?filepath=org/orekit/rugged/${version.key}/rugged-${version.key}.jar)                 |
 |  javadoc | [rugged-${version.key}-javadoc.jar](https://search.maven.org/remotecontent?filepath=org/orekit/rugged/${version.key}/rugged-${version.key}-javadoc.jar) |
 version ${version.key} downloads (release date: ${version.value})
