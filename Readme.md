@@ -23,7 +23,7 @@ images and correlation between sensors observing the same area.
 
 
 [![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=alert_status)](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged)
-[![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=coverage)](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged)
+[![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=coverage)](https://sonar.orekit.org/component_measures?id=org.orekit%3Arugged&metric=coverage&view=treemap)
 
 ## Download
 
