@@ -23,7 +23,7 @@
      <release version="2.2" date="TBD" description="This is a minor release.
      It adds access to algorithm identifier, 
      corrects an Earth constant for model IERS96, 
-     improves documentationand fixes a few bugs.
+     improves documentation and fixes a few bugs.
      Automatic building, release and code analysis are available with Gitlab CI.
      This version depends on Orekit 10.2 and Hipparchus 1.7.">
       <action dev="guylaine" type="update" issue="383">
@@ -143,9 +143,8 @@
       <action dev="guylaine" type="add" due-to="Jonathan Guinet, Lucie Labat-Allée">
         Added refinement feature, to adjust viewing model parameters
       </action>
-      <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
+      <action dev="luc" type="add" due-to="Lars Næsbye Christensen" issue="343">
         Added Danish translations.
-        Fixes issue #343.
       </action>
       <action dev="luc" type="update">
         Updated dependency to Hipparchus 1.1, released on 2017, March 16th.
