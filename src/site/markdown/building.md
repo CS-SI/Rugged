@@ -64,12 +64,27 @@ the Orekit source from Orekit git repository at Gitlab in some
 temporary folder and install it with maven. This is done by
 running the commands below (using Linux command syntax):
 
-    git clone https://gitlab.orekit.org/orekit/orekit.git
+    git clone -b develop https://gitlab.orekit.org/orekit/orekit.git
     cd orekit
-    git checkout -b develop origin/develop
+    mvn install
+    
+If, in a similar way, the command above ends with an error message like:
+ 
+    [ERROR] Failed to execute goal on project orekit: Could not resolve dependencies for project org.orekit:orekit:jar:Y.y-SNAPSHOT: 
+            The following artifacts could not be resolved: org.hipparchus:hipparchus-core:jar:Z.z-SNAPSHOT, org.hipparchus:hipparchus-geometry:jar:Z.z-SNAPSHOT,   
+            ... 
+            Could not find artifact org.hipparchus:hipparchus-core:jar:Z.Z-SNAPSHOT
+
+Before building the Orekit artefact, you should start by building the missing Hipparchus artifact 
+and install it in your local maven repository 
+beforehand, in the same way as Orekit, by cloning
+the Hipparchus source from Hipparchus git repository at GitHub:
+
+    git clone https://github.com/Hipparchus-Math/hipparchus.git
+    cd hipparchus
     mvn install
 
-Once the Orekit development version has been installed locally using
+Once the Orekit (and possibly Hipparchus) development version has been installed locally using
 the previous commands, you can delete the cloned folder if you want. You can then
 attempt again the mvn command at Rugged level, this time it should succeed as the
 necessary artifact is now locally available.
