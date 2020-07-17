@@ -1081,7 +1081,7 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithAllCorrections()
         {
         doTestInverseLocationDerivatives(2000, true, true,
-                                         3.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
+                                         7.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
     }
 
     /**
