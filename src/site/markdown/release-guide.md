@@ -14,7 +14,7 @@ and Luc Maisonobe <luc.maisonobe@csgroup.eu> for everything else.
    https://central.sonatype.org/pages/ossrh-guide.html
 
 If you need help with either, ask on the [development section of the Rugged
-forum](https://forum.orekit.org/c/rugged-development/7).
+forum](https://forum.orekit.org/c/rugged-development/).
 
 Once you have a SonaType OSS account, the corresponding credentials must be set
 in the `servers` section of your `$HOME/.m2/settings.xml` file, using an id of
@@ -230,7 +230,7 @@ Once the modification pushed to develop branch, the [test website](https://test.
 ## Calling for the vote
 
 Everything is now ready so the developers and PMC can vote for the release.
-Create a post in the [Rugged development category of the forum](https://forum.orekit.org/c/rugged-development/7)
+Create a post in the [Rugged development category of the forum](https://forum.orekit.org/c/rugged-development/)
 with a subject line of the form:
 
     [VOTE] Releasing Rugged X.Y from release candidate n
@@ -354,7 +354,7 @@ Click “Close Milestone” for the line corresponding to the release X.Y.
 ## Announce release
 
 The last step is to announce the release by creating a post in the 
-[Rugged announcements category of the forum](https://forum.orekit.org/c/rugged-announcements/10) 
+[Rugged announcements category of the forum](https://forum.orekit.org/c/rugged-announcements/) 
 with a subject line of the form:
 
     Rugged X.Y released
