@@ -32,7 +32,7 @@
       <item name="Building"                 href="/building.html"                           />
       <item name="Configuration"            href="/configuration.html"                      />
       <item name="FAQ"                      href="/faq.html"                                />
-      <item name="License"                  href="/licenses.html"                            />
+      <item name="License"                  href="/licenses.html"                           />
       <item name="Downloads"                href="/downloads.html"                          />
       <item name="Changes"                  href="/changes-report.html"                     />
       <item name="Contact"                  href="/contact.html"                            />
@@ -41,7 +41,7 @@
       <item name="Overview"                 href="/design/overview.html"                    />
       <item name="Technical choices"        href="/design/technical-choices.html"           />
       <item name="Digital Elevation Model"  href="/design/digital-elevation-model.html"     />
-      <item name="Design"		    href="/design/design.html"          />
+      <item name="Design"		            href="/design/design.html"                      />
     </menu>
     <menu name="Tutorials">
       <item name="Direct location"          href="/tutorials/direct-location.html"          />
@@ -53,7 +53,8 @@
       <item name="Contributing"             href="/contributing.html"                       />
       <item name="Guidelines"               href="/guidelines.html"                         />
       <item name="Javadoc"                  href="/apidocs/index.html"                      />
-      </menu>
+      <item name="Release guide"            href="/release-guide.html"                      />
+    </menu>
     <menu ref="reports"/>
   </body>
   <poweredBy>
