@@ -9,7 +9,7 @@ and Luc Maisonobe <luc.maisonobe@csgroup.eu> for everything else.
 ## Prerequisites
 
 1. Obtain private key of the Rugged Signing Key, key id:
-   `xxxxxxxxxxxxxxxxxx`
+   `9A928E5485FBC44A2A4F9C2E9128808ECB6C9DED`
 2. Register for account on OSSRH and associate it with the Rugged project, see:
    https://central.sonatype.org/pages/ossrh-guide.html
 
