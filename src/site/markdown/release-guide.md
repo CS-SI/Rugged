@@ -162,7 +162,7 @@ without the `-RCx` suffix will be put once the vote succeeds, on the same
 commit (which will therefore have two tags). Tagging and signing is done using
 the following command, with `-RCn` replaced with the Release Candidate number:
 
-    git tag X.Y-RCn -s -u xxxxxxxxxxxxxxxxxx -m "Release Candidate n for version X.Y."
+    git tag X.Y-RCn -s -u 9A928E5485FBC44A2A4F9C2E9128808ECB6C9DED -m "Release Candidate n for version X.Y."
 
 The tag should be verified using command:
 
@@ -280,7 +280,7 @@ publish the release.
 As the vote passed, a final signed tag must be added to the succeeding release
 candidate, verified and pushed:
 
-    git tag X.Y -s -u xxxxxxxxxxxxxxxxxx -m "Version X.Y."
+    git tag X.Y -s -u 9A928E5485FBC44A2A4F9C2E9128808ECB6C9DED -m "Version X.Y."
     git tag -v X.Y
     git push --tags
 
