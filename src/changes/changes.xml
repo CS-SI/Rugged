@@ -52,6 +52,9 @@
       <action dev="guylaine" type="update">
         Update building explanations in static site and remove redundant BUILDING.txt.
       </action>
+      <action dev="guylaine" type="add">
+        Create a release guide in static site.
+      </action>
       <action dev="guylaine" type="update">
         Update deprecated method of Orekit DataProvidersManager class.
       </action>
