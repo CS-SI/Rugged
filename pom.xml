@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.orekit</groupId>
   <artifactId>rugged</artifactId>
-  <version>2.2</version>
+  <version>2.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Rugged</name>
   <url>https://www.orekit.org/rugged</url>

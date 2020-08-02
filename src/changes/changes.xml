@@ -20,7 +20,9 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-     <release version="2.2" date="2020-07-31" description="This is a minor release.
+    <release version="2.3" date="TBD" description="TBD">
+    </release>
+    <release version="2.2" date="2020-07-31" description="This is a minor release.
      It adds access to algorithm identifier, 
      corrects an Earth constant for model IERS96, 
      improves documentation and fixes a few bugs.
