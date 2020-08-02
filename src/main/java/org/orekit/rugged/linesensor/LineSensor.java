@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -18,13 +18,13 @@ package org.orekit.rugged.linesensor;
 
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
@@ -113,37 +113,36 @@ public class LineSensor {
 
     /** Get the pixel normalized line-of-sight at some date,
      * and their derivatives with respect to estimated parameters.
+     * @param <T> derivative type
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
-     * @param generator generator to use for building {@link DerivativeStructure} instances
+     * @param generator generator to use for building {@link Derivative} instances
      * @return pixel normalized line-of-sight
-     * @since 2.0
      */
-    public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final int i,
-                                                                final DSGenerator generator) {
+    public <T extends Derivative<T>> FieldVector3D<T> getLOSDerivatives(final AbsoluteDate date, final int i,
+                                                                        final DerivativeGenerator<T> generator) {
         return los.getLOSDerivatives(i, date, generator);
     }
 
     /** Get the pixel normalized line-of-sight at some date,
      * and their derivatives with respect to estimated parameters.
+     * @param <T> derivative type
      * @param date current date
      * @param i pixel index (must be between 0 and {@link #getNbPixels()} - 1
-     * @param generator generator to use for building {@link DerivativeStructure} instances
+     * @param generator generator to use for building {@link Derivative} instances
      * @return pixel normalized line-of-sight
      * @since 2.0
      */
-    public FieldVector3D<DerivativeStructure> getLOSDerivatives(final AbsoluteDate date, final double i,
-                                                                final DSGenerator generator) {
+    public <T extends Derivative<T>> FieldVector3D<T> getLOSDerivatives(final AbsoluteDate date, final double i,
+                                                                        final DerivativeGenerator<T> generator) {
 
         // find surrounding pixels of pixelB (in order to interpolate LOS from pixelB (that is not an integer)
         final int iInf = FastMath.max(0, FastMath.min(getNbPixels() - 2, (int) FastMath.floor(i)));
         final int iSup = iInf + 1;
 
-        final FieldVector3D<DerivativeStructure> interpolatedLos = new FieldVector3D<DerivativeStructure> (
-                                                                    iSup - i,
-                                                                    los.getLOSDerivatives(iInf, date, generator),
-                                                                    i - iInf,
-                                                                    los.getLOSDerivatives(iSup, date, generator)).normalize();
+        final FieldVector3D<T> interpolatedLos =
+                        new FieldVector3D<> (iSup - i, los.getLOSDerivatives(iInf, date, generator),
+                                             i - iInf, los.getLOSDerivatives(iSup, date, generator)).normalize();
         return interpolatedLos;
     }
 

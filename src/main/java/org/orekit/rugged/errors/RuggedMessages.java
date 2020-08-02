@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
@@ -164,11 +165,9 @@ public enum RuggedMessages implements Localizable {
                 stream = loader.getResourceAsStream(resourceName);
             }
             if (stream != null) {
-                try {
+                try (InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                     // Only this line is changed to make it to read properties files as UTF-8.
-                    bundle = new PropertyResourceBundle(new InputStreamReader(stream, "UTF-8"));
-                } finally {
-                    stream.close();
+                    bundle = new PropertyResourceBundle(inputStreamReader);
                 }
             }
             return bundle;

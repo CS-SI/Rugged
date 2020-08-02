@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -23,9 +23,6 @@ import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.raster.SimpleTile;
-import org.orekit.rugged.raster.SimpleTileFactory;
-import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.Tile.Location;
 
 public class SimpleTileTest {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright 2013-2019 CS Systèmes d'Information
+  Copyright 2013-2020 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -15,7 +15,7 @@
  -->
 <project name="Rugged">
   <bannerLeft>
-    <name>CS Syst&#232;mes d&#039;Information</name>
+    <name>CS GROUP</name>
     <src>/images/logo_cs_2008_baseline_ang.jpg</src>
     <height>180</height>
     <href>http://www.c-s.fr/</href>
@@ -32,16 +32,16 @@
       <item name="Building"                 href="/building.html"                           />
       <item name="Configuration"            href="/configuration.html"                      />
       <item name="FAQ"                      href="/faq.html"                                />
-      <item name="License"                  href="/licenses.html"                            />
+      <item name="License"                  href="/licenses.html"                           />
       <item name="Downloads"                href="/downloads.html"                          />
       <item name="Changes"                  href="/changes-report.html"                     />
       <item name="Contact"                  href="/contact.html"                            />
     </menu>
     <menu name="Design">
-      <item name="Overview"                 href="/design/overview.html"                    />
-      <item name="Technical choices"        href="/design/technical-choices.html"           />
-      <item name="Digital Elevation Model"  href="/design/digital-elevation-model.html"     />
-      <item name="Design"		    href="/design/design.html"          />
+      <item name="Overview"                       href="/design/overview.html"                    />
+      <item name="Technical choices"              href="/design/technical-choices.html"           />
+      <item name="Digital Elevation Model"        href="/design/digital-elevation-model.html"     />
+      <item name="Design of the major functions"  href="/design/design-major-functions.html"                      />
     </menu>
     <menu name="Tutorials">
       <item name="Direct location"          href="/tutorials/direct-location.html"          />
@@ -53,7 +53,8 @@
       <item name="Contributing"             href="/contributing.html"                       />
       <item name="Guidelines"               href="/guidelines.html"                         />
       <item name="Javadoc"                  href="/apidocs/index.html"                      />
-      </menu>
+      <item name="Release guide"            href="/release-guide.html"                      />
+    </menu>
     <menu ref="reports"/>
   </body>
   <poweredBy>

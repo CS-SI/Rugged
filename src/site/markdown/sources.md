@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2019 CS Systèmes d'Information
+<!--- Copyright 2013-2020 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -52,4 +52,4 @@ tab in Rugged Gitlab.
 
         git clone -b develop git@gitlab.orekit.org:orekit/rugged.git
 
-[Top of the page](#top) 
+[Top of the page](#top)

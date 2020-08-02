@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -16,8 +16,6 @@
  */
 package org.orekit.rugged.utils;
 
-import java.util.List;
-
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.orekit.utils.ParameterDriver;
 
@@ -27,29 +25,8 @@ import org.orekit.utils.ParameterDriver;
  * </p>
  * @author Luc Maisonobe
  * @since 2.0
+ * @deprecated as of 2.2, replaced by {@link DerivativeGenerator}
  */
-public interface DSGenerator {
-
-    /** Get the parameters selected for estimation.
-     * @return parameters selected for estimation
-     */
-    List<ParameterDriver> getSelected();
-
-    /** Generate a constant {@link DerivativeStructure}.
-     * @param value value of the constant
-     * @return constant {@link DerivativeStructure}
-     */
-    DerivativeStructure constant(double value);
-
-    /** Generate a {@link DerivativeStructure} representing the
-     * parameter driver either as a canonical variable or a constant.
-     * <p>
-     * The instance created is a variable only if the parameter
-     * has been selected for estimation, otherwise it is a constant.
-     * </p>
-     * @param driver driver for the variable
-     * @return variable {@link DerivativeStructure}
-     */
-    DerivativeStructure variable(ParameterDriver driver);
-
+public interface DSGenerator extends DerivativeGenerator<DerivativeStructure> {
+    // nothing specialized here
 }

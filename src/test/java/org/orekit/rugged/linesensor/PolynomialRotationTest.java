@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -21,10 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hipparchus.Field;
 import org.hipparchus.analysis.UnivariateMatrixFunction;
 import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
+import org.hipparchus.analysis.differentiation.Gradient;
+import org.hipparchus.analysis.differentiation.GradientField;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableMatrixFunction;
 import org.hipparchus.analysis.polynomials.PolynomialFunction;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
@@ -41,7 +44,7 @@ import org.junit.Test;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.PolynomialRotation;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
@@ -173,8 +176,8 @@ public class PolynomialRotationTest {
             for (final ParameterDriver driver : selected) {
                 driver.setSelected(true);
             }
-            final DSFactory factoryS = new DSFactory(selected.size(), 1);
-            DSGenerator generator = new DSGenerator() {
+            final GradientField field = GradientField.getField(selected.size());
+            DerivativeGenerator<Gradient> generator = new DerivativeGenerator<Gradient>() {
 
                 /** {@inheritDoc} */
                 @Override
@@ -184,21 +187,27 @@ public class PolynomialRotationTest {
 
                 /** {@inheritDoc} */
                 @Override
-                public DerivativeStructure constant(final double value) {
-                    return factoryS.constant(value);
+                public Gradient constant(final double value) {
+                    return Gradient.constant(selected.size(), value);
                 }
 
                 /** {@inheritDoc} */
                 @Override
-                public DerivativeStructure variable(final ParameterDriver driver) {
+                public Gradient variable(final ParameterDriver driver) {
                     int index = 0;
                     for (ParameterDriver d : getSelected()) {
                         if (d == driver) {
-                            return factoryS.variable(index, driver.getValue());
+                            return Gradient.variable(selected.size(), index, driver.getValue());
                         }
                         ++index;
                     }
                     return constant(driver.getValue());
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public Field<Gradient> getField() {
+                    return field;
                 }
 
             };
@@ -226,7 +235,7 @@ public class PolynomialRotationTest {
                 DerivativeStructure[][] mDS = f.value(factory11.variable(0, driver.getValue()));
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, date);
-                    FieldVector3D<DerivativeStructure> losDS = tdl.getLOSDerivatives(i, date, generator);
+                    FieldVector3D<Gradient> losDS = tdl.getLOSDerivatives(i, date, generator);
                     Assert.assertEquals(los.getX(), losDS.getX().getValue(), 2.0e-15);
                     Assert.assertEquals(los.getY(), losDS.getY().getValue(), 2.0e-15);
                     Assert.assertEquals(los.getZ(), losDS.getZ().getValue(), 2.0e-15);

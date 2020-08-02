@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -33,9 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.exception.LocalizedCoreFormats;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
@@ -62,7 +63,7 @@ import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
 import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.refraction.MultiLayerModel;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -224,6 +225,12 @@ public class DumpReplayer {
     /** Keyword for null result. */
     private static final String NULL_RESULT = "NULL";
 
+    /** Pattern for delimiting regular expressions. */
+    private static final Pattern SEPARATOR = Pattern.compile("\\s+");
+
+    /** Empty pattern. */
+    private static final Pattern PATTERN = Pattern.compile(" ");
+
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
 
@@ -271,6 +278,7 @@ public class DumpReplayer {
 
     /** Dumped calls. */
     private final List<DumpedCall> calls;
+
 
     /** Simple constructor.
      */
@@ -976,14 +984,14 @@ public class DumpReplayer {
 
             final int colon = line.indexOf(':');
             if (colon > 0) {
-                final String parsedKey = line.substring(0, colon).trim().replaceAll(" ", "_").toUpperCase();
+                final String parsedKey = PATTERN.matcher(line.substring(0, colon).trim()).replaceAll("_").toUpperCase();
                 try {
                     final LineParser parser = LineParser.valueOf(parsedKey);
                     final String[] fields;
                     if (colon + 1 >= line.length()) {
                         fields = new String[0];
                     } else {
-                        fields = line.substring(colon + 1).trim().split("\\s+");
+                        fields = SEPARATOR.split(line.substring(colon + 1).trim());
                     }
                     parser.parse(l, file, line, fields, global);
                 } catch (IllegalArgumentException iae) {
@@ -1207,12 +1215,12 @@ public class DumpReplayer {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date,
-                                                                    final DSGenerator generator) {
+        public <T extends Derivative<T>> FieldVector3D<T> getLOSDerivatives(final int index, final AbsoluteDate date,
+                                                                            final DerivativeGenerator<T> generator) {
             final Vector3D los = getLOS(index, date);
-            return new FieldVector3D<DerivativeStructure>(generator.constant(los.getX()),
-                                                          generator.constant(los.getY()),
-                                                          generator.constant(los.getZ()));
+            return new FieldVector3D<>(generator.constant(los.getX()),
+                                       generator.constant(los.getY()),
+                                       generator.constant(los.getZ()));
         }
 
         /** Set a datation pair.

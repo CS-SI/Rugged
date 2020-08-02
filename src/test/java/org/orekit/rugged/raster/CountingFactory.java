@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 package org.orekit.rugged.raster;
-
-import org.orekit.rugged.raster.SimpleTile;
-import org.orekit.rugged.raster.SimpleTileFactory;
-import org.orekit.rugged.raster.TileFactory;
 
 public class CountingFactory implements TileFactory<SimpleTile> {
 

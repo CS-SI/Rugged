@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -48,12 +48,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.refraction.MultiLayerModel;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.ParameterDriver;
@@ -67,7 +67,7 @@ public class DumpReplayerTest {
     public void testDirectLoc01() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-01.txt").toURI().getPath();
         DumpReplayer replayer = new DumpReplayer();
@@ -90,7 +90,7 @@ public class DumpReplayerTest {
     public void testDirectLoc02() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-02.txt").toURI().getPath();
         DumpReplayer replayer = new DumpReplayer();
@@ -113,7 +113,7 @@ public class DumpReplayerTest {
     public void testDirectLoc03() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-03.txt").toURI().getPath();
         DumpReplayer replayer = new DumpReplayer();
@@ -136,7 +136,7 @@ public class DumpReplayerTest {
     public void testDirectLoc04() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-04.txt").toURI().getPath();
         File dump = tempFolder.newFile();
@@ -167,7 +167,7 @@ public class DumpReplayerTest {
     public void testDirectLocNull() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File tempFile = tempFolder.newFile();
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
@@ -194,7 +194,7 @@ public class DumpReplayerTest {
     public void testInverseLoc01() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-01.txt").toURI().getPath();
         DumpReplayer replayer = new DumpReplayer();
@@ -216,7 +216,7 @@ public class DumpReplayerTest {
     public void testInverseLoc02() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-02.txt").toURI().getPath();
         DumpReplayer replayer = new DumpReplayer();
@@ -238,7 +238,7 @@ public class DumpReplayerTest {
     public void testInverseLoc03() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-03.txt").toURI().getPath();
         DumpReplayer replayer = new DumpReplayer();
@@ -260,7 +260,7 @@ public class DumpReplayerTest {
     public void testInverseLocNull() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File tempFile = tempFolder.newFile();
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
@@ -284,7 +284,7 @@ public class DumpReplayerTest {
     public void testCorruptedFiles() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File folder = new File(getClass().getClassLoader().getResource("replay/replay-direct-loc-01.txt").toURI().getPath()).getParentFile();
         for (final File file : folder.listFiles()) {
@@ -336,7 +336,7 @@ public class DumpReplayerTest {
     public void testDirectLocIssue376_01() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-Issue376-01.txt").toURI().getPath();
 
@@ -356,7 +356,7 @@ public class DumpReplayerTest {
     public void testDirectLocIssue376_02() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-Issue376-02.txt").toURI().getPath();
 
@@ -376,7 +376,7 @@ public class DumpReplayerTest {
     public void testDirectLocIssue376_03() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-Issue376-03.txt").toURI().getPath();
 
@@ -398,7 +398,7 @@ public class DumpReplayerTest {
     public void testCreateRuggedWithAtmosphere() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File tempFile = tempFolder.newFile();
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
@@ -423,7 +423,7 @@ public class DumpReplayerTest {
     public void testCreateRuggedNoDEMdata() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File tempFile = tempFolder.newFile();
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
@@ -456,7 +456,7 @@ public class DumpReplayerTest {
     public void testLineParserBadKey() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File tempFile = tempFolder.newFile();
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
@@ -485,7 +485,7 @@ public class DumpReplayerTest {
     public void testLineParserEndColon() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File tempFile = tempFolder.newFile();
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
@@ -510,7 +510,7 @@ public class DumpReplayerTest {
     public void testLineParserNoColon() throws URISyntaxException, IOException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         File tempFile = tempFolder.newFile();
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
@@ -537,7 +537,7 @@ public class DumpReplayerTest {
                                                                 InvocationTargetException, NoSuchMethodException, SecurityException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         // ParsedSensor inner class
         Class<?> innerClass = Class.forName("org.orekit.rugged.errors.DumpReplayer$ParsedSensor");
@@ -590,7 +590,7 @@ public class DumpReplayerTest {
                                                         InvocationTargetException, NoSuchMethodException, SecurityException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         // ParsedSensor inner class
         Class<?> innerClass = Class.forName("org.orekit.rugged.errors.DumpReplayer$ParsedSensor");
@@ -620,7 +620,7 @@ public class DumpReplayerTest {
                                                      InvocationTargetException, NoSuchMethodException, SecurityException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(orekitPath)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         // ParsedSensor inner class
         Class<?> innerClass = Class.forName("org.orekit.rugged.errors.DumpReplayer$ParsedSensor");
@@ -643,11 +643,11 @@ public class DumpReplayerTest {
  
         // ParsedSensor.getLOSDerivatives
         // Needs some LOS to be set
-        Method getLOSDerivatives = innerClass.getDeclaredMethod("getLOSDerivatives", int.class, AbsoluteDate.class, DSGenerator.class);
+        Method getLOSDerivatives = innerClass.getDeclaredMethod("getLOSDerivatives", int.class, AbsoluteDate.class, DerivativeGenerator.class);
         getLOSDerivatives.setAccessible(true);
 
         final DSFactory factory = new DSFactory(1, 1);
-        DSGenerator generator = new DSGenerator() {
+        DerivativeGenerator<DerivativeStructure> generator = new DerivativeGenerator<DerivativeStructure>() {
             @Override
             public List<ParameterDriver> getSelected() {
                 return null;

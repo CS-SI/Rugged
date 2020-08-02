@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -21,10 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
@@ -122,8 +122,8 @@ public class LOSBuilder {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
-                                                               final AbsoluteDate date, final DSGenerator generator) {
+        public <T extends Derivative<T>> FieldVector3D<T> transformLOS(final int i, final FieldVector3D<T> los,
+                                                                       final AbsoluteDate date, final DerivativeGenerator<T> generator) {
             return transform.transformLOS(i, los, generator);
         }
 
@@ -179,14 +179,13 @@ public class LOSBuilder {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date,
-                                                                    final DSGenerator generator) {
+        public <T extends Derivative<T>> FieldVector3D<T> getLOSDerivatives(final int index, final AbsoluteDate date,
+                                                                            final DerivativeGenerator<T> generator) {
 
             // the raw line of sights are considered to be constant
-            FieldVector3D<DerivativeStructure> los =
-                            new FieldVector3D<DerivativeStructure>(generator.constant(raw[index].getX()),
-                                                                   generator.constant(raw[index].getY()),
-                                                                   generator.constant(raw[index].getZ()));
+            FieldVector3D<T> los = new FieldVector3D<>(generator.constant(raw[index].getX()),
+                                                       generator.constant(raw[index].getY()),
+                                                       generator.constant(raw[index].getZ()));
 
             // apply the transforms, which depend on parameters and hence may introduce non-zero derivatives
             for (final LOSTransform transform : transforms) {

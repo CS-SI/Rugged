@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 
@@ -158,7 +158,7 @@ public class FixedRotationTest {
                 driver.setSelected(true);
             }
             final DSFactory factoryS = new DSFactory(selected.size(), 1);
-            DSGenerator generator = new DSGenerator() {
+            DerivativeGenerator<DerivativeStructure> generator = new DerivativeGenerator<DerivativeStructure>() {
 
                 /** {@inheritDoc} */
                 @Override

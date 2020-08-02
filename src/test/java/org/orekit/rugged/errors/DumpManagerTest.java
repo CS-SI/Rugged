@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.orbits.Orbit;
 import org.orekit.rugged.TestUtils;
@@ -150,7 +150,7 @@ public class DumpManagerTest {
        int dimension = 200;
 
        String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-       DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+       DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
        final BodyShape  earth = TestUtils.createEarth();
        final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -234,9 +234,7 @@ public class DumpManagerTest {
    @Test
    public void testWriteError() throws URISyntaxException, IOException {
        try {
-           File dump = tempFolder.newFile();
-           dump.setReadOnly();
-           DumpManager.activate(dump);
+           DumpManager.activate(tempFolder.getRoot());
            Assert.fail("an exception should have been thrown");
        } catch (RuggedException re) {
            Assert.assertEquals(RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, re.getSpecifier());

@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -26,7 +26,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
@@ -65,7 +65,7 @@ public class InverseLocation {
             // Initialize Orekit, assuming an orekit-data folder is in user home directory
             File home       = new File(System.getProperty("user.home"));
             File orekitData = new File(home, "orekit-data");
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(orekitData));
 
             // Sensor's definition
             // ===================

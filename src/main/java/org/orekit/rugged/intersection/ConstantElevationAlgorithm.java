@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -25,27 +25,33 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Intersection ignoring Digital Elevation Model.
  * <p>
- * This dummy implementation simply uses the ellipsoid itself.
+ * This implementation uses a constant elevation over the ellipsoid.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
 
     /** Constant elevation over ellipsoid. */
     private final double constantElevation;
 
+    /** Algorithm Id.
+     * @since 2.2 */
+    private final AlgorithmId algorithmId;
+
     /** Simple constructor.
      * @param constantElevation constant elevation over ellipsoid
      */
     public ConstantElevationAlgorithm(final double constantElevation) {
         this.constantElevation = constantElevation;
+        this.algorithmId = AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID;
     }
 
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
                                                 final Vector3D position, final Vector3D los) {
-        DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
+        DumpManager.dumpAlgorithm(this.algorithmId, constantElevation);
         final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
         final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
         return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(), 0.0);
@@ -56,7 +62,7 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
     public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
                                                       final Vector3D position, final Vector3D los,
                                                       final NormalizedGeodeticPoint closeGuess) {
-        DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
+        DumpManager.dumpAlgorithm(this.algorithmId, constantElevation);
         final Vector3D      p  = ellipsoid.pointAtAltitude(position, los, constantElevation);
         final GeodeticPoint gp = ellipsoid.transform(p, ellipsoid.getFrame(), null);
         return new NormalizedGeodeticPoint(gp.getLatitude(), gp.getLongitude(), gp.getAltitude(),
@@ -71,8 +77,13 @@ public class ConstantElevationAlgorithm implements IntersectionAlgorithm {
      */
     @Override
     public double getElevation(final double latitude, final double longitude) {
-        DumpManager.dumpAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation);
+        DumpManager.dumpAlgorithm(this.algorithmId, constantElevation);
         return constantElevation;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public AlgorithmId getAlgorithmId() {
+        return this.algorithmId;
+    }
 }

@@ -17,7 +17,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.orbits.Orbit;
 import org.orekit.rugged.TestUtils;
@@ -128,7 +128,7 @@ public class AtmosphericRefractionTest {
     private RuggedBuilder initRuggedForAtmosphericTests(final int dimension, final String sensorName) throws URISyntaxException {
         
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 

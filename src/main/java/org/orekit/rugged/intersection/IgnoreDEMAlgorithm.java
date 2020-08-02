@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -27,19 +27,25 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
  * This dummy implementation simply uses the ellipsoid itself.
  * </p>
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
+
+    /** Algorithm Id.
+     * @since 2.2 */
+    private final AlgorithmId algorithmId;
 
     /** Simple constructor.
      */
     public IgnoreDEMAlgorithm() {
+        this.algorithmId = AlgorithmId.IGNORE_DEM_USE_ELLIPSOID;
     }
 
     /** {@inheritDoc} */
     @Override
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
                                                 final Vector3D position, final Vector3D los) {
-        DumpManager.dumpAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
+        DumpManager.dumpAlgorithm(this.algorithmId);
         return ellipsoid.pointOnGround(position, los, 0.0);
     }
 
@@ -48,7 +54,7 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
     public NormalizedGeodeticPoint refineIntersection(final ExtendedEllipsoid ellipsoid,
                                                       final Vector3D position, final Vector3D los,
                                                       final NormalizedGeodeticPoint closeGuess) {
-        DumpManager.dumpAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
+        DumpManager.dumpAlgorithm(this.algorithmId);
         return intersection(ellipsoid, position, los);
     }
 
@@ -60,8 +66,13 @@ public class IgnoreDEMAlgorithm implements IntersectionAlgorithm {
      */
     @Override
     public double getElevation(final double latitude, final double longitude) {
-        DumpManager.dumpAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID);
+        DumpManager.dumpAlgorithm(this.algorithmId);
         return 0.0;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public AlgorithmId getAlgorithmId() {
+        return this.algorithmId;
+    }
 }

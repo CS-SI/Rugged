@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2020 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -17,6 +17,8 @@
 package org.orekit.rugged.intersection;
 
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.net.URISyntaxException;
 
@@ -28,11 +30,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.orekit.attitudes.Attitude;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.CartesianOrbit;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.intersection.duvenhage.DuvenhageAlgorithm;
 import org.orekit.rugged.raster.CheckedPatternElevationUpdater;
 import org.orekit.rugged.raster.TileUpdater;
@@ -96,11 +99,20 @@ public class ConstantElevationAlgorithmTest {
         double elevation0 = ignore.getElevation(gpRef.getLatitude(), gpConst.getLatitude());
         Assert.assertEquals(elevation0, 0.0, 1.e-15);
     }
+    
+    @Test
+    public void testAlgorithmId() {
+        IntersectionAlgorithm constantElevation = new ConstantElevationAlgorithm(0.0);
+        assertEquals(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID, constantElevation.getAlgorithmId());
+
+        IntersectionAlgorithm ignore = new IgnoreDEMAlgorithm();
+        assertEquals(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID, ignore.getAlgorithmId());
+    }
 
     @Before
     public void setUp() throws  URISyntaxException {
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         earth = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                       Constants.WGS84_EARTH_FLATTENING,
                                       FramesFactory.getITRF(IERSConventions.IERS_2010, true));

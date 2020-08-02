@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Gradient;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
@@ -17,7 +18,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.orbits.Orbit;
@@ -33,7 +34,7 @@ import org.orekit.rugged.api.Rugged;
 import org.orekit.rugged.api.RuggedBuilder;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.SensorPixel;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularDerivativesFilter;
@@ -104,7 +105,7 @@ public class InitInterRefiningTest {
         try {
             
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
             
             // Initialize refining context
             // ---------------------------
@@ -268,11 +269,29 @@ public class InitInterRefiningTest {
      * @param realPixelA real pixel from sensor A
      * @param realPixelB real pixel from sensor B
      * @return the distances of two real pixels computed between LOS and to the ground
+     * @deprecated as of 2.2, replaced by {@link #computeDistancesBetweenLOSGradient(SensorPixel, SensorPixel, double, double)}
      */
     public DerivativeStructure[] computeDistancesBetweenLOSDerivatives(final SensorPixel realPixelA, final SensorPixel realPixelB,
-                                                                       double losDistance, double earthDistance) 
+                                                                       final double losDistance, final double earthDistance) 
         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        
+        final Gradient[] gradient = computeDistancesBetweenLOSGradient(realPixelA, realPixelB, losDistance, earthDistance);
+        final DerivativeStructure[] ds = new DerivativeStructure[gradient.length];
+        for (int i = 0; i < gradient.length; ++i) {
+            ds[i] = gradient[i].toDerivativeStructure();
+        }
+        return ds;
+    }
+
+    /** Compute the distances with derivatives between LOS of two real pixels (one from sensor A and one from sensor B)
+     * @param realPixelA real pixel from sensor A
+     * @param realPixelB real pixel from sensor B
+     * @return the distances of two real pixels computed between LOS and to the ground
+     * @since 2.2
+     */
+    public Gradient[] computeDistancesBetweenLOSGradient(final SensorPixel realPixelA, final SensorPixel realPixelB,
+                                                         final double losDistance, final double earthDistance) 
+        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            
         final SpacecraftToObservedBody scToBodyA = ruggedA.getScToBody();
 
         final AbsoluteDate realDateA = lineSensorA.getDate(realPixelA.getLineNumber());
@@ -301,15 +320,14 @@ public class InitInterRefiningTest {
         listLineSensor.addAll(ruggedA.getLineSensors());
         listLineSensor.addAll(ruggedB.getLineSensors());
 
-        DSGenerator generator = (DSGenerator) createGenerator.invoke(optimizationPbBuilder, listLineSensor);
+        @SuppressWarnings("unchecked")
+        DerivativeGenerator<Gradient> generator = (DerivativeGenerator<Gradient>) createGenerator.invoke(optimizationPbBuilder, listLineSensor);
 
-        final DerivativeStructure[] distanceLOSwithDS = ruggedB.distanceBetweenLOSderivatives(
-                                           lineSensorA, realDateA, realPixelA.getPixelNumber(), 
-                                           scToBodyA,
-                                           lineSensorB, realDateB, realPixelB.getPixelNumber(),
-                                           generator);
+        return ruggedB.distanceBetweenLOSderivatives(lineSensorA, realDateA, realPixelA.getPixelNumber(), 
+                                                     scToBodyA,
+                                                     lineSensorB, realDateB, realPixelB.getPixelNumber(),
+                                                     generator);
         
-        return distanceLOSwithDS;
     }
     
     /** Generate noisy measurements (sensor to sensor mapping)
