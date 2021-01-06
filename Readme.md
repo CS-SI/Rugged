@@ -30,7 +30,7 @@ images and correlation between sensors observing the same area.
 ### Official releases
 
 [Official Rugged releases](https://gitlab.orekit.org/orekit/rugged/-/releases)
-are available on our [Gitlab instance](https://gitlab.orekit.org/). They are
+are available on our [Gitlab instance](https://gitlab.orekit.org/orekit/rugged). They are
 also available in the
 [Maven repository](https://mvnrepository.com/artifact/org.orekit/rugged).
 
