@@ -686,7 +686,7 @@ public class Rugged {
         // ===========================================
         // Need to be computed only once for a given sensor (with the same minLine and maxLine)
         if (atmosphericRefraction.getBifPixel() == null || atmosphericRefraction.getBifLine() == null || // lazy evaluation
-            (!atmosphericRefraction.isSameContext(sensorName, minLine, maxLine))) { // Must be recomputed if the context changed
+            !atmosphericRefraction.isSameContext(sensorName, minLine, maxLine)) { // Must be recomputed if the context changed
 
             // Definition of a regular grid (at sensor level)
             atmosphericRefraction.configureCorrectionGrid(sensor, minLine, maxLine);
@@ -814,10 +814,10 @@ public class Rugged {
                     }
 
                     // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
-                    if ((sensorPixelGrid[uIndex][vIndex] != null &&
-                           (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < (-INVLOC_MARGIN) ||
-                            sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1))) ||
-                        (sensorPixelGrid[uIndex][vIndex] == null) ) {
+                    if (sensorPixelGrid[uIndex][vIndex] != null &&
+                        (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < -INVLOC_MARGIN ||
+                         sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1)) ||
+                        sensorPixelGrid[uIndex][vIndex] == null) {
                         // In order for the dump to end nicely
                         DumpManager.endNicely();
                         // Impossible to find the point in the given min line

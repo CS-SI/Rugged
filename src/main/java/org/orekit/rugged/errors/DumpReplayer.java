@@ -1072,8 +1072,8 @@ public class DumpReplayer {
         public boolean isInterpolable(final double latitude, final double longitude) {
             final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
             final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
-            return (latitudeIndex  >= 0) && (latitudeIndex  <= latitudeRows     - 2) &&
-                   (longitudeIndex >= 0) && (longitudeIndex <= longitudeColumns - 2);
+            return latitudeIndex  >= 0 && latitudeIndex  <= latitudeRows     - 2 &&
+                   longitudeIndex >= 0 && longitudeIndex <= longitudeColumns - 2;
         }
 
         /** Update the tile according to the Digital Elevation Model.
