@@ -98,7 +98,7 @@ interoperability in space systems.
 
 ## Maintained library
 
-Rugged has been in development since 2014 inside [CS GROUP](http://www.c-s.fr/ "CS GROUP homepage")
+Rugged has been in development since 2014 inside [CS GROUP](https://www.csgroup.eu/ "CS GROUP homepage")
 and is still used and maintained by its dual teams
 of space dynamics and image processing experts.
 

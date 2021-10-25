@@ -120,9 +120,9 @@ public abstract class AtmosphericRefraction {
     */
     public Boolean isSameContext(final String sensorName, final int minLine, final int maxLine) {
 
-        return (Double.compare(atmosphericParams.getMinLineSensor(), minLine) == 0) &&
-               (Double.compare(atmosphericParams.getMaxLineSensor(), maxLine) == 0) &&
-               (atmosphericParams.getSensorName().compareTo(sensorName) == 0);
+        return Double.compare(atmosphericParams.getMinLineSensor(), minLine) == 0 &&
+               Double.compare(atmosphericParams.getMaxLineSensor(), maxLine) == 0 &&
+               atmosphericParams.getSensorName().compareTo(sensorName) == 0;
     }
 
     /** Get the computation parameters.

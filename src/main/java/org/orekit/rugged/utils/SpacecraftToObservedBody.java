@@ -300,8 +300,8 @@ public class SpacecraftToObservedBody implements Serializable {
      * @return true if date is in the supported range
      */
     public boolean isInRange(final AbsoluteDate date) {
-        return (minDate.durationFrom(date) <= overshootTolerance) &&
-               (date.durationFrom(maxDate) <= overshootTolerance);
+        return minDate.durationFrom(date) <= overshootTolerance &&
+               date.durationFrom(maxDate) <= overshootTolerance;
     }
 
 }
