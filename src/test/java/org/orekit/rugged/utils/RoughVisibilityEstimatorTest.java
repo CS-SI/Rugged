@@ -78,7 +78,7 @@ public class RoughVisibilityEstimatorTest {
         Assert.assertEquals(0.0,
                             new AbsoluteDate("2012-01-01T03:47:08.814121623",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
-                            1.0e-9);
+                            1.0e-8);
 
     }
 
@@ -102,7 +102,7 @@ public class RoughVisibilityEstimatorTest {
         Assert.assertEquals(0.0,
                             new AbsoluteDate("2012-01-01T01:02:39.122526662",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
-                            1.0e-9);
+                            1.0e-8);
 
     }
 
