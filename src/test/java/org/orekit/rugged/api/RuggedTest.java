@@ -59,6 +59,7 @@ import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.Orbit;
+import org.orekit.propagation.EphemerisGenerator;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.GroundOptimizationProblemBuilder;
@@ -136,9 +137,9 @@ public class RuggedTest {
 
         Propagator propagator = TestUtils.createPropagator(earth, gravityField, orbit);
         propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
-        propagator.setEphemerisMode();
+       final EphemerisGenerator generator = propagator.getEphemerisGenerator();
         propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
-        Propagator ephemeris = propagator.getGeneratedEphemeris();
+        Propagator ephemeris = generator.getGeneratedEphemeris();
 
         Rugged rugged = new RuggedBuilder().
                 setDigitalElevationModel(updater, 8).

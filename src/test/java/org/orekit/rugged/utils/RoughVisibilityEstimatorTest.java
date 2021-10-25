@@ -50,7 +50,6 @@ import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;
@@ -69,18 +68,17 @@ public class RoughVisibilityEstimatorTest {
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
         final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(1.0, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                pv.add(currentState.getPVCoordinates());
-            }
-        });
+        propagator.getMultiplexer().add(1.0, currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(3 * orbit.getKeplerianPeriod()));
 
         RoughVisibilityEstimator estimator = new RoughVisibilityEstimator(ellipsoid, orbit.getFrame(), pv);
         AbsoluteDate d = estimator.estimateVisibility(new GeodeticPoint(FastMath.toRadians(-81.5),
                                                                         FastMath.toRadians(-2.0),
                                                                         0.0));
-        Assert.assertEquals("2012-01-01T03:47:08.814", d.toString(TimeScalesFactory.getUTC()));
+        Assert.assertEquals(0.0,
+                            new AbsoluteDate("2012-01-01T03:47:08.814121623",
+                                             TimeScalesFactory.getUTC()).durationFrom(d),
+                            1.0e-9);
 
     }
 
@@ -94,18 +92,17 @@ public class RoughVisibilityEstimatorTest {
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
         final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(1.0, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                pv.add(currentState.getPVCoordinates());
-            }
-        });
+        propagator.getMultiplexer().add(1.0,  currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(orbit.getKeplerianPeriod()));
 
         RoughVisibilityEstimator estimator = new RoughVisibilityEstimator(ellipsoid, orbit.getFrame(), pv);
         AbsoluteDate d = estimator.estimateVisibility(new GeodeticPoint(FastMath.toRadians(43.303),
                                                                         FastMath.toRadians(-46.126),
                                                                         0.0));
-        Assert.assertEquals("2012-01-01T01:02:39.123", d.toString(TimeScalesFactory.getUTC()));
+        Assert.assertEquals(0.0,
+                            new AbsoluteDate("2012-01-01T01:02:39.122526662",
+                                             TimeScalesFactory.getUTC()).durationFrom(d),
+                            1.0e-9);
 
     }
 

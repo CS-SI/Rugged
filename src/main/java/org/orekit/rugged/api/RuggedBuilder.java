@@ -32,8 +32,6 @@ import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
@@ -733,19 +731,14 @@ public class RuggedBuilder {
                 new ArrayList<TimeStampedPVCoordinates>();
         final List<TimeStampedAngularCoordinates> quaternions =
                 new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
-
-            /** {@inheritDoc} */
-            @Override
-            public void handleStep(final SpacecraftState currentState, final boolean isLast) {
-                final AbsoluteDate  date = currentState.getDate();
-                final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
-                final Rotation      q    = currentState.getAttitude().getRotation();
-                positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
-                quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
-            }
-
-        });
+        propagator.getMultiplexer().add(interpolationStep,
+                                        currentState -> {
+                                            final AbsoluteDate  date = currentState.getDate();
+                                            final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
+                                            final Rotation      q    = currentState.getAttitude().getRotation();
+                                            positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
+                                            quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
+                                        });
         propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
 
         // orbit/attitude to body converter

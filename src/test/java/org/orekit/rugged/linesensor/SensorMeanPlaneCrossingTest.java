@@ -44,9 +44,7 @@ import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.los.LOSBuilder;
@@ -316,14 +314,10 @@ public class SensorMeanPlaneCrossingTest {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedPVCoordinates(currentState.getDate(),
-                                                      currentState.getPVCoordinates().getPosition(),
-                                                      currentState.getPVCoordinates().getVelocity(),
-                                                      Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedPVCoordinates(currentState.getDate(),
+                                                                                                    currentState.getPVCoordinates().getPosition(),
+                                                                                                    currentState.getPVCoordinates().getVelocity(),
+                                                                                                    Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }
@@ -336,13 +330,9 @@ public class SensorMeanPlaneCrossingTest {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
-                                                           currentState.getAttitude().getRotation(),
-                                                           Vector3D.ZERO, Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
+                                                                                                         currentState.getAttitude().getRotation(),
+                                                                                                         Vector3D.ZERO, Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }
