@@ -732,13 +732,13 @@ public class RuggedBuilder {
         final List<TimeStampedAngularCoordinates> quaternions =
                 new ArrayList<TimeStampedAngularCoordinates>();
         propagator.getMultiplexer().add(interpolationStep,
-                                        currentState -> {
-                                            final AbsoluteDate  date = currentState.getDate();
-                                            final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
-                                            final Rotation      q    = currentState.getAttitude().getRotation();
-                                            positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
-                                            quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
-                                        });
+            currentState -> {
+                final AbsoluteDate  date = currentState.getDate();
+                final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
+                final Rotation      q    = currentState.getAttitude().getRotation();
+                positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
+                quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
+            });
         propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
 
         // orbit/attitude to body converter
