@@ -120,9 +120,29 @@ public class AtmosphericRefractionTest {
         GeodeticPoint dummyGP = new GeodeticPoint(dummyLat, dummyLon, 0.);
         try {
             ruggedWith.inverseLocation(sensorName, dummyGP, minLine, maxLine);
+            Assert.fail("an exeption should have been thrown");
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.INVALID_RANGE_FOR_LINES, re.getSpecifier());
         }
+
+        try {
+            ruggedWith.inverseLocation(sensorName,
+                                       gpWithAtmosphericRefractionCorrection[0],
+                                       210, maxLine);
+            Assert.fail("an exeption should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.INVALID_RANGE_FOR_LINES, re.getSpecifier());
+        }
+
+        try {
+            ruggedWith.inverseLocation(sensorName,
+                                       gpWithAtmosphericRefractionCorrection[0],
+                                       minLine, 190);
+            Assert.fail("an exeption should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.INVALID_RANGE_FOR_LINES, re.getSpecifier());
+        }
+
     }
 
     private RuggedBuilder initRuggedForAtmosphericTests(final int dimension, final String sensorName) throws URISyntaxException {

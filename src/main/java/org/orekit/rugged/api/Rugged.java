@@ -814,10 +814,7 @@ public class Rugged {
                     }
 
                     // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
-                    if (sensorPixelGrid[uIndex][vIndex] != null &&
-                        (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < -INVLOC_MARGIN ||
-                         sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1)) ||
-                        sensorPixelGrid[uIndex][vIndex] == null) {
+                    if (!pixelIsInside(sensorPixelGrid[uIndex][vIndex], sensor)) {
                         // In order for the dump to end nicely
                         DumpManager.endNicely();
                         // Impossible to find the point in the given min line
@@ -837,6 +834,15 @@ public class Rugged {
 
         // The sensor grid computed WITHOUT atmospheric refraction correction
         return sensorPixelGrid;
+    }
+
+    /** Check if pixel is inside the sensor with a margin.
+     * @param pixel pixel to check (may be null if not found)
+     * @param sensor the line sensor
+     * @return true if the pixel is inside the sensor
+     */
+    private boolean pixelIsInside(final SensorPixel pixel, final LineSensor sensor) {
+        return pixel != null && pixel.getPixelNumber() >= -INVLOC_MARGIN && pixel.getPixelNumber() < INVLOC_MARGIN + sensor.getNbPixels() - 1;
     }
 
     /** Computation, for the sensor pixels grid, of the direct location WITH atmospheric refraction.
