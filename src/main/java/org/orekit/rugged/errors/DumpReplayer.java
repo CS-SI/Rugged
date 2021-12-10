@@ -415,21 +415,7 @@ public class DumpReplayer {
 
             return rugged;
 
-        } catch (IOException ioe) {
-            throw new RuggedException(ioe, LocalizedCoreFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
-        } catch (SecurityException e) {
-            // this should never happen
-            throw new RuggedInternalError(e);
-        } catch (NoSuchMethodException e) {
-            // this should never happen
-            throw new RuggedInternalError(e);
-        } catch (IllegalArgumentException e) {
-            // this should never happen
-            throw new RuggedInternalError(e);
-        } catch (IllegalAccessException e) {
-            // this should never happen
-            throw new RuggedInternalError(e);
-        } catch (InvocationTargetException e) {
+        } catch (IOException | NoSuchMethodException  | IllegalAccessException  | InvocationTargetException e) {
             // this should never happen
             throw new RuggedInternalError(e);
         }
