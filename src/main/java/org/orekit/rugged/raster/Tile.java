@@ -256,7 +256,19 @@ public interface Tile extends UpdatableTile {
     double interpolateElevation(double latitude, double longitude);
 
     /** Find the intersection of a line-of-sight and a Digital Elevation Model cell.
-     * @param p point on the line
+     * <p>
+     * Beware that for continuity reasons, the point argument in {@code cellIntersection} is normalized
+     * with respect to other points used by the caller. This implies that the longitude may be
+     * outside of the [-π ; +π] interval (or the [0 ; 2π] interval, depending on the DEM). In particular,
+     * when a Line Of Sight crosses the antimeridian at  ±π longitude, the library may call the
+     * {@code cellIntersection} method with a point having a longitude of -π-ε to ensure this continuity.
+     * As tiles are stored with longitude clipped to a some DEM specific interval (either  [-π ; +π] or [0 ; 2π]),
+     * implementations MUST take care to clip the input point back to the tile interval using
+     * {@link org.hipparchus.util.MathUtils#normalizeAngle(double, double) MathUtils.normalizeAngle(p.getLongitude(),
+     * someLongitudeWithinTheTile)}. The output point normalization should also be made consistent with
+     * the current tile.
+     * </p>
+     * @param p point on the line (beware its longitude is <em>not</em> normalized with respect to tile)
      * @param los line-of-sight, in the topocentric frame (East, North, Zenith) of the point,
      * scaled to match radians in the horizontal plane and meters along the vertical axis
      * @param latitudeIndex latitude index of the Digital Elevation Model cell
