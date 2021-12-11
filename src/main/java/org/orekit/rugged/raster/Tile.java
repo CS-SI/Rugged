@@ -17,7 +17,6 @@
 package org.orekit.rugged.raster;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface representing a raster tile.
@@ -265,8 +264,8 @@ public interface Tile extends UpdatableTile {
      * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
      * if it lies within the cell, null otherwise
      */
-    NormalizedGeodeticPoint cellIntersection(GeodeticPoint p, Vector3D los,
-                                              int latitudeIndex, int longitudeIndex);
+    NormalizedGeodeticPoint cellIntersection(NormalizedGeodeticPoint p, Vector3D los,
+                                             int latitudeIndex, int longitudeIndex);
 
     /** Check if a tile covers a ground point.
      * @param latitude ground point latitude
