@@ -21,6 +21,9 @@
   </properties>
   <body>
     <release version="3.0" date="TBD" description="TBD">
+      <action dev="luc" type="update" issue="388">
+        Fixed longitude normalization issue with tiles.
+      </action>
       <action dev="luc" type="update" issue="387">
         Updated dependencies to Orekit 11.0.1 (and Hipparchus 2.0).
       </action>
