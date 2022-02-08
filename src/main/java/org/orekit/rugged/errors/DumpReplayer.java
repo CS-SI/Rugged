@@ -283,9 +283,9 @@ public class DumpReplayer {
     /** Simple constructor.
      */
     public DumpReplayer() {
-        tiles   = new ArrayList<ParsedTile>();
-        sensors = new ArrayList<ParsedSensor>();
-        calls   = new ArrayList<DumpedCall>();
+        tiles   = new ArrayList<>();
+        sensors = new ArrayList<>();
+        calls   = new ArrayList<>();
     }
 
     /** Parse a dump file.
@@ -350,8 +350,8 @@ public class DumpReplayer {
 
             // build missing transforms by extrapolating the parsed ones
             final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
-            final List<Transform> b2iList = new ArrayList<Transform>(n);
-            final List<Transform> s2iList = new ArrayList<Transform>(n);
+            final List<Transform> b2iList = new ArrayList<>(n);
+            final List<Transform> s2iList = new ArrayList<>(n);
             for (int i = 0; i < n; ++i) {
                 if (bodyToInertial.containsKey(i)) {
                     // the i-th transform was dumped
@@ -385,7 +385,7 @@ public class DumpReplayer {
             final ByteArrayInputStream  bis = new ByteArrayInputStream(bos.toByteArray());
             builder.setTrajectoryAndTimeSpan(bis);
 
-            final List<SensorMeanPlaneCrossing> planeCrossings = new ArrayList<SensorMeanPlaneCrossing>();
+            final List<SensorMeanPlaneCrossing> planeCrossings = new ArrayList<>();
             for (final ParsedSensor parsedSensor : sensors) {
                 final LineSensor sensor = new LineSensor(parsedSensor.name,
                                                          parsedSensor,

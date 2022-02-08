@@ -82,11 +82,11 @@ public class SensorToSensorMapping {
                                  final String sensorNameB, final String ruggedNameB,
                                  final double bodyConstraintWeight) {
 
-        this.interMapping = new SensorMapping<SensorPixel>(sensorNameA, ruggedNameA);
+        this.interMapping = new SensorMapping<>(sensorNameA, ruggedNameA);
         this.sensorNameB = sensorNameB;
         this.ruggedNameB = ruggedNameB;
-        this.losDistances = new ArrayList<Double>();
-        this.bodyDistances = new ArrayList<Double>();
+        this.losDistances = new ArrayList<>();
+        this.bodyDistances = new ArrayList<>();
         this.bodyConstraintWeight = bodyConstraintWeight;
     }
 

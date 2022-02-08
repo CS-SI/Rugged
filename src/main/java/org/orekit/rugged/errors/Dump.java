@@ -75,8 +75,8 @@ class Dump {
      */
     Dump(final PrintWriter writer) {
         this.writer          = writer;
-        this.tiles           = new ArrayList<DumpedTileData>();
-        this.sensors         = new ArrayList<DumpedSensorData>();
+        this.tiles           = new ArrayList<>();
+        this.sensors         = new ArrayList<>();
         this.algorithmDumped = false;
         this.ellipsoidDumped = false;
         this.tranformsDumped = null;

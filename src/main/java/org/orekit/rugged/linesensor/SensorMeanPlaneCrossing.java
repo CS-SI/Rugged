@@ -152,7 +152,7 @@ public class SensorMeanPlaneCrossing {
 
         this.meanPlaneNormal             = meanPlaneNormal;
 
-        this.cachedResults               = new ArrayList<CrossingResult>(CACHED_RESULTS);
+        this.cachedResults               = new ArrayList<>(CACHED_RESULTS);
         cachedResults.forEach(crossingResult -> {
             if (crossingResult != null && this.cachedResults.size() < CACHED_RESULTS) {
                 this.cachedResults.add(crossingResult);

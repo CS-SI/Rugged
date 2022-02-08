@@ -93,7 +93,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     protected void initMapping() {
 
         final String ruggedName = rugged.getName();
-        this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
+        this.sensorToGroundMappings = new ArrayList<>();
         for (final LineSensor lineSensor : this.getSensors()) {
             final SensorToGroundMapping mapping = this.getMeasurements().getGroundMapping(ruggedName, lineSensor.getName());
             if (mapping != null) {

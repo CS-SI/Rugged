@@ -171,7 +171,7 @@ public class RuggedBuilder {
      * </p>
      */
     public RuggedBuilder() {
-        sensors                     = new ArrayList<LineSensor>();
+        sensors                     = new ArrayList<>();
         constantElevation           = Double.NaN;
         lightTimeCorrection         = true;
         aberrationOfLightCorrection = true;
@@ -728,9 +728,9 @@ public class RuggedBuilder {
 
         // extract position/attitude samples from propagator
         final List<TimeStampedPVCoordinates> positionsVelocities =
-                new ArrayList<TimeStampedPVCoordinates>();
+                new ArrayList<>();
         final List<TimeStampedAngularCoordinates> quaternions =
-                new ArrayList<TimeStampedAngularCoordinates>();
+                new ArrayList<>();
         propagator.getMultiplexer().add(interpolationStep,
             currentState -> {
                 final AbsoluteDate  date = currentState.getDate();

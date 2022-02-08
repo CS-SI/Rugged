@@ -56,7 +56,7 @@ public class SensorToGroundMapping {
     public SensorToGroundMapping(final String ruggedName, final String sensorName) {
 
         this.sensorName     = sensorName;
-        this.groundMapping = new SensorMapping<GeodeticPoint>(sensorName, ruggedName);
+        this.groundMapping = new SensorMapping<>(sensorName, ruggedName);
     }
 
     /** Get the name of the sensor to which mapping applies.

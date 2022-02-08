@@ -90,7 +90,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     @Override
     protected void initMapping() {
 
-        this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
+        this.sensorToSensorMappings = new ArrayList<>();
 
         for (final String ruggedNameA : this.ruggedMap.keySet()) {
             for (final String ruggedNameB : this.ruggedMap.keySet()) {

@@ -63,7 +63,7 @@ public class LOSBuilder {
      */
     public LOSBuilder(final List<Vector3D> rawLOS) {
         this.rawLOS          = rawLOS;
-        this.transforms      = new ArrayList<LOSTransform>();
+        this.transforms      = new ArrayList<>();
         this.timeIndependent = true;
     }
 
@@ -158,7 +158,7 @@ public class LOSBuilder {
                 this.raw[i] = raw.get(i);
             }
 
-            this.transforms = new ArrayList<LOSTransform>(transforms);
+            this.transforms = new ArrayList<>(transforms);
 
         }
 

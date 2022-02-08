@@ -47,7 +47,7 @@ import org.orekit.time.AbsoluteDate;
 public class DumpManager {
 
     /** Dump file (default initial value is null, i.e. nothing is dumped). */
-    private static final ThreadLocal<Dump> DUMP = new ThreadLocal<Dump>();
+    private static final ThreadLocal<Dump> DUMP = new ThreadLocal<>();
 
     /** Boolean to check if the dump is suspended. */
     private static boolean isSuspended = false;

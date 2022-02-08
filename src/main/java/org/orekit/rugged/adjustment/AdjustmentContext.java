@@ -119,8 +119,8 @@ public class AdjustmentContext {
     public Optimum estimateFreeParameters(final Collection<String> ruggedNameList, final int maxEvaluations,
                                           final double parametersConvergenceThreshold) {
 
-        final List<Rugged> ruggedList = new ArrayList<Rugged>();
-        final List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
+        final List<Rugged> ruggedList = new ArrayList<>();
+        final List<LineSensor> selectedSensors = new ArrayList<>();
         for (String ruggedName : ruggedNameList) {
             final Rugged rugged = this.viewingModel.get(ruggedName);
             if (rugged == null) {

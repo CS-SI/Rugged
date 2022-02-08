@@ -59,7 +59,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
 
         this.ellipsoid = ellipsoid;
 
-        this.refractionLayers = new ArrayList<ConstantRefractionLayer>(15);
+        this.refractionLayers = new ArrayList<>(15);
         this.refractionLayers.add(new ConstantRefractionLayer(100000.00, 1.000000));
         this.refractionLayers.add(new ConstantRefractionLayer( 50000.00, 1.000000));
         this.refractionLayers.add(new ConstantRefractionLayer( 40000.00, 1.000001));

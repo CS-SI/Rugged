@@ -61,7 +61,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
      * @param maxCachedTiles maximum number of tiles stored in the cache
      */
     public BasicScanAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        this.cache = new TilesCache<SimpleTile>(new SimpleTileFactory(), updater, maxCachedTiles);
+        this.cache = new TilesCache<>(new SimpleTileFactory(), updater, maxCachedTiles);
         this.hMin  = Double.POSITIVE_INFINITY;
         this.hMax  = Double.NEGATIVE_INFINITY;
         this.algorithmId = AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY;
@@ -81,7 +81,7 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
         double maxLatitude  = Double.NaN;
         double minLongitude = Double.NaN;
         double maxLongitude = Double.NaN;
-        final List<SimpleTile> scannedTiles = new ArrayList<SimpleTile>();
+        final List<SimpleTile> scannedTiles = new ArrayList<>();
         double centralLongitude = Double.NaN;
         for (boolean changedMinMax = true; changedMinMax; changedMinMax = checkMinMax(scannedTiles)) {
 
