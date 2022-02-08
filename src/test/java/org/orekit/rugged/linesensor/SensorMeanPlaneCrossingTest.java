@@ -46,6 +46,8 @@ import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.rugged.TestUtils;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -146,8 +148,7 @@ public class SensorMeanPlaneCrossingTest {
 
     private void doTestDerivative(boolean lightTimeCorrection,
                                   boolean aberrationOfLightCorrection,
-                                  double tol)
-        {
+                                  double tol) {
 
         final Vector3D position  = new Vector3D(1.5, Vector3D.PLUS_I);
         final Vector3D normal    = Vector3D.PLUS_I;
@@ -214,6 +215,20 @@ public class SensorMeanPlaneCrossingTest {
         Assert.assertEquals(0.0,
                             Vector3D.distance(result.getTargetDirectionDerivative(), dirDer),
                             tol * dirDer.getNorm());
+
+        try {
+            mean.getScToBody().getBodyToInertial(refDate.shiftedBy(-Constants.JULIAN_CENTURY));
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+        }
+        try {
+            mean.getScToBody().getBodyToInertial(refDate.shiftedBy(Constants.JULIAN_CENTURY));
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+        }
+        Assert.assertNotNull(mean.getScToBody().getBodyToInertial(refDate));
 
     }
 

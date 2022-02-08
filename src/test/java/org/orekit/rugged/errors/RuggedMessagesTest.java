@@ -97,6 +97,18 @@ public class RuggedMessagesTest {
     }
 
     @Test
+    public void testMissingLanguageMissingTranslation() {
+        Assert.assertEquals(RuggedMessages.INTERNAL_ERROR.getSourceString(),
+                            RuggedMessages.INTERNAL_ERROR.getLocalizedString(Locale.KOREAN));
+        Assert.assertEquals(RuggedMessages.NO_DEM_DATA.getSourceString(),
+                            RuggedMessages.NO_DEM_DATA.getLocalizedString(Locale.KOREAN));
+        Assert.assertEquals("ABCDEF {0}",
+                            RuggedMessages.UNKNOWN_SENSOR.getLocalizedString(Locale.KOREAN));
+        Assert.assertEquals(RuggedMessages.EMPTY_TILE.getSourceString(),
+                            RuggedMessages.EMPTY_TILE.getLocalizedString(Locale.KOREAN));
+    }
+
+    @Test
     public void testVariablePartsConsistency() {
         for (final String language : LANGUAGES_LIST) {
             Locale locale = new Locale(language);
