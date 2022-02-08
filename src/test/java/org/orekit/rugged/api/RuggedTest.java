@@ -905,6 +905,28 @@ public class RuggedTest {
 
         Assert.assertNotNull(sensorPixel);
 
+        Assert.assertFalse(inside(rugged, null, lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(-100, -100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(-100, +100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(+100, -100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(+100, +100), lineSensor));
+        Assert.assertTrue(inside(rugged, new SensorPixel(0.2, 0.3), lineSensor));
+
+    }
+
+    private boolean inside(final Rugged rugged, final SensorPixel sensorPixel, LineSensor lineSensor) {
+        try {
+            final Method inside =
+                            Rugged.class.getDeclaredMethod("pixelIsInside",
+                                                           SensorPixel.class,
+                                                           LineSensor.class);
+            inside.setAccessible(true);
+            return ((Boolean) inside.invoke(rugged, sensorPixel, lineSensor)).booleanValue();
+        } catch (NoSuchMethodException | IllegalAccessException |
+                 IllegalArgumentException | InvocationTargetException e) {
+            Assert.fail(e.getLocalizedMessage());
+            return false;
+        }
     }
 
     @Test
