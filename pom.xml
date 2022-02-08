@@ -420,6 +420,7 @@
         <configuration>
           <threshold>Normal</threshold>
           <effort>Default</effort>
+          <onlyAnalyze>org.orekit.rugged.*</onlyAnalyze>
           <excludeFilterFile>${basedir}/spotbugs-exclude-filter.xml</excludeFilterFile>
         </configuration>
       </plugin>

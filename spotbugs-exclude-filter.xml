@@ -6,4 +6,238 @@
 -->
 <FindBugsFilter>
 
+  <!-- The following internal representation exposure are intentional,
+       They are used to pass data back and forth between classes
+    -->
+  <Match>
+    <Class name="org.orekit.rugged.adjustment.AdjustmentContext"/>
+    <Method name="&lt;init>"
+            params="java.util.Collection,
+                    org.orekit.rugged.adjustment.measurements.Observables"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.adjustment.GroundOptimizationProblemBuilder"/>
+    <Method name="&lt;init>"
+            params="java.util.List,org.orekit.rugged.adjustment.measurements.Observables,
+                    org.orekit.rugged.api.Rugged"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.adjustment.measurements.SensorToSensorMapping"/>
+    <Or>
+      <Method name="getBodyDistances"
+              params=""
+              returns="java.util.List" />
+      <Method name="getLosDistances"
+              params=""
+              returns="java.util.List" />
+    </Or>
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.api.Rugged"/>
+    <Or>
+      <Method name="getEllipsoid"
+              params=""
+              returns="org.orekit.rugged.utils.ExtendedEllipsoid" />
+      <Method name="getRefractionCorrection"
+              params=""
+              returns="org.orekit.rugged.refraction.AtmosphericRefraction" />
+    </Or>
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.api.RuggedBuilder"/>
+    <Or>
+      <Method name="getEllipsoid"
+              params=""
+              returns="org.orekit.rugged.utils.ExtendedEllipsoid" />
+      <Method name="getPositionsVelocities"
+              params=""
+              returns="java.util.List" />
+      <Method name="getQuaternions"
+              params=""
+              returns="java.util.List" />
+      <Method name="getRefractionCorrection"
+              params=""
+              returns="org.orekit.rugged.refraction.AtmosphericRefraction" />
+    </Or>
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.api.RuggedBuilder"/>
+    <Or>
+      <Method name="setRefractionCorrection"
+              params="org.orekit.rugged.refraction.AtmosphericRefraction"
+              returns="org.orekit.rugged.api.RuggedBuilder" />
+      <Method name="setTrajectory"
+              params="double,
+                      int,
+                      org.orekit.utils.CartesianDerivativesFilter,
+                      org.orekit.utils.AngularDerivativesFilter,
+                      org.orekit.propagation.Propagator"
+              returns="org.orekit.rugged.api.RuggedBuilder" />
+      <Method name="setTrajectory"
+              params="org.orekit.frames.Frame,
+                      java.util.List,
+                      int,
+                      org.orekit.utils.CartesianDerivativesFilter,
+                      java.util.List,
+                      int,
+                      org.orekit.utils.AngularDerivativesFilter"
+              returns="org.orekit.rugged.api.RuggedBuilder" />
+    </Or>
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.errors.RuggedExceptionWrapper"/>
+    <Method name="getException"
+            params=""
+            returns="org.orekit.rugged.errors.RuggedException" />
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.errors.RuggedExceptionWrapper"/>
+    <Method name="&lt;init>"
+            params="org.orekit.rugged.errors.RuggedException"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.linesensor.LineSensor"/>
+    <Method name="getPosition"
+            params=""
+            returns="org.hipparchus.geometry.euclidean.threed.Vector3D" />
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.linesensor.LineSensor"/>
+    <Method name="&lt;init>"
+            params="java.lang.String,
+                    org.orekit.rugged.linesensor.LineDatation,
+                    org.hipparchus.geometry.euclidean.threed.Vector3D,
+                    org.orekit.rugged.los.TimeDependentLOS"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.linesensor.SensorMeanPlaneCrossing"/>
+    <Method name="getMeanPlaneNormal"
+            params=""
+            returns="org.hipparchus.geometry.euclidean.threed.Vector3D" />
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.linesensor.SensorMeanPlaneCrossing"/>
+    <Method name="&lt;init>"
+            params="org.orekit.rugged.linesensor.LineSensor,
+                    org.orekit.rugged.utils.SpacecraftToObservedBody,
+                    int,
+                    int,
+                    boolean,
+                    boolean,
+                    int,
+                    double,
+                    org.hipparchus.geometry.euclidean.threed.Vector3D,
+                    java.util.stream.Stream"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.linesensor.SensorMeanPlaneCrossing$CrossingResult"/>
+    <Or>
+      <Method name="getTarget"
+              params=""
+              returns="org.hipparchus.geometry.euclidean.threed.Vector3D" />
+      <Method name="getTargetDirection"
+              params=""
+              returns="org.hipparchus.geometry.euclidean.threed.Vector3D" />
+      <Method name="getTargetDirectionDerivative"
+              params=""
+              returns="org.hipparchus.geometry.euclidean.threed.Vector3D" />
+    </Or>
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.linesensor.SensorMeanPlaneCrossing$CrossingResult"/>
+    <Method name="&lt;init>"
+            params="org.orekit.time.AbsoluteDate,
+                    double,
+                    org.hipparchus.geometry.euclidean.threed.Vector3D,
+                    org.hipparchus.geometry.euclidean.threed.Vector3D,
+                    org.hipparchus.geometry.euclidean.threed.Vector3D"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.los.FixedRotation"/>
+    <Method name="&lt;init>"
+            params="java.lang.String,
+                    org.hipparchus.geometry.euclidean.threed.Vector3D,double"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.los.LOSBuilder"/>
+    <Method name="&lt;init>"
+            params="java.util.List"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.los.PolynomialRotation"/>
+    <Method name="&lt;init>"
+            params="java.lang.String,
+                    org.hipparchus.geometry.euclidean.threed.Vector3D,
+                    org.orekit.time.AbsoluteDate,
+                    double[]"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.refraction.AtmosphericRefraction"/>
+    <Method name="getComputationParameters"
+            params=""
+            returns="org.orekit.rugged.refraction.AtmosphericComputationParameters" />
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.refraction.MultiLayerModel"/>
+    <Or>
+      <Method name="&lt;init>"
+              params="org.orekit.rugged.utils.ExtendedEllipsoid"
+              returns="void" />
+      <Method name="&lt;init>"
+              params="org.orekit.rugged.utils.ExtendedEllipsoid,
+                      java.util.List"
+              returns="void" />
+    </Or>
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.utils.RoughVisibilityEstimator"/>
+    <Method name="&lt;init>"
+            params="org.orekit.bodies.OneAxisEllipsoid,
+                    org.orekit.frames.Frame,java.util.List"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.orekit.rugged.utils.SpacecraftToObservedBody"/>
+    <Method name="&lt;init>"
+            params="org.orekit.frames.Frame,
+                    org.orekit.frames.Frame,
+                    org.orekit.time.AbsoluteDate,
+                    org.orekit.time.AbsoluteDate,
+                    double,
+                    double,
+                    java.util.List,
+                    java.util.List"
+            returns="void" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+
 </FindBugsFilter>
