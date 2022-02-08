@@ -22,7 +22,7 @@
   <body>
     <release version="3.0" date="TBD" description="TBD">
       <action dev="luc" type="update" issue="387">
-        Updated dependencies to Orekit 11.0.1 (and Hipparchus 2.0).
+        Updated dependencies to Orekit 11.1 (and Hipparchus 2.0).
       </action>
     </release>
     <release version="2.2" date="2020-07-31" description="This is a minor release.
