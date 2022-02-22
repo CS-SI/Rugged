@@ -541,6 +541,7 @@
               <Implementation-Build>${rugged.implementation.build}</Implementation-Build>
               <X-Compile-Source-JDK>${rugged.compiler.source}</X-Compile-Source-JDK>
               <X-Compile-Target-JDK>${rugged.compiler.target}</X-Compile-Target-JDK>
+              <Automatic-Module-Name>org.orekit.rugged</Automatic-Module-Name>
             </manifestEntries>
            </archive>
           </configuration>
