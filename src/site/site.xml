@@ -16,9 +16,8 @@
 <project name="Rugged">
   <bannerLeft>
     <name>CS GROUP</name>
-    <src>/images/logo_cs_2008_baseline_ang.jpg</src>
-    <height>180</height>
-    <href>http://www.c-s.fr/</href>
+    <src>/images/logo_cs_group.png</src>
+    <href>https://www.csgroup.eu/</href>
   </bannerLeft>
   <bannerRight>
     <name>Rugged</name>
