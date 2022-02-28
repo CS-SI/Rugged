@@ -30,6 +30,9 @@
       <action dev="guylaine" type="update" issue="390">
         Changed CS Group website URL.
       </action>
+      <action dev="guylaine" type="update">
+        Updated link to Sergeï Tanygin's paper about attitude interpolation in documentation.
+      </action>
     </release>
     <release version="2.2" date="2020-07-31" description="This is a minor release.
      It adds access to algorithm identifier, 
