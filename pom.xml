@@ -19,7 +19,7 @@
 
     
     <!-- COTS version -->
-    <rugged.orekit.version>11.1</rugged.orekit.version>
+    <rugged.orekit.version>11.2-SNAPSHOT</rugged.orekit.version>
     <rugged.junit.version>4.13.2</rugged.junit.version>
     
     <!-- Compilers and Tools version -->
