@@ -142,6 +142,17 @@ public abstract class AtmosphericRefraction {
     public void setGridSteps(final int pixelStep, final int lineStep) {
         atmosphericParams.setGridSteps(pixelStep, lineStep);
     }
+    
+    /**
+     * Set the margin for computation of inverse location with atmospheric refraction correction.
+     * Overwrite the default value DEFAULT_INVLOC_MARGIN.
+     * No check is done about this margin. A recommended value is around 1.
+     * @param inverseLocMargin margin in pixel size to compute inverse location with atmospheric refraction correction.
+     * @since 3.0
+     */
+    public void setInverseLocMargin(final double inverseLocMargin) {
+        atmosphericParams.setInverseLocMargin(inverseLocMargin);
+    }
 
     /** Compute the correction functions for pixel and lines.
      * The corrections are computed for pixels and lines, on a regular grid at sensor level.
@@ -174,9 +185,10 @@ public abstract class AtmosphericRefraction {
                     gridDiffLine[pixelIndex][lineIndex] = diffLine;
 
                 } else {
-                    // Impossible to find the point in the given min line and max line
-                    throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES,
-                                              atmosphericParams.getMinLineSensor(), atmosphericParams.getMaxLineSensor(), "");
+                    // Impossible to find the sensor pixel in the given range lines
+                    final String info = "in given range lines (with atmospheric refraction) between lines" + 
+                                         atmosphericParams.getMinLineSensor() + " and " + atmosphericParams.getMaxLineSensor();
+                    throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, info);
                 }
             }
         }
