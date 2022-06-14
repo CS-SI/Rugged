@@ -289,17 +289,32 @@ public class AtmosphericRefractionTest {
                 los);
         builder.addLineSensor(sensor);
 
-        Rugged rugged = builder.build();
+        Rugged ruggedWithDefaultMargin = builder.build();
 
-        GeodeticPoint point = rugged.directLocation(sensor.getName(), 1000)[500];
+        GeodeticPoint point = ruggedWithDefaultMargin.directLocation(sensor.getName(), 1000)[500];
         try {
             final int maxLine = 4999; // works with 4980, fails with 4999
-            rugged.inverseLocation(sensor.getName(), point, 0, maxLine);
+            ruggedWithDefaultMargin.inverseLocation(sensor.getName(), point, 0, maxLine);
             Assert.fail("An exception should have been thrown");
 
         } catch (RuggedException re) {
             Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND,re.getSpecifier());
         }
+
+        // Check the default margin is equal to the used one
+        Assert.assertEquals(builder.getRefractionCorrection().getComputationParameters().getDefaultInverseLocMargin(),
+                builder.getRefractionCorrection().getComputationParameters().getInverseLocMargin(),
+                1.0e-10);
+
+        // Change the margin to an admissible one for this case
+        builder.getRefractionCorrection().setInverseLocMargin(0.81);
+        Rugged ruggedWithCustomMargin = builder.build();
+
+        point = ruggedWithCustomMargin.directLocation(sensor.getName(), 1000)[500];
+        final int maxLine = 4999; // works with a margin > 0.803
+        SensorPixel pixel = ruggedWithCustomMargin.inverseLocation(sensor.getName(), point, 0, maxLine);
+        Assert.assertTrue(pixel != null);
+
     }
 
     @Test
