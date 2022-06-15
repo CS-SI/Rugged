@@ -142,7 +142,7 @@ public abstract class AtmosphericRefraction {
     public void setGridSteps(final int pixelStep, final int lineStep) {
         atmosphericParams.setGridSteps(pixelStep, lineStep);
     }
-    
+
     /**
      * Set the margin for computation of inverse location with atmospheric refraction correction.
      * Overwrite the default value DEFAULT_INVLOC_MARGIN.
@@ -186,7 +186,7 @@ public abstract class AtmosphericRefraction {
 
                 } else {
                     // Impossible to find the sensor pixel in the given range lines
-                    throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, 
+                    throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES,
                                               atmosphericParams.getMinLineSensor(), atmosphericParams.getMaxLineSensor());
                 }
             }

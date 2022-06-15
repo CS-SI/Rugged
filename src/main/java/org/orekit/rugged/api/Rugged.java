@@ -727,7 +727,7 @@ public class Rugged {
         if (sp0 == null) {
             // In order for the dump to end nicely
             DumpManager.endNicely();
-            
+
             // Impossible to find the sensor pixel in the given range lines (without atmosphere)
             throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
         }
@@ -813,10 +813,10 @@ public class Rugged {
 
                     // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
                     if (!pixelIsInside(sensorPixelGrid[uIndex][vIndex], sensor)) {
-                        
+
                         // In order for the dump to end nicely
                         DumpManager.endNicely();
-                        
+
                         if (sensorPixelGrid[uIndex][vIndex] == null) {
                             // Impossible to find the sensor pixel in the given range lines
                             throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
@@ -824,7 +824,7 @@ public class Rugged {
                             // Impossible to find the sensor pixel
                             final double invLocationMargin = atmosphericRefraction.getComputationParameters().getInverseLocMargin();
                             throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE, sensorPixelGrid[uIndex][vIndex].getPixelNumber(),
-                                                      (-invLocationMargin), (invLocationMargin + sensor.getNbPixels() - 1), invLocationMargin);
+                                                      -invLocationMargin, invLocationMargin + sensor.getNbPixels() - 1, invLocationMargin);
                         }
                     }
 
@@ -851,7 +851,7 @@ public class Rugged {
     private boolean pixelIsInside(final SensorPixel pixel, final LineSensor sensor) {
         // Get the inverse location margin
         final double invLocationMargin = atmosphericRefraction.getComputationParameters().getInverseLocMargin();
-        
+
         return pixel != null && pixel.getPixelNumber() >= -invLocationMargin && pixel.getPixelNumber() < invLocationMargin + sensor.getNbPixels() - 1;
     }
 

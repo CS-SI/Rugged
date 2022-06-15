@@ -39,15 +39,15 @@ public class AtmosphericComputationParameters {
     /** Default value for line step. */
     private static final int DEFAULT_STEP_LINE = 100;
 
+    /** Default margin for computation of inverse location with atmospheric refraction correction.
+    * @since 3.0
+    */
+    private static final double DEFAULT_INVLOC_MARGIN = 0.8;
+
     /** Actual values for pixel step in case default are overwritten. */
     private int pixelStep;
     /** Actual values for line step in case default are overwritten. */
     private int lineStep;
-    
-    /** Default margin for computation of inverse location with atmospheric refraction correction. 
-    * @since 3.0
-    */
-    private static final double DEFAULT_INVLOC_MARGIN = 0.8;
 
     /** Actual values for inverse location margin with atmospheric refraction  in case default are overwritten.
     * @since 3.0
@@ -131,7 +131,7 @@ public class AtmosphericComputationParameters {
         this.pixelStep = gridPixelStep;
         this.lineStep = gridLineStep;
     }
-    
+
     /**
      * Set the margin for computation of inverse location with atmospheric refraction correction.
      * Overwrite the default value DEFAULT_INVLOC_MARGIN.
@@ -140,7 +140,6 @@ public class AtmosphericComputationParameters {
      * @since 3.0
      */
     public void setInverseLocMargin(final double inverseLocMargin) {
-        
         this.invlocMargin = inverseLocMargin;
     }
 
@@ -149,7 +148,7 @@ public class AtmosphericComputationParameters {
     * @since 3.0
     */
     public double getInverseLocMargin () {
-       return this.invlocMargin;
+        return this.invlocMargin;
     }
 
     /**
@@ -157,9 +156,9 @@ public class AtmosphericComputationParameters {
     * @since 3.0
     */
     public double getDefaultInverseLocMargin () {
-       return DEFAULT_INVLOC_MARGIN;
+        return DEFAULT_INVLOC_MARGIN;
     }
-    
+
     /**
      * @return the size of pixel grid
      */
