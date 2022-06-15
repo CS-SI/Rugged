@@ -68,6 +68,7 @@ import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
+import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
@@ -78,7 +79,9 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DerivativeGenerator;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -880,6 +883,17 @@ public class RuggedTest {
         LinearLineDatation lineDatation = new LinearLineDatation(absDate, 0.03125d, 19.95565693384045);
         LineSensor lineSensor = new LineSensor("QUICK_LOOK", lineDatation, offset,
                                                new LOSBuilder(lineOfSight).build());
+        
+        // in order not to have a problem when calling the pixelIsInside method (AtmosphericRefraction must be not null)
+        AtmosphericRefraction atmos = new AtmosphericRefraction() {
+            @Override
+            public NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos,
+                    NormalizedGeodeticPoint rawIntersection, IntersectionAlgorithm algorithm) {
+                return rawIntersection;
+            }
+        };
+        atmos.deactivateComputation();
+        
         Rugged rugged = new RuggedBuilder().
                 setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
@@ -889,6 +903,7 @@ public class RuggedTest {
                               satellitePVList, 6, CartesianDerivativesFilter.USE_P,
                               satelliteQList, 8, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor).
+                setRefractionCorrection(atmos).
                 build();
 
         GeodeticPoint[] temp = rugged.directLocation("QUICK_LOOK", -250);

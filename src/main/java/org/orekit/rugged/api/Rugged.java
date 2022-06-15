@@ -66,9 +66,6 @@ public class Rugged {
     /** Maximum number of evaluations for crossing algorithms. */
     private static final int MAX_EVAL = 50;
 
-    /** Margin for computation of inverse location with atmospheric refraction correction. */
-    private static final double INVLOC_MARGIN = 0.8;
-
     /** Threshold for pixel convergence in fixed point method
      * (for inverse location with atmospheric refraction correction). */
     private static final double PIXEL_CV_THRESHOLD = 1.e-4;
@@ -730,8 +727,9 @@ public class Rugged {
         if (sp0 == null) {
             // In order for the dump to end nicely
             DumpManager.endNicely();
-            // Impossible to find the point in the given min line and max line (without atmosphere)
-            throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
+
+            // Impossible to find the sensor pixel in the given range lines (without atmosphere)
+            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
         }
 
         // set up the starting point of the fixed point method
@@ -815,10 +813,19 @@ public class Rugged {
 
                     // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
                     if (!pixelIsInside(sensorPixelGrid[uIndex][vIndex], sensor)) {
+
                         // In order for the dump to end nicely
                         DumpManager.endNicely();
-                        // Impossible to find the point in the given min line
-                        throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
+
+                        if (sensorPixelGrid[uIndex][vIndex] == null) {
+                            // Impossible to find the sensor pixel in the given range lines
+                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
+                        } else {
+                            // Impossible to find the sensor pixel
+                            final double invLocationMargin = atmosphericRefraction.getComputationParameters().getInverseLocMargin();
+                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE, sensorPixelGrid[uIndex][vIndex].getPixelNumber(),
+                                                      -invLocationMargin, invLocationMargin + sensor.getNbPixels() - 1, invLocationMargin);
+                        }
                     }
 
                 } else { // groundGrid[uIndex][vIndex] == null: impossible to compute inverse loc because ground point not defined
@@ -842,7 +849,10 @@ public class Rugged {
      * @return true if the pixel is inside the sensor
      */
     private boolean pixelIsInside(final SensorPixel pixel, final LineSensor sensor) {
-        return pixel != null && pixel.getPixelNumber() >= -INVLOC_MARGIN && pixel.getPixelNumber() < INVLOC_MARGIN + sensor.getNbPixels() - 1;
+        // Get the inverse location margin
+        final double invLocationMargin = atmosphericRefraction.getComputationParameters().getInverseLocMargin();
+
+        return pixel != null && pixel.getPixelNumber() >= -invLocationMargin && pixel.getPixelNumber() < invLocationMargin + sensor.getNbPixels() - 1;
     }
 
     /** Computation, for the sensor pixels grid, of the direct location WITH atmospheric refraction.

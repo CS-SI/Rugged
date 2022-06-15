@@ -84,7 +84,10 @@ public enum RuggedMessages implements Localizable {
     UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled"),
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})"),
     INVALID_STEP("step {0} is not valid : {1}"),
-    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}");
+    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}"),
+    SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES("impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}"),
+    SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE("impossible to find sensor pixel: pixel {0} outside interval [ {1} , {2} [ (with atmospheric refraction margin = {3})");
+
 
     // CHECKSTYLE: resume JavadocVariable check
 
