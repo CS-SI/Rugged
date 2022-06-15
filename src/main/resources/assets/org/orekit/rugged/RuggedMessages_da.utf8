@@ -97,5 +97,8 @@ INVALID_STEP = skridt {0} er ikke gyldigt : {1}
 # range between min line {0} and max line {1} too small {2}
 INVALID_RANGE_FOR_LINES = interval mellem minimumslinje {0} og maksimumslinje {1} for lille {2}
 
-# Impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}
-SENSOR_PIXEL_NOT_FOUND = <MISSING TRANSLATION>
+# impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}
+SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES = <MISSING TRANSLATION>
+
+# impossible to find sensor pixel: pixel {0} outside interval [ {1} , {2} [ (with atmospheric refraction margin = {3})
+SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE = <MISSING TRANSLATION>

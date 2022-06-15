@@ -30,7 +30,7 @@ public class RuggedMessagesTest {
     private final String[] LANGUAGES_LIST = { "da", "de", "en", "es", "fr", "gl", "it", "no", "ro" } ;
     @Test
     public void testMessageNumber() {
-        Assert.assertEquals(34, RuggedMessages.values().length);
+        Assert.assertEquals(35, RuggedMessages.values().length);
     }
 
     @Test

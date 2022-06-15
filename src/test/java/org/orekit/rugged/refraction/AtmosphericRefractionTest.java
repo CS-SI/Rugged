@@ -135,7 +135,7 @@ public class AtmosphericRefractionTest {
             ruggedWith.inverseLocation(sensorName, dummyGP, minLine, maxLine);
             Assert.fail("an exeption should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, re.getSpecifier());
+            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
         }
 
         try {
@@ -144,7 +144,7 @@ public class AtmosphericRefractionTest {
                                        210, maxLine);
             Assert.fail("an exeption should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, re.getSpecifier());
+            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
         }
 
         try {
@@ -153,7 +153,7 @@ public class AtmosphericRefractionTest {
                                        minLine, 190);
             Assert.fail("an exeption should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, re.getSpecifier());
+            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
         }
 
     }
@@ -298,7 +298,7 @@ public class AtmosphericRefractionTest {
             Assert.fail("An exception should have been thrown");
 
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND,re.getSpecifier());
+            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE,re.getSpecifier());
         }
 
         // Check the default margin is equal to the used one

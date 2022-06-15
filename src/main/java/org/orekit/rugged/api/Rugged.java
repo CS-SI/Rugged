@@ -729,8 +729,7 @@ public class Rugged {
             DumpManager.endNicely();
             
             // Impossible to find the sensor pixel in the given range lines (without atmosphere)
-            final String info = "in given range lines (with atmospheric refraction) between lines" + minLine + " and " + maxLine;
-            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, info);
+            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
         }
 
         // set up the starting point of the fixed point method
@@ -820,13 +819,12 @@ public class Rugged {
                         
                         if (sensorPixelGrid[uIndex][vIndex] == null) {
                             // Impossible to find the sensor pixel in the given range lines
-                            final String info = "in given range lines (with atmospheric refraction) between lines" + minLine + " and " + maxLine;
-                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, info);
+                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
                         } else {
                             // Impossible to find the sensor pixel
                             final double invLocationMargin = atmosphericRefraction.getComputationParameters().getInverseLocMargin();
-                            final String info = ": pixel = " + sensorPixelGrid[uIndex][vIndex].getPixelNumber() + " outside interval [ " + (-invLocationMargin) + " , " + (invLocationMargin + sensor.getNbPixels() - 1) + " [ (with atmospheric refraction margin = " + invLocationMargin + ")";
-                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, info);
+                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE, sensorPixelGrid[uIndex][vIndex].getPixelNumber(),
+                                                      (-invLocationMargin), (invLocationMargin + sensor.getNbPixels() - 1), invLocationMargin);
                         }
                     }
 

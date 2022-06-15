@@ -186,9 +186,8 @@ public abstract class AtmosphericRefraction {
 
                 } else {
                     // Impossible to find the sensor pixel in the given range lines
-                    final String info = "in given range lines (with atmospheric refraction) between lines" + 
-                                         atmosphericParams.getMinLineSensor() + " and " + atmosphericParams.getMaxLineSensor();
-                    throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND, info);
+                    throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, 
+                                              atmosphericParams.getMinLineSensor(), atmosphericParams.getMaxLineSensor());
                 }
             }
         }

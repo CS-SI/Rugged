@@ -97,5 +97,8 @@ INVALID_STEP = le pas {0} n''est pas valable : {1}
 # range between min line {0} and max line {1} is invalid {2}
 INVALID_RANGE_FOR_LINES = l''écart entre la ligne min {0} et la ligne max {1} est non valide {2}
 
-# Impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}
-SENSOR_PIXEL_NOT_FOUND = impossible de trouver le pixel senseur {0}
+# impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}
+SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES = impossible de trouver le pixel senseur dans l''intervalle de lignes (avec réfraction atmosphérique) entre les lignes {0} et {1}
+
+# impossible to find sensor pixel: pixel {0} outside interval [ {1} , {2} [ (with atmospheric refraction margin = {3})
+SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE = impossible de trouver le pixel senseur: pixel {0} en dehors de l''intervalle  [ {1} , {2} [ (avec la marge pour la réfraction atmosphérique = {3})
