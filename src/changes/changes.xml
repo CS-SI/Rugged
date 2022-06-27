@@ -20,7 +20,9 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="3.0" date="TBD" description="TBD">
+    <release version="3.0" date="2022-07-05" description="This is a major release.
+    It fixes a few bugs.
+    This version depends on Orekit 11.2 and Hipparchus 2.1.">
       <action dev="luc" type="update" issue="388">
         Fixed longitude normalization issue with tiles.
       </action>
