@@ -43,7 +43,7 @@ with groupID org.orekit and artifactId rugged so maven
 internal mechanism will download automatically all artifacts and dependencies
 as required.
 
-#set ( $versions = {"2.2": "2020-07-31", "2.1": "2019-03-14", "2.0": "2017-12-19", "1.0": "2016-02-10"} )
+#set ( $versions = {"3.0": "2022-07-05", "2.2": "2020-07-31", "2.1": "2019-03-14", "2.0": "2017-12-19", "1.0": "2016-02-10"} )
 #foreach( $version in $versions.entrySet() )
 
 |  package |                                              link                                                                                     |
