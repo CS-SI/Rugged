@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -121,17 +121,17 @@ public class SpacecraftToObservedBody implements Serializable {
 
         // set up the cache for position-velocities
         final TimeStampedCache<TimeStampedPVCoordinates> pvCache =
-                new ImmutableTimeStampedCache<TimeStampedPVCoordinates>(pvInterpolationNumber, positionsVelocities);
+                new ImmutableTimeStampedCache<>(pvInterpolationNumber, positionsVelocities);
 
         // set up the cache for attitudes
         final TimeStampedCache<TimeStampedAngularCoordinates> aCache =
-                new ImmutableTimeStampedCache<TimeStampedAngularCoordinates>(aInterpolationNumber, quaternions);
+                new ImmutableTimeStampedCache<>(aInterpolationNumber, quaternions);
 
         final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
         this.tStep          = tStep;
-        this.bodyToInertial = new ArrayList<Transform>(n);
-        this.inertialToBody = new ArrayList<Transform>(n);
-        this.scToInertial   = new ArrayList<Transform>(n);
+        this.bodyToInertial = new ArrayList<>(n);
+        this.inertialToBody = new ArrayList<>(n);
+        this.scToInertial   = new ArrayList<>(n);
         for (AbsoluteDate date = minDate; bodyToInertial.size() < n; date = date.shiftedBy(tStep)) {
 
             // interpolate position-velocity, allowing slight extrapolation near the boundaries
@@ -200,7 +200,7 @@ public class SpacecraftToObservedBody implements Serializable {
         this.bodyToInertial     = bodyToInertial;
         this.scToInertial       = scToInertial;
 
-        this.inertialToBody = new ArrayList<Transform>(bodyToInertial.size());
+        this.inertialToBody = new ArrayList<>(bodyToInertial.size());
         for (final Transform b2i : bodyToInertial) {
             inertialToBody.add(b2i.getInverse());
         }
@@ -300,8 +300,8 @@ public class SpacecraftToObservedBody implements Serializable {
      * @return true if date is in the supported range
      */
     public boolean isInRange(final AbsoluteDate date) {
-        return (minDate.durationFrom(date) <= overshootTolerance) &&
-               (date.durationFrom(maxDate) <= overshootTolerance);
+        return minDate.durationFrom(date) <= overshootTolerance &&
+               date.durationFrom(maxDate) <= overshootTolerance;
     }
 
 }

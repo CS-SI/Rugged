@@ -1,0 +1,8 @@
+# no Digital Elevation Model data at latitude {0} and longitude {1}
+NO_DEM_DATA = <MISSING TRANSLATION>
+
+# unknown sensor {0}
+UNKNOWN_SENSOR = ABCDEF {0}
+
+# tile is empty: {0} ⨉ {1}
+EMPTY_TILE =

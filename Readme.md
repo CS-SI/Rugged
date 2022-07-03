@@ -22,6 +22,7 @@ Direct and inverse location can be used to perform full ortho-rectification of
 images and correlation between sensors observing the same area.
 
 
+[![](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 [![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=alert_status)](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged)
 [![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=coverage)](https://sonar.orekit.org/component_measures?id=org.orekit%3Arugged&metric=coverage&view=treemap)
 
@@ -30,7 +31,7 @@ images and correlation between sensors observing the same area.
 ### Official releases
 
 [Official Rugged releases](https://gitlab.orekit.org/orekit/rugged/-/releases)
-are available on our [Gitlab instance](https://gitlab.orekit.org/). They are
+are available on our [Gitlab instance](https://gitlab.orekit.org/orekit/rugged). They are
 also available in the
 [Maven repository](https://mvnrepository.com/artifact/org.orekit/rugged).
 
@@ -93,6 +94,6 @@ More detailed information is available in the
 
 ## License
 
-Rugged is licensed by [CS GROUP](https://www.c-s.fr/) under
+Rugged is licensed by [CS GROUP](https://www.csgroup.eu/) under
 the [Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 A copy of this license is provided in the [LICENSE.txt](LICENSE.txt) file.

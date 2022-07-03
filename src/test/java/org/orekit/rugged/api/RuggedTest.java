@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -59,6 +59,7 @@ import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.Orbit;
+import org.orekit.propagation.EphemerisGenerator;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.GroundOptimizationProblemBuilder;
@@ -67,6 +68,7 @@ import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
+import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
@@ -77,7 +79,9 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.utils.DerivativeGenerator;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -136,9 +140,9 @@ public class RuggedTest {
 
         Propagator propagator = TestUtils.createPropagator(earth, gravityField, orbit);
         propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
-        propagator.setEphemerisMode();
+       final EphemerisGenerator generator = propagator.getEphemerisGenerator();
         propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
-        Propagator ephemeris = propagator.getGeneratedEphemeris();
+        Propagator ephemeris = generator.getGeneratedEphemeris();
 
         Rugged rugged = new RuggedBuilder().
                 setDigitalElevationModel(updater, 8).
@@ -879,6 +883,17 @@ public class RuggedTest {
         LinearLineDatation lineDatation = new LinearLineDatation(absDate, 0.03125d, 19.95565693384045);
         LineSensor lineSensor = new LineSensor("QUICK_LOOK", lineDatation, offset,
                                                new LOSBuilder(lineOfSight).build());
+        
+        // in order not to have a problem when calling the pixelIsInside method (AtmosphericRefraction must be not null)
+        AtmosphericRefraction atmos = new AtmosphericRefraction() {
+            @Override
+            public NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos,
+                    NormalizedGeodeticPoint rawIntersection, IntersectionAlgorithm algorithm) {
+                return rawIntersection;
+            }
+        };
+        atmos.deactivateComputation();
+        
         Rugged rugged = new RuggedBuilder().
                 setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
@@ -888,6 +903,7 @@ public class RuggedTest {
                               satellitePVList, 6, CartesianDerivativesFilter.USE_P,
                               satelliteQList, 8, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor).
+                setRefractionCorrection(atmos).
                 build();
 
         GeodeticPoint[] temp = rugged.directLocation("QUICK_LOOK", -250);
@@ -904,6 +920,28 @@ public class RuggedTest {
 
         Assert.assertNotNull(sensorPixel);
 
+        Assert.assertFalse(inside(rugged, null, lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(-100, -100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(-100, +100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(+100, -100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(+100, +100), lineSensor));
+        Assert.assertTrue(inside(rugged, new SensorPixel(0.2, 0.3), lineSensor));
+
+    }
+
+    private boolean inside(final Rugged rugged, final SensorPixel sensorPixel, LineSensor lineSensor) {
+        try {
+            final Method inside =
+                            Rugged.class.getDeclaredMethod("pixelIsInside",
+                                                           SensorPixel.class,
+                                                           LineSensor.class);
+            inside.setAccessible(true);
+            return ((Boolean) inside.invoke(rugged, sensorPixel, lineSensor)).booleanValue();
+        } catch (NoSuchMethodException | IllegalAccessException |
+                 IllegalArgumentException | InvocationTargetException e) {
+            Assert.fail(e.getLocalizedMessage());
+            return false;
+        }
     }
 
     @Test

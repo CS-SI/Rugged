@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -59,7 +59,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
 
         this.ellipsoid = ellipsoid;
 
-        this.refractionLayers = new ArrayList<ConstantRefractionLayer>(15);
+        this.refractionLayers = new ArrayList<>(15);
         this.refractionLayers.add(new ConstantRefractionLayer(100000.00, 1.000000));
         this.refractionLayers.add(new ConstantRefractionLayer( 50000.00, 1.000000));
         this.refractionLayers.add(new ConstantRefractionLayer( 40000.00, 1.000001));

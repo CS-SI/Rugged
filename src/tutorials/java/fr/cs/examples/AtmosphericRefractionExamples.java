@@ -150,10 +150,17 @@ public class AtmosphericRefractionExamples {
         int pixelStep = 100;
         int lineStep = 100;
         atmosphericRefraction.setGridSteps(pixelStep, lineStep);
+               
+        // To compute the inverse location grid with atmospheric refraction, a default margin is available:
+        //   atmosphericRefraction.getComputationParameters().getDefaultInverseLocMargin();
+
+        // but can be modified with:
+        //   atmosphericRefraction.setInverseLocMargin(margin);
 
         // Build Rugged with atmospheric refraction model
         builder.setRefractionCorrection(atmosphericRefraction);
         Rugged ruggedWith = builder.build();
+        
 
         // Direct location on a line WITHOUT and WITH atmospheric correction
         // -----------------------------------------------------------------

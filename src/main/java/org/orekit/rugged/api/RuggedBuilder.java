@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -32,8 +32,6 @@ import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
@@ -173,7 +171,7 @@ public class RuggedBuilder {
      * </p>
      */
     public RuggedBuilder() {
-        sensors                     = new ArrayList<LineSensor>();
+        sensors                     = new ArrayList<>();
         constantElevation           = Double.NaN;
         lightTimeCorrection         = true;
         aberrationOfLightCorrection = true;
@@ -730,22 +728,17 @@ public class RuggedBuilder {
 
         // extract position/attitude samples from propagator
         final List<TimeStampedPVCoordinates> positionsVelocities =
-                new ArrayList<TimeStampedPVCoordinates>();
+                new ArrayList<>();
         final List<TimeStampedAngularCoordinates> quaternions =
-                new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
-
-            /** {@inheritDoc} */
-            @Override
-            public void handleStep(final SpacecraftState currentState, final boolean isLast) {
+                new ArrayList<>();
+        propagator.getMultiplexer().add(interpolationStep,
+            currentState -> {
                 final AbsoluteDate  date = currentState.getDate();
                 final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
                 final Rotation      q    = currentState.getAttitude().getRotation();
                 positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
                 quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
-            }
-
-        });
+            });
         propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
 
         // orbit/attitude to body converter

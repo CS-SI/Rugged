@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -84,7 +84,10 @@ public enum RuggedMessages implements Localizable {
     UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled"),
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})"),
     INVALID_STEP("step {0} is not valid : {1}"),
-    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}");
+    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}"),
+    SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES("impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}"),
+    SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE("impossible to find sensor pixel: pixel {0} outside interval [ {1} , {2} [ (with atmospheric refraction margin = {3})");
+
 
     // CHECKSTYLE: resume JavadocVariable check
 
@@ -116,9 +119,8 @@ public enum RuggedMessages implements Localizable {
                     ResourceBundle.getBundle(RESOURCE_BASE_NAME, locale, new UTF8Control());
             if (bundle.getLocale().getLanguage().equals(locale.getLanguage())) {
                 final String translated = bundle.getString(name());
-                if ((translated != null) &&
-                    (translated.length() > 0) &&
-                    (!translated.toLowerCase(locale).contains("missing translation"))) {
+                if (translated.length() > 0 &&
+                    !translated.toLowerCase(locale).contains("missing translation")) {
                     // the value of the resource is the translated format
                     return translated;
                 }

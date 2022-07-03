@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2020 CS GROUP
+<!--- Copyright 2013-2022 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -105,7 +105,7 @@ components between Q1 and Q2 or -Q1 and Q2 leads to completely different rotatio
 will typically have one sign change per orbit at some random point. The third reason is that instead of doing an
 interpolation that respect quaternions constraint, the interpolation departs from the constraint first and attempts to
 recover afterwards in a normalization step. Orekit uses a method based on Sergeï Tanygin's paper
-[Attitude interpolation](http://www.agi.com/resources/white-papers/attitude-interpolation) with slight
+[Attitude interpolation](https://www.agi.com/resources/whitepapers/attitude-interpolation) with slight
 changes to use modified Rodrigues vectors as defined in Malcolm D Shuster's
 [A Survey of Attitude Representations](http://www.ladispe.polito.it/corsi/Meccatronica/02JHCOR/2011-12/Slides/Shuster_Pub_1993h_J_Repsurv_scan.pdf),
 despite attitude is still represented by quaternions in Orekit (Rodrigues vectors are used only for interpolation).

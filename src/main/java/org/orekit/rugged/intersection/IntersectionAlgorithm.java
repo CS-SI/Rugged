@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,7 +17,6 @@
 package org.orekit.rugged.intersection;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
@@ -40,7 +39,7 @@ public interface IntersectionAlgorithm {
      * <p>
      * This method is used to refine an intersection when a close guess is
      * already known. The intersection is typically looked for by a direct
-     * {@link org.orekit.rugged.raster.Tile#cellIntersection(GeodeticPoint,
+     * {@link org.orekit.rugged.raster.Tile#cellIntersection(NormalizedGeodeticPoint,
      * Vector3D, int, int) cell intersection} in the tile which already
      * contains the close guess, or any similar very fast algorithm.
      * </p>

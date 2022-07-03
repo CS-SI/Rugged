@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -120,9 +120,9 @@ public abstract class AtmosphericRefraction {
     */
     public Boolean isSameContext(final String sensorName, final int minLine, final int maxLine) {
 
-        return (Double.compare(atmosphericParams.getMinLineSensor(), minLine) == 0) &&
-               (Double.compare(atmosphericParams.getMaxLineSensor(), maxLine) == 0) &&
-               (atmosphericParams.getSensorName().compareTo(sensorName) == 0);
+        return Double.compare(atmosphericParams.getMinLineSensor(), minLine) == 0 &&
+               Double.compare(atmosphericParams.getMaxLineSensor(), maxLine) == 0 &&
+               atmosphericParams.getSensorName().compareTo(sensorName) == 0;
     }
 
     /** Get the computation parameters.
@@ -141,6 +141,17 @@ public abstract class AtmosphericRefraction {
      */
     public void setGridSteps(final int pixelStep, final int lineStep) {
         atmosphericParams.setGridSteps(pixelStep, lineStep);
+    }
+
+    /**
+     * Set the margin for computation of inverse location with atmospheric refraction correction.
+     * Overwrite the default value DEFAULT_INVLOC_MARGIN.
+     * No check is done about this margin. A recommended value is around 1.
+     * @param inverseLocMargin margin in pixel size to compute inverse location with atmospheric refraction correction.
+     * @since 3.0
+     */
+    public void setInverseLocMargin(final double inverseLocMargin) {
+        atmosphericParams.setInverseLocMargin(inverseLocMargin);
     }
 
     /** Compute the correction functions for pixel and lines.
@@ -174,9 +185,9 @@ public abstract class AtmosphericRefraction {
                     gridDiffLine[pixelIndex][lineIndex] = diffLine;
 
                 } else {
-                    // Impossible to find the point in the given min line and max line
-                    throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES,
-                                              atmosphericParams.getMinLineSensor(), atmosphericParams.getMaxLineSensor(), "");
+                    // Impossible to find the sensor pixel in the given range lines
+                    throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES,
+                                              atmosphericParams.getMinLineSensor(), atmosphericParams.getMaxLineSensor());
                 }
             }
         }

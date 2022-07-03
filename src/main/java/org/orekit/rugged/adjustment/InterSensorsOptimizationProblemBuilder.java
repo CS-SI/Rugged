@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -90,7 +90,7 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
     @Override
     protected void initMapping() {
 
-        this.sensorToSensorMappings = new ArrayList<SensorToSensorMapping>();
+        this.sensorToSensorMappings = new ArrayList<>();
 
         for (final String ruggedNameA : this.ruggedMap.keySet()) {
             for (final String ruggedNameB : this.ruggedMap.keySet()) {

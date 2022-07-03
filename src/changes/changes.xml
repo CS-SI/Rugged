@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- Copyright 2013-2020 CS GROUP
+<!-- Copyright 2013-2022 CS GROUP
   Licensed to CS GROUP (CS) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -20,7 +20,26 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-     <release version="2.2" date="2020-07-31" description="This is a minor release.
+    <release version="3.0" date="2022-07-05" description="This is a major release.
+    It fixes a few bugs.
+    This version depends on Orekit 11.2 and Hipparchus 2.1.">
+      <action dev="luc" type="update" issue="388">
+        Fixed longitude normalization issue with tiles.
+      </action>
+      <action dev="guylaine" type="update" issue="391">
+        Fixed inverse location issue with atmospheric refraction.
+      </action>
+      <action dev="luc" type="update" issue="387">
+        Updated dependencies to Orekit 11.2 (and Hipparchus 2.1 ).
+      </action>
+      <action dev="guylaine" type="update" issue="390">
+        Changed CS Group website URL.
+      </action>
+      <action dev="guylaine" type="update">
+        Updated link to Sergeï Tanygin's paper about attitude interpolation in documentation.
+      </action>
+    </release>
+    <release version="2.2" date="2020-07-31" description="This is a minor release.
      It adds access to algorithm identifier, 
      corrects an Earth constant for model IERS96, 
      improves documentation and fixes a few bugs.

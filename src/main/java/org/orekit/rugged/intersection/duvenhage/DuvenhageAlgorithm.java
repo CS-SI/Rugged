@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -74,7 +74,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      */
     public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles,
                               final boolean flatBody) {
-        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
+        this.cache = new TilesCache<>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
         this.flatBody = flatBody;
         this.algorithmId = flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE;
     }

@@ -1,4 +1,4 @@
-/* Copyright 2013-2020 CS GROUP
+/* Copyright 2013-2022 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -44,10 +44,10 @@ import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.TestUtils;
+import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing.CrossingResult;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -148,8 +148,7 @@ public class SensorMeanPlaneCrossingTest {
 
     private void doTestDerivative(boolean lightTimeCorrection,
                                   boolean aberrationOfLightCorrection,
-                                  double tol)
-        {
+                                  double tol) {
 
         final Vector3D position  = new Vector3D(1.5, Vector3D.PLUS_I);
         final Vector3D normal    = Vector3D.PLUS_I;
@@ -216,6 +215,20 @@ public class SensorMeanPlaneCrossingTest {
         Assert.assertEquals(0.0,
                             Vector3D.distance(result.getTargetDirectionDerivative(), dirDer),
                             tol * dirDer.getNorm());
+
+        try {
+            mean.getScToBody().getBodyToInertial(refDate.shiftedBy(-Constants.JULIAN_CENTURY));
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+        }
+        try {
+            mean.getScToBody().getBodyToInertial(refDate.shiftedBy(Constants.JULIAN_CENTURY));
+            Assert.fail("an exception should have been thrown");
+        } catch (RuggedException re) {
+            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+        }
+        Assert.assertNotNull(mean.getScToBody().getBodyToInertial(refDate));
 
     }
 
@@ -316,14 +329,10 @@ public class SensorMeanPlaneCrossingTest {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedPVCoordinates(currentState.getDate(),
-                                                      currentState.getPVCoordinates().getPosition(),
-                                                      currentState.getPVCoordinates().getVelocity(),
-                                                      Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedPVCoordinates(currentState.getDate(),
+                                                                                                    currentState.getPVCoordinates().getPosition(),
+                                                                                                    currentState.getPVCoordinates().getVelocity(),
+                                                                                                    Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }
@@ -336,13 +345,9 @@ public class SensorMeanPlaneCrossingTest {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
-                                                           currentState.getAttitude().getRotation(),
-                                                           Vector3D.ZERO, Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
+                                                                                                         currentState.getAttitude().getRotation(),
+                                                                                                         Vector3D.ZERO, Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }

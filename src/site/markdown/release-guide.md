@@ -326,6 +326,21 @@ set the artifacts in the release notes.
 
 Navigate to Projects > Rugged > Project Overview > Releases and make sure it looks nice.
 
+## Synchronize the Github mirror
+
+To enhance the visibility of the project, [a mirror](https://github.com/CS-SI/Rugged) is maintained on Github. 
+The releases created on Gitlab are not automatically pushed on this mirror. 
+They have to be declared manually to make visible the vitality of Rugged.
+
+1. Login to Github
+2. Go to the [Rugged releases](https://github.com/CS-SI/Rugged/releases) page
+3. Click on the [Draft a new release](https://github.com/CS-SI/Rugged/releases) button
+4. In the "Tag version" field of the form and in the "Release title" field, enter the tag of the release to be declared
+5. Describe the release as it has been done on Gitlab
+6. Click on "Publish release"
+
+Github automically adds two assets (zip and tarball archives of the tagged source code).
+
 ## Update Rugged website
 
 Several edits need to be made to the Rugged website after the vote.
@@ -336,13 +351,13 @@ with the ones used to create the release notes.
 Edit `_layouts/home_rugged.html` and edit the text of the button to use the new version.
 
 Edit `rugged/overview.html` with the new Orekit and Hipparchus versions. Don't forget to update the
-rugged/img/overview.png image with the new dependencies.
+rugged/img/rugged-architecture.png image with the new dependencies.
 
-Create a new post for the release in `_post/` using as template a previous Rugged post (in order to be published in the Rugged News page).
+Create a new post for the release in `_post/` using as template a previous Rugged post (in order to be published in the Rugged News page). To be noticed the `--future` option is needed to see a post in the future, otherwise `jekyll serve` will ignore it !
 
 Run:
 
-    jekyll serve
+    jekyll serve --future
 
 and make sure the website looks nice. View it on http://localhost:4000/
 
