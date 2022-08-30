@@ -44,14 +44,14 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 
-    protected IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+    protected IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOvelappingTiles) {
+        return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOvelappingTiles);
     }
 
     @Test
     public void testNumericalIssueAtTileExit() {
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         Vector3D los = new Vector3D( 0.5127552821932051, -0.8254313129088879, -0.2361041470463311);
         GeodeticPoint intersection = algorithm.refineIntersection(earth, position, los,
@@ -62,7 +62,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     @Test
     public void testCrossingBeforeLineSegmentStart() {
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         Vector3D los = new Vector3D( 0.42804005978915904, -0.8670291034054828, -0.2550338037664377);
         GeodeticPoint intersection = algorithm.refineIntersection(earth, position, los,
@@ -73,7 +73,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     @Test
     public void testWrongPositionMissesGround() {
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         Vector3D position = new Vector3D(7.551889113912788E9, -3.173692685491814E10, 1.5727517321541348E9);
         Vector3D los = new Vector3D(0.010401349221417867, -0.17836068905951286, 0.9839101973923178);
         try {
@@ -105,7 +105,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
                 }
             }
         };
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         try {
             algorithm.intersection(earth,
                                    new Vector3D(-3010311.9672771087, 5307094.8081077365, 1852867.7919871407),
@@ -118,7 +118,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     @Test
     public void testPureEastWestLOS() {
         updater = new CheckedPatternElevationUpdater(FastMath.toRadians(1.0),1201, 41.0, 1563.0);
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         NormalizedGeodeticPoint gp =
             algorithm.intersection(earth,
                                    new Vector3D(-3041185.154503948, 6486750.132281409, -32335.022880173332),
@@ -137,7 +137,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
         updater.updateTile((3 * size) / 2, (3 * size) / 2, northTile);
         MinMaxTreeTile southTile = new MinMaxTreeTileFactory().createTile();
         updater.updateTile((-3 * size) / 2, (3 * size) / 2, southTile);
-        IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
 
         // line of sight in the South West corner
         Assert.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
@@ -200,10 +200,10 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
     public void testAlgorithmId() {
         setUpMayonVolcanoContext();
  
-        final IntersectionAlgorithm algorithm = new DuvenhageAlgorithm(updater, 8, false);
+        final IntersectionAlgorithm algorithm = new DuvenhageAlgorithm(updater, 8, false, true);
         assertEquals(AlgorithmId.DUVENHAGE, algorithm.getAlgorithmId());
         
-        final IntersectionAlgorithm algorithmFlatBody = new DuvenhageAlgorithm(updater, 8, true);
+        final IntersectionAlgorithm algorithmFlatBody = new DuvenhageAlgorithm(updater, 8, true, true);
         assertEquals(AlgorithmId.DUVENHAGE_FLAT_BODY, algorithmFlatBody.getAlgorithmId());
     }
 

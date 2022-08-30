@@ -54,7 +54,7 @@ public class ConstantElevationAlgorithmTest {
         final Vector3D los = new Vector3D(-0.626242839, 0.0124194184, -0.7795291301);
         IntersectionAlgorithm duvenhage = new DuvenhageAlgorithm(new CheckedPatternElevationUpdater(FastMath.toRadians(1.0),
                                                                                                     256, 150.0, 150.0),
-                                                                 8, false);
+                                                                 8, false, true);
         IntersectionAlgorithm constantElevation = new ConstantElevationAlgorithm(150.0);
         NormalizedGeodeticPoint gpRef = duvenhage.intersection(earth, state.getPVCoordinates().getPosition(), los);
         NormalizedGeodeticPoint gpConst = constantElevation.intersection(earth, state.getPVCoordinates().getPosition(), los);
