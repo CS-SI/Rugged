@@ -34,7 +34,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 /** Digital Elevation Model intersection using Bernardt Duvenhage's algorithm.
  * <p>
  * The algorithm is described in the 2009 paper:
- * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
+ * <a href="https://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
  * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
  * </p>
  * @author Luc Maisonobe
