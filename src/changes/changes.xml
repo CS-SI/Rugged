@@ -20,6 +20,8 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
+    <release version="3.1" date="TBD" description="TBD">
+    </release>
     <release version="3.0" date="2022-07-05" description="This is a major release.
     It fixes a few bugs.
     This version depends on Orekit 11.2 and Hipparchus 2.1.">
