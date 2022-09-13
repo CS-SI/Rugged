@@ -339,20 +339,10 @@ Fetch the current code:
 
 Switch to `develop` branch. 
 
-<!-- Edit `download/.htaccess` and replace the URLs of the 3 Rugged artifacts with the ones used to create the release notes.-->
-
-<!-- Edit `_layouts/home_rugged.html` and edit the text of the button to use the new version.-->
-
 Edit `rugged/overview.html` with the new Orekit and Hipparchus versions. 
 Don't forget to update the `rugged/img/rugged-architecture.png` image with the new dependencies.
 
 Create a new post for the release in `_post/` using as template a previous Rugged post (in order to be published in the Rugged News page). 
-
-
-<!-- To be noticed the `--future` option is needed to see a post in the future, otherwise `jekyll serve` will ignore it ! -->
-<!-- Run:-->
-<!--    jekyll serve --future-->
-<!-- and make sure the website looks nice. View it on http://localhost:4000/-->
 
 
 Once the modification pushed to develop branch, wait the pipeline on Gitlab is finished, then the [test website](https://test.orekit.org/rugged) will be updated.
