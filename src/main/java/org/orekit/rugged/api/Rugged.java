@@ -593,6 +593,8 @@ public class Rugged {
         final Vector3D  eP2      = ellipsoid.transform(gp1);
         final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
         final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
+        // At this stage the light time correction is negligible so not taken into account even if asked for
+        // For more details: https://forum.orekit.org/t/light-time-correction-coupled-with-atmospheric-refraction-issue-in-direct-location/1963
         return algorithm.refineIntersection(ellipsoid,
                                              shifted2.transformPosition(pInert),
                                              shifted2.transformVector(lInert),
