@@ -116,18 +116,18 @@ public class TilesCache<T extends Tile> {
 
         if ( !isOvelapping ) { // DEM with seamless tiles (no overlapping)
             
-            // Check if the tile HAS INTERPOLATION NEIGHBORS (the (latitude, longitude) is inside the tile)
-            // otherwise the (latitude, longitude) is on the edge of the tile: one must create a zipper tile 
-            // because tiles are not overlapping ...
-            final Tile.Location location = tile.getLocation(latitude, longitude);
+            // Check if the tile HAS INTERPOLATION NEIGHBORS (the point (latitude, longitude) is inside the tile),
+            // otherwise the point (latitude, longitude) is on the edge of the tile: 
+            // one must create a zipper tile because tiles are not overlapping ...
+            final Tile.Location pointLocation = tile.getLocation(latitude, longitude);
 
-            // TODO GP final Tile.Location neighborhood = tile.checkNeighborhood(latitude, longitude);
+            // TODO GP check if useful: final Tile.Location neighborhood = tile.checkNeighborhood(latitude, longitude);
 
             // We are on the edge of the tile 
-            if (location != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
+            if (pointLocation != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
 
                 // Create a "zipper tile"
-                return createZipperTile(latitude, longitude, tile, location);
+                return createZipperTile(tile, latitude, longitude, pointLocation);
 
             } else { // we are not on the edge of the tile
                 
@@ -153,6 +153,7 @@ public class TilesCache<T extends Tile> {
      * @param latitude latitude of the desired tile (rad)
      * @param longitude longitude of the desired tile (rad)
      * @return the tile
+     * @since X.x
      */
     private T createTile(final double latitude, final double longitude) {
         
@@ -174,13 +175,24 @@ public class TilesCache<T extends Tile> {
         return tile;
     }
 
-    private T createZipperTile(final double latitude, final double longitude, 
-                               final T currentTile, final Tile.Location location) {
+
+    /** Create a zipper tile for DEM with seamless tiles (no overlapping)
+     * @param currentTile current tile
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
+     * @param pointLocation ground point location with respect to the tile
+     * @return zipper tile covering the ground point
+     * @since X.x
+     */
+    private T createZipperTile(final T currentTile, 
+                               final double latitude, final double longitude, 
+                               final Tile.Location pointLocation) {
 
         T zipperTile = null;
         
-        // One must create a zipper tile between this tile and the neighbor tile
-        switch (location) {
+        // One must create a zipper tile between this tile and the neighbor tile 
+        // according to the ground point location
+        switch (pointLocation) {
 
         case NORTH: // latitudeIndex > latitudeRows - 2
 
@@ -223,8 +235,11 @@ public class TilesCache<T extends Tile> {
             break;
             
       default:
-            System.out.println("Location= " + location + " => Case not yet implemented");
+          // TODO AFAC
+            System.out.println("Point location= " + pointLocation + " => Case not yet implemented");
             return null;
+//            // impossible to reach
+//            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
 
         } // end switch
         
@@ -238,13 +253,22 @@ public class TilesCache<T extends Tile> {
     }
 
     /** Initialize the zipper tile for a given geometry and the full set of elevations 
+     * @param zipperLatitudeMin
+     * @param zipperLongitudeMin
+     * @param zipperLatitudeStep
+     * @param zipperLongitudeStep
+     * @param zipperLatitudeRows
+     * @param zipperLongitudeColumns
+     * @param zipperElevations
+     * @return the zipper tile
+     * @since X.x
      */
     private T initializeZipperTile(final double zipperLatitudeMin, final double zipperLongitudeMin, 
                                    final double zipperLatitudeStep, final double zipperLongitudeStep, 
                                    final int zipperLatitudeRows, final int zipperLongitudeColumns,
                                    final double[][] zipperElevations) {
         
-//        Tile zipperTile = new ZipperTile();
+        // Create an empty tile
         final T zipperTile = factory.createTile();
 
         // Set the tile geometry
@@ -264,13 +288,103 @@ public class TilesCache<T extends Tile> {
         return zipperTile;
     }
 
+    
+    private T createZipperNorthOrSouth(final EarthHemisphere latitudeHemisphere, final double longitude, final T tile) {
+                
+        final int latitudeRows = tile.getLatitudeRows();
+        final int longitudeCols = tile.getLongitudeColumns();
+        final double latStep = tile.getLatitudeStep();
+        final double lonStep = tile.getLongitudeStep();
+        final double minLat = tile.getMinimumLatitude();
+         
+        // Get the North or South tile
+        final T tileNorthOrSouth = createNorthOrSouthTile(latitudeHemisphere, longitude, minLat, latitudeRows, latStep);
+
+        // TODO AFAC ################
+        switch (latitudeHemisphere) {
+        case NORTH:
+            tilePrint(tileNorthOrSouth, "North tile:");
+            break;
+        case SOUTH:
+            tilePrint(tileNorthOrSouth, "South tile:");
+            break;          
+        default:
+            // impossible to reach
+            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
+        }
+
+        
+        // If NORTH hemisphere:
+        // Create zipper tile between the current tile and the North tile;
+        // 2 rows belong to the North part of the origin/current tile
+        // 2 rows belong to the South part of the North tile
+
+        // If SOUTH hemisphere:
+        // Create zipper tile between the current tile and the South tile;
+        // 2 rows belong to the South part of the origin/current tile
+        // 2 rows belong to the North part of the South tile
+
+        // TODO we suppose here the 2 tiles have same origin, step and size along longitude
+
+        double zipperLatStep = latStep;
+        int zipperLatRows = 4;
+
+        int zipperLonCols = longitudeCols;
+
+        double zipperLatMin;
+        double[][] elevations;
+        switch (latitudeHemisphere) {
+        case NORTH:
+            zipperLatMin = minLat + (latitudeRows - 2)*latStep;
+            
+            elevations = getZipperNorthSouthElevations(zipperLatRows, zipperLonCols, 
+                                                       tileNorthOrSouth, tile, latitudeRows);
+            break;
+            
+        case SOUTH:
+            zipperLatMin = minLat - 2*latStep;
+            
+            elevations= getZipperNorthSouthElevations(zipperLatRows, zipperLonCols, 
+                                                      tile, tileNorthOrSouth, latitudeRows);
+            break;
+            
+        default:
+            // impossible to reach
+            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
+        }
+
+        final T zipperNorthOrSouth = initializeZipperTile(zipperLatMin, tile.getMinimumLongitude(), 
+                                                          zipperLatStep, lonStep, 
+                                                          zipperLatRows, zipperLonCols, elevations);
+        
+        // TODO AFAC ################
+        switch (latitudeHemisphere) {
+        case NORTH:
+            tilePrint(zipperNorthOrSouth, "NORTH Zipper tile:");
+            break;
+        case SOUTH:
+            tilePrint(zipperNorthOrSouth, "SOUTH Zipper tile:");
+            break;          
+        default:
+            // impossible to reach
+            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
+        }
+//            printTileFile(tileZipperNorth, "Plots/Zipper_lat_");
+        // ################
+        
+        return zipperNorthOrSouth;
+    }
+
     /** Create the zipper tile between the current tile and the Northern tile of the current tile
      * for a given longitude
      * @param longitude given longitude (rad)
      * @param tile current tile
-     * @return northern tile of the current tile
+     * @return northern zipper tile of the current tile
+     * @since X.x
      */
     private T createZipperNorth(final double longitude, final T tile) {
+        
+        //TODO GP check if can be put in common with createZipperSouth ??
         
         final int latitudeRows = tile.getLatitudeRows();
         final int longitudeCols = tile.getLongitudeColumns();
@@ -300,8 +414,8 @@ public class TilesCache<T extends Tile> {
                                                                     tileNorth, tile, latitudeRows);
 
         final T zipperNorth = initializeZipperTile(zipperLatMin, tile.getMinimumLongitude(), 
-                                                      zipperLatStep, lonStep, 
-                                                      zipperLatRows, zipperLonCols, elevations);
+                                                   zipperLatStep, lonStep,
+                                                   zipperLatRows, zipperLonCols, elevations);
         // TODO AFAC ################
         tilePrint(zipperNorth, "NORTH Zipper tile:");
 //            printTileFile(tileZipperNorth, "Plots/Zipper_lat_");
@@ -314,7 +428,8 @@ public class TilesCache<T extends Tile> {
      * for a given longitude
      * @param longitude given longitude (rad)
      * @param tile current tile
-     * @return southern tile of the current tile
+     * @return southern zipper tile of the current tile
+     * @since X.x
      */
     private T createZipperSouth(final double longitude, final T tile) {
         
@@ -361,8 +476,8 @@ public class TilesCache<T extends Tile> {
                                                                     tile, tileSouth, latitudeRows);
         
         final T zipperSouth = initializeZipperTile(zipperLatMin, tile.getMinimumLongitude(), 
-                                                      zipperLatStep, lonStep, 
-                                                      zipperLatRows, zipperLonCols, elevations);
+                                                   zipperLatStep, lonStep, 
+                                                   zipperLatRows, zipperLonCols, elevations);
         // TODO AFAC ################
         tilePrint(zipperSouth, "SOUTH Zipper tile:");
 //            printTileFile(zipperSouth, "Plots/Zipper_lat_");
@@ -372,12 +487,13 @@ public class TilesCache<T extends Tile> {
     }
 
     /** Get the elevations for the zipper tile between a northern and a southern tiles
-     * @param zipperLatRows
-     * @param zipperLonCols
+     * @param zipperLatRows number of rows in latitude
+     * @param zipperLonCols number of column in longitude
      * @param northernTile the tile which is the northern
      * @param southernTile the tile which is the southern
      * @param southernLatRows latitude rows of the southern tile
-      * @return the elevations to fill in the zipper tile between a northern and a southern tiles
+     * @return the elevations to fill in the zipper tile between a northern and a southern tiles
+     * @since X.x
      */
     private double[][] getZipperNorthSouthElevations(int zipperLatRows, int zipperLonCols, 
                                                      final T northernTile, final T southernTile,
@@ -405,9 +521,12 @@ public class TilesCache<T extends Tile> {
      * for a given latitude
      * @param latitude given latitude (rad)
      * @param tile current tile
-     * @return western tile of the current tile
+     * @return western zipper tile of the current tile
+     * @since X.x
      */
     private T createZipperWest(final double latitude, final T tile) {
+        
+        //TODO GP check if can be put in common with createZipperEast ??
         
         final int latitudeRows = tile.getLatitudeRows();
         final int longitudeCols = tile.getLongitudeColumns();
@@ -466,7 +585,8 @@ public class TilesCache<T extends Tile> {
      * for a given latitude
      * @param latitude given latitude (rad)
      * @param tile current tile
-     * @return eastern tile of the current tile
+     * @return eastern zipper tile of the current tile
+     * @since X.x
      */
      private T createZipperEast(final double latitude, final T tile) {
         
@@ -523,14 +643,15 @@ public class TilesCache<T extends Tile> {
         return zipperEast;
     }    
     
-     /** Get the elevations for the zipper tile between a eastern and a western tiles
-      * @param zipperLatRows
-      * @param zipperLonCols
-      * @param easternTile the tile which is the eastern
-      * @param westernTile the tile which is the western
-      * @param westernLonCols longitude columns of the western tile
-      * @return the elevations to fill in the zipper tile between a eastern and a western tiles
-      */
+    /** Get the elevations for the zipper tile between a eastern and a western tiles
+     * @param zipperLatRows number of rows in latitude
+     * @param zipperLonCols number of column in longitude
+     * @param easternTile the tile which is the eastern
+     * @param westernTile the tile which is the western
+     * @param westernLonCols longitude columns of the western tile
+     * @return the elevations to fill in the zipper tile between a eastern and a western tiles
+     * @since X.x
+     */
      private double[][] getZipperEastWestElevations(int zipperLatRows, int zipperLonCols, 
                                                     final T easternTile, final T westernTile,
                                                     final int westernLonCols) {
@@ -553,6 +674,18 @@ public class TilesCache<T extends Tile> {
          return elevations;
      }
 
+    /** Create a corner zipper tile
+     * @param zipperCorner zipper tile point at minimum latitude and minimum longitude
+     * @param zipperLatStep latitude step (rad)
+     * @param zipperLonStep longitude step (rad)
+     * @param currentTile current tile
+     * @param belowLeftTile below left tile
+     * @param aboveLeftTile above left tile
+     * @param belowRightTile below right tile
+     * @param aboveRightTile above right tile
+     * @return corner zipper tile
+     * @since X.x
+     */
     private T createCornerZipper(final GeodeticPoint zipperCorner,
                                  final double zipperLatStep, final double zipperLonStep,
                                  final T currentTile,
@@ -563,7 +696,9 @@ public class TilesCache<T extends Tile> {
         final int zipperLonCols = 4;
         double[][] elevations = new double[zipperLatRows][zipperLonCols];
         
-        // rows 0 and 1 of zipper: 2 first cells belong to the below left tile and 2 last cells to the below right tile
+        // rows 0 and 1 of zipper: 
+        // 2 first cells belong to the below left tile and 2 last cells to the below right tile
+        
         // row 0
         elevations[0][0] = belowLeftTile.getElevationAtIndices(belowLeftTile.getLatitudeRows() - 2, belowLeftTile.getLongitudeColumns() - 2);
         elevations[0][1] = belowLeftTile.getElevationAtIndices(belowLeftTile.getLatitudeRows() - 2, belowLeftTile.getLongitudeColumns() - 1);
@@ -578,7 +713,9 @@ public class TilesCache<T extends Tile> {
         elevations[1][2] = belowRightTile.getElevationAtIndices(belowRightTile.getLatitudeRows() - 1, 0);
         elevations[1][3] = belowRightTile.getElevationAtIndices(belowRightTile.getLatitudeRows() - 1, 1);
         
-        // rows 2 and 3 of zipper: 2 first cells belong to the above left tile and 2 last cells to the above right tile
+        // rows 2 and 3 of zipper: 
+        // 2 first cells belong to the above left tile and 2 last cells to the above right tile
+        
         // row 2
         elevations[2][0] = aboveLeftTile.getElevationAtIndices(0, aboveLeftTile.getLongitudeColumns() - 2);
         elevations[2][1] = aboveLeftTile.getElevationAtIndices(0, aboveLeftTile.getLongitudeColumns() - 1);
@@ -604,8 +741,15 @@ public class TilesCache<T extends Tile> {
         return cornerZipperTile;
     }
     
-   private T createCornerZipperNorthWest(final double latitude, final double longitude, final T currentTile) {
-        
+    /** Create the North West corner zipper tile 
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
+     * @param currentTile current tile
+     * @return the North West corner zipper tile 
+     * @since X.x
+    */
+    private T createCornerZipperNorthWest(final double latitude, final double longitude, final T currentTile) {
+
         final int latitudeRows = currentTile.getLatitudeRows();
         final int longitudeCols = currentTile.getLongitudeColumns();
         final double latStep = currentTile.getLatitudeStep();
@@ -642,7 +786,14 @@ public class TilesCache<T extends Tile> {
 
     }
    
-   private T createCornerZipperNorthEast(final double latitude, final double longitude, final T currentTile) {
+    /** Create the North East corner zipper tile 
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
+     * @param currentTile current tile
+     * @return the North East corner zipper tile 
+     * @since X.x
+     */
+    private T createCornerZipperNorthEast(final double latitude, final double longitude, final T currentTile) {
        
        final int latitudeRows = currentTile.getLatitudeRows();
        final int longitudeCols = currentTile.getLongitudeColumns();
@@ -679,7 +830,14 @@ public class TilesCache<T extends Tile> {
                                  currentTile, belowLeftTile, aboveLeftTile, belowRightTile, aboveRightTile);
    }
    
-   private T createCornerZipperSouthWest(final double latitude, final double longitude, final T currentTile) {
+    /** Create the South West corner zipper tile 
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
+     * @param currentTile current tile
+     * @return the South West corner zipper tile 
+     * @since X.x
+     */
+    private T createCornerZipperSouthWest(final double latitude, final double longitude, final T currentTile) {
        
        final int latitudeRows = currentTile.getLatitudeRows();
        final int longitudeCols = currentTile.getLongitudeColumns();
@@ -716,7 +874,14 @@ public class TilesCache<T extends Tile> {
                                  currentTile, belowLeftTile, aboveLeftTile, belowRightTile, aboveRightTile);
    }
 
-  private T createCornerZipperSouthEast(final double latitude, final double longitude, final T currentTile) {
+    /** Create the South East corner zipper tile 
+     * @param latitude ground point latitude (rad)
+     * @param longitude ground point longitude (rad)
+     * @param currentTile current tile
+     * @return the South East corner zipper tile 
+     * @since X.x
+     */
+    private T createCornerZipperSouthEast(final double latitude, final double longitude, final T currentTile) {
        
        final int latitudeRows = currentTile.getLatitudeRows();
        final int longitudeCols = currentTile.getLongitudeColumns();
@@ -753,22 +918,23 @@ public class TilesCache<T extends Tile> {
                                  currentTile, belowLeftTile, aboveLeftTile, belowRightTile, aboveRightTile);
    }
   
-  /**
-   * Create the tile in intercardinal direction of the current Tile i.e. NW, NE, SW, SE
-   * @param latitudeHemisphere
-   * @param minLat
-   * @param latitudeRows
-   * @param latStep
-   * @param longitudeHemisphere
-   * @param minLon
-   * @param longitudeCols
-   * @param lonStep
-   * @return
-   */
-  private T createIntercardinalTile(final EarthHemisphere latitudeHemisphere, 
-                                    final double minLat, final int latitudeRows, final double latStep,
-                                    final EarthHemisphere longitudeHemisphere,
-                                    final double minLon, final int longitudeCols, final double lonStep) {
+    /**
+     * Create the tile in intercardinal direction of the current Tile i.e. NW, NE, SW, SE
+     * @param latitudeHemisphere hemisphere for latitude: NORTH / SOUTH
+     * @param minLat latitude minimum for the tile (rad)
+     * @param latitudeRows latitude rows
+     * @param latStep latitude step (rad)
+     * @param longitudeHemisphere hemisphere for longitude : WEST / EAST
+     * @param minLon longitude minimum for the tile (rad)
+     * @param longitudeCols longitude columns
+     * @param lonStep longitude step (rad)
+     * @return the tile in intercardinal direction
+     * @since X.x
+     */
+    private T createIntercardinalTile(final EarthHemisphere latitudeHemisphere, 
+                                      final double minLat, final int latitudeRows, final double latStep,
+                                      final EarthHemisphere longitudeHemisphere,
+                                      final double minLon, final int longitudeCols, final double lonStep) {
 
       // lonHemisphere = +1 : East or = -1 : West
       int lonHemisphere;
@@ -805,10 +971,22 @@ public class TilesCache<T extends Tile> {
   }
 
   
-  private GeodeticPoint computeZipperOrigin(final EarthHemisphere latitudeHemisphere, 
-                                            final double minLat, final int latitudeRows, final double latStep,
-                                            final EarthHemisphere longitudeHemisphere,
-                                            final double minLon, final int longitudeCols, final double lonStep) {
+    /** Compute the zipper tile origin
+     * @param latitudeHemisphere latitude hemisphere
+     * @param minLat zipper tile latitude origin (rad)
+     * @param latitudeRows latitude rows
+     * @param latStep latitude step (rad)
+     * @param longitudeHemisphere longitude hemisphere
+     * @param minLon zipper tile longitude origin (rad)
+     * @param longitudeCols longitude columns
+     * @param lonStep longitude step (rad)
+     * @return zipper tile origin point
+     * @since X.x
+     */
+    private GeodeticPoint computeZipperOrigin(final EarthHemisphere latitudeHemisphere, 
+                                              final double minLat, final int latitudeRows, final double latStep,
+                                              final EarthHemisphere longitudeHemisphere,
+                                              final double minLon, final int longitudeCols, final double lonStep) {
       
       double addLon;
       switch (longitudeHemisphere) {
@@ -843,18 +1021,19 @@ public class TilesCache<T extends Tile> {
   }
   
     /** Create the Northern or Southern tile of a given tile defined by minLat, longitude, latitudeRows and latStep
-     * @param earthHemisphere
-     * @param longitude
-     * @param minLat
-     * @param latitudeRows
-     * @param latStep
-     * @return
+     * @param latitudeHemisphere latitude hemisphere
+     * @param longitude longitude to define the tile (rad)
+     * @param minLat minimum latitude to define the tile (rad)
+     * @param latitudeRows latitude rows
+     * @param latStep latitude step (rad)
+     * @return North or South tile according to the Earth hemisphere
+     * @since X.x
      */
-    private T createNorthOrSouthTile(final EarthHemisphere earthHemisphere, final double longitude, 
+    private T createNorthOrSouthTile(final EarthHemisphere latitudeHemisphere, final double longitude, 
                                      final double minLat, final int latitudeRows, final double latStep) {
         // hemisphere = +1 : North or = -1 : South
         int hemisphere;
-        switch (earthHemisphere) {
+        switch (latitudeHemisphere) {
         case NORTH:
             hemisphere = +1;
             break;
@@ -872,18 +1051,19 @@ public class TilesCache<T extends Tile> {
     
     
     /** Create the Eastern or Western tile of a given tile defined by latitude, minLon, longitudeCols and lonStep
-     * @param earthHemisphere
-     * @param latitude
-     * @param minLon
-     * @param longitudeCols
-     * @param lonStep
-     * @return
+     * @param longitudeHemisphere longitude hemisphere
+     * @param latitude latitude to define the tile (rad)
+     * @param minLon minimum longitude to define the tile (rad)
+     * @param longitudeCols longitude columns
+     * @param lonStep longitude step (rad)
+     * @return East or West tile  tile according to the Earth hemisphere
+     * @since X.x
      */
-    private T createEastOrWestTile(final EarthHemisphere earthHemisphere, final double latitude, 
+    private T createEastOrWestTile(final EarthHemisphere longitudeHemisphere, final double latitude, 
                                    final double minLon, final int longitudeCols, final double lonStep) {
         // hemisphere = +1 : East or = -1 : West
         int hemisphere;
-        switch (earthHemisphere) {
+        switch (longitudeHemisphere) {
         case EAST:
             hemisphere = +1;
             break;
@@ -950,6 +1130,7 @@ public class TilesCache<T extends Tile> {
                 "\n");
     }
 
+    // TODO GP AFAC
     private void printTileFile(final Tile tile, String prefix) {   
         String tileFileName = prefix + (int) FastMath.toDegrees(tile.getMinimumLatitude()) + 
                 "_lon_" + (int) FastMath.toDegrees(tile.getMinimumLongitude()) + ".txt";

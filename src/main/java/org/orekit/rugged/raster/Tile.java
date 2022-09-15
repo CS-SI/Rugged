@@ -289,6 +289,8 @@ public interface Tile extends UpdatableTile {
      */
     Location getLocation(double latitude, double longitude);
 
+    
+    // TODO GP check if useful ...
     /** Get tile neighborhood (in case the DEM tiles are not overlapping).
      * <p>
      * TBN: used to create zipper tiles in case of DEM with tiles not overlapping.
