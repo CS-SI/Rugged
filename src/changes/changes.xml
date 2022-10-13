@@ -24,6 +24,9 @@
       <action dev="guylaine" type="update" issue="392">
         Fixed light time correction in atmospheric refraction computation.
       </action>
+      <action dev="guylaine" type="update">
+        Updated dependencies to Orekit 11.2.1 (and Hipparchus 2.1 ).
+      </action>
     </release>
     <release version="3.0" date="2022-07-05" description="This is a major release.
     It fixes a few bugs.
