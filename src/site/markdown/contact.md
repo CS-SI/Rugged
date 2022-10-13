@@ -46,7 +46,7 @@ please use the following address:
     31506 Toulouse Cedex 5
     FRANCE
 
-    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Jonathan Guinet)
+    phone: +33 5-61-17-66-66 (ask for Jonathan Guinet or Guylaine Prat)
 
 
 [Top of the page](#top)
