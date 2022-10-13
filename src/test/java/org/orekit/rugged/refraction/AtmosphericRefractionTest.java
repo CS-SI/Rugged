@@ -67,6 +67,7 @@ public class AtmosphericRefractionTest {
         int dimension = 4000;
 
         RuggedBuilder builder = initRuggedForAtmosphericTests(dimension, sensorName);
+
         // Build Rugged without atmospheric refraction model
         Rugged ruggedWithout = builder.build();
         
@@ -93,7 +94,7 @@ public class AtmosphericRefractionTest {
 
         final double epsilonPixel = pixelThreshold;
         final double epsilonLine = lineThreshold;
-        double earthRadius = ruggedWithout.getEllipsoid().getEquatorialRadius();
+        final double earthRadius = ruggedWithout.getEllipsoid().getEquatorialRadius();
 
         // Direct loc on a line WITHOUT and WITH atmospheric correction
         // ============================================================
@@ -315,6 +316,72 @@ public class AtmosphericRefractionTest {
         SensorPixel pixel = ruggedWithCustomMargin.inverseLocation(sensor.getName(), point, 0, maxLine);
         Assert.assertTrue(pixel != null);
 
+    }
+    
+    /**
+     * Test for issue #392
+     */
+    @Test
+    public void testLightTimeCorrection() throws URISyntaxException  {
+        
+        String sensorName = "line";
+        int dimension = 4000;
+
+        RuggedBuilder builder = initRuggedForAtmosphericTests(dimension, sensorName);
+        
+        // Build Rugged without atmospheric refraction but with light time correction
+        builder.setLightTimeCorrection(true);
+        Rugged ruggedWithLightTimeWithoutRefraction = builder.build();
+
+        // Defines atmospheric refraction model (with the default multi layers model)
+        AtmosphericRefraction atmosphericRefraction = new MultiLayerModel(builder.getEllipsoid());
+        int pixelStep = 100;
+        int lineStep = 100;
+        atmosphericRefraction.setGridSteps(pixelStep, lineStep);
+
+        // Add atmospheric refraction model
+        builder.setRefractionCorrection(atmosphericRefraction);
+
+        // Build Rugged without light time correction (with atmospheric refraction)
+        builder.setLightTimeCorrection(false);
+        Rugged ruggedWithoutLightTime = builder.build();
+        
+        // Build Rugged with light time correction (with atmospheric refraction)
+        builder.setLightTimeCorrection(true);
+        Rugged ruggedWithLightTime = builder.build();
+
+
+        // Compare direct loc on a line :
+        // * with atmospheric refraction, WITHOUT and WITH light time correction:
+        //   distance on ground must be not null and < 1.2 m (max shift at equator for orbit at 800km)
+        // * with light time correction, WITHOUT and WITH atmospheric refraction
+        //   distance on ground must be not null and < 2 m (max shift due to atmospheric refraction)
+        // =========================================================================================
+        double chosenLine = 200.;
+        GeodeticPoint[] gpWithoutLightTime = ruggedWithoutLightTime.directLocation(sensorName, chosenLine);
+        GeodeticPoint[] gpWithLightTime = ruggedWithLightTime.directLocation(sensorName, chosenLine);
+        
+        GeodeticPoint[] gpWithLightTimeWithoutRefraction = ruggedWithLightTimeWithoutRefraction.directLocation(sensorName, chosenLine);
+        
+        double earthRadius = builder.getEllipsoid().getEquatorialRadius();
+
+        // Check the shift on the ground
+        for (int i = 0; i < gpWithLightTime.length; i++) {
+            
+            double currentRadius = earthRadius + (gpWithLightTime[i].getAltitude() + gpWithoutLightTime[i].getAltitude())/2.;
+            // Compute distance between point (with atmospheric refraction) with light time correction and without
+            double distance = GeodeticUtilities.computeDistanceInMeter(currentRadius, gpWithLightTime[i], gpWithoutLightTime[i]);
+
+            // Check if the distance is not 0 and < 1.2m (at equator max of shift)
+            Assert.assertTrue(distance > 0.0);
+            Assert.assertTrue(distance <= 1.2);
+            
+            // Compute distance between point (with light time correction) with refraction and without refraction
+            distance = GeodeticUtilities.computeDistanceInMeter(currentRadius, gpWithLightTime[i], gpWithLightTimeWithoutRefraction[i]);
+            // Check if the distance is not 0  and < 2m
+            Assert.assertTrue(distance > 0.0);
+            Assert.assertTrue(distance < 2.);
+        }
     }
 
     @Test
