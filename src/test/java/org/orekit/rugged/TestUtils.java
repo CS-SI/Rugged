@@ -217,6 +217,8 @@ public class TestUtils {
         //  gravity.field.order                 = 12
         AbsoluteDate date = new AbsoluteDate("2012-01-01T00:00:00.000", TimeScalesFactory.getUTC());
         Frame eme2000 = FramesFactory.getEME2000();
+        
+        // Observation satellite about 800km above ground
         return new CircularOrbit(7173352.811913891,
                                  -4.029194321683225E-4, 0.0013530362644647786,
                                  FastMath.toRadians(98.63218182243709),
