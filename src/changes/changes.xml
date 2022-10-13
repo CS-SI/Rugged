@@ -21,6 +21,9 @@
   </properties>
   <body>
     <release version="3.1" date="TBD" description="TBD">
+      <action dev="guylaine" type="update" issue="392">
+        Fixed light time correction in atmospheric refraction computation.
+      </action>
     </release>
     <release version="3.0" date="2022-07-05" description="This is a major release.
     It fixes a few bugs.
