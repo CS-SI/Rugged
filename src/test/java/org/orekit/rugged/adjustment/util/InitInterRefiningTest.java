@@ -110,14 +110,14 @@ public class InitInterRefiningTest {
             // Initialize refining context
             // ---------------------------
             final String sensorNameA = "SensorA";
-            final double incidenceAngleA = -5.0;
+            final double rollAngleA = -5.0;
             final String dateA = "2016-01-01T11:59:50.0";
-            this.pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
+            this.pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, rollAngleA, dateA);
 
             final String sensorNameB = "SensorB";
-            final double incidenceAngleB = 0.0;
+            final double rollAngleB = 0.0;
             final String dateB = "2016-01-01T12:02:50.0";
-            this.pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
+            this.pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, rollAngleB, dateB);
 
             PleiadesOrbitModel orbitmodelA =  new PleiadesOrbitModel();
             PleiadesOrbitModel orbitmodelB =  new PleiadesOrbitModel();
