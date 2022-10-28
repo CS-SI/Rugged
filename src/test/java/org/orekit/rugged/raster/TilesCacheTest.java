@@ -18,19 +18,31 @@ package org.orekit.rugged.raster;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Map;
 
+import org.hipparchus.exception.DummyLocalizable;
 import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
+import org.hipparchus.util.MathUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.orekit.rugged.errors.RuggedException;
 
 /**
  * @author Luc Maisonobe
@@ -178,396 +190,235 @@ public class TilesCacheTest {
 
         // Simple SRTM with 2 elevations
         final int rowCols = 1000;
-//        final int rowCols = 6000;
-        final double tileSizeDeg = 5.;
-        DummySRTMsimpleElevationUpdater srtmUpdater = new DummySRTMsimpleElevationUpdater(tileSizeDeg, rowCols, 10.0, 20.0);
-        final double rasterStepDeg = srtmUpdater.getTileStepDeg(); // 1./1200.;
+        DummySRTMsimpleElevationUpdater srtmUpdater = new DummySRTMsimpleElevationUpdater(rowCols, 10.0, 20.0);
         
-//        // Complex SRTM with random values
-//        final int rowCols = 4097; // power of 2 + 1
-//        final double tileSizeDeg = 5.;
-//        DummySRTMelevationUpdater srtmUpdater = new DummySRTMelevationUpdater(tileSizeDeg, rowCols, 800.0, 9000.0, 0.1, 0xf0a401650191f9f6l);
-//        final double rasterStepDeg = srtmUpdater.getTileStepDeg(); // 1./1200.;
-        
-//        org.gdal.gdal.gdal.AllRegister();
-//
-        //        String demRootDir =  "/home/guylaine/RuggedProject/demReader/data/DEM/extract";
-        //        fr.cssi.demreader.raster.RasterFilesHandler rasterFile = new fr.cssi.demreader.raster.SrtmDt1FileHandler(demRootDir);
-        //        fr.cssi.demreader.raster.DemReaderTileUpdater srtmUpdater = null;
-        //        if (rasterFile.findRasterFile()) {
-        //            srtmUpdater = fr.cssi.demreader.raster.RasterHandler.initRasterHandler(rasterFile);
-        //        } else {
-        //            String str = "Raster files of type .dt1 not found in " + demRootDir;
-        //            DummyLocalizable message = new DummyLocalizable(str);
-        //            throw new RuggedException(message);
-        //        }
-        //        // from gdalinfo
-        //        final int rowCols = 1201;
-        //        final double rasterStepDeg = 0.000833333333333;
-        //        final double tileSizeDeg = rasterStepDeg * rowCols;
+        final double tileSizeDeg = srtmUpdater.getTileSizeDeg();
+        final double rasterStepDeg = srtmUpdater.getTileStepDeg();
+        System.out.println("Default size: " + srtmUpdater.getTileSizeDeg() + " step " + srtmUpdater.getTileStepDeg());
 
-       
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+
         double epsilonLatLon = 1.e-5;
+        double latTileDeg;
+        double lonTileDeg;
         double latDeg;
         double lonDeg;
-        SimpleTile zipperTile;
-        
-        // North-East hemisphere 
+
+        // North-East hemisphere  
         // =====================
-        System.out.println("#################################");
+        System.out.println("\n\n#################################");
         System.out.println("NORTH EAST hemisphere");
-        latDeg = 37.1;
-        lonDeg = 17.5;
-        //        // méditerannée 
-        //        latDegVO = 37.1;
-        //        lonDegVO = 17.5;
-        //        // zone montagneuse italie
-        //        latDegVO = 46.1;
-        //        lonDegVO = 12.5;
-                // plaine france
-//                latDegVO = 46.1;
-//                lonDegVO = 12.5;
-                // search the tile
-//                latDeg = latDegVO;
-//                lonDeg = lonDegVO;
+        latTileDeg = 47.;
+        lonTileDeg = 12.3;
 
-
-
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
-        SimpleTile tileNE = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-        printTileInfo(tileNE, rasterStepDeg, rasterStepDeg);
-        
-        if (rowCols == 6000) checkLatLonIndex(latDeg, 2519, lonDeg, 2999, 77.729902, tileNE);
-
-//        +        tileName = "lat" + Double.toString(latDeg) + "lon" + Double.toString(lonDeg) + ".txt";
-//        +        stepPrint = 1;
-//        +        stepPrintZipper = 1;
-//        +        nbRowColForPrint = 10;
-//        +        //      printTileData(tileName, tileNE, stepPrint);
-//        +        //      printExtractTileData(tileName, tileNE, stepPrint, tileNE.getLatitudeRows() - nbRowColForPrint, tileNE.getLatitudeRows(), 0, tileNE.getLongitudeColumns());
-//        +        printEdgeTileData(tileName, tileNE, stepPrint, tileNE.getLatitudeRows(), tileNE.getLongitudeColumns(), nbRowColForPrint);
-//        +        printSurroundingTiles(latDeg, lonDeg, tileSizeDeg, rasterStepDeg, cache, stepPrint, nbRowColForPrint);
+        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+        SimpleTile tileNEhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
         // Latitude North of the tile
         System.out.println("##### Bord de tuile au niveau latitude North #####");
-        latDeg = getNorthernEdgeOfTile(tileNE);
-        lonDeg = 17.5;
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
-
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-                39.99875, 40.00125, 15.00042, 19.99958,
-                1, 2999,  82.248141);
-
-//      String zipperName = "zipperNorthLatitude.txt";
-//      printTileData(zipperName, zipperTile, stepPrintZipper);
+        latDeg = getNorthernEdgeOfTile(tileNEhemisphere);
+        lonDeg = lonTileDeg;
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Latitude South of the tile
         System.out.println("#### Bord de tuile au niveau latitude South #####");
-        latDeg = getSouthernEdgeOfTile(tileNE);
-        lonDeg = 17.5;
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = getSouthernEdgeOfTile(tileNEhemisphere);
+        lonDeg = lonTileDeg;
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-                34.99875, 35.00125, 15.00042, 19.99958,
-                1, 2999,  73.224625);
-
-        //      zipperName = "zipperSouthLatitude.txt";
-//      printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Longitude West of the tile
         System.out.println("#### Bord de tuile au niveau longitude West #####");
-        latDeg = 37.1;
-        lonDeg = getWesternEdgeOfTile(tileNE);
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = latTileDeg;
+        lonDeg = getWesternEdgeOfTile(tileNEhemisphere);
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-                35.00042, 39.99958, 14.99875, 15.00125,
-                2519, 1,  90.134193);
-
-//        zipperName = "zipperWestLongitude.txt";
-//        printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Longitude East of the tile
         System.out.println("#### Bord de tuile au niveau longitude East #####");
-        latDeg = 37.1;
-        lonDeg = getEasternEdgeOfTile(tileNE);
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST,tileNE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = latTileDeg;
+        lonDeg = getEasternEdgeOfTile(tileNEhemisphere);
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-                35.00042, 39.99958, 19.99875, 20.00125,
-                2519, 1,  63.887513);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST,tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
-//        zipperName = "zipperEastLongitude.txt";
-//        printTileData(zipperName, zipperTile, stepPrintZipper);
-        
         // Check the 4 corner zipper tiles
-        check4cornersZipperTiles(tileNE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        check4cornersZipperTiles(tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // South-East hemisphere 
         // =====================
-        System.out.println("#################################");
+        System.out.println("\n\n#################################");
         System.out.println("SOUTH EAST hemisphere");
-        
-        latDeg = -37.1;
-        lonDeg = 17.5;
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
-        SimpleTile tileSE = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-        printTileInfo(tileSE, rasterStepDeg, rasterStepDeg);
-        
-//        if (rowCols == 6000) checkLatLonIndex(latDeg, 3479, lonDeg, 2999,  -307.157295, tileSE);
 
-//        String tileName = "lat" + Double.toString(latDeg) + "lon" + Double.toString(lonDeg) + ".txt";
-//        int stepPrint = 1;
-//        int stepPrintZipper = 1;
-//        int nbRowColForPrint = 10;
-////        printTileData(tileName, tileNE, stepPrint);
-////        printExtractTileData(tileName, tileNE, stepPrint, tileNE.getLatitudeRows() - nbRowColForPrint, tileNE.getLatitudeRows(), 0, tileNE.getLongitudeColumns());
-//        printEdgeTileData(tileName, tileSE, stepPrint, tileSE.getLatitudeRows(), tileSE.getLongitudeColumns(), nbRowColForPrint);
-//        printSurroundingTiles(latDeg, lonDeg, tileSizeDeg, rasterStepDeg, cache, stepPrint, nbRowColForPrint);
+        latTileDeg = -16.2;
+        lonTileDeg = 22.3;
+        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+        SimpleTile tileSEhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
-//        +        tileName = "lat" + Double.toString(latDeg) + "lon" + Double.toString(lonDeg) + ".txt";
-//        +        stepPrint = 1;
-//        +        stepPrintZipper = 1;
-//        +        nbRowColForPrint = 10;
-//        +        //        printTileData(tileName, tileNE, stepPrint);
-//        +        //        printExtractTileData(tileName, tileNE, stepPrint, tileNE.getLatitudeRows() - nbRowColForPrint, tileNE.getLatitudeRows(), 0, tileNE.getLongitudeColumns());
-//        +        printEdgeTileData(tileName, tileSE, stepPrint, tileSE.getLatitudeRows(), tileSE.getLongitudeColumns(), nbRowColForPrint);
-//        +        printSurroundingTiles(latDeg, lonDeg, tileSizeDeg, rasterStepDeg, cache, stepPrint, nbRowColForPrint);
+        printTileInfo(tileSEhemisphere, rasterStepDeg, rasterStepDeg);
 
         // Latitude North of the tile
         System.out.println("##### Bord de tuile au niveau latitude North #####");
-        latDeg = getNorthernEdgeOfTile(tileSE);
-        lonDeg = 17.5;
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = getNorthernEdgeOfTile(tileSEhemisphere);
+        lonDeg = lonTileDeg;
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-                -35.00125, -34.99875, 15.00042, 19.99958,
-                1, 2999, -302.652423);
-
-//        String zipperName = "zipperNorthLatitude.txt";
-//        printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Latitude South of the tile
         System.out.println("#### Bord de tuile au niveau latitude South #####");
-        latDeg = getSouthernEdgeOfTile(tileSE);
-        lonDeg = 17.5;
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = getSouthernEdgeOfTile(tileSEhemisphere);
+        lonDeg = lonTileDeg;
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-                -40.00125, -39.99875, 15.00042, 19.99958,
-                1, 2999, -327.258708);
-        
-//        zipperName = "zipperSouthLatitude.txt";
-//        printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Longitude West of the tile
         System.out.println("#### Bord de tuile au niveau longitude West #####");
-        latDeg = -37.1;
-        lonDeg = getWesternEdgeOfTile(tileSE);
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = latTileDeg;
+        lonDeg = getWesternEdgeOfTile(tileSEhemisphere);
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-                -39.99958, -35.00042, 14.99875, 15.00125,
-                3479, 1, -292.441872);
-
-        //        zipperName = "zipperWestLongitude.txt";
-//        printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Longitude East of the tile
         System.out.println("#### Bord de tuile au niveau longitude East #####");
-        latDeg = -37.1;
-        lonDeg = getEasternEdgeOfTile(tileSE);
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileSE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
-
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-                -39.99958, -35.00042, 19.99875, 20.00125,
-                3479, 1, -320.999684);
-        
-        //        zipperName = "zipperEastLongitude.txt";
-        //        printTileData(zipperName, zipperTile, stepPrintZipper);
+        latDeg = latTileDeg;
+        lonDeg = getEasternEdgeOfTile(tileSEhemisphere);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Check the 4 corner zipper tiles
-        check4cornersZipperTiles(tileSE, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        check4cornersZipperTiles(tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // North-West hemisphere 
         // =====================
-        System.out.println("#################################");
+        System.out.println("\n\n#################################");
         System.out.println("NORTH WEST hemisphere");
-        latDeg = 37.1;
-        lonDeg = -17.5;
-        
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
-        SimpleTile tileNW = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-        printTileInfo(tileNW, rasterStepDeg, rasterStepDeg);
-        
-//        if (rowCols == 6000) checkLatLonIndex(latDeg, 2519, lonDeg, 2999,  76.790119, tileNW);
+        latTileDeg = 46.8;
+        lonTileDeg = -66.5; 
 
-//        +        tileName = "lat" + Double.toString(latDeg) + "lon" + Double.toString(lonDeg) + ".txt";
-//        +        stepPrint = 1;
-//        +        stepPrintZipper = 1;
-//        +        nbRowColForPrint = 10;
-//        +//        printTileData(tileName, tileNE, stepPrint);
-//        +//        printExtractTileData(tileName, tileNE, stepPrint, tileNE.getLatitudeRows() - nbRowColForPrint, tileNE.getLatitudeRows(), 0, tileNE.getLongitudeColumns());
-//        +        printEdgeTileData(tileName, tileNW, stepPrint, tileNW.getLatitudeRows(), tileNW.getLongitudeColumns(), nbRowColForPrint);
-//        +        printSurroundingTiles(latDeg, lonDeg, tileSizeDeg, rasterStepDeg, cache, stepPrint, nbRowColForPrint);
+        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+        SimpleTile tileNWhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+        printTileInfo(tileNWhemisphere, rasterStepDeg, rasterStepDeg);
 
         // Latitude North of the tile
         System.out.println("##### Bord de tuile au niveau latitude North #####");
-        latDeg = getNorthernEdgeOfTile(tileNW);
-        lonDeg = -17.5;
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = getNorthernEdgeOfTile(tileNWhemisphere);
+        lonDeg = lonTileDeg;
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-                39.99875, 40.00125, -19.99958, -15.00042,
-                1, 2999, 77.919679);
-
-//        +        zipperName = "zipperNorthLatitude.txt";
-//        +        printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Latitude South of the tile
         System.out.println("#### Bord de tuile au niveau latitude South #####");
-        latDeg = getSouthernEdgeOfTile(tileNW);
-        lonDeg = -17.5;
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = getSouthernEdgeOfTile(tileNWhemisphere);
+        lonDeg = lonTileDeg;
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-                34.99875, 35.00125, -19.99958, -15.00042,
-                1, 2999, 90.796560);
-        
-//        +        zipperName = "zipperSouthLatitude.txt";
-//        +        printTileData(zipperName, zipperTile, stepPrintZipper);
-
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Longitude West of the tile
         System.out.println("#### Bord de tuile au niveau longitude West #####");
-        latDeg = 37.1;
-        lonDeg = getWesternEdgeOfTile(tileNW);
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        latDeg = latTileDeg;
+        lonDeg = getWesternEdgeOfTile(tileNWhemisphere);
 
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-                35.00042, 39.99958, -20.00125, -19.99875,
-                2519, 1, 80.250639);
-        
-//        +        zipperName = "zipperWestLongitude.txt";
-//        +        printTileData(zipperName, zipperTile, stepPrintZipper);
-
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Longitude East of the tile
         System.out.println("#### Bord de tuile au niveau longitude East #####");
-        latDeg = 37.1;
-        lonDeg = getEasternEdgeOfTile(tileNW);
-        zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileNW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
-        
-        if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-                35.00042, 39.99958, -15.00125, -14.99875,
-                2519, 1, 73.111331);
-        
-//        +        zipperName = "zipperEastLongitude.txt";
-//        +        printTileData(zipperName, zipperTile, stepPrintZipper);
+        latDeg = latTileDeg;
+        lonDeg = getEasternEdgeOfTile(tileNWhemisphere);
 
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
         // Check the 4 corner zipper tiles
-        check4cornersZipperTiles(tileNW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        check4cornersZipperTiles(tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
-      // South-West hemisphere 
-      // =====================
-      System.out.println("#################################");
-      System.out.println("SOUTH WEST hemisphere");
-      
-      latDeg = -37.1;
-      lonDeg = -17.5;
-      System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
-      SimpleTile tileSW = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-      printTileInfo(tileSW, rasterStepDeg, rasterStepDeg);
-      
-      if (rowCols == 6000) checkLatLonIndex(latDeg, 3479, lonDeg, 2999,  -64.1245445, tileSW);
+        // South-West hemisphere 
+        // =====================
+        System.out.println("\n\n#################################");
+        System.out.println("SOUTH WEST hemisphere");
 
-//      +      tileName = "lat" + Double.toString(latDeg) + "lon" + Double.toString(lonDeg) + ".txt";
-//      +      stepPrint = 1;
-//      +      stepPrintZipper = 1;
-//      +      nbRowColForPrint = 10;
-//      +//      printTileData(tileName, tileNE, stepPrint);
-//      +//      printExtractTileData(tileName, tileNE, stepPrint, tileNE.getLatitudeRows() - nbRowColForPrint, tileNE.getLatitudeRows(), 0, tileNE.getLongitudeColumns());
-//      +      printEdgeTileData(tileName, tileSW, stepPrint, tileSW.getLatitudeRows(), tileSW.getLongitudeColumns(), nbRowColForPrint);
-//      +      printSurroundingTiles(latDeg, lonDeg, tileSizeDeg, rasterStepDeg, cache, stepPrint, nbRowColForPrint);
+        latTileDeg = -28.8  ;
+        lonTileDeg = -58.4; 
+        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+        SimpleTile tileSWhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+        printTileInfo(tileSWhemisphere, rasterStepDeg, rasterStepDeg);
 
-      // Latitude North of the tile
-      System.out.println("##### Bord de tuile au niveau latitude North #####");
-      latDeg = getNorthernEdgeOfTile(tileSW);
-      lonDeg = -17.5;
-      zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        // Latitude North of the tile
+        System.out.println("##### Bord de tuile au niveau latitude North #####");
+        latDeg = getNorthernEdgeOfTile(tileSWhemisphere);
+        lonDeg = lonTileDeg;
 
-      if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-              -35.00125, -34.99875, -19.99958, -15.000416,
-              1, 2999, -60.408025);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
-//      +      zipperName = "zipperNorthLatitude.txt";
-//      +      printTileData(zipperName, zipperTile, stepPrintZipper);
+        // Latitude South of the tile
+        System.out.println("#### Bord de tuile au niveau latitude South #####");
+        latDeg = getSouthernEdgeOfTile(tileSWhemisphere);
+        lonDeg = lonTileDeg;
 
-      // Latitude South of the tile
-      System.out.println("#### Bord de tuile au niveau latitude South #####");
-      latDeg = getSouthernEdgeOfTile(tileSW);
-      lonDeg = -17.5;
-      zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
-      if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, 4, rowCols, epsilonLatLon,
-              -40.00125, -39.99875, -19.99958, -15.000417,
-              1, 2999, -67.851618);
-      
-//      +      zipperName = "zipperSouthLatitude.txt";
-//      +      printTileData(zipperName, zipperTile, stepPrintZipper);
+        // Longitude West of the tile
+        System.out.println("#### Bord de tuile au niveau longitude West #####");
+        latDeg = latTileDeg;
+        lonDeg = getWesternEdgeOfTile(tileSWhemisphere);
 
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
-      // Longitude West of the tile
-      System.out.println("#### Bord de tuile au niveau longitude West #####");
-      latDeg = -37.1;
-      lonDeg = getWesternEdgeOfTile(tileSW);
-      zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        // Longitude East of the tile
+        System.out.println("#### Bord de tuile au niveau longitude East #####");
+        latDeg = latTileDeg;
+        lonDeg = getEasternEdgeOfTile(tileSWhemisphere);
 
-      if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-              -39.99958, -35.00042, -20.00125, -19.99875,
-              3479, 1, -51.107712);
-      
-//      +      zipperName = "zipperWestLongitude.txt";
-//      +      printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
 
+        // Check the 4 corner zipper tiles
+        check4cornersZipperTiles(tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+        
+        // Anti meridians  (180 degrees W/E)
+        // =====================
+        System.out.println("\n\n#################################");
+        System.out.println("Anti meridien test (180 degre East)");
+        // tile SRTM 72/16: 175 - 180 East / 15 - 20 South  
+        latTileDeg = -18.;
+        lonTileDeg = 178.;
+        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+        SimpleTile tileAntiMeridianEast = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
-      // Longitude East of the tile
-      System.out.println("#### Bord de tuile au niveau longitude East #####");
-      latDeg = -37.1;
-      lonDeg = getEasternEdgeOfTile(tileSW);
-      zipperTile = searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileSW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
- 
-      if (rowCols == 6000) checkOneValueZipperTile(latDeg, lonDeg, zipperTile, rowCols, 4, epsilonLatLon,
-              -39.99958, -35.00042, -15.00125, -14.998750,
-              3479, 1, -76.264544);
+        // Longitude East of the tile
+        System.out.println("#### Bord de tuile au niveau longitude East #####");
+        latDeg = latTileDeg;
+        lonDeg = getEasternEdgeOfTile(tileAntiMeridianEast);
 
-//      +      zipperName = "zipperEastLongitude.txt";
-//      +      printTileData(zipperName, zipperTile, stepPrintZipper);
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST,tileAntiMeridianEast, tileSizeDeg, cache, epsilonLatLon);
 
-      // Check the 4 corner zipper tiles
-      check4cornersZipperTiles(tileSW, tileSizeDeg, rasterStepDeg, cache, epsilonLatLon);
+        System.out.println("#################################");
+        System.out.println("Anti meridien test (180 degre West)");
+        // tile SRTM 01/16: 175 - 180 West / 15 - 20 South  
+        latTileDeg = -18.;
+        lonTileDeg = -178.;
+        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+        SimpleTile tileAntiMeridianWest = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+
+        // Longitude West of the tile
+        System.out.println("#### Bord de tuile au niveau longitude West #####");
+        latDeg = latTileDeg;
+        lonDeg = getWesternEdgeOfTile(tileAntiMeridianWest);
+
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST,tileAntiMeridianWest, tileSizeDeg, cache, epsilonLatLon);
     }
 
+    
+    
 
     private SimpleTile searchAndVerifyZipperTile(double latDeg, double lonDeg, Tile.Location zipperLocation, SimpleTile tile, final double tileSizeDeg,
-            final double rasterStepDeg, TilesCache<SimpleTile> cache, double epsilonLatLon) {
+            TilesCache<SimpleTile> cache, double epsilonLatLon) {
  
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
-
         SimpleTile zipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
         
-        printTileInfo(zipperTile, rasterStepDeg, rasterStepDeg);
-
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), zipperTile);
         checkZipperTile(zipperTile, zipperLocation, tile, tileSizeDeg, cache, epsilonLatLon);
         
         return zipperTile;
     }
 
-    private void check4cornersZipperTiles(SimpleTile tile, final double tileSizeDeg, final double rasterStepDeg,
+    private void check4cornersZipperTiles(SimpleTile tile, final double tileSizeDeg,
                                           TilesCache<SimpleTile> cache, double epsilonLatLon) {
         double latDeg;
         double lonDeg;
@@ -580,7 +431,7 @@ public class TilesCacheTest {
         lonDeg = getWesternEdgeOfTile(tile);
         System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
+//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
 
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.NORTH_WEST, tile, tileSizeDeg, cache, epsilonLatLon);
@@ -591,7 +442,7 @@ public class TilesCacheTest {
         lonDeg = getEasternEdgeOfTile(tile);
         System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
+//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
 
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.NORTH_EAST, tile, tileSizeDeg, cache, epsilonLatLon);
@@ -602,7 +453,7 @@ public class TilesCacheTest {
         lonDeg = getWesternEdgeOfTile(tile);
         System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
+//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
 
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.SOUTH_WEST, tile, tileSizeDeg, cache, epsilonLatLon);
@@ -613,7 +464,7 @@ public class TilesCacheTest {
         lonDeg = getEasternEdgeOfTile(tile);
         System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
+//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
 
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.SOUTH_EAST, tile, tileSizeDeg, cache, epsilonLatLon);
@@ -933,47 +784,46 @@ public class TilesCacheTest {
                 assertEquals(rightELevation, zipperElevation, epsilonLatLon);
             }
         }
-
     }
 
-    final static double getNorthernEdgeOfTile(SimpleTile tile) {
+    private final static double getNorthernEdgeOfTile(SimpleTile tile) {
         double northernLatitudeForTile = getNorthernLatitudeForTile(tile);
         // Inside the northern row of latitude
         return northernLatitudeForTile - 0.1*FastMath.toDegrees(tile.getLatitudeStep());
     }
     
-    final static double getSouthernEdgeOfTile(SimpleTile tile) {
+    private final static double getSouthernEdgeOfTile(SimpleTile tile) {
       double southernLatitudeForTile = getSouthernLatitudeForTile(tile);
       // Inside the southern row of latitude
       return southernLatitudeForTile + 0.1*FastMath.toDegrees(tile.getLatitudeStep());
     }
 
-    final static double getWesternEdgeOfTile(SimpleTile tile) {
+    private final static double getWesternEdgeOfTile(SimpleTile tile) {
         double westernLongitudeForTile = getWesternLongitudeForTile(tile);
         // Inside the western column of longitude
         return westernLongitudeForTile + 0.1*FastMath.toDegrees(tile.getLongitudeStep());
     }
 
-    final static double getEasternEdgeOfTile(SimpleTile tile) {
+    private final static double getEasternEdgeOfTile(SimpleTile tile) {
         double easternLongitudeForTile = getEasternLongitudeForTile(tile);
         // Inside the eastern column of longitude
         return easternLongitudeForTile - 0.1*FastMath.toDegrees(tile.getLongitudeStep());
     }
     
     
-    final static double getNorthernLatitudeForTile(SimpleTile tile) {
+    private final static double getNorthernLatitudeForTile(SimpleTile tile) {
         return FastMath.toDegrees(tile.getMaximumLatitude()) + 0.5*FastMath.toDegrees(tile.getLatitudeStep());
     }
     
-    final static double getSouthernLatitudeForTile(SimpleTile tile) {
+    private final static double getSouthernLatitudeForTile(SimpleTile tile) {
         return FastMath.toDegrees(tile.getMinimumLatitude()) - 0.5*FastMath.toDegrees(tile.getLatitudeStep());
     }
 
-    final static double getWesternLongitudeForTile(SimpleTile tile) {
+    private final static double getWesternLongitudeForTile(SimpleTile tile) {
         return FastMath.toDegrees(tile.getMinimumLongitude()) - 0.5*FastMath.toDegrees(tile.getLongitudeStep());
     }
 
-    final static double getEasternLongitudeForTile(SimpleTile tile) {
+    private final static double getEasternLongitudeForTile(SimpleTile tile) {
         return FastMath.toDegrees(tile.getMaximumLongitude()) + 0.5*FastMath.toDegrees(tile.getLongitudeStep());
     }
 
@@ -1081,53 +931,585 @@ public class TilesCacheTest {
 //        +        printExtractTileData(tileName + "EastEdge", tile, stepPrint, 0, iLatMax, jLonMax - nbRowCols, jLonMax);
 
     }      
+    
+    /** Clean up of factory map
+     * @param factoryClass
+     */
+    private static void clearFactoryMaps(Class<?> factoryClass) {
+        try {
+            
+            for (Field field : factoryClass.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) &&
+                    Map.class.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    ((Map<?, ?>) field.get(null)).clear();
+                }
+            }
+        } catch (IllegalAccessException iae) {
+            Assert.fail(iae.getMessage());
+        }
+    }
+
+
+//    // Test for development purpose only: use a real DEM (SRTM)
+//    // Needs:
+//    // * install GDAL
+//    // * add in pom.xml
+//    // For <properties>:
+//    //    <!-- GDAL version -->
+//    //    <!--urugged.gdal.version>2.4.0</urugged.gdal.version-->
+//    //    <rugged.gdal.version>3.0.0</rugged.gdal.version>
+//    //    <!-- GDAL native library path -->
+//    //    <rugged.gdal.native.library.path>${env.GDAL_PATH}</rugged.gdal.native.library.path>
+//    // and for <dependencies>:
+//    //    <dependency>
+//    //      <groupId>org.gdal</groupId>
+//    //      <artifactId>gdal</artifactId>
+//    //      <version>${rugged.gdal.version}</version>
+//    //      <type>jar</type>
+//    //      <optional>false</optional>
+//    //      <scope>test</scope>
+//    //    </dependency>
+//    // * Get the following SRTM tiles (for instance from : http://dwtkns.com/srtm/
+//    //    01/{15,16}; 22/{02,03,04}; 23/{02,03,04}; 24/{02,03,04,17,18,19}; 25/{17,18,19}; 26/{17,18,19}; 
+//    //    38/{02,03,04}; 39/{02,03,04}; 40/{02,03,04,15,16,17}; 41/{15,16,17}; 42/{15,16,17}; 72/{15,16}
+//
+//    @Test
+//    @Ignore
+//    public void testRealSRTM() throws URISyntaxException, FileNotFoundException, UnsupportedEncodingException {
+//
+//        // Initialize GDAL
+//        org.gdal.gdal.gdal.AllRegister();
+//
+//        String demRootDir = "/home/guylaine/RuggedAndCo/rugged/dem-data/SRTM";
+//        SRTMElevationUpdater srtmUpdater = new SRTMElevationUpdater(demRootDir);
+//
+//        CountingFactory factory = new CountingFactory();
+//        TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+//
+//        double epsilonLatLon = 1.e-5;
+//        double latTileDeg;
+//        double lonTileDeg;
+//        double latDeg;
+//        double lonDeg;
+//
+//        // North-East hemisphere 
+//        // =====================
+//        System.out.println("#################################");
+//        System.out.println("NORTH EAST hemisphere");
+//        // tile SRTM: 45N - 50N / 10E-15E
+//        latTileDeg = 47.;
+//        lonTileDeg = 12.3;
+//
+//        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+//        SimpleTile tileNEhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+//        // same step and size in longitude and latitude
+//        double tileSizeDeg = FastMath.toDegrees(tileNEhemisphere.getLatitudeRows()*tileNEhemisphere.getLatitudeStep());
+//        double rasterStepDeg = FastMath.toDegrees(tileNEhemisphere.getLatitudeStep());
+//
+//
+//        // Latitude North of the tile
+//        System.out.println("##### Bord de tuile au niveau latitude North #####");
+//        latDeg = getNorthernEdgeOfTile(tileNEhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Latitude South of the tile
+//        System.out.println("#### Bord de tuile au niveau latitude South #####");
+//        latDeg = getSouthernEdgeOfTile(tileNEhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // Longitude West of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude West #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getWesternEdgeOfTile(tileNEhemisphere);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Longitude East of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude East #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getEasternEdgeOfTile(tileNEhemisphere);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST,tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Check the 4 corner zipper tiles
+//        check4cornersZipperTiles(tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // South-East hemisphere 
+//        // =====================
+//        // Cleanup
+//        clearFactoryMaps(CountingFactory.class);
+//        factory = new CountingFactory();
+//        cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+//
+//        System.out.println("#################################");
+//        System.out.println("SOUTH EAST hemisphere");
+//
+//        latTileDeg = -16.2;
+//        lonTileDeg = 22.3;
+//        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+//        SimpleTile tileSEhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+//        tileSizeDeg = FastMath.toDegrees(tileSEhemisphere.getLatitudeRows()*tileSEhemisphere.getLatitudeStep());
+//        rasterStepDeg = FastMath.toDegrees(tileSEhemisphere.getLatitudeStep());
+//
+//        printTileInfo(tileSEhemisphere, rasterStepDeg, rasterStepDeg);
+//
+//
+//        // Latitude North of the tile
+//        System.out.println("##### Bord de tuile au niveau latitude North #####");
+//        latDeg = getNorthernEdgeOfTile(tileSEhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Latitude South of the tile
+//        System.out.println("#### Bord de tuile au niveau latitude South #####");
+//        latDeg = getSouthernEdgeOfTile(tileSEhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Longitude West of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude West #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getWesternEdgeOfTile(tileSEhemisphere);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Longitude East of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude East #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getEasternEdgeOfTile(tileSEhemisphere);
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // Check the 4 corner zipper tiles
+//        check4cornersZipperTiles(tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // North-West hemisphere 
+//        // =====================
+//        // Cleanup
+//        clearFactoryMaps(CountingFactory.class);
+//        factory = new CountingFactory();
+//        cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+//
+//        System.out.println("#################################");
+//        System.out.println("NORTH WEST hemisphere");
+//        latTileDeg = 46.8;
+//        lonTileDeg = -66.5; 
+//
+//        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+//        SimpleTile tileNWhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+//        tileSizeDeg = FastMath.toDegrees(tileNWhemisphere.getLatitudeRows()*tileNWhemisphere.getLatitudeStep());
+//        rasterStepDeg = FastMath.toDegrees(tileNWhemisphere.getLatitudeStep());
+//        printTileInfo(tileNWhemisphere, rasterStepDeg, rasterStepDeg);
+//
+//
+//        // Latitude North of the tile
+//        System.out.println("##### Bord de tuile au niveau latitude North #####");
+//        latDeg = getNorthernEdgeOfTile(tileNWhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Latitude South of the tile
+//        System.out.println("#### Bord de tuile au niveau latitude South #####");
+//        latDeg = getSouthernEdgeOfTile(tileNWhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Longitude West of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude West #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getWesternEdgeOfTile(tileNWhemisphere);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Longitude East of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude East #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getEasternEdgeOfTile(tileNWhemisphere);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // Check the 4 corner zipper tiles
+//        check4cornersZipperTiles(tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // South-West hemisphere 
+//        // =====================
+//        // Cleanup
+//        clearFactoryMaps(CountingFactory.class);
+//        factory = new CountingFactory();
+//        cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+//
+//        System.out.println("#################################");
+//        System.out.println("SOUTH WEST hemisphere");
+//
+//        latTileDeg = -28.8  ;
+//        lonTileDeg = -58.4; 
+//        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+//        SimpleTile tileSWhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+//        tileSizeDeg = FastMath.toDegrees(tileSWhemisphere.getLatitudeRows()*tileSWhemisphere.getLatitudeStep());
+//        rasterStepDeg = FastMath.toDegrees(tileSWhemisphere.getLatitudeStep());
+//        printTileInfo(tileSWhemisphere, rasterStepDeg, rasterStepDeg);
+//
+//        // Latitude North of the tile
+//        System.out.println("##### Bord de tuile au niveau latitude North #####");
+//        latDeg = getNorthernEdgeOfTile(tileSWhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Latitude South of the tile
+//        System.out.println("#### Bord de tuile au niveau latitude South #####");
+//        latDeg = getSouthernEdgeOfTile(tileSWhemisphere);
+//        lonDeg = lonTileDeg;
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        // Longitude West of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude West #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getWesternEdgeOfTile(tileSWhemisphere);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // Longitude East of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude East #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getEasternEdgeOfTile(tileSWhemisphere);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//
+//        // Check the 4 corner zipper tiles
+//        check4cornersZipperTiles(tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon);
+//        
+//        // Cleanup
+//        clearFactoryMaps(CountingFactory.class);
+//        factory = new CountingFactory();
+//        cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+//
+//        // Anti meridians  (180 degrees W/E)
+//        // =====================
+//        // Cleanup
+//        clearFactoryMaps(CountingFactory.class);
+//        factory = new CountingFactory();
+//        cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+//
+//
+//        System.out.println("#################################");
+//        System.out.println("Anti meridien test (180 degre East)");
+//        // tile SRTM 72/16: 175 - 180 East / 15 - 20 South  
+//        latTileDeg = -18.;
+//        lonTileDeg = 178.;
+//        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+//        SimpleTile tileAntiMeridianEast = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+//        // same step and size in longitude and latitude
+//        tileSizeDeg = FastMath.toDegrees(tileAntiMeridianEast.getLatitudeRows()*tileAntiMeridianEast.getLatitudeStep());
+//        rasterStepDeg = FastMath.toDegrees(tileAntiMeridianEast.getLatitudeStep());
+//
+//        // Longitude East of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude East #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getEasternEdgeOfTile(tileAntiMeridianEast);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST,tileAntiMeridianEast, tileSizeDeg, cache, epsilonLatLon);
+//
+//
+//        System.out.println("#################################");
+//        System.out.println("Anti meridien test (180 degre West)");
+//        // tile SRTM 01/16: 175 - 180 West / 15 - 20 South  
+//        latTileDeg = -18.;
+//        lonTileDeg = -178.;
+//        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+//        SimpleTile tileAntiMeridianWest = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+//        // same step and size in longitude and latitude
+//        tileSizeDeg = FastMath.toDegrees(tileAntiMeridianWest.getLatitudeRows()*tileAntiMeridianWest.getLatitudeStep());
+//        rasterStepDeg = FastMath.toDegrees(tileAntiMeridianWest.getLatitudeStep());
+//
+//        // Longitude West of the tile
+//        System.out.println("#### Bord de tuile au niveau longitude West #####");
+//        latDeg = latTileDeg;
+//        lonDeg = getWesternEdgeOfTile(tileAntiMeridianWest);
+//
+//        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST,tileAntiMeridianWest, tileSizeDeg, cache, epsilonLatLon);
+//
+//    }
+    
+ 
 }
+
+
+
+//// Test for development purpose only: use a real DEM (SRTM)
+///**
+// * To read SRTM tiles (get from http://dwtkns.com/srtm/)
+// * The tiles are seamless = no overlapping 
+// */
+//class SRTMElevationUpdater implements TileUpdater {
+//    
+//    /** Last lat value used to ask to update a tile. */
+//    private double lastLat = Double.NaN;
+//
+//    /** Last lon value used to ask to update a tile. */
+//    private double lastLon = Double.NaN;
+//
+//    /** Nb times the same lat/lon value is used to ask to update a tile (used to avoid infinite loop). */
+//    private int nbCall = 0;
+//
+//    /** Nb time rugged ask exactly same DEM tile: means that infinite loop. */
+//    private static final int NB_TIME_ASK_SAME_TILE = 1000;
+//
+//    /** Raster root directory, should contains raster files. */
+//    private String rootDirectory;
+//
+//
+//    /**
+//     * Constructor.
+//     */
+//    public SRTMElevationUpdater(final String rootDirectory) {
+//        
+//        this.rootDirectory = rootDirectory;
+//        checkRasterDirectory(rootDirectory);
+//    }
+//    
+//    /** Update given tile using DEM elevation.
+//     * @param latitude latitude that must be covered by the tile (rad)
+//     * @param longitude longitude that must be covered by the tile (rad)
+//     * @param tile to update
+//     */
+//    @Override
+//    public void updateTile(final double latitude, final double longitude, final UpdatableTile tile) {
+//
+//        // Check if latitude and longitude already known
+//        if (latitude == this.lastLat && longitude == this.lastLon) {
+//            this.nbCall++;
+//        } else {
+//            this.lastLat = latitude;
+//            this.lastLon = longitude;
+//            this.nbCall = 0;
+//        }
+//        if (this.nbCall > NB_TIME_ASK_SAME_TILE) {
+//            String str = String.format("infinite loop for %3.8f long %3.8f lat ", longitude, latitude);
+//            DummyLocalizable message = new DummyLocalizable(str);
+//            throw new RuggedException(message);
+//        }
+//
+//        String rasterFileName = getRasterFilePath(latitude, longitude);
+//        
+////        File rasterFile = new File(rasterFileName);
+////        if (!rasterFile.exists()) {
+////            // No DEM => we are on water => read geoid
+////            GeoidHandler geoidHandler = GeoidHandler.getInstance();
+////            geoidHandler.updateTile(latitude, longitude, tile);
+////            System.out.format("WARNING: No DEM tile found for latitude (deg) = %3.8f  and longitude (deg) = %3.8f." +
+////                              " DEM file %s doesn't exist. Use of Geoid data instead.%n",
+////                              FastMath.toDegrees(latitude), FastMath.toDegrees(longitude), rasterFileName);
+////            return;
+////        }
+//
+//        org.gdal.gdal.Dataset ds = org.gdal.gdal.gdal.Open(rasterFileName, org.gdal.gdalconst.gdalconst.GA_ReadOnly);
+//        int rasterLonSize = ds.GetRasterXSize();
+//        int rasterLatSize = ds.GetRasterYSize();
+//        double[] geoTransformInfo = ds.GetGeoTransform();
+//
+//        double minLat = Double.NaN;
+//        double minLon = Double.NaN;
+//        double lonStep = Double.NaN;
+//        double latStep = Double.NaN;
+//
+//        if (geoTransformInfo.length < 6) { // Check that the geoTransformInfo is correct
+//            String str = "GDALGeoTransform has < 6 elements";
+//            DummyLocalizable message = new DummyLocalizable(str);
+//            throw new RuggedException(message);
+//        } else {
+//            lonStep = FastMath.abs(geoTransformInfo[1]);
+//            latStep = FastMath.abs(geoTransformInfo[5]);
+//
+//            minLon = geoTransformInfo[0] + 0.5 * lonStep;
+//            minLat = geoTransformInfo[3] - (rasterLatSize - 0.5) * latStep;
+//        }
+//
+//        org.gdal.gdal.Band band = ds.GetRasterBand(1);
+//
+//        // Define Tile Geometry
+//        tile.setGeometry(FastMath.toRadians(minLat), FastMath.toRadians(minLon), FastMath.toRadians(latStep), FastMath.toRadians(lonStep), rasterLatSize, rasterLonSize);
+//
+//        // Loop over raster values
+//        double[] data = new double[rasterLatSize * rasterLonSize];
+//
+////        // SRTM is given above the geoid
+////         GeoidHandler geoidHandler = GeoidHandler.getInstance();
+////         GdalTransformTools gtTools = new GdalTransformTools(geoTransformInfo, rasterLonSize, rasterLatSize);
+//
+//        // We read all raster at once to limit the numbers of Band.ReadRaster calls
+//        band.ReadRaster(0, 0, rasterLonSize, rasterLatSize, data);
+//
+//        // Get the no data value from the raster
+//        Double[] noDataValue = new Double[1];
+//        band.GetNoDataValue(noDataValue);
+//
+//        // test if the no data value exists
+//        Boolean noDataValueExist = false;
+//        if (noDataValue[0] != null) noDataValueExist = true;
+//
+//        // from bottom left to upper right corner
+//        for (int iLat = rasterLatSize - 1; iLat >= 0; iLat--) {
+//            for (int jLon = 0; jLon < rasterLonSize; jLon++) {
+//
+//                double elevationOverEllipsoid = 0.0;
+//                elevationOverEllipsoid = data[iLat * rasterLonSize + jLon];
+//
+//                if (noDataValueExist && (elevationOverEllipsoid == noDataValue[0])) {
+//                    elevationOverEllipsoid = 0.0;
+//                }
+//                
+////                // The elevation value we send to rugged must be computed against ellipsoid
+////                // => when DEM is SRTM , we must add geoid value
+////                double lon = gtTools.getXFromPixelLine(jLon, iLat);
+////                double lat = gtTools.getYFromPixelLine(jLon, iLat);
+////                elevationOverEllipsoid = elevationOverEllipsoid + geoidHandler.getElevationDegree(lat, lon);
+//
+//                // Set elevation over the ellipsoid
+//                tile.setElevation(rasterLatSize - 1 - iLat, jLon, elevationOverEllipsoid);
+//            }
+//        }
+//        band.delete();
+//        band = null;
+//        ds.delete();
+//        ds = null;
+//    }
+//
+//    private String getRasterFilePath(final double latitude, final double longitude) {
+//
+//        double latDeg = FastMath.toDegrees(latitude);
+//        // Assure that the longitude belongs to [-180, + 180]
+//        double lonDeg = FastMath.toDegrees(MathUtils.normalizeAngle(longitude, 0.0));
+//
+//        // Compute parent dir with longitude value
+//        int parentDirValue = (int) (1 + (lonDeg + 180.) / 5);
+//        String parentDir = String.format("%02d", parentDirValue);
+//
+//        // Compute sub dir with latitude value
+//        int subDirValue = (int) (1 + (60. - latDeg) / 5);
+//        String subDir = String.format("%02d", subDirValue);
+//
+//        String filePath = this.rootDirectory + File.separator + parentDir + File.separator + subDir + File.separator +
+//                          "srtm_" + parentDir + "_" + subDir + ".tif";
+//        return filePath;
+//    }
+//    
+//    private boolean checkRasterDirectory(final String directory) {
+//        
+//        if (directory == null) {
+//
+//            String str = "Directory not defined";
+//            DummyLocalizable message = new DummyLocalizable(str);
+//            throw new RuggedException(message);
+//
+//        } else {
+//            try {
+//                Path dir = FileSystems.getDefault().getPath(directory);
+//                DirectoryStream<Path> stream = Files.newDirectoryStream(dir);
+//                boolean found = false;
+//                for (Path path : stream) {
+//                    if (!found) {
+//                        File currentFile = path.toFile();
+//                        if (currentFile.isDirectory()) {
+//                            found = checkRasterDirectory(currentFile.getAbsolutePath());
+//                        } else {
+//                            String filePath = currentFile.getAbsolutePath();
+//                            if (filePath.matches(".*.tif")) {
+//                                found = true;
+//                            }
+//                        }
+//                        if (found) {
+//                            stream.close();
+//                            return true;
+//                        }
+//                    }
+//                }
+//                stream.close();
+//
+//                String str = "raster not found  in" + directory;
+//                DummyLocalizable message = new DummyLocalizable(str);
+//                throw new RuggedException(message);
+//
+//            } catch (IOException e) {
+//                String str = "dir not found " + directory;
+//                DummyLocalizable message = new DummyLocalizable(str);
+//                throw new RuggedException(message);
+//            }
+//        }
+//    }
+//}
+
 
 class SurroundingTiles {
 
-	private SimpleTile tileAbove;
-	private SimpleTile tileBelow;
-	private SimpleTile tileLeft;
-	private SimpleTile tileRight;
-	
-	SurroundingTiles(SimpleTile originTile, double tileSizeDeg, TilesCache<SimpleTile> cache) {
+    private double latDeg;
+    private double lonDeg;
+    private TilesCache<SimpleTile> cache;
+    private double tileSizeDeg;
+    
+    SurroundingTiles(SimpleTile originTile, double tileSizeDeg, TilesCache<SimpleTile> cache) {
 
-		int latRows = originTile.getLatitudeRows();
-		int loncols = originTile.getLongitudeColumns();
-		double latDeg = FastMath.toDegrees(originTile.getLatitudeAtIndex(latRows/2));
-		double lonDeg = FastMath.toDegrees(originTile.getLongitudeAtIndex(loncols/2));
+        this.cache = cache;
+        this.tileSizeDeg = tileSizeDeg;
+        
+        int latRows = originTile.getLatitudeRows();
+        int loncols = originTile.getLongitudeColumns();
+        
+        // Get a middle point of the tile
+        this.latDeg = FastMath.toDegrees(originTile.getLatitudeAtIndex(latRows/2));
+        this.lonDeg = FastMath.toDegrees(originTile.getLongitudeAtIndex(loncols/2));
+    }
 
-		// get tile above ...
-		double latAbove =  latDeg + tileSizeDeg;
-		this.tileAbove = cache.getTile(FastMath.toRadians(latAbove), FastMath.toRadians(lonDeg));
+    public SimpleTile getTileAbove() {
+        
+        // get tile above ...
+        double latAbove =  latDeg + tileSizeDeg;
+        return cache.getTile(FastMath.toRadians(latAbove), FastMath.toRadians(lonDeg));
+    }
 
-		// get tile below
-		double latBelow = latDeg - tileSizeDeg;
-		this.tileBelow = cache.getTile(FastMath.toRadians(latBelow), FastMath.toRadians(lonDeg));
+    public SimpleTile getTileBelow() {
+        
+        // get tile below
+        double latBelow = latDeg - tileSizeDeg;
+        return cache.getTile(FastMath.toRadians(latBelow), FastMath.toRadians(lonDeg));
+    }
 
-		// get tile left
-		double lonLeft = lonDeg - tileSizeDeg;
-		this.tileLeft = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonLeft));
+    public SimpleTile getTileLeft() {
+        
+        // get tile left
+        double lonLeftRad = FastMath.toRadians(lonDeg - tileSizeDeg);
+        // Assure that the longitude belongs to [-180, + 180]
+        double lonLeftNorm = MathUtils.normalizeAngle(lonLeftRad, 0.0);
+        return cache.getTile(FastMath.toRadians(latDeg), lonLeftNorm);
+    }
 
-		// get tile right
-		double lonRight = lonDeg + tileSizeDeg;
-		this.tileRight = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonRight));
-
-	}
-
-	public SimpleTile getTileAbove() {
-		return tileAbove;
-	}
-
-	public SimpleTile getTileBelow() {
-		return tileBelow;
-	}
-
-	public SimpleTile getTileLeft() {
-		return tileLeft;
-	}
-
-	public SimpleTile getTileRight() {
-		return tileRight;
-	}
+    public SimpleTile getTileRight() {
+        
+        // get tile right
+        double lonRightRad = FastMath.toRadians(lonDeg + tileSizeDeg);
+        // Assure that the longitude belongs to [-180, + 180]
+        double lonRightNorm = MathUtils.normalizeAngle(lonRightRad, 0.0);
+        return cache.getTile(FastMath.toRadians(latDeg), lonRightNorm);
+    }
 }
+

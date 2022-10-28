@@ -47,7 +47,6 @@ public class TilesCache<T extends Tile> {
      * @since X.x */
     private final boolean isOvelapping;
 
-
     /** Cache. */
     private final T[] tiles;
 
@@ -121,7 +120,8 @@ public class TilesCache<T extends Tile> {
             // one must create a zipper tile because tiles are not overlapping ...
             final Tile.Location pointLocation = tile.getLocation(latitude, longitude);
 
-            // TODO GP check if useful: final Tile.Location neighborhood = tile.checkNeighborhood(latitude, longitude);
+            // TODO GP check if useful: 
+            final Tile.Location neighborhood = tile.checkNeighborhood(latitude, longitude);
 
             // We are on the edge of the tile 
             if (pointLocation != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
@@ -196,22 +196,22 @@ public class TilesCache<T extends Tile> {
 
         case NORTH: // latitudeIndex > latitudeRows - 2
 
-            zipperTile = createZipperNorth(longitude, currentTile);
+            zipperTile = createZipperNorthOrSouth(EarthHemisphere.NORTH, longitude, currentTile);
             break;
             
         case SOUTH: // latitudeIndex < 0
 
-            zipperTile = createZipperSouth(longitude, currentTile);
+            zipperTile = createZipperNorthOrSouth(EarthHemisphere.SOUTH, longitude, currentTile);
             break;
 
         case WEST: // longitudeIndex < 0
 
-            zipperTile = createZipperWest(latitude, currentTile);
+            zipperTile = createZipperWestOrEast(EarthHemisphere.WEST, latitude, currentTile);
             break;
             
         case EAST: // longitudeIndex > longitudeColumns - 2
 
-            zipperTile = createZipperEast(latitude, currentTile);
+            zipperTile = createZipperWestOrEast(EarthHemisphere.EAST, latitude, currentTile);
             break;
             
         case NORTH_WEST: 
@@ -235,11 +235,8 @@ public class TilesCache<T extends Tile> {
             break;
             
       default:
-          // TODO AFAC
-            System.out.println("Point location= " + pointLocation + " => Case not yet implemented");
-            return null;
-//            // impossible to reach
-//            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
+            // impossible to reach
+            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
 
         } // end switch
         
@@ -287,8 +284,16 @@ public class TilesCache<T extends Tile> {
 
         return zipperTile;
     }
-
     
+    /** Create the zipper tile between the current tile and the Northern or Southern tile of the current tile
+     * for a given longitude.
+     * The zipper have 4 rows in latitude.
+     * @param latitudeHemisphere hemisphere for latitude: NORTH / SOUTH
+     * @param longitude given longitude (rad)
+     * @param tile current tile
+     * @return northern or southern zipper tile of the current tile according to latitudeHemisphere
+     * @since X.x
+     */
     private T createZipperNorthOrSouth(final EarthHemisphere latitudeHemisphere, final double longitude, final T tile) {
                 
         final int latitudeRows = tile.getLatitudeRows();
@@ -299,7 +304,7 @@ public class TilesCache<T extends Tile> {
          
         // Get the North or South tile
         final T tileNorthOrSouth = createNorthOrSouthTile(latitudeHemisphere, longitude, minLat, latitudeRows, latStep);
-
+        
         // TODO AFAC ################
         switch (latitudeHemisphere) {
         case NORTH:
@@ -312,7 +317,6 @@ public class TilesCache<T extends Tile> {
             // impossible to reach
             throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
         }
-
         
         // If NORTH hemisphere:
         // Create zipper tile between the current tile and the North tile;
@@ -324,7 +328,9 @@ public class TilesCache<T extends Tile> {
         // 2 rows belong to the South part of the origin/current tile
         // 2 rows belong to the North part of the South tile
 
+        // TODO #########################
         // TODO we suppose here the 2 tiles have same origin, step and size along longitude
+        // TODO #########################
 
         double zipperLatStep = latStep;
         int zipperLatRows = 4;
@@ -333,6 +339,7 @@ public class TilesCache<T extends Tile> {
 
         double zipperLatMin;
         double[][] elevations;
+        
         switch (latitudeHemisphere) {
         case NORTH:
             zipperLatMin = minLat + (latitudeRows - 2)*latStep;
@@ -369,164 +376,20 @@ public class TilesCache<T extends Tile> {
             // impossible to reach
             throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
         }
-//            printTileFile(tileZipperNorth, "Plots/Zipper_lat_");
-        // ################
         
         return zipperNorthOrSouth;
     }
 
-    /** Create the zipper tile between the current tile and the Northern tile of the current tile
-     * for a given longitude
-     * @param longitude given longitude (rad)
-     * @param tile current tile
-     * @return northern zipper tile of the current tile
-     * @since X.x
-     */
-    private T createZipperNorth(final double longitude, final T tile) {
-        
-        //TODO GP check if can be put in common with createZipperSouth ??
-        
-        final int latitudeRows = tile.getLatitudeRows();
-        final int longitudeCols = tile.getLongitudeColumns();
-        final double latStep = tile.getLatitudeStep();
-        final double lonStep = tile.getLongitudeStep();
-        final double minLat = tile.getMinimumLatitude();
-        
-        // Get the North Tile
-        final T tileNorth = createNorthOrSouthTile(EarthHemisphere.NORTH, longitude, minLat, latitudeRows, latStep);
-
-        // TODO AFAC ################
-        tilePrint(tileNorth, "North tile:");
-
-        // Create zipper tile between the current tile and the North tile;
-        // 2 rows belong to the North part of the origin/current tile
-        // 2 rows belong to the South part of the North tile
-
-        // TODO we suppose here the 2 tiles have same origin, step and size along longitude
-
-        double zipperLatMin = minLat + (latitudeRows - 2)*latStep;
-        double zipperLatStep = latStep;
-        int zipperLatRows = 4;
-
-        int zipperLonCols = longitudeCols;
-
-        final double[][] elevations = getZipperNorthSouthElevations(zipperLatRows, zipperLonCols, 
-                                                                    tileNorth, tile, latitudeRows);
-
-        final T zipperNorth = initializeZipperTile(zipperLatMin, tile.getMinimumLongitude(), 
-                                                   zipperLatStep, lonStep,
-                                                   zipperLatRows, zipperLonCols, elevations);
-        // TODO AFAC ################
-        tilePrint(zipperNorth, "NORTH Zipper tile:");
-//            printTileFile(tileZipperNorth, "Plots/Zipper_lat_");
-        // ################
-        
-        return zipperNorth;
-    }
-   
-    /** Create the zipper tile between the current tile and the Southern tile of the current tile
-     * for a given longitude
-     * @param longitude given longitude (rad)
-     * @param tile current tile
-     * @return southern zipper tile of the current tile
-     * @since X.x
-     */
-    private T createZipperSouth(final double longitude, final T tile) {
-        
-        final int latitudeRows = tile.getLatitudeRows();
-        final int longitudeCols = tile.getLongitudeColumns();
-        final double latStep = tile.getLatitudeStep();
-        final double lonStep = tile.getLongitudeStep();
-        final double minLat = tile.getMinimumLatitude();
-        
-        // Get the South Tile
-        final T tileSouth = createNorthOrSouthTile(EarthHemisphere.SOUTH, longitude, minLat, latitudeRows, latStep);
-
-        // TODO AFAC ################
-        tilePrint(tileSouth, "South tile:");
-        // ################
-
-        // Create zipper tile between the current tile and the South tile;
-        // 2 rows belong to the South part of the origin/current tile
-        // 2 rows belong to the North part of the South tile
-
-        // TODO we suppose here the 2 tiles have same origin, step and size along longitude
-
-        double zipperLatMin = minLat - 2*latStep;
-        double zipperLatStep = latStep;
-        int zipperLatRows = 4;
-
-        int zipperLonCols = longitudeCols;
-
-// TODO GP AFAC
-//        double[][] elevations = new double[zipperLatRows][zipperLonCols];
-//        for (int jLon = 0; jLon < zipperLonCols; jLon++) {
-//            // Part from the origin tile
-//            elevations[3][jLon] = tile.getElevationAtIndices(1, jLon);
-//            elevations[2][jLon] = tile.getElevationAtIndices(0, jLon);
-//
-//            // Part from the South tile
-//            int lat1 = latitudeRows - 1;
-//            elevations[1][jLon] = tileSouth.getElevationAtIndices(lat1, jLon);
-//            int lat0 = latitudeRows - 2;
-//            elevations[0][jLon] = tileSouth.getElevationAtIndices(lat0, jLon);
-//        }
-        
-        final double[][] elevations = getZipperNorthSouthElevations(zipperLatRows, zipperLonCols, 
-                                                                    tile, tileSouth, latitudeRows);
-        
-        final T zipperSouth = initializeZipperTile(zipperLatMin, tile.getMinimumLongitude(), 
-                                                   zipperLatStep, lonStep, 
-                                                   zipperLatRows, zipperLonCols, elevations);
-        // TODO AFAC ################
-        tilePrint(zipperSouth, "SOUTH Zipper tile:");
-//            printTileFile(zipperSouth, "Plots/Zipper_lat_");
-        // ################
-        
-        return zipperSouth;
-    }
-
-    /** Get the elevations for the zipper tile between a northern and a southern tiles
-     * @param zipperLatRows number of rows in latitude
-     * @param zipperLonCols number of column in longitude
-     * @param northernTile the tile which is the northern
-     * @param southernTile the tile which is the southern
-     * @param southernLatRows latitude rows of the southern tile
-     * @return the elevations to fill in the zipper tile between a northern and a southern tiles
-     * @since X.x
-     */
-    private double[][] getZipperNorthSouthElevations(int zipperLatRows, int zipperLonCols, 
-                                                     final T northernTile, final T southernTile,
-                                                     final int southernLatRows) {
-        
-        double[][] elevations = new double[zipperLatRows][zipperLonCols];
-
-        for (int jLon = 0; jLon < zipperLonCols; jLon++) {
-            // Part from the northern tile
-            int lat3 = 1;
-            elevations[3][jLon] = northernTile.getElevationAtIndices(lat3, jLon);
-            int lat2 = 0;
-            elevations[2][jLon] = northernTile.getElevationAtIndices(lat2, jLon);
-
-            // Part from the southern tile
-            int lat1 = southernLatRows - 1;
-            elevations[1][jLon] = southernTile.getElevationAtIndices(lat1, jLon);
-            int lat0 = southernLatRows - 2;
-            elevations[0][jLon] = southernTile.getElevationAtIndices(lat0, jLon);
-        }
-        return elevations;
-    }
-
-    /** Create the zipper tile between the current tile and the Western tile of the current tile
-     * for a given latitude
+    /** Create the zipper tile between the current tile and the Western or Eastern tile of the current tile
+     * for a given latitude.
+     * The zipper have 4 columns in longitude.
+     * @param longitudeHemisphere hemisphere for longitude: WEST / EAST
      * @param latitude given latitude (rad)
      * @param tile current tile
-     * @return western zipper tile of the current tile
+     * @return western or eastern zipper tile of the current tile according to longitudeHemisphere
      * @since X.x
      */
-    private T createZipperWest(final double latitude, final T tile) {
-        
-        //TODO GP check if can be put in common with createZipperEast ??
+    private T createZipperWestOrEast(final EarthHemisphere longitudeHemisphere, double latitude, final T tile) {
         
         final int latitudeRows = tile.getLatitudeRows();
         final int longitudeCols = tile.getLongitudeColumns();
@@ -534,115 +397,112 @@ public class TilesCache<T extends Tile> {
         final double lonStep = tile.getLongitudeStep();
         final double minLon = tile.getMinimumLongitude();
         
-        // Get the West Tile
-        final T tileWest = createEastOrWestTile(EarthHemisphere.WEST, latitude, minLon, longitudeCols, lonStep);
+        // Get the West or East Tile
+        final T tileWestOrEast = createEastOrWestTile(longitudeHemisphere, latitude, minLon, longitudeCols, lonStep);
 
         // TODO AFAC ################
-        tilePrint(tileWest, "West tile:");
-        // ################
+        switch (longitudeHemisphere) {
+        case WEST:
+            tilePrint(tileWestOrEast, "West tile:");
+            break;
+        case EAST:
+            tilePrint(tileWestOrEast, "East tile:");
+            break;          
+        default:
+            // impossible to reach
+            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
+        }
 
+        // If WEST hemisphere
         // Create zipper tile between the current tile and the West tile;
         // 2 cols belong to the West part of the origin/current tile
         // 2 cols belong to the East part of the West tile
-
-        // TODO we suppose here the 2 tiles have same origin, step and size along longitude
-
-        int zipperLatRows = latitudeRows;
-
-        double zipperLonMin = minLon - 2*lonStep;
-        double zipperLonStep = lonStep;
-        int zipperLonCols = 4;
-
-// TODO GP AFAC
-//        double[][] elevations = new double[zipperLatRows][zipperLonCols];
-//        for (int iLat = 0; iLat < zipperLatRows; iLat++) {
-//            // Part from the origin tile
-//            elevations[iLat][3] = tile.getElevationAtIndices(iLat, 1);
-//            elevations[iLat][2] = tile.getElevationAtIndices(iLat, 0);
-//
-//            // Part from the West tile
-//            int lon1 = longitudeCols - 1;
-//            elevations[iLat][1] = tileWest.getElevationAtIndices(iLat, lon1);
-//            int lon0 = longitudeCols - 2;
-//            elevations[iLat][0] = tileWest.getElevationAtIndices(iLat, lon0);
-//        }
-
-        double[][] elevations = getZipperEastWestElevations(zipperLatRows, zipperLonCols, 
-                                                            tile, tileWest, longitudeCols);
-
-        final T zipperWest = initializeZipperTile(tile.getMinimumLatitude(), zipperLonMin, 
-                                                     latStep, zipperLonStep, 
-                                                     zipperLatRows, zipperLonCols, elevations);
-        // TODO AFAC ################
-        tilePrint(zipperWest, "WEST Zipper tile:");
-//            printTileFile(zipperWest, "Plots/Zipper_lat_");
-        // ################
         
-        return zipperWest;
-    }
-
-    /** Create the zipper tile between the current tile and the Eastern tile of the current tile
-     * for a given latitude
-     * @param latitude given latitude (rad)
-     * @param tile current tile
-     * @return eastern zipper tile of the current tile
-     * @since X.x
-     */
-     private T createZipperEast(final double latitude, final T tile) {
-        
-        final int latitudeRows = tile.getLatitudeRows();
-        final int longitudeCols = tile.getLongitudeColumns();
-        final double latStep = tile.getLatitudeStep();
-        final double lonStep = tile.getLongitudeStep();
-
-        final double minLon = tile.getMinimumLongitude();
-        
-        // Get the East Tile
-        final T tileEast = createEastOrWestTile(EarthHemisphere.EAST, latitude, minLon, longitudeCols, lonStep);
-
-        // TODO AFAC ################
-        tilePrint(tileEast, "East tile:");
-        // ################
-
+        // If EAST hemisphere
         // Create zipper tile between the current tile and the East tile;
         // 2 cols belong to the East part of the origin/current tile
         // 2 cols belong to the West part of the East tile
 
         // TODO we suppose here the 2 tiles have same origin, step and size along longitude
 
-        int zipperLatRows = latitudeRows;
-
-        double zipperLonMin = minLon + (longitudeCols - 2)*lonStep;
         double zipperLonStep = lonStep;
+        int zipperLatRows = latitudeRows;
         int zipperLonCols = 4;
 
-        // TODO GP AFAC
-//        double[][] elevations = new double[zipperLatRows][zipperLonCols];
-//        for (int iLat = 0; iLat < zipperLatRows; iLat++) {
-//            // Part from the origin tile
-//            int lon0 = longitudeCols - 2;
-//            elevations[iLat][0] = tile.getElevationAtIndices(iLat, lon0);
-//            int lon1 = longitudeCols - 1;
-//            elevations[iLat][1] = tile.getElevationAtIndices(iLat, lon1);
-//
-//            // Part from the East tile
-//            elevations[iLat][2] = tileEast.getElevationAtIndices(iLat, 0);
-//            elevations[iLat][3] = tileEast.getElevationAtIndices(iLat, 1);
-//        }
-        double[][] elevations = getZipperEastWestElevations(zipperLatRows, zipperLonCols, 
-                                                            tileEast, tile, longitudeCols);
+        double zipperLonMin;
+        double[][] elevations;
         
-        final T zipperEast = initializeZipperTile(tile.getMinimumLatitude(), zipperLonMin, 
+        switch (longitudeHemisphere) {
+        case WEST:
+            zipperLonMin = minLon - 2*lonStep;
+            elevations = getZipperEastWestElevations(zipperLatRows, zipperLonCols, 
+                                                     tile, tileWestOrEast, longitudeCols);
+            break;
+            
+        case EAST:
+            zipperLonMin = minLon + (longitudeCols - 2)*lonStep;
+
+            elevations = getZipperEastWestElevations(zipperLatRows, zipperLonCols, 
+                                                     tileWestOrEast, tile, longitudeCols);
+            break;
+            
+        default:
+            // impossible to reach
+            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
+        }
+        
+        
+        final T zipperWestOrEast = initializeZipperTile(tile.getMinimumLatitude(), zipperLonMin, 
                                                      latStep, zipperLonStep, 
                                                      zipperLatRows, zipperLonCols, elevations);
-
-        // TODO AFAC ################
-        tilePrint(zipperEast, "EAST Zipper tile:");
-        // ################
         
-        return zipperEast;
-    }    
-    
+        // TODO AFAC ################
+        switch (longitudeHemisphere) {
+        case WEST:
+            tilePrint(zipperWestOrEast, "WEST Zipper tile:");
+            break;
+        case EAST:
+            tilePrint(zipperWestOrEast, "EAST Zipper tile:");
+            break;          
+        default:
+            // impossible to reach
+            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
+        }
+
+        return zipperWestOrEast;
+    }
+
+    /** Get the elevations for the zipper tile between a northern and a southern tiles
+      * @param zipperLatRows number of rows in latitude
+      * @param zipperLonCols number of column in longitude
+      * @param northernTile the tile which is the northern
+      * @param southernTile the tile which is the southern
+      * @param southernLatRows latitude rows of the southern tile
+      * @return the elevations to fill in the zipper tile between a northern and a southern tiles
+      * @since X.x
+      */
+     private double[][] getZipperNorthSouthElevations(int zipperLatRows, int zipperLonCols, 
+                                                      final T northernTile, final T southernTile,
+                                                      final int southernLatRows) {
+
+         double[][] elevations = new double[zipperLatRows][zipperLonCols];
+
+         for (int jLon = 0; jLon < zipperLonCols; jLon++) {
+             // Part from the northern tile
+             int lat3 = 1;
+             elevations[3][jLon] = northernTile.getElevationAtIndices(lat3, jLon);
+             int lat2 = 0;
+             elevations[2][jLon] = northernTile.getElevationAtIndices(lat2, jLon);
+
+             // Part from the southern tile
+             int lat1 = southernLatRows - 1;
+             elevations[1][jLon] = southernTile.getElevationAtIndices(lat1, jLon);
+             int lat0 = southernLatRows - 2;
+             elevations[0][jLon] = southernTile.getElevationAtIndices(lat0, jLon);
+         }
+         return elevations;
+     }
+
     /** Get the elevations for the zipper tile between a eastern and a western tiles
      * @param zipperLatRows number of rows in latitude
      * @param zipperLonCols number of column in longitude
@@ -674,7 +534,7 @@ public class TilesCache<T extends Tile> {
          return elevations;
      }
 
-    /** Create a corner zipper tile
+    /** Create a corner zipper tile (with 4 rows in latitude and 4 columns in longitude)
      * @param zipperCorner zipper tile point at minimum latitude and minimum longitude
      * @param zipperLatStep latitude step (rad)
      * @param zipperLonStep longitude step (rad)
@@ -1078,29 +938,7 @@ public class TilesCache<T extends Tile> {
         final double lonToGetNewTile = minLon + hemisphere*longitudeCols*lonStep;
         return createTile(latitude, lonToGetNewTile);
     }
-    
-//    private T createSurroundingTile(final EarthHemisphere earthHemisphere, final double longitude, 
-//                                    final double minCoord, final int nbRowCol, final double step) {
-//        // hemisphere = +1 : North or = -1 : South
-//        int hemisphere;
-//        switch (earthHemisphere) {
-//        case NORTH:
-//            hemisphere = +1;
-//            break;
-//        case SOUTH:
-//            hemisphere = -1;
-//            break;          
-//        default:
-//            // impossible to reach
-//            throw new RuggedException(RuggedMessages.INTERNAL_ERROR);
-//        }
-//
-//        final double coordToGetNewTile = minCoord + hemisphere*nbRowCol*step;
-//        return createTile(coordToGetNewTile, longitude);
-//    }
-
-
-
+ 
     // TODO GP AFAC
     protected void tilePrint(final Tile tile, String comment) {
         
