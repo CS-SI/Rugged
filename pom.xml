@@ -27,6 +27,12 @@
     <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
 
+        <!-- GDAL version -->
+        <!--urugged.gdal.version>2.4.0</urugged.gdal.version-->
+        <rugged.gdal.version>3.0.0</rugged.gdal.version>
+        <!-- GDAL native library path -->
+        <rugged.gdal.native.library.path>${env.GDAL_PATH}</rugged.gdal.native.library.path>
+        
     <!-- sonar related properties -->
     <sonar.host.url>https://sonar.orekit.org/</sonar.host.url>
 
@@ -152,6 +158,15 @@
   </distributionManagement>
 
   <dependencies>
+          <dependency>
+          <groupId>org.gdal</groupId>
+          <artifactId>gdal</artifactId>
+          <version>${rugged.gdal.version}</version>
+          <type>jar</type>
+          <optional>false</optional>
+          <!--scope>test</scope-->
+        </dependency>
+        
     <dependency>
         <groupId>org.orekit</groupId>
         <artifactId>orekit</artifactId>
