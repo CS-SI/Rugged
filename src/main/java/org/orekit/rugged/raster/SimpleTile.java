@@ -434,7 +434,7 @@ public class SimpleTile implements Tile {
      * @param latitude geodetic latitude (rad)
      * @return latitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLatitudeIndex(final double latitude) {
+    protected double getDoubleLatitudeIndex(final double latitude) {
         return (latitude  - minLatitude)  / latitudeStep;
     }
 
@@ -442,7 +442,7 @@ public class SimpleTile implements Tile {
      * @param longitude geodetic longitude (rad)
      * @return longitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLongitudeIndex(final double longitude) {
+    protected double getDoubleLongitudeIndex(final double longitude) {
         return (longitude - minLongitude) / longitudeStep;
     }
 
@@ -477,52 +477,4 @@ public class SimpleTile implements Tile {
             }
         }
     }
-
-    /** {@inheritDoc} 
-     * @sinceX.x
-     */
-    @Override
-    public Location checkNeighborhood(double latitude, double longitude) {
-        
-// TODO GP check if useful ...
-        
-        final int latitudeIndex  = getFloorLatitudeIndex(latitude);
-        final int longitudeIndex = getFloorLongitudeIndex(longitude);
-        System.out.format(">>> Index lat = " + latitudeIndex + " long = " + longitudeIndex + " ");
-        if (longitudeIndex < 1) {
-            if (latitudeIndex < 1) {
-                System.out.println(Location.SOUTH_WEST + "\n");
-                return Location.SOUTH_WEST;
-            } else if (latitudeIndex <= (latitudeRows - 2)) {
-                System.out.println(Location.WEST + "\n");
-                return Location.WEST;
-            } else {
-                System.out.println(Location.NORTH_WEST + "\n");
-                return Location.NORTH_WEST;
-            }
-        } else if (longitudeIndex <= (longitudeColumns - 2)) {
-            if (latitudeIndex < 1) {
-                System.out.println(Location.SOUTH + "\n");
-                return Location.SOUTH;
-            } else if (latitudeIndex <= (latitudeRows - 2)) {
-                System.out.println(Location.HAS_INTERPOLATION_NEIGHBORS + "\n");
-                return Location.HAS_INTERPOLATION_NEIGHBORS;
-            } else {
-                System.out.println(Location.NORTH + "\n");
-                return Location.NORTH;
-            }
-        } else {
-            if (latitudeIndex < 1) {
-                System.out.println(Location.SOUTH_EAST + "\n");
-                return Location.SOUTH_EAST;
-            } else if (latitudeIndex <= (latitudeRows - 2)) {
-                System.out.println(Location.EAST + "\n");
-                return Location.EAST;
-            } else {
-                System.out.println(Location.NORTH_EAST + "\n");
-                return Location.NORTH_EAST;
-            }
-        }
-    }
-
 }

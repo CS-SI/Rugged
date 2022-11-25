@@ -280,25 +280,10 @@ public interface Tile extends UpdatableTile {
                                              int latitudeIndex, int longitudeIndex);
 
     /** Check if a tile covers a ground point.
-     * <p>
-     * TBN: used by intersection algorithms. Supposed tiles are overlapping.
-     * </p>
      * @param latitude ground point latitude
      * @param longitude ground point longitude
      * @return location of the ground point with respect to tile
      */
     Location getLocation(double latitude, double longitude);
 
-    
-    // TODO GP check if useful ...
-    /** Get tile neighborhood (in case the DEM tiles are not overlapping).
-     * <p>
-     * TBN: used to create zipper tiles in case of DEM with tiles not overlapping.
-     * </p>
-     * @param latitude ground point latitude
-     * @param longitude ground point longitude
-     * @return location of the tile vs the neighborhood
-     * @since X.x
-     */
-    Location checkNeighborhood(double latitude, double longitude);
 }

@@ -7,6 +7,7 @@ import org.hipparchus.util.MathUtils;
  * To simulate DEM SRTM3 V4.0 tiles (without the real data !)
  * The tiles are seamless = no overlapping 
  * 
+ * @author Guylaine Prat
  */
 public class DummySRTMsimpleElevationUpdater implements TileUpdater {
     
@@ -45,6 +46,19 @@ public class DummySRTMsimpleElevationUpdater implements TileUpdater {
      */
     public void updateTile(final double latitude, final double longitude, UpdatableTile tile) {
 
+        int numberOfStep;
+        
+        // Change the tile step for latitude above 60 degrees and below 60 degrees
+        if (FastMath.toDegrees(latitude) > 60. || FastMath.toDegrees(latitude) < -60.) {
+            // step * 3 for latitude > 60 or < -60
+            this.stepRad = FastMath.toRadians(this.tileSizeDeg*3 / this.n);
+            numberOfStep = this.n/3;
+
+        } else { // step = tile size / n
+            this.stepRad = FastMath.toRadians(this.tileSizeDeg / this.n);
+            numberOfStep = this.n;
+        }
+        
         // Get the tile indices that contents the current latitude and longitude
         int[] tileIndex = findIndexInTile(latitude, longitude);
         double latIndex = tileIndex[0];
@@ -57,15 +71,15 @@ public class DummySRTMsimpleElevationUpdater implements TileUpdater {
         double minLatitude = FastMath.toRadians(60. - latIndex*5.) + 0.5*stepRad;
         double minLongitude = FastMath.toRadians(-180. + (lonIndex - 1)*5.) + 0.5*stepRad;
 
-        tile.setGeometry(minLatitude, minLongitude, stepRad, stepRad, n, n);
+        tile.setGeometry(minLatitude, minLongitude, stepRad, stepRad, numberOfStep, numberOfStep);
 
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < numberOfStep; ++i) {
             int p = (int) FastMath.floor((FastMath.abs(minLatitude) + i * stepRad) / stepRad);
-            for (int j = 0; j < n; ++j) {
+            for (int j = 0; j < numberOfStep; ++j) {
                 int q = (int) FastMath.floor((FastMath.abs(minLongitude) + j * stepRad) / stepRad);
                 double factor = FastMath.sin(minLatitude + i*stepRad - (minLongitude + j*stepRad))*
                                 FastMath.cos(minLatitude + i*stepRad + (minLongitude + j*stepRad));
-                tile.setElevation(i, j, (((p ^ q) & 0x1) == 0) ? factor*lonIndex*elevation1 : factor*latIndex*elevation2);
+                tile.setElevation(i, j, (((p ^ q) & 0x1) == 0) ? factor*lonIndex*elevation1 + q  : factor*latIndex*elevation2 + q*p);
             }
         }
     }
