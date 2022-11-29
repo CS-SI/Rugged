@@ -71,13 +71,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * is therefore <em>not</em> corrected in this case. As this computation is not
      * costly (a few percents overhead), it is highly recommended to set this parameter
      * to {@code false}. This flag is mainly intended for comparison purposes with other systems
-     * @param isOvelappingTiles flag to tell if the DEM tiles are overlapping: 
-     *                          true if overlapping; false otherwise. 
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                          true if overlapping; false otherwise.
      */
     public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles,
-                              final boolean flatBody, final boolean isOvelappingTiles) {
-        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, 
-                                                    maxCachedTiles, isOvelappingTiles);
+                              final boolean flatBody, final boolean isOverlappingTiles) {
+        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater,
+                                                    maxCachedTiles, isOverlappingTiles);
         this.flatBody = flatBody;
         this.algorithmId = flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE;
     }

@@ -33,6 +33,7 @@ import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import org.hipparchus.util.MathUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -185,7 +186,6 @@ public class TilesCacheTest {
         
         double tileSizeDeg = srtmUpdater.getTileSizeDeg();
         double rasterStepDeg = srtmUpdater.getTileStepDeg();
-        System.out.println("Default size: " + srtmUpdater.getTileSizeDeg() + " step " + srtmUpdater.getTileStepDeg());
 
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
@@ -203,36 +203,29 @@ public class TilesCacheTest {
 
         // North-East hemisphere  
         // =====================
-        System.out.println("\n\n#################################");
-        System.out.println("NORTH EAST hemisphere");
         latTileDeg = 47.;
         lonTileDeg = 12.3;
 
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileNEhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
         // Latitude North of the tile
-        System.out.println("##### Bord de tuile au niveau latitude North #####");
         latDeg = getNorthernEdgeOfTile(tileNEhemisphere);
         lonDeg = lonTileDeg;
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Latitude South of the tile
-        System.out.println("#### Bord de tuile au niveau latitude South #####");
         latDeg = getSouthernEdgeOfTile(tileNEhemisphere);
         lonDeg = lonTileDeg;
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude West of the tile
-        System.out.println("#### Bord de tuile au niveau longitude West #####");
         latDeg = latTileDeg;
         lonDeg = getWesternEdgeOfTile(tileNEhemisphere);
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNEhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude East of the tile
-        System.out.println("#### Bord de tuile au niveau longitude East #####");
         latDeg = latTileDeg;
         lonDeg = getEasternEdgeOfTile(tileNEhemisphere);
 
@@ -243,39 +236,29 @@ public class TilesCacheTest {
 
         // South-East hemisphere 
         // =====================
-        System.out.println("\n\n#################################");
-        System.out.println("SOUTH EAST hemisphere");
-
         latTileDeg = -16.2;
         lonTileDeg = 22.3;
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileSEhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
-        printTileInfo(tileSEhemisphere, rasterStepDeg, rasterStepDeg);
-
         // Latitude North of the tile
-        System.out.println("##### Bord de tuile au niveau latitude North #####");
         latDeg = getNorthernEdgeOfTile(tileSEhemisphere);
         lonDeg = lonTileDeg;
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Latitude South of the tile
-        System.out.println("#### Bord de tuile au niveau latitude South #####");
         latDeg = getSouthernEdgeOfTile(tileSEhemisphere);
         lonDeg = lonTileDeg;
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude West of the tile
-        System.out.println("#### Bord de tuile au niveau longitude West #####");
         latDeg = latTileDeg;
         lonDeg = getWesternEdgeOfTile(tileSEhemisphere);
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude East of the tile
-        System.out.println("#### Bord de tuile au niveau longitude East #####");
         latDeg = latTileDeg;
         lonDeg = getEasternEdgeOfTile(tileSEhemisphere);
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST, tileSEhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
@@ -285,38 +268,30 @@ public class TilesCacheTest {
 
         // North-West hemisphere 
         // =====================
-        System.out.println("\n\n#################################");
-        System.out.println("NORTH WEST hemisphere");
         latTileDeg = 46.8;
         lonTileDeg = -66.5; 
 
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileNWhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
-        printTileInfo(tileNWhemisphere, rasterStepDeg, rasterStepDeg);
 
         // Latitude North of the tile
-        System.out.println("##### Bord de tuile au niveau latitude North #####");
         latDeg = getNorthernEdgeOfTile(tileNWhemisphere);
         lonDeg = lonTileDeg;
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Latitude South of the tile
-        System.out.println("#### Bord de tuile au niveau latitude South #####");
         latDeg = getSouthernEdgeOfTile(tileNWhemisphere);
         lonDeg = lonTileDeg;
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude West of the tile
-        System.out.println("#### Bord de tuile au niveau longitude West #####");
         latDeg = latTileDeg;
         lonDeg = getWesternEdgeOfTile(tileNWhemisphere);
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileNWhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude East of the tile
-        System.out.println("#### Bord de tuile au niveau longitude East #####");
         latDeg = latTileDeg;
         lonDeg = getEasternEdgeOfTile(tileNWhemisphere);
 
@@ -327,38 +302,29 @@ public class TilesCacheTest {
 
         // South-West hemisphere 
         // =====================
-        System.out.println("\n\n#################################");
-        System.out.println("SOUTH WEST hemisphere");
-
         latTileDeg = -28.8  ;
         lonTileDeg = -58.4; 
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileSWhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
-        printTileInfo(tileSWhemisphere, rasterStepDeg, rasterStepDeg);
 
         // Latitude North of the tile
-        System.out.println("##### Bord de tuile au niveau latitude North #####");
         latDeg = getNorthernEdgeOfTile(tileSWhemisphere);
         lonDeg = lonTileDeg;
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Latitude South of the tile
-        System.out.println("#### Bord de tuile au niveau latitude South #####");
         latDeg = getSouthernEdgeOfTile(tileSWhemisphere);
         lonDeg = lonTileDeg;
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude West of the tile
-        System.out.println("#### Bord de tuile au niveau longitude West #####");
         latDeg = latTileDeg;
         lonDeg = getWesternEdgeOfTile(tileSWhemisphere);
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST, tileSWhemisphere, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Longitude East of the tile
-        System.out.println("#### Bord de tuile au niveau longitude East #####");
         latDeg = latTileDeg;
         lonDeg = getEasternEdgeOfTile(tileSWhemisphere);
 
@@ -369,31 +335,23 @@ public class TilesCacheTest {
         
         // Anti meridians  (180 degrees W/E)
         // =====================
-        System.out.println("\n\n#################################");
-        System.out.println("Anti meridien test (180 degre East)");
         // tile SRTM 72/16: 175 - 180 East / 15 - 20 South  
         latTileDeg = -18.;
         lonTileDeg = 178.;
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileAntiMeridianEast = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
         // Longitude East of the tile
-        System.out.println("#### Bord de tuile au niveau longitude East #####");
         latDeg = latTileDeg;
         lonDeg = getEasternEdgeOfTile(tileAntiMeridianEast);
 
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.EAST,tileAntiMeridianEast, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
-        System.out.println("#################################");
-        System.out.println("Anti meridien test (180 degre West)");
         // tile SRTM 01/16: 175 - 180 West / 15 - 20 South  
         latTileDeg = -18.;
         lonTileDeg = -178.;
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileAntiMeridianWest = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
         // Longitude West of the tile
-        System.out.println("#### Bord de tuile au niveau longitude West #####");
         latDeg = latTileDeg;
         lonDeg = getWesternEdgeOfTile(tileAntiMeridianWest);
 
@@ -415,20 +373,14 @@ public class TilesCacheTest {
 
         // Above 60 degrees  
         // ================
-        System.out.println("\n\n#################################");
-        System.out.println("Above 60 degrees ");
         latTileDeg = 59.;
         lonTileDeg = 12.3;
 
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileAround60deg = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
         
         // Latitude North of the tile
-        System.out.println("##### Bord de tuile au niveau latitude North #####");
-
         latDeg = getNorthernEdgeOfTile(tileAround60deg);
         lonDeg = lonTileDeg;
-        System.out.println(">>>> Bord Nord lat deg = " + latDeg + "\n");
 
         isDifferentStep = true;
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileAround60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
@@ -441,20 +393,14 @@ public class TilesCacheTest {
         
         // Below -60 degrees  
         // =================
-        System.out.println("\n\n#################################");
-        System.out.println("Below -60 degrees ");
         latTileDeg = -59.;
         lonTileDeg = 12.3;
 
-        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
         SimpleTile tileAroundMinus60deg = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
 
         // Latitude South of the tile
-        System.out.println("##### Bord de tuile au niveau latitude South #####");
-
         latDeg = getSouthernEdgeOfTile(tileAroundMinus60deg);
         lonDeg = lonTileDeg;
-        System.out.println(">>>> Bord South lat deg = " + latDeg + "\n");
         
         isDifferentStep = true;
         searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileAroundMinus60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
@@ -503,45 +449,33 @@ public class TilesCacheTest {
         SimpleTile cornerZipperTile;
         
         // Latitude/Longitude corner NW
-        System.out.println("##### Coin de tuile au niveau latitude North et longitude West #####");
         latDeg = getNorthernEdgeOfTile(tile);
         lonDeg = getWesternEdgeOfTile(tile);
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
         
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.NORTH_WEST, tile, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
         
         // Latitude/Longitude corner SW
-        System.out.println("##### Coin de tuile au niveau latitude South et longitude West #####");
         latDeg = getSouthernEdgeOfTile(tile);
         lonDeg = getWesternEdgeOfTile(tile);
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
 
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.SOUTH_WEST, tile, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Latitude/Longitude corner NE
-        System.out.println("##### Coin de tuile au niveau latitude North et longitude Est #####");
         latDeg = getNorthernEdgeOfTile(tile);
         lonDeg = getEasternEdgeOfTile(tile);
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
 
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.NORTH_EAST, tile, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 
         // Latitude/Longitude corner SE
-        System.out.println("##### Coin de tuile au niveau latitude South et longitude Est #####");
         latDeg = getSouthernEdgeOfTile(tile);
         lonDeg = getEasternEdgeOfTile(tile);
-        System.out.println(">>>> Search lat deg = " + latDeg + " lon deg= " + lonDeg + "\n");
         cornerZipperTile = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg));
-//        printTileInfo(cornerZipperTile, rasterStepDeg, rasterStepDeg);
 
         checkGeodeticPointBelongsToZipper(FastMath.toRadians(latDeg), FastMath.toRadians(lonDeg), cornerZipperTile);
         checkCornerZipperTile(cornerZipperTile, Tile.Location.SOUTH_EAST, tile, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
@@ -559,50 +493,6 @@ public class TilesCacheTest {
         assertTrue((lonMin <= longitude) && (longitude <= lonMax));
         
     }
-
-    private void printSurroundingTiles(double latDeg, double lonDeg, final double sizeDeg, final double rasterStepDeg,
-            TilesCache<SimpleTile> cache, int stepPrint, int nbRowCol) throws FileNotFoundException, UnsupportedEncodingException {
-
-        // print tile above ...
-        double latUp = latDeg + sizeDeg;
-        SimpleTile tileUp = cache.getTile(FastMath.toRadians(latUp), FastMath.toRadians(lonDeg));
-        String tileUpName = "above_lat" + Double.toString(latUp) + "lon" + Double.toString(lonDeg) + ".txt";
-        printExtractTileData(tileUpName, tileUp, stepPrint, 0, nbRowCol, 0, tileUp.getLongitudeColumns());
-
-        // print tile below
-        double latBelow = latDeg - sizeDeg;
-        SimpleTile tileBelow = cache.getTile(FastMath.toRadians(latBelow), FastMath.toRadians(lonDeg));
-        String tileBelowName = "below_lat" + Double.toString(latBelow) + "lon" + Double.toString(lonDeg) + ".txt";
-        printExtractTileData(tileBelowName, tileBelow, stepPrint, tileBelow.getLatitudeRows() - nbRowCol, tileBelow.getLatitudeRows(), 0, tileBelow.getLongitudeColumns());
-
-        // print tile left
-        double lonLeft = lonDeg - sizeDeg;
-        SimpleTile tileLeft = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonLeft));
-        String tileLeftName = "left_lat" + Double.toString(latDeg) + "lon" + Double.toString(lonLeft) + ".txt";
-        printExtractTileData(tileLeftName, tileLeft, stepPrint, 0, tileLeft.getLatitudeRows(),tileLeft.getLongitudeColumns() - nbRowCol, tileLeft.getLongitudeColumns());
-
-        // print tile right
-        double lonRight = lonDeg + sizeDeg;
-        SimpleTile tileRight = cache.getTile(FastMath.toRadians(latDeg), FastMath.toRadians(lonRight));
-        String tileRightName = "right_lat" + Double.toString(latDeg) + "lon" + Double.toString(lonRight) + ".txt";
-        printExtractTileData(tileRightName, tileRight, stepPrint, 0, tileRight.getLatitudeRows(), 0, nbRowCol);
-
-    }
-
-    private void checkOneValueZipperTile(double latDeg, double lonDeg, SimpleTile zipperTile, 
-            final int nbRows, final int nbCols,
-            double epsilonLatLon, double minLat, double maxLat, double minLon, double maxLon,
-            final int expectedLatIndex, final int expectedLonIndex, final double expectedElevation) {
-        
-        assertTrue(zipperTile.getLatitudeRows() == nbRows);
-        assertTrue(zipperTile.getLongitudeColumns() == nbCols);
-        assertEquals(FastMath.toDegrees(zipperTile.getMinimumLatitude()), minLat, epsilonLatLon);
-        assertEquals(FastMath.toDegrees(zipperTile.getMaximumLatitude()), maxLat, epsilonLatLon);
-        assertEquals(FastMath.toDegrees(zipperTile.getMinimumLongitude()), minLon, epsilonLatLon);
-        assertEquals(FastMath.toDegrees(zipperTile.getMaximumLongitude()), maxLon, epsilonLatLon);
-        checkLatLonIndex(latDeg, expectedLatIndex, lonDeg, expectedLonIndex,  expectedElevation, zipperTile);
-    }
-    
     private void checkCornerZipperTile(SimpleTile cornerZipperTile, Tile.Location location, SimpleTile originTile,
             double tileSizeDeg, TilesCache<SimpleTile> cache, double epsilonLatLon, boolean isDifferentStep) {
     
@@ -637,14 +527,8 @@ public class TilesCacheTest {
                 SimpleTile aboveRight = originTile;
                 SimpleTile aboveLeft = tileLeft;
                 
-                
-                System.out.println("CORNER SOUTH WEST");
-                printSurroundingCorner(cornerZipperTile,belowRight, belowLeft, aboveRight, aboveLeft);
-                
                checkCornerElevationsDifferentStep(cornerZipperTile, originTile, belowLeft, belowRight, aboveLeft, aboveRight, epsilonLatLon);
-
             }
-
         } else if (location == Tile.Location.NORTH_WEST) {
 
             SimpleTile tileAbove = surroundingTiles.getTileAbove();
@@ -675,11 +559,7 @@ public class TilesCacheTest {
                 SimpleTile aboveRight = tileAbove;
                 SimpleTile aboveLeft = leftAboveOfCurrent;
                 
-                System.out.println("CORNER NORTH WEST");
-                printSurroundingCorner(cornerZipperTile,belowRight, belowLeft, aboveRight, aboveLeft);
-
                 checkCornerElevationsDifferentStep(cornerZipperTile, originTile, belowLeft, belowRight, aboveLeft, aboveRight, epsilonLatLon);
-
             }
             
 
@@ -712,12 +592,8 @@ public class TilesCacheTest {
                 SimpleTile aboveRight  = tileRight;
                 SimpleTile aboveLeft   = originTile;
                 
-                System.out.println("CORNER SOUTH EAST");
-                printSurroundingCorner(cornerZipperTile,belowRight, belowLeft, aboveRight, aboveLeft);
-                
                 checkCornerElevationsDifferentStep(cornerZipperTile, originTile, belowLeft, belowRight, aboveLeft, aboveRight, epsilonLatLon);
             }
-
         } else if (location == Tile.Location.NORTH_EAST) {
 
             SimpleTile tileAbove = surroundingTiles.getTileAbove();
@@ -747,118 +623,10 @@ public class TilesCacheTest {
                 SimpleTile aboveRight = aboveRightOfCurrent;
                 SimpleTile aboveLeft = tileAbove;
                 
-                System.out.println("CORNER NORTH_EAST");
-                printSurroundingCorner(cornerZipperTile,belowRight, belowLeft, aboveRight, aboveLeft);
- 
                 checkCornerElevationsDifferentStep(cornerZipperTile, originTile, belowLeft, belowRight, aboveLeft, aboveRight, epsilonLatLon);
-
             }
         }
     }
-
-    private void printSurroundingCorner(SimpleTile cornerZipperTile, SimpleTile belowRight, SimpleTile belowLeft, SimpleTile aboveRight,
-            SimpleTile aboveLeft) {
-        
-        
-        for (int i = 3; i >= 0; i--) {
-            System.out.println(cornerZipperTile.getElevationAtIndices(i, 0) + " | " + cornerZipperTile.getElevationAtIndices(i, 1) + " | " + 
-                               cornerZipperTile.getElevationAtIndices(i, 2) + " | " + cornerZipperTile.getElevationAtIndices(i, 3) + " | " );
-            }
-
-        System.out.println(" BELOW RIGHT");
-        if (belowRight.getLongitudeColumns() > 3) {
-            for (int i = belowRight.getLatitudeRows() - 1; i >= belowRight.getLatitudeRows() - 3; i--) {
-                System.out.println(belowRight.getElevationAtIndices(i, 0) + " | " +
-                        belowRight.getElevationAtIndices(i, 1) + " | "  +
-                        belowRight.getElevationAtIndices(i, 2) + " | "  +
-                        belowRight.getElevationAtIndices(i, 3) + " | "  +
-                        belowRight.getElevationAtIndices(i, 4) + " | "  +
-                        belowRight.getElevationAtIndices(i, 5) + " | "  +
-                        belowRight.getElevationAtIndices(i, 6) + " | "  +
-                        belowRight.getElevationAtIndices(i, 7) + " | "  +
-                        belowRight.getElevationAtIndices(i, 8) + " | "  +
-                        belowRight.getElevationAtIndices(i, 9) + " | ");
-            }
-        } else {
-            for (int i = 2; i >= 0; i--) {
-                System.out.println(belowRight.getElevationAtIndices(i, 0) + " | " +
-                        belowRight.getElevationAtIndices(i, 1) + " | "  +
-                        belowRight.getElevationAtIndices(i, 2) + " | " );
-            }
-        }
-        
-        System.out.println(" BELOW LEFT");
-        if (belowLeft.getLongitudeColumns() > 3) {
-            for (int i = belowLeft.getLatitudeRows() - 1; i >= belowLeft.getLatitudeRows() - 3; i--) {
-                System.out.println(belowLeft.getElevationAtIndices(i, 0) + " | " +
-                        belowLeft.getElevationAtIndices(i, 1) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 2) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 3) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 4) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 5) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 6) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 7) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 8) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 9) + " | ");
-            }
-        } else {
-            for (int i = 2; i >= 0; i--) {
-                System.out.println(belowLeft.getElevationAtIndices(i, 0) + " | " +
-                        belowLeft.getElevationAtIndices(i, 1) + " | "  +
-                        belowLeft.getElevationAtIndices(i, 2) + " | " );
-            }
-
-        }
-        
-        
-        System.out.println(" ABOVE RIGHT");
-        
-        if (aboveRight.getLongitudeColumns() > 3) {
-            for (int i = 3; i >= 0; i--) {
-                System.out.println(aboveRight.getElevationAtIndices(i, 0) + " | " +
-                        aboveRight.getElevationAtIndices(i, 1) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 2) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 3) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 4) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 5) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 6) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 7) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 8) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 9) + " | ");
-            }
-
-        } else {
-            for (int i = 2; i >= 0; i--) {
-                System.out.println(aboveRight.getElevationAtIndices(i, 0) + " | " +
-                        aboveRight.getElevationAtIndices(i, 1) + " | "  +
-                        aboveRight.getElevationAtIndices(i, 2) + " | " );
-            }
-        }
-
-        System.out.println(" ABOVE LEFT");
-        if (aboveLeft.getLongitudeColumns() > 3) {
-            for (int i = 3; i >= 0; i--) {
-                System.out.println(aboveLeft.getElevationAtIndices(i, 0) + " | " +
-                        aboveLeft.getElevationAtIndices(i, 1) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 2) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 3) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 4) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 5) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 6) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 7) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 8) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 9) + " | ");
-            }
-
-        } else {
-            for (int i = 2; i >= 0; i--) {
-                System.out.println(aboveLeft.getElevationAtIndices(i, 0) + " | " +
-                        aboveLeft.getElevationAtIndices(i, 1) + " | "  +
-                        aboveLeft.getElevationAtIndices(i, 2) + " | " );
-            }
-        }
-    }
-
     private void checkCornerElevations(SimpleTile cornerZipperTile, SimpleTile originTile, 
                                        SimpleTile belowLeft, SimpleTile belowRight, SimpleTile aboveLeft, SimpleTile aboveRight, 
                                        double epsilonLatLon) {
@@ -941,10 +709,9 @@ public class TilesCacheTest {
         assertEquals(aboveRightElevation, cornerZipperElevation, epsilonLatLon);
     }
     
-    
     private void checkCornerElevationsDifferentStep(SimpleTile cornerZipperTile, SimpleTile originTile, 
-                                       SimpleTile belowLeft, SimpleTile belowRight, SimpleTile aboveLeft, SimpleTile aboveRight, 
-                                       double epsilonLatLon) {
+                                                    SimpleTile belowLeft, SimpleTile belowRight, SimpleTile aboveLeft, SimpleTile aboveRight, 
+                                                    double epsilonLatLon) {
         
         
         // We assure to be inside a cell by adding a delta step (to avoid inappropriate index computation)
@@ -1086,7 +853,6 @@ public class TilesCacheTest {
         assertEquals(aboveRightElevation, cornerZipperElevation, epsilonLatLon);
     }
 
-    	
     private void checkZipperTile(SimpleTile zipperTile, Tile.Location zipperLocation, 
                                  SimpleTile originTile, double tileSizeDeg, 
                                  TilesCache<SimpleTile> cache, double epsilonLatLon) {
@@ -1211,7 +977,6 @@ public class TilesCacheTest {
                 double belowTileDoubleLongitudeIndex = (zipperLongitude - tileBelow.getMinimumLongitude()) / tileBelow.getLongitudeStep();
                 int belowTileLongitudeIndex = FastMath.max(0, FastMath.min(tileBelow.getLongitudeColumns() - 1, (int) FastMath.floor(belowTileDoubleLongitudeIndex)));
 
- 
                 // row 0 of zipper
                 double zipperLat0 = zipperTile.getMinimumLatitude() + 0.1*zipperTile.getLatitudeStep();
                 double belowTileDoubleLatitudeIndex =  (zipperLat0  - tileBelow.getMinimumLatitude())  / tileBelow.getLatitudeStep();
@@ -1350,7 +1115,6 @@ public class TilesCacheTest {
         }
     }
 
-
     private final static double getNorthernEdgeOfTile(SimpleTile tile) {
         double northernLatitudeForTile = getNorthernLatitudeForTile(tile);
         // Inside the northern row of latitude
@@ -1375,7 +1139,6 @@ public class TilesCacheTest {
         return easternLongitudeForTile - 0.1*FastMath.toDegrees(tile.getLongitudeStep());
     }
     
-    
     private final static double getNorthernLatitudeForTile(SimpleTile tile) {
         return FastMath.toDegrees(tile.getMaximumLatitude()) + 0.5*FastMath.toDegrees(tile.getLatitudeStep());
     }
@@ -1392,112 +1155,11 @@ public class TilesCacheTest {
         return FastMath.toDegrees(tile.getMaximumLongitude()) + 0.5*FastMath.toDegrees(tile.getLongitudeStep());
     }
 
-
-    
-    private void checkLatLonIndex(final double latDeg, final int expectedLatIndex, 
-                                  final double lonDeg, final int expectedLonIndex, 
-                                  final double expectedElevation,
-                                  final SimpleTile tile) {
-        
-        double latRad = FastMath.toRadians(latDeg);
-        double lonRad = FastMath.toRadians(lonDeg);
-
-        assertTrue(tile.getFloorLatitudeIndex(latRad) == expectedLatIndex);
-        assertTrue((FastMath.toDegrees(tile.getLatitudeAtIndex(expectedLatIndex)) <= latDeg &&
-                (FastMath.toDegrees(tile.getLatitudeAtIndex(expectedLatIndex+1)) >= latDeg)));
-        
-        assertTrue(tile.getFloorLongitudeIndex(lonRad) == expectedLonIndex);
-        assertTrue((FastMath.toDegrees(tile.getLongitudeAtIndex(expectedLonIndex)) <= lonDeg &&
-                (FastMath.toDegrees(tile.getLongitudeAtIndex(expectedLonIndex+1)) >= lonDeg)));
-        
-        assertEquals(expectedElevation, tile.getElevationAtIndices(expectedLatIndex, expectedLonIndex), epsilonElevation);
-    }
-    
     final static double epsilonElevation = 1.e-6;
 
     final static java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols(java.util.Locale.US);
     final static java.text.DecimalFormat dfs = new java.text.DecimalFormat("#.#####",symbols);
 
-    private void printTileInfo(SimpleTile tile, double stepLatDeg, double stepLonDeg){
-        try {
-            System.out.format(
-                    "Bilan found Tile: " + tile.getLatitudeRows() + " lat rows x " + 
-                                           tile.getLongitudeColumns() + " long columns \n" +  
-                    "                   Rugged Convention { " +
-                    " min lat = " + dfs.format(FastMath.toDegrees(tile.getMinimumLatitude())) + 
-                    " max lat = " + dfs.format(FastMath.toDegrees(tile.getMaximumLatitude())) + "}" + 
-                    " {" + 
-                    " min lon = " + dfs.format(FastMath.toDegrees(tile.getMinimumLongitude())) + 
-                    " max lon = " + dfs.format(FastMath.toDegrees(tile.getMaximumLongitude())) + "}\n");
-            System.out.format(
-                    "                   SRTM Convention { "+
-                    " min lat = " + dfs.format(FastMath.toDegrees(tile.getMinimumLatitude())-0.5*stepLatDeg) + 
-                    " max lat = " + dfs.format(FastMath.toDegrees(tile.getMaximumLatitude())+0.5*stepLatDeg) + "}" + 
-                    " {" + 
-                    " min lon = " + dfs.format(FastMath.toDegrees(tile.getMinimumLongitude())-0.5*stepLonDeg) + 
-                    " max lon = " + dfs.format(FastMath.toDegrees(tile.getMaximumLongitude())+0.5*stepLonDeg) + "}" +
-                    " \n\n");
-        } catch (Exception e) {
-            System.out.println("problem");
-        }
-    }
-    
-    private void printTileData(String tileName, SimpleTile tile, int stepPrint) throws FileNotFoundException, UnsupportedEncodingException {
-        
-        printExtractTileData(tileName, tile, stepPrint, 0, tile.getLatitudeRows(), 0, tile.getLongitudeColumns());
-    }
-
-    private void printExtractTileData(String tileName, SimpleTile tile, int stepPrint,
-            int iLatMin, int iLatMax, int jLonMin, int jLonMax) throws FileNotFoundException, UnsupportedEncodingException {
-        
-        PrintWriter elevationPrinter = new PrintWriter(tileName, "UTF-8");
-
-//        elevationPrinter.println("# latitude(°) longitude(°) h (m)" + "\n" + delimiter);
-        for (int jLon = jLonMin; jLon < jLonMax; jLon += stepPrint) {
-//            if (jLon % 100 == 0) System.out.println("longitude = " + jLon);
-            for (int iLat = iLatMin; iLat < iLatMax; iLat += stepPrint) {
-
-                double elevation = tile.getElevationAtIndices(iLat, jLon);
-                double latitude = tile.getLatitudeAtIndex(iLat);
-                double longitude = tile.getLongitudeAtIndex(jLon);
-                elevationPrinter.format(Locale.US, "%3.8f %3.8f %.4f%n",
-                                        FastMath.toDegrees(latitude), FastMath.toDegrees(longitude), elevation);
-            }
-        }
-        if (elevationPrinter != null) elevationPrinter.close();
-
-    }
- 
-    private void printEdgeTileData(String tileName, SimpleTile tile, int stepPrint,
-            int iLatMax, int jLonMax, int nbRowCols) throws FileNotFoundException, UnsupportedEncodingException {
-        
-        PrintWriter elevationPrinter = new PrintWriter(tileName, "UTF-8");
-
-        for (int jLon = 0; jLon < jLonMax; jLon += stepPrint) {
-//            if (jLon % 100 == 0) System.out.println("longitude = " + jLon);
-            for (int iLat = 0; iLat < iLatMax; iLat += stepPrint) {
-
-                if ((((0 <= iLat) && (iLat < nbRowCols)) || ((iLatMax - nbRowCols <= iLat) && (iLat < iLatMax))) ||
-                    (((0 <= jLon) && (jLon < nbRowCols)) || ((jLonMax - nbRowCols <= jLon) && (jLon < jLonMax)))
-                    ) {
-                    double elevation = tile.getElevationAtIndices(iLat, jLon);
-                    double latitude = tile.getLatitudeAtIndex(iLat);
-                    double longitude = tile.getLongitudeAtIndex(jLon);
-                    elevationPrinter.format(Locale.US, "%3.8f %3.8f %.4f%n",
-                            FastMath.toDegrees(latitude), FastMath.toDegrees(longitude), elevation);
-                }
-            }
-        }
-        if (elevationPrinter != null) elevationPrinter.close();
-        
-//        +        printExtractTileData(tileName + "NorthEdge", tile, stepPrint, iLatMax - nbRowCols, iLatMax, 0, jLonMax);
-//        +        printExtractTileData(tileName + "SouthEdge", tile, stepPrint, 0, nbRowCols, 0, jLonMax);
-//        +        printExtractTileData(tileName + "WestEdge", tile, stepPrint, 0, iLatMax, 0, nbRowCols);
-//        +        printExtractTileData(tileName + "EastEdge", tile, stepPrint, 0, iLatMax, jLonMax - nbRowCols, jLonMax);
-
-    }      
-
-    
     /** Clean up of factory map
      * @param factoryClass
      */
@@ -1815,214 +1477,36 @@ public class TilesCacheTest {
 //
 //        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.WEST,tileAntiMeridianWest, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
 //
+//        
+//        // Change of resolution between tiles
+//        // ==================================
+//        // Cleanup
+//        clearFactoryMaps(CountingFactory.class);
+//        factory = new CountingFactory();
+//        cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
+//
+//        isDifferentStep = true;
+//
+////        // North-East hemisphere 
+////        // =====================
+////        System.out.println("#################################");
+////        System.out.println("NORTH EAST hemisphere");
+////        // tile SRTM: 45N - 50N / 10E-15E
+////        latTileDeg = 47.;
+////        lonTileDeg = 12.3;
+////
+////        System.out.println(">>>> Search lat deg = " + latTileDeg + " lon deg= " + lonTileDeg + "\n");
+////        SimpleTile tileNEhemisphere = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+////        // same step and size in longitude and latitude
+////        double tileSizeDeg = FastMath.toDegrees(tileNEhemisphere.getLatitudeRows()*tileNEhemisphere.getLatitudeStep());
+////        double rasterStepDeg = FastMath.toDegrees(tileNEhemisphere.getLatitudeStep());
+//
+//
+//
 //    }
     
 
 }
-
-//// Test for development purpose only: use a real DEM (SRTM)
-//
-///**
-// * To read SRTM tiles (get from http://dwtkns.com/srtm/)
-// * The tiles are seamless = no overlapping 
-// */
-//class SRTMElevationUpdater implements TileUpdater {
-//    
-//    /** Last lat value used to ask to update a tile. */
-//    private double lastLat = Double.NaN;
-//
-//    /** Last lon value used to ask to update a tile. */
-//    private double lastLon = Double.NaN;
-//
-//    /** Nb times the same lat/lon value is used to ask to update a tile (used to avoid infinite loop). */
-//    private int nbCall = 0;
-//
-//    /** Nb time rugged ask exactly same DEM tile: means that infinite loop. */
-//    private static final int NB_TIME_ASK_SAME_TILE = 1000;
-//
-//    /** Raster root directory, should contains raster files. */
-//    private String rootDirectory;
-//
-//
-//    /**
-//     * Constructor.
-//     */
-//    public SRTMElevationUpdater(final String rootDirectory) {
-//        
-//        this.rootDirectory = rootDirectory;
-//        checkRasterDirectory(rootDirectory);
-//    }
-//    
-//    /** Update given tile using DEM elevation.
-//     * @param latitude latitude that must be covered by the tile (rad)
-//     * @param longitude longitude that must be covered by the tile (rad)
-//     * @param tile to update
-//     */
-//    @Override
-//    public void updateTile(final double latitude, final double longitude, final UpdatableTile tile) {
-//
-//        // Check if latitude and longitude already known
-//        if (latitude == this.lastLat && longitude == this.lastLon) {
-//            this.nbCall++;
-//        } else {
-//            this.lastLat = latitude;
-//            this.lastLon = longitude;
-//            this.nbCall = 0;
-//        }
-//        if (this.nbCall > NB_TIME_ASK_SAME_TILE) {
-//            String str = String.format("infinite loop for %3.8f long %3.8f lat ", longitude, latitude);
-//            org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
-//            throw new org.orekit.rugged.errors.RuggedException(message);
-//        }
-//
-//        String rasterFileName = getRasterFilePath(latitude, longitude);
-//        
-////        java.io.FileFile rasterFile = new java.io.File(rasterFileName);
-////        if (!rasterFile.exists()) {
-////            // No DEM => we are on water => read geoid
-////            GeoidHandler geoidHandler = GeoidHandler.getInstance();
-////            geoidHandler.updateTile(latitude, longitude, tile);
-////            System.out.format("WARNING: No DEM tile found for latitude (deg) = %3.8f  and longitude (deg) = %3.8f." +
-////                              " DEM file %s doesn't exist. Use of Geoid data instead.%n",
-////                              FastMath.toDegrees(latitude), FastMath.toDegrees(longitude), rasterFileName);
-////            return;
-////        }
-//
-//        org.gdal.gdal.Dataset ds = org.gdal.gdal.gdal.Open(rasterFileName, org.gdal.gdalconst.gdalconst.GA_ReadOnly);
-//        int rasterLonSize = ds.GetRasterXSize();
-//        int rasterLatSize = ds.GetRasterYSize();
-//        double[] geoTransformInfo = ds.GetGeoTransform();
-//
-//        double minLat = Double.NaN;
-//        double minLon = Double.NaN;
-//        double lonStep = Double.NaN;
-//        double latStep = Double.NaN;
-//
-//        if (geoTransformInfo.length < 6) { // Check that the geoTransformInfo is correct
-//            String str = "GDALGeoTransform has < 6 elements";
-//            org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
-//            throw new org.orekit.rugged.errors.RuggedException(message);
-//        } else {
-//            lonStep = FastMath.abs(geoTransformInfo[1]);
-//            latStep = FastMath.abs(geoTransformInfo[5]);
-//
-//            minLon = geoTransformInfo[0] + 0.5 * lonStep;
-//            minLat = geoTransformInfo[3] - (rasterLatSize - 0.5) * latStep;
-//        }
-//
-//        org.gdal.gdal.Band band = ds.GetRasterBand(1);
-//
-//        // Define Tile Geometry
-//        tile.setGeometry(FastMath.toRadians(minLat), FastMath.toRadians(minLon), FastMath.toRadians(latStep), FastMath.toRadians(lonStep), rasterLatSize, rasterLonSize);
-//
-//        // Loop over raster values
-//        double[] data = new double[rasterLatSize * rasterLonSize];
-//
-////        // SRTM is given above the geoid
-////         GeoidHandler geoidHandler = GeoidHandler.getInstance();
-////         GdalTransformTools gtTools = new GdalTransformTools(geoTransformInfo, rasterLonSize, rasterLatSize);
-//
-//        // We read all raster at once to limit the numbers of Band.ReadRaster calls
-//        band.ReadRaster(0, 0, rasterLonSize, rasterLatSize, data);
-//
-//        // Get the no data value from the raster
-//        Double[] noDataValue = new Double[1];
-//        band.GetNoDataValue(noDataValue);
-//
-//        // test if the no data value exists
-//        Boolean noDataValueExist = false;
-//        if (noDataValue[0] != null) noDataValueExist = true;
-//
-//        // from bottom left to upper right corner
-//        for (int iLat = rasterLatSize - 1; iLat >= 0; iLat--) {
-//            for (int jLon = 0; jLon < rasterLonSize; jLon++) {
-//
-//                double elevationOverEllipsoid = 0.0;
-//                elevationOverEllipsoid = data[iLat * rasterLonSize + jLon];
-//
-//                if (noDataValueExist && (elevationOverEllipsoid == noDataValue[0])) {
-//                    elevationOverEllipsoid = 0.0;
-//                }
-//                
-////                // The elevation value we send to rugged must be computed against ellipsoid
-////                // => when DEM is SRTM , we must add geoid value
-////                double lon = gtTools.getXFromPixelLine(jLon, iLat);
-////                double lat = gtTools.getYFromPixelLine(jLon, iLat);
-////                elevationOverEllipsoid = elevationOverEllipsoid + geoidHandler.getElevationDegree(lat, lon);
-//
-//                // Set elevation over the ellipsoid
-//                tile.setElevation(rasterLatSize - 1 - iLat, jLon, elevationOverEllipsoid);
-//            }
-//        }
-//        band.delete();
-//        band = null;
-//        ds.delete();
-//        ds = null;
-//    }
-//
-//    private String getRasterFilePath(final double latitude, final double longitude) {
-//
-//        double latDeg = FastMath.toDegrees(latitude);
-//        // Assure that the longitude belongs to [-180, + 180]
-//        double lonDeg = FastMath.toDegrees(MathUtils.normalizeAngle(longitude, 0.0));
-//
-//        // Compute parent dir with longitude value
-//        int parentDirValue = (int) (1 + (lonDeg + 180.) / 5);
-//        String parentDir = String.format("%02d", parentDirValue);
-//
-//        // Compute sub dir with latitude value
-//        int subDirValue = (int) (1 + (60. - latDeg) / 5);
-//        String subDir = String.format("%02d", subDirValue);
-//
-//        String filePath = this.rootDirectory + java.io.File.separator + parentDir + java.io.File.separator + subDir + java.io.File.separator +
-//                          "srtm_" + parentDir + "_" + subDir + ".tif";
-//        return filePath;
-//    }
-//    
-//    private boolean checkRasterDirectory(final String directory) {
-//        
-//        if (directory == null) {
-//
-//            String str = "Directory not defined";
-//            org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
-//            throw new org.orekit.rugged.errors.RuggedException(message);
-//
-//        } else {
-//            try {
-//                java.nio.file.Path dir = java.nio.file.FileSystems.getDefault().getPath(directory);
-//                java.nio.file.DirectoryStream<java.nio.file.Path> stream = java.nio.file.Files.newDirectoryStream(dir);
-//                boolean found = false;
-//                for (java.nio.file.Path path : stream) {
-//                    if (!found) {
-//                        java.io.File currentFile = path.toFile();
-//                        if (currentFile.isDirectory()) {
-//                            found = checkRasterDirectory(currentFile.getAbsolutePath());
-//                        } else {
-//                            String filePath = currentFile.getAbsolutePath();
-//                            if (filePath.matches(".*.tif")) {
-//                                found = true;
-//                            }
-//                        }
-//                        if (found) {
-//                            stream.close();
-//                            return true;
-//                        }
-//                    }
-//                }
-//                stream.close();
-//
-//                String str = "raster not found  in" + directory;
-//                org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
-//                throw new org.orekit.rugged.errors.RuggedException(message);
-//
-//            } catch (java.io.IOException e) {
-//                String str = "dir not found " + directory;
-//                org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
-//                throw new org.orekit.rugged.errors.RuggedException(message);
-//            }
-//        }
-//    }
-//}
 
 class SurroundingTiles {
 
@@ -2076,3 +1560,208 @@ class SurroundingTiles {
         return cache.getTile(FastMath.toRadians(latDeg), lonRightNorm);
 	}
 }
+
+////Test for development purpose only: use a real DEM (SRTM)
+//
+///**
+//* To read SRTM tiles (get from http://dwtkns.com/srtm/)
+//* The tiles are seamless = no overlapping 
+//*/
+//class SRTMElevationUpdater implements TileUpdater {
+//
+///** Last lat value used to ask to update a tile. */
+//private double lastLat = Double.NaN;
+//
+///** Last lon value used to ask to update a tile. */
+//private double lastLon = Double.NaN;
+//
+///** Nb times the same lat/lon value is used to ask to update a tile (used to avoid infinite loop). */
+//private int nbCall = 0;
+//
+///** Nb time rugged ask exactly same DEM tile: means that infinite loop. */
+//private static final int NB_TIME_ASK_SAME_TILE = 1000;
+//
+///** Raster root directory, should contains raster files. */
+//private String rootDirectory;
+//
+//
+///**
+//* Constructor.
+//*/
+//public SRTMElevationUpdater(final String rootDirectory) {
+//   
+//   this.rootDirectory = rootDirectory;
+//   checkRasterDirectory(rootDirectory);
+//}
+//
+///** Update given tile using DEM elevation.
+//* @param latitude latitude that must be covered by the tile (rad)
+//* @param longitude longitude that must be covered by the tile (rad)
+//* @param tile to update
+//*/
+//@Override
+//public void updateTile(final double latitude, final double longitude, final UpdatableTile tile) {
+//
+//   // Check if latitude and longitude already known
+//   if (latitude == this.lastLat && longitude == this.lastLon) {
+//       this.nbCall++;
+//   } else {
+//       this.lastLat = latitude;
+//       this.lastLon = longitude;
+//       this.nbCall = 0;
+//   }
+//   if (this.nbCall > NB_TIME_ASK_SAME_TILE) {
+//       String str = String.format("infinite loop for %3.8f long %3.8f lat ", longitude, latitude);
+//       org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
+//       throw new org.orekit.rugged.errors.RuggedException(message);
+//   }
+//
+//   String rasterFileName = getRasterFilePath(latitude, longitude);
+//   
+////   java.io.FileFile rasterFile = new java.io.File(rasterFileName);
+////   if (!rasterFile.exists()) {
+////       // No DEM => we are on water => read geoid
+////       GeoidHandler geoidHandler = GeoidHandler.getInstance();
+////       geoidHandler.updateTile(latitude, longitude, tile);
+////       System.out.format("WARNING: No DEM tile found for latitude (deg) = %3.8f  and longitude (deg) = %3.8f." +
+////                         " DEM file %s doesn't exist. Use of Geoid data instead.%n",
+////                         FastMath.toDegrees(latitude), FastMath.toDegrees(longitude), rasterFileName);
+////       return;
+////   }
+//
+//   org.gdal.gdal.Dataset ds = org.gdal.gdal.gdal.Open(rasterFileName, org.gdal.gdalconst.gdalconst.GA_ReadOnly);
+//   int rasterLonSize = ds.GetRasterXSize();
+//   int rasterLatSize = ds.GetRasterYSize();
+//   double[] geoTransformInfo = ds.GetGeoTransform();
+//
+//   double minLat = Double.NaN;
+//   double minLon = Double.NaN;
+//   double lonStep = Double.NaN;
+//   double latStep = Double.NaN;
+//
+//   if (geoTransformInfo.length < 6) { // Check that the geoTransformInfo is correct
+//       String str = "GDALGeoTransform has < 6 elements";
+//       org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
+//       throw new org.orekit.rugged.errors.RuggedException(message);
+//   } else {
+//       lonStep = FastMath.abs(geoTransformInfo[1]);
+//       latStep = FastMath.abs(geoTransformInfo[5]);
+//
+//       minLon = geoTransformInfo[0] + 0.5 * lonStep;
+//       minLat = geoTransformInfo[3] - (rasterLatSize - 0.5) * latStep;
+//   }
+//
+//   org.gdal.gdal.Band band = ds.GetRasterBand(1);
+//
+//   // Define Tile Geometry
+//   tile.setGeometry(FastMath.toRadians(minLat), FastMath.toRadians(minLon), FastMath.toRadians(latStep), FastMath.toRadians(lonStep), rasterLatSize, rasterLonSize);
+//
+//   // Loop over raster values
+//   double[] data = new double[rasterLatSize * rasterLonSize];
+//
+////   // SRTM is given above the geoid
+////    GeoidHandler geoidHandler = GeoidHandler.getInstance();
+////    GdalTransformTools gtTools = new GdalTransformTools(geoTransformInfo, rasterLonSize, rasterLatSize);
+//
+//   // We read all raster at once to limit the numbers of Band.ReadRaster calls
+//   band.ReadRaster(0, 0, rasterLonSize, rasterLatSize, data);
+//
+//   // Get the no data value from the raster
+//   Double[] noDataValue = new Double[1];
+//   band.GetNoDataValue(noDataValue);
+//
+//   // test if the no data value exists
+//   Boolean noDataValueExist = false;
+//   if (noDataValue[0] != null) noDataValueExist = true;
+//
+//   // from bottom left to upper right corner
+//   for (int iLat = rasterLatSize - 1; iLat >= 0; iLat--) {
+//       for (int jLon = 0; jLon < rasterLonSize; jLon++) {
+//
+//           double elevationOverEllipsoid = 0.0;
+//           elevationOverEllipsoid = data[iLat * rasterLonSize + jLon];
+//
+//           if (noDataValueExist && (elevationOverEllipsoid == noDataValue[0])) {
+//               elevationOverEllipsoid = 0.0;
+//           }
+//           
+////           // The elevation value we send to rugged must be computed against ellipsoid
+////           // => when DEM is SRTM , we must add geoid value
+////           double lon = gtTools.getXFromPixelLine(jLon, iLat);
+////           double lat = gtTools.getYFromPixelLine(jLon, iLat);
+////           elevationOverEllipsoid = elevationOverEllipsoid + geoidHandler.getElevationDegree(lat, lon);
+//
+//           // Set elevation over the ellipsoid
+//           tile.setElevation(rasterLatSize - 1 - iLat, jLon, elevationOverEllipsoid);
+//       }
+//   }
+//   band.delete();
+//   band = null;
+//   ds.delete();
+//   ds = null;
+//}
+//
+//private String getRasterFilePath(final double latitude, final double longitude) {
+//
+//   double latDeg = FastMath.toDegrees(latitude);
+//   // Assure that the longitude belongs to [-180, + 180]
+//   double lonDeg = FastMath.toDegrees(MathUtils.normalizeAngle(longitude, 0.0));
+//
+//   // Compute parent dir with longitude value
+//   int parentDirValue = (int) (1 + (lonDeg + 180.) / 5);
+//   String parentDir = String.format("%02d", parentDirValue);
+//
+//   // Compute sub dir with latitude value
+//   int subDirValue = (int) (1 + (60. - latDeg) / 5);
+//   String subDir = String.format("%02d", subDirValue);
+//
+//   String filePath = this.rootDirectory + java.io.File.separator + parentDir + java.io.File.separator + subDir + java.io.File.separator +
+//                     "srtm_" + parentDir + "_" + subDir + ".tif";
+//   return filePath;
+//}
+//
+//private boolean checkRasterDirectory(final String directory) {
+//   
+//   if (directory == null) {
+//
+//       String str = "Directory not defined";
+//       org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
+//       throw new org.orekit.rugged.errors.RuggedException(message);
+//
+//   } else {
+//       try {
+//           java.nio.file.Path dir = java.nio.file.FileSystems.getDefault().getPath(directory);
+//           java.nio.file.DirectoryStream<java.nio.file.Path> stream = java.nio.file.Files.newDirectoryStream(dir);
+//           boolean found = false;
+//           for (java.nio.file.Path path : stream) {
+//               if (!found) {
+//                   java.io.File currentFile = path.toFile();
+//                   if (currentFile.isDirectory()) {
+//                       found = checkRasterDirectory(currentFile.getAbsolutePath());
+//                   } else {
+//                       String filePath = currentFile.getAbsolutePath();
+//                       if (filePath.matches(".*.tif")) {
+//                           found = true;
+//                       }
+//                   }
+//                   if (found) {
+//                       stream.close();
+//                       return true;
+//                   }
+//               }
+//           }
+//           stream.close();
+//
+//           String str = "raster not found  in" + directory;
+//           org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
+//           throw new org.orekit.rugged.errors.RuggedException(message);
+//
+//       } catch (java.io.IOException e) {
+//           String str = "dir not found " + directory;
+//           org.hipparchus.exception.DummyLocalizable message = new org.hipparchus.exception.DummyLocalizable(str);
+//           throw new org.orekit.rugged.errors.RuggedException(message);
+//       }
+//   }
+//}
+//}
+

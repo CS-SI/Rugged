@@ -50,7 +50,7 @@ import org.orekit.utils.PVCoordinates;
 
 public abstract class AbstractAlgorithmTest {
 
-    protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOvelappingTiles);
+    protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOverlappingTiles);
 
     @Test
     public void testMayonVolcanoOnSubTileCorner() {

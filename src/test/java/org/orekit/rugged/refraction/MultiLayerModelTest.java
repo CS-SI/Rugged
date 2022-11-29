@@ -257,8 +257,8 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     }
 
     @Override
-    protected IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOvelappingTiles) {
-        return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOvelappingTiles);
+    protected IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOverlappingTiles) {
+        return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOverlappingTiles);
     }
 
 }

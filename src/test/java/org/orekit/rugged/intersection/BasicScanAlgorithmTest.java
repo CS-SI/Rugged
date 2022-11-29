@@ -25,8 +25,8 @@ import org.orekit.rugged.raster.TileUpdater;
 
 public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
 
-    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOvelappingTiles) {
-        return new BasicScanAlgorithm(updater, maxCachedTiles, isOvelappingTiles);
+    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOverlappingTiles) {
+        return new BasicScanAlgorithm(updater, maxCachedTiles, isOverlappingTiles);
     }
 
     @Test

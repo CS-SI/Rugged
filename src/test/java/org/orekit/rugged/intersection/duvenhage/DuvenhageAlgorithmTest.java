@@ -44,8 +44,8 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
 
-    protected IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOvelappingTiles) {
-        return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOvelappingTiles);
+    protected IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOverlappingTiles) {
+        return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOverlappingTiles);
     }
 
     @Test

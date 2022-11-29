@@ -95,10 +95,10 @@ public class RuggedBuilder {
 
     /** Updater used to load Digital Elevation Model tiles. */
     private TileUpdater tileUpdater;
-    
-    /** Flag to tell if the Digital Elevation Model tiles are overlapping. 
+
+    /** Flag to tell if the Digital Elevation Model tiles are overlapping.
      * @since X.x */
-    private boolean isOvelappingTiles = true;
+    private boolean isOverlappingTiles = true;
 
     /** Constant elevation over ellipsoid (m).
      * used only with {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID. */
@@ -306,20 +306,20 @@ public class RuggedBuilder {
      * </p>
      * @param newTileUpdater updater used to load Digital Elevation Model tiles
      * @param newMaxCachedTiles maximum number of tiles stored in the cache
-     * @param newIsOverlappingTiles flag to tell if the DEM tiles are overlapping: 
+     * @param newIsOverlappingTiles flag to tell if the DEM tiles are overlapping:
      *                              true if overlapping; false otherwise.
      * @return the builder instance
      * @see #setAlgorithm(AlgorithmId)
      * @see #getTileUpdater()
      * @see #getMaxCachedTiles()
-     * @see #isOvelappingTiles()
+     * @see #isOverlappingTiles()
      * @since X.x
      */
-    public RuggedBuilder setDigitalElevationModel(final TileUpdater newTileUpdater, final int newMaxCachedTiles, 
+    public RuggedBuilder setDigitalElevationModel(final TileUpdater newTileUpdater, final int newMaxCachedTiles,
                                                   final boolean newIsOverlappingTiles) {
         this.tileUpdater    = newTileUpdater;
         this.maxCachedTiles = newMaxCachedTiles;
-        this.isOvelappingTiles = newIsOverlappingTiles;
+        this.isOverlappingTiles = newIsOverlappingTiles;
         return this;
     }
 
@@ -331,25 +331,25 @@ public class RuggedBuilder {
     public TileUpdater getTileUpdater() {
         return tileUpdater;
     }
-    
+
     /**
-     * Get the flag telling if the DEM tiles are overlapping. 
-     * @return true if the Digital Elevation Model tiles are overlapping; 
+     * Get the flag telling if the DEM tiles are overlapping.
+     * @return true if the Digital Elevation Model tiles are overlapping;
      *         false otherwise. Default = true.
      * @since X.x
      */
-    public boolean isOvelappingTiles() {
-        return isOvelappingTiles;
+    public boolean isOverlappingTiles() {
+        return isOverlappingTiles;
     }
 
     /**
-     * Set the DEM overlapping tiles flag
-     * @param isOvelappingTiles flag to tell if the Digital Elevation Model tiles are overlapping: 
+     * Set the DEM overlapping tiles flag.
+     * @param newIsOverlappingTiles flag to tell if the Digital Elevation Model tiles are overlapping:
      *        true if overlapping; false otherwise
      * @since X.x
      */
-    public void setOvelappingTiles(boolean isOvelappingTiles) {
-        this.isOvelappingTiles = isOvelappingTiles;
+    public void setOverlappingTiles(final boolean newIsOverlappingTiles) {
+        this.isOverlappingTiles = newIsOverlappingTiles;
     }
 
     /** Set the user-provided constant elevation model.
@@ -993,6 +993,8 @@ public class RuggedBuilder {
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param constantElevation constant elevation over ellipsoid
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                           true if overlapping; false otherwise.
      * @return selected algorithm
      */
     private static IntersectionAlgorithm createAlgorithm(final AlgorithmId algorithmID,
@@ -1034,7 +1036,7 @@ public class RuggedBuilder {
             }
         }
         createInterpolatorIfNeeded();
-        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation, isOvelappingTiles), ellipsoid,
+        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation, isOverlappingTiles), ellipsoid,
                           lightTimeCorrection, aberrationOfLightCorrection, atmosphericRefraction, scToBody, sensors, name);
     }
 }
