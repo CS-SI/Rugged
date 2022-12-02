@@ -35,6 +35,9 @@ public class DummySRTMsimpleElevationUpdater implements TileUpdater {
 
     /** SRTM tile number of rows and columns */
     private int n;
+    
+    /** Factor to change resolution above 60 degrees and below 60 degrees */
+    private int resolutionChange;
 
     private double elevation1;
     private double elevation2;
@@ -44,11 +47,13 @@ public class DummySRTMsimpleElevationUpdater implements TileUpdater {
      * @param rowCol SRTM tile number of rows and column
      * @param elevation1 chosen elevation1 (m)
      * @param elevation2 chosen elevation2 (m)
+     * @param resolutionChange factor to change resolution at +/- 60 degrees
      */
-    public DummySRTMsimpleElevationUpdater(final int rowCol, final double elevation1, final double elevation2) {
+    public DummySRTMsimpleElevationUpdater(final int rowCol, final double elevation1, final double elevation2, final int resolutionChange) {
         
         this.n = rowCol;
         this.stepRad = FastMath.toRadians(this.tileSizeDeg / this.n);
+        this.resolutionChange = resolutionChange;
         
         this.elevation1 = elevation1;
         this.elevation2 = elevation2;
@@ -66,9 +71,9 @@ public class DummySRTMsimpleElevationUpdater implements TileUpdater {
         
         // Change the tile step for latitude above 60 degrees and below 60 degrees
         if (FastMath.toDegrees(latitude) > 60. || FastMath.toDegrees(latitude) < -60.) {
-            // step * 3 for latitude > 60 or < -60
-            this.stepRad = FastMath.toRadians(this.tileSizeDeg*3 / this.n);
-            numberOfStep = this.n/3;
+            // step * resolutionChange for latitude > 60 or < -60
+            this.stepRad = FastMath.toRadians(this.tileSizeDeg*this.resolutionChange / this.n);
+            numberOfStep = this.n/this.resolutionChange;
 
         } else { // step = tile size / n
             this.stepRad = FastMath.toRadians(this.tileSizeDeg / this.n);

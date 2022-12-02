@@ -182,10 +182,8 @@ public class TilesCacheTest {
 
         // Simple SRTM with 2 elevations
         int rowCols = 1000;
-        DummySRTMsimpleElevationUpdater srtmUpdater = new DummySRTMsimpleElevationUpdater(rowCols, 10.0, 20.0);
-        
+        DummySRTMsimpleElevationUpdater srtmUpdater = new DummySRTMsimpleElevationUpdater(rowCols, 10.0, 20.0, 3);
         double tileSizeDeg = srtmUpdater.getTileSizeDeg();
-        double rasterStepDeg = srtmUpdater.getTileStepDeg();
 
         CountingFactory factory = new CountingFactory();
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory, srtmUpdater , 5, false);
@@ -365,7 +363,7 @@ public class TilesCacheTest {
         clearFactoryMaps(CountingFactory.class);
         
         rowCols = 10;
-        srtmUpdater = new DummySRTMsimpleElevationUpdater(rowCols, 10.0, 20.0);
+        srtmUpdater = new DummySRTMsimpleElevationUpdater(rowCols, 10.0, 20.0, 2);
         tileSizeDeg = srtmUpdater.getTileSizeDeg();
 
         factory = new CountingFactory();
@@ -373,6 +371,9 @@ public class TilesCacheTest {
 
         // Above 60 degrees  
         // ================
+        
+        // Current tile is below 60 degrees
+        // --------------------------------
         latTileDeg = 59.;
         lonTileDeg = 12.3;
 
@@ -391,8 +392,31 @@ public class TilesCacheTest {
         check4cornersZipperTiles(tileAround60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
         isDifferentStep = false;
         
+        // Current tile is above 60 degrees
+        // --------------------------------
+        latTileDeg = 61.;
+        lonTileDeg = 12.3;
+
+        tileAround60deg = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+        
+        // Latitude South of the tile
+        latDeg = getSouthernEdgeOfTile(tileAround60deg);
+        lonDeg = lonTileDeg;
+
+        isDifferentStep = true;
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.SOUTH, tileAround60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
+        isDifferentStep = false;
+
+        // Check the 4 corner zipper tiles
+        isDifferentStep = true;
+        check4cornersZipperTiles(tileAround60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
+        isDifferentStep = false;
+
         // Below -60 degrees  
         // =================
+        
+        // Current tile is above -60 degrees
+        // --------------------------------
         latTileDeg = -59.;
         lonTileDeg = 12.3;
 
@@ -410,6 +434,27 @@ public class TilesCacheTest {
         isDifferentStep = true;
         check4cornersZipperTiles(tileAroundMinus60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
         isDifferentStep = false;
+        
+        // Current tile is below -60 degrees
+        // --------------------------------
+        latTileDeg = -61.;
+        lonTileDeg = 12.3;
+
+        tileAroundMinus60deg = cache.getTile(FastMath.toRadians(latTileDeg), FastMath.toRadians(lonTileDeg));
+
+        // Latitude North of the tile
+        latDeg = getNorthernEdgeOfTile(tileAroundMinus60deg);
+        lonDeg = lonTileDeg;
+        
+        isDifferentStep = true;
+        searchAndVerifyZipperTile(latDeg, lonDeg, Tile.Location.NORTH, tileAroundMinus60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
+        isDifferentStep = false;
+        
+        // Check the 4 corner zipper tiles
+        isDifferentStep = true;
+        check4cornersZipperTiles(tileAroundMinus60deg, tileSizeDeg, cache, epsilonLatLon, isDifferentStep);
+        isDifferentStep = false;
+
     }
 
     /**
@@ -728,36 +773,36 @@ public class TilesCacheTest {
         double zipperLatitude3 = cornerZipperTile.getLatitudeAtIndex(3) + deltaLat;
 
         // Longitudes for column 0 of corner zipper
-        double aboveLeftDoubleLongitudeIndex0 = (zipperLongitude0 - aboveLeft.getMinimumLongitude()) / aboveLeft.getLongitudeStep();
+        double aboveLeftDoubleLongitudeIndex0 = computeLongitudeIndexDifferentStep(zipperLongitude0, aboveLeft);
         int aboveLeftLongitudeIndex0 = FastMath.max(0, FastMath.min(aboveLeft.getLongitudeColumns() - 1, (int) FastMath.floor(aboveLeftDoubleLongitudeIndex0)));
 
-        double belowLeftDoubleLongitudeIndex0 = (zipperLongitude0 - belowLeft.getMinimumLongitude()) / belowLeft.getLongitudeStep();
+        double belowLeftDoubleLongitudeIndex0 = computeLongitudeIndexDifferentStep(zipperLongitude0, belowLeft);
         int belowLeftLongitudeIndex0 = FastMath.max(0, FastMath.min(belowLeft.getLongitudeColumns() - 1, (int) FastMath.floor(belowLeftDoubleLongitudeIndex0)));
 
         // Longitudes for column 1 of corner zipper
-        double aboveLeftDoubleLongitudeIndex1 = (zipperLongitude1 - aboveLeft.getMinimumLongitude()) / aboveLeft.getLongitudeStep();
+        double aboveLeftDoubleLongitudeIndex1 = computeLongitudeIndexDifferentStep(zipperLongitude1, aboveLeft);
         int aboveLeftLongitudeIndex1 = FastMath.max(0, FastMath.min(aboveLeft.getLongitudeColumns() - 1, (int) FastMath.floor(aboveLeftDoubleLongitudeIndex1)));
 
-        double belowLeftDoubleLongitudeIndex1 = (zipperLongitude1 - belowLeft.getMinimumLongitude()) / belowLeft.getLongitudeStep();
+        double belowLeftDoubleLongitudeIndex1 = computeLongitudeIndexDifferentStep(zipperLongitude1, belowLeft);
         int belowLeftLongitudeIndex1 = FastMath.max(0, FastMath.min(belowLeft.getLongitudeColumns() - 1, (int) FastMath.floor(belowLeftDoubleLongitudeIndex1)));
 
         // Longitudes for column 2 of corner zipper
-        double aboveRightDoubleLongitudeIndex2 = (zipperLongitude2 - aboveRight.getMinimumLongitude()) / aboveRight.getLongitudeStep();
+        double aboveRightDoubleLongitudeIndex2 = computeLongitudeIndexDifferentStep(zipperLongitude2, aboveRight);
         int aboveRightLongitudeIndex2 = FastMath.max(0, FastMath.min(aboveRight.getLongitudeColumns() - 1, (int) FastMath.floor(aboveRightDoubleLongitudeIndex2)));
 
-        double belowRightDoubleLongitudeIndex2 = (zipperLongitude2 - belowRight.getMinimumLongitude()) / belowRight.getLongitudeStep();
+        double belowRightDoubleLongitudeIndex2 = computeLongitudeIndexDifferentStep(zipperLongitude2, belowRight);
         int belowRightLongitudeIndex2 = FastMath.max(0, FastMath.min(belowRight.getLongitudeColumns() - 1, (int) FastMath.floor(belowRightDoubleLongitudeIndex2)));
 
         // Longitudes for column 3 of corner zipper
-        double aboveRightDoubleLongitudeIndex3 = (zipperLongitude3 - aboveRight.getMinimumLongitude()) / aboveRight.getLongitudeStep();
+        double aboveRightDoubleLongitudeIndex3 = computeLongitudeIndexDifferentStep(zipperLongitude3, aboveRight);
         int aboveRightLongitudeIndex3 = FastMath.max(0, FastMath.min(aboveRight.getLongitudeColumns() - 1, (int) FastMath.floor(aboveRightDoubleLongitudeIndex3)));
 
-        double belowRightDoubleLongitudeIndex3 = (zipperLongitude3 - belowRight.getMinimumLongitude()) / belowRight.getLongitudeStep();
+        double belowRightDoubleLongitudeIndex3 = computeLongitudeIndexDifferentStep(zipperLongitude3, belowRight);
         int belowRightLongitudeIndex3 = FastMath.max(0, FastMath.min(belowRight.getLongitudeColumns() - 1, (int) FastMath.floor(belowRightDoubleLongitudeIndex3)));
 
         
         // row 0 of zipper 
-        double belowLeftDoubleLatitudeIndex0 = (zipperLatitude0 - belowLeft.getMinimumLatitude()) / belowLeft.getLatitudeStep();
+        double belowLeftDoubleLatitudeIndex0 = computeLatitudeIndexDifferentStep(zipperLatitude0, belowLeft);
         int belowLeftLatitudeIndex0 = FastMath.max(0, FastMath.min(belowLeft.getLatitudeRows() - 1, (int) FastMath.floor(belowLeftDoubleLatitudeIndex0)));
         
         double belowLeftElevation = belowLeft.getElevationAtIndices(belowLeftLatitudeIndex0, belowLeftLongitudeIndex0);
@@ -769,7 +814,7 @@ public class TilesCacheTest {
         assertEquals(belowLeftElevation, cornerZipperElevation, epsilonLatLon);
 
         
-        double belowRightDoubleLatitudeIndex0 = (zipperLatitude0 - belowRight.getMinimumLatitude()) / belowRight.getLatitudeStep();
+        double belowRightDoubleLatitudeIndex0 = computeLatitudeIndexDifferentStep(zipperLatitude0, belowRight);
         int belowRightLatitudeIndex0 = FastMath.max(0, FastMath.min(belowRight.getLatitudeRows() - 1, (int) FastMath.floor(belowRightDoubleLatitudeIndex0)));
 
         double belowRightElevation = belowRight.getElevationAtIndices(belowRightLatitudeIndex0, belowRightLongitudeIndex2);
@@ -782,7 +827,7 @@ public class TilesCacheTest {
 
 
         // row 1 of zipper 
-        double belowLeftDoubleLatitudeIndex1 = (zipperLatitude1 - belowLeft.getMinimumLatitude()) / belowLeft.getLatitudeStep();
+        double belowLeftDoubleLatitudeIndex1 = computeLatitudeIndexDifferentStep(zipperLatitude1, belowLeft);
         int belowLeftLatitudeIndex1 = FastMath.max(0, FastMath.min(belowLeft.getLatitudeRows() - 1, (int) FastMath.floor(belowLeftDoubleLatitudeIndex1)));
         
         belowLeftElevation = belowLeft.getElevationAtIndices(belowLeftLatitudeIndex1, belowLeftLongitudeIndex0);
@@ -794,7 +839,7 @@ public class TilesCacheTest {
         assertEquals(belowLeftElevation, cornerZipperElevation, epsilonLatLon);
         
 
-        double belowRightDoubleLatitudeIndex1 = (zipperLatitude1 - belowRight.getMinimumLatitude()) / belowRight.getLatitudeStep();
+        double belowRightDoubleLatitudeIndex1 = computeLatitudeIndexDifferentStep(zipperLatitude1, belowRight);
         int belowRightLatitudeIndex1 = FastMath.max(0, FastMath.min(belowRight.getLatitudeRows() - 1, (int) FastMath.floor(belowRightDoubleLatitudeIndex1)));
 
         belowRightElevation = belowRight.getElevationAtIndices(belowRightLatitudeIndex1, belowRightLongitudeIndex2);
@@ -806,7 +851,7 @@ public class TilesCacheTest {
         assertEquals(belowRightElevation, cornerZipperElevation, epsilonLatLon);
 
         // row 2 of zipper 
-        double aboveLeftDoubleLatitudeIndex2 = (zipperLatitude2 - aboveLeft.getMinimumLatitude()) / aboveLeft.getLatitudeStep();
+        double aboveLeftDoubleLatitudeIndex2 = computeLatitudeIndexDifferentStep(zipperLatitude2, aboveLeft);
         int aboveLeftLatitudeIndex2 = FastMath.max(0, FastMath.min(aboveLeft.getLatitudeRows() - 1, (int) FastMath.floor(aboveLeftDoubleLatitudeIndex2)));
         
         double aboveLeftELevation = aboveLeft.getElevationAtIndices(aboveLeftLatitudeIndex2, aboveLeftLongitudeIndex0);
@@ -818,7 +863,7 @@ public class TilesCacheTest {
         assertEquals(aboveLeftELevation, cornerZipperElevation, epsilonLatLon);
 
         
-        double aboveRightDoubleLatitudeIndex2 = (zipperLatitude2 - aboveRight.getMinimumLatitude()) / aboveRight.getLatitudeStep();
+        double aboveRightDoubleLatitudeIndex2 = computeLatitudeIndexDifferentStep(zipperLatitude2, aboveRight);
         int aboveRightLatitudeIndex2 = FastMath.max(0, FastMath.min(aboveRight.getLatitudeRows() - 1, (int) FastMath.floor(aboveRightDoubleLatitudeIndex2)));
 
         double aboveRightElevation = aboveRight.getElevationAtIndices(aboveRightLatitudeIndex2, aboveRightLongitudeIndex2);
@@ -830,7 +875,7 @@ public class TilesCacheTest {
         assertEquals(aboveRightElevation, cornerZipperElevation, epsilonLatLon);
 
         // row 3 of zipper
-        double aboveLeftDoubleLatitudeIndex3 = (zipperLatitude3 - aboveLeft.getMinimumLatitude()) / aboveLeft.getLatitudeStep();
+        double aboveLeftDoubleLatitudeIndex3 = computeLatitudeIndexDifferentStep(zipperLatitude3, aboveLeft);
         int aboveLeftLatitudeIndex3 = FastMath.max(0, FastMath.min(aboveLeft.getLatitudeRows() - 1, (int) FastMath.floor(aboveLeftDoubleLatitudeIndex3)));
         
         aboveLeftELevation = aboveLeft.getElevationAtIndices(aboveLeftLatitudeIndex3, aboveLeftLongitudeIndex0);
@@ -841,7 +886,7 @@ public class TilesCacheTest {
         cornerZipperElevation = cornerZipperTile.getElevationAtIndices(3, 1);
         assertEquals(aboveLeftELevation, cornerZipperElevation, epsilonLatLon);
 
-        double aboveRightDoubleLatitudeIndex3 = (zipperLatitude3 - aboveRight.getMinimumLatitude()) / aboveRight.getLatitudeStep();
+        double aboveRightDoubleLatitudeIndex3 = computeLatitudeIndexDifferentStep(zipperLatitude3, aboveRight);
         int aboveRightLatitudeIndex3 = FastMath.max(0, FastMath.min(aboveRight.getLatitudeRows() - 1, (int) FastMath.floor(aboveRightDoubleLatitudeIndex3)));
 
         aboveRightElevation = aboveRight.getElevationAtIndices(aboveRightLatitudeIndex3, aboveRightLongitudeIndex2);
@@ -852,6 +897,7 @@ public class TilesCacheTest {
         cornerZipperElevation = cornerZipperTile.getElevationAtIndices(3, 3);
         assertEquals(aboveRightElevation, cornerZipperElevation, epsilonLatLon);
     }
+
 
     private void checkZipperTile(SimpleTile zipperTile, Tile.Location zipperLocation, 
                                  SimpleTile originTile, double tileSizeDeg, 
@@ -971,15 +1017,15 @@ public class TilesCacheTest {
                 double deltaLon = 0.1*zipperTile.getLongitudeStep();
                 double zipperLongitude = zipperTile.getLongitudeAtIndex(jLon) + deltaLon;
                 
-                double originTileDoubleLongitudeIndex = (zipperLongitude - originTile.getMinimumLongitude()) / originTile.getLongitudeStep();
+                double originTileDoubleLongitudeIndex = computeLongitudeIndexDifferentStep(zipperLongitude, originTile);
                 int originTileLongitudeIndex = FastMath.max(0, FastMath.min(originTile.getLongitudeColumns() - 1, (int) FastMath.floor(originTileDoubleLongitudeIndex)));
 
-                double belowTileDoubleLongitudeIndex = (zipperLongitude - tileBelow.getMinimumLongitude()) / tileBelow.getLongitudeStep();
+                double belowTileDoubleLongitudeIndex = computeLongitudeIndexDifferentStep(zipperLongitude, tileBelow);
                 int belowTileLongitudeIndex = FastMath.max(0, FastMath.min(tileBelow.getLongitudeColumns() - 1, (int) FastMath.floor(belowTileDoubleLongitudeIndex)));
 
                 // row 0 of zipper
                 double zipperLat0 = zipperTile.getMinimumLatitude() + 0.1*zipperTile.getLatitudeStep();
-                double belowTileDoubleLatitudeIndex =  (zipperLat0  - tileBelow.getMinimumLatitude())  / tileBelow.getLatitudeStep();
+                double belowTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat0, tileBelow);
                 int belowTileLatitudeIndex0 = FastMath.max(0, FastMath.min(tileBelow.getLatitudeRows() - 1, (int) FastMath.floor(belowTileDoubleLatitudeIndex)));
 
                 double zipperElevation = zipperTile.getElevationAtIndices(0, jLon);
@@ -988,7 +1034,7 @@ public class TilesCacheTest {
 
                 // row 1 of zipper
                 double zipperLat1 = zipperLat0 + zipperTile.getLatitudeStep();
-                belowTileDoubleLatitudeIndex =  (zipperLat1  - tileBelow.getMinimumLatitude())  / tileBelow.getLatitudeStep();
+                belowTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat1, tileBelow);
                 int originTileLatitudeIndex1 = FastMath.max(0, FastMath.min(tileBelow.getLatitudeRows() - 1, (int) FastMath.floor(belowTileDoubleLatitudeIndex)));
 
                 zipperElevation = zipperTile.getElevationAtIndices(1, jLon);
@@ -997,7 +1043,7 @@ public class TilesCacheTest {
 
                 // row 2 of zipper 
                 double zipperLat2 = zipperLat0 + 2*zipperTile.getLatitudeStep();
-                double originTileDoubleLatitudeIndex =  (zipperLat2  - originTile.getMinimumLatitude())  / originTile.getLatitudeStep();
+                double originTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat2, originTile);
                 int originTileLatitudeIndex2 = FastMath.max(0, FastMath.min(originTile.getLatitudeRows() - 1, (int) FastMath.floor(originTileDoubleLatitudeIndex)));
                
                 zipperElevation = zipperTile.getElevationAtIndices(2, jLon);
@@ -1006,7 +1052,7 @@ public class TilesCacheTest {
 
                 // row 3 of zipper 
                 double zipperLat3 = zipperLat0 + 3*zipperTile.getLatitudeStep();
-                originTileDoubleLatitudeIndex =  (zipperLat3  - originTile.getMinimumLatitude())  / originTile.getLatitudeStep();
+                originTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat3, originTile);
                 int originTileLatitudeIndex3 = FastMath.max(0, FastMath.min(originTile.getLatitudeRows() - 1, (int) FastMath.floor(originTileDoubleLatitudeIndex)));
 
                 zipperElevation = zipperTile.getElevationAtIndices(3, jLon);
@@ -1023,15 +1069,15 @@ public class TilesCacheTest {
                 double deltaLon = 0.1*zipperTile.getLongitudeStep();
                 double zipperLongitude = zipperTile.getLongitudeAtIndex(jLon) + deltaLon;
                 
-                double originTileDoubleLongitudeIndex = (zipperLongitude - originTile.getMinimumLongitude()) / originTile.getLongitudeStep();
+                double originTileDoubleLongitudeIndex = computeLongitudeIndexDifferentStep(zipperLongitude,originTile);
                 int originTileLongitudeIndex = FastMath.max(0, FastMath.min(originTile.getLongitudeColumns() - 1, (int) FastMath.floor(originTileDoubleLongitudeIndex)));
 
-                double aboveTileDoubleLongitudeIndex = (zipperLongitude - tileAbove.getMinimumLongitude()) / tileAbove.getLongitudeStep();
+                double aboveTileDoubleLongitudeIndex = computeLongitudeIndexDifferentStep(zipperLongitude, tileAbove);
                 int aboveTileLongitudeIndex = FastMath.max(0, FastMath.min(tileAbove.getLongitudeColumns() - 1, (int) FastMath.floor(aboveTileDoubleLongitudeIndex)));
 
                 // row 0 of zipper
                 double zipperLat0 = zipperTile.getMinimumLatitude() + 0.1*zipperTile.getLatitudeStep();
-                double originTileDoubleLatitudeIndex =  (zipperLat0  - originTile.getMinimumLatitude())  / originTile.getLatitudeStep();
+                double originTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat0, originTile);
                 int originTileLatitudeIndex0 = FastMath.max(0, FastMath.min(originTile.getLatitudeRows() - 1, (int) FastMath.floor(originTileDoubleLatitudeIndex)));
 
                 double zipperElevation = zipperTile.getElevationAtIndices(0, jLon);
@@ -1040,7 +1086,7 @@ public class TilesCacheTest {
 
                 // row 1 of zipper 
                 double zipperLat1 = zipperLat0 + zipperTile.getLatitudeStep();
-                originTileDoubleLatitudeIndex =  (zipperLat1  - originTile.getMinimumLatitude())  / originTile.getLatitudeStep();
+                originTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat1, originTile);
                 int originTileLatitudeIndex1 = FastMath.max(0, FastMath.min(originTile.getLatitudeRows() - 1, (int) FastMath.floor(originTileDoubleLatitudeIndex)));
 
                 zipperElevation = zipperTile.getElevationAtIndices(1, jLon);
@@ -1049,7 +1095,7 @@ public class TilesCacheTest {
 
                 // row 2 of zipper 
                 double zipperLat2 = zipperLat0 + 2*zipperTile.getLatitudeStep();
-                double aboveTileDoubleLatitudeIndex =  (zipperLat2  - tileAbove.getMinimumLatitude())  / tileAbove.getLatitudeStep();
+                double aboveTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat2, tileAbove);
                 int aboveTileLatitudeIndex2 = FastMath.max(0, FastMath.min(tileAbove.getLatitudeRows() - 1, (int) FastMath.floor(aboveTileDoubleLatitudeIndex)));
 
                 zipperElevation = zipperTile.getElevationAtIndices(2, jLon);
@@ -1058,7 +1104,7 @@ public class TilesCacheTest {
 
                 // row 3 of zipper 
                 double zipperLat3 = zipperLat0 + 3*zipperTile.getLatitudeStep();
-                aboveTileDoubleLatitudeIndex =  (zipperLat3  - tileAbove.getMinimumLatitude())  / tileAbove.getLatitudeStep();
+                aboveTileDoubleLatitudeIndex =  computeLatitudeIndexDifferentStep(zipperLat3, tileAbove);
                 int aboveTileLatitudeIndex3 = FastMath.max(0, FastMath.min(tileAbove.getLatitudeRows() - 1, (int) FastMath.floor(aboveTileDoubleLatitudeIndex)));
 
                 zipperElevation = zipperTile.getElevationAtIndices(3, jLon);
@@ -1113,6 +1159,16 @@ public class TilesCacheTest {
                 assertEquals(rightELevation, zipperElevation, epsilonLatLon);
             }
         }
+    }
+    
+    private double computeLatitudeIndexDifferentStep(double latitude, SimpleTile tileToSearchLatitudeIndex) {
+        // Formula different from code 
+        return 0.5 + latitude/ tileToSearchLatitudeIndex.getLatitudeStep() - tileToSearchLatitudeIndex.getMinimumLatitude() / tileToSearchLatitudeIndex.getLatitudeStep();
+    }
+
+    private double computeLongitudeIndexDifferentStep(double longitude, SimpleTile tileToSearchLongitudeIndex) {
+        // Formula different from code 
+        return 0.5 + longitude/ tileToSearchLongitudeIndex.getLongitudeStep() - tileToSearchLongitudeIndex.getMinimumLongitude() / tileToSearchLongitudeIndex.getLongitudeStep();
     }
 
     private final static double getNorthernEdgeOfTile(SimpleTile tile) {
