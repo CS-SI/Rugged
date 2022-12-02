@@ -353,11 +353,14 @@ public class TilesCache<T extends Tile> {
 
         switch (latitudeHemisphere) {
             case NORTH:
-                // Defines the zipper min latitude wrt the current tile max latitude minus 2 zipper step in latitude
+                // Defines the zipper min latitude (center of the cell) wrt the current tile Northern latitude
                 // Explanation: we want the 2 first rows belongs to the current tile and 2 last rows to the Northern tile
-                //    If zipperLatStep = latStep, the 2 first rows = exactly lines of the current tile
-                //    otherwise (latStep > North tile step), the 2 first rows will be smaller (in latitude) than the 2 lines of the current tile
-                zipperLatMin = currentTileMinLat + currentTileLatRows * currentTileLatStep - 2 * zipperLatStep;
+                //    If zipperLatStep = currentTileLatStep, the 2 first rows = exactly lines of the current tile
+                //    otherwise (currentTileLatStep > North tile step), the 2 first rows will be smaller (in latitude) than the 2 lines of the current tile
+                final double currentTileNorthernLatitude = currentTileMinLat - 0.5 * currentTileLatStep + currentTileLatRows * currentTileLatStep;
+                // Zipper min latitude = center of the Southern zipper cell in latitude
+                // In case of resolution change zipperLatStep may be different from currentTileLatStep
+                zipperLatMin = currentTileNorthernLatitude - 2 * zipperLatStep + 0.5 * zipperLatStep;
 
                 // Define the zipper min longitude = current tile min longitude
                 zipperLonMin = currentTileMinLon;
@@ -369,11 +372,15 @@ public class TilesCache<T extends Tile> {
                 break;
 
             case SOUTH:
-                // Defines the zipper min latitude wrt the current tile min latitude
+                // Defines the zipper min latitude wrt the current tile Southern latitude
                 // Explanation: we want the 2 last rows belongs to the current tile and 2 first rows to the Southern tile
-                //    If zipperLatStep = latStep, the 2 last rows = exactly lines of the current tile
-                //    otherwise (latStep > South tile step), the 2 last rows will be smaller (in latitude) than the 2 lines of the current tile
-                zipperLatMin = currentTileMinLat - 2 * zipperLatStep;
+                //    If zipperLatStep = currentTileLatStep, the 2 last rows = exactly lines of the current tile
+                //    otherwise (currentTileLatStep > South tile step), the 2 last rows will be smaller (in latitude) than the 2 lines of the current tile
+                final double currentTileSouthernLatitude = currentTileMinLat - 0.5 * currentTileLatStep;
+                // Zipper min latitude = center of the Southern zipper cell in latitude
+                // In case of resolution change zipperLatStep may be different from currentTileLatStep
+                zipperLatMin = currentTileSouthernLatitude - 2 * zipperLatStep + 0.5 * zipperLatStep;
+
                 // Define the zipper min longitude = current tile min longitude
                 zipperLonMin = currentTileMinLon;
 
@@ -470,7 +477,9 @@ public class TilesCache<T extends Tile> {
      * @since X.x
      */
     private int computeLatitudeIndex(final double latitude, final double latitudeMin, final double latitudeStep, final int latitudeRows) {
-        final double doubleLatitudeIndex =  (latitude  - latitudeMin)  / latitudeStep;
+        // Compute the difference in latitude wrt the Southern edge latitude of the tile
+        // TBN: latitude min is at the center of the Southern cell tiles.
+        final double doubleLatitudeIndex =  (latitude  - (latitudeMin - 0.5 * latitudeStep))  / latitudeStep;
         return FastMath.max(0, FastMath.min(latitudeRows - 1, (int) FastMath.floor(doubleLatitudeIndex)));
     }
 
@@ -483,7 +492,9 @@ public class TilesCache<T extends Tile> {
      * @since X.x
      */
     private int computeLongitudeIndex(final double longitude, final double longitudeMin, final double longitudeStep, final int longitudeColumns) {
-        final double doubleLongitudeIndex = (longitude - longitudeMin) / longitudeStep;
+        // Compute the difference in longitude wrt the Western edge longitude of the tile
+        // TBN: longitude min is at the center of the Western cell tiles.
+        final double doubleLongitudeIndex = (longitude - (longitudeMin - 0.5 * longitudeStep)) / longitudeStep;
         return FastMath.max(0, FastMath.min(longitudeColumns - 1, (int) FastMath.floor(doubleLongitudeIndex)));
     }
 
