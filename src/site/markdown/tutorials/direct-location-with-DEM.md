@@ -18,7 +18,7 @@
 
 The aim of this tutorial is to compute a direct location grid by intersection of 
 the line of sight with a DEM (Digital Elevation Model), using Duvenhage's algorithm. 
-This algorithm is the most performant one in Rugged. 
+This algorithm is the most efficient one in Rugged. 
 
 The following figure shows the effects of taking into account the DEM in the computation of latitude, longitude and altitude:
 
@@ -28,7 +28,7 @@ The following figure shows the effects of taking into account the DEM in the com
 
 Rugged does not parse DEM files but takes buffers of elevation data as input. 
 It is up to the calling application to read the DEM and load the data into buffers. 
-Rugged provides a tile mecanism with cache for large DEMs allowing the user to load 
+Rugged provides a tile mechanism with cache for large DEMs allowing the user to load 
 one tile at a time. This is in line with the format of world coverage DEMs such as SRTM. 
 Rugged offers an interface for updating the DEM tiles in cache with a callback function 
 triggered everytime a coordinate falls outside the current region. 
@@ -108,13 +108,17 @@ Here's the source code of the class `VolcanicConeElevationUpdater` :
 
 ### Important notes on DEM tiles :
 
-* Ground point elevation are obtained by bilinear interpolation between 4 neighbouring cells. There is no specific algorithm for border management. As a consequence, a point falling on the border of the tile is considered outside. **DEM tiles must be overlapping by at least one line/column in all directions**.
+* Ground point elevation are obtained by bilinear interpolation between 4 neighbouring cells. There is no specific algorithm for border management in this computation. As a consequence, a point falling on the border of the tile is considered outside. **DEM tiles must be overlapping by at least one line/column in all directions**. Two options are available:
+
+  - until version 3.0, the DEM tiles should comply to the overlapping obligation.
+  - after version 3.0, the DEM tiles could be seamless (i.e. not overlapping). In that case, a specific algorithm creates zipper tiles on the fly, in order to comply to the overlapping obligation. The case of overlapping DEM tiles is still possible. The choice is given through the API `setDigitalElevationModel` (see below paragraph `Initializing Rugged with a DEM`).
 
 * In Rugged terminology, the minimum latitude and longitude correspond to the centre of the farthest Southwest cell of the DEM. Be careful if using GDAL to pass the correct information as there is half a pixel shift with respect to the lower left corner coordinates in gdalinfo.
 
-The following diagram illustrates proper DEM tiling with one line/column overlaps between neighbouring tiles :
+The following diagram illustrates needed DEM tiling with one line/column overlaps between neighbouring tiles :
 
 ![DEM-tiles-overlap.png](../images/DEM-tiles-overlap.png)
+
 
 This diagram tries to represent the meaning of the different parameters in the definition of a tile :
 
@@ -131,12 +135,13 @@ Instantiate an object derived from TileUpdater :
 
     int nbTiles = 8 ; //number max of tiles in Rugged cache
     AlgorithmId algoId = AlgorithmId.DUVENHAGE;
+    boolean isOverlappingTiles = true;
 
  
 Initialize Rugged with these parameters :
 
     Rugged rugged = new RuggedBuilder().
-                    setDigitalElevationModel(updater, nbTiles).
+                    setDigitalElevationModel(updater, nbTiles, isOverlappingTiles).
                     setAlgorithm(algoId). 
                     setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
                     setTimeSpan(startDate, stopDate, 0.1, 10.0). 
@@ -145,6 +150,10 @@ Initialize Rugged with these parameters :
                                   satelliteQList, 8, AngularDerivativesFilter.USE_R).
                     addLineSensor(lineSensor).
                     build();
+
+To be noticed:
+
+one can use `setDigitalElevationModel(updater, nbTiles)` in the case of overlapping tiles (the flag isOverlappingTiles = true by default)
 
 ## Computing a direct location grid
 

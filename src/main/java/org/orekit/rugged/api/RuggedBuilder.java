@@ -241,7 +241,8 @@ public class RuggedBuilder {
      *   {@link AlgorithmId#DUVENHAGE_FLAT_BODY DUVENHAGE_FLAT_BODY}
      *   and {@link AlgorithmId#BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY
      *   BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY} all
-     *   require {@link #setDigitalElevationModel(TileUpdater, int) setDigitalElevationModel}
+     *   require {@link #setDigitalElevationModel(TileUpdater, int, boolean) setDigitalElevationModel}
+     *   or {@link #setDigitalElevationModel(TileUpdater, int) setDigitalElevationModel}
      *   to be called,</li>
      *   <li>{@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
      *   CONSTANT_ELEVATION_OVER_ELLIPSOID} requires
@@ -253,6 +254,7 @@ public class RuggedBuilder {
      *
      * @param newAlgorithmId identifier of algorithm to use for Digital Elevation Model intersection
      * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getAlgorithm()
      */
@@ -286,6 +288,7 @@ public class RuggedBuilder {
      * @param newTileUpdater updater used to load Digital Elevation Model tiles
      * @param newMaxCachedTiles maximum number of tiles stored in the cache
      * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setAlgorithm(AlgorithmId)
      * @see #getTileUpdater()
      * @see #getMaxCachedTiles()
@@ -309,6 +312,7 @@ public class RuggedBuilder {
      * @param newIsOverlappingTiles flag to tell if the DEM tiles are overlapping:
      *                              true if overlapping; false otherwise.
      * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #setAlgorithm(AlgorithmId)
      * @see #getTileUpdater()
      * @see #getMaxCachedTiles()
@@ -325,6 +329,7 @@ public class RuggedBuilder {
 
     /** Get the updater used to load Digital Elevation Model tiles.
      * @return updater used to load Digital Elevation Model tiles
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getMaxCachedTiles()
      */
@@ -379,6 +384,7 @@ public class RuggedBuilder {
 
     /** Get the maximum number of tiles stored in the cache.
      * @return maximum number of tiles stored in the cache
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getTileUpdater()
      */
