@@ -40,12 +40,13 @@
       <item name="Overview"                       href="/design/overview.html"                    />
       <item name="Technical choices"              href="/design/technical-choices.html"           />
       <item name="Digital Elevation Model"        href="/design/digital-elevation-model.html"     />
-      <item name="Design of the major functions"  href="/design/design-major-functions.html"                      />
+      <item name="Design of the major functions"  href="/design/design-major-functions.html"      />
     </menu>
     <menu name="Tutorials">
       <item name="Direct location"          href="/tutorials/direct-location.html"          />
       <item name="Direct location with DEM" href="/tutorials/direct-location-with-DEM.html" />
       <item name="Inverse location"         href="/tutorials/inverse-location.html"         />
+      <item name="Tile updater example"          href="/tutorials/tile-updater.html"           />
       <item name="Matlab examples"          href="/tutorials/matlab-example.html"           />
     </menu>
     <menu name="Development">
