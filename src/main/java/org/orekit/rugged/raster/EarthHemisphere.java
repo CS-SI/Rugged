@@ -14,25 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.orekit.rugged.intersection;
+package org.orekit.rugged.raster;
 
+/**
+ * Enumerate for Earth hemispheres for tiles definition.
+ * <p>
+ * For Latitude: NORTH / SOUTH
+ * <p>
+ * For Longitude: WESTEXTREME / WEST / EAST / EASTEXTREME
+ * @author Guylaine Prat
+ * @since X.x
+ */
+public enum EarthHemisphere {
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-import org.orekit.rugged.api.AlgorithmId;
-import org.orekit.rugged.raster.TileUpdater;
-
-public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
-
-    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOverlappingTiles) {
-        return new BasicScanAlgorithm(updater, maxCachedTiles, isOverlappingTiles);
-    }
-
-    @Test
-    public void testAlgorithmId() {
-        setUpMayonVolcanoContext();
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
-        assertEquals(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY, algorithm.getAlgorithmId());
-    }
+    /** South hemisphere. */
+   SOUTH,
+   /** North hemisphere. */
+   NORTH,
+   /** Extreme West. */
+   WESTEXTREME,
+   /** West hemisphere. */
+   WEST,
+   /** East hemisphere. */
+   EAST,
+   /** Extreme East. */
+   EASTEXTREME
 }

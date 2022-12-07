@@ -43,7 +43,7 @@ public interface Tile extends UpdatableTile {
      * <p>
      * This enumerate represent the position of a point taking this off-by-one property
      * into account, the value {@link #HAS_INTERPOLATION_NEIGHBORS} correspond to points that
-     * do have the necessary four neightbors, whereas the other values correspond to points
+     * do have the necessary four neighbors, whereas the other values correspond to points
      * that are either completely outside of the tile or within the tile but in either the
      * northernmost row or easternmost column.
      * </p>

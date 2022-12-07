@@ -70,11 +70,14 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * in geodetic coordinates. The sagitta resulting from real ellipsoid curvature
      * is therefore <em>not</em> corrected in this case. As this computation is not
      * costly (a few percents overhead), it is highly recommended to set this parameter
-     * to {@code false}. This flag is mainly intended for comparison purposes with other systems.
+     * to {@code false}. This flag is mainly intended for comparison purposes with other systems
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                          true if overlapping; false otherwise.
      */
     public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles,
-                              final boolean flatBody) {
-        this.cache = new TilesCache<>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
+                              final boolean flatBody, final boolean isOverlappingTiles) {
+        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater,
+                                                    maxCachedTiles, isOverlappingTiles);
         this.flatBody = flatBody;
         this.algorithmId = flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE;
     }
