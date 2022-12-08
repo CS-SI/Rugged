@@ -165,6 +165,11 @@ public class RuggedBuilderTest {
             Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
             Assert.assertEquals("RuggedBuilder.setEllipsoid()", re.getParts()[0]);
         }
+        
+        Assert.assertTrue(builder.isOverlappingTiles());
+        builder.setOverlappingTiles(false);
+        Assert.assertTrue(!builder.isOverlappingTiles());
+        
         builder.setEllipsoid(EllipsoidId.GRS80, BodyRotatingFrameId.ITRF);
         try {
             builder.build();
