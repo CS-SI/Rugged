@@ -137,7 +137,9 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
             int i = 0;
             for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
 
-                if (i == reference.getMapping().size()) break;
+                if (i == reference.getMapping().size()) {
+                    break;
+                }
 
                 // Get LOS distance
                 final Double losDistance  = reference.getLosDistance(i);

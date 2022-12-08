@@ -114,7 +114,9 @@ public class DumpManager {
      */
     public static void endNicely() {
         isSuspended = false;
-        if (isActive()) deactivate();
+        if (isActive()) {
+            deactivate();
+        }
 
     }
 
