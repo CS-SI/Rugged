@@ -97,7 +97,7 @@ public class RuggedBuilder {
     private TileUpdater tileUpdater;
 
     /** Flag to tell if the Digital Elevation Model tiles are overlapping.
-     * @since X.x */
+     * @since 4.0 */
     private boolean isOverlappingTiles = true;
 
     /** Constant elevation over ellipsoid (m).
@@ -317,7 +317,7 @@ public class RuggedBuilder {
      * @see #getTileUpdater()
      * @see #getMaxCachedTiles()
      * @see #isOverlappingTiles()
-     * @since X.x
+     * @since 4.0
      */
     public RuggedBuilder setDigitalElevationModel(final TileUpdater newTileUpdater, final int newMaxCachedTiles,
                                                   final boolean newIsOverlappingTiles) {
@@ -341,7 +341,7 @@ public class RuggedBuilder {
      * Get the flag telling if the DEM tiles are overlapping.
      * @return true if the Digital Elevation Model tiles are overlapping;
      *         false otherwise. Default = true.
-     * @since X.x
+     * @since 4.0
      */
     public boolean isOverlappingTiles() {
         return isOverlappingTiles;
@@ -351,7 +351,7 @@ public class RuggedBuilder {
      * Set the DEM overlapping tiles flag.
      * @param newIsOverlappingTiles flag to tell if the Digital Elevation Model tiles are overlapping:
      *        true if overlapping; false otherwise
-     * @since X.x
+     * @since 4.0
      */
     public void setOverlappingTiles(final boolean newIsOverlappingTiles) {
         this.isOverlappingTiles = newIsOverlappingTiles;

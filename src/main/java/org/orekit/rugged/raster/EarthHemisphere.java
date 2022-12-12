@@ -23,7 +23,7 @@ package org.orekit.rugged.raster;
  * <p>
  * For Longitude: WESTEXTREME / WEST / EAST / EASTEXTREME
  * @author Guylaine Prat
- * @since X.x
+ * @since 4.0
  */
 public enum EarthHemisphere {
 
