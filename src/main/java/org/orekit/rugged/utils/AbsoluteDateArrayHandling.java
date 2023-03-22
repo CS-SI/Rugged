@@ -31,7 +31,7 @@ public class AbsoluteDateArrayHandling {
      * compute duration
      */
     public AbsoluteDateArrayHandling(final AbsoluteDate[] dates) {
-        this.dates = dates;
+        this.dates = dates.clone();
     }
     
     /** Get time-shifted dates for several dates or several time shifts.
