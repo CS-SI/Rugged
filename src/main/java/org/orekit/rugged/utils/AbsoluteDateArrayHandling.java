@@ -20,14 +20,13 @@ import org.hipparchus.exception.LocalizedCoreFormats;
 import org.orekit.errors.OrekitException;
 import org.orekit.time.AbsoluteDate;
 
-/** AbsoluteDateForVectorisation consist of additions to AbsoluteDate to handle arrays for
- * vectorization.
+/** AbsoluteDateArrayHandling consist of additions to AbsoluteDate to handle arrays.
  * @author Melina Vanel
  */
 public class AbsoluteDateArrayHandling {
 
     /** Dates array on which we want to apply time shift or compute duration. */
-    private AbsoluteDate[] dates;
+    private final AbsoluteDate[] dates;
 
     /** Simple constructor.
      * @param dates is an array of absolute dates on which we want to apply time shift or
@@ -41,7 +40,7 @@ public class AbsoluteDateArrayHandling {
      * @return dates array
      */
     public AbsoluteDate[] getDates() {
-        return this.dates;
+        return this.dates.clone();
     }
 
     /** Get time-shifted dates for several dates or several time shifts.
@@ -52,14 +51,14 @@ public class AbsoluteDateArrayHandling {
      * [...]
      * [daten shiftedby dts1, daten shiftedBy dts2, ..., date1 shiftedBy dtsn]].
      * If ones want to apply only 1 time shift corresponding to 1 date see
-     * {@link #shiftedByCorrespondingTimeShift}.
+     * {@link #shiftedBy(double[])}.
      * @param dts time shifts array in seconds we want to apply to dates
      * @return a matrix of new dates, shifted with respect to wanted time
      * shifts. If instance dates = [date1, date2, ..., daten] each line
      * correspond to one date (for example date1 shiftedBy all timeshifts
      * (building the different columns))
      */
-    public AbsoluteDate[][] shiftedBySeveralTimeShift(final double[] dts) {
+    public AbsoluteDate[][] multipleShiftedBy(final double[] dts) {
 
         final AbsoluteDate[][] datesShifted = new AbsoluteDate[dates.length][dts.length];
         int index_dates = 0;
@@ -83,13 +82,13 @@ public class AbsoluteDateArrayHandling {
      * dts = [dts1, dts2, ..., dtsn] then this function will return
      * [date1 shiftedby dts1, date2 shiftedBy dts2, ..., daten shiftedBy dtsn]. If
      * several time shift want to be applied on each date see
-     * {@link #shiftedBySeveralTimeShift}.
+     * {@link #multipleShiftedBy(double[])}.
      * @param dts time shifts array in seconds we want to apply to corresponding dates.
      * Warning, must be same length as dates.
      * @return an 1D array of new dates, shifted with respect to wanted corresponding time
      * shifts.
      */
-    public AbsoluteDate[] shiftedByCorrespondingTimeShift(final double[] dts) {
+    public AbsoluteDate[] shiftedBy(final double[] dts) {
 
         // Check same dimensions
         if (dates.length != dts.length) {
@@ -116,14 +115,14 @@ public class AbsoluteDateArrayHandling {
      * [...]
      * [daten durationFrom d1, daten durationFrom d2, ..., date1 durationFrom dn]].
      * If ones want to compute duration from only 1 date corresponding to 1 instance date see
-     * {@link #durationsFromCorrespondingDates}.
+     * {@link #durationFrom(AbsoluteDate[])}.
      * @param datesForDuration dates for which we want to compute the duration form instances dates
      * @return a matrix of double representing durations from instance dates
      * If instance dates = [date1, date2, ..., daten] each line
      * correspond to one date (for example date1 duration from all given dates in arguments
      * (building the different columns))
      */
-    public double[][] durationsFromSeveralDates(final AbsoluteDate[] datesForDuration) {
+    public double[][] multipleDurationFrom(final AbsoluteDate[] datesForDuration) {
 
         final double[][] durationsFromDates = new double[dates.length][datesForDuration.length];
         int index_dates = 0;
@@ -147,13 +146,13 @@ public class AbsoluteDateArrayHandling {
      * datesForDuration = [d1, d2, ..., dn] then this function will return
      * [date1 durationFrom d1, date2 durationFrom d2, ..., daten durationFrom dn]. If
      * duration from from all arguments dates wants to be compute on each date see
-     * {@link #durationsFromSeveralDates(AbsoluteDate[])}.
+     * {@link #multipleDurationFrom(AbsoluteDate[])}.
      * @param datesForDuration dates for which we want to compute the duration form instances dates.
      * Warning must have same length as instance dates.
-     * @return a arry of double representing durations between instance dates and corresponding
+     * @return a array of double representing durations between instance dates and corresponding
      * argument dates
      */
-    public double[] durationsFromCorrespondingDates(final AbsoluteDate[] datesForDuration) {
+    public double[] durationFrom(final AbsoluteDate[] datesForDuration) {
 
         // Check same dimensions
         if (dates.length != datesForDuration.length) {
