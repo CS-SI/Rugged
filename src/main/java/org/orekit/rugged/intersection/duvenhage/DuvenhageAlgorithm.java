@@ -96,6 +96,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
 
         NormalizedGeodeticPoint current = null;
+        NormalizedGeodeticPoint positionGP = null;
         double hMax = tile.getMaxElevation();
         while (current == null) {
 
@@ -106,7 +107,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                 // let's see if at least we are above DEM
                 try {
-                    final NormalizedGeodeticPoint positionGP =
+                    positionGP =
                                     ellipsoid.transform(position, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
                     final double elevationAtPosition = tile.interpolateElevation(positionGP.getLatitude(), positionGP.getLongitude());
                     if (positionGP.getAltitude() >= elevationAtPosition) {
@@ -117,7 +118,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     }
                 } catch (RuggedException re) {
                     if (re.getSpecifier() == RuggedMessages.OUT_OF_TILE_ANGLES) {
-                        current = null;
+                        // the entry point is in another tile, we can use the current position as the entry point;
+                        current = positionGP;
                     }
                 }
 
@@ -221,7 +223,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             // regular curved ellipsoid model
 
             NormalizedGeodeticPoint currentGuess = closeGuess;
-
             // normally, we should succeed at first attempt but in very rare cases
             // we may loose the intersection (typically because some corrections introduced
             // between the first intersection and the refining have slightly changed the
@@ -250,7 +251,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     return foundIntersection;
                 } else {
                     // extremely rare case: we have lost the intersection
-
                     // find a start point for new search, leaving the current cell behind
                     final double cellBoundaryLatitude  = tile.getLatitudeAtIndex(topoLOS.getY()  <= 0 ? iLat : iLat + 1);
                     final double cellBoundaryLongitude = tile.getLongitudeAtIndex(topoLOS.getX() <= 0 ? iLon : iLon + 1);
@@ -269,7 +269,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         // we consider this point to be OK
                         return cellExitGP;
                     }
-
 
                     // We recompute fully a new guess, starting from the point after current cell
                     final GeodeticPoint currentGuessGP = intersection(ellipsoid, cellExit, los);
