@@ -91,11 +91,13 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         // compute intersection with ellipsoid
         final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
+        //System.out.format("gp0 %3.9f %3.9f %4.3f\n",gp0.getLatitude(), gp0.getLongitude(), gp0.getAltitude());
 
         // locate the entry tile along the line-of-sight
         MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
 
         NormalizedGeodeticPoint current = null;
+        NormalizedGeodeticPoint positionGP = null;
         double hMax = tile.getMaxElevation();
         while (current == null) {
 
@@ -106,18 +108,24 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                 // let's see if at least we are above DEM
                 try {
-                    final NormalizedGeodeticPoint positionGP =
+                    positionGP =
                                     ellipsoid.transform(position, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
+                    //System.out.format("position GP latitude %3.9f %3.9f %4.3f\n",positionGP.getLatitude(), positionGP.getLongitude(), positionGP.getAltitude());
                     final double elevationAtPosition = tile.interpolateElevation(positionGP.getLatitude(), positionGP.getLongitude());
                     if (positionGP.getAltitude() >= elevationAtPosition) {
                         // we can use the current position as the entry point
                         current = positionGP;
                     } else {
+                        //System.out.format("%f %f \n",positionGP.getAltitude(), elevationAtPosition);
                         current = null;
                     }
                 } catch (RuggedException re) {
                     if (re.getSpecifier() == RuggedMessages.OUT_OF_TILE_ANGLES) {
-                        current = null;
+                        //System.out.format("out of tiles angles \n");
+                        //System.out.format("h max %f \n",hMax);
+                        //System.out.format("h max %f \n",hMax);
+                        //MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
+                        current = positionGP;
                     }
                 }
 
@@ -133,6 +141,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 // the entry point is in another tile
                 tile    = cache.getTile(current.getLatitude(), current.getLongitude());
                 hMax    = FastMath.max(hMax, tile.getMaxElevation());
+                ///System.out.format("new h max %f \n",hMax);
                 current = null;
             }
 
@@ -221,7 +230,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             // regular curved ellipsoid model
 
             NormalizedGeodeticPoint currentGuess = closeGuess;
-
+            //System.out.format("closeGuess %2.8f %2.8f",closeGuess.getLongitude(), closeGuess.getLatitude());
             // normally, we should succeed at first attempt but in very rare cases
             // we may loose the intersection (typically because some corrections introduced
             // between the first intersection and the refining have slightly changed the
@@ -250,7 +259,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     return foundIntersection;
                 } else {
                     // extremely rare case: we have lost the intersection
-
+                    //System.out.format("not found intersection ");
                     // find a start point for new search, leaving the current cell behind
                     final double cellBoundaryLatitude  = tile.getLatitudeAtIndex(topoLOS.getY()  <= 0 ? iLat : iLat + 1);
                     final double cellBoundaryLongitude = tile.getLongitudeAtIndex(topoLOS.getX() <= 0 ? iLon : iLon + 1);
@@ -270,7 +279,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         return cellExitGP;
                     }
 
-
+                    //System.out.format("cellExit %2.8f %2.8f %2.8f \n",cellExit.getX(), cellExit.getY(),cellExit.getZ());
                     // We recompute fully a new guess, starting from the point after current cell
                     final GeodeticPoint currentGuessGP = intersection(ellipsoid, cellExit, los);
                     currentGuess = new NormalizedGeodeticPoint(currentGuessGP.getLatitude(),

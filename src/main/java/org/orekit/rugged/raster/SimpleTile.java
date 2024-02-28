@@ -315,6 +315,8 @@ public class SimpleTile implements Tile {
         final double z01 = getElevationAtIndices(iLat + 1, jLong);
         final double z10 = getElevationAtIndices(iLat,     jLong + 1);
         final double z11 = getElevationAtIndices(iLat + 1, jLong + 1);
+        //System.out.format("x00 %2.9f y00 %2.9f \n",x00, y00);
+        //System.out.format("z00 %3.6f z01 %3.6f z10 %3.6f z11 %3.6f \n",z00, z01, z10,z11);
 
         // normalize back to tile coordinates
         final NormalizedGeodeticPoint tileP = new NormalizedGeodeticPoint(p.getLatitude(),
@@ -363,6 +365,7 @@ public class SimpleTile implements Tile {
             // the equation is quadratic
             final double b2  = b * b;
             final double fac = 4 * a * c;
+            //System.out.format("b2 %2.9f fac %2.9f b2 - fac %2.9f \n",b2, fac, b2-fac);
             if (b2 < fac) {
                 // no intersection at all
                 return null;
@@ -373,9 +376,11 @@ public class SimpleTile implements Tile {
 
         }
 
+        //System.out.format("interpolate p1 \n");
         final NormalizedGeodeticPoint p1 = interpolate(t1, tileP, dxA, dyA, los, x00);
+        //System.out.format("interpolate p2 \n");
         final NormalizedGeodeticPoint p2 = interpolate(t2, tileP, dxA, dyA, los, x00);
-
+        //if  (p1 == null && p2 ==null) { System.out.format("all null\n");}
         // select the first point along line-of-sight
         if (p1 == null) {
             return p2;
@@ -402,6 +407,7 @@ public class SimpleTile implements Tile {
                                                 final Vector3D los, final double centralLongitude) {
 
         if (Double.isInfinite(t)) {
+            //System.out.format("infinite t \n");
             return null;
         }
 
@@ -413,6 +419,8 @@ public class SimpleTile implements Tile {
                                                tileP.getAltitude()  + t * los.getZ(),
                                                centralLongitude);
         } else {
+            //System.out.format("outside \n");
+            //System.out.format("dx %f dy %f \n", dx,dy);
             return null;
         }
 
