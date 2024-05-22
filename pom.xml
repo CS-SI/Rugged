@@ -21,7 +21,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- COTS version -->
-    <rugged.orekit.version>11.3.2</rugged.orekit.version>
+    <rugged.orekit.version>12.0.2</rugged.orekit.version>
     <rugged.junit.version>4.13.2</rugged.junit.version>
 
     <!-- Compilers and Tools version -->
