@@ -28,6 +28,7 @@ import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
+import org.orekit.utils.TimeSpanMap;
 
 /** Builder for lines-of-sight list.
  * <p>
@@ -226,7 +227,13 @@ public class LOSBuilder {
             final ParameterObserver resettingObserver = new ParameterObserver() {
                 /** {@inheritDoc} */
                 @Override
-                public void valueChanged(final double previousValue, final ParameterDriver driver) {
+                public void valueChanged(final double previousValue, final ParameterDriver driver, AbsoluteDate date) {
+                    Arrays.fill(transformed, null);
+                }
+                
+                /** {@inheritDoc} */
+                @Override
+                public void valueSpanMapChanged​(TimeSpanMap<Double> previousValueSpanMap, ParameterDriver driver) {
                     Arrays.fill(transformed, null);
                 }
             };

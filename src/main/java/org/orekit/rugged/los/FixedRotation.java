@@ -26,8 +26,10 @@ import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.rugged.utils.DerivativeGenerator;
+import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
+import org.orekit.utils.TimeSpanMap;
 
 /** {@link TimeIndependentLOSTransform LOS transform} based on a fixed rotation.
  * @author Luc Maisonobe
@@ -71,7 +73,14 @@ public class FixedRotation implements TimeIndependentLOSTransform {
         this.angleDriver = new ParameterDriver(name, angle, SCALE, -2 * FastMath.PI, 2 * FastMath.PI);
         angleDriver.addObserver(new ParameterObserver() {
             @Override
-            public void valueChanged(final double previousValue, final ParameterDriver driver) {
+            public void valueChanged(final double previousValue, final ParameterDriver driver, AbsoluteDate date) {
+                // reset rotations to null, they will be evaluated lazily if needed
+                rotation = null;
+                rDS      = null;
+            }
+            
+            @Override
+            public void valueSpanMapChanged​(TimeSpanMap<Double> previousValueSpanMap, ParameterDriver driver) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 rotation = null;
                 rDS      = null;
