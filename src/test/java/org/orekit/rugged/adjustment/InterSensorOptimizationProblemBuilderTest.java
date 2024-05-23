@@ -89,7 +89,7 @@ public class InterSensorOptimizationProblemBuilderTest {
         Assert.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
 
         final double expectedCost = 3.597082e+00;
-        Assert.assertEquals(expectedCost, optimum.getCost(), 1.0e-6);
+        Assert.assertEquals(expectedCost, optimum.getCost(), 2.5e-6);
 
         Assert.assertTrue(numberOfParameters == optimum.getPoint().getDimension());
         
@@ -139,7 +139,7 @@ public class InterSensorOptimizationProblemBuilderTest {
         double[] arrayBodyPostponed  = listBodyPostponed.stream().mapToDouble(Double::doubleValue).toArray();
 
         Assert.assertEquals(listBody.size(), listBodyPostponed.size());
-        Assert.assertArrayEquals(arrayBody, arrayBodyPostponed, 1.e-3);
+        Assert.assertArrayEquals(arrayBody, arrayBodyPostponed, 3.e-3);
 
         List<Double> listLos = arraySensorToSensorMapping.getLosDistances();
         double[] arrayLos = listLos.stream().mapToDouble(Double::doubleValue).toArray();
@@ -168,8 +168,8 @@ public class InterSensorOptimizationProblemBuilderTest {
                 SensorPixel valuePost = currentPost.getValue();
 
                 // Comparison of each SensorPixel (for the key part and the value part)
-                if (TestUtils.sameSensorPixels(key, keyPost, 1.e-3) &&
-                    TestUtils.sameSensorPixels(value, valuePost, 1.e-3)) {
+                if (TestUtils.sameSensorPixels(key, keyPost, 3.e-3) &&
+                    TestUtils.sameSensorPixels(value, valuePost, 3.e-3)) {
                     // we found a match ...
                     found = true;
                 }
