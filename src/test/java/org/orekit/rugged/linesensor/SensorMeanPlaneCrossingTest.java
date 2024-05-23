@@ -42,7 +42,7 @@ import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
-import org.orekit.orbits.PositionAngle;
+import org.orekit.orbits.PositionAngleType;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.rugged.TestUtils;
@@ -304,7 +304,7 @@ public class SensorMeanPlaneCrossingTest {
                                         -4.029194321683225E-4, 0.0013530362644647786,
                                         FastMath.toRadians(98.63218182243709),
                                         FastMath.toRadians(77.55565567747836),
-                                        FastMath.PI, PositionAngle.TRUE,
+                                        FastMath.PI, PositionAngleType.TRUE,
                                         FramesFactory.getEME2000(), sensor.getDate(1000),
                                         Constants.EIGEN5C_EARTH_MU);
         BodyShape earth = new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
