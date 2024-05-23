@@ -33,6 +33,9 @@
       <action dev="guylaine" type="update">
         Updated dependencies to Orekit 11.3 (and Hipparchus 2.3).
       </action>
+      <action dev="clement" type="update" issue="395">
+        Updated dependencies to Orekit 12.0.2.
+      </action>
     </release>
     <release version="3.0" date="2022-07-05" description="This is a major release.
     It fixes a few bugs.
