@@ -227,13 +227,13 @@ public class LOSBuilder {
             final ParameterObserver resettingObserver = new ParameterObserver() {
                 /** {@inheritDoc} */
                 @Override
-                public void valueChanged(final double previousValue, final ParameterDriver driver, AbsoluteDate date) {
+                public void valueChanged(final double previousValue, final ParameterDriver driver, final AbsoluteDate date) {
                     Arrays.fill(transformed, null);
                 }
-                
+
                 /** {@inheritDoc} */
                 @Override
-                public void valueSpanMapChanged​(TimeSpanMap<Double> previousValueSpanMap, ParameterDriver driver) {
+                public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                     Arrays.fill(transformed, null);
                 }
             };

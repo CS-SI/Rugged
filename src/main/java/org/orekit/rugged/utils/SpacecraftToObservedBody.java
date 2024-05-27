@@ -129,11 +129,11 @@ public class SpacecraftToObservedBody implements Serializable {
         // set up the TimeStampedPVCoordinates interpolator
         final TimeInterpolator<TimeStampedPVCoordinates> pvInterpolator =
                 new TimeStampedPVCoordinatesHermiteInterpolator(pvInterpolationNumber, pvFilter);
-        
+
         // set up the cache for attitudes
         final TimeStampedCache<TimeStampedAngularCoordinates> aCache =
                 new ImmutableTimeStampedCache<>(aInterpolationNumber, quaternions);
-        
+
         // set up the TimeStampedAngularCoordinates Hermite interpolator
         final TimeInterpolator<TimeStampedAngularCoordinates> angularInterpolator =
                 new TimeStampedAngularCoordinatesHermiteInterpolator(aInterpolationNumber, aFilter);
@@ -155,7 +155,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 pvInterpolationDate = date;
             }
             final TimeStampedPVCoordinates interpolatedPV =
-                    pvInterpolator.interpolate(pvInterpolationDate, 
+                    pvInterpolator.interpolate(pvInterpolationDate,
                             pvCache.getNeighbors(pvInterpolationDate));
             final TimeStampedPVCoordinates pv = interpolatedPV.shiftedBy(date.durationFrom(pvInterpolationDate));
 
@@ -169,7 +169,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 aInterpolationDate = date;
             }
             final TimeStampedAngularCoordinates interpolatedQuaternion =
-                    angularInterpolator.interpolate(aInterpolationDate, 
+                    angularInterpolator.interpolate(aInterpolationDate,
                             aCache.getNeighbors(aInterpolationDate).collect(Collectors.toList()));
             final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 

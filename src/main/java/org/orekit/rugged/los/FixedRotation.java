@@ -73,14 +73,14 @@ public class FixedRotation implements TimeIndependentLOSTransform {
         this.angleDriver = new ParameterDriver(name, angle, SCALE, -2 * FastMath.PI, 2 * FastMath.PI);
         angleDriver.addObserver(new ParameterObserver() {
             @Override
-            public void valueChanged(final double previousValue, final ParameterDriver driver, AbsoluteDate date) {
+            public void valueChanged(final double previousValue, final ParameterDriver driver, final AbsoluteDate date) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 rotation = null;
                 rDS      = null;
             }
-            
+
             @Override
-            public void valueSpanMapChanged​(TimeSpanMap<Double> previousValueSpanMap, ParameterDriver driver) {
+            public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 rotation = null;
                 rDS      = null;

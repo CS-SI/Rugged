@@ -67,14 +67,14 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
         this.factorDriver = new ParameterDriver(name, factorvalue, SCALE, 0, Double.POSITIVE_INFINITY);
         factorDriver.addObserver(new ParameterObserver() {
             @Override
-            public void valueChanged(final double previousValue, final ParameterDriver driver, AbsoluteDate date) {
+            public void valueChanged(final double previousValue, final ParameterDriver driver, final AbsoluteDate date) {
                 // reset factor to zero, they will be evaluated lazily if needed
                 factor = 0.0;
                 factorDS = null;
             }
-            
+
             @Override
-            public void valueSpanMapChanged​(TimeSpanMap<Double> previousValueSpanMap, ParameterDriver driver) {
+            public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                 // reset factor to zero, they will be evaluated lazily if needed
                 factor = 0.0;
                 factorDS = null;

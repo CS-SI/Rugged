@@ -88,15 +88,15 @@ public class PolynomialRotation implements LOSTransform {
         this.coefficientsDrivers = new ParameterDriver[angleCoeffs.length];
         final ParameterObserver resettingObserver = new ParameterObserver() {
             @Override
-            public void valueChanged(final double previousValue, final ParameterDriver driver, AbsoluteDate date) {
+            public void valueChanged(final double previousValue, final ParameterDriver driver, final AbsoluteDate date) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 angle   = null;
                 axisDS  = null;
                 angleDS = null;
             }
-            
+
             @Override
-            public void valueSpanMapChanged​(TimeSpanMap<Double> previousValueSpanMap, ParameterDriver driver) {
+            public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 angle   = null;
                 axisDS  = null;
