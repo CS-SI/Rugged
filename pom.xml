@@ -17,21 +17,17 @@
 
   <properties>
 
-    
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     <!-- COTS version -->
     <rugged.orekit.version>11.3.2</rugged.orekit.version>
     <rugged.junit.version>4.13.2</rugged.junit.version>
-    
+
     <!-- Compilers and Tools version -->
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
-
-    <!-- sonar related properties -->
-    <sonar.host.url>https://sonar.orekit.org/</sonar.host.url>
-
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rugged.spotbugs-maven-plugin.version>4.5.3.0</rugged.spotbugs-maven-plugin.version>
     <rugged.jacoco-maven-plugin.version>0.8.8</rugged.jacoco-maven-plugin.version>
     <rugged.maven-bundle-plugin.version>5.1.8</rugged.maven-bundle-plugin.version>
@@ -49,8 +45,6 @@
     <rugged.maven-resources-plugin.version>3.3.0</rugged.maven-resources-plugin.version>
     <rugged.maven-site-plugin.version>3.12.1</rugged.maven-site-plugin.version>
     <rugged.maven-source-plugin.version>3.2.1</rugged.maven-source-plugin.version>
-    <!-- Surefire 2.22.2 is the last to support CentOS/RedHat 7 due to
-         https://issues.apache.org/jira/browse/SUREFIRE-1628 -->
     <rugged.maven-surefire-plugin.version>2.22.2</rugged.maven-surefire-plugin.version>
     <rugged.maven-surefire-report-plugin.version>3.0.0-M6</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.12</rugged.jgit.buildnumber.version>
@@ -58,7 +52,7 @@
     <rugged.nexus-staging-maven-plugin.version>1.6.13</rugged.nexus-staging-maven-plugin.version>
     <rugged.maven-gpg-plugin.version>3.0.1</rugged.maven-gpg-plugin.version>
     <rugged.maven-install-plugin.version>3.0.1</rugged.maven-install-plugin.version>
-    
+
   </properties>
 
   <developers>
