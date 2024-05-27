@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -46,7 +46,7 @@ import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
@@ -63,7 +63,6 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineDatation;
@@ -99,7 +98,7 @@ public class RuggedBuilderTest {
         throws URISyntaxException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         AbsoluteDate t0 = new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC());
 
         List<TimeStampedPVCoordinates> pv = Arrays.asList(
@@ -166,6 +165,11 @@ public class RuggedBuilderTest {
             Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
             Assert.assertEquals("RuggedBuilder.setEllipsoid()", re.getParts()[0]);
         }
+        
+        Assert.assertTrue(builder.isOverlappingTiles());
+        builder.setOverlappingTiles(false);
+        Assert.assertTrue(!builder.isOverlappingTiles());
+        
         builder.setEllipsoid(EllipsoidId.GRS80, BodyRotatingFrameId.ITRF);
         try {
             builder.build();
@@ -315,7 +319,7 @@ public class RuggedBuilderTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
@@ -360,7 +364,7 @@ public class RuggedBuilderTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         AbsoluteDate t0 = new AbsoluteDate("2012-01-01T00:00:00", TimeScalesFactory.getUTC());
 
         List<TimeStampedPVCoordinates> pv = Arrays.asList(
@@ -464,7 +468,7 @@ public class RuggedBuilderTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = createEarth();
         final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -533,7 +537,7 @@ public class RuggedBuilderTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = createEarth();
         final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -583,7 +587,7 @@ public class RuggedBuilderTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = createEarth();
         final Orbit      orbit = createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -642,7 +646,7 @@ public class RuggedBuilderTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
 
         // the following array is a real serialization file corresponding to the following
         // made-up empty class that does not exist in Rugged:
@@ -825,14 +829,10 @@ public class RuggedBuilderTest {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedPVCoordinates(currentState.getDate(),
-                                                      currentState.getPVCoordinates().getPosition(),
-                                                      currentState.getPVCoordinates().getVelocity(),
-                                                      Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedPVCoordinates(currentState.getDate(),
+                                                                                                    currentState.getPVCoordinates().getPosition(),
+                                                                                                    currentState.getPVCoordinates().getVelocity(),
+                                                                                                    Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }
@@ -845,13 +845,9 @@ public class RuggedBuilderTest {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
-                                                           currentState.getAttitude().getRotation(),
-                                                           Vector3D.ZERO, Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
+                                                                                                         currentState.getAttitude().getRotation(),
+                                                                                                         Vector3D.ZERO, Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }

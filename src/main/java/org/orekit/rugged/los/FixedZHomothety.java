@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -18,11 +18,11 @@ package org.orekit.rugged.los;
 
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
 
@@ -46,7 +46,7 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
     private double factor;
 
     /** Underlying homothety with derivatives. */
-    private DerivativeStructure factorDS;
+    private Derivative<?> factorDS;
 
     /** Driver for homothety factor. */
     private final ParameterDriver factorDriver;
@@ -91,14 +91,26 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     @Override
-    public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
-                                                           final DSGenerator generator) {
-        if (factorDS == null) {
+    public <T extends Derivative<T>> FieldVector3D<T> transformLOS(final int i, final FieldVector3D<T> los,
+                                                                   final DerivativeGenerator<T> generator) {
+        final T factorD;
+        if (factorDS == null || !factorDS.getField().equals(generator.getField())) {
+
             // lazy evaluation of the homothety
-            factorDS = generator.variable(factorDriver);
+            factorD = generator.variable(factorDriver);
+
+            // cache evaluated homothety
+            factorDS = factorD;
+
+        } else {
+            // reuse cached value
+            factorD  = (T) factorDS;
         }
-        return new FieldVector3D<DerivativeStructure>(los.getX(), los.getY(), factorDS.multiply(los.getZ()));
+
+        return new FieldVector3D<>(los.getX(), los.getY(), factorD.multiply(los.getZ()));
+
     }
 
 }

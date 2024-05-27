@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -18,15 +18,14 @@ package org.orekit.rugged.raster;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
+import org.hipparchus.util.MathUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
-import org.orekit.rugged.raster.SimpleTile;
-import org.orekit.rugged.raster.SimpleTileFactory;
-import org.orekit.rugged.raster.Tile;
 import org.orekit.rugged.raster.Tile.Location;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 public class SimpleTileTest {
 
@@ -100,6 +99,29 @@ public class SimpleTileTest {
             }
         }
 
+    }
+    
+    @Test
+    public void testZipper() {
+
+        SimpleTile tile0 = new SimpleTileFactory().createTile();
+        tile0.setGeometry(1.0, 2.0, 0.1, 0.2, 100, 200);
+        for (int i = 0; i < tile0.getLatitudeRows(); ++i) {
+            for (int j = 0; j < tile0.getLongitudeColumns(); ++j) {
+                tile0.setElevation(i, j, 1000 * i + j);
+            }
+        }
+        tile0.tileUpdateCompleted();
+
+        Assert.assertEquals(Location.SOUTH_WEST, tile0.getLocation( 0.0,  1.0));
+        Assert.assertEquals(Location.WEST,       tile0.getLocation( 6.0,  1.0));
+        Assert.assertEquals(Location.NORTH_WEST, tile0.getLocation(12.0,  1.0));
+        Assert.assertEquals(Location.SOUTH,      tile0.getLocation( 0.0, 22.0));
+        Assert.assertEquals(Location.HAS_INTERPOLATION_NEIGHBORS,    tile0.getLocation( 6.0, 22.0));
+        Assert.assertEquals(Location.NORTH,      tile0.getLocation(12.0, 22.0));
+        Assert.assertEquals(Location.SOUTH_EAST, tile0.getLocation( 0.0, 43.0));
+        Assert.assertEquals(Location.EAST,       tile0.getLocation( 6.0, 43.0));
+        Assert.assertEquals(Location.NORTH_EAST, tile0.getLocation(12.0, 43.0));
     }
 
     @Test
@@ -219,16 +241,44 @@ public class SimpleTileTest {
         tile.setElevation(21, 14, 162.0);
         tile.setElevation(21, 15,  95.0);
         tile.tileUpdateCompleted();
-        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
-                                              300.0);
-        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
-                                              10.0);
-        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 20, 14);
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
+                                                                  300.0, tile.getLongitudeAtIndex(14));
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
+                                                                  10.0, tile.getLongitudeAtIndex(14));
+        NormalizedGeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 20, 14);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 20, 14);
+        NormalizedGeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 20, 14);
+        checkInLine(gpA, gpB, gpIBA);
+        checkOnTile(tile, gpIBA);
+
+        Assert.assertEquals(gpIAB.getLatitude(),  gpIBA.getLatitude(),  1.0e-10);
+        Assert.assertEquals(gpIAB.getLongitude(), gpIBA.getLongitude(), 1.0e-10);
+        Assert.assertEquals(gpIAB.getAltitude(),  gpIBA.getAltitude(),  1.0e-10);
+
+    }
+
+    @Test
+    public void testCellIntersection2PiWrapping() {
+        SimpleTile tile = new SimpleTileFactory().createTile();
+        tile.setGeometry(0.0, 0.0, 0.025, 0.025, 50, 50);
+        tile.setElevation(20, 14,  91.0);
+        tile.setElevation(20, 15, 210.0);
+        tile.setElevation(21, 14, 162.0);
+        tile.setElevation(21, 15,  95.0);
+        tile.tileUpdateCompleted();
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
+                                                                  300.0, +4 * FastMath.PI);
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
+                                                                  10.0, +4 * FastMath.PI);
+        NormalizedGeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 20, 14);
+        checkInLine(gpA, gpB, gpIAB);
+        checkOnTile(tile, gpIAB);
+        NormalizedGeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 20, 14);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -247,19 +297,19 @@ public class SimpleTileTest {
         tile.setElevation(21, 14, 162.0);
         tile.setElevation(21, 15,  95.0);
         tile.tileUpdateCompleted();
-        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
-                                              120.0);
-        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
-                                              130.0);
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
+                                                                  120.0, tile.getLongitudeAtIndex(14));
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
+                                                                  130.0, tile.getLongitudeAtIndex(14));
 
         // the line from gpA to gpB should traverse the DEM twice within the tile
         // we use the points in the two different orders to retrieve both solutions
-        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 20, 14);
+        NormalizedGeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 20, 14);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 20, 14);
+        NormalizedGeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 20, 14);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -278,12 +328,12 @@ public class SimpleTileTest {
         tile.setElevation(21, 14, 162.0);
         tile.setElevation(21, 15,  95.0);
         tile.tileUpdateCompleted();
-        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
-                                              180.0);
-        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
-                                              190.0);
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.1 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.2 * tile.getLongitudeStep(),
+                                                                  180.0, tile.getLongitudeAtIndex(14));
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(20)  + 0.7 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(14) + 0.9 * tile.getLongitudeStep(),
+                                                                  190.0, tile.getLongitudeAtIndex(14));
 
         Assert.assertNull(tile.cellIntersection(gpA, los(gpA, gpB), 20, 14));
 
@@ -298,17 +348,17 @@ public class SimpleTileTest {
         tile.setElevation(1, 0,  40.0);
         tile.setElevation(1, 1,  40.0);
         tile.tileUpdateCompleted();
-        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              50.0);
-        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              20.0);
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  50.0, tile.getLongitudeAtIndex(0));
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  20.0, tile.getLongitudeAtIndex(0));
 
-        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 0, 0);
+        NormalizedGeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 0, 0);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 0, 0);
+        NormalizedGeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 0, 0);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -327,12 +377,12 @@ public class SimpleTileTest {
         tile.setElevation(1, 0,  40.0);
         tile.setElevation(1, 1,  40.0);
         tile.tileUpdateCompleted();
-        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              45.0);
-        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              55.0);
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  45.0, tile.getLongitudeAtIndex(0));
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  55.0, tile.getLongitudeAtIndex(0));
 
        Assert.assertNull(tile.cellIntersection(gpA, los(gpA, gpB), 0, 0));
 
@@ -347,12 +397,12 @@ public class SimpleTileTest {
         tile.setElevation(1, 0,  40.0);
         tile.setElevation(1, 1,  40.0);
         tile.tileUpdateCompleted();
-        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              45.0);
-        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              50.0);
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  45.0, tile.getLongitudeAtIndex(0));
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  50.0, tile.getLongitudeAtIndex(0));
 
         Assert.assertNull(tile.cellIntersection(gpA, los(gpA, gpB), 0, 0));
 
@@ -367,17 +417,17 @@ public class SimpleTileTest {
         tile.setElevation(1, 0,  40.0);
         tile.setElevation(1, 1,  40.0);
         tile.tileUpdateCompleted();
-        GeodeticPoint gpA = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              32.5);
-        GeodeticPoint gpB = new GeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
-                                              tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
-                                              37.5);
+        NormalizedGeodeticPoint gpA = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.25 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  32.5, tile.getLongitudeAtIndex(0));
+        NormalizedGeodeticPoint gpB = new NormalizedGeodeticPoint(tile.getLatitudeAtIndex(0)  + 0.75 * tile.getLatitudeStep(),
+                                                                  tile.getLongitudeAtIndex(0) + 0.50 * tile.getLongitudeStep(),
+                                                                  37.5, tile.getLongitudeAtIndex(0));
 
-        GeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 0, 0);
+        NormalizedGeodeticPoint gpIAB = tile.cellIntersection(gpA, los(gpA, gpB), 0, 0);
         checkInLine(gpA, gpB, gpIAB);
         checkOnTile(tile, gpIAB);
-        GeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 0, 0);
+        NormalizedGeodeticPoint gpIBA = tile.cellIntersection(gpB, los(gpB, gpA), 0, 0);
         checkInLine(gpA, gpB, gpIBA);
         checkOnTile(tile, gpIBA);
 
@@ -435,7 +485,7 @@ public class SimpleTileTest {
                             1.0e-10);
 
         Assert.assertEquals(gpI.getLongitude(),
-                            gpA.getLongitude() * (1 - t) + gpB.getLongitude() * t,
+                            MathUtils.normalizeAngle(gpA.getLongitude() * (1 - t) + gpB.getLongitude() * t, gpI.getLongitude()),
                             1.0e-10);
 
     }

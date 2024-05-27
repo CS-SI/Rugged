@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -18,7 +18,8 @@ package org.orekit.rugged.los;
 
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.Field;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.analysis.polynomials.PolynomialFunction;
 import org.hipparchus.geometry.euclidean.threed.FieldRotation;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
@@ -26,7 +27,8 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.orekit.rugged.utils.DSGenerator;
+import org.hipparchus.util.MathArrays;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
@@ -52,10 +54,10 @@ public class PolynomialRotation implements LOSTransform {
     private PolynomialFunction angle;
 
     /** Rotation axis and derivatives. */
-    private FieldVector3D<DerivativeStructure> axisDS;
+    private FieldVector3D<?> axisDS;
 
     /** Rotation angle polynomial and derivatives. */
-    private DerivativeStructure[] angleDS;
+    private Derivative<?>[] angleDS;
 
     /** Reference date for polynomial evaluation. */
     private final AbsoluteDate referenceDate;
@@ -143,30 +145,44 @@ public class PolynomialRotation implements LOSTransform {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     @Override
-    public FieldVector3D<DerivativeStructure> transformLOS(final int i, final FieldVector3D<DerivativeStructure> los,
-                                                           final AbsoluteDate date, final DSGenerator generator) {
+    public <T extends Derivative<T>> FieldVector3D<T> transformLOS(final int i, final FieldVector3D<T> los,
+                                                                   final AbsoluteDate date,
+                                                                   final DerivativeGenerator<T> generator) {
 
-        if (angleDS == null) {
+        final Field<T> field = generator.getField();
+        final FieldVector3D<T> axisD;
+        final T[] angleD;
+        if (axisDS == null || !axisDS.getX().getField().equals(field)) {
+
             // lazy evaluation of the rotation
-            axisDS = new FieldVector3D<DerivativeStructure>(generator.constant(axis.getX()),
-                                                            generator.constant(axis.getY()),
-                                                            generator.constant(axis.getZ()));
-            angleDS = new DerivativeStructure[coefficientsDrivers.length];
-            for (int k = 0; k < angleDS.length; ++k) {
-                angleDS[k] = generator.variable(coefficientsDrivers[k]);
+            axisD = new FieldVector3D<>(generator.constant(axis.getX()),
+                                        generator.constant(axis.getY()),
+                                        generator.constant(axis.getZ()));
+            angleD = MathArrays.buildArray(field, coefficientsDrivers.length);
+            for (int k = 0; k < angleD.length; ++k) {
+                angleD[k] = generator.variable(coefficientsDrivers[k]);
             }
+
+            // cache evaluated rotation parameters
+            axisDS  = axisD;
+            angleDS = angleD;
+
+        } else {
+            // reuse cached values
+            axisD  = (FieldVector3D<T>) axisDS;
+            angleD = (T[]) angleDS;
         }
+
         // evaluate polynomial, with all its partial derivatives
         final double t = date.durationFrom(referenceDate);
-        DerivativeStructure alpha = axisDS.getX().getField().getZero();
+        T alpha = field.getZero();
         for (int k = angleDS.length - 1; k >= 0; --k) {
-            alpha = alpha.multiply(t).add(angleDS[k]);
+            alpha = alpha.multiply(t).add(angleD[k]);
         }
 
-        return new FieldRotation<DerivativeStructure>(axisDS,
-                                                      alpha,
-                                                      RotationConvention.VECTOR_OPERATOR).applyTo(los);
+        return new FieldRotation<>(axisD, alpha, RotationConvention.VECTOR_OPERATOR).applyTo(los);
 
     }
 

@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -47,7 +47,7 @@ import org.orekit.time.AbsoluteDate;
 public class DumpManager {
 
     /** Dump file (default initial value is null, i.e. nothing is dumped). */
-    private static final ThreadLocal<Dump> DUMP = new ThreadLocal<Dump>();
+    private static final ThreadLocal<Dump> DUMP = new ThreadLocal<>();
 
     /** Boolean to check if the dump is suspended. */
     private static boolean isSuspended = false;
@@ -86,15 +86,38 @@ public class DumpManager {
     }
 
     /** Suspend the dump.
+     * In case the dump is already suspended, keep the previous status in order to
+     * correctly deal the resume stage.
+     * @return a flag to tell if the dump is already suspended (true; false otherwise)
      */
-    public static void suspend() {
-        isSuspended = true;
+    public static Boolean suspend() {
+        // Check if the dump is already suspended
+        if (isSuspended) {
+            return isSuspended;
+        } else {
+            isSuspended = true;
+            return false;
+        }
     }
 
-    /** Resume the dump.
+    /** Resume the dump, only if it was not already suspended.
+     * @param wasSuspended flag to tell if the dump was already suspended (true; false otherwise)
      */
-    public static void resume() {
+    public static void resume(final Boolean wasSuspended) {
+        if (!wasSuspended) {
+            isSuspended = false;
+        }
+    }
+
+    /** In case dump is suspended and an exception is thrown,
+     * allows the dump to end nicely.
+     */
+    public static void endNicely() {
         isSuspended = false;
+        if (isActive()) {
+            deactivate();
+        }
+
     }
 
     /** Check if dump is active for this thread.
@@ -175,6 +198,7 @@ public class DumpManager {
     /** Dump an inverse location computation.
      * @param sensor sensor
      * @param point point to localize
+     * @param ellipsoid the used ellipsoid
      * @param minLine minimum line number
      * @param maxLine maximum line number
      * @param lightTimeCorrection flag for light time correction
@@ -182,12 +206,14 @@ public class DumpManager {
      * @param refractionCorrection flag for refraction correction
      */
     public static void dumpInverseLocation(final LineSensor sensor, final GeodeticPoint point,
+                                           final ExtendedEllipsoid ellipsoid,
                                            final int minLine, final int maxLine,
                                            final boolean lightTimeCorrection, final boolean aberrationOfLightCorrection,
                                            final boolean refractionCorrection) {
         if (isActive()) {
             DUMP.get().dumpInverseLocation(sensor, point, minLine, maxLine,
                                            lightTimeCorrection, aberrationOfLightCorrection, refractionCorrection);
+            DUMP.get().dumpEllipsoid(ellipsoid);
         }
     }
 

@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -17,7 +17,6 @@
 package org.orekit.rugged.raster;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface representing a raster tile.
@@ -44,7 +43,7 @@ public interface Tile extends UpdatableTile {
      * <p>
      * This enumerate represent the position of a point taking this off-by-one property
      * into account, the value {@link #HAS_INTERPOLATION_NEIGHBORS} correspond to points that
-     * do have the necessary four neightbors, whereas the other values correspond to points
+     * do have the necessary four neighbors, whereas the other values correspond to points
      * that are either completely outside of the tile or within the tile but in either the
      * northernmost row or easternmost column.
      * </p>
@@ -257,7 +256,19 @@ public interface Tile extends UpdatableTile {
     double interpolateElevation(double latitude, double longitude);
 
     /** Find the intersection of a line-of-sight and a Digital Elevation Model cell.
-     * @param p point on the line
+     * <p>
+     * Beware that for continuity reasons, the point argument in {@code cellIntersection} is normalized
+     * with respect to other points used by the caller. This implies that the longitude may be
+     * outside of the [-π ; +π] interval (or the [0 ; 2π] interval, depending on the DEM). In particular,
+     * when a Line Of Sight crosses the antimeridian at  ±π longitude, the library may call the
+     * {@code cellIntersection} method with a point having a longitude of -π-ε to ensure this continuity.
+     * As tiles are stored with longitude clipped to a some DEM specific interval (either  [-π ; +π] or [0 ; 2π]),
+     * implementations MUST take care to clip the input point back to the tile interval using
+     * {@link org.hipparchus.util.MathUtils#normalizeAngle(double, double) MathUtils.normalizeAngle(p.getLongitude(),
+     * someLongitudeWithinTheTile)}. The output point normalization should also be made consistent with
+     * the current tile.
+     * </p>
+     * @param p point on the line (beware its longitude is <em>not</em> normalized with respect to tile)
      * @param los line-of-sight, in the topocentric frame (East, North, Zenith) of the point,
      * scaled to match radians in the horizontal plane and meters along the vertical axis
      * @param latitudeIndex latitude index of the Digital Elevation Model cell
@@ -265,8 +276,8 @@ public interface Tile extends UpdatableTile {
      * @return point corresponding to line-of-sight crossing the Digital Elevation Model surface
      * if it lies within the cell, null otherwise
      */
-    NormalizedGeodeticPoint cellIntersection(GeodeticPoint p, Vector3D los,
-                                              int latitudeIndex, int longitudeIndex);
+    NormalizedGeodeticPoint cellIntersection(NormalizedGeodeticPoint p, Vector3D los,
+                                             int latitudeIndex, int longitudeIndex);
 
     /** Check if a tile covers a ground point.
      * @param latitude ground point latitude

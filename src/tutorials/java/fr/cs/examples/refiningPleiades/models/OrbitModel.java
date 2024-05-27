@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -248,12 +248,12 @@ public class OrbitModel {
 
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(step,
-        		                 (currentState, isLast) ->
-                                 list.add(new TimeStampedPVCoordinates(currentState.getDate(),
-                                                                       currentState.getPVCoordinates().getPosition(),
-                                                                       currentState.getPVCoordinates().getVelocity(),
-                                                                       Vector3D.ZERO)));
+        propagator.getMultiplexer().add(step,
+        		                        currentState ->
+                                        list.add(new TimeStampedPVCoordinates(currentState.getDate(),
+                                                                              currentState.getPVCoordinates().getPosition(),
+                                                                              currentState.getPVCoordinates().getVelocity(),
+                                                                              Vector3D.ZERO)));
         propagator.propagate(maxDate);
 
         return list;
@@ -269,12 +269,12 @@ public class OrbitModel {
         propagator.setAttitudeProvider(createAttitudeProvider(earth, orbit));
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<>();
-        propagator.setMasterMode(step,
-                                 (currentState, isLast) ->
-                                 list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
-                                                                            currentState.getAttitude().getRotation(),
-                                                                            Vector3D.ZERO,
-                                                                            Vector3D.ZERO)));
+        propagator.getMultiplexer().add(step,
+                                        currentState ->
+                                        list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
+                                                                                   currentState.getAttitude().getRotation(),
+                                                                                   Vector3D.ZERO,
+                                                                                   Vector3D.ZERO)));
         propagator.propagate(maxDate);
 
         return list;

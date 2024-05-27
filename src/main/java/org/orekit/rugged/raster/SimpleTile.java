@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -16,12 +16,11 @@
  */
 package org.orekit.rugged.raster;
 
+import java.util.Arrays;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.hipparchus.util.Precision;
-import java.util.Arrays;
-
-import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
@@ -268,7 +267,7 @@ public class SimpleTile implements Tile {
     public double interpolateElevation(final double latitude, final double longitude) {
 
         final double doubleLatitudeIndex  = getDoubleLatitudeIndex(latitude);
-        final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
+        final double doubleLongitudeIndex = getDoubleLongitudeIndex(longitude);
         if (doubleLatitudeIndex  < -TOLERANCE || doubleLatitudeIndex  >= (latitudeRows - 1 + TOLERANCE) ||
             doubleLongitudeIndex < -TOLERANCE || doubleLongitudeIndex >= (longitudeColumns - 1 + TOLERANCE)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES,
@@ -302,7 +301,7 @@ public class SimpleTile implements Tile {
 
     /** {@inheritDoc} */
     @Override
-    public NormalizedGeodeticPoint cellIntersection(final GeodeticPoint p, final Vector3D los,
+    public NormalizedGeodeticPoint cellIntersection(final NormalizedGeodeticPoint p, final Vector3D los,
                                                     final int latitudeIndex, final int longitudeIndex) {
 
         // ensure neighboring cells to not fall out of tile
@@ -317,10 +316,16 @@ public class SimpleTile implements Tile {
         final double z10 = getElevationAtIndices(iLat,     jLong + 1);
         final double z11 = getElevationAtIndices(iLat + 1, jLong + 1);
 
+        // normalize back to tile coordinates
+        final NormalizedGeodeticPoint tileP = new NormalizedGeodeticPoint(p.getLatitude(),
+                                                                          p.getLongitude(),
+                                                                          p.getAltitude(),
+                                                                          x00);
+
         // line-of-sight coordinates at close points
-        final double dxA = (p.getLongitude() - x00) / longitudeStep;
-        final double dyA = (p.getLatitude()  - y00) / latitudeStep;
-        final double dzA = p.getAltitude();
+        final double dxA = (tileP.getLongitude() - x00) / longitudeStep;
+        final double dyA = (tileP.getLatitude()  - y00) / latitudeStep;
+        final double dzA = tileP.getAltitude();
         final double dxB = dxA + los.getX() / longitudeStep;
         final double dyB = dyA + los.getY() / latitudeStep;
         final double dzB = dzA + los.getZ();
@@ -368,8 +373,8 @@ public class SimpleTile implements Tile {
 
         }
 
-        final NormalizedGeodeticPoint p1 = interpolate(t1, p, dxA, dyA, los, x00);
-        final NormalizedGeodeticPoint p2 = interpolate(t2, p, dxA, dyA, los, x00);
+        final NormalizedGeodeticPoint p1 = interpolate(t1, tileP, dxA, dyA, los, x00);
+        final NormalizedGeodeticPoint p2 = interpolate(t2, tileP, dxA, dyA, los, x00);
 
         // select the first point along line-of-sight
         if (p1 == null) {
@@ -384,7 +389,7 @@ public class SimpleTile implements Tile {
 
     /** Interpolate point along a line.
      * @param t abscissa along the line
-     * @param p start point
+     * @param tileP start point, normalized to tile area
      * @param dxP relative coordinate of the start point with respect to current cell
      * @param dyP relative coordinate of the start point with respect to current cell
      * @param los direction of the line-of-sight, in geodetic space
@@ -392,7 +397,7 @@ public class SimpleTile implements Tile {
      * be normalized between lc-π and lc+π
      * @return interpolated point along the line
      */
-    private NormalizedGeodeticPoint interpolate(final double t, final GeodeticPoint p,
+    private NormalizedGeodeticPoint interpolate(final double t, final NormalizedGeodeticPoint tileP,
                                                 final double dxP, final double dyP,
                                                 final Vector3D los, final double centralLongitude) {
 
@@ -403,9 +408,9 @@ public class SimpleTile implements Tile {
         final double dx = dxP + t * los.getX() / longitudeStep;
         final double dy = dyP + t * los.getY() / latitudeStep;
         if (dx >= -TOLERANCE && dx <= 1 + TOLERANCE && dy >= -TOLERANCE && dy <= 1 + TOLERANCE) {
-            return new NormalizedGeodeticPoint(p.getLatitude()  + t * los.getY(),
-                                               p.getLongitude() + t * los.getX(),
-                                               p.getAltitude()  + t * los.getZ(),
+            return new NormalizedGeodeticPoint(tileP.getLatitude()  + t * los.getY(),
+                                               tileP.getLongitude() + t * los.getX(),
+                                               tileP.getAltitude()  + t * los.getZ(),
                                                centralLongitude);
         } else {
             return null;
@@ -422,14 +427,14 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public int getFloorLongitudeIndex(final double longitude) {
-        return (int) FastMath.floor(getDoubleLontitudeIndex(longitude));
+        return (int) FastMath.floor(getDoubleLongitudeIndex(longitude));
     }
 
     /** Get the latitude index of a point.
      * @param latitude geodetic latitude (rad)
      * @return latitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLatitudeIndex(final double latitude) {
+    protected double getDoubleLatitudeIndex(final double latitude) {
         return (latitude  - minLatitude)  / latitudeStep;
     }
 
@@ -437,7 +442,7 @@ public class SimpleTile implements Tile {
      * @param longitude geodetic longitude (rad)
      * @return longitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLontitudeIndex(final double longitude) {
+    protected double getDoubleLongitudeIndex(final double longitude) {
         return (longitude - minLongitude) / longitudeStep;
     }
 
@@ -472,5 +477,4 @@ public class SimpleTile implements Tile {
             }
         }
     }
-
 }

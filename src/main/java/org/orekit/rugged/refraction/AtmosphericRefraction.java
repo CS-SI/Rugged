@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -37,7 +37,7 @@ public abstract class AtmosphericRefraction {
      * By default: computation is set up.
      * @since 2.1
      */
-    private boolean mustBeComputed = true;
+    private boolean mustBeComputed;
 
     /** The current atmospheric parameters.
      * @since 2.1
@@ -47,12 +47,12 @@ public abstract class AtmosphericRefraction {
     /** Bilinear interpolating function for pixel (used by inverse location).
      * @since 2.1
     */
-    private BilinearInterpolatingFunction bifPixel = null;
+    private BilinearInterpolatingFunction bifPixel;
 
     /** Bilinear interpolating function of line (used by inverse location).
      * @since 2.1
     */
-    private BilinearInterpolatingFunction bifLine = null;
+    private BilinearInterpolatingFunction bifLine;
 
     /**
      * Default constructor.
@@ -60,6 +60,9 @@ public abstract class AtmosphericRefraction {
     protected AtmosphericRefraction() {
         // Set up the atmospheric parameters ... with lazy evaluation of the grid (done only if necessary)
         this.atmosphericParams = new AtmosphericComputationParameters();
+        this.mustBeComputed    = true;
+        this.bifPixel          = null;
+        this.bifLine           = null;
     }
 
     /** Apply correction to the intersected point with an atmospheric refraction model.
@@ -72,23 +75,6 @@ public abstract class AtmosphericRefraction {
      * {@link org.orekit.rugged.intersection.IntersectionAlgorithm#refineIntersection(org.orekit.rugged.utils.ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
      */
     public abstract NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
-                                            IntersectionAlgorithm algorithm);
-
-    /** Apply correction to the intersected point with an atmospheric refraction model,
-     * using a time optimized algorithm.
-     * @param lineSensor the line sensor
-     * @param sensorPixel the sensor pixel (must be defined)
-     * @param satPos satellite position, in <em>body frame</em>
-     * @param satLos sensor pixel line of sight, in <em>body frame</em>
-     * @param rawIntersection intersection point before refraction correction
-     * @param algorithm intersection algorithm
-     * @return corrected point with the effect of atmospheric refraction
-     * {@link org.orekit.rugged.utils.ExtendedEllipsoid#pointAtAltitude(Vector3D, Vector3D, double)} or see
-     * {@link org.orekit.rugged.intersection.IntersectionAlgorithm#refineIntersection(org.orekit.rugged.utils.ExtendedEllipsoid, Vector3D, Vector3D, NormalizedGeodeticPoint)}
-     * @since 2.1
-     */
-    public abstract NormalizedGeodeticPoint applyCorrection(LineSensor lineSensor, SensorPixel sensorPixel,
-                                            Vector3D satPos, Vector3D satLos, NormalizedGeodeticPoint rawIntersection,
                                             IntersectionAlgorithm algorithm);
 
     /** Deactivate computation (needed for the inverse location computation).
@@ -134,9 +120,9 @@ public abstract class AtmosphericRefraction {
     */
     public Boolean isSameContext(final String sensorName, final int minLine, final int maxLine) {
 
-        return (Double.compare(atmosphericParams.getMinLineSensor(), minLine) == 0) &&
-               (Double.compare(atmosphericParams.getMaxLineSensor(), maxLine) == 0) &&
-               (atmosphericParams.getSensorName().compareTo(sensorName) == 0);
+        return Double.compare(atmosphericParams.getMinLineSensor(), minLine) == 0 &&
+               Double.compare(atmosphericParams.getMaxLineSensor(), maxLine) == 0 &&
+               atmosphericParams.getSensorName().compareTo(sensorName) == 0;
     }
 
     /** Get the computation parameters.
@@ -155,6 +141,17 @@ public abstract class AtmosphericRefraction {
      */
     public void setGridSteps(final int pixelStep, final int lineStep) {
         atmosphericParams.setGridSteps(pixelStep, lineStep);
+    }
+
+    /**
+     * Set the margin for computation of inverse location with atmospheric refraction correction.
+     * Overwrite the default value DEFAULT_INVLOC_MARGIN.
+     * No check is done about this margin. A recommended value is around 1.
+     * @param inverseLocMargin margin in pixel size to compute inverse location with atmospheric refraction correction.
+     * @since 3.0
+     */
+    public void setInverseLocMargin(final double inverseLocMargin) {
+        atmosphericParams.setInverseLocMargin(inverseLocMargin);
     }
 
     /** Compute the correction functions for pixel and lines.
@@ -188,9 +185,9 @@ public abstract class AtmosphericRefraction {
                     gridDiffLine[pixelIndex][lineIndex] = diffLine;
 
                 } else {
-                    // Impossible to find the point in the given min line and max line
-                    throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES,
-                                              atmosphericParams.getMinLineSensor(), atmosphericParams.getMaxLineSensor(), "");
+                    // Impossible to find the sensor pixel in the given range lines
+                    throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES,
+                                              atmosphericParams.getMinLineSensor(), atmosphericParams.getMaxLineSensor());
                 }
             }
         }

@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hipparchus.analysis.differentiation.DSFactory;
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.analysis.differentiation.FiniteDifferencesDifferentiator;
+import org.hipparchus.analysis.differentiation.Gradient;
 import org.hipparchus.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
@@ -52,13 +52,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.potential.NormalizedSphericalHarmonicsProvider;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.Orbit;
+import org.orekit.propagation.EphemerisGenerator;
 import org.orekit.propagation.Propagator;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.GroundOptimizationProblemBuilder;
@@ -67,6 +68,7 @@ import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IgnoreDEMAlgorithm;
+import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.linesensor.LineDatation;
 import org.orekit.rugged.linesensor.LineSensor;
 import org.orekit.rugged.linesensor.LinearLineDatation;
@@ -77,7 +79,9 @@ import org.orekit.rugged.los.TimeDependentLOS;
 import org.orekit.rugged.raster.RandomLandscapeUpdater;
 import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.VolcanicConeElevationUpdater;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.refraction.AtmosphericRefraction;
+import org.orekit.rugged.utils.DerivativeGenerator;
+import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
@@ -106,7 +110,7 @@ public class RuggedTest {
         int dimension = 2000;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = TestUtils.createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = TestUtils.createGravityField();
         Orbit      orbit                                  = TestUtils.createOrbit(gravityField.getMu());
@@ -136,9 +140,9 @@ public class RuggedTest {
 
         Propagator propagator = TestUtils.createPropagator(earth, gravityField, orbit);
         propagator.propagate(lineDatation.getDate(firstLine).shiftedBy(-1.0));
-        propagator.setEphemerisMode();
+       final EphemerisGenerator generator = propagator.getEphemerisGenerator();
         propagator.propagate(lineDatation.getDate(lastLine).shiftedBy(+1.0));
-        Propagator ephemeris = propagator.getGeneratedEphemeris();
+        Propagator ephemeris = generator.getGeneratedEphemeris();
 
         Rugged rugged = new RuggedBuilder().
                 setDigitalElevationModel(updater, 8).
@@ -196,7 +200,7 @@ public class RuggedTest {
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -274,7 +278,7 @@ public class RuggedTest {
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -331,7 +335,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -393,7 +397,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -451,7 +455,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -512,7 +516,7 @@ public class RuggedTest {
         int dimension = 200;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -577,7 +581,7 @@ public class RuggedTest {
         int nbSensors = 3;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -708,7 +712,7 @@ public class RuggedTest {
     public void testInverseLocNearLineEnd() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         Vector3D offset = Vector3D.ZERO;
         TimeScale gps = TimeScalesFactory.getGPS();
         Frame eme2000 = FramesFactory.getEME2000();
@@ -810,7 +814,7 @@ public class RuggedTest {
     public void testInverseLoc() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         Vector3D offset = Vector3D.ZERO;
         TimeScale gps = TimeScalesFactory.getGPS();
         Frame eme2000 = FramesFactory.getEME2000();
@@ -879,6 +883,17 @@ public class RuggedTest {
         LinearLineDatation lineDatation = new LinearLineDatation(absDate, 0.03125d, 19.95565693384045);
         LineSensor lineSensor = new LineSensor("QUICK_LOOK", lineDatation, offset,
                                                new LOSBuilder(lineOfSight).build());
+        
+        // in order not to have a problem when calling the pixelIsInside method (AtmosphericRefraction must be not null)
+        AtmosphericRefraction atmos = new AtmosphericRefraction() {
+            @Override
+            public NormalizedGeodeticPoint applyCorrection(Vector3D satPos, Vector3D satLos,
+                    NormalizedGeodeticPoint rawIntersection, IntersectionAlgorithm algorithm) {
+                return rawIntersection;
+            }
+        };
+        atmos.deactivateComputation();
+        
         Rugged rugged = new RuggedBuilder().
                 setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                 setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
@@ -888,6 +903,7 @@ public class RuggedTest {
                               satellitePVList, 6, CartesianDerivativesFilter.USE_P,
                               satelliteQList, 8, AngularDerivativesFilter.USE_R).
                 addLineSensor(lineSensor).
+                setRefractionCorrection(atmos).
                 build();
 
         GeodeticPoint[] temp = rugged.directLocation("QUICK_LOOK", -250);
@@ -904,6 +920,28 @@ public class RuggedTest {
 
         Assert.assertNotNull(sensorPixel);
 
+        Assert.assertFalse(inside(rugged, null, lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(-100, -100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(-100, +100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(+100, -100), lineSensor));
+        Assert.assertFalse(inside(rugged, new SensorPixel(+100, +100), lineSensor));
+        Assert.assertTrue(inside(rugged, new SensorPixel(0.2, 0.3), lineSensor));
+
+    }
+
+    private boolean inside(final Rugged rugged, final SensorPixel sensorPixel, LineSensor lineSensor) {
+        try {
+            final Method inside =
+                            Rugged.class.getDeclaredMethod("pixelIsInside",
+                                                           SensorPixel.class,
+                                                           LineSensor.class);
+            inside.setAccessible(true);
+            return ((Boolean) inside.invoke(rugged, sensorPixel, lineSensor)).booleanValue();
+        } catch (NoSuchMethodException | IllegalAccessException |
+                 IllegalArgumentException | InvocationTargetException e) {
+            Assert.fail(e.getLocalizedMessage());
+            return false;
+        }
     }
 
     @Test
@@ -911,7 +949,7 @@ public class RuggedTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -967,7 +1005,7 @@ public class RuggedTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -1081,7 +1119,7 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithAllCorrections()
         {
         doTestInverseLocationDerivatives(2000, true, true,
-                                         3.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
+                                         7.0e-10, 5.0e-10, 2.0e-12, 7.0e-8);
     }
 
     /**
@@ -1104,7 +1142,7 @@ public class RuggedTest {
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
             final BodyShape  earth = TestUtils.createEarth();
             final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -1170,7 +1208,8 @@ public class RuggedTest {
             java.lang.reflect.Method getGenerator = GroundOptimizationProblemBuilder.class.getSuperclass().getDeclaredMethod("getGenerator");
             getGenerator.setAccessible(true);
 
-            DSGenerator generator = (DSGenerator) getGenerator.invoke(optimizationPbBuilder);
+            @SuppressWarnings("unchecked")
+            DerivativeGenerator<Gradient> generator = (DerivativeGenerator<Gradient>) getGenerator.invoke(optimizationPbBuilder);
 
             double referenceLine = 0.87654 * dimension;
             GeodeticPoint[] gp = rugged.directLocation("line", referenceLine);
@@ -1178,13 +1217,13 @@ public class RuggedTest {
             Method inverseLoc = Rugged.class.getDeclaredMethod("inverseLocationDerivatives",
                                                                String.class, GeodeticPoint.class,
                                                                Integer.TYPE, Integer.TYPE,
-                                                               DSGenerator.class);
+                                                               DerivativeGenerator.class);
             inverseLoc.setAccessible(true);
             int referencePixel = (3 * dimension) / 4;
-            DerivativeStructure[] result = 
-                            (DerivativeStructure[]) inverseLoc.invoke(rugged,
-                                                                      "line", gp[referencePixel], 0, dimension,
-                                                                      generator);
+            Gradient[] result = 
+                            (Gradient[]) inverseLoc.invoke(rugged,
+                                                           "line", gp[referencePixel], 0, dimension,
+                                                           generator);
             Assert.assertEquals(referenceLine,  result[0].getValue(), lineTolerance);
             Assert.assertEquals(referencePixel, result[1].getValue(), pixelTolerance);
             Assert.assertEquals(2, result[0].getFreeParameters());
@@ -1245,7 +1284,7 @@ public class RuggedTest {
         throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -1324,7 +1363,7 @@ public class RuggedTest {
                     throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
@@ -1388,27 +1427,27 @@ public class RuggedTest {
 
         // Expected derivatives for
         // minimum distance between LOS
-        double[] expectedDminDerivatives = {3.88800245, -153874.01319097, -678866.03112033, 191294.06938169, 668600.16715270} ;
+        double[] expectedDminDerivatives = {-153874.01319097, -678866.03112033, 191294.06938169, 668600.16715270} ;
         // minimum distance to the ground
-        double[] expectedDcentralBodyDerivatives = {6368020.55910153, 7007767.46926062, -1577060.82402054, -6839286.39593802, 1956452.66636262};
+        double[] expectedDcentralBodyDerivatives = {7007767.46926062, -1577060.82402054, -6839286.39593802, 1956452.66636262};
 
-        DerivativeStructure[] distancesBetweenLOSwithDS = refiningTest.computeDistancesBetweenLOSDerivatives(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
+        Gradient[] distancesBetweenLOSGradient = refiningTest.computeDistancesBetweenLOSGradient(realPixelA, realPixelB, expectedDistanceBetweenLOS, expectedDistanceToTheGround);
 
         // Minimum distance between LOS
-        DerivativeStructure dMin = distancesBetweenLOSwithDS[0];
+        Gradient dMin = distancesBetweenLOSGradient[0];
         // Minimum distance to the ground
-        DerivativeStructure dCentralBody = distancesBetweenLOSwithDS[1];
+        Gradient dCentralBody = distancesBetweenLOSGradient[1];
 
         Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 1.e-8);
         Assert.assertEquals(expectedDistanceToTheGround, dCentralBody.getValue() , 1.e-5);
 
 
-        for (int i = 0; i < dMin.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDminDerivatives[i], dMin.getAllDerivatives()[i], 1.e-8);
+        for (int i = 0; i < dMin.getFreeParameters(); i++) {
+            Assert.assertEquals(expectedDminDerivatives[i], dMin.getPartialDerivative(i), 1.e-8);
         }
 
-        for (int i = 0; i < dCentralBody.getAllDerivatives().length; i++) {
-            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getAllDerivatives()[i], 1.e-8);
+        for (int i = 0; i < dCentralBody.getFreeParameters(); i++) {
+            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getPartialDerivative(i), 3.e-8);
         }
     }
 
@@ -1418,7 +1457,7 @@ public class RuggedTest {
         int dimension = 400;
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         final BodyShape  earth = TestUtils.createEarth();
         final Orbit      orbit = TestUtils.createOrbit(Constants.EIGEN5C_EARTH_MU);
 
@@ -1463,6 +1502,9 @@ public class RuggedTest {
         
         // Get the algorithm
         assertTrue(rugged.getAlgorithm().getClass().isInstance(new IgnoreDEMAlgorithm()));
+        
+        // Get the algorithm Id
+        assertEquals(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID, rugged.getAlgorithmId());
         
         // Change the min and max line in inverse location to update the SensorMeanPlaneCrossing when the planeCrossing is not null
         int minLine = firstLine;

@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -34,7 +34,7 @@ import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
@@ -50,7 +50,6 @@ import org.orekit.orbits.PositionAngle;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.Constants;
@@ -63,24 +62,23 @@ public class RoughVisibilityEstimatorTest {
     public void testThreeOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
         final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(1.0, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                pv.add(currentState.getPVCoordinates());
-            }
-        });
+        propagator.getMultiplexer().add(1.0, currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(3 * orbit.getKeplerianPeriod()));
 
         RoughVisibilityEstimator estimator = new RoughVisibilityEstimator(ellipsoid, orbit.getFrame(), pv);
         AbsoluteDate d = estimator.estimateVisibility(new GeodeticPoint(FastMath.toRadians(-81.5),
                                                                         FastMath.toRadians(-2.0),
                                                                         0.0));
-        Assert.assertEquals("2012-01-01T03:47:08.814", d.toString(TimeScalesFactory.getUTC()));
+        Assert.assertEquals(0.0,
+                            new AbsoluteDate("2012-01-01T03:47:08.814121623",
+                                             TimeScalesFactory.getUTC()).durationFrom(d),
+                            1.0e-8);
 
     }
 
@@ -88,24 +86,23 @@ public class RoughVisibilityEstimatorTest {
     public void testOneOrbitsSpan() throws URISyntaxException {
 
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         BodyShape  earth                                  = createEarth();
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
         final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(1.0, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                pv.add(currentState.getPVCoordinates());
-            }
-        });
+        propagator.getMultiplexer().add(1.0,  currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(orbit.getKeplerianPeriod()));
 
         RoughVisibilityEstimator estimator = new RoughVisibilityEstimator(ellipsoid, orbit.getFrame(), pv);
         AbsoluteDate d = estimator.estimateVisibility(new GeodeticPoint(FastMath.toRadians(43.303),
                                                                         FastMath.toRadians(-46.126),
                                                                         0.0));
-        Assert.assertEquals("2012-01-01T01:02:39.123", d.toString(TimeScalesFactory.getUTC()));
+        Assert.assertEquals(0.0,
+                            new AbsoluteDate("2012-01-01T01:02:39.122526662",
+                                             TimeScalesFactory.getUTC()).durationFrom(d),
+                            1.0e-8);
 
     }
 
@@ -176,7 +173,7 @@ public class RoughVisibilityEstimatorTest {
         try {
 
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
 
             Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
             ellipsoid = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,

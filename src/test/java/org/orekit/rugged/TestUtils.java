@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -38,7 +38,7 @@ import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel;
 import org.orekit.forces.gravity.ThirdBodyAttraction;
 import org.orekit.forces.gravity.potential.GravityFieldFactory;
@@ -58,7 +58,6 @@ import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.propagation.semianalytical.dsst.utilities.JacobiPolynomials;
 import org.orekit.propagation.semianalytical.dsst.utilities.NewcombOperators;
 import org.orekit.rugged.linesensor.SensorPixel;
@@ -107,8 +106,8 @@ public class TestUtils {
         TimeScalesFactory.clearUTCTAIOffsetsLoaders();
         GravityFieldFactory.clearPotentialCoefficientsReaders();
         GravityFieldFactory.clearOceanTidesReaders();
-        DataProvidersManager.getInstance().clearProviders();
-        DataProvidersManager.getInstance().clearLoadedDataNames();
+        DataContext.getDefault().getDataProvidersManager().clearProviders();
+        DataContext.getDefault().getDataProvidersManager().clearLoadedDataNames();
     }
 
     /** Clean up of factory map
@@ -218,6 +217,8 @@ public class TestUtils {
         //  gravity.field.order                 = 12
         AbsoluteDate date = new AbsoluteDate("2012-01-01T00:00:00.000", TimeScalesFactory.getUTC());
         Frame eme2000 = FramesFactory.getEME2000();
+        
+        // Observation satellite about 800km above ground
         return new CircularOrbit(7173352.811913891,
                                  -4.029194321683225E-4, 0.0013530362644647786,
                                  FastMath.toRadians(98.63218182243709),
@@ -302,14 +303,10 @@ public class TestUtils {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedPVCoordinates> list = new ArrayList<TimeStampedPVCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedPVCoordinates(currentState.getDate(),
-                                                      currentState.getPVCoordinates().getPosition(),
-                                                      currentState.getPVCoordinates().getVelocity(),
-                                                      Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedPVCoordinates(currentState.getDate(),
+                                                                                                    currentState.getPVCoordinates().getPosition(),
+                                                                                                    currentState.getPVCoordinates().getVelocity(),
+                                                                                                    Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }
@@ -325,13 +322,9 @@ public class TestUtils {
         propagator.setAttitudeProvider(new YawCompensation(orbit.getFrame(), new NadirPointing(orbit.getFrame(), earth)));
         propagator.propagate(minDate);
         final List<TimeStampedAngularCoordinates> list = new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(step, new OrekitFixedStepHandler() {
-            public void handleStep(SpacecraftState currentState, boolean isLast) {
-                list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
-                                                           currentState.getAttitude().getRotation(),
-                                                           Vector3D.ZERO, Vector3D.ZERO));
-            }
-        });
+        propagator.getMultiplexer().add(step, currentState -> list.add(new TimeStampedAngularCoordinates(currentState.getDate(),
+                                                                                                         currentState.getAttitude().getRotation(),
+                                                                                                         Vector3D.ZERO, Vector3D.ZERO)));
         propagator.propagate(maxDate);
         return list;
     }

@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -17,12 +17,13 @@
 package org.orekit.rugged.intersection;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.bodies.GeodeticPoint;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
 /** Interface for Digital Elevation Model intersection algorithm.
  * @author Luc Maisonobe
+ * @author Guylaine Prat
  */
 public interface IntersectionAlgorithm {
 
@@ -38,7 +39,7 @@ public interface IntersectionAlgorithm {
      * <p>
      * This method is used to refine an intersection when a close guess is
      * already known. The intersection is typically looked for by a direct
-     * {@link org.orekit.rugged.raster.Tile#cellIntersection(GeodeticPoint,
+     * {@link org.orekit.rugged.raster.Tile#cellIntersection(NormalizedGeodeticPoint,
      * Vector3D, int, int) cell intersection} in the tile which already
      * contains the close guess, or any similar very fast algorithm.
      * </p>
@@ -58,4 +59,9 @@ public interface IntersectionAlgorithm {
      */
     double getElevation(double latitude, double longitude);
 
+    /** Get the algorithmId.
+     * @return the algorithmId
+     * @since 2.2
+     */
+    AlgorithmId getAlgorithmId();
 }

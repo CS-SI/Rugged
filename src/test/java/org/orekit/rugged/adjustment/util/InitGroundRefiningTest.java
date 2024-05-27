@@ -12,7 +12,7 @@ import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
 import org.orekit.orbits.Orbit;
@@ -79,14 +79,14 @@ public class InitGroundRefiningTest {
         try {
             
             String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-            DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+            DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
             
             // Initialize refining context
             // ---------------------------
             final String sensorName = "line";
-            final double incidenceAngle = -5.0;
+            final double rollAngle = -5.0;
             final String date = "2016-01-01T11:59:50.0";
-            this.pleiadesViewingModel = new PleiadesViewingModel(sensorName, incidenceAngle, date);
+            this.pleiadesViewingModel = new PleiadesViewingModel(sensorName, rollAngle, date);
 
 
             PleiadesOrbitModel orbitmodel =  new PleiadesOrbitModel();

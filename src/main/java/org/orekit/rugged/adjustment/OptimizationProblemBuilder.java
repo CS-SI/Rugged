@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -24,8 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hipparchus.analysis.differentiation.DSFactory;
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.Field;
+import org.hipparchus.analysis.differentiation.Gradient;
+import org.hipparchus.analysis.differentiation.GradientField;
 import org.hipparchus.optim.ConvergenceChecker;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
@@ -34,7 +35,7 @@ import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.utils.ParameterDriver;
 
 /**
@@ -51,8 +52,8 @@ abstract class OptimizationProblemBuilder {
     /** Margin used in parameters estimation for the inverse location lines range. */
     protected static final int ESTIMATION_LINE_RANGE_MARGIN = 100;
 
-    /** Derivative structure generator.*/
-    private final DSGenerator generator;
+    /** Gradient generator.*/
+    private final DerivativeGenerator<Gradient> generator;
 
     /** Parameter drivers list. */
     private final List<ParameterDriver> drivers;
@@ -151,11 +152,11 @@ abstract class OptimizationProblemBuilder {
         return validator;
     }
 
-    /** Create the generator for {@link DerivativeStructure} instances.
+    /** Create the generator for {@link Gradient} instances.
      * @param selectedSensors list of sensors referencing the parameters drivers
      * @return a new generator
      */
-    private DSGenerator createGenerator(final List<LineSensor> selectedSensors) {
+    private DerivativeGenerator<Gradient> createGenerator(final List<LineSensor> selectedSensors) {
 
         // Initialize set of drivers name
         final Set<String> names = new HashSet<>();
@@ -188,10 +189,9 @@ abstract class OptimizationProblemBuilder {
             });
         }
 
-        final DSFactory factory = new DSFactory(map.size(), 1);
-
-        // Derivative Structure Generator
-        return new DSGenerator() {
+        // gradient Generator
+        final GradientField field = GradientField.getField(map.size());
+        return new DerivativeGenerator<Gradient>() {
 
             /** {@inheritDoc} */
             @Override
@@ -201,21 +201,27 @@ abstract class OptimizationProblemBuilder {
 
             /** {@inheritDoc} */
             @Override
-            public DerivativeStructure constant(final double value) {
-                return factory.constant(value);
+            public Gradient constant(final double value) {
+                return Gradient.constant(map.size(), value);
             }
 
             /** {@inheritDoc} */
             @Override
-            public DerivativeStructure variable(final ParameterDriver driver) {
-
+            public Gradient variable(final ParameterDriver driver) {
                 final Integer index = map.get(driver.getName());
                 if (index == null) {
                     return constant(driver.getValue());
                 } else {
-                    return factory.variable(index.intValue(), driver.getValue());
+                    return Gradient.variable(map.size(), index.intValue(), driver.getValue());
                 }
             }
+
+            /** {@inheritDoc} */
+            @Override
+            public Field<Gradient> getField() {
+                return field;
+            }
+
         };
     }
 
@@ -245,7 +251,7 @@ abstract class OptimizationProblemBuilder {
      * Get the derivative structure generator.
      * @return the derivative structure generator.
      */
-    protected final DSGenerator getGenerator() {
+    protected final DerivativeGenerator<Gradient> getGenerator() {
         return this.generator;
     }
 

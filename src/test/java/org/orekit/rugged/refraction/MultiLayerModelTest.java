@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -42,7 +42,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testAlmostNadir() {
 
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         final Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D los = new Vector3D( 0.5127552821932051, -0.8254313129088879, -0.2361041470463311);
         final NormalizedGeodeticPoint rawIntersection =
@@ -63,7 +63,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testNoOpRefraction() {
 
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
         final NormalizedGeodeticPoint rawIntersection = algorithm.refineIntersection(earth, position, los,
@@ -91,7 +91,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
         final NormalizedGeodeticPoint rawIntersection = algorithm.refineIntersection(earth, position, los,
@@ -139,7 +139,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
         final NormalizedGeodeticPoint rawIntersection = algorithm.refineIntersection(earth, position, los,
@@ -181,7 +181,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testMissingLayers() {
 
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
         final NormalizedGeodeticPoint rawIntersection = algorithm.refineIntersection(earth, position, los,
@@ -206,7 +206,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testLayersBelowDEM() {
 
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
         final NormalizedGeodeticPoint rawIntersection = algorithm.refineIntersection(earth, position, los,
@@ -225,7 +225,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testDivingAngleChange() {
 
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         final Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         AtmosphericRefraction model = new MultiLayerModel(earth);
 
@@ -257,8 +257,8 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     }
 
     @Override
-    protected IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles) {
-        return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+    protected IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOverlappingTiles) {
+        return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOverlappingTiles);
     }
 
 }

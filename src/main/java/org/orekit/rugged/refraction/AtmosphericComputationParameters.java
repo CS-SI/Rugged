@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -27,6 +27,7 @@ import org.orekit.rugged.utils.GridCreation;
  * @author Guylaine Prat
  * @since 2.1
  */
+
 public class AtmosphericComputationParameters {
 
     /** Margin for definition of the interpolation grid.
@@ -38,10 +39,20 @@ public class AtmosphericComputationParameters {
     /** Default value for line step. */
     private static final int DEFAULT_STEP_LINE = 100;
 
+    /** Default margin for computation of inverse location with atmospheric refraction correction.
+    * @since 3.0
+    */
+    private static final double DEFAULT_INVLOC_MARGIN = 0.8;
+
     /** Actual values for pixel step in case default are overwritten. */
     private int pixelStep;
     /** Actual values for line step in case default are overwritten. */
     private int lineStep;
+
+    /** Actual values for inverse location margin with atmospheric refraction  in case default are overwritten.
+    * @since 3.0
+    */
+    private double invlocMargin;
 
     // Definition of grids for sensor (u = along pixel; v = along line)
     /** Linear grid in pixel. */
@@ -67,6 +78,7 @@ public class AtmosphericComputationParameters {
     public AtmosphericComputationParameters() {
         this.pixelStep = DEFAULT_STEP_PIXEL;
         this.lineStep = DEFAULT_STEP_LINE;
+        this.invlocMargin = DEFAULT_INVLOC_MARGIN;
     }
 
     /** Configuration of the interpolation grid. This grid is associated to the given sensor,
@@ -94,13 +106,9 @@ public class AtmosphericComputationParameters {
         }
         this.nbLineGrid = (maxLine - minLine + 1 - 2 * MARGIN_LINE) / this.lineStep;
 
-        // CHECKSTYLE: stop UnnecessaryParentheses check
-
         // Compute the linear grids in pixel (u index) and line (v index)
-        this.uGrid = GridCreation.createLinearGrid(0, (sensorNbPxs - 1), this.nbPixelGrid);
-        this.vGrid = GridCreation.createLinearGrid((minLine + MARGIN_LINE), (maxLine - MARGIN_LINE), this.nbLineGrid);
-
-        // CHECKSTYLE: resume UnnecessaryParentheses check
+        this.uGrid = GridCreation.createLinearGrid(0, sensorNbPxs - 1, this.nbPixelGrid);
+        this.vGrid = GridCreation.createLinearGrid(minLine + MARGIN_LINE, maxLine - MARGIN_LINE, this.nbLineGrid);
 
     }
 
@@ -122,6 +130,33 @@ public class AtmosphericComputationParameters {
         }
         this.pixelStep = gridPixelStep;
         this.lineStep = gridLineStep;
+    }
+
+    /**
+     * Set the margin for computation of inverse location with atmospheric refraction correction.
+     * Overwrite the default value DEFAULT_INVLOC_MARGIN.
+     * No check is done about this margin. A recommended value is around 1.
+     * @param inverseLocMargin margin in pixel size to compute inverse location with atmospheric refraction correction.
+     * @since 3.0
+     */
+    public void setInverseLocMargin(final double inverseLocMargin) {
+        this.invlocMargin = inverseLocMargin;
+    }
+
+    /**
+     * @return the inverse location margin for computation of inverse location with atmospheric refraction correction.
+    * @since 3.0
+    */
+    public double getInverseLocMargin () {
+        return this.invlocMargin;
+    }
+
+    /**
+    * @return the default inverse location margin for computation of inverse location with atmospheric refraction correction.
+    * @since 3.0
+    */
+    public double getDefaultInverseLocMargin () {
+        return DEFAULT_INVLOC_MARGIN;
     }
 
     /**

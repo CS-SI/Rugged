@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -72,7 +72,7 @@ public class RoughVisibilityEstimator {
         // project spacecraft position-velocity to ground
         final Frame bodyFrame = ellipsoid.getBodyFrame();
         final int n = positionsVelocities.size();
-        this.pvGround = new ArrayList<TimeStampedPVCoordinates>(n);
+        this.pvGround = new ArrayList<>(n);
         for (final TimeStampedPVCoordinates pv : positionsVelocities) {
             final Transform t = frame.getTransformTo(bodyFrame, pv.getDate());
             pvGround.add(ellipsoid.projectToGround(t.transformPVCoordinates(pv), bodyFrame));

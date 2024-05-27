@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -18,10 +18,10 @@ package org.orekit.rugged.los;
 
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.utils.ParameterDriver;
 
 /** Interface for lines-of-sight tranforms that do not depend on time.
@@ -50,13 +50,14 @@ public interface TimeIndependentLOSTransform {
      * method must have been set to {@code true} for the various parameters returned
      * by {@link #getParametersDrivers()} that should be estimated.
      * </p>
+     * @param <T> derivative type
      * @param index los pixel index
      * @param los line-of-sight to transform
-     * @param generator generator to use for building {@link DerivativeStructure} instances
+     * @param generator generator to use for building {@link Derivative} instances
      * @return line of sight, and its first partial derivatives with respect to the parameters
      */
-    FieldVector3D<DerivativeStructure> transformLOS(int index, FieldVector3D<DerivativeStructure> los,
-                                                    DSGenerator generator);
+    <T extends Derivative<T>> FieldVector3D<T> transformLOS(int index, FieldVector3D<T> los,
+                                                            DerivativeGenerator<T> generator);
 
     /** Get the drivers for LOS parameters.
      * @return drivers for LOS parameters

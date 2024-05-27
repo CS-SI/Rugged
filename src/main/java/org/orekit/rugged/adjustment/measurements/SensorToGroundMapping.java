@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -56,7 +56,7 @@ public class SensorToGroundMapping {
     public SensorToGroundMapping(final String ruggedName, final String sensorName) {
 
         this.sensorName     = sensorName;
-        this.groundMapping = new SensorMapping<GeodeticPoint>(sensorName, ruggedName);
+        this.groundMapping = new SensorMapping<>(sensorName, ruggedName);
     }
 
     /** Get the name of the sensor to which mapping applies.

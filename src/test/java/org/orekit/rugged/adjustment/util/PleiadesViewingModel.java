@@ -28,21 +28,21 @@ public class PleiadesViewingModel {
     private static final int DIMENSION = 40000;
     private static final double LINE_PERIOD =  1.e-4; 
 
-    private double incidenceAngle;
+    private double rollAngle;
     private LineSensor lineSensor;
     private String referenceDate;
     private String sensorName;
 
     /** PleiadesViewingModel constructor.
      * @param sensorName sensor name
-     * @param incidenceAngle incidence angle
+     * @param rollAngle roll angle
      * @param referenceDate reference date
      */
-    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate) {
+    public PleiadesViewingModel(final String sensorName, final double rollAngle, final String referenceDate) {
 
         this.sensorName = sensorName;
         this.referenceDate = referenceDate;
-        this.incidenceAngle = incidenceAngle;
+        this.rollAngle = rollAngle;
         this.createLineSensor();
     }
 
@@ -63,10 +63,12 @@ public class PleiadesViewingModel {
      */
     public TimeDependentLOS buildLOS() {
 
-        final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
-                FastMath.toRadians(incidenceAngle),
-                RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
-                Vector3D.PLUS_I, FastMath.toRadians(FOV / 2), DIMENSION);
+        // Roll angle applied to the LOS
+        // Compute the transformation of vector K (Z axis) through the rotation around I (X axis) with the roll angle
+        // If roll angle = 0: vector center = vector K (Z axis)
+        final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I, FastMath.toRadians(rollAngle),
+                                                          RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
+                                             Vector3D.PLUS_I, FastMath.toRadians(FOV / 2), DIMENSION);
 
         losBuilder.addTransform(new FixedRotation(sensorName + InitInterRefiningTest.rollSuffix,  Vector3D.MINUS_I, 0.00));
         losBuilder.addTransform(new FixedRotation(sensorName + InitInterRefiningTest.pitchSuffix, Vector3D.MINUS_J, 0.00));

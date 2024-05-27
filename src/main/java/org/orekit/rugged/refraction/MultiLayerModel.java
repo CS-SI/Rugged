@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -26,8 +26,6 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
-import org.orekit.rugged.linesensor.LineSensor;
-import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 
@@ -61,7 +59,7 @@ public class MultiLayerModel extends AtmosphericRefraction {
 
         this.ellipsoid = ellipsoid;
 
-        this.refractionLayers = new ArrayList<ConstantRefractionLayer>(15);
+        this.refractionLayers = new ArrayList<>(15);
         this.refractionLayers.add(new ConstantRefractionLayer(100000.00, 1.000000));
         this.refractionLayers.add(new ConstantRefractionLayer( 50000.00, 1.000000));
         this.refractionLayers.add(new ConstantRefractionLayer( 40000.00, 1.000001));
@@ -246,17 +244,6 @@ public class MultiLayerModel extends AtmosphericRefraction {
         // We can compute the intersection of line of sight (los) with Digital Elevation Model
         // as usual (without atmospheric refraction).
         return algorithm.refineIntersection(ellipsoid, pos, los, rawIntersection);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public NormalizedGeodeticPoint applyCorrection(final LineSensor lineSensor, final SensorPixel sensorPixel,
-                                                   final Vector3D satPos, final Vector3D satLos,
-                                                   final NormalizedGeodeticPoint rawIntersection,
-                                                   final IntersectionAlgorithm algorithm) {
-
-        // TODO to be done
-        throw new RuggedException(RuggedMessages.UNINITIALIZED_CONTEXT, "Atmospheric optimization for direct loc");
     }
 
 } // end of class MultiLayerModel

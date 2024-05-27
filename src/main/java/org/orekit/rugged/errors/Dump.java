@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -75,8 +75,8 @@ class Dump {
      */
     Dump(final PrintWriter writer) {
         this.writer          = writer;
-        this.tiles           = new ArrayList<DumpedTileData>();
-        this.sensors         = new ArrayList<DumpedSensorData>();
+        this.tiles           = new ArrayList<>();
+        this.sensors         = new ArrayList<>();
         this.algorithmDumped = false;
         this.ellipsoidDumped = false;
         this.tranformsDumped = null;
@@ -170,6 +170,8 @@ class Dump {
             writer.format(Locale.US,
                           "direct location result: latitude %22.15e longitude %22.15e elevation %22.15e%n",
                           gp.getLatitude(), gp.getLongitude(), gp.getAltitude());
+        } else {
+            writer.format(Locale.US, "direct location result: NULL");
         }
     }
 
@@ -203,6 +205,8 @@ class Dump {
             writer.format(Locale.US,
                           "inverse location result: lineNumber %22.15e pixelNumber %22.15e%n",
                           pixel.getLineNumber(), pixel.getPixelNumber());
+        } else {
+            writer.format(Locale.US, "inverse location result: NULL");
         }
     }
 
@@ -508,7 +512,7 @@ class Dump {
                                 result.getTargetDirectionDerivative().getY(),
                                 result.getTargetDirectionDerivative().getZ());
                     } catch (RuggedException re) {
-                        throw RuggedException.createInternalError(re);
+                        throw new RuggedInternalError(re);
                     }
                 });
                 writer.format(Locale.US, "%n");

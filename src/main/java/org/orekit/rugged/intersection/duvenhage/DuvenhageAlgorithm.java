@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -22,6 +22,7 @@ import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.raster.Tile;
@@ -33,7 +34,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 /** Digital Elevation Model intersection using Bernardt Duvenhage's algorithm.
  * <p>
  * The algorithm is described in the 2009 paper:
- * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
+ * <a href="https://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
  * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
  * </p>
  * @author Luc Maisonobe
@@ -44,15 +45,22 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     /** Step size when skipping from one tile to a neighbor one, in meters. */
     private static final double STEP = 0.01;
 
-    /** Nb time cell intersection (with DEM) performed for null intersection: means that infinite loop.
+    /** Maximum number of attempts to refine intersection.
+     * <p>
+     * This parameter is intended to prevent infinite loops.
+     * </p>
      * @since 2.1 */
-    private static final int NB_TIME_CELL_INTERSECTION = 100;
+    private static final int MAX_REFINING_ATTEMPTS = 100;
 
     /** Cache for DEM tiles. */
     private final TilesCache<MinMaxTreeTile> cache;
 
     /** Flag for flat-body hypothesis. */
     private final boolean flatBody;
+
+    /** Algorithm Id.
+     * @since 2.2 */
+    private final AlgorithmId algorithmId;
 
     /** Simple constructor.
      * @param updater updater used to load Digital Elevation Model tiles
@@ -62,12 +70,16 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * in geodetic coordinates. The sagitta resulting from real ellipsoid curvature
      * is therefore <em>not</em> corrected in this case. As this computation is not
      * costly (a few percents overhead), it is highly recommended to set this parameter
-     * to {@code false}. This flag is mainly intended for comparison purposes with other systems.
+     * to {@code false}. This flag is mainly intended for comparison purposes with other systems
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                          true if overlapping; false otherwise.
      */
     public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles,
-                              final boolean flatBody) {
-        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
+                              final boolean flatBody, final boolean isOverlappingTiles) {
+        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater,
+                                                    maxCachedTiles, isOverlappingTiles);
         this.flatBody = flatBody;
+        this.algorithmId = flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE;
     }
 
     /** {@inheritDoc} */
@@ -75,7 +87,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
     public NormalizedGeodeticPoint intersection(final ExtendedEllipsoid ellipsoid,
                                                 final Vector3D position, final Vector3D los) {
 
-        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+        DumpManager.dumpAlgorithm(this.algorithmId);
 
         // compute intersection with ellipsoid
         final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
@@ -91,9 +103,31 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             final Vector3D entryP = ellipsoid.pointAtAltitude(position, los, hMax + STEP);
             if (Vector3D.dotProduct(entryP.subtract(position), los) < 0) {
                 // the entry point is behind spacecraft!
-                throw new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT);
+
+                // let's see if at least we are above DEM
+                try {
+                    final NormalizedGeodeticPoint positionGP =
+                                    ellipsoid.transform(position, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
+                    final double elevationAtPosition = tile.interpolateElevation(positionGP.getLatitude(), positionGP.getLongitude());
+                    if (positionGP.getAltitude() >= elevationAtPosition) {
+                        // we can use the current position as the entry point
+                        current = positionGP;
+                    } else {
+                        current = null;
+                    }
+                } catch (RuggedException re) {
+                    if (re.getSpecifier() == RuggedMessages.OUT_OF_TILE_ANGLES) {
+                        current = null;
+                    }
+                }
+
+                if (current == null) {
+                    throw new RuggedException(RuggedMessages.DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT);
+                }
+
+            } else {
+                current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
             }
-            current = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
 
             if (tile.getLocation(current.getLatitude(), current.getLongitude()) != Tile.Location.HAS_INTERPOLATION_NEIGHBORS) {
                 // the entry point is in another tile
@@ -156,7 +190,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (intersection != null) {
                     return intersection;
                 } else {
-                    throw RuggedException.createInternalError(null);
+                    throw new RuggedInternalError(null);
                 }
             }
         }
@@ -168,42 +202,37 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                       final Vector3D position, final Vector3D los,
                                                       final NormalizedGeodeticPoint closeGuess) {
 
-        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
-
-        NormalizedGeodeticPoint currentGuess = closeGuess;
-        NormalizedGeodeticPoint foundIntersection = null;
+        DumpManager.dumpAlgorithm(this.algorithmId);
 
         if (flatBody) {
             // under the (bad) flat-body assumption, the reference point must remain
             // at DEM entry and exit, even if we already have a much better close guess :-(
             // this is in order to remain consistent with other systems
-            final Tile tile = cache.getTile(currentGuess.getLatitude(), currentGuess.getLongitude());
+            final Tile tile = cache.getTile(closeGuess.getLatitude(), closeGuess.getLongitude());
             final Vector3D      exitP  = ellipsoid.pointAtAltitude(position, los, tile.getMinElevation());
             final Vector3D      entryP = ellipsoid.pointAtAltitude(position, los, tile.getMaxElevation());
             final NormalizedGeodeticPoint entry  = ellipsoid.transform(entryP, ellipsoid.getBodyFrame(), null,
                                                                        tile.getMinimumLongitude());
-            foundIntersection = tile.cellIntersection(entry, ellipsoid.convertLos(entryP, exitP),
-                                                      tile.getFloorLatitudeIndex(currentGuess.getLatitude()),
-                                                      tile.getFloorLongitudeIndex(currentGuess.getLongitude()));
+            return tile.cellIntersection(entry, ellipsoid.convertLos(entryP, exitP),
+                                         tile.getFloorLatitudeIndex(closeGuess.getLatitude()),
+                                         tile.getFloorLongitudeIndex(closeGuess.getLongitude()));
 
-        } else { // with a DEM
+        } else {
+            // regular curved ellipsoid model
 
-            // Keep the initial guess
-            final NormalizedGeodeticPoint currentGuess0 = closeGuess;
+            NormalizedGeodeticPoint currentGuess = closeGuess;
 
-            // number of times cell intersection (with DEM) is performed for null intersection (used to avoid infinite loop)
-            int nbCall = 0;
-            // Shift for s to find the solution if foundIntersection is null
-            double deltaS = -1.;
-            // if the shifts in one way was not successful, try the other way
-            boolean secondChance = false;
+            // normally, we should succeed at first attempt but in very rare cases
+            // we may loose the intersection (typically because some corrections introduced
+            // between the first intersection and the refining have slightly changed the
+            // relative geometry between Digital Elevation Model and Line Of Sight).
+            // In these rare cases, we have to recover a new intersection
+            for (int i = 0; i < MAX_REFINING_ATTEMPTS; ++i) {
 
-            while (foundIntersection == null && (nbCall < NB_TIME_CELL_INTERSECTION)) {
-
-                final Vector3D delta  = ellipsoid.transform(currentGuess).subtract(position);
-                final double       s  = Vector3D.dotProduct(delta, los) / los.getNormSq();
-                final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                    ellipsoid.getBodyFrame(), null);
+                final Vector3D      delta      = ellipsoid.transform(currentGuess).subtract(position);
+                final double        s          = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                final Vector3D      projectedP = new Vector3D(1, position, s, los);
+                final GeodeticPoint projected  = ellipsoid.transform(projectedP, ellipsoid.getBodyFrame(), null);
                 final NormalizedGeodeticPoint normalizedProjected =
                         new NormalizedGeodeticPoint(projected.getLatitude(),
                                                     projected.getLongitude(),
@@ -211,47 +240,67 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                                                     currentGuess.getLongitude());
                 final Tile tile = cache.getTile(normalizedProjected.getLatitude(), normalizedProjected.getLongitude());
 
-                foundIntersection = tile.cellIntersection(normalizedProjected,
-                                                          ellipsoid.convertLos(normalizedProjected, los),
-                                                          tile.getFloorLatitudeIndex(normalizedProjected.getLatitude()),
-                                                          tile.getFloorLongitudeIndex(normalizedProjected.getLongitude()));
+                final Vector3D                topoLOS           = ellipsoid.convertLos(normalizedProjected, los);
+                final int                     iLat              = tile.getFloorLatitudeIndex(normalizedProjected.getLatitude());
+                final int                     iLon              = tile.getFloorLongitudeIndex(normalizedProjected.getLongitude());
+                final NormalizedGeodeticPoint foundIntersection = tile.cellIntersection(normalizedProjected, topoLOS, iLat, iLon);
 
-                // For extremely rare case : the cell intersection gave no results ...
-                // We use as a new guess a slightly modified projected geodetic point (which is on the LOS line)
-                if (foundIntersection == null) {
-                    final double shiftedS = s + deltaS;
-                    final GeodeticPoint currentGuessGP = ellipsoid.transform(new Vector3D(1, position, shiftedS, los),
-                                                                             ellipsoid.getBodyFrame(), null);
+                if (foundIntersection != null) {
+                    // nominal case, we were able to refine the intersection
+                    return foundIntersection;
+                } else {
+                    // extremely rare case: we have lost the intersection
+
+                    // find a start point for new search, leaving the current cell behind
+                    final double cellBoundaryLatitude  = tile.getLatitudeAtIndex(topoLOS.getY()  <= 0 ? iLat : iLat + 1);
+                    final double cellBoundaryLongitude = tile.getLongitudeAtIndex(topoLOS.getX() <= 0 ? iLon : iLon + 1);
+                    final Vector3D cellExit = new Vector3D(1, selectClosest(latitudeCrossing(ellipsoid, projectedP,  los, cellBoundaryLatitude,  projectedP),
+                                                                            longitudeCrossing(ellipsoid, projectedP, los, cellBoundaryLongitude, projectedP),
+                                                                            projectedP),
+                                                           STEP, los);
+                    final GeodeticPoint egp = ellipsoid.transform(cellExit, ellipsoid.getBodyFrame(), null);
+                    final NormalizedGeodeticPoint cellExitGP = new NormalizedGeodeticPoint(egp.getLatitude(),
+                                                                                           egp.getLongitude(),
+                                                                                           egp.getAltitude(),
+                                                                                           currentGuess.getLongitude());
+                    if (tile.interpolateElevation(cellExitGP.getLatitude(), cellExitGP.getLongitude()) >= cellExitGP.getAltitude()) {
+                        // extremely rare case! The line-of-sight traversed the Digital Elevation Model
+                        // during the very short forward step we used to move to next cell
+                        // we consider this point to be OK
+                        return cellExitGP;
+                    }
+
+
+                    // We recompute fully a new guess, starting from the point after current cell
+                    final GeodeticPoint currentGuessGP = intersection(ellipsoid, cellExit, los);
                     currentGuess = new NormalizedGeodeticPoint(currentGuessGP.getLatitude(),
                                                                currentGuessGP.getLongitude(),
                                                                currentGuessGP.getAltitude(),
                                                                projected.getLongitude());
-                    // to avoid infinite loop ...
-                    nbCall++;
+                }
 
-                    // if impossible to find a solution with deltaS = -1
-                    // we start a new search with deltaS = +1
-                    if (nbCall == NB_TIME_CELL_INTERSECTION  && !secondChance) {
-                        currentGuess = currentGuess0;
-                        deltaS = 1.;
-                        nbCall = 0;
-                        secondChance = true; // to avoid infinite loop if second chance does not work !
-                    } // end if nbCall == NB_TIME_CELL_INTERSECTION
-                } // end if foundIntersection = null
-            } // end while foundIntersection = null
+            }
+
+            // no intersection found
+            return null;
 
         } // end test on flatbody
 
-        return foundIntersection;
     }
 
     /** {@inheritDoc} */
     @Override
     public double getElevation(final double latitude, final double longitude) {
 
-        DumpManager.dumpAlgorithm(flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE);
+        DumpManager.dumpAlgorithm(this.algorithmId);
         final Tile tile = cache.getTile(latitude, longitude);
         return tile.interpolateElevation(latitude, longitude);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public AlgorithmId getAlgorithmId() {
+        return this.algorithmId;
     }
 
     /** Compute intersection of line with Digital Elevation Model in a sub-tile.
@@ -277,7 +326,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         if (depth > 30) {
             // this should never happen
-            throw RuggedException.createInternalError(null);
+            throw new RuggedInternalError(null);
         }
 
         if (searchDomainSize(entryLat, entryLon, exitLat, exitLon) < 4) {
@@ -487,24 +536,26 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 if (gp != null) {
 
                     // improve the point, by projecting it back on the 3D line, fixing the small body curvature at cell level
-                    final Vector3D      delta     = ellipsoid.transform(gp).subtract(position);
-                    final double        s         = Vector3D.dotProduct(delta, los) / los.getNormSq();
-                    final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
-                                                                        ellipsoid.getBodyFrame(), null);
-                    final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
-                                                                                                    projected.getLongitude(),
-                                                                                                    projected.getAltitude(),
-                                                                                                    gp.getLongitude());
-                    final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(normalizedProjected,
-                                                                                     ellipsoid.convertLos(normalizedProjected, los),
-                                                                                     i, j);
+                    final Vector3D delta = ellipsoid.transform(gp).subtract(position);
+                    final double   s     = Vector3D.dotProduct(delta, los) / los.getNormSq();
+                    if (s > 0) {
+                        final GeodeticPoint projected = ellipsoid.transform(new Vector3D(1, position, s, los),
+                                                                            ellipsoid.getBodyFrame(), null);
+                        final NormalizedGeodeticPoint normalizedProjected = new NormalizedGeodeticPoint(projected.getLatitude(),
+                                                                                                        projected.getLongitude(),
+                                                                                                        projected.getAltitude(),
+                                                                                                        gp.getLongitude());
+                        final NormalizedGeodeticPoint gpImproved = tile.cellIntersection(normalizedProjected,
+                                                                                         ellipsoid.convertLos(normalizedProjected, los),
+                                                                                         i, j);
 
-                    if (gpImproved != null) {
-                        final Vector3D point = ellipsoid.transform(gpImproved);
-                        final double dot = Vector3D.dotProduct(point.subtract(position), los);
-                        if (dot < intersectionDot) {
-                            intersectionGP  = gpImproved;
-                            intersectionDot = dot;
+                        if (gpImproved != null) {
+                            final Vector3D point = ellipsoid.transform(gpImproved);
+                            final double dot = Vector3D.dotProduct(point.subtract(position), los);
+                            if (dot < intersectionDot) {
+                                intersectionGP  = gpImproved;
+                                intersectionDot = dot;
+                            }
                         }
                     }
 
@@ -599,7 +650,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
 
     }
@@ -621,7 +672,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @param latitude latitude with respect to ellipsoid
      * @param closeReference reference point used to select the closest solution
      * when there are two points at the desired latitude along the line
-     * @return point at altitude, or closeReference if no such point can be found
+     * @return point at latitude, or closeReference if no such point can be found
      */
     private Vector3D latitudeCrossing(final ExtendedEllipsoid ellipsoid,
                                       final Vector3D position, final Vector3D los,
@@ -639,8 +690,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * @param los pixel line-of-sight, not necessarily normalized (in body frame)
      * @param longitude longitude with respect to ellipsoid
      * @param closeReference reference point used to select the closest solution
-     * when there are two points at the desired latitude along the line
-     * @return point at altitude, or closeReference if no such point can be found
+     * when there are two points at the desired longitude along the line
+     * @return point at longitude, or closeReference if no such point can be found
      */
     private Vector3D longitudeCrossing(final ExtendedEllipsoid ellipsoid,
                                        final Vector3D position, final Vector3D los,
@@ -700,5 +751,4 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         }
 
     }
-
 }

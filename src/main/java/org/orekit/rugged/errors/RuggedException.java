@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -27,7 +27,7 @@ import org.hipparchus.exception.LocalizedException;
  * the rugged library classes.
 
  * <p>
- * This class is heavily based on Orekit {@link org.orekit.errors.OrekitException},
+ * This class is heavily based on {@code OrekitException},
  * which is distributed under the terms of the Apache License V2.
  * </p>
  *
@@ -111,39 +111,6 @@ public class RuggedException extends RuntimeException implements LocalizedExcept
     private static String buildMessage(final Locale locale, final Localizable specifier,
                                        final Object... parts) {
         return (specifier == null) ? "" : new MessageFormat(specifier.getLocalizedString(locale), locale).format(parts);
-    }
-
-    /** Create an {@link java.lang.RuntimeException} for an internal error.
-     * @param cause underlying cause
-     * @return an {@link java.lang.RuntimeException} for an internal error
-     */
-    public static RuntimeException createInternalError(final Throwable cause) {
-
-        /** Format specifier (to be translated). */
-        final Localizable specifier = RuggedMessages.INTERNAL_ERROR;
-
-        /** Parts to insert in the format (no translation). */
-        final String parts     = "https://gitlab.orekit.org/orekit/rugged/issues";
-
-        return new RuntimeException() {
-
-            /** Serializable UID. */
-            private static final long serialVersionUID = 20140309L;
-
-            /** {@inheritDoc} */
-            @Override
-            public String getMessage() {
-                return buildMessage(Locale.US, specifier, parts);
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public String getLocalizedMessage() {
-                return buildMessage(Locale.getDefault(), specifier, parts);
-            }
-
-        };
-
     }
 
 }

@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -17,14 +17,22 @@
 package org.orekit.rugged.intersection;
 
 
-import org.orekit.rugged.intersection.BasicScanAlgorithm;
-import org.orekit.rugged.intersection.IntersectionAlgorithm;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+import org.orekit.rugged.api.AlgorithmId;
 import org.orekit.rugged.raster.TileUpdater;
 
 public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
 
-    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        return new BasicScanAlgorithm(updater, maxCachedTiles);
+    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOverlappingTiles) {
+        return new BasicScanAlgorithm(updater, maxCachedTiles, isOverlappingTiles);
     }
 
+    @Test
+    public void testAlgorithmId() {
+        setUpMayonVolcanoContext();
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
+        assertEquals(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY, algorithm.getAlgorithmId());
+    }
 }

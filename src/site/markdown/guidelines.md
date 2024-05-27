@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2019 CS Systèmes d'Information
+<!--- Copyright 2013-2022 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -234,4 +234,4 @@ root directory.
   fix _all_ errors and warnings found by checkstyle
 
 [Top of the page](#top)
-  
+

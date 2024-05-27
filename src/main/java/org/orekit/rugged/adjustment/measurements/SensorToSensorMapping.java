@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -82,11 +82,11 @@ public class SensorToSensorMapping {
                                  final String sensorNameB, final String ruggedNameB,
                                  final double bodyConstraintWeight) {
 
-        this.interMapping = new SensorMapping<SensorPixel>(sensorNameA, ruggedNameA);
+        this.interMapping = new SensorMapping<>(sensorNameA, ruggedNameA);
         this.sensorNameB = sensorNameB;
         this.ruggedNameB = ruggedNameB;
-        this.losDistances = new ArrayList<Double>();
-        this.bodyDistances = new ArrayList<Double>();
+        this.losDistances = new ArrayList<>();
+        this.bodyDistances = new ArrayList<>();
         this.bodyConstraintWeight = bodyConstraintWeight;
     }
 

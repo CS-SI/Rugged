@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- Copyright 2013-2019 CS Systèmes d'Information
-  Licensed to CS Systèmes d'Information (CS) under one or more
+<!-- Copyright 2013-2022 CS GROUP
+  Licensed to CS GROUP (CS) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
   CS licenses this file to You under the Apache License, Version 2.0
@@ -20,11 +20,92 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-     <release version="2.1-SNAPSHOT" date="TBD" description="TTBD">
-      <action dev="guylaine" type="update">
-        Updated dependencies to Orekit 9.3 and Hipparchus 1.4.
+    <release version="4.0" date="TBD" description="TBD">
+      <action dev="guylaine" type="update" issue="375">
+        Made Rugged able to deal with seamless DEM tiles (no overlapping constraints).
       </action>
-      <action dev="guylaine" type="fix" issue="376">
+      <action dev="guylaine" type="update" issue="392">
+        Fixed light time correction in atmospheric refraction computation.
+      </action>
+      <action dev="guylaine" type="update" issue="393">
+        Created a tutorial about how to initialize a tile updater with a real DEM.
+       </action>
+      <action dev="guylaine" type="update">
+        Updated dependencies to Orekit 11.3 (and Hipparchus 2.3).
+      </action>
+    </release>
+    <release version="3.0" date="2022-07-05" description="This is a major release.
+    It fixes a few bugs.
+    This version depends on Orekit 11.2 and Hipparchus 2.1.">
+      <action dev="luc" type="update" issue="388">
+        Fixed longitude normalization issue with tiles.
+      </action>
+      <action dev="guylaine" type="update" issue="391">
+        Fixed inverse location issue with atmospheric refraction.
+      </action>
+      <action dev="luc" type="update" issue="387">
+        Updated dependencies to Orekit 11.2 (and Hipparchus 2.1 ).
+      </action>
+      <action dev="guylaine" type="update" issue="390">
+        Changed CS Group website URL.
+      </action>
+      <action dev="guylaine" type="update">
+        Updated link to Sergeï Tanygin's paper about attitude interpolation in documentation.
+      </action>
+    </release>
+    <release version="2.2" date="2020-07-31" description="This is a minor release.
+     It adds access to algorithm identifier, 
+     corrects an Earth constant for model IERS96, 
+     improves documentation and fixes a few bugs.
+     Automatic building, release and code analysis are available with Gitlab CI.
+     This version depends on Orekit 10.2 and Hipparchus 1.7.">
+      <action dev="guylaine" type="update" issue="383">
+        Updated dependencies to Orekit 10.2 (and Hipparchus 1.7).
+      </action>
+      <action dev="guylaine" type="fix" issue="384">
+        Add connection with Gitlab CI to allow automatic building and release,
+        as well as automatic code analysis (https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged).
+      </action>
+      <action dev="luc" type="fix" issue="386">
+        Fix a unit test due to CI specificity.
+      </action>
+      <action dev="guylaine" type="update"  issue="381">
+        Give access to algorithm identifier (DUVENHAGE,
+        CONSTANT_ELEVATION_OVER_ELLIPSOID, ...) with the new method getAlgorithmId().
+      </action>
+      <action dev="guylaine" type="update"  issue="385">
+        Use the new Derivative&lt;T&gt; interface from Hipparchus.
+      </action>
+       <action dev="guylaine" type="fix" issue="379">
+        Correct erroneous Earth flattening for model IERS96 in RuggedBuilder.
+      </action>
+      <action dev="guylaine" type="update" issue="378">
+        Replace in RuggedBuilder hard-coded constants by Orekit Earth constants.
+      </action>
+      <action dev="guylaine" type="update">
+        Update building explanations in static site and remove redundant BUILDING.txt.
+      </action>
+      <action dev="guylaine" type="add">
+        Create a release guide in static site.
+      </action>
+      <action dev="guylaine" type="update">
+        Update deprecated method of Orekit DataProvidersManager class.
+      </action>
+      <action dev="guylaine" type="update" issue="382">
+        Remove explicit dependency to Hipparchus library.
+      </action>
+      <action dev="guylaine" type="add">
+        Add package-info documentation.
+      </action>
+     </release>
+     
+     <release version="2.1" date="2019-03-14" description="This is a minor release.
+     It adds refraction in inverse location and fixes a few bugs. This version depends
+     on Orekit 9.3.1 and Hipparchus 1.4.">
+      <action dev="guylaine" type="update">
+        Updated dependencies to Orekit 9.3.1 and Hipparchus 1.4.
+      </action>
+      <action dev="luc" type="fix" issue="376">
         Direct location may result to a null result in some very rugged region.
         In Duvenhage algorithm, in the refineIntersection method for the DEM, 
         some rare cases led to no intersection (as a result from SimpleTile.cellIntersection) 
@@ -32,13 +113,20 @@
         along the LOS direction, with an iterative process, we are able to find the intersection.
       </action>
       <action dev="guylaine" type="fix" issue="377">
-        Add the possibilty to suspend and resume the dump.
+        Add the possibility to suspend and resume the dump.
         When performing a dump, in some cases, some extra informations are dumped 
         but are not relevant. 
         For instance when updating a tile for a SRTM tile, we need to add the geoid
         value of the current point. In the dump file, the geoid tile is also dumped
-        and it leds to bad results when performing the DumpReplayer, as the geoid 
+        and it leads to bad results when performing the DumpReplayer, as the geoid 
         elevations are read instead of the real elevations.
+      </action>
+      <action dev="guylaine" type="update">
+        Enable null in dump of direct or inverse location results.
+        If direct or inverse location gave "null" as a result, it was not dumped.
+      </action>
+      <action dev="guylaine" type="update">
+        Improve test coverage of classes related to dump (org.orekit.rugged.errors).
       </action>
       <action dev="guylaine" type="fix" issue="373">
         Changed RuggedException from checked to unchecked exception.
@@ -63,7 +151,8 @@
         adjustment.measurements.SensorToGroundMapping due to a parameters reversal error.
       </action>
       <action dev="guylaine" type="fix" issue="256">
-      Bad check of maxDate validity in utils.SpacecraftToObservedBody.SpacecraftToObservedBody method.
+        Bad check of maxDate validity in utils.SpacecraftToObservedBody.SpacecraftToObservedBody
+        method.
       </action>
            
       <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
@@ -90,9 +179,8 @@
       <action dev="guylaine" type="add" due-to="Jonathan Guinet, Lucie Labat-Allée">
         Added refinement feature, to adjust viewing model parameters
       </action>
-      <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
+      <action dev="luc" type="add" due-to="Lars Næsbye Christensen" issue="343">
         Added Danish translations.
-        Fixes issue #343.
       </action>
       <action dev="luc" type="update">
         Updated dependency to Hipparchus 1.1, released on 2017, March 16th.

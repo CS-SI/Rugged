@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -33,9 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.exception.LocalizedCoreFormats;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
@@ -62,7 +63,7 @@ import org.orekit.rugged.raster.TileUpdater;
 import org.orekit.rugged.raster.UpdatableTile;
 import org.orekit.rugged.refraction.AtmosphericRefraction;
 import org.orekit.rugged.refraction.MultiLayerModel;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
@@ -221,6 +222,15 @@ public class DumpReplayer {
     /** Keyword for target direction. */
     private static final String TARGET_DIRECTION = "targetDirection";
 
+    /** Keyword for null result. */
+    private static final String NULL_RESULT = "NULL";
+
+    /** Pattern for delimiting regular expressions. */
+    private static final Pattern SEPARATOR = Pattern.compile("\\s+");
+
+    /** Empty pattern. */
+    private static final Pattern PATTERN = Pattern.compile(" ");
+
     /** Constant elevation for constant elevation algorithm. */
     private double constantElevation;
 
@@ -269,12 +279,13 @@ public class DumpReplayer {
     /** Dumped calls. */
     private final List<DumpedCall> calls;
 
+
     /** Simple constructor.
      */
     public DumpReplayer() {
-        tiles   = new ArrayList<ParsedTile>();
-        sensors = new ArrayList<ParsedSensor>();
-        calls   = new ArrayList<DumpedCall>();
+        tiles   = new ArrayList<>();
+        sensors = new ArrayList<>();
+        calls   = new ArrayList<>();
     }
 
     /** Parse a dump file.
@@ -308,6 +319,9 @@ public class DumpReplayer {
             if (algorithmId == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
                 builder.setConstantElevation(constantElevation);
             } else if (algorithmId != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID) {
+                // In the case of user used a non overlapping DEM: no need here to take it into account
+                // as Rugged during the run created if necessary zipper tiles.
+                // At this stage, the read DEM in the dump behave like an overlapping DEM.
                 builder.setDigitalElevationModel(new TileUpdater() {
 
                     /** {@inheritDoc} */
@@ -339,8 +353,8 @@ public class DumpReplayer {
 
             // build missing transforms by extrapolating the parsed ones
             final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
-            final List<Transform> b2iList = new ArrayList<Transform>(n);
-            final List<Transform> s2iList = new ArrayList<Transform>(n);
+            final List<Transform> b2iList = new ArrayList<>(n);
+            final List<Transform> s2iList = new ArrayList<>(n);
             for (int i = 0; i < n; ++i) {
                 if (bodyToInertial.containsKey(i)) {
                     // the i-th transform was dumped
@@ -374,7 +388,7 @@ public class DumpReplayer {
             final ByteArrayInputStream  bis = new ByteArrayInputStream(bos.toByteArray());
             builder.setTrajectoryAndTimeSpan(bis);
 
-            final List<SensorMeanPlaneCrossing> planeCrossings = new ArrayList<SensorMeanPlaneCrossing>();
+            final List<SensorMeanPlaneCrossing> planeCrossings = new ArrayList<>();
             for (final ParsedSensor parsedSensor : sensors) {
                 final LineSensor sensor = new LineSensor(parsedSensor.name,
                                                          parsedSensor,
@@ -404,23 +418,9 @@ public class DumpReplayer {
 
             return rugged;
 
-        } catch (IOException ioe) {
-            throw new RuggedException(ioe, LocalizedCoreFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
-        } catch (SecurityException e) {
+        } catch (IOException | NoSuchMethodException  | IllegalAccessException  | InvocationTargetException e) {
             // this should never happen
-            throw RuggedException.createInternalError(e);
-        } catch (NoSuchMethodException e) {
-            // this should never happen
-            throw RuggedException.createInternalError(e);
-        } catch (IllegalArgumentException e) {
-            // this should never happen
-            throw RuggedException.createInternalError(e);
-        } catch (IllegalAccessException e) {
-            // this should never happen
-            throw RuggedException.createInternalError(e);
-        } catch (InvocationTargetException e) {
-            // this should never happen
-            throw RuggedException.createInternalError(e);
+            throw new RuggedInternalError(e);
         }
     }
 
@@ -595,15 +595,24 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                if (fields.length < 6 || !fields[0].equals(LATITUDE) ||
-                    !fields[2].equals(LONGITUDE) || !fields[4].equals(ELEVATION)) {
+                if (fields.length == 1) {
+                    if (fields[0].equals(NULL_RESULT)) {
+                        final GeodeticPoint gp = null;
+                        final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                        last.expected = gp;
+                    } else {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                } else if (fields.length < 6 || !fields[0].equals(LATITUDE) ||
+                           !fields[2].equals(LONGITUDE) || !fields[4].equals(ELEVATION)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                } else {
+                    final GeodeticPoint gp = new GeodeticPoint(Double.parseDouble(fields[1]),
+                                                               Double.parseDouble(fields[3]),
+                                                               Double.parseDouble(fields[5]));
+                    final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                    last.expected = gp;
                 }
-                final GeodeticPoint gp = new GeodeticPoint(Double.parseDouble(fields[1]),
-                                                           Double.parseDouble(fields[3]),
-                                                           Double.parseDouble(fields[5]));
-                final DumpedCall last = global.calls.get(global.calls.size() - 1);
-                last.expected = gp;
             }
 
         },
@@ -806,13 +815,22 @@ public class DumpReplayer {
             /** {@inheritDoc} */
             @Override
             public void parse(final int l, final File file, final String line, final String[] fields, final DumpReplayer global) {
-                if (fields.length < 4 || !fields[0].equals(LINE_NUMBER) || !fields[2].equals(PIXEL_NUMBER)) {
+                if (fields.length == 1) {
+                    if (fields[0].equals(NULL_RESULT)) {
+                        final SensorPixel sp = null;
+                        final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                        last.expected = sp;
+                    } else {
+                        throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                    }
+                } else if (fields.length < 4 || !fields[0].equals(LINE_NUMBER) || !fields[2].equals(PIXEL_NUMBER)) {
                     throw new RuggedException(RuggedMessages.CANNOT_PARSE_LINE, l, file, line);
+                } else {
+                    final SensorPixel sp = new SensorPixel(Double.parseDouble(fields[1]),
+                                                           Double.parseDouble(fields[3]));
+                    final DumpedCall last = global.calls.get(global.calls.size() - 1);
+                    last.expected = sp;
                 }
-                final SensorPixel sp = new SensorPixel(Double.parseDouble(fields[1]),
-                                                       Double.parseDouble(fields[3]));
-                final DumpedCall last = global.calls.get(global.calls.size() - 1);
-                last.expected = sp;
             }
 
         },
@@ -955,14 +973,14 @@ public class DumpReplayer {
 
             final int colon = line.indexOf(':');
             if (colon > 0) {
-                final String parsedKey = line.substring(0, colon).trim().replaceAll(" ", "_").toUpperCase();
+                final String parsedKey = PATTERN.matcher(line.substring(0, colon).trim()).replaceAll("_").toUpperCase();
                 try {
                     final LineParser parser = LineParser.valueOf(parsedKey);
                     final String[] fields;
                     if (colon + 1 >= line.length()) {
                         fields = new String[0];
                     } else {
-                        fields = line.substring(colon + 1).trim().split("\\s+");
+                        fields = SEPARATOR.split(line.substring(colon + 1).trim());
                     }
                     parser.parse(l, file, line, fields, global);
                 } catch (IllegalArgumentException iae) {
@@ -1043,8 +1061,8 @@ public class DumpReplayer {
         public boolean isInterpolable(final double latitude, final double longitude) {
             final int latitudeIndex  = (int) FastMath.floor((latitude  - minLatitude)  / latitudeStep);
             final int longitudeIndex = (int) FastMath.floor((longitude - minLongitude) / longitudeStep);
-            return (latitudeIndex  >= 0) && (latitudeIndex  <= latitudeRows     - 2) &&
-                   (longitudeIndex >= 0) && (longitudeIndex <= longitudeColumns - 2);
+            return latitudeIndex  >= 0 && latitudeIndex  <= latitudeRows     - 2 &&
+                   longitudeIndex >= 0 && longitudeIndex <= longitudeColumns - 2;
         }
 
         /** Update the tile according to the Digital Elevation Model.
@@ -1158,7 +1176,7 @@ public class DumpReplayer {
         public Vector3D getLOS(final int index, final AbsoluteDate date) {
             final List<Pair<AbsoluteDate, Vector3D>> list = losMap.get(index);
             if (list == null) {
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
             }
 
             if (list.size() < 2) {
@@ -1186,12 +1204,12 @@ public class DumpReplayer {
 
         /** {@inheritDoc} */
         @Override
-        public FieldVector3D<DerivativeStructure> getLOSDerivatives(final int index, final AbsoluteDate date,
-                                                                    final DSGenerator generator) {
+        public <T extends Derivative<T>> FieldVector3D<T> getLOSDerivatives(final int index, final AbsoluteDate date,
+                                                                            final DerivativeGenerator<T> generator) {
             final Vector3D los = getLOS(index, date);
-            return new FieldVector3D<DerivativeStructure>(generator.constant(los.getX()),
-                                                          generator.constant(los.getY()),
-                                                          generator.constant(los.getZ()));
+            return new FieldVector3D<>(generator.constant(los.getX()),
+                                       generator.constant(los.getY()),
+                                       generator.constant(los.getZ()));
         }
 
         /** Set a datation pair.

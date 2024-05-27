@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -32,9 +32,8 @@ import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
-import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.BasicScanAlgorithm;
 import org.orekit.rugged.intersection.ConstantElevationAlgorithm;
@@ -96,6 +95,10 @@ public class RuggedBuilder {
 
     /** Updater used to load Digital Elevation Model tiles. */
     private TileUpdater tileUpdater;
+
+    /** Flag to tell if the Digital Elevation Model tiles are overlapping.
+     * @since 4.0 */
+    private boolean isOverlappingTiles = true;
 
     /** Constant elevation over ellipsoid (m).
      * used only with {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID. */
@@ -172,7 +175,7 @@ public class RuggedBuilder {
      * </p>
      */
     public RuggedBuilder() {
-        sensors                     = new ArrayList<LineSensor>();
+        sensors                     = new ArrayList<>();
         constantElevation           = Double.NaN;
         lightTimeCorrection         = true;
         aberrationOfLightCorrection = true;
@@ -238,7 +241,8 @@ public class RuggedBuilder {
      *   {@link AlgorithmId#DUVENHAGE_FLAT_BODY DUVENHAGE_FLAT_BODY}
      *   and {@link AlgorithmId#BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY
      *   BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY} all
-     *   require {@link #setDigitalElevationModel(TileUpdater, int) setDigitalElevationModel}
+     *   require {@link #setDigitalElevationModel(TileUpdater, int, boolean) setDigitalElevationModel}
+     *   or {@link #setDigitalElevationModel(TileUpdater, int) setDigitalElevationModel}
      *   to be called,</li>
      *   <li>{@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
      *   CONSTANT_ELEVATION_OVER_ELLIPSOID} requires
@@ -250,6 +254,7 @@ public class RuggedBuilder {
      *
      * @param newAlgorithmId identifier of algorithm to use for Digital Elevation Model intersection
      * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getAlgorithm()
      */
@@ -268,6 +273,10 @@ public class RuggedBuilder {
 
     /** Set the user-provided {@link TileUpdater tile updater}.
      * <p>
+     * The DEM tiles must be overlapping, otherwise use {@link #setDigitalElevationModel(TileUpdater, int, boolean)}
+     * with flag set to false.
+     * </p>
+     * <p>
      * Note that when the algorithm specified in {@link #setAlgorithm(AlgorithmId)}
      * is either {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
      * CONSTANT_ELEVATION_OVER_ELLIPSOID} or {@link
@@ -279,23 +288,73 @@ public class RuggedBuilder {
      * @param newTileUpdater updater used to load Digital Elevation Model tiles
      * @param newMaxCachedTiles maximum number of tiles stored in the cache
      * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setAlgorithm(AlgorithmId)
      * @see #getTileUpdater()
      * @see #getMaxCachedTiles()
      */
     public RuggedBuilder setDigitalElevationModel(final TileUpdater newTileUpdater, final int newMaxCachedTiles) {
+        return setDigitalElevationModel(newTileUpdater, newMaxCachedTiles, true);
+    }
+
+    /** Set the user-provided {@link TileUpdater tile updater}.
+     * <p>
+     * Note that when the algorithm specified in {@link #setAlgorithm(AlgorithmId)}
+     * is either {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
+     * CONSTANT_ELEVATION_OVER_ELLIPSOID} or {@link
+     * AlgorithmId#IGNORE_DEM_USE_ELLIPSOID IGNORE_DEM_USE_ELLIPSOID},
+     * then this method becomes irrelevant and can either be not called at all,
+     * or it can be called with an updater set to {@code null}. For all other
+     * algorithms, the updater must be properly configured.
+     * </p>
+     * @param newTileUpdater updater used to load Digital Elevation Model tiles
+     * @param newMaxCachedTiles maximum number of tiles stored in the cache
+     * @param newIsOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                              true if overlapping; false otherwise.
+     * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int)
+     * @see #setAlgorithm(AlgorithmId)
+     * @see #getTileUpdater()
+     * @see #getMaxCachedTiles()
+     * @see #isOverlappingTiles()
+     * @since 4.0
+     */
+    public RuggedBuilder setDigitalElevationModel(final TileUpdater newTileUpdater, final int newMaxCachedTiles,
+                                                  final boolean newIsOverlappingTiles) {
         this.tileUpdater    = newTileUpdater;
         this.maxCachedTiles = newMaxCachedTiles;
+        this.isOverlappingTiles = newIsOverlappingTiles;
         return this;
     }
 
     /** Get the updater used to load Digital Elevation Model tiles.
      * @return updater used to load Digital Elevation Model tiles
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getMaxCachedTiles()
      */
     public TileUpdater getTileUpdater() {
         return tileUpdater;
+    }
+
+    /**
+     * Get the flag telling if the DEM tiles are overlapping.
+     * @return true if the Digital Elevation Model tiles are overlapping;
+     *         false otherwise. Default = true.
+     * @since 4.0
+     */
+    public boolean isOverlappingTiles() {
+        return isOverlappingTiles;
+    }
+
+    /**
+     * Set the DEM overlapping tiles flag.
+     * @param newIsOverlappingTiles flag to tell if the Digital Elevation Model tiles are overlapping:
+     *        true if overlapping; false otherwise
+     * @since 4.0
+     */
+    public void setOverlappingTiles(final boolean newIsOverlappingTiles) {
+        this.isOverlappingTiles = newIsOverlappingTiles;
     }
 
     /** Set the user-provided constant elevation model.
@@ -325,6 +384,7 @@ public class RuggedBuilder {
 
     /** Get the maximum number of tiles stored in the cache.
      * @return maximum number of tiles stored in the cache
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getTileUpdater()
      */
@@ -729,22 +789,17 @@ public class RuggedBuilder {
 
         // extract position/attitude samples from propagator
         final List<TimeStampedPVCoordinates> positionsVelocities =
-                new ArrayList<TimeStampedPVCoordinates>();
+                new ArrayList<>();
         final List<TimeStampedAngularCoordinates> quaternions =
-                new ArrayList<TimeStampedAngularCoordinates>();
-        propagator.setMasterMode(interpolationStep, new OrekitFixedStepHandler() {
-
-            /** {@inheritDoc} */
-            @Override
-            public void handleStep(final SpacecraftState currentState, final boolean isLast) {
+                new ArrayList<>();
+        propagator.getMultiplexer().add(interpolationStep,
+            currentState -> {
                 final AbsoluteDate  date = currentState.getDate();
                 final PVCoordinates pv   = currentState.getPVCoordinates(inertialFrame);
                 final Rotation      q    = currentState.getAttitude().getRotation();
                 positionsVelocities.add(new TimeStampedPVCoordinates(date, pv.getPosition(), pv.getVelocity(), Vector3D.ZERO));
                 quaternions.add(new TimeStampedAngularCoordinates(date, q, Vector3D.ZERO, Vector3D.ZERO));
-            }
-
-        });
+            });
         propagator.propagate(minDate.shiftedBy(-interpolationStep), maxDate.shiftedBy(interpolationStep));
 
         // orbit/attitude to body converter
@@ -883,7 +938,7 @@ public class RuggedBuilder {
                 return FramesFactory.getVeis1950();
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
     }
 
@@ -903,7 +958,7 @@ public class RuggedBuilder {
                 return FramesFactory.getGTOD(IERSConventions.IERS_1996, true);
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
     }
 
@@ -917,18 +972,24 @@ public class RuggedBuilder {
         // set up the ellipsoid
         switch (ellipsoidID) {
             case GRS80 :
-                return new OneAxisEllipsoid(6378137.0, 1.0 / 298.257222101, bodyFrame);
+                return new OneAxisEllipsoid(Constants.GRS80_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.GRS80_EARTH_FLATTENING,
+                                            bodyFrame);
             case WGS84 :
                 return new OneAxisEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                             Constants.WGS84_EARTH_FLATTENING,
                                             bodyFrame);
             case IERS96 :
-                return new OneAxisEllipsoid(6378136.49, 1.0 / 298.25645, bodyFrame);
+                return new OneAxisEllipsoid(Constants.IERS96_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.IERS96_EARTH_FLATTENING,
+                                            bodyFrame);
             case IERS2003 :
-                return new OneAxisEllipsoid(6378136.6, 1.0 / 298.25642, bodyFrame);
+                return new OneAxisEllipsoid(Constants.IERS2003_EARTH_EQUATORIAL_RADIUS,
+                                            Constants.IERS2003_EARTH_FLATTENING,
+                                            bodyFrame);
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
 
     }
@@ -938,27 +999,28 @@ public class RuggedBuilder {
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param constantElevation constant elevation over ellipsoid
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                           true if overlapping; false otherwise.
      * @return selected algorithm
      */
     private static IntersectionAlgorithm createAlgorithm(final AlgorithmId algorithmID,
                                                          final TileUpdater updater, final int maxCachedTiles,
-                                                         final double constantElevation) {
-
+                                                         final double constantElevation, final boolean isOverlappingTiles) {
         // set up the algorithm
         switch (algorithmID) {
             case DUVENHAGE :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOverlappingTiles);
             case DUVENHAGE_FLAT_BODY :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, true, isOverlappingTiles);
             case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-                return new BasicScanAlgorithm(updater, maxCachedTiles);
+                return new BasicScanAlgorithm(updater, maxCachedTiles, isOverlappingTiles);
             case CONSTANT_ELEVATION_OVER_ELLIPSOID :
                 return new ConstantElevationAlgorithm(constantElevation);
             case IGNORE_DEM_USE_ELLIPSOID :
                 return new IgnoreDEMAlgorithm();
             default :
                 // this should never happen
-                throw RuggedException.createInternalError(null);
+                throw new RuggedInternalError(null);
         }
     }
 
@@ -980,7 +1042,7 @@ public class RuggedBuilder {
             }
         }
         createInterpolatorIfNeeded();
-        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation), ellipsoid,
+        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation, isOverlappingTiles), ellipsoid,
                           lightTimeCorrection, aberrationOfLightCorrection, atmosphericRefraction, scToBody, sensors, name);
     }
 }

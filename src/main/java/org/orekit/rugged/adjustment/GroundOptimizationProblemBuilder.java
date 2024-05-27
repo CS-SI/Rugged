@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hipparchus.analysis.differentiation.DerivativeStructure;
+import org.hipparchus.analysis.differentiation.Gradient;
 import org.hipparchus.linear.Array2DRowRealMatrix;
 import org.hipparchus.linear.ArrayRealVector;
 import org.hipparchus.linear.RealMatrix;
@@ -93,7 +93,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
     protected void initMapping() {
 
         final String ruggedName = rugged.getName();
-        this.sensorToGroundMappings = new ArrayList<SensorToGroundMapping>();
+        this.sensorToGroundMappings = new ArrayList<>();
         for (final LineSensor lineSensor : this.getSensors()) {
             final SensorToGroundMapping mapping = this.getMeasurements().getGroundMapping(ruggedName, lineSensor.getName());
             if (mapping != null) {
@@ -162,7 +162,7 @@ public class GroundOptimizationProblemBuilder extends OptimizationProblemBuilder
             for (final SensorToGroundMapping reference : this.sensorToGroundMappings) {
                 for (final Map.Entry<SensorPixel, GeodeticPoint> mapping : reference.getMapping()) {
                     final GeodeticPoint gp = mapping.getValue();
-                    final DerivativeStructure[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, this.getGenerator());
+                    final Gradient[] ilResult = this.rugged.inverseLocationDerivatives(reference.getSensorName(), gp, minLine, maxLine, this.getGenerator());
 
                     if (ilResult == null) {
                         value.setEntry(l, minLine - 100.0); // arbitrary

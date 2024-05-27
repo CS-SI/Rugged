@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -18,7 +18,7 @@ package org.orekit.rugged.raster;
 
 /** Interface used to update Digital Elevation Model tiles.
  * <p>
- * Implementations of this interface are must be provided by
+ * Implementations of this interface must be provided by
  * the image processing mission-specific layer, thus allowing
  * the Rugged library to access the Digital Elevation Model data.
  * </p>

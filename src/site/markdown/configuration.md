@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2019 CS Systèmes d'Information
+<!--- Copyright 2013-2022 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -27,7 +27,7 @@ into `orekit-data` and add the following lines at the start of your program (bef
 first time):
 
     File orekitData = new File("/path/to/the/folder/orekit-data");
-    DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
+    DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(orekitData));
 
 This is sufficient to start working.
 

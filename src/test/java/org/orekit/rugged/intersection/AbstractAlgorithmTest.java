@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.orekit.attitudes.Attitude;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.Transform;
@@ -50,7 +50,7 @@ import org.orekit.utils.PVCoordinates;
 
 public abstract class AbstractAlgorithmTest {
 
-    protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles);
+    protected abstract IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOverlappingTiles);
 
     @Test
     public void testMayonVolcanoOnSubTileCorner() {
@@ -68,7 +68,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
 
         // preliminary check: the point has been chosen in the spacecraft (YZ) plane
         Transform earthToSpacecraft = new Transform(state.getDate(),
@@ -102,7 +102,7 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
 
         // test direct location
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
@@ -129,7 +129,9 @@ public abstract class AbstractAlgorithmTest {
         final GeodeticPoint groundGP = new GeodeticPoint(latitude, longitude, altitude);
         Vector3D groundP = earth.transform(groundGP);
 
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
+        Assert.assertEquals(  0.0, algorithm.getElevation(latitude, longitude - 2.0e-5), 1.0e-6);
+        Assert.assertEquals(120.0, algorithm.getElevation(latitude, longitude + 2.0e-5), 1.0e-6);
 
         // preliminary check: the point has been chosen in the spacecraft (YZ) plane
         Transform earthToSpacecraft = new Transform(state.getDate(),
@@ -269,7 +271,7 @@ public abstract class AbstractAlgorithmTest {
     public void setUp() throws URISyntaxException {
         
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(new File(path)));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
         earth = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                       Constants.WGS84_EARTH_FLATTENING,
                                       FramesFactory.getITRF(IERSConventions.IERS_2010, true));

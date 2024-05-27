@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -38,6 +38,7 @@ import org.hipparchus.util.FastMath;
 import org.hipparchus.util.Precision;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
@@ -151,7 +152,7 @@ public class SensorMeanPlaneCrossing {
 
         this.meanPlaneNormal             = meanPlaneNormal;
 
-        this.cachedResults               = new ArrayList<CrossingResult>(CACHED_RESULTS);
+        this.cachedResults               = new ArrayList<>(CACHED_RESULTS);
         cachedResults.forEach(crossingResult -> {
             if (crossingResult != null && this.cachedResults.size() < CACHED_RESULTS) {
                 this.cachedResults.add(crossingResult);
@@ -537,7 +538,7 @@ public class SensorMeanPlaneCrossing {
                                 evaluateLine(x, targetPV, scToBody.getBodyToInertial(date), scToBody.getScToInertial(date));
                         return 0.5 * FastMath.PI - FastMath.acos(Vector3D.dotProduct(targetDirection[0], meanPlaneNormal));
                     } catch (RuggedException re) {
-                        throw RuggedException.createInternalError(re);
+                        throw new RuggedInternalError(re);
                     }
                 }
             }, minLine, maxLine, startValue);

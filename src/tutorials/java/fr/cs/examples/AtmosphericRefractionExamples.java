@@ -13,7 +13,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.stat.descriptive.DescriptiveStatistics;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
-import org.orekit.data.DataProvidersManager;
+import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
@@ -52,7 +52,7 @@ public class AtmosphericRefractionExamples {
         // Initialize Orekit, assuming an orekit-data folder is in user home directory
         File home       = new File(System.getProperty("user.home"));
         File orekitData = new File(home, "orekit-data");
-        DataProvidersManager.getInstance().addProvider(new DirectoryCrawler(orekitData));
+        DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(orekitData));
 
         // Sensor's definition
         // ===================
@@ -150,10 +150,17 @@ public class AtmosphericRefractionExamples {
         int pixelStep = 100;
         int lineStep = 100;
         atmosphericRefraction.setGridSteps(pixelStep, lineStep);
+               
+        // To compute the inverse location grid with atmospheric refraction, a default margin is available:
+        //   atmosphericRefraction.getComputationParameters().getDefaultInverseLocMargin();
+
+        // but can be modified with:
+        //   atmosphericRefraction.setInverseLocMargin(margin);
 
         // Build Rugged with atmospheric refraction model
         builder.setRefractionCorrection(atmosphericRefraction);
         Rugged ruggedWith = builder.build();
+        
 
         // Direct location on a line WITHOUT and WITH atmospheric correction
         // -----------------------------------------------------------------

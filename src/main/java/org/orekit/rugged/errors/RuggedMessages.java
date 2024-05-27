@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
@@ -43,7 +44,7 @@ import org.hipparchus.exception.Localizable;
  * translation is missing.
  * </p>
  * <p>
- * This class is heavily based on Orekit {@link org.orekit.errors.OrekitMessages},
+ * This class is heavily based on {@code OrekitMessages},
  * which is distributed under the terms of the Apache License V2.
  * </p>
  */
@@ -83,7 +84,10 @@ public enum RuggedMessages implements Localizable {
     UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled"),
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})"),
     INVALID_STEP("step {0} is not valid : {1}"),
-    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}");
+    INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}"),
+    SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES("impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}"),
+    SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE("impossible to find sensor pixel: pixel {0} outside interval [ {1} , {2} [ (with atmospheric refraction margin = {3})");
+
 
     // CHECKSTYLE: resume JavadocVariable check
 
@@ -115,9 +119,8 @@ public enum RuggedMessages implements Localizable {
                     ResourceBundle.getBundle(RESOURCE_BASE_NAME, locale, new UTF8Control());
             if (bundle.getLocale().getLanguage().equals(locale.getLanguage())) {
                 final String translated = bundle.getString(name());
-                if ((translated != null) &&
-                    (translated.length() > 0) &&
-                    (!translated.toLowerCase(locale).contains("missing translation"))) {
+                if (translated.length() > 0 &&
+                    !translated.toLowerCase(locale).contains("missing translation")) {
                     // the value of the resource is the translated format
                     return translated;
                 }
@@ -164,11 +167,9 @@ public enum RuggedMessages implements Localizable {
                 stream = loader.getResourceAsStream(resourceName);
             }
             if (stream != null) {
-                try {
+                try (InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                     // Only this line is changed to make it to read properties files as UTF-8.
-                    bundle = new PropertyResourceBundle(new InputStreamReader(stream, "UTF-8"));
-                } finally {
-                    stream.close();
+                    bundle = new PropertyResourceBundle(inputStreamReader);
                 }
             }
             return bundle;

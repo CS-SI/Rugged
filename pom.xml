@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.orekit</groupId>
   <artifactId>rugged</artifactId>
-  <version>2.1-SNAPSHOT</version>
+  <version>4.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Rugged</name>
   <url>https://www.orekit.org/rugged</url>
@@ -19,42 +19,45 @@
 
     
     <!-- COTS version -->
-    <rugged.orekit.version>9.3</rugged.orekit.version>
-    <rugged.hipparchus.version>1.4</rugged.hipparchus.version>
-    <rugged.junit.version>4.12</rugged.junit.version>
+    <rugged.orekit.version>11.3.2</rugged.orekit.version>
+    <rugged.junit.version>4.13.2</rugged.junit.version>
     
     <!-- Compilers and Tools version -->
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
 
+    <!-- sonar related properties -->
+    <sonar.host.url>https://sonar.orekit.org/</sonar.host.url>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <rugged.spotbugs-maven-plugin.version>3.1.7</rugged.spotbugs-maven-plugin.version>
-    <rugged.jacoco-maven-plugin.version>0.8.2</rugged.jacoco-maven-plugin.version>
-    <rugged.maven-assembly-plugin.version>3.1.0</rugged.maven-assembly-plugin.version>
-    <rugged.maven-bundle-plugin.version>4.1.0</rugged.maven-bundle-plugin.version>
+    <rugged.spotbugs-maven-plugin.version>4.5.3.0</rugged.spotbugs-maven-plugin.version>
+    <rugged.jacoco-maven-plugin.version>0.8.8</rugged.jacoco-maven-plugin.version>
+    <rugged.maven-bundle-plugin.version>5.1.8</rugged.maven-bundle-plugin.version>
     <rugged.maven-changes-plugin.version>2.12.1</rugged.maven-changes-plugin.version>
-    <rugged.maven-checkstyle-plugin.version>3.0.0</rugged.maven-checkstyle-plugin.version>
-    <rugged.checkstyle.version>8.14</rugged.checkstyle.version>
-    <rugged.maven-clean-plugin.version>3.1.0</rugged.maven-clean-plugin.version>
-    <rugged.maven-compiler-plugin.version>3.8.0</rugged.maven-compiler-plugin.version>
-    <rugged.maven-javadoc-plugin.version>3.0.1</rugged.maven-javadoc-plugin.version>
-    <rugged.maven-jar-plugin.version>3.1.0</rugged.maven-jar-plugin.version>
-    <rugged.maven-jxr-plugin.version>3.0.0</rugged.maven-jxr-plugin.version>
+    <rugged.maven-checkstyle-plugin.version>3.2.0</rugged.maven-checkstyle-plugin.version>
+    <rugged.checkstyle.version>9.3</rugged.checkstyle.version>
+    <rugged.maven-clean-plugin.version>3.2.0</rugged.maven-clean-plugin.version>
+    <rugged.maven-compiler-plugin.version>3.10.1</rugged.maven-compiler-plugin.version>
+    <rugged.maven-javadoc-plugin.version>3.4.1</rugged.maven-javadoc-plugin.version>
+    <rugged.maven-jar-plugin.version>3.3.0</rugged.maven-jar-plugin.version>
+    <rugged.maven-jxr-plugin.version>3.3.0</rugged.maven-jxr-plugin.version>
     <rugged.plantuml-maven-plugin.version>1.2</rugged.plantuml-maven-plugin.version>
-    <rugged.plantuml.version>1.2018.12</rugged.plantuml.version>
-    <rugged.maven-project-info-reports-plugin.version>3.0.0</rugged.maven-project-info-reports-plugin.version>
-    <rugged.maven-resources-plugin.version>3.1.0</rugged.maven-resources-plugin.version>
-    <rugged.maven-site-plugin.version>3.7.1</rugged.maven-site-plugin.version>
-    <rugged.maven-source-plugin.version>3.0.1</rugged.maven-source-plugin.version>
-    <rugged.maven-surefire-plugin.version>2.22.1</rugged.maven-surefire-plugin.version>
-    <rugged.maven-surefire-report-plugin.version>2.22.1</rugged.maven-surefire-report-plugin.version>
-    <rugged.jgit.buildnumber.version>1.2.10</rugged.jgit.buildnumber.version>
-    <rugged.build-helper-maven-plugin.version>3.0.0</rugged.build-helper-maven-plugin.version>
-    <rugged.nexus-staging-maven-plugin.version>1.6.8</rugged.nexus-staging-maven-plugin.version>
-    <rugged.maven-gpg-plugin.version>1.6</rugged.maven-gpg-plugin.version>
-    <rugged.maven-install-plugin.version>3.0.0-M1</rugged.maven-install-plugin.version>
+    <rugged.plantuml.version>1.2022.8</rugged.plantuml.version>
+    <rugged.maven-project-info-reports-plugin.version>3.4.1</rugged.maven-project-info-reports-plugin.version>
+    <rugged.maven-resources-plugin.version>3.3.0</rugged.maven-resources-plugin.version>
+    <rugged.maven-site-plugin.version>3.12.1</rugged.maven-site-plugin.version>
+    <rugged.maven-source-plugin.version>3.2.1</rugged.maven-source-plugin.version>
+    <!-- Surefire 2.22.2 is the last to support CentOS/RedHat 7 due to
+         https://issues.apache.org/jira/browse/SUREFIRE-1628 -->
+    <rugged.maven-surefire-plugin.version>2.22.2</rugged.maven-surefire-plugin.version>
+    <rugged.maven-surefire-report-plugin.version>3.0.0-M6</rugged.maven-surefire-report-plugin.version>
+    <rugged.jgit.buildnumber.version>1.2.12</rugged.jgit.buildnumber.version>
+    <rugged.build-helper-maven-plugin.version>3.3.0</rugged.build-helper-maven-plugin.version>
+    <rugged.nexus-staging-maven-plugin.version>1.6.13</rugged.nexus-staging-maven-plugin.version>
+    <rugged.maven-gpg-plugin.version>3.0.1</rugged.maven-gpg-plugin.version>
+    <rugged.maven-install-plugin.version>3.0.1</rugged.maven-install-plugin.version>
     
   </properties>
 
@@ -118,14 +121,14 @@
   </contributors>
 
   <organization>
-    <name>CS Syst&#232;mes d&#039;Information</name>
-    <url>http://www.c-s.fr/</url>
+    <name>CS GROUP</name>
+    <url>https://www.csgroup.eu/</url>
   </organization>
 
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
 
@@ -142,9 +145,9 @@
 
   <distributionManagement>
     <site>
-      <id>rugged.website</id>
+      <id>website</id>
       <name>Rugged Website</name>
-      <url>https://www.orekit.org/rugged/</url>
+      <url>scp://cochise@spoutnik.orekit.org/var/www/mvn-sites/site-rugged-${project.version}</url>
     </site>
   </distributionManagement>
 
@@ -156,28 +159,6 @@
         <type>jar</type>
         <optional>false</optional>
     </dependency>
-    <dependency>
-  	  <groupId>org.hipparchus</groupId>
-	    <artifactId>hipparchus-core</artifactId>
-	    <version>${rugged.hipparchus.version}</version>
-  	    <type>jar</type>
-	    <optional>false</optional>
-    </dependency>
-    <dependency>
-        <groupId>org.hipparchus</groupId>
-        <artifactId>hipparchus-geometry</artifactId>
-        <version>${rugged.hipparchus.version}</version>
-        <type>jar</type>
-        <optional>false</optional>
-    </dependency>
-    <dependency>
-        <groupId>org.hipparchus</groupId>
-        <artifactId>hipparchus-stat</artifactId>
-        <version>${rugged.hipparchus.version}</version>
-        <type>jar</type>
-        <optional>false</optional>
-    </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -212,17 +193,6 @@
               <X-Compile-Target-JDK>${rugged.compiler.target}</X-Compile-Target-JDK>
             </manifestEntries>
           </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>${rugged.maven-assembly-plugin.version}</version>
-        <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/source-distribution-assembly.xml</descriptor>
-            <descriptor>src/main/assembly/source-jar-assembly.xml</descriptor>
-          </descriptors>
         </configuration>
       </plugin>
       <plugin>
@@ -339,6 +309,23 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${rugged.maven-site-plugin.version}</version>
+          <dependencies>
+            <dependency><!-- add support for ssh/scp -->
+              <groupId>org.apache.maven.wagon</groupId>
+              <artifactId>wagon-ssh</artifactId>
+              <version>3.3.4</version>
+            </dependency>
+          </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>${rugged.maven-project-info-reports-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changes-plugin</artifactId>
+        <version>${rugged.maven-changes-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>com.github.jeluard</groupId>
@@ -385,7 +372,7 @@
           </archive>
           <manifestLocation>${project.build.directory}/osgi</manifestLocation>
           <instructions>
-            <Export-Package>org.orekit.rugged.api.*;version=${project.version};-noimport:=true</Export-Package>
+            <Export-Package>org.orekit.rugged.*;version=${project.version};-noimport:=true</Export-Package>
             <Bundle-DocURL>${project.url}</Bundle-DocURL>
           </instructions>
         </configuration>
@@ -438,6 +425,7 @@
         <configuration>
           <threshold>Normal</threshold>
           <effort>Default</effort>
+          <onlyAnalyze>org.orekit.rugged.*</onlyAnalyze>
           <excludeFilterFile>${basedir}/spotbugs-exclude-filter.xml</excludeFilterFile>
         </configuration>
       </plugin>
@@ -472,8 +460,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changes-plugin</artifactId>
         <version>${rugged.maven-changes-plugin.version}</version>
-        <configuration>
-          <xmlPath>${basedir}/src/site/xdoc/changes.xml</xmlPath>
+         <configuration>
+          <teamlist>team.html</teamlist>
         </configuration>
         <reportSets>
           <reportSet>
@@ -489,7 +477,7 @@
         <version>${rugged.maven-jxr-plugin.version}</version>
         <configuration>
           <linkJavadoc>false</linkJavadoc>
-          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="http://www.c-s.fr">CS Syst&egrave;mes d&apos;information</a>. All rights reserved.]]></bottom>
+          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="https://www.csgroup.eu/">CS GROUP</a>. All rights reserved.]]></bottom>
         </configuration>
       </plugin>
       <plugin>
@@ -497,12 +485,14 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${rugged.maven-javadoc-plugin.version}</version>
         <configuration>
-          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="http://www.c-s.fr">CS Syst&egrave;mes d&apos;information</a>. All rights reserved.]]></bottom>
+          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="https://www.csgroup.eu/">CS GROUP</a>. All rights reserved.]]></bottom>
           <links>
             <link>https://docs.oracle.com/javase/8/docs/api/</link>
             <link>https://www.hipparchus.org/apidocs/</link>
-            <link>http://www.orekit.org/site-rugged-${rugged.orekit.version}/apidocs/</link>
+            <link>https://www.orekit.org/site-orekit-${rugged.orekit.version}/apidocs/</link>
           </links>
+          <source>${rugged.compiler.source}</source>
+          <doclint>none</doclint>
         </configuration>
         <reportSets>
           <reportSet>
@@ -531,7 +521,7 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>ru.concerteza.buildnumber</groupId>
+            <groupId>org.bidib.buildnumber</groupId>
             <artifactId>maven-jgit-buildnumber-plugin</artifactId>
             <version>${rugged.jgit.buildnumber.version}</version>
             <executions>
@@ -556,6 +546,7 @@
               <Implementation-Build>${rugged.implementation.build}</Implementation-Build>
               <X-Compile-Source-JDK>${rugged.compiler.source}</X-Compile-Source-JDK>
               <X-Compile-Target-JDK>${rugged.compiler.target}</X-Compile-Target-JDK>
+              <Automatic-Module-Name>org.orekit.rugged</Automatic-Module-Name>
             </manifestEntries>
            </archive>
           </configuration>
@@ -565,6 +556,16 @@
     </profile>
     <profile>
       <id>release</id>
+      <!-- distributionManagement>
+        <repository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+      </distributionManagement-->
       <build>
         <plugins>
           <plugin>
@@ -634,6 +635,7 @@
               <gpgArguments>
                 <arg>--digest-algo=SHA512</arg>
               </gpgArguments>
+              <!-- keyname>0802AB8C87B0B1AEC1C1C5871550FDBD6375C33B</keyname-->
             </configuration>
             <executions>
               <execution>
@@ -655,6 +657,20 @@
           </plugin>
         </plugins>
      </build>
+    </profile>
+    <profile>
+      <!-- A profile to configure staging deployment (for continuous integration process) -->
+      <id>ci-deploy</id>
+      <distributionManagement>
+        <repository>
+          <id>ci-releases</id>
+          <url>https://packages.orekit.org/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ci-snapshots</id>
+            <url>https://packages.orekit.org/repository/maven-snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
     </profile>
     <profile>
       <id>eclipse</id>

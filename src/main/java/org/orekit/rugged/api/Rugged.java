@@ -1,5 +1,5 @@
-/* Copyright 2013-2019 CS Systèmes d'Information
- * Licensed to CS Systèmes d'Information (CS) under one or more
+/* Copyright 2013-2022 CS GROUP
+ * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * CS licenses this file to You under the Apache License, Version 2.0
@@ -20,14 +20,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hipparchus.analysis.differentiation.Derivative;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
+import org.hipparchus.util.MathArrays;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
+import org.orekit.rugged.errors.RuggedInternalError;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.IntersectionAlgorithm;
 import org.orekit.rugged.linesensor.LineSensor;
@@ -35,7 +38,7 @@ import org.orekit.rugged.linesensor.SensorMeanPlaneCrossing;
 import org.orekit.rugged.linesensor.SensorPixel;
 import org.orekit.rugged.linesensor.SensorPixelCrossing;
 import org.orekit.rugged.refraction.AtmosphericRefraction;
-import org.orekit.rugged.utils.DSGenerator;
+import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.rugged.utils.ExtendedEllipsoid;
 import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 import org.orekit.rugged.utils.SpacecraftToObservedBody;
@@ -62,9 +65,6 @@ public class Rugged {
 
     /** Maximum number of evaluations for crossing algorithms. */
     private static final int MAX_EVAL = 50;
-
-    /** Margin for computation of inverse location with atmospheric refraction correction. */
-    private static final double INVLOC_MARGIN = 0.8;
 
     /** Threshold for pixel convergence in fixed point method
      * (for inverse location with atmospheric refraction correction). */
@@ -163,6 +163,14 @@ public class Rugged {
      */
     public IntersectionAlgorithm getAlgorithm() {
         return algorithm;
+    }
+
+    /** Get the DEM intersection algorithm identifier.
+     * @return DEM intersection algorithm Id
+     * @since 2.2
+     */
+    public AlgorithmId getAlgorithmId() {
+        return algorithm.getAlgorithmId();
     }
 
     /** Get flag for light time correction.
@@ -292,10 +300,35 @@ public class Rugged {
             // compute with atmospheric refraction correction if necessary
             if (atmosphericRefraction != null && atmosphericRefraction.mustBeComputed()) {
 
+                final Vector3D pBody;
+                final Vector3D lBody;
+
+                // Take into account the light time correction
+                // @since 3.1
+                if (lightTimeCorrection) {
+                    // Transform sensor position in inertial frame to observed body
+                    final Vector3D sP = inertToBody.transformPosition(pInert);
+                    // Convert ground location of the pixel in cartesian coordinates
+                    final Vector3D eP = ellipsoid.transform(gp[i]);
+                    // Compute the light time correction (s)
+                    final double deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+                    // Apply shift due to light time correction
+                    final Transform shiftedInertToBody = inertToBody.shiftedBy(-deltaT);
+
+                    pBody = shiftedInertToBody.transformPosition(pInert);
+                    lBody = shiftedInertToBody.transformVector(lInert);
+
+                } else { // Light time correction NOT to be taken into account
+
+                    pBody = inertToBody.transformPosition(pInert);
+                    lBody = inertToBody.transformVector(lInert);
+
+                } // end test on lightTimeCorrection
+
                 // apply atmospheric refraction correction
-                final Vector3D pBody = inertToBody.transformPosition(pInert);
-                final Vector3D lBody = inertToBody.transformVector(lInert);
                 gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
+
             }
             DumpManager.dumpDirectLocationResult(gp[i]);
         }
@@ -338,7 +371,7 @@ public class Rugged {
             lInert = obsLInert;
         }
 
-        // Compute ground location of specified pixel
+        // Compute ground location of specified pixel according to light time correction flag
         final NormalizedGeodeticPoint gp;
 
         if (lightTimeCorrection) {
@@ -354,14 +387,39 @@ public class Rugged {
                                               algorithm.intersection(ellipsoid, pBody, lBody));
         }
 
+        // Compute ground location of specified pixel according to atmospheric refraction correction flag
         NormalizedGeodeticPoint result = gp;
 
         // compute the ground location with atmospheric correction if asked for
         if (atmosphericRefraction != null && atmosphericRefraction.mustBeComputed()) {
 
+            final Vector3D pBody;
+            final Vector3D lBody;
+
+            // Take into account the light time correction
+            // @since 3.1
+            if (lightTimeCorrection) {
+                // Transform sensor position in inertial frame to observed body
+                final Vector3D sP = inertToBody.transformPosition(pInert);
+                // Convert ground location of the pixel in cartesian coordinates
+                final Vector3D eP = ellipsoid.transform(gp);
+                // Compute the light time correction (s)
+                final double deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+                // Apply shift due to light time correction
+                final Transform shiftedInertToBody = inertToBody.shiftedBy(-deltaT);
+
+                pBody = shiftedInertToBody.transformPosition(pInert);
+                lBody = shiftedInertToBody.transformVector(lInert);
+
+            } else { // Light time correction NOT to be taken into account
+
+                pBody = inertToBody.transformPosition(pInert);
+                lBody = inertToBody.transformVector(lInert);
+
+            } // end test on lightTimeCorrection
+
             // apply atmospheric refraction correction
-            final Vector3D pBody = inertToBody.transformPosition(pInert);
-            final Vector3D lBody = inertToBody.transformVector(lInert);
             result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
 
         } // end test on atmosphericRefraction != null
@@ -514,7 +572,7 @@ public class Rugged {
                                        final int minLine, final int maxLine) {
 
         final LineSensor sensor = getLineSensor(sensorName);
-        DumpManager.dumpInverseLocation(sensor, point, minLine, maxLine, lightTimeCorrection,
+        DumpManager.dumpInverseLocation(sensor, point, ellipsoid, minLine, maxLine, lightTimeCorrection,
                                         aberrationOfLightCorrection, atmosphericRefraction != null);
 
         final SensorMeanPlaneCrossing planeCrossing = getPlaneCrossing(sensorName, minLine, maxLine);
@@ -561,7 +619,7 @@ public class Rugged {
      * @param scToInert transform for the date from spacecraft to inertial
      * @param inertToBody transform for the date from inertial to body
      * @param pInert sensor position in inertial frame
-     * @param lInert line of sight in inertial frame
+     * @param lInert line of sight in inertial frame (with light time correction if asked for)
      * @return geodetic point with light time correction
      */
     private NormalizedGeodeticPoint computeWithLightTimeCorrection(final AbsoluteDate date,
@@ -569,26 +627,41 @@ public class Rugged {
                                                                    final Transform scToInert, final Transform inertToBody,
                                                                    final Vector3D pInert, final Vector3D lInert) {
 
-        // compute the approximate transform between spacecraft and observed body
+        // Compute the transform between spacecraft and observed body
         final Transform approximate = new Transform(date, scToInert, inertToBody);
 
+        // Transform LOS in spacecraft frame to observed body
         final Vector3D  sL       = approximate.transformVector(los);
+        // Transform sensor position in spacecraft frame to observed body
         final Vector3D  sP       = approximate.transformPosition(sensorPosition);
 
+        // Compute point intersecting ground (= the ellipsoid) along the pixel LOS
         final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL, 0.0));
+
+        // Compute light time time correction (vs the ellipsoid) (s)
         final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+        // Apply shift due to light time correction (vs the ellipsoid)
         final Transform shifted1 = inertToBody.shiftedBy(-deltaT1);
+
+        // Search the intersection of LOS (taking into account the light time correction if asked for) with DEM
         final NormalizedGeodeticPoint gp1  = algorithm.intersection(ellipsoid,
                                                                     shifted1.transformPosition(pInert),
                                                                     shifted1.transformVector(lInert));
 
+        // Convert the geodetic point (intersection of LOS with DEM) in cartesian coordinates
         final Vector3D  eP2      = ellipsoid.transform(gp1);
+
+        // Compute the light time correction (vs DEM) (s)
         final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+        // Apply shift due to light time correction (vs DEM)
         final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
+
         return algorithm.refineIntersection(ellipsoid,
-                                             shifted2.transformPosition(pInert),
-                                             shifted2.transformVector(lInert),
-                                             gp1);
+                                            shifted2.transformPosition(pInert),
+                                            shifted2.transformVector(lInert),
+                                            gp1);
     }
 
     /**
@@ -675,7 +748,7 @@ public class Rugged {
         // ===========================================
         // Need to be computed only once for a given sensor (with the same minLine and maxLine)
         if (atmosphericRefraction.getBifPixel() == null || atmosphericRefraction.getBifLine() == null || // lazy evaluation
-            (!atmosphericRefraction.isSameContext(sensorName, minLine, maxLine))) { // Must be recomputed if the context changed
+            !atmosphericRefraction.isSameContext(sensorName, minLine, maxLine)) { // Must be recomputed if the context changed
 
             // Definition of a regular grid (at sensor level)
             atmosphericRefraction.configureCorrectionGrid(sensor, minLine, maxLine);
@@ -706,19 +779,29 @@ public class Rugged {
         // ==================
         // Initialization
         // --------------
+        // Deactivate the dump because no need to keep intermediate computations of inverse loc (can be regenerate)
+        final Boolean wasSuspended = DumpManager.suspend();
+
         // compute the sensor pixel on the desired ground point WITHOUT atmosphere
         atmosphericRefraction.deactivateComputation();
         final SensorPixel sp0 = inverseLocation(sensorName, point, minLine, maxLine);
         atmosphericRefraction.reactivateComputation();
+        // Reactivate the dump
+        DumpManager.resume(wasSuspended);
 
         if (sp0 == null) {
-            // Impossible to find the point in the given min line and max line (without atmosphere)
-            throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
+            // In order for the dump to end nicely
+            DumpManager.endNicely();
+
+            // Impossible to find the sensor pixel in the given range lines (without atmosphere)
+            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
         }
 
         // set up the starting point of the fixed point method
         final double pixel0 = sp0.getPixelNumber();
         final double line0 = sp0.getLineNumber();
+        // Needed data for the dump
+        sensor.dumpRate(line0);
 
         // Apply fixed point method until convergence in pixel and line
         // ------------------------------------------------------------
@@ -746,6 +829,8 @@ public class Rugged {
         }
         // The sensor pixel is found !
         final SensorPixel sensorPixelWithAtmosphere = new SensorPixel(corrLinePrevious, corrPixelPrevious);
+
+        // Dump the found sensorPixel
         DumpManager.dumpInverseLocationResult(sensorPixelWithAtmosphere);
 
         return sensorPixelWithAtmosphere;
@@ -766,6 +851,9 @@ public class Rugged {
                                                                      final int nbPixelGrid, final int nbLineGrid,
                                                                      final LineSensor sensor, final int minLine, final int maxLine) {
 
+        // Deactivate the dump because no need to keep intermediate computations of inverse loc (can be regenerate)
+        final Boolean wasSuspended = DumpManager.suspend();
+
         final SensorPixel[][] sensorPixelGrid = new SensorPixel[nbPixelGrid][nbLineGrid];
         final String sensorName = sensor.getName();
 
@@ -783,17 +871,26 @@ public class Rugged {
                         sensorPixelGrid[uIndex][vIndex] = inverseLocation(sensorName, currentLat, currentLon, minLine, maxLine);
 
                     } catch (RuggedException re) { // This should never happen
-                        throw RuggedException.createInternalError(re);
+                        // In order for the dump to end nicely
+                        DumpManager.endNicely();
+                        throw new RuggedInternalError(re);
                     }
 
                     // Check if the pixel is inside the sensor (with a margin) OR if the inverse location was impossible (null result)
-                    if ((sensorPixelGrid[uIndex][vIndex] != null &&
-                           (sensorPixelGrid[uIndex][vIndex].getPixelNumber() < (-INVLOC_MARGIN) ||
-                            sensorPixelGrid[uIndex][vIndex].getPixelNumber() > (INVLOC_MARGIN + sensor.getNbPixels() - 1))) ||
-                        (sensorPixelGrid[uIndex][vIndex] == null) ) {
+                    if (!pixelIsInside(sensorPixelGrid[uIndex][vIndex], sensor)) {
 
-                        // Impossible to find the point in the given min line
-                        throw new RuggedException(RuggedMessages.INVALID_RANGE_FOR_LINES, minLine, maxLine, "");
+                        // In order for the dump to end nicely
+                        DumpManager.endNicely();
+
+                        if (sensorPixelGrid[uIndex][vIndex] == null) {
+                            // Impossible to find the sensor pixel in the given range lines
+                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, minLine, maxLine);
+                        } else {
+                            // Impossible to find the sensor pixel
+                            final double invLocationMargin = atmosphericRefraction.getComputationParameters().getInverseLocMargin();
+                            throw new RuggedException(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE, sensorPixelGrid[uIndex][vIndex].getPixelNumber(),
+                                                      -invLocationMargin, invLocationMargin + sensor.getNbPixels() - 1, invLocationMargin);
+                        }
                     }
 
                 } else { // groundGrid[uIndex][vIndex] == null: impossible to compute inverse loc because ground point not defined
@@ -804,8 +901,23 @@ public class Rugged {
             } // end loop vIndex
         } // end loop uIndex
 
+        // Reactivate the dump
+        DumpManager.resume(wasSuspended);
+
         // The sensor grid computed WITHOUT atmospheric refraction correction
         return sensorPixelGrid;
+    }
+
+    /** Check if pixel is inside the sensor with a margin.
+     * @param pixel pixel to check (may be null if not found)
+     * @param sensor the line sensor
+     * @return true if the pixel is inside the sensor
+     */
+    private boolean pixelIsInside(final SensorPixel pixel, final LineSensor sensor) {
+        // Get the inverse location margin
+        final double invLocationMargin = atmosphericRefraction.getComputationParameters().getInverseLocMargin();
+
+        return pixel != null && pixel.getPixelNumber() >= -invLocationMargin && pixel.getPixelNumber() < invLocationMargin + sensor.getNbPixels() - 1;
     }
 
     /** Computation, for the sensor pixels grid, of the direct location WITH atmospheric refraction.
@@ -818,6 +930,9 @@ public class Rugged {
      */
     private GeodeticPoint[][] computeDirectLocOnGridWithAtmosphere(final double[] pixelGrid, final double[] lineGrid,
                                                                    final LineSensor sensor) {
+
+        // Deactivate the dump because no need to keep intermediate computations of direct loc (can be regenerate)
+        final Boolean wasSuspended = DumpManager.suspend();
 
         final int nbPixelGrid = pixelGrid.length;
         final int nbLineGrid = lineGrid.length;
@@ -835,10 +950,15 @@ public class Rugged {
                     groundGridWithAtmosphere[uIndex][vIndex] = directLocation(date, sensorPosition, los);
 
                 } catch (RuggedException re) { // This should never happen
-                    throw RuggedException.createInternalError(re);
+                    // In order for the dump to end nicely
+                    DumpManager.endNicely();
+                    throw new RuggedInternalError(re);
                 }
             } // end loop vIndex
         } // end loop uIndex
+
+        // Reactivate the dump
+        DumpManager.resume(wasSuspended);
 
         // The ground grid computed WITH atmospheric refraction correction
         return groundGridWithAtmosphere;
@@ -915,6 +1035,7 @@ public class Rugged {
     }
 
     /** Compute distances between two line sensors with derivatives.
+     * @param <T> derivative type
      * @param sensorA line sensor A
      * @param dateA current date for sensor A
      * @param pixelA pixel index for sensor A
@@ -926,11 +1047,11 @@ public class Rugged {
      * @return distances computed, with derivatives, between LOS and to the ground
      * @see #distanceBetweenLOS(LineSensor, AbsoluteDate, double, SpacecraftToObservedBody, LineSensor, AbsoluteDate, double)
      */
-    public DerivativeStructure[] distanceBetweenLOSderivatives(
+    public <T extends Derivative<T>> T[] distanceBetweenLOSderivatives(
                                  final LineSensor sensorA, final AbsoluteDate dateA, final double pixelA,
                                  final SpacecraftToObservedBody scToBodyA,
                                  final LineSensor sensorB, final AbsoluteDate dateB, final double pixelB,
-                                 final DSGenerator generator) {
+                                 final DerivativeGenerator<T> generator) {
 
         // Compute the approximate transforms between spacecraft and observed body
         // from Rugged instance A
@@ -944,59 +1065,63 @@ public class Rugged {
         final Transform transformScToBodyB = new Transform(dateB, scToInertB, inertToBodyB);
 
         // Get sensors LOS into local frame
-        final FieldVector3D<DerivativeStructure> vALocal = sensorA.getLOSDerivatives(dateA, pixelA, generator);
-        final FieldVector3D<DerivativeStructure> vBLocal = sensorB.getLOSDerivatives(dateB, pixelB, generator);
+        final FieldVector3D<T> vALocal = sensorA.getLOSDerivatives(dateA, pixelA, generator);
+        final FieldVector3D<T> vBLocal = sensorB.getLOSDerivatives(dateB, pixelB, generator);
 
         // Get sensors LOS into body frame
-        final FieldVector3D<DerivativeStructure> vA = transformScToBodyA.transformVector(vALocal); // V_a : line of sight's vectorA
-        final FieldVector3D<DerivativeStructure> vB = transformScToBodyB.transformVector(vBLocal); // V_b : line of sight's vectorB
+        final FieldVector3D<T> vA = transformScToBodyA.transformVector(vALocal); // V_a : line of sight's vectorA
+        final FieldVector3D<T> vB = transformScToBodyB.transformVector(vBLocal); // V_b : line of sight's vectorB
 
         // Position of sensors into local frame
         final Vector3D sAtmp = sensorA.getPosition();
         final Vector3D sBtmp = sensorB.getPosition();
 
-        final DerivativeStructure scaleFactor = FieldVector3D.dotProduct(vA.normalize(), vA.normalize()); // V_a.V_a=1
+        final T scaleFactor = FieldVector3D.dotProduct(vA.normalize(), vA.normalize()); // V_a.V_a=1
 
         // Build a vector from the position and a scale factor (equals to 1).
         // The vector built will be scaleFactor * sAtmp for example.
-        final FieldVector3D<DerivativeStructure> sALocal = new FieldVector3D<DerivativeStructure>(scaleFactor, sAtmp);
-        final FieldVector3D<DerivativeStructure> sBLocal = new FieldVector3D<DerivativeStructure>(scaleFactor, sBtmp);
+        final FieldVector3D<T> sALocal = new FieldVector3D<>(scaleFactor, sAtmp);
+        final FieldVector3D<T> sBLocal = new FieldVector3D<>(scaleFactor, sBtmp);
 
         // Get sensors position into body frame
-        final FieldVector3D<DerivativeStructure> sA = transformScToBodyA.transformPosition(sALocal); // S_a : sensorA 's position
-        final FieldVector3D<DerivativeStructure> sB = transformScToBodyB.transformPosition(sBLocal); // S_b : sensorB 's position
+        final FieldVector3D<T> sA = transformScToBodyA.transformPosition(sALocal); // S_a : sensorA 's position
+        final FieldVector3D<T> sB = transformScToBodyB.transformPosition(sBLocal); // S_b : sensorB 's position
 
         // Compute distance
-        final FieldVector3D<DerivativeStructure> vBase = sB.subtract(sA);    // S_b - S_a
-        final DerivativeStructure svA = FieldVector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
-        final DerivativeStructure svB = FieldVector3D.dotProduct(vBase, vB); // SV_b = (S_b - S_a).V_b
+        final FieldVector3D<T> vBase = sB.subtract(sA);    // S_b - S_a
+        final T svA = FieldVector3D.dotProduct(vBase, vA); // SV_a = (S_b - S_a).V_a
+        final T svB = FieldVector3D.dotProduct(vBase, vB); // SV_b = (S_b - S_a).V_b
 
-        final DerivativeStructure vAvB = FieldVector3D.dotProduct(vA, vB); // V_a.V_b
+        final T vAvB = FieldVector3D.dotProduct(vA, vB); // V_a.V_b
 
         // Compute lambda_b = (SV_a * V_a.V_b - SV_b) / (1 - (V_a.V_b)²)
-        final DerivativeStructure lambdaB = (svA.multiply(vAvB).subtract(svB)).divide(vAvB.multiply(vAvB).subtract(1).negate());
+        final T lambdaB = (svA.multiply(vAvB).subtract(svB)).divide(vAvB.multiply(vAvB).subtract(1).negate());
 
         // Compute lambda_a = SV_a + lambdaB * V_a.V_b
-        final DerivativeStructure lambdaA = vAvB.multiply(lambdaB).add(svA);
+        final T lambdaA = vAvB.multiply(lambdaB).add(svA);
 
         // Compute vector M_a:
-        final FieldVector3D<DerivativeStructure> mA = sA.add(vA.scalarMultiply(lambdaA)); // M_a = S_a + lambda_a * V_a
+        final FieldVector3D<T> mA = sA.add(vA.scalarMultiply(lambdaA)); // M_a = S_a + lambda_a * V_a
         // Compute vector M_b
-        final FieldVector3D<DerivativeStructure> mB = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
+        final FieldVector3D<T> mB = sB.add(vB.scalarMultiply(lambdaB)); // M_b = S_b + lambda_b * V_b
 
         // Compute vector M_a -> M_B for which distance between LOS is minimum
-        final FieldVector3D<DerivativeStructure> vDistanceMin = mB.subtract(mA); // M_b - M_a
+        final FieldVector3D<T> vDistanceMin = mB.subtract(mA); // M_b - M_a
 
         // Compute vector from mid point of vector M_a -> M_B to the ground (corresponds to minimum elevation)
-        final FieldVector3D<DerivativeStructure> midPoint = (mB.add(mA)).scalarMultiply(0.5);
+        final FieldVector3D<T> midPoint = (mB.add(mA)).scalarMultiply(0.5);
 
         // Get the euclidean norms to compute the minimum distances:
         // between LOS
-        final DerivativeStructure dMin = vDistanceMin.getNorm();
+        final T dMin = vDistanceMin.getNorm();
         // to the ground
-        final DerivativeStructure dCentralBody = midPoint.getNorm();
+        final T dCentralBody = midPoint.getNorm();
 
-        return new DerivativeStructure[] {dMin, dCentralBody};
+        final T[] ret = MathArrays.buildArray(dMin.getField(), 2);
+        ret[0] = dMin;
+        ret[1] = dCentralBody;
+        return ret;
+
     }
 
 
@@ -1037,22 +1162,22 @@ public class Rugged {
     }
 
     /** Inverse location of a point with derivatives.
+     * @param <T> derivative type
      * @param sensorName name of the line sensor
      * @param point point to localize
      * @param minLine minimum line number
      * @param maxLine maximum line number
-     * @param generator generator to use for building {@link DerivativeStructure} instances
+     * @param generator generator to use for building {@link Derivative} instances
      * @return sensor pixel seeing point with derivatives, or null if point cannot be seen between the
      * prescribed line numbers
      * @see #inverseLocation(String, GeodeticPoint, int, int)
      * @since 2.0
      */
-
-    public DerivativeStructure[] inverseLocationDerivatives(final String sensorName,
-                                                            final GeodeticPoint point,
-                                                            final int minLine,
-                                                            final int maxLine,
-                                                            final DSGenerator generator) {
+    public <T extends Derivative<T>> T[] inverseLocationDerivatives(final String sensorName,
+                                                                    final GeodeticPoint point,
+                                                                    final int minLine,
+                                                                    final int maxLine,
+                                                                    final DerivativeGenerator<T> generator) {
 
         final LineSensor sensor = getLineSensor(sensorName);
 
@@ -1080,37 +1205,39 @@ public class Rugged {
         // fix line by considering the closest pixel exact position and line-of-sight
         // (this pixel might point towards a direction slightly above or below the mean sensor plane)
         final int lowIndex = FastMath.max(0, FastMath.min(sensor.getNbPixels() - 2, (int) FastMath.floor(coarsePixel)));
-        final FieldVector3D<DerivativeStructure> lowLOS =
+        final FieldVector3D<T> lowLOS =
                         sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex, generator);
-        final FieldVector3D<DerivativeStructure> highLOS = sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex + 1, generator);
-        final FieldVector3D<DerivativeStructure> localZ = FieldVector3D.crossProduct(lowLOS, highLOS).normalize();
-        final DerivativeStructure beta         = FieldVector3D.dotProduct(crossingResult.getTargetDirection(), localZ).acos();
-        final DerivativeStructure s            = FieldVector3D.dotProduct(crossingResult.getTargetDirectionDerivative(), localZ);
-        final DerivativeStructure minusBetaDer = s.divide(s.multiply(s).subtract(1).negate().sqrt());
-        final DerivativeStructure deltaL       = beta.subtract(0.5 * FastMath.PI) .divide(minusBetaDer);
-        final DerivativeStructure fixedLine    = deltaL.add(crossingResult.getLine());
-        final FieldVector3D<DerivativeStructure> fixedDirection =
-                        new FieldVector3D<DerivativeStructure>(deltaL.getField().getOne(), crossingResult.getTargetDirection(),
-                                                               deltaL, crossingResult.getTargetDirectionDerivative()).normalize();
+        final FieldVector3D<T> highLOS = sensor.getLOSDerivatives(crossingResult.getDate(), lowIndex + 1, generator);
+        final FieldVector3D<T> localZ = FieldVector3D.crossProduct(lowLOS, highLOS).normalize();
+        final T beta         = FieldVector3D.dotProduct(crossingResult.getTargetDirection(), localZ).acos();
+        final T s            = FieldVector3D.dotProduct(crossingResult.getTargetDirectionDerivative(), localZ);
+        final T minusBetaDer = s.divide(s.multiply(s).subtract(1).negate().sqrt());
+        final T deltaL       = beta.subtract(0.5 * FastMath.PI) .divide(minusBetaDer);
+        final T fixedLine    = deltaL.add(crossingResult.getLine());
+        final FieldVector3D<T> fixedDirection =
+                        new FieldVector3D<>(deltaL.getField().getOne(), crossingResult.getTargetDirection(),
+                                            deltaL, crossingResult.getTargetDirectionDerivative()).normalize();
 
         // fix neighbouring pixels
         final AbsoluteDate fixedDate  = sensor.getDate(fixedLine.getValue());
-        final FieldVector3D<DerivativeStructure> fixedX = sensor.getLOSDerivatives(fixedDate, lowIndex, generator);
-        final FieldVector3D<DerivativeStructure> fixedZ = FieldVector3D.crossProduct(fixedX, sensor.getLOSDerivatives(fixedDate, lowIndex + 1, generator));
-        final FieldVector3D<DerivativeStructure> fixedY = FieldVector3D.crossProduct(fixedZ, fixedX);
+        final FieldVector3D<T> fixedX = sensor.getLOSDerivatives(fixedDate, lowIndex, generator);
+        final FieldVector3D<T> fixedZ = FieldVector3D.crossProduct(fixedX, sensor.getLOSDerivatives(fixedDate, lowIndex + 1, generator));
+        final FieldVector3D<T> fixedY = FieldVector3D.crossProduct(fixedZ, fixedX);
 
         // fix pixel
-        final DerivativeStructure hY         = FieldVector3D.dotProduct(highLOS, fixedY);
-        final DerivativeStructure hX         = FieldVector3D.dotProduct(highLOS, fixedX);
-        final DerivativeStructure pixelWidth = hY.atan2(hX);
-        final DerivativeStructure fY         = FieldVector3D.dotProduct(fixedDirection, fixedY);
-        final DerivativeStructure fX         = FieldVector3D.dotProduct(fixedDirection, fixedX);
-        final DerivativeStructure alpha      = fY.atan2(fX);
-        final DerivativeStructure fixedPixel = alpha.divide(pixelWidth).add(lowIndex);
+        final T hY         = FieldVector3D.dotProduct(highLOS, fixedY);
+        final T hX         = FieldVector3D.dotProduct(highLOS, fixedX);
+        final T pixelWidth = hY.atan2(hX);
+        final T fY         = FieldVector3D.dotProduct(fixedDirection, fixedY);
+        final T fX         = FieldVector3D.dotProduct(fixedDirection, fixedX);
+        final T alpha      = fY.atan2(fX);
+        final T fixedPixel = alpha.divide(pixelWidth).add(lowIndex);
 
-        return new DerivativeStructure[] {
-            fixedLine, fixedPixel
-        };
+        final T[] ret = MathArrays.buildArray(fixedPixel.getField(), 2);
+        ret[0] = fixedLine;
+        ret[1] = fixedPixel;
+        return ret;
+
     }
 
     /** Get transform from spacecraft to inertial frame.
