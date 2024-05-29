@@ -53,7 +53,6 @@ public enum RuggedMessages implements Localizable {
 
     /** INTERNAL_ERROR. */
     INTERNAL_ERROR("internal error, please notify development team by creating an issue at {0}"),
-    
     /** OUT_OF_TILE_INDICES. */
     OUT_OF_TILE_INDICES("no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)"),
     
