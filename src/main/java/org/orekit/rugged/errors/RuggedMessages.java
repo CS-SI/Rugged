@@ -55,106 +55,72 @@ public enum RuggedMessages implements Localizable {
     INTERNAL_ERROR("internal error, please notify development team by creating an issue at {0}"),
     /** OUT_OF_TILE_INDICES. */
     OUT_OF_TILE_INDICES("no data at indices [{0}, {1}], tile only covers from [0, 0] to [{2}, {3}] (inclusive)"),
-    
     /** OUT_OF_TILE_ANGLES. */
     OUT_OF_TILE_ANGLES("no data at latitude {0} and longitude {1}, tile covers only latitudes {2} to {3} and longitudes {4} to {5}"),
-   
     /** NO_DEM_DATA. */
     NO_DEM_DATA("no Digital Elevation Model data at latitude {0} and longitude {1}"),
-    
     /** TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED. */
     TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED("the tile selected for latitude {0} and longitude {1} does not contain required point neighborhood"),
-    
     /** OUT_OF_TIME_RANGE. */
     OUT_OF_TIME_RANGE("date {0} is out of time span [{1}, {2}] (UTC)"),
-    
     /** UNINITIALIZED_CONTEXT. */
     UNINITIALIZED_CONTEXT("general context has not been initialized (missing call to {0})"),
-    
     /** EMPTY_TILE. */
     EMPTY_TILE("tile is empty: {0} ⨉ {1}"),
-    
     /** UNKNOWN_SENSOR. */
     UNKNOWN_SENSOR("unknown sensor {0}"),
-    
     /** LINE_OF_SIGHT_DOES_NOT_REACH_GROUND. */
     LINE_OF_SIGHT_DOES_NOT_REACH_GROUND("line-of-sight does not reach ground"),
-
     /** LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE. */
     LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE("line-of-sight never crosses latitude {0}"),
-        
     /** LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE. */
-    LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE("line-of-sight never crosses longitude {0}"),
-        
+    LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE("line-of-sight never crosses longitude {0}"),        
     /** LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE. */
     LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE("line-of-sight never crosses altitude {0}"),
-        
     /** DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT. */
     DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT("line-of-sight enters the Digital Elevation Model behind spacecraft!"),
-        
     /** FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP. */
     FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP("frame {0} does not match frame {1} from interpolator dump"),
-        
     /** NOT_INTERPOLATOR_DUMP_DATA. */
     NOT_INTERPOLATOR_DUMP_DATA("data is not an interpolator dump"),
-        
     /** DEBUG_DUMP_ALREADY_ACTIVE. */
     DEBUG_DUMP_ALREADY_ACTIVE("debug dump is already active for this thread"),
-        
     /** DEBUG_DUMP_ACTIVATION_ERROR. */
     DEBUG_DUMP_ACTIVATION_ERROR("unable to active debug dump with file {0}: {1}"),
-        
     /** DEBUG_DUMP_NOT_ACTIVE. */
     DEBUG_DUMP_NOT_ACTIVE("debug dump is not active for this thread"),
-        
     /** CANNOT_PARSE_LINE. */
     CANNOT_PARSE_LINE("cannot parse line {0}, file {1}: {2}"),
-        
     /** LIGHT_TIME_CORRECTION_REDEFINED. */
     LIGHT_TIME_CORRECTION_REDEFINED("light time correction redefined, line {0}, file {1}: {2}"),
-        
     /** ABERRATION_OF_LIGHT_CORRECTION_REDEFINED. */
     ABERRATION_OF_LIGHT_CORRECTION_REDEFINED("aberration of light correction redefined, line {0}, file {1}: {2}"),
-        
     /** ATMOSPHERIC_REFRACTION_REDEFINED. */
     ATMOSPHERIC_REFRACTION_REDEFINED("atmospheric refraction correction redefined, line {0}, file {1}: {2}"),
-        
     /** TILE_ALREADY_DEFINED. */
     TILE_ALREADY_DEFINED("tile {0} already defined, line {1}, file {2}: {3}"),
-        
     /** UNKNOWN_TILE. */
     UNKNOWN_TILE("unknown tile {0}, line {1}, file {2}: {3}"),
-        
     /** NO_PARAMETERS_SELECTED. */
     NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),
-        
     /** NO_REFERENCE_MAPPINGS. */
-    NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),
-        
+    NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),   
     /** DUPLICATED_PARAMETER_NAME. */
     DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
-        
     /** INVALID_RUGGED_NAME. */
     INVALID_RUGGED_NAME("invalid rugged name"),
-        
     /** UNSUPPORTED_REFINING_CONTEXT. */
     UNSUPPORTED_REFINING_CONTEXT("refining using {0} rugged instance is not handled"),
-        
     /** NO_LAYER_DATA. */
     NO_LAYER_DATA("no atmospheric layer data at altitude {0} (lowest altitude: {1})"),
-        
     /** INVALID_STEP. */
     INVALID_STEP("step {0} is not valid : {1}"),
-      
     /** INVALID_RANGE_FOR_LINES. */
     INVALID_RANGE_FOR_LINES("range between min line {0} and max line {1} is invalid {2}"),
-    
     /** SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES. */
     SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES("impossible to find sensor pixel in given range lines (with atmospheric refraction) between lines {0} and {1}"),
-    
     /** SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE. */
     SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE("impossible to find sensor pixel: pixel {0} outside interval [ {1} , {2} [ (with atmospheric refraction margin = {3})");
-
 
     /** Base name of the resource bundle in classpath. */
     private static final String RESOURCE_BASE_NAME = "assets/org/orekit/rugged/RuggedMessages";
