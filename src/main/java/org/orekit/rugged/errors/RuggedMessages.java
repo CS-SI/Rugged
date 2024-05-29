@@ -74,7 +74,7 @@ public enum RuggedMessages implements Localizable {
     /** LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE. */
     LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE("line-of-sight never crosses latitude {0}"),
     /** LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE. */
-    LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE("line-of-sight never crosses longitude {0}"),        
+    LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE("line-of-sight never crosses longitude {0}"),
     /** LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE. */
     LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE("line-of-sight never crosses altitude {0}"),
     /** DEM_ENTRY_POINT_IS_BEHIND_SPACECRAFT. */
@@ -104,7 +104,7 @@ public enum RuggedMessages implements Localizable {
     /** NO_PARAMETERS_SELECTED. */
     NO_PARAMETERS_SELECTED("no parameters have been selected for estimation"),
     /** NO_REFERENCE_MAPPINGS. */
-    NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),   
+    NO_REFERENCE_MAPPINGS("no reference mappings for parameters estimation"),
     /** DUPLICATED_PARAMETER_NAME. */
     DUPLICATED_PARAMETER_NAME("a different parameter with name {0} already exists"),
     /** INVALID_RUGGED_NAME. */
