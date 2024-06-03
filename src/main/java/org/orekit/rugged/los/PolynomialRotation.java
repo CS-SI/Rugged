@@ -32,6 +32,7 @@ import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
+import org.orekit.utils.TimeSpanMap;
 
 /** {@link LOSTransform LOS transform} based on a rotation with polynomial angle.
  * @author Luc Maisonobe
@@ -87,7 +88,15 @@ public class PolynomialRotation implements LOSTransform {
         this.coefficientsDrivers = new ParameterDriver[angleCoeffs.length];
         final ParameterObserver resettingObserver = new ParameterObserver() {
             @Override
-            public void valueChanged(final double previousValue, final ParameterDriver driver) {
+            public void valueChanged(final double previousValue, final ParameterDriver driver, final AbsoluteDate date) {
+                // reset rotations to null, they will be evaluated lazily if needed
+                angle   = null;
+                axisDS  = null;
+                angleDS = null;
+            }
+
+            @Override
+            public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 angle   = null;
                 axisDS  = null;

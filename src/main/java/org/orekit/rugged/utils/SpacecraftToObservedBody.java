@@ -28,12 +28,15 @@ import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.time.TimeInterpolator;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.ImmutableTimeStampedCache;
 import org.orekit.utils.TimeStampedAngularCoordinates;
+import org.orekit.utils.TimeStampedAngularCoordinatesHermiteInterpolator;
 import org.orekit.utils.TimeStampedCache;
 import org.orekit.utils.TimeStampedPVCoordinates;
+import org.orekit.utils.TimeStampedPVCoordinatesHermiteInterpolator;
 
 /** Provider for observation transforms.
  * @author Luc Maisonobe
@@ -123,9 +126,17 @@ public class SpacecraftToObservedBody implements Serializable {
         final TimeStampedCache<TimeStampedPVCoordinates> pvCache =
                 new ImmutableTimeStampedCache<>(pvInterpolationNumber, positionsVelocities);
 
+        // set up the TimeStampedPVCoordinates interpolator
+        final TimeInterpolator<TimeStampedPVCoordinates> pvInterpolator =
+                new TimeStampedPVCoordinatesHermiteInterpolator(pvInterpolationNumber, pvFilter);
+
         // set up the cache for attitudes
         final TimeStampedCache<TimeStampedAngularCoordinates> aCache =
                 new ImmutableTimeStampedCache<>(aInterpolationNumber, quaternions);
+
+        // set up the TimeStampedAngularCoordinates Hermite interpolator
+        final TimeInterpolator<TimeStampedAngularCoordinates> angularInterpolator =
+                new TimeStampedAngularCoordinatesHermiteInterpolator(aInterpolationNumber, aFilter);
 
         final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
         this.tStep          = tStep;
@@ -144,7 +155,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 pvInterpolationDate = date;
             }
             final TimeStampedPVCoordinates interpolatedPV =
-                    TimeStampedPVCoordinates.interpolate(pvInterpolationDate, pvFilter,
+                    pvInterpolator.interpolate(pvInterpolationDate,
                             pvCache.getNeighbors(pvInterpolationDate));
             final TimeStampedPVCoordinates pv = interpolatedPV.shiftedBy(date.durationFrom(pvInterpolationDate));
 
@@ -158,7 +169,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 aInterpolationDate = date;
             }
             final TimeStampedAngularCoordinates interpolatedQuaternion =
-                    TimeStampedAngularCoordinates.interpolate(aInterpolationDate, aFilter,
+                    angularInterpolator.interpolate(aInterpolationDate,
                             aCache.getNeighbors(aInterpolationDate).collect(Collectors.toList()));
             final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 
