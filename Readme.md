@@ -4,35 +4,40 @@
 
 > A sensor-to-terrain mapping tool
 
-[Rugged](https://www.orekit.org/rugged/  "Rugged homepage") is a free java library for geolocation and used for satellite imagery.
+[Rugged](https://www.orekit.org/rugged/  "Rugged homepage") is a free java
+library for geolocation and used for satellite imagery.
 
-Rugged is an add-on for [Orekit](https://www.orekit.org/ "Orekit homepage") handling Digital Elevation Models contribution to line of sight computation. It is a free software intermediate-level library written in Java.
+Rugged is an add-on for [Orekit](https://www.orekit.org/ "Orekit homepage")
+handling Digital Elevation Models contribution to line of sight computation. It
+is a free software intermediate-level library written in Java.
 
-It mainly provides direct and inverse location, i.e. it allows to compute accurately 
-which ground point is looked at from a specific pixel in a spacecraft instrument, 
-and conversely which pixel will see a specified ground point. This mapping between 
-ground and sensor is computed with a viewing model taking into account:
-* ground Digital Elevation Model (DEM), 
-* Earth rotation will all its tiny irregularities, 
-* on-board sensor pixels individual line-of-sights, 
+It mainly provides direct and inverse location, i.e. it allows to compute
+accurately which ground point is looked at from a specific pixel in a spacecraft
+instrument, and conversely which pixel will see a specified ground point. This
+mapping between ground and sensor is computed with a viewing model taking into
+account:
+* ground Digital Elevation Model (DEM),
+* Earth rotation will all its tiny irregularities,
+* on-board sensor pixels individual line-of-sights,
 * spacecraft motion and attitude,
 * several physical effects.
 
-Direct and inverse location can be used to perform full ortho-rectification of 
+Direct and inverse location can be used to perform full ortho-rectification of
 images and correlation between sensors observing the same area.
 
 
 [![](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
-[![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=alert_status)](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged)
-[![](https://sonar.orekit.org/api/project_badges/measure?project=org.orekit%3Arugged&metric=coverage)](https://sonar.orekit.org/component_measures?id=org.orekit%3Arugged&metric=coverage&view=treemap)
+[![](https://sonar.orekit.org/api/project_badges/measure?project=orekit%3Arugged&metric=alert_status)](https://sonar.orekit.org/dashboard?id=orekit%3Arugged)
+
+[![](https://sonar.orekit.org/api/project_badges/measure?project=orekit%3Arugged&metric=coverage)](https://sonar.orekit.org/component_measures?id=orekit%3Arugged&metric=coverage&view=treemap)
 
 ## Download
 
 ### Official releases
 
 [Official Rugged releases](https://gitlab.orekit.org/orekit/rugged/-/releases)
-are available on our [Gitlab instance](https://gitlab.orekit.org/orekit/rugged). They are
-also available in the
+are available on our [Gitlab instance](https://gitlab.orekit.org/orekit/rugged).
+They are also available in the
 [Maven repository](https://mvnrepository.com/artifact/org.orekit/rugged).
 
 ### Development version
@@ -62,13 +67,14 @@ reporting security issues check the "This issue is confidential" box.
 ## Contributing
 
 Please take a look at our
-[contributing guidelines](https://www.orekit.org/site-rugged-latest/contributing.html) if you're
-interested in helping!
+[contributing guidelines](https://www.orekit.org/site-rugged-latest/contributing.html)
+if you're interested in helping!
 
 ## Building
 
 Detailed information on how to build Rugged from source either using Maven or
-Eclipse is provided in [building](https://www.orekit.org/site-rugged-latest/building.html) explanations.
+Eclipse is provided in
+[building](https://www.orekit.org/site-rugged-latest/building.html) explanations.
 
 ## Dependencies
 
@@ -78,8 +84,8 @@ all released under business friendly FOSS licenses.
 
 ### Compile-time/run-time dependencies
 
-* [Orekit](https://www.orekit.org/), a low level space dynamics library released under
-  the Apache License, version 2.0.
+* [Orekit](https://www.orekit.org/), a low level space dynamics library released
+  under the Apache License, version 2.0.
 
 * [Hipparchus](https://hipparchus.org/), a mathematics library released under
   the Apache License, version 2.0.
