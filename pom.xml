@@ -40,7 +40,7 @@
     <rugged.maven-jar-plugin.version>3.3.0</rugged.maven-jar-plugin.version>
     <rugged.maven-jxr-plugin.version>3.3.1</rugged.maven-jxr-plugin.version>
     <rugged.plantuml-maven-plugin.version>1.2</rugged.plantuml-maven-plugin.version>
-    <rugged.plantuml.version>1.2024.5</rugged.plantuml.version>
+    <rugged.plantuml.version>1.2024.6</rugged.plantuml.version>
     <rugged.maven-project-info-reports-plugin.version>3.4.5</rugged.maven-project-info-reports-plugin.version>
     <rugged.maven-resources-plugin.version>3.3.1</rugged.maven-resources-plugin.version>
     <rugged.maven-site-plugin.version>3.12.1</rugged.maven-site-plugin.version>
