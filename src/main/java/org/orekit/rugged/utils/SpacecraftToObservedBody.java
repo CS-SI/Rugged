@@ -53,7 +53,7 @@ import org.orekit.utils.TimeStampedPVCoordinatesHermiteInterpolator;
 public class SpacecraftToObservedBody implements Serializable {
 
     /** Serializable UID. */
-    private static final long serialVersionUID = 20250427l;
+    private static final long serialVersionUID = 20250427L;
 
     /** Inertial frame. */
     private final Frame inertialFrame;
@@ -406,7 +406,7 @@ public class SpacecraftToObservedBody implements Serializable {
     private static class DataTransferObject implements Serializable {
 
         /** Serializable UID. */
-        private static final long serialVersionUID = 20250427l;
+        private static final long serialVersionUID = 20250427L;
 
         /** Inertial frame. */
         private final Predefined inertialFrame;
@@ -449,7 +449,7 @@ public class SpacecraftToObservedBody implements Serializable {
          * @param bodyToInertialTimeOffset time offsets of transforms sample from observed body frame to inertial frame
          * @param bodyToInertialCoordinates coordinates of transforms sample from observed body frame to inertial frame
          * @param scToInertialTimOffset time offsets transforms sample from spacecraft frame to inertial frame
-         * @param scToInertialTimOffset coordinates transforms sample from spacecraft frame to inertial frame
+         * @param scToInertialCoordinates coordinates transforms sample from spacecraft frame to inertial frame
          */
         DataTransferObject(final Predefined inertialFrame, final Predefined bodyFrame,
                            final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,

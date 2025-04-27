@@ -49,6 +49,7 @@ import org.orekit.orbits.OrbitType;
 import org.orekit.orbits.PositionAngleType;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.propagation.ToleranceProvider;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -146,12 +147,12 @@ public class RoughVisibilityEstimatorTest {
         SpacecraftState state = new SpacecraftState(orbit,
                                                     yawCompensation.getAttitude(orbit,
                                                                                 orbit.getDate(),
-                                                                                orbit.getFrame()),
-                                                    1180.0);
+                                                                                orbit.getFrame())).
+                                withMass(1180.0);
 
         // numerical model for improving orbit
         OrbitType type = OrbitType.CIRCULAR;
-        double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit, type);
+        double[][] tolerances = ToleranceProvider.getDefaultToleranceProvider(0.1).getTolerances(orbit, type);
         DormandPrince853Integrator integrator =
                         new DormandPrince853Integrator(1.0e-4 * orbit.getKeplerianPeriod(),
                                                        1.0e-1 * orbit.getKeplerianPeriod(),
@@ -179,10 +180,8 @@ public class RoughVisibilityEstimatorTest {
             ellipsoid = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                               Constants.WGS84_EARTH_FLATTENING,
                                               itrf);
-        } catch (OrekitException oe) {
-            Assert.fail(oe.getLocalizedMessage());
-        } catch (URISyntaxException use) {
-            Assert.fail(use.getLocalizedMessage());
+        } catch (OrekitException | URISyntaxException e) {
+            Assert.fail(e.getLocalizedMessage());
         }
     }
 
