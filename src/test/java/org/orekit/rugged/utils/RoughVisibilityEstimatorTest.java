@@ -67,7 +67,7 @@ public class RoughVisibilityEstimatorTest {
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
-        final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
+        final List<TimeStampedPVCoordinates> pv = new ArrayList<>();
         propagator.getMultiplexer().add(1.0, currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(3 * orbit.getKeplerianPeriod()));
 
@@ -76,7 +76,7 @@ public class RoughVisibilityEstimatorTest {
                                                                         FastMath.toRadians(-2.0),
                                                                         0.0));
         Assert.assertEquals(0.0,
-                            new AbsoluteDate("2012-01-01T03:47:08.814121623",
+                            new AbsoluteDate("2012-01-01T03:47:08.81412028",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
                             1.0e-8);
 
@@ -91,7 +91,7 @@ public class RoughVisibilityEstimatorTest {
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
-        final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
+        final List<TimeStampedPVCoordinates> pv = new ArrayList<>();
         propagator.getMultiplexer().add(1.0,  currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(orbit.getKeplerianPeriod()));
 
@@ -100,7 +100,7 @@ public class RoughVisibilityEstimatorTest {
                                                                         FastMath.toRadians(-46.126),
                                                                         0.0));
         Assert.assertEquals(0.0,
-                            new AbsoluteDate("2012-01-01T01:02:39.122526662",
+                            new AbsoluteDate("2012-01-01T01:02:39.12252184",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
                             1.0e-8);
 

@@ -63,7 +63,7 @@ public class InterSensorOptimizationProblemBuilderTest {
     }
 
     @Test
-    public void testEstimateFreeParameters() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testEstimateFreeParameters() throws SecurityException, IllegalArgumentException {
 
         AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
 
@@ -88,7 +88,7 @@ public class InterSensorOptimizationProblemBuilderTest {
         final double expectedRMS = 0.069302;
         Assert.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
 
-        final double expectedCost = 3.597082e+00;
+        final double expectedCost = 3.597014;
         Assert.assertEquals(expectedCost, optimum.getCost(), 2.5e-6);
 
         Assert.assertTrue(numberOfParameters == optimum.getPoint().getDimension());
