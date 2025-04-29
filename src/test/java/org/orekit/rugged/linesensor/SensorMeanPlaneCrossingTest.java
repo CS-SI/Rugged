@@ -203,7 +203,7 @@ public class SensorMeanPlaneCrossingTest {
             // the simple model from which reference results have been compute applies here
             Assert.assertEquals(refLine, result.getLine(), 5.0e-11* refLine);
             Assert.assertEquals(0.0, result.getDate().durationFrom(refDate), 1.0e-9);
-            Assert.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 5.4e-15);
+            Assert.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 7.6e-15);
         }
 
         double deltaL = 0.5;

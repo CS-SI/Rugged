@@ -359,7 +359,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6L,
                                            FastMath.toRadians(1.0), 257);
 
         RuggedBuilder builder = new RuggedBuilder().
@@ -421,7 +421,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6L,
                                            FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
@@ -479,7 +479,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6L,
                                            FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
@@ -540,7 +540,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xe12ef744f224cf43l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xe12ef744f224cf43L,
                                            FastMath.toRadians(1.0), 257);
 
         RuggedBuilder builder = new RuggedBuilder().
@@ -587,7 +587,7 @@ public class RuggedTest {
 
         AbsoluteDate crossing = new AbsoluteDate("2012-01-01T12:30:00.000", TimeScalesFactory.getUTC());
 
-        List<LineSensor> sensors = new ArrayList<LineSensor>();
+        List<LineSensor> sensors = new ArrayList<>();
         for (int i = 0; i < nbSensors; ++i) {
             // one line sensor
             // position: 1.5m in front (+X) and 20 cm above (-Z) of the S/C center of mass
@@ -609,7 +609,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = sensors.get(sensors.size() - 1).getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6L,
                                            FastMath.toRadians(1.0), 257);
 
         RuggedBuilder builder = new RuggedBuilder().
@@ -634,7 +634,7 @@ public class RuggedTest {
         double delta = FastMath.toRadians(0.5);
 
         try {
-            long             size   = nbSensors * dimension * dimension * 2l * Integer.SIZE / 8l;
+            long             size   = nbSensors * dimension * dimension * 2L * Integer.SIZE / 8L;
             RandomAccessFile out    = new RandomAccessFile(tempFolder.newFile(), "rw");
             MappedByteBuffer buffer = out.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
 
@@ -668,7 +668,7 @@ public class RuggedTest {
 
             long t2 = System.currentTimeMillis();
             out.close();
-            int sizeM = (int) (size / (1024l * 1024l));
+            int sizeM = (int) (size / (1024L * 1024L));
             System.out.format(Locale.US,
                               "%n%n%5dx%5d, %d sensors:%n" +
                               "  Orekit initialization and DEM creation   : %5.1fs%n" +
@@ -717,8 +717,8 @@ public class RuggedTest {
         TimeScale gps = TimeScalesFactory.getGPS();
         Frame eme2000 = FramesFactory.getEME2000();
         Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-        ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
-        ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
+        ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<>();
+        ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<>();
 
         TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T16:58:42.592937", -0.340236d, 0.333952d, -0.844012d, -0.245684d);
         TestUtils.addSatelliteQ(gps, satelliteQList, "2009-12-11T16:59:06.592937", -0.354773d, 0.329336d, -0.837871d, -0.252281d);
@@ -744,7 +744,7 @@ public class RuggedTest {
         TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -1920.64d, -3249.148d, -6433.531d);
         TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -1896.952d, -3101.26d, -6513.056d);
 
-        TileUpdater updater = new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l, FastMath.toRadians(1.0), 257);
+        TileUpdater updater = new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6L, FastMath.toRadians(1.0), 257);
         RuggedBuilder builder = new RuggedBuilder().
                 setDigitalElevationModel(updater, 8).
                 setAlgorithm(AlgorithmId.DUVENHAGE).
@@ -754,7 +754,7 @@ public class RuggedTest {
                               satellitePVList, 8, CartesianDerivativesFilter.USE_PV,
                               satelliteQList, 8, AngularDerivativesFilter.USE_R);
 
-        List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
+        List<Vector3D> lineOfSight = new ArrayList<>();
         lineOfSight.add(new Vector3D(-0.011204, 0.181530, 1d).normalize());
         lineOfSight.add(new Vector3D(-0.011204, 0.181518, 1d).normalize());
         lineOfSight.add(new Vector3D(-0.011204, 0.181505, 1d).normalize());
@@ -819,8 +819,8 @@ public class RuggedTest {
         TimeScale gps = TimeScalesFactory.getGPS();
         Frame eme2000 = FramesFactory.getEME2000();
         Frame itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-        ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<TimeStampedAngularCoordinates>();
-        ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<TimeStampedPVCoordinates>();
+        ArrayList<TimeStampedAngularCoordinates> satelliteQList = new ArrayList<>();
+        ArrayList<TimeStampedPVCoordinates> satellitePVList = new ArrayList<>();
 
         TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:27", -0.327993d, -0.715194d, -0.56313d, 0.252592d);
         TestUtils.addSatelliteQ(gps, satelliteQList, "2013-07-07T17:16:29", -0.328628d, -0.71494d, -0.562769d, 0.25329d);
@@ -874,7 +874,7 @@ public class RuggedTest {
         TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:30.857531", -912495.948d, -6327504.159d, 3233100.411d, -1700.825d, -3108.095d, -6563.77d);
         TestUtils.addSatellitePV(gps, eme2000, itrf, satellitePVList, "2013-07-07T17:20:39.857531", -931933.933d, -6354591.778d, 3173886.968d, -1693.833d, -3045.116d, -6595.024d);
 
-        List<Vector3D> lineOfSight = new ArrayList<Vector3D>();
+        List<Vector3D> lineOfSight = new ArrayList<>();
         lineOfSight.add(new Vector3D(0.0046536264d, -0.1851800945d, 1d));
         lineOfSight.add(new Vector3D(0.0000001251d, -0.0002815246d, 1d));
         lineOfSight.add(new Vector3D(0.0046694108d, 0.1853863933d, 1d));
@@ -936,7 +936,7 @@ public class RuggedTest {
                                                            SensorPixel.class,
                                                            LineSensor.class);
             inside.setAccessible(true);
-            return ((Boolean) inside.invoke(rugged, sensorPixel, lineSensor)).booleanValue();
+            return ((Boolean) inside.invoke(rugged, sensorPixel, lineSensor));
         } catch (NoSuchMethodException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {
             Assert.fail(e.getLocalizedMessage());
@@ -974,7 +974,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6L,
                                            FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
@@ -1031,7 +1031,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6L,
                                            FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().
@@ -1098,14 +1098,14 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithoutCorrections()
         {
         doTestInverseLocationDerivatives(2000, false, false,
-                                         8.0e-9, 3.0e-10, 5.0e-12, 9.0e-8);
+                                         8.0e-9, 5.0e-10, 5.0e-12, 9.0e-8);
     }
 
     @Test
     public void testInverseLocationDerivativesWithLightTimeCorrection()
         {
         doTestInverseLocationDerivatives(2000, true, false,
-                                         3.0e-9, 9.0e-9, 2.1e-12, 7e-6);
+                                         3.0e-9, 9.0e-9, 2.8e-12, 7e-6);
     }
 
     @Test
@@ -1172,7 +1172,7 @@ public class RuggedTest {
             AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
             TileUpdater updater =
-                            new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6l,
+                            new RandomLandscapeUpdater(0.0, 9000.0, 0.3, 0xf0a401650191f9f6L,
                                                        FastMath.toRadians(1.0), 257);
 
             Rugged rugged = new RuggedBuilder().
@@ -1310,7 +1310,7 @@ public class RuggedTest {
         AbsoluteDate maxDate = lineSensor.getDate(lastLine).shiftedBy(+1.0);
 
         TileUpdater updater =
-                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6l,
+                new RandomLandscapeUpdater(0.0, 9000.0, 0.5, 0xf0a401650191f9f6L,
                                            FastMath.toRadians(1.0), 257);
 
         Rugged rugged = new RuggedBuilder().

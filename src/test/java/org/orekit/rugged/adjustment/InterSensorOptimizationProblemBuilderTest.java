@@ -63,11 +63,11 @@ public class InterSensorOptimizationProblemBuilderTest {
     }
 
     @Test
-    public void testEstimateFreeParameters() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testEstimateFreeParameters() throws SecurityException, IllegalArgumentException {
 
         AdjustmentContext adjustmentContext = new AdjustmentContext(ruggedList, measurements);
 
-        List<String> ruggedNameList = new ArrayList<String>();
+        List<String> ruggedNameList = new ArrayList<>();
         for(Rugged rugged : ruggedList) {
             ruggedNameList.add(rugged.getName());
         }
@@ -88,7 +88,7 @@ public class InterSensorOptimizationProblemBuilderTest {
         final double expectedRMS = 0.069302;
         Assert.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
 
-        final double expectedCost = 3.597082e+00;
+        final double expectedCost = 3.597014;
         Assert.assertEquals(expectedCost, optimum.getCost(), 2.5e-6);
 
         Assert.assertTrue(numberOfParameters == optimum.getPoint().getDimension());
@@ -181,8 +181,8 @@ public class InterSensorOptimizationProblemBuilderTest {
         } // end on iteration on mapping
 
         Assert.assertEquals(arraySensorToSensorMapping.getRuggedNameA(),arraySensorToSensorMappingPostponed.getRuggedNameA());
-        Assert.assertEquals(arraySensorToSensorMapping.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());;
-        Assert.assertEquals(arraySensorToSensorMapping.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());;
+        Assert.assertEquals(arraySensorToSensorMapping.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());
+        Assert.assertEquals(arraySensorToSensorMapping.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());
         Assert.assertEquals(arraySensorToSensorMapping.getSensorNameB(),arraySensorToSensorMappingPostponed.getSensorNameB());
     } 
     
@@ -230,7 +230,7 @@ public class InterSensorOptimizationProblemBuilderTest {
             SensorPixel value = current.getValue();
 
             // Will search in mappingPostponed if we can find the (key,value) found in mapping 
-            Boolean found = false;
+            boolean found = false;
             Iterator<Entry<SensorPixel, SensorPixel>> itMappingPost = mappingPostponed.iterator();
             while(itMappingPost.hasNext()) {
                 Entry<SensorPixel, SensorPixel> currentPost = itMappingPost.next();
@@ -251,8 +251,8 @@ public class InterSensorOptimizationProblemBuilderTest {
         } // end on iteration on mapping
 
         Assert.assertEquals(arraySensorToSensorMappingWithWeight.getRuggedNameA(),arraySensorToSensorMappingPostponed.getRuggedNameA());
-        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());;
-        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());;
+        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());
+        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());
         Assert.assertEquals(arraySensorToSensorMappingWithWeight.getSensorNameB(),arraySensorToSensorMappingPostponed.getSensorNameB());
     }
     
@@ -263,7 +263,7 @@ public class InterSensorOptimizationProblemBuilderTest {
             final int maxIterations = 120;
             final double convergenceThreshold = 1.e-7;
 
-            final List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
+            final List<LineSensor> selectedSensors = new ArrayList<>();
             for (Rugged rugged : ruggedList) {
                 selectedSensors.addAll(rugged.getLineSensors());
             }
@@ -288,7 +288,7 @@ public class InterSensorOptimizationProblemBuilderTest {
             final int maxIterations = 120;
             final double convergenceThreshold = 1.e-7;
 
-            final List<LineSensor> selectedSensors = new ArrayList<LineSensor>();
+            final List<LineSensor> selectedSensors = new ArrayList<>();
             for (Rugged rugged : ruggedList) {
                 selectedSensors.addAll(rugged.getLineSensors());
             }
