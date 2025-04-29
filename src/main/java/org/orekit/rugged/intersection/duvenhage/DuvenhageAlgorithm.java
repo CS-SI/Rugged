@@ -114,7 +114,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         // we can use the current position as the entry point
                         current = positionGP;
                     } else {
-                        //System.out.format("%f %f \n",positionGP.getAltitude(), elevationAtPosition);
                         current = null;
                     }
                 } catch (RuggedException re) {
@@ -224,7 +223,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             // regular curved ellipsoid model
 
             NormalizedGeodeticPoint currentGuess = closeGuess;
-            //System.out.format("closeGuess %2.8f %2.8f",closeGuess.getLongitude(), closeGuess.getLatitude());
             // normally, we should succeed at first attempt but in very rare cases
             // we may loose the intersection (typically because some corrections introduced
             // between the first intersection and the refining have slightly changed the
@@ -253,7 +251,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     return foundIntersection;
                 } else {
                     // extremely rare case: we have lost the intersection
-                    //System.out.format("not found intersection ");
                     // find a start point for new search, leaving the current cell behind
                     final double cellBoundaryLatitude  = tile.getLatitudeAtIndex(topoLOS.getY()  <= 0 ? iLat : iLat + 1);
                     final double cellBoundaryLongitude = tile.getLongitudeAtIndex(topoLOS.getX() <= 0 ? iLon : iLon + 1);
@@ -273,7 +270,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         return cellExitGP;
                     }
 
-                    //System.out.format("cellExit %2.8f %2.8f %2.8f \n",cellExit.getX(), cellExit.getY(),cellExit.getZ());
                     // We recompute fully a new guess, starting from the point after current cell
                     final GeodeticPoint currentGuessGP = intersection(ellipsoid, cellExit, los);
                     currentGuess = new NormalizedGeodeticPoint(currentGuessGP.getLatitude(),

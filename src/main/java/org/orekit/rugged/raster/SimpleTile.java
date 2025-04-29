@@ -374,9 +374,7 @@ public class SimpleTile implements Tile {
 
         }
 
-
         final NormalizedGeodeticPoint p1 = interpolate(t1, tileP, dxA, dyA, los, x00);
-
         final NormalizedGeodeticPoint p2 = interpolate(t2, tileP, dxA, dyA, los, x00);
 
         // select the first point along line-of-sight
