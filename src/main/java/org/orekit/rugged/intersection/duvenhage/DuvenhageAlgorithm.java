@@ -91,8 +91,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
         // compute intersection with ellipsoid
         final NormalizedGeodeticPoint gp0 = ellipsoid.pointOnGround(position, los, 0.0);
-        //System.out.format("gp0 %3.9f %3.9f %4.3f\n",gp0.getLatitude(), gp0.getLongitude(), gp0.getAltitude());
-
+        
         // locate the entry tile along the line-of-sight
         MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
 
@@ -110,7 +109,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 try {
                     positionGP =
                                     ellipsoid.transform(position, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
-                    //System.out.format("position GP latitude %3.9f %3.9f %4.3f\n",positionGP.getLatitude(), positionGP.getLongitude(), positionGP.getAltitude());
                     final double elevationAtPosition = tile.interpolateElevation(positionGP.getLatitude(), positionGP.getLongitude());
                     if (positionGP.getAltitude() >= elevationAtPosition) {
                         // we can use the current position as the entry point
@@ -121,10 +119,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     }
                 } catch (RuggedException re) {
                     if (re.getSpecifier() == RuggedMessages.OUT_OF_TILE_ANGLES) {
-                        //System.out.format("out of tiles angles \n");
-                        //System.out.format("h max %f \n",hMax);
-                        //System.out.format("h max %f \n",hMax);
-                        //MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
+                        // we can use the current position as the entry point;
                         current = positionGP;
                     }
                 }
@@ -141,7 +136,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                 // the entry point is in another tile
                 tile    = cache.getTile(current.getLatitude(), current.getLongitude());
                 hMax    = FastMath.max(hMax, tile.getMaxElevation());
-                ///System.out.format("new h max %f \n",hMax);
                 current = null;
             }
 
