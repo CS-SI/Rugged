@@ -315,7 +315,7 @@ public class SimpleTile implements Tile {
         final double z01 = getElevationAtIndices(iLat + 1, jLong);
         final double z10 = getElevationAtIndices(iLat,     jLong + 1);
         final double z11 = getElevationAtIndices(iLat + 1, jLong + 1);
-        
+
         // normalize back to tile coordinates
         final NormalizedGeodeticPoint tileP = new NormalizedGeodeticPoint(p.getLatitude(),
                                                                           p.getLongitude(),
@@ -363,7 +363,6 @@ public class SimpleTile implements Tile {
             // the equation is quadratic
             final double b2  = b * b;
             final double fac = 4 * a * c;
-            
             if (b2 < fac) {
                 // no intersection at all
                 return null;
