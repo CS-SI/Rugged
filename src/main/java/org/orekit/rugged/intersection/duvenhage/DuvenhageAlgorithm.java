@@ -118,7 +118,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     }
                 } catch (RuggedException re) {
                     if (re.getSpecifier() == RuggedMessages.OUT_OF_TILE_ANGLES) {
-                        // we can use the current position as the entry point;
+                        // the entry point is in another tile, we can use the current position as the entry point;
                         current = positionGP;
                     }
                 }
