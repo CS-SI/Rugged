@@ -233,7 +233,7 @@ public class LOSBuilder {
 
                 /** {@inheritDoc} */
                 @Override
-                public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
+                public void valueSpanMapChanged(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                     Arrays.fill(transformed, null);
                 }
             };

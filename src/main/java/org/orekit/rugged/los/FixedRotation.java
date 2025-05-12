@@ -80,7 +80,7 @@ public class FixedRotation implements TimeIndependentLOSTransform {
             }
 
             @Override
-            public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
+            public void valueSpanMapChanged(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 rotation = null;
                 rDS      = null;

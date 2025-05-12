@@ -96,7 +96,7 @@ public class PolynomialRotation implements LOSTransform {
             }
 
             @Override
-            public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
+            public void valueSpanMapChanged(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                 // reset rotations to null, they will be evaluated lazily if needed
                 angle   = null;
                 axisDS  = null;
