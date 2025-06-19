@@ -21,7 +21,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- COTS version -->
-    <rugged.orekit.version>13.0.2</rugged.orekit.version>
+    <rugged.orekit.version>13.0.3</rugged.orekit.version>
     <rugged.junit.version>4.13.2</rugged.junit.version>
 
     <!-- Compilers and Tools version -->
@@ -33,17 +33,19 @@
     <rugged.maven-bundle-plugin.version>5.1.9</rugged.maven-bundle-plugin.version>
     <rugged.maven-changes-plugin.version>2.12.1</rugged.maven-changes-plugin.version>
     <rugged.maven-checkstyle-plugin.version>3.6.0</rugged.maven-checkstyle-plugin.version>
+    <!-- Checkstyle 9.3 seems to be the last version usable with JDK 8 -->
     <rugged.checkstyle.version>9.3</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.4.1</rugged.maven-clean-plugin.version>
     <rugged.maven-compiler-plugin.version>3.14.0</rugged.maven-compiler-plugin.version>
     <rugged.maven-javadoc-plugin.version>3.11.2</rugged.maven-javadoc-plugin.version>
     <rugged.maven-jar-plugin.version>3.4.2</rugged.maven-jar-plugin.version>
-    <rugged.maven-jxr-plugin.version>3.3.1</rugged.maven-jxr-plugin.version>
+    <rugged.maven-jxr-plugin.version>3.6.0</rugged.maven-jxr-plugin.version>
     <rugged.plantuml-maven-plugin.version>1.2</rugged.plantuml-maven-plugin.version>
     <rugged.plantuml.version>1.2025.2</rugged.plantuml.version>
     <rugged.maven-project-info-reports-plugin.version>3.9.0</rugged.maven-project-info-reports-plugin.version>
     <rugged.maven-resources-plugin.version>3.3.1</rugged.maven-resources-plugin.version>
     <rugged.maven-site-plugin.version>3.12.1</rugged.maven-site-plugin.version>
+    <rugged.maven-wagon-ssh-external-plugin.version>3.5.3</rugged.maven-wagon-ssh-external-plugin.version>
     <rugged.maven-source-plugin.version>3.3.1</rugged.maven-source-plugin.version>
     <rugged.maven-surefire-plugin.version>2.22.2</rugged.maven-surefire-plugin.version>
     <rugged.maven-surefire-report-plugin.version>3.5.2</rugged.maven-surefire-report-plugin.version>
@@ -302,7 +304,7 @@
             <dependency><!-- add support for ssh/scp -->
               <groupId>org.apache.maven.wagon</groupId>
               <artifactId>wagon-ssh</artifactId>
-              <version>3.3.4</version>
+              <version>${rugged.maven-wagon-ssh-external-plugin.version}</version>
             </dependency>
           </dependencies>
       </plugin>
