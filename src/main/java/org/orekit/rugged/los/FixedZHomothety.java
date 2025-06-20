@@ -74,7 +74,7 @@ public class FixedZHomothety implements TimeIndependentLOSTransform {
             }
 
             @Override
-            public void valueSpanMapChanged​(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
+            public void valueSpanMapChanged(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                 // reset factor to zero, they will be evaluated lazily if needed
                 factor = 0.0;
                 factorDS = null;
