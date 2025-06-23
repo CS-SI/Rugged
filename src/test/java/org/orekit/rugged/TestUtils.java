@@ -54,8 +54,10 @@ import org.orekit.orbits.FieldKeplerianOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.OrbitType;
 import org.orekit.orbits.PositionAngleType;
+import org.orekit.propagation.CartesianToleranceProvider;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.propagation.ToleranceProvider;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.propagation.semianalytical.dsst.utilities.JacobiPolynomials;
@@ -238,12 +240,11 @@ public class TestUtils {
         SpacecraftState state = new SpacecraftState(orbit,
                                                     yawCompensation.getAttitude(orbit,
                                                                                 orbit.getDate(),
-                                                                                orbit.getFrame()),
-                                                    1180.0);
+                                                                                orbit.getFrame())).withMass(1180.0);
 
         // numerical model for improving orbit
         OrbitType type = OrbitType.CIRCULAR;
-        double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit, type);
+        double[][] tolerances = ToleranceProvider.of(CartesianToleranceProvider.of(0.1)).getTolerances(orbit, type);
         DormandPrince853Integrator integrator =
                 new DormandPrince853Integrator(1.0e-4 * orbit.getKeplerianPeriod(),
                                                1.0e-1 * orbit.getKeplerianPeriod(),
