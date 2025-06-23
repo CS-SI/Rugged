@@ -2,7 +2,7 @@ RUGGED
 Copyright 2013-2022 CS GROUP
 
 This product includes software developed by
-CS GROUP (https://www.csgroup.eu/)
+CS GROUP (https://www.cs-soprasteria.com/)
 
 This product depends on software developed by
 The Apache Software Foundation (http://www.apache.org/)

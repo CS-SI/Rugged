@@ -100,6 +100,6 @@ More detailed information is available in the
 
 ## License
 
-Rugged is licensed by [CS GROUP](https://www.csgroup.eu/) under
+Rugged is licensed by [CS GROUP](https://www.cs-soprasteria.com/) under
 the [Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 A copy of this license is provided in the [LICENSE.txt](LICENSE.txt) file.

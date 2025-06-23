@@ -3,8 +3,8 @@
 This release guide is largely inspired from [Hipparchus Release
 Guide](https://www.hipparchus.org/release-guide.html) and [Orekit Release Guide](https://www.orekit.org/site-orekit-development/release-guide.html). It lists the steps that
 have been used in the past to release a new version of Rugged. When in doubt
-ask the experts: Sébastien Dinot <sebastien.dinot@csgroup.eu> for website questions
-and Jonathan Guinet <jonathan.guinet@csgroup.eu> or Guylaine Prat <guylaine.prat@csgroup.eu> for everything else.
+ask the experts: Sébastien Dinot <sebastien.dinot@cs-soprasteria.com> for website questions
+and Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com> for everything else.
 
 ## Prerequisites
 
