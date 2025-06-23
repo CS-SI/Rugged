@@ -2,7 +2,7 @@
 <!--
   This file contains some false positive bugs detected by spotbugs. Their
   false positive nature has been analyzed individually and they have been
-  put here to instruct findbugs it must ignore them.
+  put here to instruct spotbugs it must ignore them.
 -->
 <FindBugsFilter>
 
