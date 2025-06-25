@@ -53,9 +53,11 @@ __Note:__ Our official repository is
 
 ## Documentation
 
-Project overview, architecture and development, detailed features list,
-Javadoc and a lot of other information is available on the
-[Maven site](https://www.orekit.org/site-rugged-development/).
+The following documentation is available:
+
+* [Latest API documentation](https://www.orekit.org/site-rugged-development/apidocs/index.html)
+* [Latest Maven site](https://www.orekit.org/site-rugged-development/) for the project overview, architecture and development,
+  detailed features list, Javadoc and a lot of other information
 
 ## Getting help
 
@@ -67,19 +69,19 @@ reporting security issues check the "This issue is confidential" box.
 ## Contributing
 
 Please take a look at our
-[contributing guidelines](https://www.orekit.org/site-rugged-latest/contributing.html)
+[contributing guidelines](https://www.orekit.org/site-rugged-development/contributing.html)
 if you're interested in helping!
 
 ## Building
 
 Detailed information on how to build Rugged from source either using Maven or
 Eclipse is provided in
-[building](https://www.orekit.org/site-rugged-latest/building.html) explanations.
+[building](https://www.orekit.org/site-rugged-development/building.html) explanations.
 
 ## Dependencies
 
 Rugged relies on the following
-[FOSS](https://en.wikipedia.org/wiki/Free_and_open-source_software) libraries,
+[Free and Open-Source Software (FOSS)](https://en.wikipedia.org/wiki/Free_and_open-source_software) libraries,
 all released under business friendly FOSS licenses.
 
 ### Compile-time/run-time dependencies
