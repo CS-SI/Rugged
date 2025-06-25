@@ -4,7 +4,8 @@ This release guide is largely inspired from [Hipparchus Release
 Guide](https://www.hipparchus.org/release-guide.html) and [Orekit Release Guide](https://www.orekit.org/site-orekit-development/release-guide.html). It lists the steps that
 have been used in the past to release a new version of Rugged. When in doubt
 ask the experts: Sébastien Dinot <sebastien.dinot@cs-soprasteria.com> for website questions
-and Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com> for everything else.
+and Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com> for everything else,
+or ask a question on the ["Rugged development" section of the forum](https://forum.orekit.org/c/rugged-development/7).
 
 ## Prerequisites
 
@@ -38,7 +39,7 @@ the technical documentation (static site).
 ## Verify the status of develop branch
 
 Before anything, check on the [continuous integration
-site](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged) that everything is fine on
+site](https://sonar.orekit.org/dashboard?branch=develop&id=orekit%3Arugged) that everything is fine on
 develop branch:
 
 * All tests pass;
@@ -47,7 +48,7 @@ develop branch:
 
 If not, fix the warnings and errors first !
 
-It is also necessary to check on the [Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/pipelines)
+It is also necessary to check on the [Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/-/pipelines?scope=all&page=1&ref=develop)
 that everything is fine on develop branch (i.e. all stages are passed).
 
 ## Prepare Git branch for release
@@ -177,10 +178,12 @@ everyone can review it:
 
 ## Static site (technical documentation)
 
-The static site is generated locally using:
+The static site is generated locally using
 
     mvn clean
     LANG=C mvn site
+
+TBN: Java 8 compiler is compulsory
 
 The official site is automatically updated on the hosting platform when work is 
 merged into branches `develop`, `release-*` or `master`.

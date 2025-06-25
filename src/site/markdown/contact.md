@@ -32,7 +32,7 @@ The main categories are:
 If for some reason you cannot use the public forums, you can reach the CS
 GROUP Rugged team for any question (either technically
 oriented or administrative) at the following email address:
-[rugged@cs-soprasteria.comu](mailto:rugged@cs-soprasteria.com)
+[rugged@cs-soprasteria.com](mailto:rugged@cs-soprasteria.com)
 
 ## Administrative contact
 

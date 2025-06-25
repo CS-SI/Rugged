@@ -107,7 +107,7 @@ interpolation that respect quaternions constraint, the interpolation departs fro
 recover afterwards in a normalization step. Orekit uses a method based on Sergeï Tanygin's paper
 [Attitude interpolation](https://www.agi.com/resources/whitepapers/attitude-interpolation) with slight
 changes to use modified Rodrigues vectors as defined in Malcolm D Shuster's
-[A Survey of Attitude Representations](http://www.ladispe.polito.it/corsi/Meccatronica/02JHCOR/2011-12/Slides/Shuster_Pub_1993h_J_Repsurv_scan.pdf),
+[A Survey of Attitude Representations](https://malcolmdshuster.com/Pub_1993h_J_Repsurv_scan.pdf),
 despite attitude is still represented by quaternions in Orekit (Rodrigues vectors are used only for interpolation).
 These changes avoid a singularity at π. Some other refinements have been added to also avoid another singularity at
 2π, but these refinements are mostly useful for either spin-stabilized spacecrafts with high rotation rate or for
