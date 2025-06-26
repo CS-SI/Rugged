@@ -20,7 +20,9 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="4.0" date="TBD" description="TBD">
+    <release version="4.0" date="TBD" description="This is a major release.
+    It mades Rugged able to deal with seamless DEM tiles and fixes a few bugs.
+    This version depends on Orekit 13.0.3 and Hipparchus 4.0.1.">
       <action dev="guylaine" type="update" issue="375">
         Made Rugged able to deal with seamless DEM tiles (no overlapping constraints).
       </action>
@@ -30,12 +32,19 @@
       <action dev="guylaine" type="update" issue="393">
         Created a tutorial about how to initialize a tile updater with a real DEM.
        </action>
+      <action dev="jonathan" type="update" issue="396">
+        Update Javadoc.
+       </action>
+      <action dev="guylaine, luc, clement" type="update" issue="399,398,395">
+        Updated dependencies to Orekit 13.0.3 (and Hipparchus 4.0.1).
+      </action>
       <action dev="guylaine" type="update">
-        Updated dependencies to Orekit 11.3 (and Hipparchus 2.3).
+        Updated link to Malcolm D Shuster's paper about Attitude Representations in documentation.
       </action>
-      <action dev="clement" type="update" issue="395">
-        Updated dependencies to Orekit 12.0.2.
+      <action dev="guylaine" type="update">
+        Updated several URLs and mails in documentation (statique site, Readme) .
       </action>
+    
     </release>
     <release version="3.0" date="2022-07-05" description="This is a major release.
     It fixes a few bugs.
@@ -47,7 +56,7 @@
         Fixed inverse location issue with atmospheric refraction.
       </action>
       <action dev="luc" type="update" issue="387">
-        Updated dependencies to Orekit 11.2 (and Hipparchus 2.1 ).
+        Updated dependencies to Orekit 11.2 (and Hipparchus 2.1).
       </action>
       <action dev="guylaine" type="update" issue="390">
         Changed CS Group website URL.
