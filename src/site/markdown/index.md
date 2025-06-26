@@ -43,7 +43,7 @@
 
   * Refinement
 
-  * Can support several types of Digital Elevation Models, including user-provided models
+  * Can support several types of Digital Elevation Models (DEM), including user-provided models. Supports seamless DEM as well as overlapping tiles DEM.
 
   * Several intersection models algorithms available
 
