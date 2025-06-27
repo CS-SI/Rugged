@@ -26,6 +26,9 @@
       <action dev="guylaine" type="update" issue="375">
         Made Rugged able to deal with seamless DEM tiles (no overlapping constraints).
       </action>
+      <action dev="jonathan" type="update" issue="403">
+        Fixed Duvenhage algorithm for coupled time light correction and non nadir view.
+      </action>
       <action dev="guylaine" type="update" issue="392">
         Fixed light time correction in atmospheric refraction computation.
       </action>
