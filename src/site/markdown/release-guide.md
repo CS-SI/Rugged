@@ -60,6 +60,14 @@ everything else:
     git branch release-X.Y
     git checkout release-X.Y
 
+## Update Copyright in sources
+
+A copyright line appears at the beginning of the source code, static site, tutorials, .... like: 
+
+    /* Copyright 2013-2025 CS GROUP
+    
+It must be updated with the year of the release.
+
 ## Update maven plugins versions
 
 Release is a good opportunity to update the maven plugin versions. They are all
