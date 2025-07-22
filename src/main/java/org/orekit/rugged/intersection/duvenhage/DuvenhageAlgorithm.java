@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -34,7 +34,7 @@ import org.orekit.rugged.utils.NormalizedGeodeticPoint;
 /** Digital Elevation Model intersection using Bernardt Duvenhage's algorithm.
  * <p>
  * The algorithm is described in the 2009 paper:
- * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
+ * <a href="https://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
  * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
  * </p>
  * @author Luc Maisonobe
@@ -70,11 +70,14 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
      * in geodetic coordinates. The sagitta resulting from real ellipsoid curvature
      * is therefore <em>not</em> corrected in this case. As this computation is not
      * costly (a few percents overhead), it is highly recommended to set this parameter
-     * to {@code false}. This flag is mainly intended for comparison purposes with other systems.
+     * to {@code false}. This flag is mainly intended for comparison purposes with other systems
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                          true if overlapping; false otherwise.
      */
     public DuvenhageAlgorithm(final TileUpdater updater, final int maxCachedTiles,
-                              final boolean flatBody) {
-        this.cache = new TilesCache<>(new MinMaxTreeTileFactory(), updater, maxCachedTiles);
+                              final boolean flatBody, final boolean isOverlappingTiles) {
+        this.cache = new TilesCache<MinMaxTreeTile>(new MinMaxTreeTileFactory(), updater,
+                                                    maxCachedTiles, isOverlappingTiles);
         this.flatBody = flatBody;
         this.algorithmId = flatBody ? AlgorithmId.DUVENHAGE_FLAT_BODY : AlgorithmId.DUVENHAGE;
     }
@@ -93,6 +96,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
         MinMaxTreeTile tile = cache.getTile(gp0.getLatitude(), gp0.getLongitude());
 
         NormalizedGeodeticPoint current = null;
+        NormalizedGeodeticPoint positionGP = null;
         double hMax = tile.getMaxElevation();
         while (current == null) {
 
@@ -103,7 +107,7 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
 
                 // let's see if at least we are above DEM
                 try {
-                    final NormalizedGeodeticPoint positionGP =
+                    positionGP =
                                     ellipsoid.transform(position, ellipsoid.getBodyFrame(), null, tile.getMinimumLongitude());
                     final double elevationAtPosition = tile.interpolateElevation(positionGP.getLatitude(), positionGP.getLongitude());
                     if (positionGP.getAltitude() >= elevationAtPosition) {
@@ -114,7 +118,8 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     }
                 } catch (RuggedException re) {
                     if (re.getSpecifier() == RuggedMessages.OUT_OF_TILE_ANGLES) {
-                        current = null;
+                        // the entry point is in another tile, we can use the current position as the entry point;
+                        current = positionGP;
                     }
                 }
 
@@ -218,7 +223,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
             // regular curved ellipsoid model
 
             NormalizedGeodeticPoint currentGuess = closeGuess;
-
             // normally, we should succeed at first attempt but in very rare cases
             // we may loose the intersection (typically because some corrections introduced
             // between the first intersection and the refining have slightly changed the
@@ -247,7 +251,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                     return foundIntersection;
                 } else {
                     // extremely rare case: we have lost the intersection
-
                     // find a start point for new search, leaving the current cell behind
                     final double cellBoundaryLatitude  = tile.getLatitudeAtIndex(topoLOS.getY()  <= 0 ? iLat : iLat + 1);
                     final double cellBoundaryLongitude = tile.getLongitudeAtIndex(topoLOS.getX() <= 0 ? iLon : iLon + 1);
@@ -266,7 +269,6 @@ public class DuvenhageAlgorithm implements IntersectionAlgorithm {
                         // we consider this point to be OK
                         return cellExitGP;
                     }
-
 
                     // We recompute fully a new guess, starting from the point after current cell
                     final GeodeticPoint currentGuessGP = intersection(ellipsoid, cellExit, los);

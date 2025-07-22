@@ -19,7 +19,7 @@ import org.orekit.frames.FramesFactory;
 import org.orekit.frames.LOFType;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
-import org.orekit.orbits.PositionAngle;
+import org.orekit.orbits.PositionAngleType;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.time.AbsoluteDate;
@@ -77,7 +77,7 @@ public class PleiadesOrbitModel {
                                  FastMath.toRadians(98.2), // Pleiades inclination 98.2 deg
                                  FastMath.toRadians(-86.47 + 180),
                                  FastMath.toRadians(135.9 + 0.3),
-                                 PositionAngle.TRUE,
+                                 PositionAngleType.TRUE,
                                  eme2000,
                                  date,
                                  mu);

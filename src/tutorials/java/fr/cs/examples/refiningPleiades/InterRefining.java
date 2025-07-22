@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -305,16 +305,16 @@ public class InterRefining extends Refining {
 	private InterRefining() {
 
 		sensorNameA = "SensorA";
-		final double incidenceAngleA = -5.0;
+		final double rollAngleA = -5.0;
 		final String dateA = "2016-01-01T11:59:50.0";
 
-		pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, incidenceAngleA, dateA);
+		pleiadesViewingModelA = new PleiadesViewingModel(sensorNameA, rollAngleA, dateA);
 
 		sensorNameB = "SensorB";
-		final double incidenceAngleB = 0.0;
+		final double rollAngleB = 0.0;
 		final String dateB = "2016-01-01T12:02:50.0";
 
-		pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, incidenceAngleB, dateB);
+		pleiadesViewingModelB = new PleiadesViewingModel(sensorNameB, rollAngleB, dateB);
 
 	}
 

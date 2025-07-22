@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -267,7 +267,7 @@ public class SimpleTile implements Tile {
     public double interpolateElevation(final double latitude, final double longitude) {
 
         final double doubleLatitudeIndex  = getDoubleLatitudeIndex(latitude);
-        final double doubleLongitudeIndex = getDoubleLontitudeIndex(longitude);
+        final double doubleLongitudeIndex = getDoubleLongitudeIndex(longitude);
         if (doubleLatitudeIndex  < -TOLERANCE || doubleLatitudeIndex  >= (latitudeRows - 1 + TOLERANCE) ||
             doubleLongitudeIndex < -TOLERANCE || doubleLongitudeIndex >= (longitudeColumns - 1 + TOLERANCE)) {
             throw new RuggedException(RuggedMessages.OUT_OF_TILE_ANGLES,
@@ -427,14 +427,14 @@ public class SimpleTile implements Tile {
     /** {@inheritDoc} */
     @Override
     public int getFloorLongitudeIndex(final double longitude) {
-        return (int) FastMath.floor(getDoubleLontitudeIndex(longitude));
+        return (int) FastMath.floor(getDoubleLongitudeIndex(longitude));
     }
 
     /** Get the latitude index of a point.
      * @param latitude geodetic latitude (rad)
      * @return latitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLatitudeIndex(final double latitude) {
+    protected double getDoubleLatitudeIndex(final double latitude) {
         return (latitude  - minLatitude)  / latitudeStep;
     }
 
@@ -442,7 +442,7 @@ public class SimpleTile implements Tile {
      * @param longitude geodetic longitude (rad)
      * @return longitude index (it may lie outside of the tile!)
      */
-    private double getDoubleLontitudeIndex(final double longitude) {
+    protected double getDoubleLongitudeIndex(final double longitude) {
         return (longitude - minLongitude) / longitudeStep;
     }
 
@@ -477,5 +477,4 @@ public class SimpleTile implements Tile {
             }
         }
     }
-
 }

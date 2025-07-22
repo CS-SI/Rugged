@@ -14,14 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.orekit.rugged.raster;
+
 /**
- *
- * This package provides the interface for Digital Elevation Model intersection
- * algorithm, as well as some simple implementations.
- *
- *
- * @author Luc Maisonobe
+ * Enumerate for Earth hemispheres for tiles definition.
+ * <p>
+ * For Latitude: NORTH / SOUTH
+ * <p>
+ * For Longitude: WESTEXTREME / WEST / EAST / EASTEXTREME
  * @author Guylaine Prat
- *
+ * @since 4.0
  */
-package org.orekit.rugged.intersection;
+public enum EarthHemisphere {
+
+    /** South hemisphere. */
+   SOUTH,
+   /** North hemisphere. */
+   NORTH,
+   /** Extreme West. */
+   WESTEXTREME,
+   /** West hemisphere. */
+   WEST,
+   /** East hemisphere. */
+   EAST,
+   /** Extreme East. */
+   EASTEXTREME
+}

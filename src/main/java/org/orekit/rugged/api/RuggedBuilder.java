@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -95,6 +95,10 @@ public class RuggedBuilder {
 
     /** Updater used to load Digital Elevation Model tiles. */
     private TileUpdater tileUpdater;
+
+    /** Flag to tell if the Digital Elevation Model tiles are overlapping.
+     * @since 4.0 */
+    private boolean isOverlappingTiles = true;
 
     /** Constant elevation over ellipsoid (m).
      * used only with {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID. */
@@ -237,7 +241,8 @@ public class RuggedBuilder {
      *   {@link AlgorithmId#DUVENHAGE_FLAT_BODY DUVENHAGE_FLAT_BODY}
      *   and {@link AlgorithmId#BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY
      *   BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY} all
-     *   require {@link #setDigitalElevationModel(TileUpdater, int) setDigitalElevationModel}
+     *   require {@link #setDigitalElevationModel(TileUpdater, int, boolean) setDigitalElevationModel}
+     *   or {@link #setDigitalElevationModel(TileUpdater, int) setDigitalElevationModel}
      *   to be called,</li>
      *   <li>{@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
      *   CONSTANT_ELEVATION_OVER_ELLIPSOID} requires
@@ -249,6 +254,7 @@ public class RuggedBuilder {
      *
      * @param newAlgorithmId identifier of algorithm to use for Digital Elevation Model intersection
      * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getAlgorithm()
      */
@@ -267,6 +273,10 @@ public class RuggedBuilder {
 
     /** Set the user-provided {@link TileUpdater tile updater}.
      * <p>
+     * The DEM tiles must be overlapping, otherwise use {@link #setDigitalElevationModel(TileUpdater, int, boolean)}
+     * with flag set to false.
+     * </p>
+     * <p>
      * Note that when the algorithm specified in {@link #setAlgorithm(AlgorithmId)}
      * is either {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
      * CONSTANT_ELEVATION_OVER_ELLIPSOID} or {@link
@@ -278,23 +288,73 @@ public class RuggedBuilder {
      * @param newTileUpdater updater used to load Digital Elevation Model tiles
      * @param newMaxCachedTiles maximum number of tiles stored in the cache
      * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setAlgorithm(AlgorithmId)
      * @see #getTileUpdater()
      * @see #getMaxCachedTiles()
      */
     public RuggedBuilder setDigitalElevationModel(final TileUpdater newTileUpdater, final int newMaxCachedTiles) {
+        return setDigitalElevationModel(newTileUpdater, newMaxCachedTiles, true);
+    }
+
+    /** Set the user-provided {@link TileUpdater tile updater}.
+     * <p>
+     * Note that when the algorithm specified in {@link #setAlgorithm(AlgorithmId)}
+     * is either {@link AlgorithmId#CONSTANT_ELEVATION_OVER_ELLIPSOID
+     * CONSTANT_ELEVATION_OVER_ELLIPSOID} or {@link
+     * AlgorithmId#IGNORE_DEM_USE_ELLIPSOID IGNORE_DEM_USE_ELLIPSOID},
+     * then this method becomes irrelevant and can either be not called at all,
+     * or it can be called with an updater set to {@code null}. For all other
+     * algorithms, the updater must be properly configured.
+     * </p>
+     * @param newTileUpdater updater used to load Digital Elevation Model tiles
+     * @param newMaxCachedTiles maximum number of tiles stored in the cache
+     * @param newIsOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                              true if overlapping; false otherwise.
+     * @return the builder instance
+     * @see #setDigitalElevationModel(TileUpdater, int)
+     * @see #setAlgorithm(AlgorithmId)
+     * @see #getTileUpdater()
+     * @see #getMaxCachedTiles()
+     * @see #isOverlappingTiles()
+     * @since 4.0
+     */
+    public RuggedBuilder setDigitalElevationModel(final TileUpdater newTileUpdater, final int newMaxCachedTiles,
+                                                  final boolean newIsOverlappingTiles) {
         this.tileUpdater    = newTileUpdater;
         this.maxCachedTiles = newMaxCachedTiles;
+        this.isOverlappingTiles = newIsOverlappingTiles;
         return this;
     }
 
     /** Get the updater used to load Digital Elevation Model tiles.
      * @return updater used to load Digital Elevation Model tiles
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getMaxCachedTiles()
      */
     public TileUpdater getTileUpdater() {
         return tileUpdater;
+    }
+
+    /**
+     * Get the flag telling if the DEM tiles are overlapping.
+     * @return true if the Digital Elevation Model tiles are overlapping;
+     *         false otherwise. Default = true.
+     * @since 4.0
+     */
+    public boolean isOverlappingTiles() {
+        return isOverlappingTiles;
+    }
+
+    /**
+     * Set the DEM overlapping tiles flag.
+     * @param newIsOverlappingTiles flag to tell if the Digital Elevation Model tiles are overlapping:
+     *        true if overlapping; false otherwise
+     * @since 4.0
+     */
+    public void setOverlappingTiles(final boolean newIsOverlappingTiles) {
+        this.isOverlappingTiles = newIsOverlappingTiles;
     }
 
     /** Set the user-provided constant elevation model.
@@ -324,6 +384,7 @@ public class RuggedBuilder {
 
     /** Get the maximum number of tiles stored in the cache.
      * @return maximum number of tiles stored in the cache
+     * @see #setDigitalElevationModel(TileUpdater, int, boolean)
      * @see #setDigitalElevationModel(TileUpdater, int)
      * @see #getTileUpdater()
      */
@@ -938,20 +999,21 @@ public class RuggedBuilder {
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
      * @param constantElevation constant elevation over ellipsoid
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                           true if overlapping; false otherwise.
      * @return selected algorithm
      */
     private static IntersectionAlgorithm createAlgorithm(final AlgorithmId algorithmID,
                                                          final TileUpdater updater, final int maxCachedTiles,
-                                                         final double constantElevation) {
-
+                                                         final double constantElevation, final boolean isOverlappingTiles) {
         // set up the algorithm
         switch (algorithmID) {
             case DUVENHAGE :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, false);
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOverlappingTiles);
             case DUVENHAGE_FLAT_BODY :
-                return new DuvenhageAlgorithm(updater, maxCachedTiles, true);
+                return new DuvenhageAlgorithm(updater, maxCachedTiles, true, isOverlappingTiles);
             case BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY :
-                return new BasicScanAlgorithm(updater, maxCachedTiles);
+                return new BasicScanAlgorithm(updater, maxCachedTiles, isOverlappingTiles);
             case CONSTANT_ELEVATION_OVER_ELLIPSOID :
                 return new ConstantElevationAlgorithm(constantElevation);
             case IGNORE_DEM_USE_ELLIPSOID :
@@ -980,7 +1042,7 @@ public class RuggedBuilder {
             }
         }
         createInterpolatorIfNeeded();
-        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation), ellipsoid,
+        return new Rugged(createAlgorithm(algorithmID, tileUpdater, maxCachedTiles, constantElevation, isOverlappingTiles), ellipsoid,
                           lightTimeCorrection, aberrationOfLightCorrection, atmosphericRefraction, scToBody, sensors, name);
     }
 }

@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -54,20 +54,64 @@ import org.orekit.rugged.utils.Selector;
  * have 9 levels:
  * </p>
  *
- * <table summary="" border="0">
- * <tr style="background-color:#EEEEFF;">
- *             <td>Level</td>         <td>Number of sub-tiles</td>    <td>Regular sub-tiles dimension</td></tr>
- * <tr>  <td align="center">8</td>  <td align="center">107 ⨉ 10</td>       <td align="center"> 1 ⨉   2</td>
- * <tr>  <td align="center">7</td>  <td align="center"> 54 ⨉ 10</td>       <td align="center"> 2 ⨉   2</td>
- * <tr>  <td align="center">6</td>  <td align="center"> 54 ⨉  5</td>        <td align="center"> 2 ⨉  4</td>
- * <tr>  <td align="center">5</td>  <td align="center"> 27 ⨉  5</td>        <td align="center"> 4 ⨉  4</td>
- * <tr>  <td align="center">4</td>  <td align="center"> 27 ⨉  3</td>        <td align="center"> 4 ⨉  8</td>
- * <tr>  <td align="center">3</td>  <td align="center"> 14 ⨉  3</td>        <td align="center"> 8 ⨉  8</td>
- * <tr>  <td align="center">2</td>  <td align="center"> 14 ⨉  2</td>        <td align="center"> 8 ⨉ 16</td>
- * <tr>  <td align="center">1</td>  <td align="center">  7 ⨉  2</td>        <td align="center">16 ⨉ 16</td>
- * <tr>  <td align="center">0</td>  <td align="center">  7 ⨉  1</td>        <td align="center">16 ⨉ 32</td>
- * </table>
- * <p>
+ *<table>
+ *  <caption>"min/max kd-tree levels for a 107 x19 raw tile "</caption>
+ *   <thead>
+ *       <tr>
+ *           <th>Level</th>
+ *           <th>Number of sub-tiles</th>
+ *           <th>Regular sub-tiles dimension</th>
+ *       </tr>
+ *   </thead>
+ *   <tbody>
+ *       <tr>
+ *           <td>8</td>
+ *           <td>107 ⨉ 10</td>
+ *           <td>1 ⨉ 2</td>
+ *       </tr>
+ *       <tr>
+ *           <td>7</td>
+ *           <td>54 ⨉ 10</td>
+ *           <td>2 ⨉ 2</td>
+ *       </tr>
+ *       <tr>
+ *           <td>6</td>
+ *           <td>54 ⨉ 5</td>
+ *           <td>2 ⨉ 4</td>
+ *       </tr>
+ *       <tr>
+ *           <td>5</td>
+ *           <td>27 ⨉ 5</td>
+ *           <td>4 ⨉ 4</td>
+ *       </tr>
+ *       <tr>
+ *           <td>4</td>
+ *           <td>27 ⨉ 3</td>
+ *           <td>4 ⨉ 8</td>
+ *       </tr>
+ *       <tr>
+ *           <td>3</td>
+ *           <td>14 ⨉ 3</td>
+ *           <td>8 ⨉ 8</td>
+ *       </tr>
+ *       <tr>
+ *           <td>2</td>
+ *           <td>14 ⨉ 2</td>
+ *           <td>8 ⨉ 16</td>
+ *       </tr>
+ *       <tr>
+ *           <td>1</td>
+ *           <td>7 ⨉ 2</td>
+ *           <td>16 ⨉ 16</td>
+ *       </tr>
+ *       <tr>
+ *           <td>0</td>
+ *           <td>7 ⨉ 1</td>
+ *           <td>16 ⨉ 32</td>
+ *       </tr>
+ *   </tbody>
+ *</table>
+ *
  * @see MinMaxTreeTileFactory
  * @author Luc Maisonobe
  */
@@ -90,7 +134,7 @@ public class MinMaxTreeTile extends SimpleTile {
      * Creates an empty tile.
      * </p>
      */
-    MinMaxTreeTile() {
+    protected MinMaxTreeTile() {
     }
 
     /** {@inheritDoc} */
@@ -139,11 +183,17 @@ public class MinMaxTreeTile extends SimpleTile {
      * considering also Eastwards and Northwards neighbors, and extends
      * up to the center of these neighbors. As an example, lets consider
      * four neighboring cells in some Digital Elevation Model:
-     * <table summary="" border="0" cellpadding="5" style="background-color:#f5f5dc;">
-     * <tr><th style="background-color:#c9d5c9;">j+1</th><td>11</td><td>10</td></tr>
-     * <tr><th style="background-color:#c9d5c9;">j</th><td>12</td><td>11</td></tr>
-     * <tr  style="background-color:#c9d5c9;"><th>j/i</th><th>i</th><th>i+1</th></tr>
-     * </table>
+     *
+     * <table>
+     * <caption>"four neighboring cells"</caption>
+     *<thead>
+     *   <tr><th>j/i</th> <th>i</th> <th>i+1</th></tr>
+     *</thead>
+     *<tbody>
+     *   <tr> <th>j+1</th><td>11</td><td>12</td> </tr>
+     *   <tr> <th>j</th> <td>10</td> <td>11</td> </tr>
+     * </tbody>
+     *</table>
      * When we interpolate elevation at a point located slightly South-West
      * to the center of the (i+1, j+1) cell, we use all four cells in the
      * interpolation, and we will get a result very close to 10 if we start
@@ -199,11 +249,16 @@ public class MinMaxTreeTile extends SimpleTile {
      * considering also Eastwards and Northwards neighbors, and extends
      * up to the center of these neighbors. As an example, lets consider
      * four neighboring cells in some Digital Elevation Model:
-     * <table summary="" border="0" cellpadding="5" style="background-color:#f5f5dc;">
-     * <tr><th style="background-color:#c9d5c9;">j+1</th><td>11</td><td>12</td></tr>
-     * <tr><th style="background-color:#c9d5c9;">j</th><td>10</td><td>11</td></tr>
-     * <tr  style="background-color:#c9d5c9;"><th>j/i</th><th>i</th><th>i+1</th></tr>
-     * </table>
+     * <table>
+     * <caption>"four neighboring cells"</caption>
+     *<thead>
+     *   <tr><th>j/i</th> <th>i</th> <th>i+1</th></tr>
+     *</thead>
+     *<tbody>
+     *   <tr> <th>j+1</th><td>11</td><td>10</td> </tr>
+     *   <tr> <th>j</th> <td>12</td> <td>11</td> </tr>
+     * </tbody>
+     *</table>
      * When we interpolate elevation at a point located slightly South-West
      * to the center of the (i+1, j+1) cell, we use all four cells in the
      * interpolation, and we will get a result very close to 12 if we start

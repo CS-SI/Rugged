@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2022 CS GROUP
+<!--- Copyright 2013-2025 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 As Rugged relied on [Orekit](https://www.orekit.org/ "Orekit homepage") for the frames computation, Orekit
 must be properly initialized for Rugged to run.
 
-The simplest way to configure is to first retrieve the example `orekit-data-master.zip`
+The simplest way to configure is to first retrieve the example `orekit-data-main.zip`
 file from Rugged download page, available in the [Rugged project download page](https://www.orekit.org/rugged/download.html) 
 (Get the physical data)
-and to unzip it anywhere you want, rename the `orekit-data-master` folder that will be created
+and to unzip it anywhere you want, rename the `orekit-data-main` folder that will be created
 into `orekit-data` and add the following lines at the start of your program (before Orekit is called for the
 first time):
 
@@ -31,7 +31,7 @@ first time):
 
 This is sufficient to start working.
 
-Note that some of the data in the orekit-data-master folder needs to be updated,
+Note that some of the data in the orekit-data-main folder needs to be updated,
 typically the UTC-TAI history file, which is updated about once every 18 months
 by IERS, and the files in the Earth-Orientation-Parameters folder which are updated
 regularly by IERS. The update frequency depends on which file you use.

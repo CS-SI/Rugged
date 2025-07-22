@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,14 +25,14 @@ import org.orekit.rugged.raster.TileUpdater;
 
 public class BasicScanAlgorithmTest extends AbstractAlgorithmTest {
 
-    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        return new BasicScanAlgorithm(updater, maxCachedTiles);
+    public IntersectionAlgorithm createAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOverlappingTiles) {
+        return new BasicScanAlgorithm(updater, maxCachedTiles, isOverlappingTiles);
     }
 
     @Test
     public void testAlgorithmId() {
         setUpMayonVolcanoContext();
-        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8);
+        final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         assertEquals(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY, algorithm.getAlgorithmId());
     }
 }

@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2022 CS GROUP
+<!--- Copyright 2013-2025 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -32,7 +32,7 @@ The main categories are:
 If for some reason you cannot use the public forums, you can reach the CS
 GROUP Rugged team for any question (either technically
 oriented or administrative) at the following email address:
-[rugged@csgroup.eu](mailto:rugged@csgroup.eu)
+[rugged@cs-soprasteria.com](mailto:rugged@cs-soprasteria.com)
 
 ## Administrative contact
 
@@ -46,7 +46,7 @@ please use the following address:
     31506 Toulouse Cedex 5
     FRANCE
 
-    phone: +33 5-61-17-66-66 (ask for Luc Maisonobe or Jonathan Guinet)
+    phone: +33 5-61-17-66-66 (ask for Jonathan Guinet or Guylaine Prat)
 
 
 [Top of the page](#top)

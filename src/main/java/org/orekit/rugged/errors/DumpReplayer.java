@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -319,6 +319,9 @@ public class DumpReplayer {
             if (algorithmId == AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID) {
                 builder.setConstantElevation(constantElevation);
             } else if (algorithmId != AlgorithmId.IGNORE_DEM_USE_ELLIPSOID) {
+                // In the case of user used a non overlapping DEM: no need here to take it into account
+                // as Rugged during the run created if necessary zipper tiles.
+                // At this stage, the read DEM in the dump behave like an overlapping DEM.
                 builder.setDigitalElevationModel(new TileUpdater() {
 
                     /** {@inheritDoc} */

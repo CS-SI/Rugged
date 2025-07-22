@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -21,19 +21,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
+import org.orekit.frames.FactoryManagedFrame;
 import org.orekit.frames.Frame;
+import org.orekit.frames.FramesFactory;
+import org.orekit.frames.Predefined;
 import org.orekit.frames.Transform;
 import org.orekit.rugged.errors.DumpManager;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.time.TimeInterpolator;
+import org.orekit.time.TimeOffset;
+import org.orekit.utils.AngularCoordinates;
 import org.orekit.utils.AngularDerivativesFilter;
 import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.ImmutableTimeStampedCache;
+import org.orekit.utils.PVCoordinates;
 import org.orekit.utils.TimeStampedAngularCoordinates;
+import org.orekit.utils.TimeStampedAngularCoordinatesHermiteInterpolator;
 import org.orekit.utils.TimeStampedCache;
 import org.orekit.utils.TimeStampedPVCoordinates;
+import org.orekit.utils.TimeStampedPVCoordinatesHermiteInterpolator;
 
 /** Provider for observation transforms.
  * @author Luc Maisonobe
@@ -42,7 +53,7 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 public class SpacecraftToObservedBody implements Serializable {
 
     /** Serializable UID. */
-    private static final long serialVersionUID = 20140909L;
+    private static final long serialVersionUID = 20250427L;
 
     /** Inertial frame. */
     private final Frame inertialFrame;
@@ -123,9 +134,17 @@ public class SpacecraftToObservedBody implements Serializable {
         final TimeStampedCache<TimeStampedPVCoordinates> pvCache =
                 new ImmutableTimeStampedCache<>(pvInterpolationNumber, positionsVelocities);
 
+        // set up the TimeStampedPVCoordinates interpolator
+        final TimeInterpolator<TimeStampedPVCoordinates> pvInterpolator =
+                new TimeStampedPVCoordinatesHermiteInterpolator(pvInterpolationNumber, pvFilter);
+
         // set up the cache for attitudes
         final TimeStampedCache<TimeStampedAngularCoordinates> aCache =
                 new ImmutableTimeStampedCache<>(aInterpolationNumber, quaternions);
+
+        // set up the TimeStampedAngularCoordinates Hermite interpolator
+        final TimeInterpolator<TimeStampedAngularCoordinates> angularInterpolator =
+                new TimeStampedAngularCoordinatesHermiteInterpolator(aInterpolationNumber, aFilter);
 
         final int n = (int) FastMath.ceil(maxDate.durationFrom(minDate) / tStep);
         this.tStep          = tStep;
@@ -144,7 +163,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 pvInterpolationDate = date;
             }
             final TimeStampedPVCoordinates interpolatedPV =
-                    TimeStampedPVCoordinates.interpolate(pvInterpolationDate, pvFilter,
+                    pvInterpolator.interpolate(pvInterpolationDate,
                             pvCache.getNeighbors(pvInterpolationDate));
             final TimeStampedPVCoordinates pv = interpolatedPV.shiftedBy(date.durationFrom(pvInterpolationDate));
 
@@ -158,7 +177,7 @@ public class SpacecraftToObservedBody implements Serializable {
                 aInterpolationDate = date;
             }
             final TimeStampedAngularCoordinates interpolatedQuaternion =
-                    TimeStampedAngularCoordinates.interpolate(aInterpolationDate, aFilter,
+                    angularInterpolator.interpolate(aInterpolationDate,
                             aCache.getNeighbors(aInterpolationDate).collect(Collectors.toList()));
             final TimeStampedAngularCoordinates quaternion = interpolatedQuaternion.shiftedBy(date.durationFrom(aInterpolationDate));
 
@@ -302,6 +321,215 @@ public class SpacecraftToObservedBody implements Serializable {
     public boolean isInRange(final AbsoluteDate date) {
         return minDate.durationFrom(date) <= overshootTolerance &&
                date.durationFrom(maxDate) <= overshootTolerance;
+    }
+
+    /** Replace the instance with a data transfer object for serialization.
+     * @return data transfer object that will be serialized
+     */
+    private Object writeReplace() {
+        return new DataTransferObject(((FactoryManagedFrame) inertialFrame).getFactoryKey(),
+                                      ((FactoryManagedFrame) bodyFrame).getFactoryKey(),
+                                      minDate, maxDate, tStep, overshootTolerance,
+                                      extractTimeOffsets(bodyToInertial),
+                                      extractCoordinates(bodyToInertial),
+                                      extractTimeOffsets(scToInertial),
+                                      extractCoordinates(scToInertial));
+    }
+
+    /** Extract time offsets from a transforms list.
+     * @param transforms transforms to convert
+     * @return time offsets
+     * @since 4.0
+     */
+    private long[] extractTimeOffsets(final List<Transform> transforms) {
+
+        final long[] offsets = new long[2 * transforms.size()];
+
+        for (int i = 0; i < transforms.size(); ++i) {
+            final Transform ti = transforms.get(i);
+            offsets[2 * i]     = ti.getDate().getSeconds();
+            offsets[2 * i + 1] = ti.getDate().getAttoSeconds();
+        }
+
+        return offsets;
+
+    }
+
+    /** Extract coordinates from a transforms list.
+     * @param transforms transforms to convert
+     * @return time offsets
+     * @since 4.0
+     */
+    private double[] extractCoordinates(final List<Transform> transforms) {
+
+        final double[] coordinates = new double[19 * transforms.size()];
+
+        for (int i = 0; i < transforms.size(); ++i) {
+
+            final PVCoordinates      pv = transforms.get(i).getCartesian();
+            final AngularCoordinates ag = transforms.get(i).getAngular();
+
+            coordinates[19 * i]      = pv.getPosition().getX();
+            coordinates[19 * i +  1] = pv.getPosition().getY();
+            coordinates[19 * i +  2] = pv.getPosition().getZ();
+
+            coordinates[19 * i +  3] = pv.getVelocity().getX();
+            coordinates[19 * i +  4] = pv.getVelocity().getY();
+            coordinates[19 * i +  5] = pv.getVelocity().getZ();
+
+            coordinates[19 * i +  6] = pv.getAcceleration().getX();
+            coordinates[19 * i +  7] = pv.getAcceleration().getY();
+            coordinates[19 * i +  8] = pv.getAcceleration().getZ();
+
+            coordinates[19 * i +  9] = ag.getRotation().getQ0();
+            coordinates[19 * i + 10] = ag.getRotation().getQ1();
+            coordinates[19 * i + 11] = ag.getRotation().getQ2();
+            coordinates[19 * i + 12] = ag.getRotation().getQ3();
+
+            coordinates[19 * i + 13] = ag.getRotationRate().getX();
+            coordinates[19 * i + 14] = ag.getRotationRate().getY();
+            coordinates[19 * i + 15] = ag.getRotationRate().getZ();
+
+            coordinates[19 * i + 16] = ag.getRotationAcceleration().getX();
+            coordinates[19 * i + 17] = ag.getRotationAcceleration().getY();
+            coordinates[19 * i + 18] = ag.getRotationAcceleration().getZ();
+
+        }
+
+        return coordinates;
+
+    }
+
+    /** Internal class used only for serialization.
+     * @since 4.0
+     */
+    private static class DataTransferObject implements Serializable {
+
+        /** Serializable UID. */
+        private static final long serialVersionUID = 20250427L;
+
+        /** Inertial frame. */
+        private final Predefined inertialFrame;
+
+        /** Body frame. */
+        private final Predefined bodyFrame;
+
+        /** Start of search time span. */
+        private final AbsoluteDate minDate;
+
+        /** End of search time span. */
+        private final AbsoluteDate maxDate;
+
+        /** Step to use for inertial frame to body frame transforms cache computations. */
+        private final double tStep;
+
+        /** Tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting. */
+        private final double overshootTolerance;
+
+        /** Transforms sample from observed body frame to inertial frame. */
+        private final long[] bodyToInertialTimeOffset;
+
+        /** Transforms sample from observed body frame to inertial frame. */
+        private final double[] bodyToInertialCoordinates;
+
+        /** Transforms sample from spacecraft frame to inertial frame. */
+        private final long[] scToInertialTimOffset;
+
+        /** Transforms sample from spacecraft frame to inertial frame. */
+        private final double[] scToInertialCoordinates;
+
+        /** Simple constructor.
+         * @param inertialFrame inertial frame
+         * @param bodyFrame observed body frame
+         * @param minDate start of search time span
+         * @param maxDate end of search time span
+         * @param tStep step to use for inertial frame to body frame transforms cache computations
+         * @param overshootTolerance tolerance in seconds allowed for {@code minDate} and {@code maxDate} overshooting
+         * slightly the position, velocity and quaternions ephemerides
+         * @param bodyToInertialTimeOffset time offsets of transforms sample from observed body frame to inertial frame
+         * @param bodyToInertialCoordinates coordinates of transforms sample from observed body frame to inertial frame
+         * @param scToInertialTimOffset time offsets transforms sample from spacecraft frame to inertial frame
+         * @param scToInertialCoordinates coordinates transforms sample from spacecraft frame to inertial frame
+         */
+        DataTransferObject(final Predefined inertialFrame, final Predefined bodyFrame,
+                           final AbsoluteDate minDate, final AbsoluteDate maxDate, final double tStep,
+                           final double overshootTolerance,
+                           final long[] bodyToInertialTimeOffset, final double[] bodyToInertialCoordinates,
+                           final long[] scToInertialTimOffset, final double[] scToInertialCoordinates) {
+            this.inertialFrame             = inertialFrame;
+            this.bodyFrame                 = bodyFrame;
+            this.minDate                   = minDate;
+            this.maxDate                   = maxDate;
+            this.tStep                     = tStep;
+            this.overshootTolerance        = overshootTolerance;
+            this.bodyToInertialTimeOffset  = bodyToInertialTimeOffset;
+            this.bodyToInertialCoordinates = bodyToInertialCoordinates;
+            this.scToInertialTimOffset     = scToInertialTimOffset;
+            this.scToInertialCoordinates   = scToInertialCoordinates;
+        }
+
+        /** Create a transform.
+         * @param i index of the transfor
+         * @param timeOffsets time offsets array
+         * @param coordinates coordinates array
+         * @return transform
+         */
+        private Transform createTransform(final int i,
+                                          final long[] timeOffsets,
+                                          final double[] coordinates) {
+            final AbsoluteDate date = new AbsoluteDate(new TimeOffset(timeOffsets[2 * i],
+                                                                      timeOffsets[2 * i + 1]));
+            final PVCoordinates pv = new PVCoordinates(new Vector3D(coordinates[19 * i],
+                                                                    coordinates[19 * i +  1],
+                                                                    coordinates[19 * i +  2]),
+                                                       new Vector3D(coordinates[19 * i +  3],
+                                                                    coordinates[19 * i +  4],
+                                                                    coordinates[19 * i +  5]),
+                                                       new Vector3D(coordinates[19 * i +  6],
+                                                                    coordinates[19 * i +  7],
+                                                                    coordinates[19 * i +  8]));
+            final AngularCoordinates ag = new AngularCoordinates(new Rotation(coordinates[19 * i +  9],
+                                                                              coordinates[19 * i + 10],
+                                                                              coordinates[19 * i + 11],
+                                                                              coordinates[19 * i + 12],
+                                                                              false),
+                                                                 new Vector3D(coordinates[19 * i + 13],
+                                                                              coordinates[19 * i + 14],
+                                                                              coordinates[19 * i + 15]),
+                                                                 new Vector3D(coordinates[19 * i + 16],
+                                                                              coordinates[19 * i + 17],
+                                                                              coordinates[19 * i + 18]));
+            return new Transform(date, pv, ag);
+        }
+
+        /** Create all transforms.
+         * @param timeOffsets time offsets array
+         * @param coordinates coordinates array
+         * @return all transforms
+         */
+        private List<Transform> createAllTransforms(final long[] timeOffsets,
+                                                    final double[] coordinates) {
+            final List<Transform> transforms = new ArrayList<>(timeOffsets.length / 2);
+            for (int i = 0; i < timeOffsets.length / 2; ++i) {
+                transforms.add(createTransform(i, timeOffsets, coordinates));
+            }
+            return transforms;
+        }
+
+        /** Replace the deserialized data transfer object with a
+         * {@link SpacecraftToObservedBody}.
+         * @return replacement {@link SpacecraftToObservedBody}
+         */
+        private Object readResolve() {
+            return new SpacecraftToObservedBody(FramesFactory.getFrame(inertialFrame),
+                                                FramesFactory.getFrame(bodyFrame),
+                                                minDate, maxDate, tStep, overshootTolerance,
+                                                createAllTransforms(bodyToInertialTimeOffset,
+                                                                    bodyToInertialCoordinates),
+                                                createAllTransforms(scToInertialTimOffset,
+                                                                    scToInertialCoordinates));
+        }
+
     }
 
 }

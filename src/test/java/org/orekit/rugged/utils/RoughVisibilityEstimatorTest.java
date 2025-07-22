@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -46,9 +46,10 @@ import org.orekit.frames.FramesFactory;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.OrbitType;
-import org.orekit.orbits.PositionAngle;
+import org.orekit.orbits.PositionAngleType;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.propagation.ToleranceProvider;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -67,7 +68,7 @@ public class RoughVisibilityEstimatorTest {
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
-        final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
+        final List<TimeStampedPVCoordinates> pv = new ArrayList<>();
         propagator.getMultiplexer().add(1.0, currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(3 * orbit.getKeplerianPeriod()));
 
@@ -76,9 +77,9 @@ public class RoughVisibilityEstimatorTest {
                                                                         FastMath.toRadians(-2.0),
                                                                         0.0));
         Assert.assertEquals(0.0,
-                            new AbsoluteDate("2012-01-01T03:47:08.814121623",
+                            new AbsoluteDate("2012-01-01T03:47:08.81412028",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
-                            1.0e-8);
+                            1.10e-8);
 
     }
 
@@ -91,7 +92,7 @@ public class RoughVisibilityEstimatorTest {
         NormalizedSphericalHarmonicsProvider gravityField = createGravityField();
         Orbit      orbit                                  = createOrbit(gravityField.getMu());
         Propagator propagator                             = createPropagator(earth, gravityField, orbit);
-        final List<TimeStampedPVCoordinates> pv = new ArrayList<TimeStampedPVCoordinates>();
+        final List<TimeStampedPVCoordinates> pv = new ArrayList<>();
         propagator.getMultiplexer().add(1.0,  currentState -> pv.add(currentState.getPVCoordinates()));
         propagator.propagate(orbit.getDate().shiftedBy(orbit.getKeplerianPeriod()));
 
@@ -100,7 +101,7 @@ public class RoughVisibilityEstimatorTest {
                                                                         FastMath.toRadians(-46.126),
                                                                         0.0));
         Assert.assertEquals(0.0,
-                            new AbsoluteDate("2012-01-01T01:02:39.122526662",
+                            new AbsoluteDate("2012-01-01T01:02:39.12252184",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
                             1.0e-8);
 
@@ -134,7 +135,7 @@ public class RoughVisibilityEstimatorTest {
                                  -4.029194321683225E-4, 0.0013530362644647786,
                                  FastMath.toRadians(98.63218182243709),
                                  FastMath.toRadians(77.55565567747836),
-                                 FastMath.PI, PositionAngle.TRUE,
+                                 FastMath.PI, PositionAngleType.TRUE,
                                  eme2000, date, mu);
     }
 
@@ -146,12 +147,12 @@ public class RoughVisibilityEstimatorTest {
         SpacecraftState state = new SpacecraftState(orbit,
                                                     yawCompensation.getAttitude(orbit,
                                                                                 orbit.getDate(),
-                                                                                orbit.getFrame()),
-                                                    1180.0);
+                                                                                orbit.getFrame())).
+                                withMass(1180.0);
 
         // numerical model for improving orbit
         OrbitType type = OrbitType.CIRCULAR;
-        double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit, type);
+        double[][] tolerances = ToleranceProvider.getDefaultToleranceProvider(0.1).getTolerances(orbit, type);
         DormandPrince853Integrator integrator =
                         new DormandPrince853Integrator(1.0e-4 * orbit.getKeplerianPeriod(),
                                                        1.0e-1 * orbit.getKeplerianPeriod(),
@@ -179,10 +180,8 @@ public class RoughVisibilityEstimatorTest {
             ellipsoid = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                               Constants.WGS84_EARTH_FLATTENING,
                                               itrf);
-        } catch (OrekitException oe) {
-            Assert.fail(oe.getLocalizedMessage());
-        } catch (URISyntaxException use) {
-            Assert.fail(use.getLocalizedMessage());
+        } catch (OrekitException | URISyntaxException e) {
+            Assert.fail(e.getLocalizedMessage());
         }
     }
 

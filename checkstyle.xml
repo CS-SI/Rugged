@@ -42,10 +42,14 @@
         <module name="MissingSwitchDefault"/>
         <module name="ModifierOrder"/>
         <module name="MultipleStringLiterals">
-            <property name="ignoreStringsRegexp" value='^(("")|("."))$'/>
+            <property name="ignoreStringsRegexp" value='^(("")|(".")|("\\\\"))$'/>
         </module>
         <module name="MultipleVariableDeclarations"/>
-        <module name="NoWhitespaceAfter"/>
+        <module name="NoWhitespaceAfter">
+            <property name="tokens"
+                      value="AT, INC, DEC, UNARY_MINUS, UNARY_PLUS, BNOT, LNOT, DOT,
+                             ARRAY_DECLARATOR, INDEX_OP"/>
+        </module>
         <module name="NoWhitespaceBefore"/>
         <module name="OperatorWrap">
             <property name="option" value="eol"/>
@@ -55,13 +59,22 @@
         <module name="TodoComment">
             <property name="severity" value="warning"/>
         </module>
-        <module name="UnnecessaryParentheses"/>
+        <module name="UnnecessaryParentheses">
+            <property name="tokens"
+                      value="EXPR, IDENT, NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG, STRING_LITERAL,
+                             LITERAL_NULL, LITERAL_FALSE, LITERAL_TRUE, ASSIGN, BAND_ASSIGN, BOR_ASSIGN,
+                             BSR_ASSIGN, BXOR_ASSIGN, DIV_ASSIGN, MINUS_ASSIGN, MOD_ASSIGN, PLUS_ASSIGN,
+                             SL_ASSIGN, SR_ASSIGN, STAR_ASSIGN, LAMBDA, TEXT_BLOCK_LITERAL_BEGIN, LAND,
+                             LOR, LITERAL_INSTANCEOF, GT, LT, GE, LE, EQUAL, NOT_EQUAL, UNARY_MINUS,
+                             UNARY_PLUS, INC, DEC, LNOT, BNOT, POST_INC, POST_DEC"/>
+        </module>
+        <module name="NeedBraces"/>
         <module name="UnusedImports"/>
         <module name="VisibilityModifier"/>
         <module name="WhitespaceAfter"/>
         <module name="WhitespaceAround">
             <property name="tokens"
-                      value="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN,
+                      value="ASSIGN, ARRAY_INIT, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN,
                              BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT,
                              LAND, LCURLY, LE, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE,
                              LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN,
@@ -69,6 +82,11 @@
                              MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS,
                              PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, SL_ASSIGN, SR,
                              SR_ASSIGN, STAR, STAR_ASSIGN"/>
+        </module>
+        <module name="SuppressionCommentFilter">
+            <property name="offCommentFormat" value="CHECKSTYLE\: stop ConstantName"/>
+            <property name="onCommentFormat"  value="CHECKSTYLE\: resume ConstantName"/>
+            <property name="checkFormat"      value="ConstantName"/>
         </module>
         <module name="SuppressionCommentFilter">
            <property name="offCommentFormat" value="CHECKSTYLE\: stop JavadocVariable check"/>
@@ -95,9 +113,15 @@
           <property name="onCommentFormat" value="CHECKSTYLE\: resume MultipleStringLiterals check"/>
           <property name="checkFormat" value="MultipleStringLiteralsCheck"/>
         </module>
+        <module name="SuppressionCommentFilter">
+          <property name="offCommentFormat" value="CHECKSTYLE\: stop IllegalCatch check"/>
+          <property name="onCommentFormat" value="CHECKSTYLE\: resume IllegalCatch check"/>
+          <property name="checkFormat" value="IllegalCatchCheck"/>
+        </module>
     </module>
     <module name="RegexpHeader">
       <property name="headerFile" value="${checkstyle.header.file}" />
+      <property name="fileExtensions" value="java" />
     </module>
     <module name="FileTabCharacter"/>
     <module name="NewlineAtEndOfFile">

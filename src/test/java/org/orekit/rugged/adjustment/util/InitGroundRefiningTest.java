@@ -84,9 +84,9 @@ public class InitGroundRefiningTest {
             // Initialize refining context
             // ---------------------------
             final String sensorName = "line";
-            final double incidenceAngle = -5.0;
+            final double rollAngle = -5.0;
             final String date = "2016-01-01T11:59:50.0";
-            this.pleiadesViewingModel = new PleiadesViewingModel(sensorName, incidenceAngle, date);
+            this.pleiadesViewingModel = new PleiadesViewingModel(sensorName, rollAngle, date);
 
 
             PleiadesOrbitModel orbitmodel =  new PleiadesOrbitModel();

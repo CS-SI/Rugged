@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright 2013-2022 CS GROUP
+  Copyright 2013-2025 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -17,13 +17,19 @@
   <bannerLeft>
     <name>CS GROUP</name>
     <src>/images/logo_cs_group.png</src>
-    <href>https://www.csgroup.eu/</href>
+    <href>https://www.cs-soprasteria.com/</href>
   </bannerLeft>
   <bannerRight>
     <name>Rugged</name>
     <src>/images/rugged-logo-small.jpg</src>
     <href>/index.html</href>
   </bannerRight>
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>2.1.0</version>
+  </skin>
+
   <body>
     <menu name="Rugged">
       <item name="Overview"                 href="/index.html"                              />
@@ -40,12 +46,13 @@
       <item name="Overview"                       href="/design/overview.html"                    />
       <item name="Technical choices"              href="/design/technical-choices.html"           />
       <item name="Digital Elevation Model"        href="/design/digital-elevation-model.html"     />
-      <item name="Design of the major functions"  href="/design/design-major-functions.html"                      />
+      <item name="Design of the major functions"  href="/design/design-major-functions.html"      />
     </menu>
     <menu name="Tutorials">
       <item name="Direct location"          href="/tutorials/direct-location.html"          />
       <item name="Direct location with DEM" href="/tutorials/direct-location-with-DEM.html" />
       <item name="Inverse location"         href="/tutorials/inverse-location.html"         />
+      <item name="Tile updater example"          href="/tutorials/tile-updater.html"           />
       <item name="Matlab examples"          href="/tutorials/matlab-example.html"           />
     </menu>
     <menu name="Development">

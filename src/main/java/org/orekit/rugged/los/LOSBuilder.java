@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -28,6 +28,7 @@ import org.orekit.rugged.utils.DerivativeGenerator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.ParameterDriver;
 import org.orekit.utils.ParameterObserver;
+import org.orekit.utils.TimeSpanMap;
 
 /** Builder for lines-of-sight list.
  * <p>
@@ -226,7 +227,13 @@ public class LOSBuilder {
             final ParameterObserver resettingObserver = new ParameterObserver() {
                 /** {@inheritDoc} */
                 @Override
-                public void valueChanged(final double previousValue, final ParameterDriver driver) {
+                public void valueChanged(final double previousValue, final ParameterDriver driver, final AbsoluteDate date) {
+                    Arrays.fill(transformed, null);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void valueSpanMapChanged(final TimeSpanMap<Double> previousValueSpanMap, final ParameterDriver driver) {
                     Arrays.fill(transformed, null);
                 }
             };

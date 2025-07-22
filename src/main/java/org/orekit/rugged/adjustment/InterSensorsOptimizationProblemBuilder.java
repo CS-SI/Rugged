@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -137,7 +137,9 @@ public class InterSensorsOptimizationProblemBuilder extends OptimizationProblemB
             int i = 0;
             for (Iterator<Map.Entry<SensorPixel, SensorPixel>> gtIt = reference.getMapping().iterator(); gtIt.hasNext(); i++) {
 
-                if (i == reference.getMapping().size()) break;
+                if (i == reference.getMapping().size()) {
+                    break;
+                }
 
                 // Get LOS distance
                 final Double losDistance  = reference.getLosDistance(i);

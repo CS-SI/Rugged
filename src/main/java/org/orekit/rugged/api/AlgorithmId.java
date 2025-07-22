@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,7 +25,7 @@ public enum AlgorithmId {
     /** Fast algorithm due to Bernardt Duvenhage.
      * <p>
      * The algorithm is described in the 2009 paper:
-     * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
+     * <a href="https://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
      * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
      * </p>
      */
@@ -34,7 +34,7 @@ public enum AlgorithmId {
     /** Fast algorithm due to Bernardt Duvenhage.
      * <p>
      * The algorithm is described in the 2009 paper:
-     * <a href="http://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
+     * <a href="https://researchspace.csir.co.za/dspace/bitstream/10204/3041/1/Duvenhage_2009.pdf">Using
      * An Implicit Min/Max KD-Tree for Doing Efficient Terrain Line of Sight Calculations</a>.
      * </p>
      * <p>

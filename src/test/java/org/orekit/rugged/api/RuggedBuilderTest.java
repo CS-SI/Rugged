@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -58,9 +58,11 @@ import org.orekit.frames.Transform;
 import org.orekit.orbits.CircularOrbit;
 import org.orekit.orbits.Orbit;
 import org.orekit.orbits.OrbitType;
-import org.orekit.orbits.PositionAngle;
+import org.orekit.orbits.PositionAngleType;
+import org.orekit.propagation.CartesianToleranceProvider;
 import org.orekit.propagation.Propagator;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.propagation.ToleranceProvider;
 import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.rugged.errors.RuggedException;
@@ -165,6 +167,11 @@ public class RuggedBuilderTest {
             Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
             Assert.assertEquals("RuggedBuilder.setEllipsoid()", re.getParts()[0]);
         }
+        
+        Assert.assertTrue(builder.isOverlappingTiles());
+        builder.setOverlappingTiles(false);
+        Assert.assertTrue(!builder.isOverlappingTiles());
+        
         builder.setEllipsoid(EllipsoidId.GRS80, BodyRotatingFrameId.ITRF);
         try {
             builder.build();
@@ -758,7 +765,7 @@ public class RuggedBuilderTest {
                                  -4.029194321683225E-4, 0.0013530362644647786,
                                  FastMath.toRadians(98.63218182243709),
                                  FastMath.toRadians(77.55565567747836),
-                                 FastMath.PI, PositionAngle.TRUE,
+                                 FastMath.PI, PositionAngleType.TRUE,
                                  eme2000, date, mu);
     }
 
@@ -770,12 +777,11 @@ public class RuggedBuilderTest {
         SpacecraftState state = new SpacecraftState(orbit,
                                                     yawCompensation.getAttitude(orbit,
                                                                                 orbit.getDate(),
-                                                                                orbit.getFrame()),
-                                                    1180.0);
+                                                                                orbit.getFrame())).withMass(1180.0);
 
         // numerical model for improving orbit
         OrbitType type = OrbitType.CIRCULAR;
-        double[][] tolerances = NumericalPropagator.tolerances(0.1, orbit, type);
+        double[][] tolerances = ToleranceProvider.of(CartesianToleranceProvider.of(0.1)).getTolerances(orbit, type);
         DormandPrince853Integrator integrator =
                 new DormandPrince853Integrator(1.0e-4 * orbit.getKeplerianPeriod(),
                                                1.0e-1 * orbit.getKeplerianPeriod(),

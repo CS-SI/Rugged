@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.hipparchus.exception.UTF8Control;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,9 +37,10 @@ public class RuggedMessagesTest {
     @Test
     public void testAllKeysPresentInPropertiesFiles() {
         for (final String language : LANGUAGES_LIST) {
-            ResourceBundle bundle =
-                            ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
-                                                     new Locale(language), new RuggedMessages.UTF8Control());
+            ResourceBundle bundle = ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
+                                                      Locale.forLanguageTag(language),
+                                                      new UTF8Control());
+
             for (RuggedMessages message : RuggedMessages.values()) {
                 final String messageKey = message.toString();
                 boolean keyPresent = false;
@@ -56,9 +58,9 @@ public class RuggedMessagesTest {
     @Test
     public void testAllPropertiesCorrespondToKeys() {
         for (final String language : LANGUAGES_LIST) {
-            ResourceBundle bundle =
-                            ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
-                                                     new Locale(language), new RuggedMessages.UTF8Control());
+            ResourceBundle bundle = ResourceBundle.getBundle("assets/org/orekit/rugged/RuggedMessages",
+                                                      Locale.forLanguageTag(language),
+                                                      new UTF8Control());
             for (final Enumeration<String> keys = bundle.getKeys(); keys.hasMoreElements();) {
                 final String propertyKey = keys.nextElement();
                 try {
@@ -111,7 +113,7 @@ public class RuggedMessagesTest {
     @Test
     public void testVariablePartsConsistency() {
         for (final String language : LANGUAGES_LIST) {
-            Locale locale = new Locale(language);
+            Locale locale = Locale.forLanguageTag(language);
             for (RuggedMessages message : RuggedMessages.values()) {
                 MessageFormat source     = new MessageFormat(message.getSourceString());
                 MessageFormat translated = new MessageFormat(message.getLocalizedString(locale));

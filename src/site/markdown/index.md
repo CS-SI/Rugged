@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2022 CS GROUP
+<!--- Copyright 2013-2025 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -43,7 +43,7 @@
 
   * Refinement
 
-  * Can support several types of Digital Elevation Models, including user-provided models
+  * Can support several types of Digital Elevation Models (DEM), including user-provided models. Supports seamless DEM as well as overlapping tiles DEM.
 
   * Several intersection models algorithms available
 
@@ -98,7 +98,7 @@ interoperability in space systems.
 
 ## Maintained library
 
-Rugged has been in development since 2014 inside [CS GROUP](https://www.csgroup.eu/ "CS GROUP homepage")
+Rugged has been in development since 2014 inside [CS GROUP](https://www.cs-soprasteria.com/ "CS GROUP homepage")
 and is still used and maintained by its dual teams
 of space dynamics and image processing experts.
 

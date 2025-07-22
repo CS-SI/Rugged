@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -300,10 +300,35 @@ public class Rugged {
             // compute with atmospheric refraction correction if necessary
             if (atmosphericRefraction != null && atmosphericRefraction.mustBeComputed()) {
 
+                final Vector3D pBody;
+                final Vector3D lBody;
+
+                // Take into account the light time correction
+                // @since 3.1
+                if (lightTimeCorrection) {
+                    // Transform sensor position in inertial frame to observed body
+                    final Vector3D sP = inertToBody.transformPosition(pInert);
+                    // Convert ground location of the pixel in cartesian coordinates
+                    final Vector3D eP = ellipsoid.transform(gp[i]);
+                    // Compute the light time correction (s)
+                    final double deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+                    // Apply shift due to light time correction
+                    final Transform shiftedInertToBody = inertToBody.shiftedBy(-deltaT);
+
+                    pBody = shiftedInertToBody.transformPosition(pInert);
+                    lBody = shiftedInertToBody.transformVector(lInert);
+
+                } else { // Light time correction NOT to be taken into account
+
+                    pBody = inertToBody.transformPosition(pInert);
+                    lBody = inertToBody.transformVector(lInert);
+
+                } // end test on lightTimeCorrection
+
                 // apply atmospheric refraction correction
-                final Vector3D pBody = inertToBody.transformPosition(pInert);
-                final Vector3D lBody = inertToBody.transformVector(lInert);
                 gp[i] = atmosphericRefraction.applyCorrection(pBody, lBody, (NormalizedGeodeticPoint) gp[i], algorithm);
+
             }
             DumpManager.dumpDirectLocationResult(gp[i]);
         }
@@ -346,7 +371,7 @@ public class Rugged {
             lInert = obsLInert;
         }
 
-        // Compute ground location of specified pixel
+        // Compute ground location of specified pixel according to light time correction flag
         final NormalizedGeodeticPoint gp;
 
         if (lightTimeCorrection) {
@@ -362,14 +387,39 @@ public class Rugged {
                                               algorithm.intersection(ellipsoid, pBody, lBody));
         }
 
+        // Compute ground location of specified pixel according to atmospheric refraction correction flag
         NormalizedGeodeticPoint result = gp;
 
         // compute the ground location with atmospheric correction if asked for
         if (atmosphericRefraction != null && atmosphericRefraction.mustBeComputed()) {
 
+            final Vector3D pBody;
+            final Vector3D lBody;
+
+            // Take into account the light time correction
+            // @since 3.1
+            if (lightTimeCorrection) {
+                // Transform sensor position in inertial frame to observed body
+                final Vector3D sP = inertToBody.transformPosition(pInert);
+                // Convert ground location of the pixel in cartesian coordinates
+                final Vector3D eP = ellipsoid.transform(gp);
+                // Compute the light time correction (s)
+                final double deltaT = eP.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+                // Apply shift due to light time correction
+                final Transform shiftedInertToBody = inertToBody.shiftedBy(-deltaT);
+
+                pBody = shiftedInertToBody.transformPosition(pInert);
+                lBody = shiftedInertToBody.transformVector(lInert);
+
+            } else { // Light time correction NOT to be taken into account
+
+                pBody = inertToBody.transformPosition(pInert);
+                lBody = inertToBody.transformVector(lInert);
+
+            } // end test on lightTimeCorrection
+
             // apply atmospheric refraction correction
-            final Vector3D pBody = inertToBody.transformPosition(pInert);
-            final Vector3D lBody = inertToBody.transformVector(lInert);
             result = atmosphericRefraction.applyCorrection(pBody, lBody, gp, algorithm);
 
         } // end test on atmosphericRefraction != null
@@ -569,7 +619,7 @@ public class Rugged {
      * @param scToInert transform for the date from spacecraft to inertial
      * @param inertToBody transform for the date from inertial to body
      * @param pInert sensor position in inertial frame
-     * @param lInert line of sight in inertial frame
+     * @param lInert line of sight in inertial frame (with light time correction if asked for)
      * @return geodetic point with light time correction
      */
     private NormalizedGeodeticPoint computeWithLightTimeCorrection(final AbsoluteDate date,
@@ -577,26 +627,41 @@ public class Rugged {
                                                                    final Transform scToInert, final Transform inertToBody,
                                                                    final Vector3D pInert, final Vector3D lInert) {
 
-        // compute the approximate transform between spacecraft and observed body
+        // Compute the transform between spacecraft and observed body
         final Transform approximate = new Transform(date, scToInert, inertToBody);
 
+        // Transform LOS in spacecraft frame to observed body
         final Vector3D  sL       = approximate.transformVector(los);
+        // Transform sensor position in spacecraft frame to observed body
         final Vector3D  sP       = approximate.transformPosition(sensorPosition);
 
+        // Compute point intersecting ground (= the ellipsoid) along the pixel LOS
         final Vector3D  eP1      = ellipsoid.transform(ellipsoid.pointOnGround(sP, sL, 0.0));
+
+        // Compute light time time correction (vs the ellipsoid) (s)
         final double    deltaT1  = eP1.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+        // Apply shift due to light time correction (vs the ellipsoid)
         final Transform shifted1 = inertToBody.shiftedBy(-deltaT1);
+
+        // Search the intersection of LOS (taking into account the light time correction if asked for) with DEM
         final NormalizedGeodeticPoint gp1  = algorithm.intersection(ellipsoid,
                                                                     shifted1.transformPosition(pInert),
                                                                     shifted1.transformVector(lInert));
 
+        // Convert the geodetic point (intersection of LOS with DEM) in cartesian coordinates
         final Vector3D  eP2      = ellipsoid.transform(gp1);
+
+        // Compute the light time correction (vs DEM) (s)
         final double    deltaT2  = eP2.distance(sP) / Constants.SPEED_OF_LIGHT;
+
+        // Apply shift due to light time correction (vs DEM)
         final Transform shifted2 = inertToBody.shiftedBy(-deltaT2);
+
         return algorithm.refineIntersection(ellipsoid,
-                                             shifted2.transformPosition(pInert),
-                                             shifted2.transformVector(lInert),
-                                             gp1);
+                                            shifted2.transformPosition(pInert),
+                                            shifted2.transformVector(lInert),
+                                            gp1);
     }
 
     /**

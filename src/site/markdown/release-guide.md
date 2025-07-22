@@ -3,8 +3,9 @@
 This release guide is largely inspired from [Hipparchus Release
 Guide](https://www.hipparchus.org/release-guide.html) and [Orekit Release Guide](https://www.orekit.org/site-orekit-development/release-guide.html). It lists the steps that
 have been used in the past to release a new version of Rugged. When in doubt
-ask the experts: Sébastien Dinot <sebastien.dinot@csgroup.eu> for website questions
-and Luc Maisonobe <luc.maisonobe@csgroup.eu> for everything else.
+ask the experts: Sébastien Dinot <sebastien.dinot@cs-soprasteria.com> for website questions
+and Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com> for everything else,
+or ask a question on the ["Rugged development" section of the forum](https://forum.orekit.org/c/rugged-development/7).
 
 ## Prerequisites
 
@@ -38,7 +39,7 @@ the technical documentation (static site).
 ## Verify the status of develop branch
 
 Before anything, check on the [continuous integration
-site](https://sonar.orekit.org/dashboard?id=org.orekit%3Arugged) that everything is fine on
+site](https://sonar.orekit.org/dashboard?branch=develop&id=orekit%3Arugged) that everything is fine on
 develop branch:
 
 * All tests pass;
@@ -47,7 +48,7 @@ develop branch:
 
 If not, fix the warnings and errors first !
 
-It is also necessary to check on the [Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/pipelines)
+It is also necessary to check on the [Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/-/pipelines?scope=all&page=1&ref=develop)
 that everything is fine on develop branch (i.e. all stages are passed).
 
 ## Prepare Git branch for release
@@ -58,6 +59,14 @@ everything else:
 
     git branch release-X.Y
     git checkout release-X.Y
+
+## Update Copyright in sources
+
+A copyright line appears at the beginning of the source code, static site, tutorials, .... like: 
+
+    /* Copyright 2013-2025 CS GROUP
+    
+It must be updated with the year of the release.
 
 ## Update maven plugins versions
 
@@ -177,10 +186,12 @@ everyone can review it:
 
 ## Static site (technical documentation)
 
-The static site is generated locally using:
+The static site is generated locally using
 
     mvn clean
     LANG=C mvn site
+
+TBN: Java 8 compiler is compulsory
 
 The official site is automatically updated on the hosting platform when work is 
 merged into branches `develop`, `release-*` or `master`.
@@ -215,17 +226,6 @@ and serve no purpose and can be deleted.
 
 Remove `rugged-X.Y.source-jar*` since they are duplicates of the
 `rugged-X.Y-sources.jar*` artifacts. Then click the “Close” button.
-
-## Update Rugged version in Rugged test website
-
-One edit needs to be made to the Rugged website before calling the vote. Fetch the current code:
-
-    git clone https://gitlab.orekit.org/orekit/website-2015
-
-Switch to `develop` branch and edit `_data/rugged/versions.yml` by adding the new version X.Y 
-to the list. 
-
-Once the modification pushed to develop branch, the [test website](https://test.orekit.org/rugged) will be updated
 
 ## Calling for the vote
 
@@ -344,22 +344,22 @@ Github automically adds two assets (zip and tarball archives of the tagged sourc
 ## Update Rugged website
 
 Several edits need to be made to the Rugged website after the vote.
+Fetch the current code:
 
-Edit `download/.htaccess` and replace the URLs of the 3 Rugged artifacts
-with the ones used to create the release notes.
+    git clone https://gitlab.orekit.org/orekit/website-2015
 
-Edit `_layouts/home_rugged.html` and edit the text of the button to use the new version.
+Switch to `develop` branch. 
 
-Edit `rugged/overview.html` with the new Orekit and Hipparchus versions. Don't forget to update the
-rugged/img/rugged-architecture.png image with the new dependencies.
+Edit `rugged/overview.html` with the new Orekit and Hipparchus versions. 
+Don't forget to update the `rugged/img/rugged-architecture.png` image with the new dependencies.
 
-Create a new post for the release in `_post/` using as template a previous Rugged post (in order to be published in the Rugged News page). To be noticed the `--future` option is needed to see a post in the future, otherwise `jekyll serve` will ignore it !
+Create a new post for the release in `_post/` using as template a previous Rugged post (in order to be published in the Rugged News page). 
 
-Run:
 
-    jekyll serve --future
+Once the modification pushed to develop branch, wait the pipeline on Gitlab is finished, then the [test website](https://test.orekit.org/rugged) will be updated.
 
-and make sure the website looks nice. View it on http://localhost:4000/
+Once the modification validated, merge the develop branch into the master branch and pushed the master branch. 
+Once the  pipeline on Gitlab is finished, then the [website](https://www.orekit.org/rugged) will be updated.
 
 ## Close X.Y milestone
 

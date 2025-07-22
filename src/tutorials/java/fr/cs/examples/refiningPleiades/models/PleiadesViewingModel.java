@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -52,7 +52,7 @@ public class PleiadesViewingModel {
     private static final int DIMENSION = 40000;
     private static final double LINE_PERIOD =  1.e-4; 
 
-    private double angle;
+    private double rollAngle;
     private LineSensor lineSensor;
     private String date;
 
@@ -62,7 +62,7 @@ public class PleiadesViewingModel {
     /** Simple constructor.
      * <p>
      *  initialize PleiadesViewingModel with
-     *  sensorName="line", incidenceAngle = 0.0, date = "2016-01-01T12:00:00.0"
+     *  sensorName="line", rollAngle = 0.0, date = "2016-01-01T12:00:00.0"
      * </p>
      */
     public PleiadesViewingModel(final String sensorName) {
@@ -72,14 +72,14 @@ public class PleiadesViewingModel {
 
     /** PleiadesViewingModel constructor.
      * @param sensorName sensor name
-     * @param incidenceAngle incidence angle
+     * @param rollAngle roll angle
      * @param referenceDate reference date
      */
-    public PleiadesViewingModel(final String sensorName, final double incidenceAngle, final String referenceDate) {
+    public PleiadesViewingModel(final String sensorName, final double rollAngle, final String referenceDate) {
     	
         this.sensorName = sensorName;
         this.date = referenceDate;
-        this.angle = incidenceAngle;
+        this.rollAngle = rollAngle;
         this.createLineSensor();
     }
 
@@ -99,9 +99,12 @@ public class PleiadesViewingModel {
     /** Build a LOS provider
      */
     public TimeDependentLOS buildLOS() {
-    	
+        
+        // Roll angle applied to the LOS
+        // Compute the transformation of vector K (Z axis) through the rotation around I (X axis) with the roll angle
+        // If roll angle = 0: vector center = vector K (Z axis)
         final LOSBuilder losBuilder = rawLOS(new Rotation(Vector3D.PLUS_I,
-                                                          FastMath.toRadians(this.angle),
+                                                          FastMath.toRadians(this.rollAngle),
                                                           RotationConvention.VECTOR_OPERATOR).applyTo(Vector3D.PLUS_K),
                                              Vector3D.PLUS_I, FastMath.toRadians(FOV / 2), DIMENSION);
 

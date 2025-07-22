@@ -1,4 +1,4 @@
-/* Copyright 2013-2022 CS GROUP
+/* Copyright 2013-2025 CS GROUP
  * Licensed to CS GROUP (CS) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -59,9 +59,11 @@ public class BasicScanAlgorithm implements IntersectionAlgorithm {
     /** Simple constructor.
      * @param updater updater used to load Digital Elevation Model tiles
      * @param maxCachedTiles maximum number of tiles stored in the cache
+     * @param isOverlappingTiles flag to tell if the DEM tiles are overlapping:
+     *                          true if overlapping; false otherwise.
      */
-    public BasicScanAlgorithm(final TileUpdater updater, final int maxCachedTiles) {
-        this.cache = new TilesCache<>(new SimpleTileFactory(), updater, maxCachedTiles);
+    public BasicScanAlgorithm(final TileUpdater updater, final int maxCachedTiles, final boolean isOverlappingTiles) {
+        this.cache = new TilesCache<>(new SimpleTileFactory(), updater, maxCachedTiles, isOverlappingTiles);
         this.hMin  = Double.POSITIVE_INFINITY;
         this.hMax  = Double.NEGATIVE_INFINITY;
         this.algorithmId = AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY;
