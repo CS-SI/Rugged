@@ -1,4 +1,4 @@
-<!--- Copyright 2013-2022 CS GROUP
+<!--- Copyright 2013-2025 CS GROUP
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -81,7 +81,7 @@ and the message should not appear.
 
 Configuring data loading is explained in the configuration page. For a start, the simplest configuration
  is to download the [orekit-data-main.zip](https://gitlab.orekit.org/orekit/orekit-data/-/archive/main/orekit-data-main.zip)
-file from the forge, to unzip it anywhere you want, rename the `orekit-data-master` folder that will be created
+file from the forge, to unzip it anywhere you want, rename the `orekit-data-main` folder that will be created
 into `orekit-data` and add the following lines at the start of your program:
 
     File orekitData = new File("/path/to/the/folder/orekit-data");
