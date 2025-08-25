@@ -128,7 +128,7 @@
 
   <organization>
     <name>CS GROUP</name>
-    <url>https://www.cs-soprasteria.com/</url>
+    <url>https://www.cs-soprasteria.com/en/</url>
   </organization>
 
   <licenses>
@@ -479,7 +479,7 @@
         <version>${rugged.maven-jxr-plugin.version}</version>
         <configuration>
           <linkJavadoc>false</linkJavadoc>
-          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="https://www.cs-soprasteria.com/">&nbsp;CS GROUP</a>. All rights reserved.]]></bottom>
+          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="https://www.cs-soprasteria.com/en/">&nbsp;CS GROUP</a>. All rights reserved.]]></bottom>
         </configuration>
       </plugin>
       <plugin>
@@ -487,7 +487,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${rugged.maven-javadoc-plugin.version}</version>
         <configuration>
-          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="https://www.cs-soprasteria.com/">&nbsp;CS GROUP</a>. All rights reserved.]]></bottom>
+          <bottom><![CDATA[Copyright &copy; ${project.inceptionYear}-{currentYear} <a href="https://www.cs-soprasteria.com/en/">&nbsp;CS GROUP</a>. All rights reserved.]]></bottom>
           <links>
             <link>https://docs.oracle.com/javase/8/docs/api/</link>
             <link>https://www.hipparchus.org/apidocs/</link>

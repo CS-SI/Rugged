@@ -79,7 +79,7 @@ gathered at one place, in a set of properties in `rugged/pom.xml`, for instance:
     ...
 
 You can find the latest version of the plugins using the search feature at
-[http://search.maven.org/#search](http://search.maven.org/#search). The
+[https://central.sonatype.com/](https://central.sonatype.com/). The
 properties name all follow the pattern `rugged.some-plugin-name.version`, the
 plugin name should be used in the web form to check for available versions.
 

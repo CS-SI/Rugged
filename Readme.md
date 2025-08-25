@@ -25,8 +25,7 @@ account:
 Direct and inverse location can be used to perform full ortho-rectification of
 images and correlation between sensors observing the same area.
 
-
-[![](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![](https://img.shields.io/:license-apache-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![](https://sonar.orekit.org/api/project_badges/measure?project=orekit%3Arugged&metric=alert_status)](https://sonar.orekit.org/dashboard?id=orekit%3Arugged)
 
 [![](https://sonar.orekit.org/api/project_badges/measure?project=orekit%3Arugged&metric=coverage)](https://sonar.orekit.org/component_measures?id=orekit%3Arugged&metric=coverage&view=treemap)
@@ -94,14 +93,14 @@ all released under business friendly FOSS licenses.
 
 ### Test-time dependencies
 
-* [JUnit 4](http://www.junit.org/), a widely used unit test framework released
-  under the Eclipse Public License, version 1.0.
+* [JUnit 4](https://www.junit.org/), a widely used unit test framework
+  released under the Eclipse Public License, version 1.0.
 
 More detailed information is available in the
 [Maven site](https://www.orekit.org/site-rugged-development/dependencies.html).
 
 ## License
 
-Rugged is licensed by [CS GROUP](https://www.cs-soprasteria.com/) under
-the [Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+Rugged is licensed by [CS GROUP](https://www.cs-soprasteria.com/en/) under
+the [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
 A copy of this license is provided in the [LICENSE.txt](LICENSE.txt) file.
