@@ -2,9 +2,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,7 @@
   * *very* fast
 
   * Both modern and legacy models for Earth rotation
-    * Lieske (1976), Wahr (1980), 
+    * Lieske (1976), Wahr (1980),
     * Mathews, Herring, Buffett (2002)
     * Capitaine (2006)
 
@@ -89,7 +89,7 @@
 Rugged is freely available both in source and binary formats, with all related
 documentation and tests.
 
-It is distributed under the [Apache License Version 2.0](./license.html). This
+It is distributed under the [Apache License Version 2.0](./licenses.html). This
 is a well known business-friendly license. This means anybody can use it to build
 any application, free or not. There are no strings attached to your own code.
 
@@ -98,12 +98,13 @@ interoperability in space systems.
 
 ## Maintained library
 
-Rugged has been in development since 2014 inside [CS GROUP](https://www.cs-soprasteria.com/ "CS GROUP homepage")
-and is still used and maintained by its dual teams
-of space dynamics and image processing experts.
+Rugged has been in development since 2014 inside
+[CS GROUP](https://www.cs-soprasteria.com/en/ "CS GROUP homepage") and is
+still used and maintained by its dual teams of space dynamics and image
+processing experts.
 
 Rugged is used for image processing of the Sentinel 2 mission at European Space
-Agency (ESA), as well as in the frame of ESA Scientific Exploitation of Operational Missions (SEOM), 
+Agency (ESA), as well as in the frame of ESA Scientific Exploitation of Operational Missions (SEOM),
 to calculate topographic shadow masks for Sentinel 2 products.
 
 Rugged has been used to validate Airbus Defence and Space (ADS) geolocation library.

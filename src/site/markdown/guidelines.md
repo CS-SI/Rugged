@@ -34,11 +34,11 @@ operations. The main driving goals are the following ones:
 
 The first goal, validation, implies tests must be as extensive as possible.
 They should include realistic operational cases but also contingency cases.
-The [jacoco](http://www.eclemma.org/jacoco/ "Jacoco homepage") tool must be used to
-monitor test coverage. A very high level of coverage is desired. We do not
-set up mandatory objective figures, but only guidelines here. However,a 60%
-line coverage would clearly not be acceptable at all and 80% would be considered
-deceptive.
+The [jacoco](https://www.eclemma.org/jacoco/ "Jacoco homepage") tool must be
+used to monitor test coverage. A very high level of coverage is desired. We do
+not set up mandatory objective figures, but only guidelines here. However,a
+60% line coverage would clearly not be acceptable at all and 80% would be
+considered deceptive.
 
 The second goal, robustness, has some specific implications for a low level
 component like Rugged. In some sense, it can be considered an extension of the
@@ -86,13 +86,13 @@ Orbits, dates, vectors, and rotations are all immutable objects.
 
 ## Source Control Management
 
-The source code control management system used is [Git](http://git-scm.com/ "Git homepage"). The
-main Rugged repository is located at [https://gitlab.orekit.org/orekit/rugged.git](https://gitlab.orekit.org/orekit/rugged.git).
+The source code control management system used is [Git](https://git-scm.com/ "Git homepage").
+The main Rugged repository is located at
+[https://gitlab.orekit.org/orekit/rugged.git](https://gitlab.orekit.org/orekit/rugged.git).
 
-Starting after version 2.0, the branch management workflow is adapted from
-both [git flow](http://nvie.com/posts/a-successful-git-branching-model/) and 
-from the [Orfeo ToolBox Workflow](https://wiki.orfeo-toolbox.org/index.php/Git#Workflow "OTB workflow"). 
-It is the same as chosen for Orekit.
+Starting after version 2.0, the branch management workflow is adapted from the
+[git flow](https://nvie.com/posts/a-successful-git-branching-model/). It is
+the same as chosen for Orekit.
 
 ![Rugged git workflow](./images/rugged-git-flow.png)
 
@@ -132,16 +132,15 @@ The master branch always refer to the latest stable release performed. No
 direct work is done on this branch. It is updated only by merging either
 release branches or bugfix branches branches to it.
 
-
 ## Style Rules
 
-For reading ease and consistency, the existing code style should be
-preserved for all new developments. The rules are common ones, inherited
-mainly from the Sun Code Conventions for the Java Programming Language guide style and
-from the default [checkstyle](http://checkstyle.sourceforge.net/) tool
+For reading ease and consistency, the existing code style should be preserved
+for all new developments. The rules are common ones, inherited mainly from the
+Sun Code Conventions for the Java Programming Language guide style and from
+the default [checkstyle](https://checkstyle.sourceforge.net/) tool
 configuration. A few of these rules are displayed below. The complete
-definition is given by the checkstyle configuration file in the project
-root directory.
+definition is given by the checkstyle configuration file in the project root
+directory.
 
 * *header rule*
 
@@ -234,4 +233,3 @@ root directory.
   fix _all_ errors and warnings found by checkstyle
 
 [Top of the page](#top)
-

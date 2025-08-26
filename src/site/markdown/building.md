@@ -2,9 +2,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,23 +17,24 @@
 # Building Rugged
 
 Rugged can be built from source using several different tools.
-  
+
 All these tools are Java based and can run on many different operating
 systems, including Unix, GNU/Linux, Windows and Mac OS X. Some GNU/Linux
 distributions provide these tools in their packages repositories.
 
 ## Building with Maven 3
 
-[Maven](http://maven.apache.org/ "Maven homepage") is a build tool that goes far beyond
-simply compiling and packaging a product. It is also able to resolve
-dependencies (including downloading the appropriate versions from the public
-repositories), to run automated tests, to launch various checking tools and
-to create a web site for a project. It runs on any platform supporting Java.
-  
+[Maven](https://maven.apache.org/ "Maven homepage") is a build tool that goes
+far beyond simply compiling and packaging a product. It is also able to
+resolve dependencies (including downloading the appropriate versions from the
+public repositories), to run automated tests, to launch various checking tools
+and to create a web site for a project. It runs on any platform supporting
+Java.
+
 For systems not providing maven as a package, maven can be
-[downloaded](http://maven.apache.org/download.cgi) from its site at the
-Apache Software Foundation. This site also explains the
-installation procedure.
+[downloaded](https://maven.apache.org/download.cgi) from its site at the
+Apache Software Foundation. This site also explains the installation
+procedure.
 
 As with all maven enabled projects, building official released versions of
 Rugged is straightforward (see below for the special case of development versions),
@@ -67,16 +68,16 @@ running the commands below (using Linux command syntax):
     git clone -b develop https://gitlab.orekit.org/orekit/orekit.git
     cd orekit
     mvn install
-    
+
 If, in a similar way, the command above ends with an error message like:
- 
-    [ERROR] Failed to execute goal on project orekit: Could not resolve dependencies for project org.orekit:orekit:jar:Y.y-SNAPSHOT: 
-            The following artifacts could not be resolved: org.hipparchus:hipparchus-core:jar:Z.z-SNAPSHOT, org.hipparchus:hipparchus-geometry:jar:Z.z-SNAPSHOT,   
-            ... 
+
+    [ERROR] Failed to execute goal on project orekit: Could not resolve dependencies for project org.orekit:orekit:jar:Y.y-SNAPSHOT:
+            The following artifacts could not be resolved: org.hipparchus:hipparchus-core:jar:Z.z-SNAPSHOT, org.hipparchus:hipparchus-geometry:jar:Z.z-SNAPSHOT,
+            ...
             Could not find artifact org.hipparchus:hipparchus-core:jar:Z.Z-SNAPSHOT
 
-Before building the Orekit artefact, you should start by building the missing Hipparchus artifact 
-and install it in your local maven repository 
+Before building the Orekit artefact, you should start by building the missing Hipparchus artifact
+and install it in your local maven repository
 beforehand, in the same way as Orekit, by cloning
 the Hipparchus source from Hipparchus git repository at GitHub:
 
@@ -90,7 +91,7 @@ attempt again the mvn command at Rugged level, this time it should succeed as th
 necessary artifact is now locally available.
 
 If you need to configure a proxy server for dependencies retrieval, see
-the [Guide to using proxies](http://maven.apache.org/guides/mini/guide-proxies.html)
+the [Guide to using proxies](https://maven.apache.org/guides/mini/guide-proxies.html)
 page at the maven site.
 
 If you already use maven for your own projects (or simply eclipse, see
@@ -100,18 +101,20 @@ with the following command:
     mvn install
 
 For other commands like generating the site, or generating the
-[checkstyle](http://checkstyle.sourceforge.net/ "Checkstyle homepage"),
+[checkstyle](https://checkstyle.sourceforge.io/ "Checkstyle homepage"),
 [spotbugs](https://spotbugs.github.io/ "Spotbugs homepage") or
-[jacoco](http://www.eclemma.org/jacoco/ "Jacoco homepage") reports, see the maven
-plugins documentation at [maven site](http://maven.apache.org/plugins/index.html "Maven plugins homepage").
+[jacoco](https://www.eclemma.org/jacoco/ "Jacoco homepage") reports, see the
+maven plugins documentation at
+[maven site](https://maven.apache.org/plugins/index.html "Maven plugins homepage").
 
 ## Building with Eclipse
 
-[Eclipse](http://www.eclipse.org/  "Eclipse homepage") is a very rich Integrated Development
-Environment (IDE). It is a huge product and not a simple build tool.
+[Eclipse](https://www.eclipse.org "Eclipse homepage") is a very rich
+Integrated Development Environment (IDE). It is a huge product and not
+a simple build tool.
 
 For systems not providing eclipse as a package, it can be downloaded from its
-site at the [Eclipse Foundation](http://www.eclipse.org/downloads/).
+site at the [Eclipse Foundation](https://www.eclipse.org/downloads/).
 
 The simplest way to use Rugged with Eclipse is to follow these steps:
 
@@ -119,7 +122,7 @@ The simplest way to use Rugged with Eclipse is to follow these steps:
   inside your Eclipse workspace. The source distribution file name has a name
   of the form rugged-x.y-sources.zip where x.y is the version number. Unpacking
   this zip file should create a folder of the form rugged-x.y in your workspace.
-  
+
 
   * using Eclipse, import the project by selecting in the top level "File" menu
     the entry "Import..."

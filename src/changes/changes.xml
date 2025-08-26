@@ -15,11 +15,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<document>
+<document xmlns="http://maven.apache.org/changes/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <properties>
     <title>Rugged Changes</title>
   </properties>
   <body>
+    <release version="4.x" date="TBD" description="TBD">
+    </release>
     <release version="4.0" date="2025-06-30" description="This is a major release.
     It mades Rugged able to deal with seamless DEM tiles and fixes a few bugs.
     This version depends on Orekit 13.0.3 and Hipparchus 4.0.1.">
@@ -47,7 +49,6 @@
       <action dev="guylaine" type="update">
         Updated several URLs and mails in documentation (static site, Readme) .
       </action>
-    
     </release>
     <release version="3.0" date="2022-07-05" description="This is a major release.
     It fixes a few bugs.
@@ -69,8 +70,8 @@
       </action>
     </release>
     <release version="2.2" date="2020-07-31" description="This is a minor release.
-     It adds access to algorithm identifier, 
-     corrects an Earth constant for model IERS96, 
+     It adds access to algorithm identifier,
+     corrects an Earth constant for model IERS96,
      improves documentation and fixes a few bugs.
      Automatic building, release and code analysis are available with Gitlab CI.
      This version depends on Orekit 10.2 and Hipparchus 1.7.">
@@ -113,7 +114,7 @@
         Add package-info documentation.
       </action>
      </release>
-     
+
      <release version="2.1" date="2019-03-14" description="This is a minor release.
      It adds refraction in inverse location and fixes a few bugs. This version depends
      on Orekit 9.3.1 and Hipparchus 1.4.">
@@ -122,18 +123,18 @@
       </action>
       <action dev="luc" type="fix" issue="376">
         Direct location may result to a null result in some very rugged region.
-        In Duvenhage algorithm, in the refineIntersection method for the DEM, 
-        some rare cases led to no intersection (as a result from SimpleTile.cellIntersection) 
-        with the closeGuess given as input of refineIntersection.By shifting the solution 
+        In Duvenhage algorithm, in the refineIntersection method for the DEM,
+        some rare cases led to no intersection (as a result from SimpleTile.cellIntersection)
+        with the closeGuess given as input of refineIntersection.By shifting the solution
         along the LOS direction, with an iterative process, we are able to find the intersection.
       </action>
       <action dev="guylaine" type="fix" issue="377">
         Add the possibility to suspend and resume the dump.
-        When performing a dump, in some cases, some extra informations are dumped 
-        but are not relevant. 
+        When performing a dump, in some cases, some extra informations are dumped
+        but are not relevant.
         For instance when updating a tile for a SRTM tile, we need to add the geoid
         value of the current point. In the dump file, the geoid tile is also dumped
-        and it leads to bad results when performing the DumpReplayer, as the geoid 
+        and it leads to bad results when performing the DumpReplayer, as the geoid
         elevations are read instead of the real elevations.
       </action>
       <action dev="guylaine" type="update">
@@ -153,23 +154,23 @@
         log a meaningful error message.
       </action>
       <action dev="guylaine" type="fix" issue="372">
-        Add (optional) atmospheric refraction for inverse location. 
+        Add (optional) atmospheric refraction for inverse location.
         In Rugged 2.0, only the direct location can take into account the atmospheric refraction.
       </action>
       <action dev="guylaine" type="add" due-to="Issam Boukerch">
         Changed terms for refining tutorials.
-        The "fulcrum points" term is changed into "Ground Control Points (GCP)" and 
+        The "fulcrum points" term is changed into "Ground Control Points (GCP)" and
         the "liaison points" term into "tie points".
       </action>
        <action dev="luc" type="fix" issue="371">
-        For refining computation, correct the constructor of the class 
+        For refining computation, correct the constructor of the class
         adjustment.measurements.SensorToGroundMapping due to a parameters reversal error.
       </action>
       <action dev="guylaine" type="fix" issue="256">
         Bad check of maxDate validity in utils.SpacecraftToObservedBody.SpacecraftToObservedBody
         method.
       </action>
-           
+
       <action dev="luc" type="add" due-to="Lars Næsbye Christensen">
         Updated Danish translations of error messages.
       </action>
@@ -182,9 +183,9 @@
       <action dev="luc" type="add" due-to="Beatriz Salazar García">
         Updated Spanish translations of error messages.
       </action>
-      
+
     </release>
-      
+
     <release version="2.0" date="2017-12-19" description="This is a major release.
       It mainly provides a refinement feature (i.e. adjusting the viewing model
       parameters to match ground control points.">
@@ -639,7 +640,7 @@
         Added getLatitudeIndex and getLongitudeIndex in Tile.
       </action>
       <action dev="luc" type="fix">
-        Handle properly tiles boundaries.    
+        Handle properly tiles boundaries.
         Tiles are expected to have no inter-tile gap, i.e. the boundary row/columns are repeated in neighboring tiles.
       </action>
       <action dev="luc" type="update">
@@ -754,7 +755,7 @@
         Added method to check ground point coverage.
       </action>
       <action dev="luc" type="update">
-        Reference latitude/longitude must be the minimum.    
+        Reference latitude/longitude must be the minimum.
         This ensures simple search for tiles given a ground point.
       </action>
     </release>

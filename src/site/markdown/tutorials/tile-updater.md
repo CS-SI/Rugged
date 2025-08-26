@@ -2,9 +2,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,11 @@ Same case as the tutorial [Direct location with a DEM](./direct-location-with-DE
 
 **WARNING**
 
-This tutorial will not be able to compile under [Rugged gitlab CI](https:gitlab.orekit.org/orekit/rugged/-/pipelines) as GDAL is not authorized in Rugged official releases.
-Don't commit under official branches (master, develop, release, ...) of Rugged, a pom.xml with the dependency to GDAL.
+This tutorial will not be able to compile under
+[Rugged gitlab CI](https://gitlab.orekit.org/orekit/rugged/-/pipelines) as
+GDAL is not authorized in Rugged official releases. Don't commit under
+official branches (master, develop, release, ...) of Rugged, a pom.xml with
+the dependency to GDAL.
 
 ## Needs
 
@@ -32,11 +35,11 @@ Search the web for how to install GDAL according to your OS.
 For instance for Linux/Ubuntu:
 
 The first time you want to install GDAL, you need to add a specific repository:
-   
+
 For GDAL 3.x, use the following repository:
 
     sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-                     
+
 For GDAL 2.x, use the following repository:
 
     sudo add-apt-repository ppa:ubuntugis/ppa
@@ -54,7 +57,7 @@ In `<properties>` part:
     <rugged.gdal.version>3.0.0</rugged.gdal.version>
     <!-- GDAL native library path -->
     <rugged.gdal.native.library.path>${env.GDAL_PATH}</rugged.gdal.native.library.path>
-   
+
 and in `<dependencies>` part:
 
     <dependency>
@@ -73,14 +76,14 @@ For instance (for Linux) according to the GDAL version and the linux distributio
 
        export GDAL_PATH=/COTS/gdal-3.0.0/swig/java/
    or
-   
+
        export GDAL_PATH=/usr/lib/jni
 
 ### Get the following SRTM tile
 
 This example needs one tile under a specific directory: `17/05/srtm_17_05.tif`
 
-For instance from : [SRTM Tile Grabber](http://dwtkns.com/srtm/)
+For instance from : [SRTM Tile Grabber](https://dwtkns.com/srtm/)
 
     srtm_17_05.zip
 
@@ -91,7 +94,7 @@ or changed the method: `getRasterFilePath(latitude, longitude)`
 
 This example needs the geoid file: `egm96_15.gtx`
 
-For instance from the [GeographicLib](https:geographiclib.sourceforge.io/C++/doc/geoid.html)
+For instance from the [GeographicLib](https://geographiclib.sourceforge.io/C++/doc/geoid.html)
 
 ### Update the path in variables demRootDir and geoidFilePath
 
@@ -101,20 +104,21 @@ Into the following code ...
 
 This is a whole example using the SRTM tiles.
 
+
     public class DirectLocationWithSRTMdem {
-    
+
     // Root dir for the SRTM tiles
     final static String demRootDir = "/mypath/dem-data/SRTM";
-    
+
     // File path for the GEOID
     final static String geoidFilePath = "/mypath/dem-data/GEOID/egm96_15.gtx";
-    
-    // Geoid elevations 
+
+    // Geoid elevations
     static GEOIDelevationReader geoidElevationReader;
     static GdalTransformTools geoidGTTools;
     static double[][] geoidElevations;
 
-    
+
     public static void main(String[] args) {
 
         try {
@@ -132,12 +136,12 @@ This is a whole example using the SRTM tiles.
 
             // Get the GEOID data once for all
             geoidElevationReader = new GEOIDelevationReader(geoidFilePath);
-            geoidGTTools = new GdalTransformTools(geoidElevationReader.getGeoidGeoTransformInfo(), 
+            geoidGTTools = new GdalTransformTools(geoidElevationReader.getGeoidGeoTransformInfo(),
                                                   geoidElevationReader.getGeoidLonSize(), geoidElevationReader.getGeoidLatSize());
             geoidElevations = geoidElevationReader.getElevationsWholeEarth();
 
             // Initialize the SRTM tile updater
-            
+
             // SRTM elevations are given over the GEOID.
             // Rugged needs elevations over the ellipsoid so the Geoid must be added to raw SRTM elevations.
             SRTMelevationUpdater srtmUpdater = new SRTMelevationUpdater(demRootDir);
@@ -173,7 +177,7 @@ This is a whole example using the SRTM tiles.
             // With the LOS and the datation now defined, we can initialize a line sensor object in Rugged:
             LineSensor lineSensor = new LineSensor("mySensor", lineDatation, Vector3D.ZERO, lineOfSight);
 
-    
+
             // Satellite position, velocity and attitude
             // =========================================
 
@@ -216,7 +220,7 @@ This is a whole example using the SRTM tiles.
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:01:56.992937", -1198331.706d, -6154056.146d, 3466192.446d, -2369.401d, -3161.764d, -6433.531d);
             addSatellitePV(gps, eme2000, itrf, satellitePVList, "2009-12-11T17:02:18.592937", -1249311.381d, -6220723.191d, 3326367.397d, -2350.574d, -3010.159d, -6513.056d);
 
-    
+
             // Rugged initialization
             // ---------------------
             Rugged rugged = new RuggedBuilder().
@@ -241,14 +245,14 @@ This is a whole example using the SRTM tiles.
                     FastMath.toDegrees(upLeftPoint.getLongitude()),
                     upLeftPoint.getAltitude());
 
-            // DEM SRTM with Geoid: (value of GEOID checked with QGIS around -30 meters) 
+            // DEM SRTM with Geoid: (value of GEOID checked with QGIS around -30 meters)
             // upper left point: φ =   37.585 °, λ =  -96.950 °, h =  344.024 m
-            
+
             // DEM SRTM without Geoid (not to be used as elevation must be over ellipsoid for Rugged):
             // upper left point: φ =   37.585 °, λ =  -96.950 °, h =  373.675 m
-            
-           
-            
+
+
+
         } catch (OrekitException oe) {
             System.err.println(oe.getLocalizedMessage());
             System.exit(1);
@@ -259,12 +263,12 @@ This is a whole example using the SRTM tiles.
 
     }
 
-    
+
     private static void addSatellitePV(TimeScale gps, Frame eme2000, Frame itrf,
                                        ArrayList<TimeStampedPVCoordinates> satellitePVList,
                                        String absDate,
                                        double px, double py, double pz, double vx, double vy, double vz) {
-        
+
         AbsoluteDate ephemerisDate = new AbsoluteDate(absDate, gps);
         Vector3D position = new Vector3D(px, py, pz); // in ITRF, unit: m
         Vector3D velocity = new Vector3D(vx, vy, vz); // in ITRF, unit: m/s
@@ -284,9 +288,9 @@ This is a whole example using the SRTM tiles.
         satelliteQList.add(pair);
     }
 
-    
+
     /**
-     * To read SRTM tiles (get from http://dwtkns.com/srtm/)
+     * To read SRTM tiles (get from https://dwtkns.com/srtm/)
      */
     private static class SRTMelevationUpdater implements TileUpdater {
 
@@ -355,7 +359,7 @@ This is a whole example using the SRTM tiles.
 
             // Open the SRTM tile
             org.gdal.gdal.Dataset srtmDataset = org.gdal.gdal.gdal.Open(rasterFileName, org.gdal.gdalconst.gdalconst.GA_ReadOnly);
-            
+
             // Get information about the tile
             int rasterLonSize = srtmDataset.GetRasterXSize();
             int rasterLatSize = srtmDataset.GetRasterYSize();
@@ -378,7 +382,7 @@ This is a whole example using the SRTM tiles.
                 minLon = srtmGeoTransformInfo[0] + 0.5 * lonStep;
                 minLat = srtmGeoTransformInfo[3] - (rasterLatSize - 0.5) * latStep;
             }
-            
+
             // Get the raster band from the tile
             org.gdal.gdal.Band band = srtmDataset.GetRasterBand(1);
 
@@ -408,7 +412,7 @@ This is a whole example using the SRTM tiles.
                 for (int jLon = 0; jLon < rasterLonSize; jLon++) {
 
                     double elevationOverGeoid = 0.0;
-                    
+
                     // Get elevation over GEOID (for SRTM)
                     elevationOverGeoid = data[iLat * rasterLonSize + jLon];
 
@@ -420,11 +424,11 @@ This is a whole example using the SRTM tiles.
                     // => for SRTM , we must add geoid value
                     double lonDeg = srtmGTTools.getXFromPixelLine(jLon, iLat);
                     double latDeg = srtmGTTools.getYFromPixelLine(jLon, iLat);
-                    
+
                     // Get the geoid elevation at latDeg and lonDeg
                     int geoidIndexLatitude = (int) FastMath.floor(geoidGTTools.getLineNumFromLatLon(latDeg, lonDeg));
                     int geoidIndexLongitude = (int) FastMath.floor(geoidGTTools.getPixelNumFromLatLon(latDeg, lonDeg));
-                    
+
                     double elevationOverEllipsoid = elevationOverGeoid + geoidElevations[geoidIndexLatitude][geoidIndexLongitude];
 
                     // Set elevation over the ellipsoid
@@ -459,11 +463,11 @@ This is a whole example using the SRTM tiles.
 
             String filePath = this.srtmRootDirectory + File.separator + parentDir + File.separator + subDir + File.separator +
                     "srtm_" + parentDir + "_" + subDir + ".tif";
-            
+
             return filePath;
         }
 
-        /** Chech the root directory for the SRTM files and the presence of .tif 
+        /** Chech the root directory for the SRTM files and the presence of .tif
          * @param directory
          * @return true if everything OK
          */
@@ -541,7 +545,7 @@ This is a whole example using the SRTM tiles.
 
             // Open the Geoid dataset
             openGeoid(geoidFilePath);
-            
+
             // Analyze and read the raster: initialize this.elevationsWholeEarth
             this.geoidGeoTransformInfo = readRaster();
         }
@@ -617,7 +621,7 @@ This is a whole example using the SRTM tiles.
         public double[][] getElevationsWholeEarth() {
             return elevationsWholeEarth;
         }
-        
+
         public double[] getGeoidGeoTransformInfo() {
             return geoidGeoTransformInfo;
         }
@@ -629,7 +633,7 @@ This is a whole example using the SRTM tiles.
         public int getGeoidLatSize() {
             return geoidLatSize;
         }
-        
+
         /** Open the geoid dataset
          * @param geoidFilePath the geoid file path
          * @return the geoid dataset
@@ -645,7 +649,7 @@ This is a whole example using the SRTM tiles.
             return this.geoidDataset;
         }
     }
-    
+
     /**
      * Tool using GeoTransform info returned from GDAL.
      */
@@ -730,8 +734,8 @@ This is a whole example using the SRTM tiles.
         }
     }
     }
-    
-    
+
+
 **To be noticed:**
 
 if you are using a version of Rugged &le; 3.0, you need to replace the call:
@@ -743,4 +747,3 @@ by
      setDigitalElevationModel(srtmUpdater, SRTMelevationUpdater.NUMBER_TILES_CACHED)
 
 and use a DEM with overlapping tiles as explained in [Direct location with a DEM](./direct-location-with-DEM.html).
-  

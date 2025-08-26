@@ -21,7 +21,7 @@
 In order to get the source for officially released versions, go to the
 [Release page](https://gitlab.orekit.org/orekit/rugged/tags) in Rugged
 forge and select one of the `rugged-x.y-sources.zip` files. The `x.y` part in the name
-specifies the version. 
+specifies the version.
 
 If this is the first time you download the library and
 you have not yet set up your own data set with UTC-TAI history, JPL ephemerides,
@@ -35,8 +35,8 @@ master branch.
 
 ## Development version
 
-The development of the Rugged project is done using the [Git](http://git-scm.com/ "Git homepage")
-source code control system. Rugged Git master repository is available online.  
+The development of the Rugged project is done using the [Git](https://git-scm.com "Git homepage")
+source code control system. Rugged Git master repository is available online.
 The latest developments are in the develop branch. This is the one you want to retrieve
 if you need the latest feature before they are published in an official release.
 See [guidelines](./guidelines.html) for the branching workflow used in Rugged.
