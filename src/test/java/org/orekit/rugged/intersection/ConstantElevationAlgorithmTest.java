@@ -17,7 +17,7 @@
 package org.orekit.rugged.intersection;
 
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -25,10 +25,10 @@ import java.net.URISyntaxException;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.attitudes.Attitude;
 import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
@@ -58,10 +58,10 @@ public class ConstantElevationAlgorithmTest {
         IntersectionAlgorithm constantElevation = new ConstantElevationAlgorithm(150.0);
         NormalizedGeodeticPoint gpRef = duvenhage.intersection(earth, state.getPVCoordinates().getPosition(), los);
         NormalizedGeodeticPoint gpConst = constantElevation.intersection(earth, state.getPVCoordinates().getPosition(), los);
-        Assert.assertEquals(gpRef.getLatitude(),  gpConst.getLatitude(),  1.0e-6);
-        Assert.assertEquals(gpRef.getLongitude(), gpConst.getLongitude(), 1.0e-6);
-        Assert.assertEquals(gpRef.getAltitude(),  gpConst.getAltitude(),  1.0e-3);
-        Assert.assertEquals(150.0,  constantElevation.getElevation(0.0, 0.0),  1.0e-3);
+        Assertions.assertEquals(gpRef.getLatitude(),  gpConst.getLatitude(),  1.0e-6);
+        Assertions.assertEquals(gpRef.getLongitude(), gpConst.getLongitude(), 1.0e-6);
+        Assertions.assertEquals(gpRef.getAltitude(),  gpConst.getAltitude(),  1.0e-3);
+        Assertions.assertEquals(150.0,  constantElevation.getElevation(0.0, 0.0),  1.0e-3);
 
         // shift longitude 2π
         NormalizedGeodeticPoint shifted =
@@ -70,7 +70,7 @@ public class ConstantElevationAlgorithmTest {
                                                                                  gpConst.getLongitude(),
                                                                                  gpConst.getAltitude(),
                                                                                  2 * FastMath.PI));
-        Assert.assertEquals(2 * FastMath.PI + gpConst.getLongitude(), shifted.getLongitude(), 1.0e-6);
+        Assertions.assertEquals(2 * FastMath.PI + gpConst.getLongitude(), shifted.getLongitude(), 1.0e-6);
 
     }
 
@@ -81,10 +81,10 @@ public class ConstantElevationAlgorithmTest {
         IntersectionAlgorithm constantElevation = new ConstantElevationAlgorithm(0.0);
         NormalizedGeodeticPoint gpRef = ignore.intersection(earth, state.getPVCoordinates().getPosition(), los);
         NormalizedGeodeticPoint gpConst = constantElevation.intersection(earth, state.getPVCoordinates().getPosition(), los);
-        Assert.assertEquals(gpRef.getLatitude(),  gpConst.getLatitude(),  1.0e-6);
-        Assert.assertEquals(gpRef.getLongitude(), gpConst.getLongitude(), 1.0e-6);
-        Assert.assertEquals(gpRef.getAltitude(),  gpConst.getAltitude(),  1.0e-3);
-        Assert.assertEquals(0.0,  constantElevation.getElevation(0.0, 0.0),  1.0e-3);
+        Assertions.assertEquals(gpRef.getLatitude(),  gpConst.getLatitude(),  1.0e-6);
+        Assertions.assertEquals(gpRef.getLongitude(), gpConst.getLongitude(), 1.0e-6);
+        Assertions.assertEquals(gpRef.getAltitude(),  gpConst.getAltitude(),  1.0e-3);
+        Assertions.assertEquals(0.0,  constantElevation.getElevation(0.0, 0.0),  1.0e-3);
 
         // shift longitude 2π
         NormalizedGeodeticPoint shifted =
@@ -93,11 +93,11 @@ public class ConstantElevationAlgorithmTest {
                                                                                  gpConst.getLongitude(),
                                                                                  gpConst.getAltitude(),
                                                                                  2 * FastMath.PI));
-        Assert.assertEquals(2 * FastMath.PI + gpConst.getLongitude(), shifted.getLongitude(), 1.0e-6);
+        Assertions.assertEquals(2 * FastMath.PI + gpConst.getLongitude(), shifted.getLongitude(), 1.0e-6);
 
         // Simple test for test coverage purpose
         double elevation0 = ignore.getElevation(gpRef.getLatitude(), gpConst.getLatitude());
-        Assert.assertEquals(elevation0, 0.0, 1.e-15);
+        Assertions.assertEquals(elevation0, 0.0, 1.e-15);
     }
     
     @Test
@@ -109,7 +109,7 @@ public class ConstantElevationAlgorithmTest {
         assertEquals(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID, ignore.getAlgorithmId());
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws  URISyntaxException {
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(path)));
@@ -141,7 +141,7 @@ public class ConstantElevationAlgorithmTest {
 
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         earth     = null;
         updater   = null;

@@ -17,7 +17,7 @@
 package org.orekit.rugged;
 
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -30,7 +30,7 @@ import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
@@ -127,7 +127,7 @@ public class TestUtils {
                 }
             }
         } catch (IllegalAccessException iae) {
-            Assert.fail(iae.getMessage());
+            Assertions.fail(iae.getMessage());
         }
     }
     
@@ -147,7 +147,7 @@ public class TestUtils {
                 }
             }
         } catch (IllegalAccessException iae) {
-            Assert.fail(iae.getMessage());
+            Assertions.fail(iae.getMessage());
         }
     }
     
@@ -333,12 +333,12 @@ public class TestUtils {
     /**
      * Asserts that two SensorPixel are equal to within a positive delta for each component.
      * For more details see: 
-     * org.junit.assert.assertEquals(String message, double expected, double actual, double delta)
+     * org.junit.assert.assertEquals(double expected, double actual, double delta)
      */
     static public void sensorPixelAssertEquals(SensorPixel expected, SensorPixel result, double delta) {
         
-        assertEquals(null,expected.getLineNumber(), result.getLineNumber(), delta);
-        assertEquals(null,expected.getPixelNumber(), result.getPixelNumber(), delta);
+        assertEquals(expected.getLineNumber(), result.getLineNumber(), delta);
+        assertEquals(expected.getPixelNumber(), result.getPixelNumber(), delta);
     }
 
     /**

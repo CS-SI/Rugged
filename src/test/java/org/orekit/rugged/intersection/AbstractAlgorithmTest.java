@@ -24,10 +24,10 @@ import org.hipparchus.geometry.euclidean.threed.Line;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.attitudes.Attitude;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
@@ -75,9 +75,9 @@ public abstract class AbstractAlgorithmTest {
                                                     earth.getBodyFrame().getTransformTo(state.getFrame(), state.getDate()),
                                                     state.toTransform());
         Vector3D pointInSpacecraftFrame = earthToSpacecraft.transformPosition(groundP);
-        Assert.assertEquals(     0.000, pointInSpacecraftFrame.getX(), 1.0e-3);
-        Assert.assertEquals(-87754.914, pointInSpacecraftFrame.getY(), 1.0e-3);
-        Assert.assertEquals(790330.254, pointInSpacecraftFrame.getZ(), 1.0e-3);
+        Assertions.assertEquals(     0.000, pointInSpacecraftFrame.getX(), 1.0e-3);
+        Assertions.assertEquals(-87754.914, pointInSpacecraftFrame.getY(), 1.0e-3);
+        Assertions.assertEquals(790330.254, pointInSpacecraftFrame.getZ(), 1.0e-3);
 
         // test direct location
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
@@ -85,7 +85,7 @@ public abstract class AbstractAlgorithmTest {
         GeodeticPoint result   = algorithm.refineIntersection(earth, position, los,
                                                               algorithm.intersection(earth, position, los));
         checkIntersection(position, los, result);
-        Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
+        Assertions.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
     }
 
@@ -110,7 +110,7 @@ public abstract class AbstractAlgorithmTest {
         GeodeticPoint result   = algorithm.refineIntersection(earth, position, los,
                                                               algorithm.intersection(earth, position, los));
         checkIntersection(position, los, result);
-        Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
+        Assertions.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
     }
 
@@ -130,24 +130,24 @@ public abstract class AbstractAlgorithmTest {
         Vector3D groundP = earth.transform(groundGP);
 
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
-        Assert.assertEquals(  0.0, algorithm.getElevation(latitude, longitude - 2.0e-5), 1.0e-6);
-        Assert.assertEquals(120.0, algorithm.getElevation(latitude, longitude + 2.0e-5), 1.0e-6);
+        Assertions.assertEquals(  0.0, algorithm.getElevation(latitude, longitude - 2.0e-5), 1.0e-6);
+        Assertions.assertEquals(120.0, algorithm.getElevation(latitude, longitude + 2.0e-5), 1.0e-6);
 
         // preliminary check: the point has been chosen in the spacecraft (YZ) plane
         Transform earthToSpacecraft = new Transform(state.getDate(),
                                                     earth.getBodyFrame().getTransformTo(state.getFrame(), state.getDate()),
                                                     state.toTransform());
         Vector3D pointInSpacecraftFrame = earthToSpacecraft.transformPosition(groundP);
-        Assert.assertEquals(     0.000, pointInSpacecraftFrame.getX(), 1.0e-3);
-        Assert.assertEquals( 66702.419, pointInSpacecraftFrame.getY(), 1.0e-3);
-        Assert.assertEquals(796873.178, pointInSpacecraftFrame.getZ(), 1.0e-3);
+        Assertions.assertEquals(     0.000, pointInSpacecraftFrame.getX(), 1.0e-3);
+        Assertions.assertEquals( 66702.419, pointInSpacecraftFrame.getY(), 1.0e-3);
+        Assertions.assertEquals(796873.178, pointInSpacecraftFrame.getZ(), 1.0e-3);
 
         Vector3D      position = state.getPVCoordinates(earth.getBodyFrame()).getPosition();
         Vector3D      los      = groundP.subtract(position);
         GeodeticPoint result   = algorithm.refineIntersection(earth, position, los,
                                                               algorithm.intersection(earth, position, los));
         checkIntersection(position, los, result);
-        Assert.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
+        Assertions.assertEquals(0.0, groundP.distance(earth.transform(result)), 2.0e-9);
 
     }
 
@@ -155,12 +155,12 @@ public abstract class AbstractAlgorithmTest {
 
         // check the point is on the line
         Line line = new Line(position, new Vector3D(1, position, 1e6, los), 1.0e-12);
-        Assert.assertEquals(0.0, line.distance(earth.transform(intersection)), 3.0e-9);
+        Assertions.assertEquals(0.0, line.distance(earth.transform(intersection)), 3.0e-9);
 
         // check the point is on the Digital Elevation Model
         MinMaxTreeTile tile = new MinMaxTreeTileFactory().createTile();
         updater.updateTile(intersection.getLatitude(), intersection.getLongitude(), tile);
-        Assert.assertEquals(tile.interpolateElevation(intersection.getLatitude(), intersection.getLongitude()),
+        Assertions.assertEquals(tile.interpolateElevation(intersection.getLatitude(), intersection.getLongitude()),
                             intersection.getAltitude(), 2.0e-9);
 
     }
@@ -267,7 +267,7 @@ public abstract class AbstractAlgorithmTest {
 
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws URISyntaxException {
         
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
@@ -275,17 +275,16 @@ public abstract class AbstractAlgorithmTest {
         earth = new ExtendedEllipsoid(Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
                                       Constants.WGS84_EARTH_FLATTENING,
                                       FramesFactory.getITRF(IERSConventions.IERS_2010, true));
-
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         earth     = null;
         updater   = null;
         state     = null;
     }
 
-    protected ExtendedEllipsoid earth;
+    public ExtendedEllipsoid earth;
     protected TileUpdater       updater;
     protected SpacecraftState   state;
 

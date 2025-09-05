@@ -17,8 +17,8 @@
 package org.orekit.rugged.utils;
 
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class NormalizedGeodeticPointTest {
 
@@ -31,12 +31,12 @@ public class NormalizedGeodeticPointTest {
         NormalizedGeodeticPoint point = new NormalizedGeodeticPoint(1, 2, 3, 4);
 
         // actions + verify
-        Assert.assertEquals(point, new NormalizedGeodeticPoint(1, 2, 3, 4));
-        Assert.assertFalse(point.equals(new NormalizedGeodeticPoint(0, 2, 3, 4)));
-        Assert.assertFalse(point.equals(new NormalizedGeodeticPoint(1, 0, 3, 4)));
-        Assert.assertFalse(point.equals(new NormalizedGeodeticPoint(1, 2, 0, 4)));
-        Assert.assertFalse(point.equals(new NormalizedGeodeticPoint(1, 2, 3, 10)));
-        Assert.assertFalse(point.equals(new Object()));
+        Assertions.assertEquals(point, new NormalizedGeodeticPoint(1, 2, 3, 4));
+        Assertions.assertFalse(point.equals(new NormalizedGeodeticPoint(0, 2, 3, 4)));
+        Assertions.assertFalse(point.equals(new NormalizedGeodeticPoint(1, 0, 3, 4)));
+        Assertions.assertFalse(point.equals(new NormalizedGeodeticPoint(1, 2, 0, 4)));
+        Assertions.assertFalse(point.equals(new NormalizedGeodeticPoint(1, 2, 3, 10)));
+        Assertions.assertFalse(point.equals(new Object()));
     }
     
     /**
@@ -48,7 +48,7 @@ public class NormalizedGeodeticPointTest {
         NormalizedGeodeticPoint point = new NormalizedGeodeticPoint(1, 2, 3, 4);
 
         // actions + verify
-        Assert.assertEquals(point.hashCode(), new NormalizedGeodeticPoint(1, 2, 3, 4).hashCode());
-        Assert.assertNotEquals(point.hashCode(), new NormalizedGeodeticPoint(1, FastMath.nextUp(2), 3, 4).hashCode());
+        Assertions.assertEquals(point.hashCode(), new NormalizedGeodeticPoint(1, 2, 3, 4).hashCode());
+        Assertions.assertNotEquals(point.hashCode(), new NormalizedGeodeticPoint(1, FastMath.nextUp(2), 3, 4).hashCode());
     }
 }

@@ -9,7 +9,7 @@ import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
@@ -155,9 +155,9 @@ public class InitGroundRefiningTest {
             
             
         } catch (OrekitException oe) {
-            Assert.fail(oe.getLocalizedMessage());
+            Assertions.fail(oe.getLocalizedMessage());
         } catch (URISyntaxException use) {
-            Assert.fail(use.getLocalizedMessage());
+            Assertions.fail(use.getLocalizedMessage());
         }
     }
     

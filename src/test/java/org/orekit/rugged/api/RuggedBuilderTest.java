@@ -35,10 +35,9 @@ import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
@@ -92,8 +91,8 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 
 public class RuggedBuilderTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
 
     @Test
     public void testSetContextWithEphemerides()
@@ -162,49 +161,49 @@ public class RuggedBuilderTest {
                                 setTimeSpan(pv.get(0).getDate(), pv.get(pv.size() - 1).getDate(), 0.001, 5.0);
         try {
             builder.build();
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
-            Assert.assertEquals("RuggedBuilder.setEllipsoid()", re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assertions.assertEquals("RuggedBuilder.setEllipsoid()", re.getParts()[0]);
         }
         
-        Assert.assertTrue(builder.isOverlappingTiles());
+        Assertions.assertTrue(builder.isOverlappingTiles());
         builder.setOverlappingTiles(false);
-        Assert.assertTrue(!builder.isOverlappingTiles());
+        Assertions.assertTrue(!builder.isOverlappingTiles());
         
         builder.setEllipsoid(EllipsoidId.GRS80, BodyRotatingFrameId.ITRF);
         try {
             builder.build();
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
-            Assert.assertEquals("RuggedBuilder.setTrajectory()", re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assertions.assertEquals("RuggedBuilder.setTrajectory()", re.getParts()[0]);
         }
         builder.setTrajectory(InertialFrameId.EME2000,
                               pv, 8, CartesianDerivativesFilter.USE_PV,
                               q, 8, AngularDerivativesFilter.USE_R);
-        Assert.assertSame(FramesFactory.getEME2000(), builder.getInertialFrame());
+        Assertions.assertSame(FramesFactory.getEME2000(), builder.getInertialFrame());
 
         // light time correction and aberration of light correction are enabled by default
         Rugged rugged = builder.build();
-        Assert.assertTrue(rugged.isLightTimeCorrected());
-        Assert.assertTrue(rugged.isAberrationOfLightCorrected());
-        Assert.assertTrue(builder.getLightTimeCorrection());
-        Assert.assertTrue(builder.getAberrationOfLightCorrection());
+        Assertions.assertTrue(rugged.isLightTimeCorrected());
+        Assertions.assertTrue(rugged.isAberrationOfLightCorrected());
+        Assertions.assertTrue(builder.getLightTimeCorrection());
+        Assertions.assertTrue(builder.getAberrationOfLightCorrection());
 
         builder.setLightTimeCorrection(false);
         rugged = builder.build();
-        Assert.assertFalse(rugged.isLightTimeCorrected());
-        Assert.assertTrue(rugged.isAberrationOfLightCorrected());
-        Assert.assertFalse(builder.getLightTimeCorrection());
-        Assert.assertTrue(builder.getAberrationOfLightCorrection());
+        Assertions.assertFalse(rugged.isLightTimeCorrected());
+        Assertions.assertTrue(rugged.isAberrationOfLightCorrected());
+        Assertions.assertFalse(builder.getLightTimeCorrection());
+        Assertions.assertTrue(builder.getAberrationOfLightCorrection());
 
         builder.setAberrationOfLightCorrection(false);
         rugged = builder.build();
-        Assert.assertFalse(rugged.isLightTimeCorrected());
-        Assert.assertFalse(rugged.isAberrationOfLightCorrected());
-        Assert.assertFalse(builder.getLightTimeCorrection());
-        Assert.assertFalse(builder.getAberrationOfLightCorrection());
+        Assertions.assertFalse(rugged.isLightTimeCorrected());
+        Assertions.assertFalse(rugged.isAberrationOfLightCorrected());
+        Assertions.assertFalse(builder.getLightTimeCorrection());
+        Assertions.assertFalse(builder.getAberrationOfLightCorrection());
         
         AtmosphericRefraction atmosphericRefraction = new MultiLayerModel(builder.getEllipsoid());
         builder.setRefractionCorrection(atmosphericRefraction);
@@ -214,8 +213,8 @@ public class RuggedBuilderTest {
         Field atmos = atmosphericRefractionFromBuilder.getClass().getDeclaredField("ellipsoid");
         atmos.setAccessible(true);
         ExtendedEllipsoid ellipsoidAtmos = (ExtendedEllipsoid) atmos.get(atmosphericRefractionFromBuilder);
-        Assert.assertEquals(builder.getEllipsoid().getEquatorialRadius(), ellipsoidAtmos.getEquatorialRadius(), 1.0e-9);
-        Assert.assertEquals(builder.getEllipsoid().getFlattening(), ellipsoidAtmos.getFlattening(), 1.0e-10);
+        Assertions.assertEquals(builder.getEllipsoid().getEquatorialRadius(), ellipsoidAtmos.getEquatorialRadius(), 1.0e-9);
+        Assertions.assertEquals(builder.getEllipsoid().getFlattening(), ellipsoidAtmos.getFlattening(), 1.0e-10);
 
         Field layers = atmosphericRefractionFromBuilder.getClass().getDeclaredField("refractionLayers");
         layers.setAccessible(true);
@@ -226,93 +225,93 @@ public class RuggedBuilderTest {
         layersExpected.setAccessible(true);
         @SuppressWarnings("unchecked")
         List<ConstantRefractionLayer> layersAtmosExpected = (List<ConstantRefractionLayer>) layersExpected.get(atmosphericRefraction);
-        Assert.assertEquals(layersAtmosExpected.size(), layersAtmos.size());
+        Assertions.assertEquals(layersAtmosExpected.size(), layersAtmos.size());
         
         List<ConstantRefractionLayer> copyAtmosExpected = new ArrayList<ConstantRefractionLayer>(layersAtmosExpected);
         List<ConstantRefractionLayer> copyAtmos = new ArrayList<ConstantRefractionLayer>(layersAtmos);
         
-        Assert.assertTrue(copyAtmosExpected.removeAll(layersAtmos) && copyAtmos.removeAll(layersAtmosExpected));
-        Assert.assertTrue(copyAtmosExpected.isEmpty() && copyAtmos.isEmpty());
+        Assertions.assertTrue(copyAtmosExpected.removeAll(layersAtmos) && copyAtmos.removeAll(layersAtmosExpected));
+        Assertions.assertTrue(copyAtmosExpected.isEmpty() && copyAtmos.isEmpty());
         
         
-        Assert.assertEquals(AlgorithmId.DUVENHAGE, builder.getAlgorithm());
-        Assert.assertEquals(6378137.0, builder.getEllipsoid().getEquatorialRadius(), 1.0e-9);
-        Assert.assertEquals(1.0 / 298.257222101, builder.getEllipsoid().getFlattening(), 1.0e-10);
-        Assert.assertSame(updater, builder.getTileUpdater());
-        Assert.assertEquals(8, builder.getMaxCachedTiles());
-        Assert.assertTrue(Double.isNaN(builder.getConstantElevation()));
-        Assert.assertEquals(pv.get(0).getDate(), builder.getMinDate());
-        Assert.assertEquals(pv.get(pv.size() - 1).getDate(), builder.getMaxDate());
-        Assert.assertEquals(0.001, builder.getTStep(), 1.0e-10);
-        Assert.assertEquals(5.0, builder.getOvershootTolerance(), 1.0e-10);
-        Assert.assertSame(FramesFactory.getEME2000(), builder.getInertialFrame());
-        Assert.assertSame(pv, builder.getPositionsVelocities());
-        Assert.assertEquals(8, builder.getPVInterpolationNumber());
-        Assert.assertEquals(CartesianDerivativesFilter.USE_PV, builder.getPVFilter());
-        Assert.assertSame(q,  builder.getQuaternions());
-        Assert.assertEquals(8, builder.getAInterpolationNumber());
-        Assert.assertEquals(AngularDerivativesFilter.USE_R, builder.getAFilter());
+        Assertions.assertEquals(AlgorithmId.DUVENHAGE, builder.getAlgorithm());
+        Assertions.assertEquals(6378137.0, builder.getEllipsoid().getEquatorialRadius(), 1.0e-9);
+        Assertions.assertEquals(1.0 / 298.257222101, builder.getEllipsoid().getFlattening(), 1.0e-10);
+        Assertions.assertSame(updater, builder.getTileUpdater());
+        Assertions.assertEquals(8, builder.getMaxCachedTiles());
+        Assertions.assertTrue(Double.isNaN(builder.getConstantElevation()));
+        Assertions.assertEquals(pv.get(0).getDate(), builder.getMinDate());
+        Assertions.assertEquals(pv.get(pv.size() - 1).getDate(), builder.getMaxDate());
+        Assertions.assertEquals(0.001, builder.getTStep(), 1.0e-10);
+        Assertions.assertEquals(5.0, builder.getOvershootTolerance(), 1.0e-10);
+        Assertions.assertSame(FramesFactory.getEME2000(), builder.getInertialFrame());
+        Assertions.assertSame(pv, builder.getPositionsVelocities());
+        Assertions.assertEquals(8, builder.getPVInterpolationNumber());
+        Assertions.assertEquals(CartesianDerivativesFilter.USE_PV, builder.getPVFilter());
+        Assertions.assertSame(q,  builder.getQuaternions());
+        Assertions.assertEquals(8, builder.getAInterpolationNumber());
+        Assertions.assertEquals(AngularDerivativesFilter.USE_R, builder.getAFilter());
 
-        Assert.assertTrue(builder.getLineSensors().isEmpty());
+        Assertions.assertTrue(builder.getLineSensors().isEmpty());
         LineSensor lineSensor = new LineSensor("line", new LinearLineDatation(t0, 2000 / 2, 1.0 / 1.5e-3),
                                                Vector3D.ZERO,
                                                createLOSPerfectLine(Vector3D.PLUS_K,
                                                                     Vector3D.PLUS_I, FastMath.toRadians(1.0), 2000));
         builder.addLineSensor(lineSensor);
-        Assert.assertEquals(1, builder.getLineSensors().size());
-        Assert.assertSame(lineSensor, builder.getLineSensors().get(0));
+        Assertions.assertEquals(1, builder.getLineSensors().size());
+        Assertions.assertSame(lineSensor, builder.getLineSensors().get(0));
         builder.clearLineSensors();
-        Assert.assertTrue(builder.getLineSensors().isEmpty());
+        Assertions.assertTrue(builder.getLineSensors().isEmpty());
 
         builder.setTrajectory(InertialFrameId.GCRF,
                               pv, 8, CartesianDerivativesFilter.USE_PV,
                               q, 8, AngularDerivativesFilter.USE_R);
-        Assert.assertSame(FramesFactory.getGCRF(), builder.getInertialFrame());
+        Assertions.assertSame(FramesFactory.getGCRF(), builder.getInertialFrame());
         builder.setTrajectory(InertialFrameId.MOD,
                               pv, 8, CartesianDerivativesFilter.USE_PV,
                               q, 8, AngularDerivativesFilter.USE_R);
-        Assert.assertSame(FramesFactory.getMOD(IERSConventions.IERS_1996), builder.getInertialFrame());
+        Assertions.assertSame(FramesFactory.getMOD(IERSConventions.IERS_1996), builder.getInertialFrame());
         builder.setTrajectory(InertialFrameId.TOD,
                               pv, 8, CartesianDerivativesFilter.USE_PV,
                               q, 8, AngularDerivativesFilter.USE_R);
-        Assert.assertSame(FramesFactory.getTOD(IERSConventions.IERS_1996, true), builder.getInertialFrame());
+        Assertions.assertSame(FramesFactory.getTOD(IERSConventions.IERS_1996, true), builder.getInertialFrame());
         builder.setTrajectory(InertialFrameId.VEIS1950,
                               pv, 8, CartesianDerivativesFilter.USE_PV,
                               q, 8, AngularDerivativesFilter.USE_R);
-        Assert.assertSame(FramesFactory.getVeis1950(), builder.getInertialFrame());
+        Assertions.assertSame(FramesFactory.getVeis1950(), builder.getInertialFrame());
 
         builder.setAlgorithm(null);
         try {
             builder.build();
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
-            Assert.assertEquals("RuggedBuilder.setAlgorithmID()", re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assertions.assertEquals("RuggedBuilder.setAlgorithmID()", re.getParts()[0]);
         }
 
         builder.setAlgorithm(AlgorithmId.CONSTANT_ELEVATION_OVER_ELLIPSOID);
         builder.setConstantElevation(Double.NaN);
         try {
             builder.build();
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
-            Assert.assertEquals("RuggedBuilder.setConstantElevation()", re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assertions.assertEquals("RuggedBuilder.setConstantElevation()", re.getParts()[0]);
         }
         builder.setConstantElevation(100.0);
-        Assert.assertNotNull(builder.build());
+        Assertions.assertNotNull(builder.build());
 
         builder.setAlgorithm(AlgorithmId.BASIC_SLOW_EXHAUSTIVE_SCAN_FOR_TESTS_ONLY);
         builder.setDigitalElevationModel(null, 8);
         try {
             builder.build();
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
-            Assert.assertEquals("RuggedBuilder.setDigitalElevationModel()", re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.UNINITIALIZED_CONTEXT, re.getSpecifier());
+            Assertions.assertEquals("RuggedBuilder.setDigitalElevationModel()", re.getParts()[0]);
         }
         builder.setDigitalElevationModel(updater, 8);
-        Assert.assertNotNull(builder.build());
+        Assertions.assertNotNull(builder.build());
 
     }
 
@@ -343,21 +342,21 @@ public class RuggedBuilderTest {
 
         // light time correction and aberration of light correction are enabled by default
         Rugged rugged = builder.build();
-        Assert.assertTrue(rugged.isLightTimeCorrected());
-        Assert.assertTrue(rugged.isAberrationOfLightCorrected());
+        Assertions.assertTrue(rugged.isLightTimeCorrected());
+        Assertions.assertTrue(rugged.isAberrationOfLightCorrected());
 
         builder.setLightTimeCorrection(false);
         rugged = builder.build();
-        Assert.assertFalse(rugged.isLightTimeCorrected());
-        Assert.assertTrue(rugged.isAberrationOfLightCorrected());
+        Assertions.assertFalse(rugged.isLightTimeCorrected());
+        Assertions.assertTrue(rugged.isAberrationOfLightCorrected());
 
         builder.setAberrationOfLightCorrection(false);
         rugged = builder.build();
-        Assert.assertFalse(rugged.isLightTimeCorrected());
-        Assert.assertFalse(rugged.isAberrationOfLightCorrected());
-        Assert.assertEquals(orbit.getDate().shiftedBy(-10.0), rugged.getMinDate());
-        Assert.assertEquals(orbit.getDate().shiftedBy(+10.0), rugged.getMaxDate());
-        Assert.assertEquals(0, rugged.getLineSensors().size());
+        Assertions.assertFalse(rugged.isLightTimeCorrected());
+        Assertions.assertFalse(rugged.isAberrationOfLightCorrected());
+        Assertions.assertEquals(orbit.getDate().shiftedBy(-10.0), rugged.getMinDate());
+        Assertions.assertEquals(orbit.getDate().shiftedBy(+10.0), rugged.getMaxDate());
+        Assertions.assertEquals(0, rugged.getLineSensors().size());
 
     }
 
@@ -396,7 +395,7 @@ public class RuggedBuilderTest {
                                                  FastMath.toRadians(30.0), 16.0,
                                                  FastMath.toRadians(1.0), 1201);
 
-        Assert.assertNotNull(new RuggedBuilder().
+        Assertions.assertNotNull(new RuggedBuilder().
                              setDigitalElevationModel(updater, 8).
                              setAlgorithm(AlgorithmId.DUVENHAGE).
                              setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
@@ -415,8 +414,8 @@ public class RuggedBuilderTest {
                           pv, 2, CartesianDerivativesFilter.USE_PV,
                           q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
-            Assert.assertEquals(t0.shiftedBy(-1), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assertions.assertEquals(t0.shiftedBy(-1), re.getParts()[0]);
         }
 
         try {
@@ -429,8 +428,8 @@ public class RuggedBuilderTest {
                           pv, 2, CartesianDerivativesFilter.USE_PV,
                           q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
-            Assert.assertEquals(t0.shiftedBy(2), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assertions.assertEquals(t0.shiftedBy(2), re.getParts()[0]);
         }
 
         try {
@@ -443,8 +442,8 @@ public class RuggedBuilderTest {
                           pv, 2, CartesianDerivativesFilter.USE_PV,
                           q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
-            Assert.assertEquals(t0.shiftedBy(9), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assertions.assertEquals(t0.shiftedBy(9), re.getParts()[0]);
         }
 
         try {
@@ -457,8 +456,8 @@ public class RuggedBuilderTest {
                           pv, 2, CartesianDerivativesFilter.USE_PV,
                           q, 2, AngularDerivativesFilter.USE_R);
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
-            Assert.assertEquals(t0.shiftedBy(12), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assertions.assertEquals(t0.shiftedBy(12), re.getParts()[0]);
         }
 
     }
@@ -511,8 +510,8 @@ public class RuggedBuilderTest {
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         original.storeInterpolator(bos);
-        Assert.assertTrue(bos.size() > 100000);
-        Assert.assertTrue(bos.size() < 200000);
+        Assertions.assertTrue(bos.size() > 100000);
+        Assertions.assertTrue(bos.size() < 200000);
 
         GeodeticPoint[] gpOriginal = original.build().directLocation("line", 100);
 
@@ -527,7 +526,7 @@ public class RuggedBuilderTest {
         for (int i = 0; i < gpOriginal.length; ++i) {
             Vector3D pOriginal  = earth.transform(gpOriginal[i]);
             Vector3D pRecovered = earth.transform(gpRecovered[i]);
-            Assert.assertEquals(0.0, Vector3D.distance(pOriginal, pRecovered), 1.0e-15);
+            Assertions.assertEquals(0.0, Vector3D.distance(pOriginal, pRecovered), 1.0e-15);
         }
 
     }
@@ -572,13 +571,13 @@ public class RuggedBuilderTest {
                               orbitToQ(orbit, earth, minDate.shiftedBy(-1.0), maxDate.shiftedBy(+1.0), 0.25),
                               2, AngularDerivativesFilter.USE_R);
 
-        FileOutputStream fos = new FileOutputStream(tempFolder.newFile());
+        FileOutputStream fos = new FileOutputStream(File.createTempFile("junit", null, tempFolder));
         fos.close();
         try {
             original.storeInterpolator(fos);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(IOException.class, re.getCause().getClass());
+            Assertions.assertEquals(IOException.class, re.getCause().getClass());
         }
     }
 
@@ -625,8 +624,8 @@ public class RuggedBuilderTest {
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         original.storeInterpolator(bos);
-        Assert.assertTrue(bos.size() > 100000);
-        Assert.assertTrue(bos.size() < 200000);
+        Assertions.assertTrue(bos.size() > 100000);
+        Assertions.assertTrue(bos.size() < 200000);
 
         for (BodyRotatingFrameId bId : Arrays.asList(BodyRotatingFrameId.GTOD,
                                                      BodyRotatingFrameId.ITRF_EQUINOX)) {
@@ -635,9 +634,9 @@ public class RuggedBuilderTest {
                 setAlgorithm(AlgorithmId.IGNORE_DEM_USE_ELLIPSOID).
                 setEllipsoid(EllipsoidId.WGS84, bId).
                 setTrajectoryAndTimeSpan(new ByteArrayInputStream(bos.toByteArray())).build();
-                Assert.fail("an exception should have been thrown");
+                Assertions.fail("an exception should have been thrown");
             } catch (RuggedException re) {
-                Assert.assertEquals(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
+                Assertions.assertEquals(RuggedMessages.FRAMES_MISMATCH_WITH_INTERPOLATOR_DUMP,
                                     re.getSpecifier());
             }
         }
@@ -696,18 +695,18 @@ public class RuggedBuilderTest {
         for (byte[] array : Arrays.asList(nonExistentClass, integerOne, truncatedDump, notSerialization)) {
             try {
                 new RuggedBuilder().setTrajectoryAndTimeSpan(new ByteArrayInputStream(array));
-                Assert.fail("an exception should have been thrown");
+                Assertions.fail("an exception should have been thrown");
             } catch (RuggedException re) {
-                Assert.assertEquals(RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA,
+                Assertions.assertEquals(RuggedMessages.NOT_INTERPOLATOR_DUMP_DATA,
                                     re.getSpecifier());
                 if (array == nonExistentClass) {
-                    Assert.assertEquals(ClassNotFoundException.class, re.getCause().getClass());
+                    Assertions.assertEquals(ClassNotFoundException.class, re.getCause().getClass());
                 } else if (array == integerOne) {
-                    Assert.assertEquals(ClassCastException.class, re.getCause().getClass());
+                    Assertions.assertEquals(ClassCastException.class, re.getCause().getClass());
                 } else if (array == truncatedDump) {
-                    Assert.assertEquals(EOFException.class, re.getCause().getClass());
+                    Assertions.assertEquals(EOFException.class, re.getCause().getClass());
                 } else if (array == notSerialization) {
-                    Assert.assertEquals(StreamCorruptedException.class, re.getCause().getClass());
+                    Assertions.assertEquals(StreamCorruptedException.class, re.getCause().getClass());
                 }
             }
         }

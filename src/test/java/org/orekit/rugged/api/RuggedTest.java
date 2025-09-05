@@ -17,9 +17,9 @@
 package org.orekit.rugged.api;
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,12 +44,11 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.stat.descriptive.StreamingStatistics;
 import org.hipparchus.stat.descriptive.rank.Percentile;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
@@ -96,12 +95,12 @@ import org.orekit.utils.TimeStampedPVCoordinates;
 
 public class RuggedTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
 
     // the following test is disabled by default
     // it is only used to check timings, and also creates a large (66M) temporary file
-    @Ignore
+    @Disabled
     @Test
     public void testMayonVolcanoTiming()
         throws URISyntaxException {
@@ -158,7 +157,7 @@ public class RuggedTest {
         try {
 
             int              size   = (lastLine - firstLine) * los.getNbPixels() * 3 * Integer.SIZE / 8;
-            RandomAccessFile out    = new RandomAccessFile(tempFolder.newFile(), "rw");
+            RandomAccessFile out    = new RandomAccessFile(File.createTempFile("junit", null, tempFolder), "rw");
             MappedByteBuffer buffer = out.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
 
             long t1 = System.currentTimeMillis();
@@ -188,7 +187,7 @@ public class RuggedTest {
                               lastLine - firstLine, los.getNbPixels(),
                               1.0e-3 * (t1 - t0), sizeM, 1.0e-3 * (t2 - t1), pixels / (1.0e-3 * (t2 - t1)));
         } catch (IOException ioe) {
-            Assert.fail(ioe.getLocalizedMessage());
+            Assertions.fail(ioe.getLocalizedMessage());
         }
 
     }
@@ -233,22 +232,22 @@ public class RuggedTest {
                 addLineSensor(lineSensor);
 
         Rugged rugged = builder.build();
-        Assert.assertEquals(1, rugged.getLineSensors().size());
-        Assert.assertTrue(lineSensor == rugged.getLineSensor("line"));
+        Assertions.assertEquals(1, rugged.getLineSensors().size());
+        Assertions.assertTrue(lineSensor == rugged.getLineSensor("line"));
         try {
             rugged.getLineSensor("dummy");
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.UNKNOWN_SENSOR, re.getSpecifier());
-            Assert.assertEquals("dummy", re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.UNKNOWN_SENSOR, re.getSpecifier());
+            Assertions.assertEquals("dummy", re.getParts()[0]);
         }
-        Assert.assertEquals(7176419.526,
+        Assertions.assertEquals(7176419.526,
                             rugged.getScToInertial(lineSensor.getDate(dimension / 2)).getTranslation().getNorm(),
                             1.0e-3);
-        Assert.assertEquals(0.0,
+        Assertions.assertEquals(0.0,
                             rugged.getBodyToInertial(lineSensor.getDate(dimension / 2)).getTranslation().getNorm(),
                             1.0e-3);
-        Assert.assertEquals(0.0,
+        Assertions.assertEquals(0.0,
                             rugged.getInertialToBody(lineSensor.getDate(dimension / 2)).getTranslation().getNorm(),
                             1.0e-3);
 
@@ -265,8 +264,8 @@ public class RuggedTest {
         for (int i = 0; i < gpWithLightTimeCorrection.length; ++i) {
             Vector3D pWith    = earth.transform(gpWithLightTimeCorrection[i]);
             Vector3D pWithout = earth.transform(gpWithoutLightTimeCorrection[i]);
-            Assert.assertTrue(Vector3D.distance(pWith, pWithout) > 1.23);
-            Assert.assertTrue(Vector3D.distance(pWith, pWithout) < 1.27);
+            Assertions.assertTrue(Vector3D.distance(pWith, pWithout) > 1.23);
+            Assertions.assertTrue(Vector3D.distance(pWith, pWithout) < 1.27);
         }
 
     }
@@ -323,8 +322,8 @@ public class RuggedTest {
         for (int i = 0; i < gpWithAberrationOfLightCorrection.length; ++i) {
             Vector3D pWith    = earth.transform(gpWithAberrationOfLightCorrection[i]);
             Vector3D pWithout = earth.transform(gpWithoutAberrationOfLightCorrection[i]);
-            Assert.assertTrue(Vector3D.distance(pWith, pWithout) > 20.0);
-            Assert.assertTrue(Vector3D.distance(pWith, pWithout) < 20.5);
+            Assertions.assertTrue(Vector3D.distance(pWith, pWithout) > 20.0);
+            Assertions.assertTrue(Vector3D.distance(pWith, pWithout) < 20.5);
         }
     }
     
@@ -384,9 +383,9 @@ public class RuggedTest {
             Vector3D pWithout = earth.transform(gpWithoutFlatBodyCorrection[i]);
             stats.addValue(Vector3D.distance(pWith, pWithout));
         }
-        Assert.assertEquals( 0.004, stats.getMin(),  1.0e-3);
-        Assert.assertEquals(28.344, stats.getMax(),  1.0e-3);
-        Assert.assertEquals( 4.801, stats.getMean(), 1.0e-3);
+        Assertions.assertEquals( 0.004, stats.getMin(),  1.0e-3);
+        Assertions.assertEquals(28.344, stats.getMax(),  1.0e-3);
+        Assertions.assertEquals( 4.801, stats.getMean(), 1.0e-3);
 
     }
 
@@ -441,9 +440,9 @@ public class RuggedTest {
             GeodeticPoint gpPixel =
                     rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
                                               lineSensor.getLOS(lineSensor.getDate(100), i));
-            Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
-            Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
-            Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
+            Assertions.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
+            Assertions.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
+            Assertions.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
         }
 
     }
@@ -502,9 +501,9 @@ public class RuggedTest {
             GeodeticPoint gpPixel =
                     rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
                                               lineSensor.getLOS(lineSensor.getDate(100), i));
-            Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
-            Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
-            Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
+            Assertions.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
+            Assertions.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
+            Assertions.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
         }
 
     }
@@ -565,13 +564,13 @@ public class RuggedTest {
             Vector3D pBasicScan = earth.transform(gpBasicScan[i]);
             data[i] = Vector3D.distance(pDuvenhage, pBasicScan);
         }
-        Assert.assertEquals(0.0, new Percentile(99).evaluate(data), 5.1e-4);
+        Assertions.assertEquals(0.0, new Percentile(99).evaluate(data), 5.1e-4);
 
     }
 
     // the following test is disabled by default
     // it is only used to check timings, and also creates a large (38M) temporary file
-    @Ignore
+    @Disabled
     @Test
     public void testInverseLocationTiming()
         throws URISyntaxException {
@@ -635,7 +634,7 @@ public class RuggedTest {
 
         try {
             long             size   = nbSensors * dimension * dimension * 2L * Integer.SIZE / 8L;
-            RandomAccessFile out    = new RandomAccessFile(tempFolder.newFile(), "rw");
+            RandomAccessFile out    = new RandomAccessFile(File.createTempFile("junit", null, tempFolder), "rw");
             MappedByteBuffer buffer = out.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
 
             long t1 = System.currentTimeMillis();
@@ -678,7 +677,7 @@ public class RuggedTest {
                               (badPixels + goodPixels) / (1.0e-3 * (t2 - t1)),
                               (100.0 * goodPixels) / (goodPixels + badPixels));
         } catch (IOException ioe) {
-            Assert.fail(ioe.getLocalizedMessage());
+            Assertions.fail(ioe.getLocalizedMessage());
         }
     }
 
@@ -793,20 +792,20 @@ public class RuggedTest {
         Rugged rugged = builder.build();
         GeodeticPoint point1 = new GeodeticPoint(0.7053784581520293, -1.7354535645320581, 691.856741468848);
         SensorPixel sensorPixel1 = rugged.inverseLocation(lineSensor.getName(), point1, 1, 131328);
-        Assert.assertEquals(   2.01474, sensorPixel1.getLineNumber(), 1.0e-5);
-        Assert.assertEquals(   2.09271, sensorPixel1.getPixelNumber(), 1.0e-5);
+        Assertions.assertEquals(   2.01474, sensorPixel1.getLineNumber(), 1.0e-5);
+        Assertions.assertEquals(   2.09271, sensorPixel1.getPixelNumber(), 1.0e-5);
         GeodeticPoint point2 = new GeodeticPoint(0.704463899881073, -1.7303503789334154, 648.9200602492216);
         SensorPixel sensorPixel2 = rugged.inverseLocation(lineSensor.getName(), point2, 1, 131328);
-        Assert.assertEquals(   2.02185, sensorPixel2.getLineNumber(), 1.0e-5);
-        Assert.assertEquals(  27.53008, sensorPixel2.getPixelNumber(), 1.0e-5);
+        Assertions.assertEquals(   2.02185, sensorPixel2.getLineNumber(), 1.0e-5);
+        Assertions.assertEquals(  27.53008, sensorPixel2.getPixelNumber(), 1.0e-5);
         GeodeticPoint point3 = new GeodeticPoint(0.7009593480939814, -1.7314283804521957, 588.3075485689468);
         SensorPixel sensorPixel3 = rugged.inverseLocation(lineSensor.getName(), point3, 1, 131328);
-        Assert.assertEquals(2305.26101, sensorPixel3.getLineNumber(),  1.0e-5);
-        Assert.assertEquals(  27.18381, sensorPixel3.getPixelNumber(), 1.0e-5);
+        Assertions.assertEquals(2305.26101, sensorPixel3.getLineNumber(),  1.0e-5);
+        Assertions.assertEquals(  27.18381, sensorPixel3.getPixelNumber(), 1.0e-5);
         GeodeticPoint point4 = new GeodeticPoint(0.7018731669637096, -1.73651769725183, 611.2759403696498);
         SensorPixel sensorPixel4 = rugged.inverseLocation(lineSensor.getName(), point4, 1, 131328);
-        Assert.assertEquals(2305.25436, sensorPixel4.getLineNumber(), 1.0e-5);
-        Assert.assertEquals(   1.54447, sensorPixel4.getPixelNumber(), 1.0e-5);
+        Assertions.assertEquals(2305.25436, sensorPixel4.getLineNumber(), 1.0e-5);
+        Assertions.assertEquals(   1.54447, sensorPixel4.getPixelNumber(), 1.0e-5);
 
     }
 
@@ -918,14 +917,14 @@ public class RuggedTest {
         GeodeticPoint gp = new GeodeticPoint((minLat + maxLat) / 2d, (minLon + maxLon) / 2d, 0d);
         SensorPixel sensorPixel = rugged.inverseLocation("QUICK_LOOK", gp, -250, 350);
 
-        Assert.assertNotNull(sensorPixel);
+        Assertions.assertNotNull(sensorPixel);
 
-        Assert.assertFalse(inside(rugged, null, lineSensor));
-        Assert.assertFalse(inside(rugged, new SensorPixel(-100, -100), lineSensor));
-        Assert.assertFalse(inside(rugged, new SensorPixel(-100, +100), lineSensor));
-        Assert.assertFalse(inside(rugged, new SensorPixel(+100, -100), lineSensor));
-        Assert.assertFalse(inside(rugged, new SensorPixel(+100, +100), lineSensor));
-        Assert.assertTrue(inside(rugged, new SensorPixel(0.2, 0.3), lineSensor));
+        Assertions.assertFalse(inside(rugged, null, lineSensor));
+        Assertions.assertFalse(inside(rugged, new SensorPixel(-100, -100), lineSensor));
+        Assertions.assertFalse(inside(rugged, new SensorPixel(-100, +100), lineSensor));
+        Assertions.assertFalse(inside(rugged, new SensorPixel(+100, -100), lineSensor));
+        Assertions.assertFalse(inside(rugged, new SensorPixel(+100, +100), lineSensor));
+        Assertions.assertTrue(inside(rugged, new SensorPixel(0.2, 0.3), lineSensor));
 
     }
 
@@ -939,7 +938,7 @@ public class RuggedTest {
             return ((Boolean) inside.invoke(rugged, sensorPixel, lineSensor));
         } catch (NoSuchMethodException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {
-            Assert.fail(e.getLocalizedMessage());
+            Assertions.fail(e.getLocalizedMessage());
             return false;
         }
     }
@@ -994,8 +993,8 @@ public class RuggedTest {
         GeodeticPoint[] gp = rugged.directLocation("curved", lineNumber);
         for (int i = 0; i < gp.length; ++i) {
             SensorPixel pixel = rugged.inverseLocation("curved", gp[i], firstLine, lastLine);
-            Assert.assertEquals(lineNumber, pixel.getLineNumber(),  5.0e-4);
-            Assert.assertEquals(i,          pixel.getPixelNumber(), 3.1e-7);
+            Assertions.assertEquals(lineNumber, pixel.getLineNumber(),  5.0e-4);
+            Assertions.assertEquals(i,          pixel.getPixelNumber(), 3.1e-7);
         }
 
     }
@@ -1060,18 +1059,18 @@ public class RuggedTest {
                                                         (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
                                                         0, dimension);
 
-            Assert.assertEquals(referenceLine, sp.getLineNumber(),  maxLineError);
-            Assert.assertEquals(p,             sp.getPixelNumber(), maxPixelError);
+            Assertions.assertEquals(referenceLine, sp.getLineNumber(),  maxLineError);
+            Assertions.assertEquals(p,             sp.getPixelNumber(), maxPixelError);
         }
 
         // point out of line (20 pixels before first pixel)
-        Assert.assertNull(rugged.inverseLocation("line",
+        Assertions.assertNull(rugged.inverseLocation("line",
                                                     21 * gp[0].getLatitude()  - 20 * gp[1].getLatitude(),
                                                     21 * gp[0].getLongitude() - 20 * gp[1].getLongitude(),
                                                     0, dimension));
 
         // point out of line (20 pixels after last pixel)
-        Assert.assertNull(rugged.inverseLocation("line",
+        Assertions.assertNull(rugged.inverseLocation("line",
                                                     -20 * gp[gp.length - 2].getLatitude()  + 21 * gp[gp.length - 1].getLatitude(),
                                                     -20 * gp[gp.length - 2].getLongitude() + 21 * gp[gp.length - 1].getLongitude(),
                                                     0, dimension));
@@ -1079,7 +1078,7 @@ public class RuggedTest {
         // point out of line (20 lines before first line)
         GeodeticPoint[] gp0 = rugged.directLocation("line", 0);
         GeodeticPoint[] gp1 = rugged.directLocation("line", 1);
-        Assert.assertNull(rugged.inverseLocation("line",
+        Assertions.assertNull(rugged.inverseLocation("line",
                                                     21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
                                                     21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
                                                     0, dimension));
@@ -1087,7 +1086,7 @@ public class RuggedTest {
         // point out of line (20 lines after last line)
         GeodeticPoint[] gp2 = rugged.directLocation("line", dimension - 2);
         GeodeticPoint[] gp3 = rugged.directLocation("line", dimension - 1);
-        Assert.assertNull(rugged.inverseLocation("line",
+        Assertions.assertNull(rugged.inverseLocation("line",
                                                     -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
                                                     -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
                                                     0, dimension));
@@ -1224,10 +1223,10 @@ public class RuggedTest {
                             (Gradient[]) inverseLoc.invoke(rugged,
                                                            "line", gp[referencePixel], 0, dimension,
                                                            generator);
-            Assert.assertEquals(referenceLine,  result[0].getValue(), lineTolerance);
-            Assert.assertEquals(referencePixel, result[1].getValue(), pixelTolerance);
-            Assert.assertEquals(2, result[0].getFreeParameters());
-            Assert.assertEquals(1, result[0].getOrder());
+            Assertions.assertEquals(referenceLine,  result[0].getValue(), lineTolerance);
+            Assertions.assertEquals(referencePixel, result[1].getValue(), pixelTolerance);
+            Assertions.assertEquals(2, result[0].getFreeParameters());
+            Assertions.assertEquals(1, result[0].getOrder());
 
             // check the partial derivatives
             DSFactory factory = new DSFactory(1, 1);
@@ -1241,7 +1240,7 @@ public class RuggedTest {
                                 return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
                             });
             double dLdR = lineVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dLdR, result[0].getPartialDerivative(1, 0), dLdR * lineDerivativeRelativeTolerance);
+            Assertions.assertEquals(dLdR, result[0].getPartialDerivative(1, 0), dLdR * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction lineVSpitch =
                             differentiator.differentiate((double pitch) -> {
@@ -1250,7 +1249,7 @@ public class RuggedTest {
                                 return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getLineNumber();
                             });
             double dLdP = lineVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dLdP, result[0].getPartialDerivative(0, 1), dLdP * lineDerivativeRelativeTolerance);
+            Assertions.assertEquals(dLdP, result[0].getPartialDerivative(0, 1), dLdP * lineDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSroll =
                             differentiator.differentiate((double roll) -> {
@@ -1259,7 +1258,7 @@ public class RuggedTest {
                                 return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
                             });
             double dXdR = pixelVSroll.value(factory.variable(0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dXdR, result[1].getPartialDerivative(1, 0), dXdR * pixelDerivativeRelativeTolerance);
+            Assertions.assertEquals(dXdR, result[1].getPartialDerivative(1, 0), dXdR * pixelDerivativeRelativeTolerance);
 
             UnivariateDifferentiableFunction pixelVSpitch =
                             differentiator.differentiate((double pitch) -> {
@@ -1268,13 +1267,13 @@ public class RuggedTest {
                                 return rugged.inverseLocation("line", gp[referencePixel], 0, dimension).getPixelNumber();
                             });
             double dXdP = pixelVSpitch.value(factory.variable(0, 0.0)).getPartialDerivative(1);
-            Assert.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
+            Assertions.assertEquals(dXdP, result[1].getPartialDerivative(0, 1), dXdP * pixelDerivativeRelativeTolerance);
 
         } catch (InvocationTargetException | NoSuchMethodException |
                 SecurityException | IllegalAccessException |
                 IllegalArgumentException | URISyntaxException |
                 OrekitException | RuggedException e) {
-            Assert.fail(e.getLocalizedMessage());
+            Assertions.fail(e.getLocalizedMessage());
         }
     }
 
@@ -1338,13 +1337,13 @@ public class RuggedTest {
                                                         (1 - d) * gp[i].getLatitude()  + d * gp[i + 1].getLatitude(),
                                                         (1 - d) * gp[i].getLongitude() + d * gp[i + 1].getLongitude(),
                                                         0, dimension);
-            Assert.assertEquals(0.0, date.durationFrom(lineSensor.getDate(referenceLine)),  maxDateError);
+            Assertions.assertEquals(0.0, date.durationFrom(lineSensor.getDate(referenceLine)),  maxDateError);
         }
 
         // point out of line (20 lines before first line)
         GeodeticPoint[] gp0 = rugged.directLocation("line", 0);
         GeodeticPoint[] gp1 = rugged.directLocation("line", 1);
-        Assert.assertNull(rugged.dateLocation("line",
+        Assertions.assertNull(rugged.dateLocation("line",
                                                     21 * gp0[dimension / 2].getLatitude()  - 20 * gp1[dimension / 2].getLatitude(),
                                                     21 * gp0[dimension / 2].getLongitude() - 20 * gp1[dimension / 2].getLongitude(),
                                                     0, dimension));
@@ -1352,7 +1351,7 @@ public class RuggedTest {
         // point out of line (20 lines after last line)
         GeodeticPoint[] gp2 = rugged.directLocation("line", dimension - 2);
         GeodeticPoint[] gp3 = rugged.directLocation("line", dimension - 1);
-        Assert.assertNull(rugged.dateLocation("line",
+        Assertions.assertNull(rugged.dateLocation("line",
                                                     -20 * gp2[dimension / 2].getLatitude()  + 21 * gp3[dimension / 2].getLatitude(),
                                                     -20 * gp2[dimension / 2].getLongitude() + 21 * gp3[dimension / 2].getLongitude(),
                                                     0, dimension));
@@ -1390,8 +1389,8 @@ public class RuggedTest {
         double recomputedFirstLine = lineSensor.getLine(minDate.shiftedBy(+1.0));
         double recomputedLastLine = lineSensor.getLine(maxDate.shiftedBy(-1.0));
 
-        Assert.assertEquals(firstLine, recomputedFirstLine, maxLineError);
-        Assert.assertEquals(lastLine, recomputedLastLine, maxLineError);
+        Assertions.assertEquals(firstLine, recomputedFirstLine, maxLineError);
+        Assertions.assertEquals(lastLine, recomputedLastLine, maxLineError);
     }
 
     @Test
@@ -1408,8 +1407,8 @@ public class RuggedTest {
         double expectedDistanceBetweenLOS = 3.88800245;
         double expectedDistanceToTheGround = 6368020.559109;
 
-        Assert.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 2.e-6);
-        Assert.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 3.e-5);
+        Assertions.assertEquals(expectedDistanceBetweenLOS, distancesBetweenLOS[0], 2.e-6);
+        Assertions.assertEquals(expectedDistanceToTheGround, distancesBetweenLOS[1], 3.e-5);
      }
 
     @Test
@@ -1438,16 +1437,16 @@ public class RuggedTest {
         // Minimum distance to the ground
         Gradient dCentralBody = distancesBetweenLOSGradient[1];
 
-        Assert.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 2.e-6);
-        Assert.assertEquals(expectedDistanceToTheGround, dCentralBody.getValue() , 4.e-5);
+        Assertions.assertEquals(expectedDistanceBetweenLOS, dMin.getValue(), 2.e-6);
+        Assertions.assertEquals(expectedDistanceToTheGround, dCentralBody.getValue() , 4.e-5);
 
 
         for (int i = 0; i < dMin.getFreeParameters(); i++) {
-            Assert.assertEquals(expectedDminDerivatives[i], dMin.getPartialDerivative(i), 3e-5);
+            Assertions.assertEquals(expectedDminDerivatives[i], dMin.getPartialDerivative(i), 3e-5);
         }
 
         for (int i = 0; i < dCentralBody.getFreeParameters(); i++) {
-            Assert.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getPartialDerivative(i), 3.e-4);
+            Assertions.assertEquals(expectedDcentralBodyDerivatives[i], dCentralBody.getPartialDerivative(i), 3.e-4);
         }
     }
 
@@ -1548,12 +1547,12 @@ public class RuggedTest {
             }
         } catch (NoSuchMethodException | SecurityException | 
                 IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            Assert.fail(e.getLocalizedMessage());
+            Assertions.fail(e.getLocalizedMessage());
         }
     }
     
     
-    @Before
+    @BeforeEach
     public void setUp() throws URISyntaxException {
         TestUtils.clearFactories();
     }

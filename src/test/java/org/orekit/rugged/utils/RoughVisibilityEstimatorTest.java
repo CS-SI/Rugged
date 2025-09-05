@@ -23,10 +23,10 @@ import java.util.List;
 
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
@@ -76,7 +76,7 @@ public class RoughVisibilityEstimatorTest {
         AbsoluteDate d = estimator.estimateVisibility(new GeodeticPoint(FastMath.toRadians(-81.5),
                                                                         FastMath.toRadians(-2.0),
                                                                         0.0));
-        Assert.assertEquals(0.0,
+        Assertions.assertEquals(0.0,
                             new AbsoluteDate("2012-01-01T03:47:08.81412028",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
                             1.10e-8);
@@ -100,7 +100,7 @@ public class RoughVisibilityEstimatorTest {
         AbsoluteDate d = estimator.estimateVisibility(new GeodeticPoint(FastMath.toRadians(43.303),
                                                                         FastMath.toRadians(-46.126),
                                                                         0.0));
-        Assert.assertEquals(0.0,
+        Assertions.assertEquals(0.0,
                             new AbsoluteDate("2012-01-01T01:02:39.12252184",
                                              TimeScalesFactory.getUTC()).durationFrom(d),
                             1.0e-8);
@@ -169,7 +169,7 @@ public class RoughVisibilityEstimatorTest {
 
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         try {
 
@@ -181,11 +181,11 @@ public class RoughVisibilityEstimatorTest {
                                               Constants.WGS84_EARTH_FLATTENING,
                                               itrf);
         } catch (OrekitException | URISyntaxException e) {
-            Assert.fail(e.getLocalizedMessage());
+            Assertions.fail(e.getLocalizedMessage());
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         ellipsoid = null;
     }

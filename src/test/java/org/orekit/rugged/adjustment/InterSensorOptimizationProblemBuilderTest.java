@@ -27,10 +27,10 @@ import java.util.Set;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorToSensorMapping;
@@ -43,7 +43,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 public class InterSensorOptimizationProblemBuilderTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         try {
@@ -58,7 +58,7 @@ public class InterSensorOptimizationProblemBuilderTest {
             numberOfParameters = refiningTest.getParameterToAdjust();
 
         }  catch (RuggedException re) {
-            Assert.fail(re.getLocalizedMessage());
+            Assertions.fail(re.getLocalizedMessage());
         }
     }
 
@@ -76,31 +76,31 @@ public class InterSensorOptimizationProblemBuilderTest {
 
         Optimum optimum = adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
 
-        Assert.assertTrue(optimum.getIterations() < maxIterations);
+        Assertions.assertTrue(optimum.getIterations() < maxIterations);
 
         // The default optimizer is a Gauss Newton.
         // For Gauss Newton, the number of evaluations is equal to the number of iterations
-        Assert.assertTrue(optimum.getEvaluations() == optimum.getIterations());
+        Assertions.assertTrue(optimum.getEvaluations() == optimum.getIterations());
 
         final double expectedMaxValue = 1.924769e-03;
-        Assert.assertEquals(expectedMaxValue, optimum.getResiduals().getMaxValue(), 1.0e-6);
+        Assertions.assertEquals(expectedMaxValue, optimum.getResiduals().getMaxValue(), 1.0e-6);
 
         final double expectedRMS = 0.069302;
-        Assert.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
+        Assertions.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
 
         final double expectedCost = 3.597014;
-        Assert.assertEquals(expectedCost, optimum.getCost(), 2.5e-6);
+        Assertions.assertEquals(expectedCost, optimum.getCost(), 2.5e-6);
 
-        Assert.assertTrue(numberOfParameters == optimum.getPoint().getDimension());
+        Assertions.assertTrue(numberOfParameters == optimum.getPoint().getDimension());
         
         final int sensorToSensorMappingSize = 1347;
         Collection<SensorToSensorMapping> ssm = measurements.getInterMappings();
         Iterator<SensorToSensorMapping> it = ssm.iterator();
         while (it.hasNext()) {
             SensorToSensorMapping ssmit = it.next();
-            Assert.assertTrue(sensorToSensorMappingSize == ssmit.getMapping().size());
+            Assertions.assertTrue(sensorToSensorMappingSize == ssmit.getMapping().size());
         }        
-        Assert.assertTrue(sensorToSensorMappingSize*2 == optimum.getResiduals().getDimension());
+        Assertions.assertTrue(sensorToSensorMappingSize*2 == optimum.getResiduals().getDimension());
 
     }
     
@@ -117,9 +117,9 @@ public class InterSensorOptimizationProblemBuilderTest {
         int nbModelsPostponed = measurementsPostponed.getNbModels();
 
         // Compare the two collections of measurements
-        Assert.assertEquals(nbModels, nbModelsPostponed);
+        Assertions.assertEquals(nbModels, nbModelsPostponed);
 
-        Assert.assertEquals(sensorToSensorMapping.size(), sensorToSensorMappingPostponed.size());
+        Assertions.assertEquals(sensorToSensorMapping.size(), sensorToSensorMappingPostponed.size());
 
         // There is only one item
         SensorToSensorMapping arraySensorToSensorMapping          = (SensorToSensorMapping) sensorToSensorMapping.toArray()[0];
@@ -138,16 +138,16 @@ public class InterSensorOptimizationProblemBuilderTest {
         List<Double> listBodyPostponed = arraySensorToSensorMappingPostponed.getBodyDistances();
         double[] arrayBodyPostponed  = listBodyPostponed.stream().mapToDouble(Double::doubleValue).toArray();
 
-        Assert.assertEquals(listBody.size(), listBodyPostponed.size());
-        Assert.assertArrayEquals(arrayBody, arrayBodyPostponed, 3.e-3);
+        Assertions.assertEquals(listBody.size(), listBodyPostponed.size());
+        Assertions.assertArrayEquals(arrayBody, arrayBodyPostponed, 3.e-3);
 
         List<Double> listLos = arraySensorToSensorMapping.getLosDistances();
         double[] arrayLos = listLos.stream().mapToDouble(Double::doubleValue).toArray();
         List<Double> listLosPostponed = arraySensorToSensorMappingPostponed.getLosDistances();
         double[] arrayLosPostponed = listLosPostponed.stream().mapToDouble(Double::doubleValue).toArray();
 
-        Assert.assertEquals(listLos.size(), listLosPostponed.size());
-        Assert.assertArrayEquals(arrayLos, arrayLosPostponed, 1.e-6);
+        Assertions.assertEquals(listLos.size(), listLosPostponed.size());
+        Assertions.assertArrayEquals(arrayLos, arrayLosPostponed, 1.e-6);
 
         // Check if the two set are the same
         Set<Entry<SensorPixel, SensorPixel>> mapping          = arraySensorToSensorMapping.getMapping();
@@ -176,14 +176,14 @@ public class InterSensorOptimizationProblemBuilderTest {
             } // end iteration on mappingPostponed
 
             if (!found) { // the current (key,value) of the mapping was not found in the mappingPostponed
-                Assert.assertTrue(found);
+                Assertions.assertTrue(found);
             }
         } // end on iteration on mapping
 
-        Assert.assertEquals(arraySensorToSensorMapping.getRuggedNameA(),arraySensorToSensorMappingPostponed.getRuggedNameA());
-        Assert.assertEquals(arraySensorToSensorMapping.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());
-        Assert.assertEquals(arraySensorToSensorMapping.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());
-        Assert.assertEquals(arraySensorToSensorMapping.getSensorNameB(),arraySensorToSensorMappingPostponed.getSensorNameB());
+        Assertions.assertEquals(arraySensorToSensorMapping.getRuggedNameA(),arraySensorToSensorMappingPostponed.getRuggedNameA());
+        Assertions.assertEquals(arraySensorToSensorMapping.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());
+        Assertions.assertEquals(arraySensorToSensorMapping.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());
+        Assertions.assertEquals(arraySensorToSensorMapping.getSensorNameB(),arraySensorToSensorMappingPostponed.getSensorNameB());
     } 
     
     @Test
@@ -202,9 +202,9 @@ public class InterSensorOptimizationProblemBuilderTest {
         int nbModelsPostponed = measurementsWithoutWeight.getNbModels();
 
         // Compare the two collections of measurements
-        Assert.assertEquals(nbModelsWithWeight, nbModelsPostponed);
+        Assertions.assertEquals(nbModelsWithWeight, nbModelsPostponed);
 
-        Assert.assertEquals(sensorToSensorMappingWithWeight.size(), sensorToSensorMappingPostponed.size());
+        Assertions.assertEquals(sensorToSensorMappingWithWeight.size(), sensorToSensorMappingPostponed.size());
 
         // There is only one item
         SensorToSensorMapping arraySensorToSensorMappingWithWeight          = (SensorToSensorMapping) sensorToSensorMappingWithWeight.toArray()[0];
@@ -216,8 +216,8 @@ public class InterSensorOptimizationProblemBuilderTest {
         List<Double> listLosPostponed = arraySensorToSensorMappingPostponed.getLosDistances();
         double[] arrayLosPostponed = listLosPostponed.stream().mapToDouble(Double::doubleValue).toArray();
 
-        Assert.assertEquals(listLosWithWeight.size(), listLosPostponed.size());
-        Assert.assertArrayEquals(arrayLosWithWeight, arrayLosPostponed, 1.e-6);
+        Assertions.assertEquals(listLosWithWeight.size(), listLosPostponed.size());
+        Assertions.assertArrayEquals(arrayLosWithWeight, arrayLosPostponed, 1.e-6);
 
         // Check if the two set are the same
         Set<Entry<SensorPixel, SensorPixel>> mappingWithWeight = arraySensorToSensorMappingWithWeight.getMapping();
@@ -246,14 +246,14 @@ public class InterSensorOptimizationProblemBuilderTest {
             } // end iteration on mappingPostponed
 
             if (!found) { // the current (key,value) of the mapping was not found in the mappingPostponed
-                Assert.assertTrue(found);
+                Assertions.assertTrue(found);
             }
         } // end on iteration on mapping
 
-        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getRuggedNameA(),arraySensorToSensorMappingPostponed.getRuggedNameA());
-        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());
-        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());
-        Assert.assertEquals(arraySensorToSensorMappingWithWeight.getSensorNameB(),arraySensorToSensorMappingPostponed.getSensorNameB());
+        Assertions.assertEquals(arraySensorToSensorMappingWithWeight.getRuggedNameA(),arraySensorToSensorMappingPostponed.getRuggedNameA());
+        Assertions.assertEquals(arraySensorToSensorMappingWithWeight.getRuggedNameB(),arraySensorToSensorMappingPostponed.getRuggedNameB());
+        Assertions.assertEquals(arraySensorToSensorMappingWithWeight.getSensorNameA(),arraySensorToSensorMappingPostponed.getSensorNameA());
+        Assertions.assertEquals(arraySensorToSensorMappingWithWeight.getSensorNameB(),arraySensorToSensorMappingPostponed.getSensorNameB());
     }
     
     @Test
@@ -275,10 +275,10 @@ public class InterSensorOptimizationProblemBuilderTest {
             sensorToSensorMapping.set(interSensorsOptimizationProblem,new ArrayList<SensorToSensorMapping>());
 
             interSensorsOptimizationProblem.build(maxIterations, convergenceThreshold);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
 
         } catch  (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.NO_REFERENCE_MAPPINGS,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.NO_REFERENCE_MAPPINGS,re.getSpecifier());
         }
     }
 
@@ -309,10 +309,10 @@ public class InterSensorOptimizationProblemBuilderTest {
                 final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(OptimizerId.GAUSS_NEWTON_QR);
                 LeastSquaresProblem theProblem = interSensorsOptimizationProblem.build(maxIterations, convergenceThreshold);
                 adjuster.optimize(theProblem);
-                Assert.fail("An exception should have been thrown");
+                Assertions.fail("An exception should have been thrown");
 
             } catch  (RuggedException re) {
-                Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
+                Assertions.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
             }
             
             // Then set RuggedA to null to get the right exception ...
@@ -324,15 +324,15 @@ public class InterSensorOptimizationProblemBuilderTest {
                 final LeastSquareAdjuster adjuster = new LeastSquareAdjuster(OptimizerId.GAUSS_NEWTON_QR);
                 LeastSquaresProblem theProblem = interSensorsOptimizationProblem.build(maxIterations, convergenceThreshold);
                 adjuster.optimize(theProblem);
-                Assert.fail("An exception should have been thrown");
+                Assertions.fail("An exception should have been thrown");
 
             } catch  (RuggedException re) {
-                Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
+                Assertions.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
             }
     }
 
     
-    @After
+    @AfterEach
     public void tearDown() {
         measurements = null;
         ruggedList = null;

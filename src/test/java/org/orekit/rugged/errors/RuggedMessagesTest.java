@@ -23,15 +23,15 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.hipparchus.exception.UTF8Control;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class RuggedMessagesTest {
 
     private final String[] LANGUAGES_LIST = { "da", "de", "en", "es", "fr", "gl", "it", "no", "ro" } ;
     @Test
     public void testMessageNumber() {
-        Assert.assertEquals(35, RuggedMessages.values().length);
+        Assertions.assertEquals(35, RuggedMessages.values().length);
     }
 
     @Test
@@ -47,10 +47,10 @@ public class RuggedMessagesTest {
                 for (final Enumeration<String> keys = bundle.getKeys(); keys.hasMoreElements();) {
                     keyPresent |= messageKey.equals(keys.nextElement());
                 }
-                Assert.assertTrue("missing key \"" + message.name() + "\" for language " + language,
-                                  keyPresent);
+                Assertions.assertTrue(keyPresent,
+                                  "missing key \"" + message.name() + "\" for language " + language);
             }
-            Assert.assertEquals(language, bundle.getLocale().getLanguage());
+            Assertions.assertEquals(language, bundle.getLocale().getLanguage());
         }
 
     }
@@ -64,12 +64,12 @@ public class RuggedMessagesTest {
             for (final Enumeration<String> keys = bundle.getKeys(); keys.hasMoreElements();) {
                 final String propertyKey = keys.nextElement();
                 try {
-                    Assert.assertNotNull(RuggedMessages.valueOf(propertyKey));
+                    Assertions.assertNotNull(RuggedMessages.valueOf(propertyKey));
                 } catch (IllegalArgumentException iae) {
-                    Assert.fail("unknown key \"" + propertyKey + "\" in language " + language);
+                    Assertions.fail("unknown key \"" + propertyKey + "\" in language " + language);
                 }
             }
-            Assert.assertEquals(language, bundle.getLocale().getLanguage());
+            Assertions.assertEquals(language, bundle.getLocale().getLanguage());
         }
 
     }
@@ -78,7 +78,7 @@ public class RuggedMessagesTest {
     public void testNoMissingFrenchTranslation() {
         for (RuggedMessages message : RuggedMessages.values()) {
             String translated = message.getLocalizedString(Locale.FRENCH);
-            Assert.assertFalse(message.name(), translated.toLowerCase().contains("missing translation"));
+            Assertions.assertFalse(translated.toLowerCase().contains("missing translation"), message.name());
         }
     }
 
@@ -86,7 +86,7 @@ public class RuggedMessagesTest {
     public void testNoOpEnglishTranslation() {
         for (RuggedMessages message : RuggedMessages.values()) {
             String translated = message.getLocalizedString(Locale.ENGLISH);
-            Assert.assertEquals(message.getSourceString(), translated);
+            Assertions.assertEquals(message.getSourceString(), translated);
         }
     }
 
@@ -94,19 +94,19 @@ public class RuggedMessagesTest {
     public void testMissingLanguageFallback() {
         for (RuggedMessages message : RuggedMessages.values()) {
             String translated = message.getLocalizedString(Locale.TRADITIONAL_CHINESE);
-            Assert.assertEquals(message.getSourceString(), translated);
+            Assertions.assertEquals(message.getSourceString(), translated);
         }
     }
 
     @Test
     public void testMissingLanguageMissingTranslation() {
-        Assert.assertEquals(RuggedMessages.INTERNAL_ERROR.getSourceString(),
+        Assertions.assertEquals(RuggedMessages.INTERNAL_ERROR.getSourceString(),
                             RuggedMessages.INTERNAL_ERROR.getLocalizedString(Locale.KOREAN));
-        Assert.assertEquals(RuggedMessages.NO_DEM_DATA.getSourceString(),
+        Assertions.assertEquals(RuggedMessages.NO_DEM_DATA.getSourceString(),
                             RuggedMessages.NO_DEM_DATA.getLocalizedString(Locale.KOREAN));
-        Assert.assertEquals("ABCDEF {0}",
+        Assertions.assertEquals("ABCDEF {0}",
                             RuggedMessages.UNKNOWN_SENSOR.getLocalizedString(Locale.KOREAN));
-        Assert.assertEquals(RuggedMessages.EMPTY_TILE.getSourceString(),
+        Assertions.assertEquals(RuggedMessages.EMPTY_TILE.getSourceString(),
                             RuggedMessages.EMPTY_TILE.getLocalizedString(Locale.KOREAN));
     }
 
@@ -117,9 +117,9 @@ public class RuggedMessagesTest {
             for (RuggedMessages message : RuggedMessages.values()) {
                 MessageFormat source     = new MessageFormat(message.getSourceString());
                 MessageFormat translated = new MessageFormat(message.getLocalizedString(locale));
-                Assert.assertEquals(message.name() + " (" + language + ")",
-                                    source.getFormatsByArgumentIndex().length,
-                                    translated.getFormatsByArgumentIndex().length);
+                Assertions.assertEquals(source.getFormatsByArgumentIndex().length,
+                                    translated.getFormatsByArgumentIndex().length,
+                                    message.name() + " (" + language + ")");
             }
         }
     }

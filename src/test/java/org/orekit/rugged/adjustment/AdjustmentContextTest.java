@@ -24,11 +24,10 @@ import java.util.List;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.rugged.adjustment.measurements.Observables;
 import org.orekit.rugged.adjustment.measurements.SensorMapping;
 import org.orekit.rugged.adjustment.util.InitInterRefiningTest;
@@ -39,7 +38,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 public class AdjustmentContextTest {
     
-    @Before
+    @BeforeEach
     public void setUp() {
         
         try {
@@ -57,7 +56,7 @@ public class AdjustmentContextTest {
             measurements = refiningTest.generateNoisyPoints(lineSampling, pixelSampling, earthConstraintWeight, false);
             
         }  catch (RuggedException re) {
-            Assert.fail(re.getLocalizedMessage());
+            Assertions.fail(re.getLocalizedMessage());
         }
     }
 
@@ -70,17 +69,17 @@ public class AdjustmentContextTest {
         Field optimizerId = adjustmentContext.getClass().getDeclaredField("optimizerID");
         optimizerId.setAccessible(true);
         OptimizerId defaultOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
-        Assert.assertTrue((defaultOptimizerId == OptimizerId.GAUSS_NEWTON_QR));
+        Assertions.assertTrue((defaultOptimizerId == OptimizerId.GAUSS_NEWTON_QR));
         
         // Check if the change of the default OptimizerId is correct
         adjustmentContext.setOptimizer(OptimizerId.GAUSS_NEWTON_LU);
         OptimizerId modifiedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
-        Assert.assertTrue((modifiedOptimizerId == OptimizerId.GAUSS_NEWTON_LU));
+        Assertions.assertTrue((modifiedOptimizerId == OptimizerId.GAUSS_NEWTON_LU));
         
         // Check if the change of the default OptimizerId is correct
         adjustmentContext.setOptimizer(OptimizerId.LEVENBERG_MARQUADT);
         modifiedOptimizerId = (OptimizerId) optimizerId.get(adjustmentContext);
-        Assert.assertTrue((modifiedOptimizerId == OptimizerId.LEVENBERG_MARQUADT));
+        Assertions.assertTrue((modifiedOptimizerId == OptimizerId.LEVENBERG_MARQUADT));
 
  
     }
@@ -110,10 +109,10 @@ public class AdjustmentContextTest {
 
             if (usedOptimizerId == OptimizerId.GAUSS_NEWTON_QR || usedOptimizerId == OptimizerId.GAUSS_NEWTON_LU) {
                 // For Gauss Newton, the number of evaluations is equal to the number of iterations
-                Assert.assertTrue(optimum.getEvaluations() == optimum.getIterations());
+                Assertions.assertTrue(optimum.getEvaluations() == optimum.getIterations());
             } else if (usedOptimizerId == OptimizerId.LEVENBERG_MARQUADT) {
                 // For Levenberg Marquadt, the number of evaluations is slightly greater than the number of iterations
-                Assert.assertTrue(optimum.getEvaluations() >= optimum.getIterations());
+                Assertions.assertTrue(optimum.getEvaluations() >= optimum.getIterations());
             }
 
         } // loop on OptimizerId
@@ -136,10 +135,10 @@ public class AdjustmentContextTest {
             final double convergenceThreshold = 1.e-7;
 
             adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
 
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.INVALID_RUGGED_NAME,re.getSpecifier());
         }
     }
 
@@ -160,10 +159,10 @@ public class AdjustmentContextTest {
             final double convergenceThreshold = 1.e-7;
 
             adjustmentContext.estimateFreeParameters(ruggedNameList, maxIterations, convergenceThreshold);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
             
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.UNSUPPORTED_REFINING_CONTEXT,re.getSpecifier());
         }
     }
     
@@ -182,11 +181,11 @@ public class AdjustmentContextTest {
         sensorField.setAccessible(true);
         String sensorRead = (String) sensorField.get(simpleMapping);
 
-        Assert.assertTrue(ruggedGiven.equals(ruggedRead));
-        Assert.assertTrue(sensorGiven.equals(sensorRead));
+        Assertions.assertTrue(ruggedGiven.equals(ruggedRead));
+        Assertions.assertTrue(sensorGiven.equals(sensorRead));
     }
     
-    @After
+    @AfterEach
     public void tearDown() {
         measurements = null;
         ruggedList = null;

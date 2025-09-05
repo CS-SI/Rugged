@@ -22,7 +22,7 @@
 
     <!-- COTS version -->
     <rugged.orekit.version>13.0.3</rugged.orekit.version>
-    <rugged.junit.version>4.13.2</rugged.junit.version>
+    <rugged.junit.jupiter.version>5.13.4</rugged.junit.jupiter.version>
 
     <!-- Compilers and Tools version -->
     <rugged.compiler.source>1.8</rugged.compiler.source>
@@ -47,7 +47,7 @@
     <rugged.maven-site-plugin.version>3.21.0</rugged.maven-site-plugin.version>
     <rugged.maven-wagon-ssh-external-plugin.version>3.5.3</rugged.maven-wagon-ssh-external-plugin.version>
     <rugged.maven-source-plugin.version>3.3.1</rugged.maven-source-plugin.version>
-    <rugged.maven-surefire-plugin.version>2.22.2</rugged.maven-surefire-plugin.version>
+    <rugged.maven-surefire-plugin.version>3.5.3</rugged.maven-surefire-plugin.version>
     <rugged.maven-surefire-report-plugin.version>3.5.2</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.12</rugged.jgit.buildnumber.version>
     <rugged.build-helper-maven-plugin.version>3.6.0</rugged.build-helper-maven-plugin.version>
@@ -150,6 +150,7 @@
   </issueManagement>
 
   <dependencies>
+
     <dependency>
         <groupId>org.orekit</groupId>
         <artifactId>orekit</artifactId>
@@ -157,14 +158,15 @@
         <type>jar</type>
         <optional>false</optional>
     </dependency>
+
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${rugged.junit.version}</version>
-      <type>jar</type>
-      <scope>test</scope>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${rugged.junit.jupiter.version}</version>
       <optional>false</optional>
+      <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
@@ -319,6 +321,18 @@
             </dependency>
           </dependencies>
       </plugin>
+            <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${rugged.maven-surefire-plugin.version}</version>
+        <configuration>
+                <additionalClasspathElements>
+                   <additionalClasspathElement>${tools.jar.path}</additionalClasspathElement>
+                </additionalClasspathElements>
+                <!-- Exécution avec JUnit 5 -->
+                <!--useModulePath>false</useModulePath-->
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -434,12 +448,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${rugged.maven-surefire-plugin.version}</version>
+        <version>${orekit.maven-surefire-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>${rugged.maven-surefire-report-plugin.version}</version>
+        <version>${orekit.maven-surefire-report-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

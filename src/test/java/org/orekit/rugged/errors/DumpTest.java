@@ -16,7 +16,7 @@
  */
 package org.orekit.rugged.errors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,9 +29,8 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
@@ -43,13 +42,13 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 public class DumpTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
     
     @Test
     public void testGetKeyOrNameCoverage() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
                                           IllegalArgumentException, InvocationTargetException, IOException {
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         PrintWriter pw = new PrintWriter(tempFile, "UTF-8");
         Dump dump = new Dump(pw);
         
@@ -67,7 +66,7 @@ public class DumpTest {
     @Test
     public void testInverseLocNull() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
                                             IllegalArgumentException, InvocationTargetException, IOException {
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         PrintWriter pw = new PrintWriter(tempFile, "UTF-8");
         Dump dump = new Dump(pw);
         
@@ -96,7 +95,7 @@ public class DumpTest {
     @Test
     public void testDirectLocNull() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
                                             IllegalArgumentException, InvocationTargetException, IOException {
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         PrintWriter pw = new PrintWriter(tempFile, "UTF-8");
         Dump dump = new Dump(pw);
         
@@ -131,7 +130,7 @@ public class DumpTest {
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-02.txt").toURI().getPath();
         
         // Regenerate a dump in order to write the "sensor mean plane: sensorName xxx lineNumber xxx targetDirection xxx targetDirection xxx ...."
-        File dummyDump = tempFolder.newFile();
+        File dummyDump = File.createTempFile("junit", null, tempFolder);
         DumpManager.activate(dummyDump);
         
         DumpReplayer replayer = new DumpReplayer();

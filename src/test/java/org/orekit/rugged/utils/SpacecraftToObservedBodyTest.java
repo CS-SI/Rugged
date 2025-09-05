@@ -25,13 +25,11 @@ import java.util.List;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.orekit.bodies.BodyShape;
 import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
@@ -52,10 +50,8 @@ import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
 
 
-@RunWith(Parameterized.class)
 public class SpacecraftToObservedBodyTest {
 
-	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
 			// Run multiple times the tests, constructing this class with the following parameters
@@ -69,9 +65,12 @@ public class SpacecraftToObservedBodyTest {
 	private double shiftQmin;
 	private double shiftQmax;
 
-	
-    @Test
-    public void testIssue256() {
+
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testIssue256(double shiftPVmin, double shiftPVmax, double shiftQmin, double shiftQmax) {
+
+        initSpacecraftToObservedBodyTest(shiftPVmin, shiftPVmax, shiftQmin, shiftQmax);
         
         AbsoluteDate minSensorDate = sensor.getDate(0);
         AbsoluteDate maxSensorDate = sensor.getDate(2000);
@@ -93,16 +92,15 @@ public class SpacecraftToObservedBodyTest {
                 8, CartesianDerivativesFilter.USE_PV,
                 qList,
                 2, AngularDerivativesFilter.USE_R);
-        Assert.fail("an exception should have been thrown");
+        Assertions.fail("an exception should have been thrown");
     	
         } catch (RuggedException re){
-            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
         }        	
     }
 
-    
-	public SpacecraftToObservedBodyTest(double shiftPVmin, double shiftPVmax, double shiftQmin, double shiftQmax) {
-		super();
+
+    public void initSpacecraftToObservedBodyTest(double shiftPVmin, double shiftPVmax, double shiftQmin, double shiftQmax) {
 		this.shiftPVmin = shiftPVmin;
 		this.shiftPVmax = shiftPVmax;
 		this.shiftQmin = shiftQmin;
@@ -110,7 +108,7 @@ public class SpacecraftToObservedBodyTest {
 	}
 	
 
-    @Before
+    @BeforeEach
     public void setUp() {
         try {
 
@@ -136,13 +134,13 @@ public class SpacecraftToObservedBodyTest {
             
 
         } catch (OrekitException oe) {
-            Assert.fail(oe.getLocalizedMessage());
+            Assertions.fail(oe.getLocalizedMessage());
         } catch (URISyntaxException use) {
-            Assert.fail(use.getLocalizedMessage());
+            Assertions.fail(use.getLocalizedMessage());
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
     }
 
