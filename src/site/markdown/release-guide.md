@@ -1,11 +1,14 @@
 # Rugged Release Guide
 
-This release guide is largely inspired from [Hipparchus Release
-Guide](https://www.hipparchus.org/release-guide.html) and [Orekit Release Guide](https://www.orekit.org/site-orekit-development/release-guide.html). It lists the steps that
-have been used in the past to release a new version of Rugged. When in doubt
-ask the experts: Sébastien Dinot <sebastien.dinot@cs-soprasteria.com> for website questions
-and Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com> for everything else,
-or ask a question on the ["Rugged development" section of the forum](https://forum.orekit.org/c/rugged-development/7).
+This release guide is largely inspired from
+[Hipparchus Release Guide](https://www.hipparchus.org/release-guide.html) and
+[Orekit Release Guide](https://www.orekit.org/site-orekit-development/release-guide.html).
+It lists the steps that have been used in the past to release a new version of
+Rugged. When in doubt ask the experts:
+* Sébastien Dinot <sebastien.dinot@cs-soprasteria.com> for website questions
+* Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com>
+  for everything else, or ask a question on the
+  ["Rugged development" section of the forum](https://forum.orekit.org/c/rugged-development/7).
 
 ## Prerequisites
 
@@ -38,9 +41,9 @@ the technical documentation (static site).
 
 ## Verify the status of develop branch
 
-Before anything, check on the [continuous integration
-site](https://sonar.orekit.org/dashboard?branch=develop&id=orekit%3Arugged) that everything is fine on
-develop branch:
+Before anything, check on the
+[continuous integration site](https://sonar.orekit.org/dashboard?branch=develop&id=orekit%3Arugged)
+that everything is fine on develop branch:
 
 * All tests pass;
 * Code coverage is up to the requirements;
@@ -48,13 +51,14 @@ develop branch:
 
 If not, fix the warnings and errors first !
 
-It is also necessary to check on the [Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/-/pipelines?scope=all&page=1&ref=develop)
+It is also necessary to check on the
+[Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/-/pipelines?scope=all&page=1&ref=develop)
 that everything is fine on develop branch (i.e. all stages are passed).
 
 ## Prepare Git branch for release
 
-Release will be performed on a dedicated branch, not directly on master or
-develop branch. So a new branch must be created as follows and used for
+Release will be performed on a dedicated branch, not directly on `main` or
+`develop` branch. So a new branch must be created as follows and used for
 everything else:
 
     git branch release-X.Y
@@ -62,7 +66,8 @@ everything else:
 
 ## Update Copyright in sources
 
-A copyright line appears at the beginning of the source code, static site, tutorials, .... like:
+A copyright line appears at the beginning of the source code, static site,
+tutorials... like:
 
     /* Copyright 2013-2025 CS GROUP
 
@@ -193,8 +198,8 @@ The static site is generated locally using
 
 TBN: Java 8 compiler is compulsory
 
-The official site is automatically updated on the hosting platform when work is
-merged into branches `develop`, `release-*` or `master`.
+The official site is automatically updated on the hosting platform when work
+is merged into branches `develop`, `release-*` or `main`.
 
 ## Generating signed artifacts
 
@@ -284,21 +289,21 @@ candidate, verified and pushed:
     git tag -v X.Y
     git push --tags
 
-## Merge release branch into master
+## Merge release branch into main
 
-Merge the release branch into the `master` branch to include any changes made.
+Merge the release branch into the `main` branch to include any changes made.
 
-    git checkout master
+    git checkout main
     git merge --no-ff release-X.Y
 
 Then commit and push.
 
-## Merge master branch into develop
+## Merge main branch into develop
 
-Merge the `master` branch into the `develop` branch to include any changes made.
+Merge the `main` branch into the `develop` branch to include any changes made.
 
     git checkout develop
-    git merge --no-ff master
+    git merge --no-ff main
 
 Then update the version number to prepare for the next development cycle:
 
@@ -358,8 +363,9 @@ Create a new post for the release in `_post/` using as template a previous Rugge
 
 Once the modification pushed to develop branch, wait the pipeline on Gitlab is finished, then the [test website](https://test.orekit.org/rugged) will be updated.
 
-Once the modification validated, merge the develop branch into the master branch and pushed the master branch.
-Once the  pipeline on Gitlab is finished, then the [website](https://www.orekit.org/rugged) will be updated.
+Once the modification validated, merge the develop branch into the `main`
+branch and pushed the `main` branch. Once the pipeline on Gitlab is finished,
+then the [website](https://www.orekit.org/rugged) will be updated.
 
 ## Close X.Y milestone
 
