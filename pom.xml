@@ -21,12 +21,12 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- COTS version -->
-    <rugged.orekit.version>13.0.3</rugged.orekit.version>
-    <rugged.junit.jupiter.version>5.13.4</rugged.junit.jupiter.version>
+    <rugged.orekit.version>13.1</rugged.orekit.version>
 
     <!-- Compilers and Tools version -->
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
+    <rugged.junit.jupiter.version>5.13.4</rugged.junit.jupiter.version>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
     <rugged.spotbugs-maven-plugin.version>4.2.3</rugged.spotbugs-maven-plugin.version>
     <rugged.jacoco-maven-plugin.version>0.8.12</rugged.jacoco-maven-plugin.version>
@@ -54,6 +54,7 @@
     <rugged.nexus-staging-maven-plugin.version>1.7.0</rugged.nexus-staging-maven-plugin.version>
     <rugged.maven-gpg-plugin.version>3.2.7</rugged.maven-gpg-plugin.version>
     <rugged.maven-install-plugin.version>3.1.4</rugged.maven-install-plugin.version>
+    <rugged.cyclonedx-maven-plugin.version>2.9.1</rugged.cyclonedx-maven-plugin.version>
 
   </properties>
 
@@ -418,6 +419,19 @@
           <enableRulesSummary>false</enableRulesSummary>
           <headerLocation>${basedir}/license-header.txt</headerLocation>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <version>${rugged.cyclonedx-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>makeAggregateBom</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
