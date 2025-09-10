@@ -90,21 +90,21 @@ The source code control management system used is [Git](http://git-scm.com/ "Git
 main Rugged repository is located at [https://gitlab.orekit.org/orekit/rugged.git](https://gitlab.orekit.org/orekit/rugged.git).
 
 Starting after version 2.0, the branch management workflow is adapted from
-both [git flow](http://nvie.com/posts/a-successful-git-branching-model/) and 
-from the [Orfeo ToolBox Workflow](https://wiki.orfeo-toolbox.org/index.php/Git#Workflow "OTB workflow"). 
+both [git flow](http://nvie.com/posts/a-successful-git-branching-model/) and
+from the [Orfeo ToolBox Workflow](https://wiki.orfeo-toolbox.org/index.php/Git#Workflow "OTB workflow").
 It is the same as chosen for Orekit.
 
 ![Rugged git workflow](./images/rugged-git-flow.png)
 
-This implies that development occurs on a develop branch only.
-Developers create feature branches, and merge them on the develop
-branch when ready. The develop branch should always be functional
+This implies that development occurs on a `develop` branch only.
+Developers create feature branches, and merge them on the `develop`
+branch when ready. The `develop` branch should always be functional
 so people wanting to be on the bleeding edge can use it (for example
 to create nightly builds or to prepare their application for upcoming
 features before the official release).
 
 In order to improve traceability, when a feature branch is merged into
-develop, it should use
+`develop`, it should use
 
     git merge ---no-ff
 
@@ -118,17 +118,17 @@ if the developer wants to share work or needs community feedback.
 
 When a release is desired, a dedicated branch should be created, with a name
 following the pattern release-x.y. These branches are created from the
-develop branch. When the release is ready, the branch is merged both into the
-master branch and into the develop branch. Once a release branch has been set
+`develop` branch. When the release is ready, the branch is merged both into the
+`main` branch and into the `develop` branch. Once a release branch has been set
 up, it will remain. This allows users relying on this specific version to be
 able to retrieve the fixes published afterward (i.e. x.y.1, x.y.2...).
 
-After a release has been published and pushed to master, it may be necessary
+After a release has been published and pushed to `main`, it may be necessary
 to publish an urgent bugfix if a serious problem in the released version is
-found. Short-lived bugfix branches that are created directly from master are
-devoted to this. These bugfix branches are merged back into master and develop.
+found. Short-lived bugfix branches that are created directly from `main` are
+devoted to this. These bugfix branches are merged back into `main` and `develop`.
 
-The master branch always refer to the latest stable release performed. No
+The `main` branch always refer to the latest stable release performed. No
 direct work is done on this branch. It is updated only by merging either
 release branches or bugfix branches branches to it.
 
@@ -234,4 +234,3 @@ root directory.
   fix _all_ errors and warnings found by checkstyle
 
 [Top of the page](#top)
-
