@@ -20,7 +20,22 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="4.x" date="TBD" description="TBD">
+    <release version="4.0.1" date="TBD" description="This is a minor release.
+     It migrates tests from Junit 4 to Junit5,
+     corrects wrong links in documentation.
+     This version depends on Orekit 13.1 and Hipparchus 4.0.1.">
+      <action dev="sébastien dinot" type="update" issue="405,404,402">
+        Corrected wrong links in documentation (static site).
+      </action>
+      <action dev="sébastien dinot" type="update" issue="408">
+        Updated documentation following renaming of the master branch to main.
+      </action>
+      <action dev="guylaine" type="update" issue="406">
+        Migrated tests from JUnit 4 to JUnit 5.
+      </action>
+      <action dev="guylaine" type="update" issue="409">
+        Updated dependencies to Orekit 13.1 (and Hipparchus 4.0.1).
+      </action>
     </release>
     <release version="4.0" date="2025-06-30" description="This is a major release.
     It mades Rugged able to deal with seamless DEM tiles and fixes a few bugs.
