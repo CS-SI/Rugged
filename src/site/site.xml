@@ -15,12 +15,12 @@
  -->
 <project name="Rugged">
   <bannerLeft>
-    <name>CS GROUP</name>
+    <alt>CS GROUP</alt>
     <src>/images/logo_cs_group.png</src>
     <href>https://www.cs-soprasteria.com/</href>
   </bannerLeft>
   <bannerRight>
-    <name>Rugged</name>
+    <alt>Rugged</alt>
     <src>/images/rugged-logo-small.jpg</src>
     <href>/index.html</href>
   </bannerRight>
