@@ -20,7 +20,7 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="4.0.1" date="TBD" description="This is a minor release.
+    <release version="4.0.1" date="2025-09-11" description="This is a minor release.
      It migrates tests from Junit 4 to Junit5,
      corrects wrong links in documentation.
      This version depends on Orekit 13.1 and Hipparchus 4.0.1.">
