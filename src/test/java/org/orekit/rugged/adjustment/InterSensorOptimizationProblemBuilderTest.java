@@ -88,7 +88,7 @@ public class InterSensorOptimizationProblemBuilderTest {
         final double expectedRMS = 0.069302;
         Assertions.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
 
-        final double expectedCost = 3.597014;
+        final double expectedCost = 3.596994;
         Assertions.assertEquals(expectedCost, optimum.getCost(), 2.5e-6);
 
         Assertions.assertTrue(numberOfParameters == optimum.getPoint().getDimension());

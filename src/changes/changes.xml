@@ -20,10 +20,10 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="4.0.1" date="2025-09-11" description="This is a minor release.
+    <release version="4.0.1" date="2025-xx-xx" description="This is a minor release.
      It migrates tests from Junit 4 to Junit5,
      corrects wrong links in documentation.
-     This version depends on Orekit 13.1 and Hipparchus 4.0.1.">
+     This version depends on Orekit 13.1.2 and Hipparchus 4.0.2.">
       <action dev="sébastien dinot" type="update" issue="405,404,402">
         Corrected wrong links in documentation (static site).
       </action>
@@ -32,6 +32,9 @@
       </action>
       <action dev="guylaine" type="update" issue="406">
         Migrated tests from JUnit 4 to JUnit 5.
+      </action>
+      <action dev="guylaine" type="update" issue="410">
+        Updated dependencies to Orekit 13.1.2 (and Hipparchus 4.0.2).
       </action>
       <action dev="guylaine" type="update" issue="409">
         Updated dependencies to Orekit 13.1 (and Hipparchus 4.0.1).

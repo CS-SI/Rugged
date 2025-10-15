@@ -21,7 +21,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- COTS version -->
-    <rugged.orekit.version>13.1</rugged.orekit.version>
+    <rugged.orekit.version>13.1.2</rugged.orekit.version>
 
     <!-- Compilers and Tools version -->
     <rugged.compiler.source>1.8</rugged.compiler.source>
@@ -37,7 +37,7 @@
     <rugged.checkstyle.version>9.3</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.4.1</rugged.maven-clean-plugin.version>
     <rugged.maven-compiler-plugin.version>3.14.0</rugged.maven-compiler-plugin.version>
-    <rugged.maven-javadoc-plugin.version>3.11.2</rugged.maven-javadoc-plugin.version>
+    <rugged.maven-javadoc-plugin.version>3.11.3</rugged.maven-javadoc-plugin.version>
     <rugged.maven-jar-plugin.version>3.4.2</rugged.maven-jar-plugin.version>
     <rugged.maven-jxr-plugin.version>3.6.0</rugged.maven-jxr-plugin.version>
     <rugged.plantuml-maven-plugin.version>1.2</rugged.plantuml-maven-plugin.version>
