@@ -2,9 +2,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,9 @@
 
 # Direct Location with a DEM
 
-The aim of this tutorial is to compute a direct location grid by intersection of 
-the line of sight with a DEM (Digital Elevation Model), using Duvenhage's algorithm. 
-This algorithm is the most efficient one in Rugged. 
+The aim of this tutorial is to compute a direct location grid by intersection of
+the line of sight with a DEM (Digital Elevation Model), using Duvenhage's algorithm.
+This algorithm is the most efficient one in Rugged.
 
 The following figure shows the effects of taking into account the DEM in the computation of latitude, longitude and altitude:
 
@@ -26,36 +26,37 @@ The following figure shows the effects of taking into account the DEM in the com
 
 ## Feeding Rugged with DEM tiles
 
-Rugged does not parse DEM files but takes buffers of elevation data as input. 
-It is up to the calling application to read the DEM and load the data into buffers. 
-Rugged provides a tile mechanism with cache for large DEMs allowing the user to load 
-one tile at a time. This is in line with the format of world coverage DEMs such as SRTM. 
-Rugged offers an interface for updating the DEM tiles in cache with a callback function 
-triggered everytime a coordinate falls outside the current region. 
+Rugged does not parse DEM files but takes buffers of elevation data as input.
+It is up to the calling application to read the DEM and load the data into buffers.
+Rugged provides a tile mechanism with cache for large DEMs allowing the user to load
+one tile at a time. This is in line with the format of world coverage DEMs such as SRTM.
+Rugged offers an interface for updating the DEM tiles in cache with a callback function
+triggered everytime a coordinate falls outside the current region.
 
-The calling application must implement the callback function for loading the tiles. 
-We recommend to use GDAL (http://www.gdal.org/) to parse the DEM files as it handles most 
-formats (including geoTIFF for Aster DEM or DTED for SRTM). Rugged does not include the 
-parsing of the DEM, by design, and yet we could have used GDAL. 
-We want Rugged to remain a low-level library that does not pull too many third-party libraries.
+The calling application must implement the callback function for loading the
+tiles. We recommend to use GDAL (https://gdal.org/en/stable/) to parse the DEM
+files as it handles most formats (including geoTIFF for Aster DEM or DTED for
+SRTM). Rugged does not include the parsing of the DEM, by design, and yet we
+could have used GDAL. We want Rugged to remain a low-level library that does
+not pull too many third-party libraries.
 
- 
-### Implementing the interface TileUpdater for DEM loading. 
 
-In this tutorial, we will not include real DEM data. Instead we are going to create a fake DEM 
-representing a volcano in a form of a perfect cone, similar to the Mayon volcano 
-in the Philippines, except that we will locate it somewhere just below our satellite. 
-This example is already part of Rugged tests cases, the source code is available 
-in the package `org.orekit.rugged.raster`, file VolcanicConeElevationUpdater.java. 
+### Implementing the interface TileUpdater for DEM loading.
 
-The class `VolcanicConeElevationUpdater` implements the interface `TileUpdater` with its method `updateTile`. 
-The method is in charge of loading a tile. The extent of the tile must be such that it covers 
-at least the ground point with coordinates (latitude, longitude) which are passed as arguments to the method. 
+In this tutorial, we will not include real DEM data. Instead we are going to create a fake DEM
+representing a volcano in a form of a perfect cone, similar to the Mayon volcano
+in the Philippines, except that we will locate it somewhere just below our satellite.
+This example is already part of Rugged tests cases, the source code is available
+in the package `org.orekit.rugged.raster`, file VolcanicConeElevationUpdater.java.
+
+The class `VolcanicConeElevationUpdater` implements the interface `TileUpdater` with its method `updateTile`.
+The method is in charge of loading a tile. The extent of the tile must be such that it covers
+at least the ground point with coordinates (latitude, longitude) which are passed as arguments to the method.
 The tile is an object of type `UpdatableTile` which has two methods :
 
 * `setGeometry(minLatitude, minLongitude, latitudeStep, longitudeStep, latitudeRows, longitudeRows)` : initializes the extent of the new tile before loading
 
-* `setElevation(latIdx, longIdx, elevation)` : fills the tile buffer at indices (latIdx, lonIdx) with value elevation    
+* `setElevation(latIdx, longIdx, elevation)` : fills the tile buffer at indices (latIdx, lonIdx) with value elevation
 
 Here's the source code of the class `VolcanicConeElevationUpdater` :
 
@@ -65,15 +66,15 @@ Here's the source code of the class `VolcanicConeElevationUpdater` :
     import org.orekit.bodies.GeodeticPoint;
     import org.orekit.rugged.errors.RuggedException;
     import org.orekit.utils.Constants;
-    
+
     public class VolcanicConeElevationUpdater implements TileUpdater {
-    
+
         private GeodeticPoint summit;
         private double        slope;
         private double        base;
         private double        size;
         private int           n;
-    
+
         public VolcanicConeElevationUpdater(GeodeticPoint summit, double slope, double base,
                                             double size, int n) {
             this.summit = summit;
@@ -82,7 +83,7 @@ Here's the source code of the class `VolcanicConeElevationUpdater` :
             this.size   = size;
             this.n      = n;
         }
-    
+
         public void updateTile(double latitude, double longitude, UpdatableTile tile)
             throws RuggedException {
             double step         = size / (n - 1);
@@ -103,7 +104,7 @@ Here's the source code of the class `VolcanicConeElevationUpdater` :
                 }
             }
         }
-    
+
     }
 
 ### Important notes on DEM tiles :
@@ -126,8 +127,8 @@ This diagram tries to represent the meaning of the different parameters in the d
 
 ## Initializing Rugged with a DEM
 
-The initialization step differs slightly from the first tutorial [Direct location](./direct-location.html), 
-as we need to pass the information about our TileUpdater.  
+The initialization step differs slightly from the first tutorial [Direct location](./direct-location.html),
+as we need to pass the information about our TileUpdater.
 
 Instantiate an object derived from TileUpdater :
 
@@ -137,16 +138,16 @@ Instantiate an object derived from TileUpdater :
     AlgorithmId algoId = AlgorithmId.DUVENHAGE;
     boolean isOverlappingTiles = true;
 
- 
+
 Initialize Rugged with these parameters :
 
     Rugged rugged = new RuggedBuilder().
                     setDigitalElevationModel(updater, nbTiles, isOverlappingTiles).
-                    setAlgorithm(algoId). 
+                    setAlgorithm(algoId).
                     setEllipsoid(EllipsoidId.WGS84, BodyRotatingFrameId.ITRF).
-                    setTimeSpan(startDate, stopDate, 0.1, 10.0). 
+                    setTimeSpan(startDate, stopDate, 0.1, 10.0).
                     setTrajectory(InertialFrameId.EME2000,
-                                  satellitePVList, 6, CartesianDerivativesFilter.USE_P, 
+                                  satellitePVList, 6, CartesianDerivativesFilter.USE_P,
                                   satelliteQList, 8, AngularDerivativesFilter.USE_R).
                     addLineSensor(lineSensor).
                     build();
@@ -157,8 +158,8 @@ one can use `setDigitalElevationModel(updater, nbTiles)` in the case of overlapp
 
 ## Computing a direct location grid
 
-In a similar way as in the first tutorial [Direct Location](./direct-location.html), 
-we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk. 
+In a similar way as in the first tutorial [Direct Location](./direct-location.html),
+we call Rugged direct location method. This time it is called in a loop so as to generate a full grid on disk.
 
     DataOutputStream dos = new DataOutputStream(new FileOutputStream("demDirectLoc.c1"));
     int lineStep = (maxLine - minLine) / nbLineStep;

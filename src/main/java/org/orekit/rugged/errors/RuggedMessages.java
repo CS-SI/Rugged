@@ -170,7 +170,7 @@ public enum RuggedMessages implements Localizable {
     /** Control class loading properties in UTF-8 encoding.
      * <p>
      * This class has been very slightly adapted from BalusC answer to question: <a
-     * href="http://stackoverflow.com/questions/4659929/how-to-use-utf-8-in-resource-properties-with-resourcebundle">
+     * href="https://stackoverflow.com/questions/4659929/how-to-use-utf-8-in-resource-properties-with-resourcebundle">
      * How to use UTF-8 in resource properties with ResourceBundle</a>.
      * </p>
      */

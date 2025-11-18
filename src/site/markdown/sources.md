@@ -37,7 +37,7 @@ It is also possible to retrieve published versions from the Git repository
 ## Development version
 
 The development of the Rugged project is done using the
-[Git](http://git-scm.com/ "Git homepage") source code control system. Rugged
+[Git](https://git-scm.com/ "Git homepage") source code control system. Rugged
 Git reference repository is available online.
 
 The latest developments are in the `develop` branch. This is the one you want

@@ -16,6 +16,7 @@
  */
 package org.orekit.rugged.errors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
@@ -49,18 +50,20 @@ public class DumpTest {
     public void testGetKeyOrNameCoverage() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
                                           IllegalArgumentException, InvocationTargetException, IOException {
         File tempFile = File.createTempFile("junit", null, tempFolder);
-        PrintWriter pw = new PrintWriter(tempFile, "UTF-8");
-        Dump dump = new Dump(pw);
-        
-        Method getKeyOrName = dump.getClass().getDeclaredMethod("getKeyOrName", Frame.class);
-        getKeyOrName.setAccessible(true);
-        
-        String dummyName = "dummy";
-        Frame frame = new Frame(FramesFactory.getEME2000(), Transform.IDENTITY, dummyName);
-        
-        String foundName = (String) getKeyOrName.invoke(dump, frame);
-        
-        assertTrue(foundName.equals(dummyName));
+        try (PrintWriter pw = new PrintWriter(tempFile, "UTF-8")) {
+
+            Dump dump = new Dump(pw);
+
+            Method getKeyOrName = dump.getClass().getDeclaredMethod("getKeyOrName", Frame.class);
+            getKeyOrName.setAccessible(true);
+
+            String dummyName = "dummy";
+            Frame frame = new Frame(FramesFactory.getEME2000(), Transform.IDENTITY, dummyName);
+
+            String foundName = (String) getKeyOrName.invoke(dump, frame);
+
+            assertEquals(dummyName, foundName);
+        }
     }
     
     @Test
@@ -85,7 +88,7 @@ public class DumpTest {
              BufferedReader    br  = new BufferedReader(isr)) {
                for (String line = br.readLine(); line != null; line = br.readLine()) {
                    final String trimmed = line.trim();
-                   if (!(trimmed.length() == 0 || trimmed.startsWith("#"))) {
+                   if (!(trimmed.isEmpty() || trimmed.startsWith("#"))) {
                        assertTrue(line.contains("inverse location result: NULL"));
                    }
                }
@@ -113,7 +116,7 @@ public class DumpTest {
              BufferedReader    br  = new BufferedReader(isr)) {
                for (String line = br.readLine(); line != null; line = br.readLine()) {
                    final String trimmed = line.trim();
-                   if (!(trimmed.length() == 0 || trimmed.startsWith("#"))) {
+                   if (!(trimmed.isEmpty() || trimmed.startsWith("#"))) {
                        assertTrue(line.contains("direct location result: NULL"));
                    }
                }
@@ -121,8 +124,8 @@ public class DumpTest {
     }
     
     @Test
-    public void testSetMeanPlane() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
-                                            IllegalArgumentException, InvocationTargetException, IOException, URISyntaxException {
+    public void testSetMeanPlane() throws SecurityException,
+            IllegalArgumentException, IOException, URISyntaxException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -146,9 +149,9 @@ public class DumpTest {
              BufferedReader    br  = new BufferedReader(isr)) {
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 final String trimmed = line.trim();
-                if (!(trimmed.length() == 0 || trimmed.startsWith("#"))) {
+                if (!(trimmed.isEmpty() || trimmed.startsWith("#"))) {
                     if (line.contains("lineNumber ")&& line.contains("targetDirection ")) {
-                        assertTrue(line.split("targetDirection").length == 6);
+                        assertEquals(6, line.split("targetDirection").length);
                     }
                 }
             }
