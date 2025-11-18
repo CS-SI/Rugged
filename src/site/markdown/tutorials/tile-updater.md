@@ -21,7 +21,7 @@ Same case as the tutorial [Direct location with a DEM](./direct-location-with-DE
 **WARNING**
 
 This tutorial will not be able to compile under
-[Rugged gitlab CI](https:gitlab.orekit.org/orekit/rugged/-/pipelines) as GDAL
+[Rugged gitlab CI](https://gitlab.orekit.org/orekit/rugged/-/pipelines) as GDAL
 is not authorized in Rugged official releases. Don't commit under official
 branches (main, develop, release...) of Rugged, a pom.xml with the dependency
 to GDAL.
@@ -83,7 +83,7 @@ For instance (for Linux) according to the GDAL version and the linux distributio
 
 This example needs one tile under a specific directory: `17/05/srtm_17_05.tif`
 
-For instance from : [SRTM Tile Grabber](http://dwtkns.com/srtm/)
+For instance from : [SRTM Tile Grabber](https://dwtkns.com/srtm/)
 
     srtm_17_05.zip
 
@@ -94,7 +94,7 @@ or changed the method: `getRasterFilePath(latitude, longitude)`
 
 This example needs the geoid file: `egm96_15.gtx`
 
-For instance from the [GeographicLib](https:geographiclib.sourceforge.io/C++/doc/geoid.html)
+For instance from the [GeographicLib](https://geographiclib.sourceforge.io/C++/doc/geoid.html)
 
 ### Update the path in variables demRootDir and geoidFilePath
 
@@ -103,6 +103,7 @@ Into the following code ...
 ## Code example
 
 This is a whole example using the SRTM tiles.
+
 
     public class DirectLocationWithSRTMdem {
 
@@ -289,7 +290,7 @@ This is a whole example using the SRTM tiles.
 
 
     /**
-     * To read SRTM tiles (get from http://dwtkns.com/srtm/)
+     * To read SRTM tiles (get from https://dwtkns.com/srtm/)
      */
     private static class SRTMelevationUpdater implements TileUpdater {
 

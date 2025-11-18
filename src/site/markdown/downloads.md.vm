@@ -19,7 +19,7 @@
 <h2>Development Library version</h2>
 
 The development version of the Rugged library is always available to
-download from our version control system. We use [Git](http://git-scm.com/ "Git homepage")
+download from our version control system. We use [Git](https://git-scm.com/ "Git homepage")
 as our SCM. The anonymous read access to our Git repository  allows users who
 need the latest features and the latest bug fixes to get them even before an
 official release.
