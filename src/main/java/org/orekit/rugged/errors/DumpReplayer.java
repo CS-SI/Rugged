@@ -20,12 +20,13 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -292,14 +293,14 @@ public class DumpReplayer {
      * @param file dump file to parse
      */
     public void parse(final File file) {
-        try {
-            final BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        try (BufferedReader reader =
+                     new BufferedReader(new InputStreamReader(Files.newInputStream(file.toPath()),
+                             StandardCharsets.UTF_8))) {
+
             int l = 0;
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 LineParser.parse(++l, file, line, this);
             }
-            reader.close();
         } catch (IOException ioe) {
             throw new RuggedException(ioe, LocalizedCoreFormats.SIMPLE_MESSAGE, ioe.getLocalizedMessage());
         }
@@ -632,8 +633,8 @@ public class DumpReplayer {
                 global.maxDate        = new AbsoluteDate(fields[3], TimeScalesFactory.getUTC());
                 global.tStep          = Double.parseDouble(fields[5]);
                 global.tolerance      = Double.parseDouble(fields[7]);
-                global.bodyToInertial = new TreeMap<Integer, Transform>();
-                global.scToInertial   = new TreeMap<Integer, Transform>();
+                global.bodyToInertial = new TreeMap<>();
+                global.scToInertial   = new TreeMap<>();
                 try {
                     global.inertialFrame = FramesFactory.getFrame(Predefined.valueOf(fields[9]));
                 } catch (IllegalArgumentException iae) {
@@ -967,7 +968,7 @@ public class DumpReplayer {
         public static void parse(final int l, final File file, final String line, final DumpReplayer global) {
 
             final String trimmed = line.trim();
-            if (trimmed.length() == 0 || trimmed.startsWith(COMMENT_START)) {
+            if (trimmed.isEmpty() || trimmed.startsWith(COMMENT_START)) {
                 return;
             }
 
@@ -1017,7 +1018,7 @@ public class DumpReplayer {
         private final double latitudeStep;
 
         /** Number of latitude rows. */
-        private int latitudeRows;
+        private final int latitudeRows;
 
         /** Minimum longitude. */
         private final double minLongitude;
@@ -1026,7 +1027,7 @@ public class DumpReplayer {
         private final double longitudeStep;
 
         /** Number of longitude columns. */
-        private int longitudeColumns;
+        private final int longitudeColumns;
 
         /** Raster elevation data. */
         private final OpenIntToDoubleHashMap elevations;
@@ -1117,9 +1118,9 @@ public class DumpReplayer {
          */
         ParsedSensor(final String name) {
             this.name     = name;
-            this.losMap   = new HashMap<Integer, List<Pair<AbsoluteDate, Vector3D>>>();
-            this.datation = new ArrayList<Pair<Double, AbsoluteDate>>();
-            this.rates    = new ArrayList<Pair<Double, Double>>();
+            this.losMap   = new HashMap<>();
+            this.datation = new ArrayList<>();
+            this.rates    = new ArrayList<>();
         }
 
         /** Set the mean place finder.
@@ -1157,7 +1158,7 @@ public class DumpReplayer {
         public void setLOS(final AbsoluteDate date, final int pixelNumber, final Vector3D los) {
             List<Pair<AbsoluteDate, Vector3D>> list = losMap.get(pixelNumber);
             if (list == null) {
-                list = new ArrayList<Pair<AbsoluteDate, Vector3D>>();
+                list = new ArrayList<>();
                 losMap.put(pixelNumber, list);
             }
             // find insertion index to have LOS sorted chronologically
@@ -1168,7 +1169,7 @@ public class DumpReplayer {
                 }
                 ++index;
             }
-            list.add(index, new Pair<AbsoluteDate, Vector3D>(date, los));
+            list.add(index, new Pair<>(date, los));
         }
 
         /** {@inheritDoc} */
@@ -1225,7 +1226,7 @@ public class DumpReplayer {
                 }
                 ++index;
             }
-            datation.add(index, new Pair<Double, AbsoluteDate>(lineNumber, date));
+            datation.add(index, new Pair<>(lineNumber, date));
         }
 
         /** {@inheritDoc} */
@@ -1295,7 +1296,7 @@ public class DumpReplayer {
                 }
                 ++index;
             }
-            rates.add(index, new Pair<Double, Double>(lineNumber, rate));
+            rates.add(index, new Pair<>(lineNumber, rate));
         }
 
         /** {@inheritDoc} */
