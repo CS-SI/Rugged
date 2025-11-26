@@ -20,13 +20,13 @@ import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well1024a;
 import org.hipparchus.util.FastMath;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class MinMaxTreeTileTest {
 
@@ -35,37 +35,37 @@ public class MinMaxTreeTileTest {
         throws SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
         MinMaxTreeTile tile = createTile(107, 19);
-        Assert.assertEquals(9, tile.getLevels());
+        Assertions.assertEquals(9, tile.getLevels());
 
         Field startField = MinMaxTreeTile.class.getDeclaredField("start");
         startField.setAccessible(true);
         int[] start = (int[]) startField.get(tile);
-        Assert.assertEquals(   0, start[ 0]);
-        Assert.assertEquals(   7, start[ 1]);
-        Assert.assertEquals(  21, start[ 2]);
-        Assert.assertEquals(  49, start[ 3]);
-        Assert.assertEquals(  91, start[ 4]);
-        Assert.assertEquals( 172, start[ 5]);
-        Assert.assertEquals( 307, start[ 6]);
-        Assert.assertEquals( 577, start[ 7]);
-        Assert.assertEquals(1117, start[ 8]);
+        Assertions.assertEquals(   0, start[ 0]);
+        Assertions.assertEquals(   7, start[ 1]);
+        Assertions.assertEquals(  21, start[ 2]);
+        Assertions.assertEquals(  49, start[ 3]);
+        Assertions.assertEquals(  91, start[ 4]);
+        Assertions.assertEquals( 172, start[ 5]);
+        Assertions.assertEquals( 307, start[ 6]);
+        Assertions.assertEquals( 577, start[ 7]);
+        Assertions.assertEquals(1117, start[ 8]);
 
-        Assert.assertTrue(tile.isColumnMerging(9));
-        Assert.assertFalse(tile.isColumnMerging(8));
-        Assert.assertTrue(tile.isColumnMerging(7));
-        Assert.assertFalse(tile.isColumnMerging(6));
-        Assert.assertTrue(tile.isColumnMerging(5));
-        Assert.assertFalse(tile.isColumnMerging(4));
-        Assert.assertTrue(tile.isColumnMerging(3));
-        Assert.assertFalse(tile.isColumnMerging(2));
-        Assert.assertTrue(tile.isColumnMerging(1));
+        Assertions.assertTrue(tile.isColumnMerging(9));
+        Assertions.assertFalse(tile.isColumnMerging(8));
+        Assertions.assertTrue(tile.isColumnMerging(7));
+        Assertions.assertFalse(tile.isColumnMerging(6));
+        Assertions.assertTrue(tile.isColumnMerging(5));
+        Assertions.assertFalse(tile.isColumnMerging(4));
+        Assertions.assertTrue(tile.isColumnMerging(3));
+        Assertions.assertFalse(tile.isColumnMerging(2));
+        Assertions.assertTrue(tile.isColumnMerging(1));
 
         Field minTreeField = MinMaxTreeTile.class.getDeclaredField("minTree");
         minTreeField.setAccessible(true);
-        Assert.assertEquals(2187, ((double[]) minTreeField.get(tile)).length);
+        Assertions.assertEquals(2187, ((double[]) minTreeField.get(tile)).length);
         Field maxTreeField = MinMaxTreeTile.class.getDeclaredField("maxTree");
         maxTreeField.setAccessible(true);
-        Assert.assertEquals(2187, ((double[]) maxTreeField.get(tile)).length);
+        Assertions.assertEquals(2187, ((double[]) maxTreeField.get(tile)).length);
 
     }
 
@@ -74,33 +74,33 @@ public class MinMaxTreeTileTest {
         throws SecurityException, NoSuchFieldException,
                IllegalArgumentException, IllegalAccessException {
         MinMaxTreeTile tile = createTile(4, 7);
-        Assert.assertEquals(4, tile.getLevels());
+        Assertions.assertEquals(4, tile.getLevels());
 
         Field startField = MinMaxTreeTile.class.getDeclaredField("start");
         startField.setAccessible(true);
         int[] start = (int[]) startField.get(tile);
-        Assert.assertEquals( 0, start[ 0]);
-        Assert.assertEquals( 2, start[ 1]);
-        Assert.assertEquals( 6, start[ 2]);
-        Assert.assertEquals(14, start[ 3]);
+        Assertions.assertEquals( 0, start[ 0]);
+        Assertions.assertEquals( 2, start[ 1]);
+        Assertions.assertEquals( 6, start[ 2]);
+        Assertions.assertEquals(14, start[ 3]);
 
-        Assert.assertTrue(tile.isColumnMerging(4));
-        Assert.assertFalse(tile.isColumnMerging(3));
-        Assert.assertTrue(tile.isColumnMerging(2));
-        Assert.assertFalse(tile.isColumnMerging(1));
+        Assertions.assertTrue(tile.isColumnMerging(4));
+        Assertions.assertFalse(tile.isColumnMerging(3));
+        Assertions.assertTrue(tile.isColumnMerging(2));
+        Assertions.assertFalse(tile.isColumnMerging(1));
 
         Field minTreeField = MinMaxTreeTile.class.getDeclaredField("minTree");
         minTreeField.setAccessible(true);
-        Assert.assertEquals(30, ((double[]) minTreeField.get(tile)).length);
+        Assertions.assertEquals(30, ((double[]) minTreeField.get(tile)).length);
         Field maxTreeField = MinMaxTreeTile.class.getDeclaredField("maxTree");
         maxTreeField.setAccessible(true);
-        Assert.assertEquals(30, ((double[]) maxTreeField.get(tile)).length);
+        Assertions.assertEquals(30, ((double[]) maxTreeField.get(tile)).length);
 
     }
 
     @Test
     public void testSinglePixel() {
-        Assert.assertEquals(0, createTile(1, 1).getLevels());
+        Assertions.assertEquals(0, createTile(1, 1).getLevels());
     }
 
     @Test
@@ -126,8 +126,8 @@ public class MinMaxTreeTileTest {
                                 }
                             }
 
-                            Assert.assertEquals(min, tile.getMinElevation(row, column, level), 1.0e-10 * min);
-                            Assert.assertEquals(max, tile.getMaxElevation(row, column, level), 1.0e-10 * max);
+                            Assertions.assertEquals(min, tile.getMinElevation(row, column, level), 1.0e-10 * min);
+                            Assertions.assertEquals(max, tile.getMaxElevation(row, column, level), 1.0e-10 * max);
                         }
                     }
                 }
@@ -155,11 +155,11 @@ public class MinMaxTreeTileTest {
                     for (int j = 0; j < tile.getLongitudeColumns(); ++j) {
                         for (int l = 0; l < tile.getLevels(); ++l) {
                             int[] min = tile.locateMin(i, j, l);
-                            Assert.assertEquals(tile.getMinElevation(i, j, l),
+                            Assertions.assertEquals(tile.getMinElevation(i, j, l),
                                                 tile.getElevationAtIndices(min[0], min[1]),
                                                 1.0e-10);
                             int[] max = tile.locateMax(i, j, l);
-                            Assert.assertEquals(tile.getMaxElevation(i, j, l),
+                            Assertions.assertEquals(tile.getMaxElevation(i, j, l),
                                                 tile.getElevationAtIndices(max[0], max[1]),
                                                 1.0e-10);
                         }
@@ -178,17 +178,17 @@ public class MinMaxTreeTileTest {
         tile.setElevation(1, 0, 3.0);
         tile.setElevation(1, 1, 4.0);
         tile.tileUpdateCompleted();
-        Assert.assertEquals(1.0, tile.getMinElevation(0, 0, 0), 1.0e-10);
-        Assert.assertEquals(3.0, tile.getMinElevation(1, 0, 0), 1.0e-10);
-        Assert.assertEquals(4.0, tile.getMaxElevation(0, 0, 0), 1.0e-10);
-        Assert.assertEquals(4.0, tile.getMaxElevation(1, 0, 0), 1.0e-10);
+        Assertions.assertEquals(1.0, tile.getMinElevation(0, 0, 0), 1.0e-10);
+        Assertions.assertEquals(3.0, tile.getMinElevation(1, 0, 0), 1.0e-10);
+        Assertions.assertEquals(4.0, tile.getMaxElevation(0, 0, 0), 1.0e-10);
+        Assertions.assertEquals(4.0, tile.getMaxElevation(1, 0, 0), 1.0e-10);
     }
 
     @Test
     public void testMergeLarge() {
         MinMaxTreeTile tile = createTile(1201, 1201);
-        Assert.assertEquals(21, tile.getLevels());
-        Assert.assertEquals( 7, tile.getMergeLevel(703, 97, 765, 59));
+        Assertions.assertEquals(21, tile.getLevels());
+        Assertions.assertEquals( 7, tile.getMergeLevel(703, 97, 765, 59));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class MinMaxTreeTileTest {
                                     int[] neighbors1 = neighbors(i1, j1, nbRows, nbColumns, tile.getLevels() - level);
                                     int[] neighbors2 = neighbors(i2, j2, nbRows, nbColumns, tile.getLevels() - level);
                                     for (int k = 0; k < neighbors1.length; ++k) {
-                                        Assert.assertTrue(neighbors1[0] == neighbors2[0] &&
+                                        Assertions.assertTrue(neighbors1[0] == neighbors2[0] &&
                                                           neighbors1[1] == neighbors2[1] &&
                                                           neighbors1[2] == neighbors2[2] &&
                                                           neighbors1[3] == neighbors2[3]);
@@ -224,7 +224,7 @@ public class MinMaxTreeTileTest {
                                                 neighbors1[3] == neighbors2[3])) {
                                             tile.getMergeLevel(i1, j1, i2, j2);
                                         }
-                                        Assert.assertFalse(neighbors1[0] == neighbors2[0] &&
+                                        Assertions.assertFalse(neighbors1[0] == neighbors2[0] &&
                                                            neighbors1[1] == neighbors2[1] &&
                                                            neighbors1[2] == neighbors2[2] &&
                                                            neighbors1[3] == neighbors2[3]);
@@ -253,14 +253,14 @@ public class MinMaxTreeTileTest {
                         for (int i2 = 0; i2 < nbRows; ++i2) {
                             int[] crossings = tile.getCrossedBoundaryRows(i1, i2, level);
                             int[] ref       = multiples(i1, i2, subTileRows);
-                            Assert.assertArrayEquals(ref, crossings);
+                            Assertions.assertArrayEquals(ref, crossings);
                         }
                     }
                     for (int j1 = 0; j1 < nbColumns; ++j1) {
                         for (int j2 = 0; j2 < nbColumns; ++j2) {
                             int[] crossings = tile.getCrossedBoundaryColumns(j1, j2, level);
                             int[] ref       = multiples(j1, j2, subTileCols);
-                            Assert.assertArrayEquals(ref, crossings);
+                            Assertions.assertArrayEquals(ref, crossings);
                         }
                     }
                 }
@@ -271,7 +271,7 @@ public class MinMaxTreeTileTest {
     @Test
     public void testForCoverage() throws IOException {
         
-        org.orekit.rugged.errors.DumpManager.activate(tempFolder.newFile());
+        org.orekit.rugged.errors.DumpManager.activate(File.createTempFile("junit", null, tempFolder));
 
         MinMaxTreeTile tile = createTile(1201, 1201);
         tile.getMinElevation(100, 100, 0);
@@ -361,7 +361,7 @@ public class MinMaxTreeTileTest {
         return tile;
     }
     
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
 
 }

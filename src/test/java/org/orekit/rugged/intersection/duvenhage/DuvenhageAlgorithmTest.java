@@ -20,14 +20,14 @@ package org.orekit.rugged.intersection.duvenhage;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 
-import static org.junit.Assert.assertEquals;
-
 import java.lang.reflect.Field;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.rugged.api.AlgorithmId;
@@ -78,9 +78,9 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
         Vector3D los = new Vector3D(0.010401349221417867, -0.17836068905951286, 0.9839101973923178);
         try {
             algorithm.intersection(earth, position, los);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.LINE_OF_SIGHT_DOES_NOT_REACH_GROUND, re.getSpecifier());
         }
     }
 
@@ -111,7 +111,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
                                    new Vector3D(-3010311.9672771087, 5307094.8081077365, 1852867.7919871407),
                                    new Vector3D(0.3953329359154183, -0.8654901360032332, -0.30763402650162286));
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.TILE_WITHOUT_REQUIRED_NEIGHBORS_SELECTED, re.getSpecifier());
         }
     }
 
@@ -123,7 +123,7 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
             algorithm.intersection(earth,
                                    new Vector3D(-3041185.154503948, 6486750.132281409, -32335.022880173332),
                                    new Vector3D(0.5660218606298548 , -0.8233939240951769, 0.040517885584811814));
-        Assert.assertEquals(1164.35, gp.getAltitude(), 0.02);
+        Assertions.assertEquals(1164.35, gp.getAltitude(), 0.02);
     }
 
     @Test
@@ -140,55 +140,55 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
         IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
 
         // line of sight in the South West corner
-        Assert.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
+        Assertions.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
                             findExit(algorithm, northTile,
                                      new Vector3D( 6278799.86896170100,   788574.17965500170,   796074.70414069280),
                                      new Vector3D( 0.09416282233912959,  0.01183204230132312, -0.99548649697728680)).getLongitude(),
                                      1.0e-6);
 
         // line of sight in the West column
-        Assert.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
+        Assertions.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
                             findExit(algorithm, northTile,
                                      new Vector3D(6278799.868961701, 788574.17965500171, 796074.7041406928),
                                      new Vector3D(0.09231669916268806, 0.011600067441452849, -0.9956621241621375)).getLongitude(),
                                      1.0e-6);
 
         // line of sight in the North-West corner
-        Assert.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
+        Assertions.assertEquals(northTile.getMinimumLongitude() - 0.0625 * northTile.getLongitudeStep(),
                             findExit(algorithm, northTile,
                                      new Vector3D( 6133039.79342824500,   770267.71434489540,  1568158.38266382620),
                                      new Vector3D(-0.52028845147300570, -0.06537691642830394, -0.85148446025875800)).getLongitude(),
                                      1.0e-6);
         // line of sight in the North-East corner
-        Assert.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
+        Assertions.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
                             findExit(algorithm, northTile,
                                      new Vector3D( 5988968.17708294100,  1529624.01701343130,  1568158.38266382620),
                                      new Vector3D(-0.93877408645552440, -0.23970837882807683, -0.24747344851359457)).getLongitude(),
                                      1.0e-6);
 
         // line of sight in the East column
-        Assert.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
+        Assertions.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
                             findExit(algorithm, northTile,
                                      new Vector3D( 6106093.15406747100,  1559538.54861392200,   979886.66862965740),
                                      new Vector3D(-0.18115090486319424, -0.04625542007869719,  0.98236693031707310)).getLongitude(),
                                      1.0e-6);
 
         // line of sight in the South-East corner
-        Assert.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
+        Assertions.assertEquals(northTile.getMaximumLongitude() + 0.0625 * northTile.getLongitudeStep(),
                             findExit(algorithm, northTile,
                                      new Vector3D( 6131304.19368509600,  1565977.62301751650,   796074.70414069280),
                                      new Vector3D( 0.09195297594530785,  0.02347944953986664, -0.99548649697728530)).getLongitude(),
                                      1.0e-6);
 
         // line of sight in the South row
-        Assert.assertEquals(northTile.getMinimumLatitude() - 0.0625 * northTile.getLatitudeStep(),
+        Assertions.assertEquals(northTile.getMinimumLatitude() - 0.0625 * northTile.getLatitudeStep(),
                             findExit(algorithm, northTile,
                                      new Vector3D(6251729.731998736, 984354.4963428857, 789526.5774750853),
                                      new Vector3D(-0.15561499277355603, 0.9878177838164719, 0.0)).getLatitude(),
                                      1.0e-6);
 
         // line of sight in the North row
-        Assert.assertEquals(southTile.getMaximumLatitude() + 0.0625 * southTile.getLatitudeStep(),
+        Assertions.assertEquals(southTile.getMaximumLatitude() + 0.0625 * southTile.getLatitudeStep(),
                             findExit(algorithm, southTile,
                                      new Vector3D(6251729.731998736, 984354.4963428857, -789526.5774750853),
                                      new Vector3D(-0.15561499277355603, 0.9878177838164719, 0.0)).getLatitude(),
@@ -227,15 +227,15 @@ public class DuvenhageAlgorithmTest extends AbstractAlgorithmTest {
             return (NormalizedGeodeticPoint) pointField.get(limitPoint);
 
         } catch (NoSuchMethodException nsme) {
-            Assert.fail(nsme.getLocalizedMessage());
+            Assertions.fail(nsme.getLocalizedMessage());
         } catch (SecurityException se) {
-            Assert.fail(se.getLocalizedMessage());
+            Assertions.fail(se.getLocalizedMessage());
         } catch (IllegalAccessException iae) {
-            Assert.fail(iae.getLocalizedMessage());
+            Assertions.fail(iae.getLocalizedMessage());
         } catch (IllegalArgumentException iae) {
-            Assert.fail(iae.getLocalizedMessage());
+            Assertions.fail(iae.getLocalizedMessage());
         } catch (NoSuchFieldException nsfe) {
-            Assert.fail(nsfe.getLocalizedMessage());
+            Assertions.fail(nsfe.getLocalizedMessage());
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof RuggedException) {
                 throw (RuggedException) e.getCause();

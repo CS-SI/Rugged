@@ -1,9 +1,9 @@
 package org.orekit.rugged.refraction;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -18,8 +18,8 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
@@ -107,8 +107,8 @@ public class AtmosphericRefractionTest {
             double currentRadius = earthRadius + (gpWithAtmosphericRefractionCorrection[i].getAltitude()+ gpWithoutAtmosphericRefractionCorrection[i].getAltitude())/2.;
             double distance = GeodeticUtilities.computeDistanceInMeter(currentRadius, gpWithAtmosphericRefractionCorrection[i], gpWithoutAtmosphericRefractionCorrection[i]);
             // Check if the distance is not 0 and < 2m
-            Assert.assertTrue(distance > 0.0);
-            Assert.assertTrue(distance < 2.);
+            Assertions.assertTrue(distance > 0.0);
+            Assertions.assertTrue(distance < 2.);
         }
         
         // Inverse loc WITH atmospheric correction
@@ -134,27 +134,27 @@ public class AtmosphericRefractionTest {
         GeodeticPoint dummyGP = new GeodeticPoint(dummyLat, dummyLon, 0.);
         try {
             ruggedWith.inverseLocation(sensorName, dummyGP, minLine, maxLine);
-            Assert.fail("an exeption should have been thrown");
+            Assertions.fail("an exeption should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
         }
 
         try {
             ruggedWith.inverseLocation(sensorName,
                                        gpWithAtmosphericRefractionCorrection[0],
                                        210, maxLine);
-            Assert.fail("an exeption should have been thrown");
+            Assertions.fail("an exeption should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
         }
 
         try {
             ruggedWith.inverseLocation(sensorName,
                                        gpWithAtmosphericRefractionCorrection[0],
                                        minLine, 190);
-            Assert.fail("an exeption should have been thrown");
+            Assertions.fail("an exeption should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_RANGE_LINES, re.getSpecifier());
         }
 
     }
@@ -296,14 +296,14 @@ public class AtmosphericRefractionTest {
         try {
             final int maxLine = 4999; // works with 4980, fails with 4999
             ruggedWithDefaultMargin.inverseLocation(sensor.getName(), point, 0, maxLine);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
 
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.SENSOR_PIXEL_NOT_FOUND_IN_PIXELS_LINE,re.getSpecifier());
         }
 
         // Check the default margin is equal to the used one
-        Assert.assertEquals(builder.getRefractionCorrection().getComputationParameters().getDefaultInverseLocMargin(),
+        Assertions.assertEquals(builder.getRefractionCorrection().getComputationParameters().getDefaultInverseLocMargin(),
                 builder.getRefractionCorrection().getComputationParameters().getInverseLocMargin(),
                 1.0e-10);
 
@@ -314,7 +314,7 @@ public class AtmosphericRefractionTest {
         point = ruggedWithCustomMargin.directLocation(sensor.getName(), 1000)[500];
         final int maxLine = 4999; // works with a margin > 0.803
         SensorPixel pixel = ruggedWithCustomMargin.inverseLocation(sensor.getName(), point, 0, maxLine);
-        Assert.assertTrue(pixel != null);
+        Assertions.assertTrue(pixel != null);
 
     }
     
@@ -373,14 +373,14 @@ public class AtmosphericRefractionTest {
             double distance = GeodeticUtilities.computeDistanceInMeter(currentRadius, gpWithLightTime[i], gpWithoutLightTime[i]);
 
             // Check if the distance is not 0 and < 1.2m (at equator max of shift)
-            Assert.assertTrue(distance > 0.0);
-            Assert.assertTrue(distance <= 1.2);
+            Assertions.assertTrue(distance > 0.0);
+            Assertions.assertTrue(distance <= 1.2);
             
             // Compute distance between point (with light time correction) with refraction and without refraction
             distance = GeodeticUtilities.computeDistanceInMeter(currentRadius, gpWithLightTime[i], gpWithLightTimeWithoutRefraction[i]);
             // Check if the distance is not 0  and < 2m
-            Assert.assertTrue(distance > 0.0);
-            Assert.assertTrue(distance < 2.);
+            Assertions.assertTrue(distance > 0.0);
+            Assertions.assertTrue(distance < 2.);
         }
     }
 
@@ -406,30 +406,30 @@ public class AtmosphericRefractionTest {
         try {
             atmosphericRefraction.setGridSteps(100, 100);
             atmosphericRefraction.configureCorrectionGrid(lineSensor, 0, 100);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
     
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.INVALID_RANGE_FOR_LINES,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.INVALID_RANGE_FOR_LINES,re.getSpecifier());
         }
         
         // Bad pixel step
         try {
             atmosphericRefraction.setGridSteps(-5, 100);
             atmosphericRefraction.configureCorrectionGrid(lineSensor, 0, 100);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
 
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.INVALID_STEP,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.INVALID_STEP,re.getSpecifier());
         }
      
         // Bad line step
         try {
             atmosphericRefraction.setGridSteps(10, -42);
             atmosphericRefraction.configureCorrectionGrid(lineSensor, 0, 100);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
 
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.INVALID_STEP,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.INVALID_STEP,re.getSpecifier());
         }
     }
 }

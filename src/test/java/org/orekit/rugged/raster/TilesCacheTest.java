@@ -16,8 +16,8 @@
  */
 package org.orekit.rugged.raster;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -30,8 +30,8 @@ import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
 import org.hipparchus.util.MathUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Luc Maisonobe
@@ -45,13 +45,13 @@ public class TilesCacheTest {
         TilesCache<SimpleTile> cache = new TilesCache<SimpleTile>(factory,
                 new CheckedPatternElevationUpdater(FastMath.toRadians(3.0), 11, 10.0, 20.0), 1000,true);
         SimpleTile tile = cache.getTile(FastMath.toRadians(-23.2), FastMath.toRadians(137.5));
-        Assert.assertEquals(1, factory.getCount());
-        Assert.assertEquals(-24.0, FastMath.toDegrees(tile.getMinimumLatitude()),  1.0e-10);
-        Assert.assertEquals(135.0, FastMath.toDegrees(tile.getMinimumLongitude()), 1.0e-10);
-        Assert.assertEquals(  0.3, FastMath.toDegrees(tile.getLatitudeStep()),     1.0e-10);
-        Assert.assertEquals(  0.3, FastMath.toDegrees(tile.getLongitudeStep()),    1.0e-10);
-        Assert.assertEquals(10.0, tile.getMinElevation(), 1.0e-10);
-        Assert.assertEquals(20.0, tile.getMaxElevation(), 1.0e-10);
+        Assertions.assertEquals(1, factory.getCount());
+        Assertions.assertEquals(-24.0, FastMath.toDegrees(tile.getMinimumLatitude()),  1.0e-10);
+        Assertions.assertEquals(135.0, FastMath.toDegrees(tile.getMinimumLongitude()), 1.0e-10);
+        Assertions.assertEquals(  0.3, FastMath.toDegrees(tile.getLatitudeStep()),     1.0e-10);
+        Assertions.assertEquals(  0.3, FastMath.toDegrees(tile.getLongitudeStep()),    1.0e-10);
+        Assertions.assertEquals(10.0, tile.getMinElevation(), 1.0e-10);
+        Assertions.assertEquals(20.0, tile.getMaxElevation(), 1.0e-10);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class TilesCacheTest {
                 cache.getTile(FastMath.toRadians(0.5 + j), FastMath.toRadians(0.5 + i));
             }
         }
-        Assert.assertEquals(12, factory.getCount());
+        Assertions.assertEquals(12, factory.getCount());
 
         // keep using the same tiles for a while
         RandomGenerator generator = new Well19937a(0xf556baa5977435c5l);
@@ -75,7 +75,7 @@ public class TilesCacheTest {
             double lon = 4.0 * generator.nextDouble();
             cache.getTile(FastMath.toRadians(lat), FastMath.toRadians(lon));
         }
-        Assert.assertEquals(12, factory.getCount());
+        Assertions.assertEquals(12, factory.getCount());
 
         // ensure the (0.0, 0.0) tile is the least recently used one
         for (int i = 0; i < 4; ++i) {
@@ -86,15 +86,15 @@ public class TilesCacheTest {
 
         // ask for one point outside of the covered area, to evict the (0.0, 0.0) tile
         cache.getTile(FastMath.toRadians(20.5), FastMath.toRadians(30.5));
-        Assert.assertEquals(13, factory.getCount());
+        Assertions.assertEquals(13, factory.getCount());
 
         // ask again for one point in the evicted tile which must be reallocated
         cache.getTile(FastMath.toRadians(0.5), FastMath.toRadians(0.5));
-        Assert.assertEquals(14, factory.getCount());
+        Assertions.assertEquals(14, factory.getCount());
 
         // the 13th allocated tile should still be there
         cache.getTile(FastMath.toRadians(20.5), FastMath.toRadians(30.5));
-        Assert.assertEquals(14, factory.getCount());
+        Assertions.assertEquals(14, factory.getCount());
 
         // evict all the tiles, going to a completely different zone
         for (int i = 0; i < 4; ++i) {
@@ -102,7 +102,7 @@ public class TilesCacheTest {
                 cache.getTile(FastMath.toRadians(40.5 + i), FastMath.toRadians(90.5 + j));
             }
         }
-        Assert.assertEquals(26, factory.getCount());
+        Assertions.assertEquals(26, factory.getCount());
 
     }
 
@@ -115,22 +115,22 @@ public class TilesCacheTest {
                                            12, true);
 
         SimpleTile regularTile = cache.getTile(0.2, 0.6);
-        Assert.assertEquals(1, factory.getCount());
-        Assert.assertEquals(0.125,    regularTile.getMinimumLatitude(),  1.0e-10);
-        Assert.assertEquals(0.5,      regularTile.getMinimumLongitude(), 1.0e-10);
-        Assert.assertEquals(0.015625, regularTile.getLatitudeStep(),     1.0e-10);
-        Assert.assertEquals(0.015625, regularTile.getLongitudeStep(),    1.0e-10);
-        Assert.assertEquals(10.0,     regularTile.getMinElevation(),     1.0e-10);
-        Assert.assertEquals(20.0,     regularTile.getMaxElevation(),     1.0e-10);
+        Assertions.assertEquals(1, factory.getCount());
+        Assertions.assertEquals(0.125,    regularTile.getMinimumLatitude(),  1.0e-10);
+        Assertions.assertEquals(0.5,      regularTile.getMinimumLongitude(), 1.0e-10);
+        Assertions.assertEquals(0.015625, regularTile.getLatitudeStep(),     1.0e-10);
+        Assertions.assertEquals(0.015625, regularTile.getLongitudeStep(),    1.0e-10);
+        Assertions.assertEquals(10.0,     regularTile.getMinElevation(),     1.0e-10);
+        Assertions.assertEquals(20.0,     regularTile.getMaxElevation(),     1.0e-10);
 
         SimpleTile tileAtEnd = cache.getTile(0.234375, 0.609375);
-        Assert.assertEquals(1, factory.getCount());
-        Assert.assertEquals(0.125,    tileAtEnd.getMinimumLatitude(),  1.0e-10);
-        Assert.assertEquals(0.5,      tileAtEnd.getMinimumLongitude(), 1.0e-10);
-        Assert.assertEquals(0.015625, tileAtEnd.getLatitudeStep(),     1.0e-10);
-        Assert.assertEquals(0.015625, tileAtEnd.getLongitudeStep(),    1.0e-10);
-        Assert.assertEquals(10.0,     tileAtEnd.getMinElevation(),     1.0e-10);
-        Assert.assertEquals(20.0,     tileAtEnd.getMaxElevation(),     1.0e-10);
+        Assertions.assertEquals(1, factory.getCount());
+        Assertions.assertEquals(0.125,    tileAtEnd.getMinimumLatitude(),  1.0e-10);
+        Assertions.assertEquals(0.5,      tileAtEnd.getMinimumLongitude(), 1.0e-10);
+        Assertions.assertEquals(0.015625, tileAtEnd.getLatitudeStep(),     1.0e-10);
+        Assertions.assertEquals(0.015625, tileAtEnd.getLongitudeStep(),    1.0e-10);
+        Assertions.assertEquals(10.0,     tileAtEnd.getMinElevation(),     1.0e-10);
+        Assertions.assertEquals(20.0,     tileAtEnd.getMaxElevation(),     1.0e-10);
 
     }
 
@@ -158,7 +158,7 @@ public class TilesCacheTest {
         cache.getTile(FastMath.toRadians(0.5), FastMath.toRadians(1.5));
         cache.getTile(FastMath.toRadians(2.5), FastMath.toRadians(0.5));
         cache.getTile(FastMath.toRadians(0.5), FastMath.toRadians(0.5));
-        Assert.assertEquals(16, factory.getCount());
+        Assertions.assertEquals(16, factory.getCount());
 
         // keep using the same tiles for a while
         RandomGenerator generator = new Well19937a(0x1c951160de55c9d5l);
@@ -167,10 +167,10 @@ public class TilesCacheTest {
             double lon = 4.0 * generator.nextDouble();
                 cache.getTile(FastMath.toRadians(lat), FastMath.toRadians(lon));
         }
-        Assert.assertEquals(16, factory.getCount());
+        Assertions.assertEquals(16, factory.getCount());
 
         cache.getTile(FastMath.toRadians(-30.5), FastMath.toRadians(2.5));
-        Assert.assertEquals(17, factory.getCount());
+        Assertions.assertEquals(17, factory.getCount());
 
     }
         
@@ -1227,7 +1227,7 @@ public class TilesCacheTest {
                 }
             }
         } catch (IllegalAccessException iae) {
-            Assert.fail(iae.getMessage());
+            Assertions.fail(iae.getMessage());
         }
     }
 }

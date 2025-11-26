@@ -19,54 +19,54 @@ package org.orekit.rugged.errors;
 
 import java.util.Locale;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class RuggedExceptionTest {
 
     @Test
     public void testTranslation() {
         RuggedException re = new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy");
-        Assert.assertFalse(re.getMessage(Locale.FRENCH).contains("parameter"));
-        Assert.assertTrue(re.getMessage(Locale.FRENCH).contains("paramètre"));
-        Assert.assertTrue(re.getMessage(Locale.FRENCH).contains("dummy"));
-        Assert.assertTrue(re.getMessage(Locale.US).contains("parameter"));
-        Assert.assertFalse(re.getMessage(Locale.US).contains("paramètre"));
-        Assert.assertTrue(re.getMessage(Locale.US).contains("dummy"));
-        Assert.assertEquals(re.getMessage(), re.getMessage(Locale.US));
+        Assertions.assertFalse(re.getMessage(Locale.FRENCH).contains("parameter"));
+        Assertions.assertTrue(re.getMessage(Locale.FRENCH).contains("paramètre"));
+        Assertions.assertTrue(re.getMessage(Locale.FRENCH).contains("dummy"));
+        Assertions.assertTrue(re.getMessage(Locale.US).contains("parameter"));
+        Assertions.assertFalse(re.getMessage(Locale.US).contains("paramètre"));
+        Assertions.assertTrue(re.getMessage(Locale.US).contains("dummy"));
+        Assertions.assertEquals(re.getMessage(), re.getMessage(Locale.US));
     }
 
     @Test
     public void testParameters() {
         RuggedException re = new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy");
-        Assert.assertEquals(RuggedMessages.DUPLICATED_PARAMETER_NAME, re.getSpecifier());
-        Assert.assertEquals("dummy", re.getParts()[0]);
+        Assertions.assertEquals(RuggedMessages.DUPLICATED_PARAMETER_NAME, re.getSpecifier());
+        Assertions.assertEquals("dummy", re.getParts()[0]);
     }
 
     @Test
     public void testNullSpecifier() {
         RuggedException re = new RuggedException(null, (Object[]) null);
-        Assert.assertEquals("", re.getMessage());
+        Assertions.assertEquals("", re.getMessage());
     }
 
     @Test
     public void testNullParts() {
         RuggedException re1 = new RuggedException(RuggedMessages.NO_PARAMETERS_SELECTED, (Object[]) null);
-        Assert.assertEquals(RuggedMessages.NO_PARAMETERS_SELECTED, re1.getSpecifier());
-        Assert.assertEquals(0, re1.getParts().length);
+        Assertions.assertEquals(RuggedMessages.NO_PARAMETERS_SELECTED, re1.getSpecifier());
+        Assertions.assertEquals(0, re1.getParts().length);
         RuggedException re2 = new RuggedException(new RuntimeException(),
                                                   RuggedMessages.NO_PARAMETERS_SELECTED, (Object[]) null);
-        Assert.assertEquals(RuggedMessages.NO_PARAMETERS_SELECTED, re2.getSpecifier());
-        Assert.assertEquals(0, re2.getParts().length);
+        Assertions.assertEquals(RuggedMessages.NO_PARAMETERS_SELECTED, re2.getSpecifier());
+        Assertions.assertEquals(0, re2.getParts().length);
     }
 
     @Test
     public void testInternalError() {
         RuggedException re = new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy");
         RuntimeException rte = new RuggedInternalError(re);
-        Assert.assertFalse(re.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
-        Assert.assertTrue(rte.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
-        Assert.assertTrue(rte.getMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
+        Assertions.assertFalse(re.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
+        Assertions.assertTrue(rte.getLocalizedMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
+        Assertions.assertTrue(rte.getMessage().contains("https://gitlab.orekit.org/orekit/rugged/issues"));
     }
 
     @Deprecated
@@ -74,7 +74,7 @@ public class RuggedExceptionTest {
     public void testCoverage() {
         RuggedExceptionWrapper rew = new RuggedExceptionWrapper(new RuggedException(RuggedMessages.DUPLICATED_PARAMETER_NAME, "dummy"));
         RuggedException re = rew.getException();
-        Assert.assertEquals(RuggedMessages.DUPLICATED_PARAMETER_NAME, re.getSpecifier());
-        Assert.assertEquals("dummy", re.getParts()[0]);
+        Assertions.assertEquals(RuggedMessages.DUPLICATED_PARAMETER_NAME, re.getSpecifier());
+        Assertions.assertEquals("dummy", re.getParts()[0]);
     }
 }

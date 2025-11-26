@@ -1,11 +1,14 @@
 # Rugged Release Guide
 
-This release guide is largely inspired from [Hipparchus Release
-Guide](https://www.hipparchus.org/release-guide.html) and [Orekit Release Guide](https://www.orekit.org/site-orekit-development/release-guide.html). It lists the steps that
-have been used in the past to release a new version of Rugged. When in doubt
-ask the experts: Sébastien Dinot <sebastien.dinot@cs-soprasteria.com> for website questions
-and Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com> for everything else,
-or ask a question on the ["Rugged development" section of the forum](https://forum.orekit.org/c/rugged-development/7).
+This release guide is largely inspired from
+[Hipparchus Release Guide](https://www.hipparchus.org/release-guide.html) and
+[Orekit Release Guide](https://www.orekit.org/site-orekit-development/release-guide.html).
+It lists the steps that have been used in the past to release a new version of
+Rugged. When in doubt ask the experts:
+* Sébastien Dinot <sebastien.dinot@cs-soprasteria.com> for website questions
+* Jonathan Guinet <jonathan.guinet@cs-soprasteria.com> or Guylaine Prat <guylaine.prat@cs-soprasteria.com>
+  for everything else, or ask a question on the
+  ["Rugged development" section of the forum](https://forum.orekit.org/c/rugged-development/7).
 
 ## Prerequisites
 
@@ -33,14 +36,14 @@ Use `mvn -ep` to generate an encrypted password.
 
 ## Install Graphviz
 
-[Graphviz (dot)](https://graphviz.org) is used to generated diagrams of 
+[Graphviz (dot)](https://graphviz.org) is used to generated diagrams of
 the technical documentation (static site).
 
 ## Verify the status of develop branch
 
-Before anything, check on the [continuous integration
-site](https://sonar.orekit.org/dashboard?branch=develop&id=orekit%3Arugged) that everything is fine on
-develop branch:
+Before anything, check on the
+[continuous integration site](https://sonar.orekit.org/dashboard?branch=develop&id=orekit%3Arugged)
+that everything is fine on develop branch:
 
 * All tests pass;
 * Code coverage is up to the requirements;
@@ -48,13 +51,14 @@ develop branch:
 
 If not, fix the warnings and errors first !
 
-It is also necessary to check on the [Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/-/pipelines?scope=all&page=1&ref=develop)
+It is also necessary to check on the
+[Gitlab CI/CD](https://gitlab.orekit.org/orekit/rugged/-/pipelines?scope=all&page=1&ref=develop)
 that everything is fine on develop branch (i.e. all stages are passed).
 
 ## Prepare Git branch for release
 
-Release will be performed on a dedicated branch, not directly on master or
-develop branch. So a new branch must be created as follows and used for
+Release will be performed on a dedicated branch, not directly on `main` or
+`develop` branch. So a new branch must be created as follows and used for
 everything else:
 
     git branch release-X.Y
@@ -62,10 +66,11 @@ everything else:
 
 ## Update Copyright in sources
 
-A copyright line appears at the beginning of the source code, static site, tutorials, .... like: 
+A copyright line appears at the beginning of the source code, static site,
+tutorials... like:
 
     /* Copyright 2013-2025 CS GROUP
-    
+
 It must be updated with the year of the release.
 
 ## Update maven plugins versions
@@ -79,7 +84,7 @@ gathered at one place, in a set of properties in `rugged/pom.xml`, for instance:
     ...
 
 You can find the latest version of the plugins using the search feature at
-[http://search.maven.org/#search](http://search.maven.org/#search). The
+[https://central.sonatype.com/](https://central.sonatype.com/). The
 properties name all follow the pattern `rugged.some-plugin-name.version`, the
 plugin name should be used in the web form to check for available versions.
 
@@ -193,8 +198,8 @@ The static site is generated locally using
 
 TBN: Java 8 compiler is compulsory
 
-The official site is automatically updated on the hosting platform when work is 
-merged into branches `develop`, `release-*` or `master`.
+The official site is automatically updated on the hosting platform when work
+is merged into branches `develop`, `release-*` or `main`.
 
 ## Generating signed artifacts
 
@@ -251,7 +256,7 @@ and content of the form:
     <https://gitlab.orekit.org/orekit/rugged/tree/X.Y-RCn>
 
     The release notes can be read here:
-    <https://test.orekit.org/site-rugged-X.Y/changes-report.html>
+    <https://test.orekit.org/site-rugged-X.Y/changes.html>
 
     Maven artifacts are available at
     <https://oss.sonatype.org/content/repositories/orgorekit-xxxx/>
@@ -284,26 +289,26 @@ candidate, verified and pushed:
     git tag -v X.Y
     git push --tags
 
-## Merge release branch into master
+## Merge release branch into main
 
-Merge the release branch into the `master` branch to include any changes made.
+Merge the release branch into the `main` branch to include any changes made.
 
-    git checkout master
+    git checkout main
     git merge --no-ff release-X.Y
 
 Then commit and push.
 
-## Merge master branch into develop
+## Merge main branch into develop
 
-Merge the `master` branch into the `develop` branch to include any changes made.
+Merge the `main` branch into the `develop` branch to include any changes made.
 
     git checkout develop
-    git merge --no-ff master
+    git merge --no-ff main
 
 Then update the version number to prepare for the next development cycle:
 
 - edit the pom.xml to update version to a SNAPSHOT,
-- make space in the `/src/changes/changes.xml` file for new changes. 
+- make space in the `/src/changes/changes.xml` file for new changes.
 
 Then commit and push.
 
@@ -316,7 +321,7 @@ button in [Nexus Repository Manager](https://oss.sonatype.org/).
 ## Upload to Gitlab
 
 Navigate to Projects > Rugged > Repository > Tags. Find the X.Y tag and
-click the edit button to enter release notes. Use the **path** in the [Nexus 
+click the edit button to enter release notes. Use the **path** in the [Nexus
 repository](https://packages.orekit.org/#browse/browse:maven-releases:org%2Forekit%2Frugged) to
 set the artifacts in the release notes.
 
@@ -328,8 +333,8 @@ Navigate to Projects > Rugged > Project Overview > Releases and make sure it loo
 
 ## Synchronize the Github mirror
 
-To enhance the visibility of the project, [a mirror](https://github.com/CS-SI/Rugged) is maintained on Github. 
-The releases created on Gitlab are not automatically pushed on this mirror. 
+To enhance the visibility of the project, [a mirror](https://github.com/CS-SI/Rugged) is maintained on Github.
+The releases created on Gitlab are not automatically pushed on this mirror.
 They have to be declared manually to make visible the vitality of Rugged.
 
 1. Login to Github
@@ -348,18 +353,19 @@ Fetch the current code:
 
     git clone https://gitlab.orekit.org/orekit/website-2015
 
-Switch to `develop` branch. 
+Switch to `develop` branch.
 
-Edit `rugged/overview.html` with the new Orekit and Hipparchus versions. 
+Edit `rugged/overview.html` with the new Orekit and Hipparchus versions.
 Don't forget to update the `rugged/img/rugged-architecture.png` image with the new dependencies.
 
-Create a new post for the release in `_post/` using as template a previous Rugged post (in order to be published in the Rugged News page). 
+Create a new post for the release in `_post/` using as template a previous Rugged post (in order to be published in the Rugged News page).
 
 
 Once the modification pushed to develop branch, wait the pipeline on Gitlab is finished, then the [test website](https://test.orekit.org/rugged) will be updated.
 
-Once the modification validated, merge the develop branch into the master branch and pushed the master branch. 
-Once the  pipeline on Gitlab is finished, then the [website](https://www.orekit.org/rugged) will be updated.
+Once the modification validated, merge the develop branch into the `main`
+branch and pushed the `main` branch. Once the pipeline on Gitlab is finished,
+then the [website](https://www.orekit.org/rugged) will be updated.
 
 ## Close X.Y milestone
 
@@ -368,16 +374,16 @@ Click “Close Milestone” for the line corresponding to the release X.Y.
 
 ## Announce release
 
-The last step is to announce the release by creating a post in the 
-[Rugged announcements category of the forum](https://forum.orekit.org/c/rugged-announcements/) 
+The last step is to announce the release by creating a post in the
+[Rugged announcements category of the forum](https://forum.orekit.org/c/rugged-announcements/)
 with a subject line of the form:
 
     Rugged X.Y released
 
 and content of the form:
 
-    The Rugged team is pleased to announce the release of Rugged version X.Y. 
-    This is a minor/major version, including both new features and bug fixes. 
+    The Rugged team is pleased to announce the release of Rugged version X.Y.
+    This is a minor/major version, including both new features and bug fixes.
     The main changes are:
 
       - feature 1 description
@@ -387,8 +393,8 @@ and content of the form:
     This version depends on Orekit X.x and Hipparchus Y.y.
 
     For complete release notes please see:
-    https://www.orekit.org/site-rugged-X.Y/changes-report.html
+    https://www.orekit.org/site-rugged-X.Y/changes.html
 
-    The maven artifacts are available in maven central. 
+    The maven artifacts are available in maven central.
     The source and binaries can be retrieved from the forge releases page:
     https://gitlab.orekit.org/orekit/rugged/-/releases

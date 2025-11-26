@@ -38,9 +38,9 @@ import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.UniformRandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.PolynomialRotation;
 import org.orekit.rugged.los.TimeDependentLOS;
@@ -63,13 +63,13 @@ public class PolynomialRotationTest {
                                                         AbsoluteDate.J2000_EPOCH, 0.0));
             TimeDependentLOS tdl = builder.build();
             for (int i = 0; i < raw.size(); ++i) {
-                Assert.assertEquals(0.0,
+                Assertions.assertEquals(0.0,
                                     Vector3D.distance(raw.get(i), tdl.getLOS(i, AbsoluteDate.J2000_EPOCH)),
                                     2.0e-15);
             }
 
-            Assert.assertEquals(1, tdl.getParametersDrivers().count());
-            Assert.assertEquals("identity[0]", tdl.getParametersDrivers().findFirst().get().getName());
+            Assertions.assertEquals(1, tdl.getParametersDrivers().count());
+            Assertions.assertEquals("identity[0]", tdl.getParametersDrivers().findFirst().get().getName());
 
         }
     }
@@ -101,42 +101,42 @@ public class PolynomialRotationTest {
             Rotation combined = r3.applyTo(r2.applyTo(r1));
 
             for (int i = 0; i < raw.size(); ++i) {
-                Assert.assertEquals(0.0,
+                Assertions.assertEquals(0.0,
                                     Vector3D.distance(combined.applyTo(raw.get(i)),
                                                       tdl.getLOS(i, AbsoluteDate.J2000_EPOCH)),
                                     2.0e-15);
             }
 
             List<ParameterDriver> drivers = tdl.getParametersDrivers().collect(Collectors.toList());
-            Assert.assertEquals(3, drivers.size());
+            Assertions.assertEquals(3, drivers.size());
             ParameterDriver driver1 = drivers.get(0);
             ParameterDriver driver2 = drivers.get(1);
             ParameterDriver driver3 = drivers.get(2);
-            Assert.assertEquals("r1[0]", driver1.getName());
-            Assert.assertTrue(Double.isInfinite(driver1.getMinValue()));
-            Assert.assertTrue(driver1.getMinValue() < 0);
-            Assert.assertTrue(Double.isInfinite(driver1.getMaxValue()));
-            Assert.assertTrue(driver1.getMaxValue() > 0);
-            Assert.assertEquals(angle1, driver1.getValue(), 2.0e-15);
-            Assert.assertEquals("r2[0]", driver2.getName());
-            Assert.assertTrue(Double.isInfinite(driver2.getMinValue()));
-            Assert.assertTrue(driver2.getMinValue() < 0);
-            Assert.assertTrue(Double.isInfinite(driver2.getMaxValue()));
-            Assert.assertTrue(driver2.getMaxValue() > 0);
-            Assert.assertEquals(angle2, driver2.getValue(), 2.0e-15);
-            Assert.assertEquals("r3[0]", driver3.getName());
-            Assert.assertTrue(Double.isInfinite(driver3.getMinValue()));
-            Assert.assertTrue(driver3.getMinValue() < 0);
-            Assert.assertTrue(Double.isInfinite(driver3.getMaxValue()));
-            Assert.assertTrue(driver3.getMaxValue() > 0);
-            Assert.assertEquals(angle3, driver3.getValue(), 2.0e-15);
+            Assertions.assertEquals("r1[0]", driver1.getName());
+            Assertions.assertTrue(Double.isInfinite(driver1.getMinValue()));
+            Assertions.assertTrue(driver1.getMinValue() < 0);
+            Assertions.assertTrue(Double.isInfinite(driver1.getMaxValue()));
+            Assertions.assertTrue(driver1.getMaxValue() > 0);
+            Assertions.assertEquals(angle1, driver1.getValue(), 2.0e-15);
+            Assertions.assertEquals("r2[0]", driver2.getName());
+            Assertions.assertTrue(Double.isInfinite(driver2.getMinValue()));
+            Assertions.assertTrue(driver2.getMinValue() < 0);
+            Assertions.assertTrue(Double.isInfinite(driver2.getMaxValue()));
+            Assertions.assertTrue(driver2.getMaxValue() > 0);
+            Assertions.assertEquals(angle2, driver2.getValue(), 2.0e-15);
+            Assertions.assertEquals("r3[0]", driver3.getName());
+            Assertions.assertTrue(Double.isInfinite(driver3.getMinValue()));
+            Assertions.assertTrue(driver3.getMinValue() < 0);
+            Assertions.assertTrue(Double.isInfinite(driver3.getMaxValue()));
+            Assertions.assertTrue(driver3.getMaxValue() > 0);
+            Assertions.assertEquals(angle3, driver3.getValue(), 2.0e-15);
 
             driver1.setValue(0.0);
             driver2.setValue(0.0);
             driver3.setValue(0.0);
 
             for (int i = 0; i < raw.size(); ++i) {
-                Assert.assertEquals(0.0,
+                Assertions.assertEquals(0.0,
                                     Vector3D.distance(raw.get(i),
                                                       tdl.getLOS(i, AbsoluteDate.J2000_EPOCH)),
                                     2.0e-15);
@@ -211,7 +211,7 @@ public class PolynomialRotationTest {
                 }
 
             };
-            Assert.assertEquals(7, generator.getSelected().size());
+            Assertions.assertEquals(7, generator.getSelected().size());
 
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.0001);
@@ -236,12 +236,12 @@ public class PolynomialRotationTest {
                 for (int i = 0; i < raw.size(); ++i) {
                     Vector3D los = tdl.getLOS(i, date);
                     FieldVector3D<Gradient> losDS = tdl.getLOSDerivatives(i, date, generator);
-                    Assert.assertEquals(los.getX(), losDS.getX().getValue(), 2.0e-15);
-                    Assert.assertEquals(los.getY(), losDS.getY().getValue(), 2.0e-15);
-                    Assert.assertEquals(los.getZ(), losDS.getZ().getValue(), 2.0e-15);
-                    Assert.assertEquals(mDS[i][0].getPartialDerivative(1), losDS.getX().getPartialDerivative(orders), 2.0e-10);
-                    Assert.assertEquals(mDS[i][1].getPartialDerivative(1), losDS.getY().getPartialDerivative(orders), 2.0e-10);
-                    Assert.assertEquals(mDS[i][2].getPartialDerivative(1), losDS.getZ().getPartialDerivative(orders), 2.0e-10);
+                    Assertions.assertEquals(los.getX(), losDS.getX().getValue(), 2.0e-15);
+                    Assertions.assertEquals(los.getY(), losDS.getY().getValue(), 2.0e-15);
+                    Assertions.assertEquals(los.getZ(), losDS.getZ().getValue(), 2.0e-15);
+                    Assertions.assertEquals(mDS[i][0].getPartialDerivative(1), losDS.getX().getPartialDerivative(orders), 2.0e-10);
+                    Assertions.assertEquals(mDS[i][1].getPartialDerivative(1), losDS.getY().getPartialDerivative(orders), 2.0e-10);
+                    Assertions.assertEquals(mDS[i][2].getPartialDerivative(1), losDS.getZ().getPartialDerivative(orders), 2.0e-10);
                 }
                 ++index;
             }
@@ -249,7 +249,7 @@ public class PolynomialRotationTest {
 
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws URISyntaxException {
 
         final Vector3D normal    = Vector3D.PLUS_I;

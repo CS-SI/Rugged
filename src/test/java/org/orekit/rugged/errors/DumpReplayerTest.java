@@ -17,8 +17,8 @@
 package org.orekit.rugged.errors;
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -43,10 +43,9 @@ import org.hipparchus.analysis.differentiation.DSFactory;
 import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.geometry.euclidean.threed.FieldVector3D;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
@@ -60,8 +59,8 @@ import org.orekit.utils.ParameterDriver;
 
 public class DumpReplayerTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
 
     @Test
     public void testDirectLoc01() throws URISyntaxException, IOException {
@@ -75,13 +74,13 @@ public class DumpReplayerTest {
         Rugged rugged = replayer.createRugged();
         DumpReplayer.Result[] results = replayer.execute(rugged);
 
-        Assert.assertEquals(5, results.length);
+        Assertions.assertEquals(5, results.length);
         for (final DumpReplayer.Result result : results) {
             GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
             GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                                 rugged.getEllipsoid().transform(replayedGP));
-            Assert.assertEquals(0.0, distance, 6.0e-8);
+            Assertions.assertEquals(0.0, distance, 6.0e-8);
         }
 
     }
@@ -98,13 +97,13 @@ public class DumpReplayerTest {
         Rugged rugged = replayer.createRugged();
         DumpReplayer.Result[] results = replayer.execute(rugged);
 
-        Assert.assertEquals(1, results.length);
+        Assertions.assertEquals(1, results.length);
         for (final DumpReplayer.Result result : results) {
             GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
             GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                                 rugged.getEllipsoid().transform(replayedGP));
-            Assert.assertEquals(0.0, distance, 1.0e-8);
+            Assertions.assertEquals(0.0, distance, 1.0e-8);
         }
 
     }
@@ -121,13 +120,13 @@ public class DumpReplayerTest {
         Rugged rugged = replayer.createRugged();
         DumpReplayer.Result[] results = replayer.execute(rugged);
 
-        Assert.assertEquals(1, results.length);
+        Assertions.assertEquals(1, results.length);
         for (final DumpReplayer.Result result : results) {
             GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
             GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                                 rugged.getEllipsoid().transform(replayedGP));
-            Assert.assertEquals(0.0, distance, 1.0e-8);
+            Assertions.assertEquals(0.0, distance, 1.0e-8);
         }
 
     }
@@ -139,7 +138,7 @@ public class DumpReplayerTest {
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-direct-loc-04.txt").toURI().getPath();
-        File dump = tempFolder.newFile();
+        File dump = File.createTempFile("junit", null, tempFolder);
         DumpManager.activate(dump);
         DumpReplayer replayer = new DumpReplayer();
         replayer.parse(new File(dumpPath));
@@ -147,18 +146,18 @@ public class DumpReplayerTest {
         DumpReplayer.Result[] results = replayer.execute(rugged);
         DumpManager.deactivate();
 
-        Assert.assertEquals(3, results.length);
+        Assertions.assertEquals(3, results.length);
         for (final DumpReplayer.Result result : results) {
             GeodeticPoint expectedGP = (GeodeticPoint) result.getExpected();
             GeodeticPoint replayedGP = (GeodeticPoint) result.getReplayed();
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                                 rugged.getEllipsoid().transform(replayedGP));
-            Assert.assertEquals(0.0, distance, 1.0e-8);
+            Assertions.assertEquals(0.0, distance, 1.0e-8);
         }
 
         try (FileReader fr = new FileReader(dump);
              BufferedReader br = new BufferedReader(fr)) {
-            Assert.assertEquals(12, br.lines().count());
+            Assertions.assertEquals(12, br.lines().count());
         }
 
     }
@@ -169,7 +168,7 @@ public class DumpReplayerTest {
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter     bw  = new BufferedWriter(osw)) {
@@ -202,12 +201,12 @@ public class DumpReplayerTest {
         Rugged rugged = replayer.createRugged();
         DumpReplayer.Result[] results = replayer.execute(rugged);
 
-        Assert.assertEquals(1, results.length);
+        Assertions.assertEquals(1, results.length);
         for (final DumpReplayer.Result result : results) {
             SensorPixel expectedSP = (SensorPixel) result.getExpected();
             SensorPixel replayedSP = (SensorPixel) result.getReplayed();
-            Assert.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
-            Assert.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
+            Assertions.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
+            Assertions.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
         }
 
     }
@@ -224,12 +223,12 @@ public class DumpReplayerTest {
         Rugged rugged = replayer.createRugged();
         DumpReplayer.Result[] results = replayer.execute(rugged);
 
-        Assert.assertEquals(3, results.length);
+        Assertions.assertEquals(3, results.length);
         for (final DumpReplayer.Result result : results) {
             SensorPixel expectedSP = (SensorPixel) result.getExpected();
             SensorPixel replayedSP = (SensorPixel) result.getReplayed();
-            Assert.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
-            Assert.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
+            Assertions.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
+            Assertions.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
         }
 
     }
@@ -246,12 +245,12 @@ public class DumpReplayerTest {
         Rugged rugged = replayer.createRugged();
         DumpReplayer.Result[] results = replayer.execute(rugged);
 
-        Assert.assertEquals(1, results.length);
+        Assertions.assertEquals(1, results.length);
         for (final DumpReplayer.Result result : results) {
             SensorPixel expectedSP = (SensorPixel) result.getExpected();
             SensorPixel replayedSP = (SensorPixel) result.getReplayed();
-            Assert.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
-            Assert.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
+            Assertions.assertEquals(expectedSP.getLineNumber(),  replayedSP.getLineNumber(),  1.0e-6);
+            Assertions.assertEquals(expectedSP.getPixelNumber(), replayedSP.getPixelNumber(), 1.0e-6);
         }
 
     }
@@ -262,7 +261,7 @@ public class DumpReplayerTest {
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter     bw  = new BufferedWriter(osw)) {
@@ -305,7 +304,7 @@ public class DumpReplayerTest {
             // for each field of each line, delete the field and check parsing fails
             for (int i = 0; i < lines.size(); ++i) {
                 for (int j = 0; j < lines.get(i).length; ++j) {
-                    final File corrupted = tempFolder.newFile();
+                    final File corrupted = File.createTempFile("junit", null, tempFolder);
                     try (PrintWriter pw = new PrintWriter(corrupted, "UTF-8")) {
                         for (int k = 0; k < lines.size(); ++k) {
                             for (int l = 0; l < lines.get(k).length; ++l) {
@@ -319,11 +318,11 @@ public class DumpReplayerTest {
                     }
                     try {
                         new DumpReplayer().parse(corrupted);
-                        Assert.fail("an exception should have been thrown");
+                        Assertions.fail("an exception should have been thrown");
                     } catch (RuggedException re) {
-                        Assert.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
-                        Assert.assertEquals(i + 1, ((Integer) re.getParts()[0]).intValue());
-                        Assert.assertEquals(corrupted, re.getParts()[1]);
+                        Assertions.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
+                        Assertions.assertEquals(i + 1, ((Integer) re.getParts()[0]).intValue());
+                        Assertions.assertEquals(corrupted, re.getParts()[1]);
                     }
                     corrupted.delete();
                 }
@@ -349,7 +348,7 @@ public class DumpReplayerTest {
         GeodeticPoint replayedGP = (GeodeticPoint) results[0].getReplayed();
         double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                             rugged.getEllipsoid().transform(replayedGP));
-        Assert.assertEquals(0.0, distance, 1.0e-8);
+        Assertions.assertEquals(0.0, distance, 1.0e-8);
     }
 
     @Test
@@ -369,7 +368,7 @@ public class DumpReplayerTest {
         GeodeticPoint replayedGP = (GeodeticPoint) results[0].getReplayed();
         double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                                             rugged.getEllipsoid().transform(replayedGP));
-        Assert.assertEquals(0.0, distance, 1.0e-8);
+        Assertions.assertEquals(0.0, distance, 1.0e-8);
     }
 
     @Test
@@ -390,7 +389,7 @@ public class DumpReplayerTest {
             GeodeticPoint replayedGP = (GeodeticPoint) results[i].getReplayed();
             double distance = Vector3D.distance(rugged.getEllipsoid().transform(expectedGP),
                     rugged.getEllipsoid().transform(replayedGP));
-            Assert.assertEquals(0.0, distance, 5.0e-8);
+            Assertions.assertEquals(0.0, distance, 5.0e-8);
         }
     }
 
@@ -400,7 +399,7 @@ public class DumpReplayerTest {
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter     bw  = new BufferedWriter(osw)) {
@@ -425,7 +424,7 @@ public class DumpReplayerTest {
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter     bw  = new BufferedWriter(osw)) {
@@ -443,11 +442,11 @@ public class DumpReplayerTest {
 
         try {
             replayer.execute(rugged);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
             // as the execution stops in the TilesCache: one must reset the DumpManager state
             DumpManager.endNicely();
-            Assert.assertEquals(RuggedMessages.NO_DEM_DATA, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.NO_DEM_DATA, re.getSpecifier());
         } 
         tempFile.delete();
     }
@@ -458,7 +457,7 @@ public class DumpReplayerTest {
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter     bw  = new BufferedWriter(osw)) {
@@ -471,12 +470,12 @@ public class DumpReplayerTest {
         DumpReplayer replayer = new DumpReplayer();
         try {
             replayer.parse(tempFile);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
-            Assert.assertEquals(2, ((Integer) re.getParts()[0]).intValue());
-            Assert.assertEquals(tempFile, re.getParts()[1]);
-            Assert.assertTrue(re.getParts()[2].toString().contains("dummy : dummy"));
+            Assertions.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
+            Assertions.assertEquals(2, ((Integer) re.getParts()[0]).intValue());
+            Assertions.assertEquals(tempFile, re.getParts()[1]);
+            Assertions.assertTrue(re.getParts()[2].toString().contains("dummy : dummy"));
         }
         tempFile.delete();
     }
@@ -487,7 +486,7 @@ public class DumpReplayerTest {
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter     bw  = new BufferedWriter(osw)) {
@@ -497,11 +496,11 @@ public class DumpReplayerTest {
         DumpReplayer replayer = new DumpReplayer();
         try {
             replayer.parse(tempFile);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
-            Assert.assertEquals(1, ((Integer) re.getParts()[0]).intValue());
-            Assert.assertEquals(tempFile, re.getParts()[1]);
+            Assertions.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
+            Assertions.assertEquals(1, ((Integer) re.getParts()[0]).intValue());
+            Assertions.assertEquals(tempFile, re.getParts()[1]);
         }
         tempFile.delete();
     }
@@ -512,7 +511,7 @@ public class DumpReplayerTest {
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
 
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         try (FileOutputStream   fos = new FileOutputStream(tempFile);
                 OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
                 BufferedWriter     bw  = new BufferedWriter(osw)) {
@@ -522,11 +521,11 @@ public class DumpReplayerTest {
         DumpReplayer replayer = new DumpReplayer();
         try {
             replayer.parse(tempFile);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
-            Assert.assertEquals(1, ((Integer) re.getParts()[0]).intValue());
-            Assert.assertEquals(tempFile, re.getParts()[1]);
+            Assertions.assertEquals(RuggedMessages.CANNOT_PARSE_LINE, re.getSpecifier());
+            Assertions.assertEquals(1, ((Integer) re.getParts()[0]).intValue());
+            Assertions.assertEquals(tempFile, re.getParts()[1]);
         }
         tempFile.delete();
     }
@@ -605,7 +604,7 @@ public class DumpReplayerTest {
         getLos.setAccessible(true);
         try {
             getLos.invoke(parsedSensor, 1, date);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (InvocationTargetException ite) {
             RuggedInternalError rie = (RuggedInternalError) ite.getTargetException();
             assertEquals(RuggedMessages.INTERNAL_ERROR, rie.getSpecifier());

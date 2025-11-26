@@ -18,8 +18,8 @@ package org.orekit.rugged.utils;
 
 
 import org.hipparchus.exception.LocalizedCoreFormats;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.orekit.errors.OrekitException;
 import org.orekit.time.AbsoluteDate;
 
@@ -32,8 +32,8 @@ public class AbsoluteDateForVectorisationTest {
         double[] dts = new double[] {10.0, 20.0, 30.0};
 	    AbsoluteDateArrayHandling datesForVect = new AbsoluteDateArrayHandling(dates);
 	    AbsoluteDate[][] datesShifted = datesForVect.multipleShiftedBy(dts);
-	    Assert.assertEquals(datesShifted[0][0].durationFrom(date1.shiftedBy(10)), 0.0, 1e-5);
-	    Assert.assertEquals(datesShifted[0][1].durationFrom(date1.shiftedBy(20)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[0][0].durationFrom(date1.shiftedBy(10)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[0][1].durationFrom(date1.shiftedBy(20)), 0.0, 1e-5);
 
     }
 
@@ -47,9 +47,9 @@ public class AbsoluteDateForVectorisationTest {
         double[] dts = new double[] {10.0, 20.0, 30.0};
 	    AbsoluteDateArrayHandling datesForVect = new AbsoluteDateArrayHandling(dates);
 	    AbsoluteDate[] datesShifted = datesForVect.shiftedBy(dts);
-	    Assert.assertEquals(datesShifted[0].durationFrom(date1.shiftedBy(10)), 0.0, 1e-5);
-	    Assert.assertEquals(datesShifted[1].durationFrom(date1.shiftedBy(10020)), 0.0, 1e-5);
-	    Assert.assertEquals(datesShifted[2].durationFrom(date1.shiftedBy(20030)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[0].durationFrom(date1.shiftedBy(10)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[1].durationFrom(date1.shiftedBy(10020)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[2].durationFrom(date1.shiftedBy(20030)), 0.0, 1e-5);
 
     }
 
@@ -62,10 +62,10 @@ public class AbsoluteDateForVectorisationTest {
         double[] dts = new double[] {10.0, 20.0, 30.0};
 	    AbsoluteDateArrayHandling datesForVect = new AbsoluteDateArrayHandling(dates);
 	    AbsoluteDate[][] datesShifted = datesForVect.multipleShiftedBy(dts);
-	    Assert.assertEquals(datesShifted[0][0].durationFrom(date1.shiftedBy(10)), 0.0, 1e-5);
-	    Assert.assertEquals(datesShifted[0][1].durationFrom(date1.shiftedBy(20)), 0.0, 1e-5);
-	    Assert.assertEquals(datesShifted[1][1].durationFrom(date2.shiftedBy(20)), 0.0, 1e-5);
-	    Assert.assertEquals(datesShifted[1][2].durationFrom(date2.shiftedBy(30)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[0][0].durationFrom(date1.shiftedBy(10)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[0][1].durationFrom(date1.shiftedBy(20)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[1][1].durationFrom(date2.shiftedBy(20)), 0.0, 1e-5);
+	    Assertions.assertEquals(datesShifted[1][2].durationFrom(date2.shiftedBy(30)), 0.0, 1e-5);
 
     }
 
@@ -80,12 +80,12 @@ public class AbsoluteDateForVectorisationTest {
         AbsoluteDate[] datesComputeDuration = new AbsoluteDate[] {date4, date1};
 	    AbsoluteDateArrayHandling datesForVect = new AbsoluteDateArrayHandling(dates);
 	    double[][] datesDurations = datesForVect.multipleDurationFrom(datesComputeDuration);
-	    Assert.assertEquals(datesDurations[0][0], date1.durationFrom(date4), 1e-5);
-	    Assert.assertEquals(datesDurations[0][1], date1.durationFrom(date1), 1e-5);
-	    Assert.assertEquals(datesDurations[1][0], date2.durationFrom(date4), 1e-5);
-	    Assert.assertEquals(datesDurations[1][1], date2.durationFrom(date1), 1e-5);
-	    Assert.assertEquals(datesDurations[2][0], date3.durationFrom(date4), 1e-5);
-	    Assert.assertEquals(datesDurations[2][1], date3.durationFrom(date1), 1e-5);
+	    Assertions.assertEquals(datesDurations[0][0], date1.durationFrom(date4), 1e-5);
+	    Assertions.assertEquals(datesDurations[0][1], date1.durationFrom(date1), 1e-5);
+	    Assertions.assertEquals(datesDurations[1][0], date2.durationFrom(date4), 1e-5);
+	    Assertions.assertEquals(datesDurations[1][1], date2.durationFrom(date1), 1e-5);
+	    Assertions.assertEquals(datesDurations[2][0], date3.durationFrom(date4), 1e-5);
+	    Assertions.assertEquals(datesDurations[2][1], date3.durationFrom(date1), 1e-5);
 
     }
 
@@ -100,9 +100,9 @@ public class AbsoluteDateForVectorisationTest {
         AbsoluteDate[] datesComputeDuration = new AbsoluteDate[] {date4, date1, date2};
 	    AbsoluteDateArrayHandling datesForVect = new AbsoluteDateArrayHandling(dates);
 	    double[] datesDurations = datesForVect.durationFrom(datesComputeDuration);
-	    Assert.assertEquals(datesDurations[0], date1.durationFrom(date4), 1e-5);
-	    Assert.assertEquals(datesDurations[1], date2.durationFrom(date1), 1e-5);
-	    Assert.assertEquals(datesDurations[2], date3.durationFrom(date2), 1e-5);
+	    Assertions.assertEquals(datesDurations[0], date1.durationFrom(date4), 1e-5);
+	    Assertions.assertEquals(datesDurations[1], date2.durationFrom(date1), 1e-5);
+	    Assertions.assertEquals(datesDurations[2], date3.durationFrom(date2), 1e-5);
 
     }
 
@@ -118,9 +118,9 @@ public class AbsoluteDateForVectorisationTest {
 	    AbsoluteDateArrayHandling datesForVect = new AbsoluteDateArrayHandling(dates);
 	    try {
 	    	datesForVect.durationFrom(datesComputeDuration);
-	    	Assert.fail("an exception should have been thrown");
+	    	Assertions.fail("an exception should have been thrown");
         } catch (OrekitException oe) {
-        	Assert.assertEquals(LocalizedCoreFormats.DIMENSIONS_MISMATCH, oe.getSpecifier());
+        	Assertions.assertEquals(LocalizedCoreFormats.DIMENSIONS_MISMATCH, oe.getSpecifier());
         }
     }
 

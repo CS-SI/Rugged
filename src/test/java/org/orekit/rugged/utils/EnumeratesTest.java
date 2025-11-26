@@ -1,6 +1,6 @@
 package org.orekit.rugged.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.orekit.rugged.adjustment.OptimizerId;
 import org.orekit.rugged.api.BodyRotatingFrameId;
 import org.orekit.rugged.api.EllipsoidId;

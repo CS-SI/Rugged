@@ -28,9 +28,9 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.random.RandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.attitudes.NadirPointing;
 import org.orekit.attitudes.YawCompensation;
 import org.orekit.bodies.BodyShape;
@@ -81,13 +81,13 @@ public class SensorMeanPlaneCrossingTest {
                                                  new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
                                                  position, new LOSBuilder(los).build());
 
-        Assert.assertEquals("perfect line", sensor.getName());
-        Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
-        Assert.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
+        Assertions.assertEquals("perfect line", sensor.getName());
+        Assertions.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
+        Assertions.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
 
         SensorMeanPlaneCrossing mean = new SensorMeanPlaneCrossing(sensor, createInterpolator(sensor),
                                                                    0, 2000, true, true, 50, 0.01);
-        Assert.assertEquals(0.0, Vector3D.angle(normal, mean.getMeanPlaneNormal()), 1.0e-15);
+        Assertions.assertEquals(0.0, Vector3D.angle(normal, mean.getMeanPlaneNormal()), 1.0e-15);
 
     }
 
@@ -116,13 +116,13 @@ public class SensorMeanPlaneCrossingTest {
                                                  new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
                                                  position, new LOSBuilder(los).build());
 
-        Assert.assertEquals("noisy line", sensor.getName());
-        Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
-        Assert.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-5);
+        Assertions.assertEquals("noisy line", sensor.getName());
+        Assertions.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
+        Assertions.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-5);
 
         SensorMeanPlaneCrossing mean = new SensorMeanPlaneCrossing(sensor, createInterpolator(sensor),
                                                                    0, 2000, true, true, 50, 0.01);
-        Assert.assertEquals(0.0, Vector3D.angle(normal, mean.getMeanPlaneNormal()), 8.0e-7);
+        Assertions.assertEquals(0.0, Vector3D.angle(normal, mean.getMeanPlaneNormal()), 8.0e-7);
 
     }
 
@@ -166,9 +166,9 @@ public class SensorMeanPlaneCrossingTest {
                                                  new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
                                                  position, new LOSBuilder(los).build());
 
-        Assert.assertEquals("perfect line", sensor.getName());
-        Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
-        Assert.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
+        Assertions.assertEquals("perfect line", sensor.getName());
+        Assertions.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
+        Assertions.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
 
         SensorMeanPlaneCrossing mean = new SensorMeanPlaneCrossing(sensor, createInterpolator(sensor),
                                                                    0, 2000, lightTimeCorrection,
@@ -194,16 +194,16 @@ public class SensorMeanPlaneCrossingTest {
         if (lightTimeCorrection) {
             // applying corrections shifts the point with respect
             // to the reference result computed from a simple model above
-            Assert.assertTrue(result.getLine() - refLine > 0.02);
+            Assertions.assertTrue(result.getLine() - refLine > 0.02);
         } else if (aberrationOfLightCorrection) {
             // applying corrections shifts the point with respect
             // to the reference result computed from a simple model above
-            Assert.assertTrue(result.getLine() - refLine > 1.9);
+            Assertions.assertTrue(result.getLine() - refLine > 1.9);
         } else {
             // the simple model from which reference results have been compute applies here
-            Assert.assertEquals(refLine, result.getLine(), 5.0e-11* refLine);
-            Assert.assertEquals(0.0, result.getDate().durationFrom(refDate), 1.0e-9);
-            Assert.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 7.6e-15);
+            Assertions.assertEquals(refLine, result.getLine(), 5.0e-11* refLine);
+            Assertions.assertEquals(0.0, result.getDate().durationFrom(refDate), 1.0e-9);
+            Assertions.assertEquals(0.0, Vector3D.angle(los.get(refPixel), result.getTargetDirection()), 7.6e-15);
         }
 
         double deltaL = 0.5;
@@ -212,23 +212,23 @@ public class SensorMeanPlaneCrossingTest {
         Transform b2scMinus = sc2b.getInverse().shiftedBy(-deltaL / sensor.getRate(refLine));
         Vector3D dirMinus = b2scMinus.transformPosition(gpCartesian).subtract(position).normalize();
         Vector3D dirDer = new Vector3D(1.0 / (2 * deltaL), dirPlus.subtract(dirMinus));
-        Assert.assertEquals(0.0,
+        Assertions.assertEquals(0.0,
                             Vector3D.distance(result.getTargetDirectionDerivative(), dirDer),
                             tol * dirDer.getNorm());
 
         try {
             mean.getScToBody().getBodyToInertial(refDate.shiftedBy(-Constants.JULIAN_CENTURY));
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
         }
         try {
             mean.getScToBody().getBodyToInertial(refDate.shiftedBy(Constants.JULIAN_CENTURY));
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.OUT_OF_TIME_RANGE, re.getSpecifier());
         }
-        Assert.assertNotNull(mean.getScToBody().getBodyToInertial(refDate));
+        Assertions.assertNotNull(mean.getScToBody().getBodyToInertial(refDate));
 
     }
 
@@ -254,9 +254,9 @@ public class SensorMeanPlaneCrossingTest {
                                                  new LinearLineDatation(AbsoluteDate.J2000_EPOCH, 0.0, 1.0 / 1.5e-3),
                                                  position, new LOSBuilder(los).build());
 
-        Assert.assertEquals("perfect line", sensor.getName());
-        Assert.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
-        Assert.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
+        Assertions.assertEquals("perfect line", sensor.getName());
+        Assertions.assertEquals(AbsoluteDate.J2000_EPOCH, sensor.getDate(0.0));
+        Assertions.assertEquals(0.0, Vector3D.distance(position, sensor.getPosition()), 1.0e-15);
 
         SensorMeanPlaneCrossing mean = new SensorMeanPlaneCrossing(sensor, createInterpolator(sensor),
                                                                    0, 2000, true, true, 50, 1.0e-6);
@@ -287,12 +287,12 @@ public class SensorMeanPlaneCrossingTest {
                         new PVCoordinates(gpCartesian, Vector3D.ZERO),
                         400.0);
 
-        Assert.assertEquals(result.getLine(), slowResult.getLine(), 2.0e-8);
-        Assert.assertEquals(0.0,
+        Assertions.assertEquals(result.getLine(), slowResult.getLine(), 2.0e-8);
+        Assertions.assertEquals(0.0,
                             Vector3D.distance(result.getTargetDirection(),
                                               slowResult.getTargetDirection()),
                             2.0e-13);
-        Assert.assertEquals(0.0,
+        Assertions.assertEquals(0.0,
                             Vector3D.distance(result.getTargetDirectionDerivative(),
                                               slowResult.getTargetDirectionDerivative()),
                             1.0e-15);
@@ -352,7 +352,7 @@ public class SensorMeanPlaneCrossingTest {
         return list;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws URISyntaxException {
         TestUtils.clearFactories();
         String path = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
