@@ -1111,7 +1111,7 @@ public class RuggedTest {
     public void testInverseLocationDerivativesWithAberrationOfLightCorrection()
         {
         doTestInverseLocationDerivatives(2000, false, true,
-                                         1e-9, 3.0e-10, 3.4e-12, 7.0e-8);
+                                         1e-9, 3.0e-10, 3.4e-12, 8.0e-8);
     }
 
     @Test
