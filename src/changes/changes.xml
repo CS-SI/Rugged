@@ -20,10 +20,12 @@
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="4.0.1" date="2025-xx-xx" description="This is a minor release.
-     It migrates tests from Junit 4 to Junit5,
-     corrects wrong links in documentation.
+    <release version="4.0.1" date="2025-11-27" description="This is a patch release.
+     It migrates tests from Junit 4 to Junit 5, corrects bugs and wrong links in documentation.
      This version depends on Orekit 13.1.2 and Hipparchus 4.0.2.">
+      <action dev="maxime" type="fix" issue="411">
+        Use try-with-resource in Dumperplayer and DumpTest.
+      </action>
       <action dev="sébastien dinot" type="update" issue="405,404,402">
         Corrected wrong links in documentation (static site).
       </action>
