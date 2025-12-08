@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.orekit</groupId>
   <artifactId>rugged</artifactId>
@@ -149,18 +149,18 @@
   </scm>
 
   <issueManagement>
-      <system>Gitlab</system>
-      <url>https://gitlab.orekit.org/orekit/rugged/issues</url>
+    <system>Gitlab</system>
+    <url>https://gitlab.orekit.org/orekit/rugged/issues</url>
   </issueManagement>
 
   <dependencies>
 
     <dependency>
-        <groupId>org.orekit</groupId>
-        <artifactId>orekit</artifactId>
-        <version>${rugged.orekit.version}</version>
-        <type>jar</type>
-        <optional>false</optional>
+      <groupId>org.orekit</groupId>
+      <artifactId>orekit</artifactId>
+      <version>${rugged.orekit.version}</version>
+      <type>jar</type>
+      <optional>false</optional>
     </dependency>
 
     <dependency>
@@ -213,7 +213,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-		      <!-- Ensure LICENSE and NOTICE are shipped with binary jar -->
+		          <!-- Ensure LICENSE and NOTICE are shipped with binary jar -->
               <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
               <resources>
                 <resource>
@@ -246,7 +246,7 @@
             </goals>
             <configuration>
               <excludes>
-               <exclude>fr/cs/examples/**/*.class</exclude>
+                <exclude>fr/cs/examples/**/*.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -258,7 +258,7 @@
             </goals>
             <configuration>
               <excludes>
-               <exclude>fr/cs/examples/**/*.class</exclude>
+                <exclude>fr/cs/examples/**/*.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -307,7 +307,7 @@
               </rules>
               <haltOnFailure>false</haltOnFailure>
               <excludes>
-               <exclude>fr/cs/examples/**/*.class</exclude>
+                <exclude>fr/cs/examples/**/*.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -317,24 +317,22 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${rugged.maven-site-plugin.version}</version>
-          <dependencies>
-            <dependency><!-- add support for ssh/scp -->
-              <groupId>org.apache.maven.wagon</groupId>
-              <artifactId>wagon-ssh</artifactId>
-              <version>${rugged.maven-wagon-ssh-external-plugin.version}</version>
-            </dependency>
-          </dependencies>
+        <dependencies>
+          <dependency><!-- add support for ssh/scp -->
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-ssh</artifactId>
+            <version>${rugged.maven-wagon-ssh-external-plugin.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
-            <plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${rugged.maven-surefire-plugin.version}</version>
         <configuration>
-                <additionalClasspathElements>
-                   <additionalClasspathElement>${tools.jar.path}</additionalClasspathElement>
-                </additionalClasspathElements>
-                <!-- Exécution avec JUnit 5 -->
-                <!--useModulePath>false</useModulePath-->
+          <additionalClasspathElements>
+            <additionalClasspathElement>${tools.jar.path}</additionalClasspathElement>
+          </additionalClasspathElements>
         </configuration>
       </plugin>
       <plugin>
@@ -493,7 +491,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changes-plugin</artifactId>
         <version>${rugged.maven-changes-plugin.version}</version>
-         <configuration>
+        <configuration>
           <teamlist>team.html</teamlist>
         </configuration>
         <reportSets>
@@ -547,9 +545,9 @@
     <profile>
       <id>git</id>
       <activation>
-      <file>
-        <exists>.git</exists>
-      </file>
+        <file>
+          <exists>.git</exists>
+        </file>
       </activation>
       <build>
         <plugins>
@@ -560,45 +558,35 @@
             <executions>
               <execution>
                 <phase>prepare-package</phase>
-                  <goals>
-                   <goal>extract-buildnumber</goal>
-                  </goals>
+                <goals>
+                  <goal>extract-buildnumber</goal>
+                </goals>
               </execution>
             </executions>
             <configuration>
             </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>${rugged.maven-jar-plugin.version}</version>
-          <configuration>
-           <archive>
-            <manifestFile>${project.build.directory}/osgi/MANIFEST.MF</manifestFile>
-            <manifestEntries>
-              <Implementation-Build>${rugged.implementation.build}</Implementation-Build>
-              <X-Compile-Source-JDK>${rugged.compiler.source}</X-Compile-Source-JDK>
-              <X-Compile-Target-JDK>${rugged.compiler.target}</X-Compile-Target-JDK>
-              <Automatic-Module-Name>org.orekit.rugged</Automatic-Module-Name>
-            </manifestEntries>
-           </archive>
-          </configuration>
-        </plugin>
-       </plugins>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>${rugged.maven-jar-plugin.version}</version>
+            <configuration>
+              <archive>
+                <manifestFile>${project.build.directory}/osgi/MANIFEST.MF</manifestFile>
+                <manifestEntries>
+                  <Implementation-Build>${rugged.implementation.build}</Implementation-Build>
+                  <X-Compile-Source-JDK>${rugged.compiler.source}</X-Compile-Source-JDK>
+                  <X-Compile-Target-JDK>${rugged.compiler.target}</X-Compile-Target-JDK>
+                  <Automatic-Module-Name>org.orekit.rugged</Automatic-Module-Name>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
     <profile>
       <id>release</id>
-      <!-- distributionManagement>
-        <repository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-      </distributionManagement-->
       <build>
         <plugins>
           <plugin>
@@ -665,10 +653,8 @@
             <artifactId>maven-gpg-plugin</artifactId>
             <version>${rugged.maven-gpg-plugin.version}</version>
             <configuration>
-              <gpgArguments>
-                <arg>--digest-algo=SHA512</arg>
-              </gpgArguments>
-              <!-- keyname>0802AB8C87B0B1AEC1C1C5871550FDBD6375C33B</keyname-->
+              <signer>bc</signer>
+              <useAgent>false</useAgent>
             </configuration>
             <executions>
               <execution>
@@ -686,7 +672,7 @@
             <version>${rugged.maven-install-plugin.version}</version>
           </plugin>
         </plugins>
-     </build>
+      </build>
     </profile>
     <profile>
       <!-- A profile to configure staging deployment (for continuous integration process) -->
@@ -697,8 +683,8 @@
           <url>https://packages.orekit.org/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>ci-snapshots</id>
-            <url>https://packages.orekit.org/repository/maven-snapshots/</url>
+          <id>ci-snapshots</id>
+          <url>https://packages.orekit.org/repository/maven-snapshots/</url>
         </snapshotRepository>
       </distributionManagement>
     </profile>
@@ -732,7 +718,7 @@
                       <action>
                         <ignore/>
                       </action>
-                     </pluginExecution>
+                    </pluginExecution>
                   </pluginExecutions>
                 </lifecycleMappingMetadata>
               </configuration>
