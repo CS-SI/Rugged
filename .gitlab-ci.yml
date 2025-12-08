@@ -62,10 +62,11 @@ verify:warning:
 deploy:artifacts:
   stage: deploy
   script:
-    - mvn $MAVEN_CLI_OPTS javadoc:jar source:jar deploy -DskipTests=true -Pci-deploy
+    - mvn $MAVEN_CLI_OPTS javadoc:jar source:jar deploy -DskipTests=true -Prelease,ci-deploy
   artifacts:
     paths:
       - target/*.jar
+      - target/*.asc
   only:
     - main@orekit/rugged
     - /^release-[.0-9]+$/@orekit/rugged
