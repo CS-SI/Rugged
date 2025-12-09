@@ -50,7 +50,6 @@
     <rugged.maven-surefire-report-plugin.version>3.5.2</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.12</rugged.jgit.buildnumber.version>
     <rugged.build-helper-maven-plugin.version>3.6.0</rugged.build-helper-maven-plugin.version>
-    <rugged.nexus-staging-maven-plugin.version>1.7.0</rugged.nexus-staging-maven-plugin.version>
     <rugged.maven-gpg-plugin.version>3.2.7</rugged.maven-gpg-plugin.version>
     <rugged.maven-install-plugin.version>3.1.4</rugged.maven-install-plugin.version>
     <rugged.cyclonedx-maven-plugin.version>2.9.1</rugged.cyclonedx-maven-plugin.version>
@@ -600,17 +599,6 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>${rugged.nexus-staging-maven-plugin.version}</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>false</autoReleaseAfterClose>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
