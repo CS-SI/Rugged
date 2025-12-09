@@ -15,12 +15,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<document xmlns="http://maven.apache.org/changes/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <properties>
     <title>Rugged Changes</title>
   </properties>
   <body>
-    <release version="4.0.1" date="2025-11-27" description="This is a patch release.
+    <release version="4.0.1" date="2025-12-09" description="This is a patch release.
      It migrates tests from Junit 4 to Junit 5, corrects bugs and wrong links in documentation.
      This version depends on Orekit 13.1.2 and Hipparchus 4.0.2.">
       <action dev="maxime" type="fix" issue="411">
