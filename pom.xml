@@ -46,7 +46,6 @@
     <rugged.maven-resources-plugin.version>3.3.1</rugged.maven-resources-plugin.version>
     <rugged.maven-site-plugin.version>3.21.0</rugged.maven-site-plugin.version>
     <rugged.maven-wagon-ssh-external-plugin.version>3.5.3</rugged.maven-wagon-ssh-external-plugin.version>
-    <rugged.maven-source-plugin.version>3.3.1</rugged.maven-source-plugin.version>
     <rugged.maven-surefire-plugin.version>3.5.3</rugged.maven-surefire-plugin.version>
     <rugged.maven-surefire-report-plugin.version>3.5.2</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.12</rugged.jgit.buildnumber.version>
@@ -589,19 +588,6 @@
       <id>release</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>${rugged.maven-source-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
