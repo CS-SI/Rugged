@@ -57,17 +57,18 @@ verify:warning:
   rules:
     - if: $SONAR_TOKEN == null
 
-# On main branches (develop, release-*, master) the produced artifacts are
+# On main branches (develop, release-*, main) the produced artifacts are
 # deployed on the Nexus of the project (https://packages.orekit.org/)
 deploy:artifacts:
   stage: deploy
   script:
-    - mvn $MAVEN_CLI_OPTS javadoc:jar source:jar deploy -DskipTests=true -Pci-deploy
+    - mvn $MAVEN_CLI_OPTS javadoc:jar source:jar deploy -DskipTests=true -Prelease,ci-deploy
   artifacts:
     paths:
       - target/*.jar
+      - target/*.asc
   only:
-    - master@orekit/rugged
+    - main@orekit/rugged
     - /^release-[.0-9]+$/@orekit/rugged
     - develop@orekit/rugged
 
@@ -85,6 +86,6 @@ deploy:site:
     - rsync -rz --links --checksum --no-perms --chmod=u=rwX,go=rX --delete-after
             target/site/ ${TARGET_URL_PREFIX}-${PROJECT_VERSION}
   only:
-    - master@orekit/rugged
+    - main@orekit/rugged
     - /^release-[.0-9]+$/@orekit/rugged
     - develop@orekit/rugged

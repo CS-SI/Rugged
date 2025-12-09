@@ -26,8 +26,8 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.orekit.rugged.errors.RuggedException;
 import org.orekit.rugged.errors.RuggedMessages;
 import org.orekit.rugged.intersection.AbstractAlgorithmTest;
@@ -42,6 +42,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testAlmostNadir() {
 
         setUpMayonVolcanoContext();
+
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         final Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D los = new Vector3D( 0.5127552821932051, -0.8254313129088879, -0.2361041470463311);
@@ -55,7 +56,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
         // this is almost a Nadir observation (LOS deviates between 1.4 and 1.6 degrees from vertical)
         // so the refraction correction is small
-        Assert.assertEquals(0.0553796, distance, 1.0e-6);
+        Assertions.assertEquals(0.0553796, distance, 1.0e-6);
 
     }
 
@@ -63,6 +64,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testNoOpRefraction() {
 
         setUpMayonVolcanoContext();
+
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
@@ -82,7 +84,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         model = new MultiLayerModel(earth, refractionLayers);
         correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
         distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
-        Assert.assertEquals(0.0, distance, 1.7e-9);
+        Assertions.assertEquals(0.0, distance, 1.7e-9);
 
     }
 
@@ -91,6 +93,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         setUpMayonVolcanoContext();
+        
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
@@ -120,17 +123,17 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
 
         // with regular atmosphere, the ray bends downwards,
         // so the ground point is closer to the sub-satellite point than the raw intersection
-        Assert.assertTrue(anglePosCorrectedIntersection < anglePosRawIntersection);
+        Assertions.assertTrue(anglePosCorrectedIntersection < anglePosRawIntersection);
 
         // with reversed atmosphere, the ray bends upwards,
         // so the ground point is farther from the sub-satellite point than the raw intersection
-        Assert.assertTrue(anglePosReversedIntersection > anglePosRawIntersection);
+        Assertions.assertTrue(anglePosReversedIntersection > anglePosRawIntersection);
 
         // the points are almost aligned (for distances around 20m, Earth curvature is small enough)
         double dRawCorrected      = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
         double dRawReversed       = Vector3D.distance(earth.transform(rawIntersection), earth.transform(reversedIntersection));
         double dReversedCorrected = Vector3D.distance(earth.transform(reversedIntersection), earth.transform(correctedIntersection));
-        Assert.assertEquals(dRawCorrected + dRawReversed, dReversedCorrected, 1.0e-12 * dReversedCorrected);
+        Assertions.assertEquals(dRawCorrected + dRawReversed, dReversedCorrected, 1.0e-12 * dReversedCorrected);
 
     }
 
@@ -139,6 +142,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
         throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         setUpMayonVolcanoContext();
+        
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
@@ -173,7 +177,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
                                                   earth.transform(baseIntersection));
         double denserDistance = Vector3D.distance(earth.transform(rawIntersection),
                                                   earth.transform(denserIntersection));
-        Assert.assertTrue(denserDistance > baseDistance);
+        Assertions.assertTrue(denserDistance > baseDistance);
 
     }
 
@@ -181,6 +185,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testMissingLayers() {
 
         setUpMayonVolcanoContext();
+
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
@@ -193,11 +198,11 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
                                                                                                           1.5)));
         try {
             model.applyCorrection(position, los, rawIntersection, algorithm);
-            Assert.fail("an exception should have been thrown");
+            Assertions.fail("an exception should have been thrown");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.NO_LAYER_DATA, re.getSpecifier());
-            Assert.assertEquals(h,         ((Double) re.getParts()[0]).doubleValue(), 1.0e-6);
-            Assert.assertEquals(h + 100.0, ((Double) re.getParts()[1]).doubleValue(), 1.0e-6);
+            Assertions.assertEquals(RuggedMessages.NO_LAYER_DATA, re.getSpecifier());
+            Assertions.assertEquals(h,         ((Double) re.getParts()[0]).doubleValue(), 1.0e-6);
+            Assertions.assertEquals(h + 100.0, ((Double) re.getParts()[1]).doubleValue(), 1.0e-6);
         }
 
     }
@@ -206,6 +211,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testLayersBelowDEM() {
 
         setUpMayonVolcanoContext();
+
         final IntersectionAlgorithm   algorithm       = createAlgorithm(updater, 8, true);
         final Vector3D                position        = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         final Vector3D                los             = los(position, FastMath.toRadians(50.0));
@@ -217,7 +223,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
                                                                                                           1.5)));
         NormalizedGeodeticPoint correctedIntersection = model.applyCorrection(position, los, rawIntersection, algorithm);
         double distance = Vector3D.distance(earth.transform(rawIntersection), earth.transform(correctedIntersection));
-        Assert.assertEquals(0.0, distance, 1.3e-9);
+        Assertions.assertEquals(0.0, distance, 1.3e-9);
 
     }
 
@@ -225,6 +231,7 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     public void testDivingAngleChange() {
 
         setUpMayonVolcanoContext();
+
         final IntersectionAlgorithm algorithm = createAlgorithm(updater, 8, true);
         final Vector3D position = new Vector3D(-3787079.6453602533, 5856784.405679551, 1655869.0582939098);
         AtmosphericRefraction model = new MultiLayerModel(earth);
@@ -243,13 +250,13 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
             final NormalizedGeodeticPoint correctedIntersection = model.applyCorrection(position, rotatingLos, rawIntersection, algorithm);
             final double distance = Vector3D.distance(earth.transform(rawIntersection),
                                                       earth.transform(correctedIntersection));
-            Assert.assertEquals(reference.value(alpha), distance, 0.12);
+            Assertions.assertEquals(reference.value(alpha), distance, 0.12);
         }
 
     }
 
     private Vector3D los(final Vector3D position, final double angleFromNadir) {
-        
+            	
         final Vector3D nadir       = earth.transform(position, earth.getBodyFrame(), null).getNadir();
         final Rotation losRotation = new Rotation(nadir.orthogonal(), angleFromNadir,
                                                   RotationConvention.VECTOR_OPERATOR);
@@ -260,5 +267,4 @@ public class MultiLayerModelTest extends AbstractAlgorithmTest {
     protected IntersectionAlgorithm createAlgorithm(TileUpdater updater, int maxCachedTiles, boolean isOverlappingTiles) {
         return new DuvenhageAlgorithm(updater, maxCachedTiles, false, isOverlappingTiles);
     }
-
 }

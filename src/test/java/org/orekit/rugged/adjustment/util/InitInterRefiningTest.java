@@ -14,8 +14,8 @@ import org.hipparchus.random.GaussianRandomGenerator;
 import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
-import org.junit.After;
-import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
@@ -42,8 +42,6 @@ import org.orekit.utils.CartesianDerivativesFilter;
 import org.orekit.utils.Constants;
 import org.orekit.utils.TimeStampedAngularCoordinates;
 import org.orekit.utils.TimeStampedPVCoordinates;
-
-
 
 
 /** Initialization for inter sensor refining Junit tests.
@@ -228,9 +226,9 @@ public class InitInterRefiningTest {
             
             
         } catch (OrekitException oe) {
-            Assert.fail(oe.getLocalizedMessage());
+            Assertions.fail(oe.getLocalizedMessage());
         } catch (URISyntaxException use) {
-            Assert.fail(use.getLocalizedMessage());
+            Assertions.fail(use.getLocalizedMessage());
         }
     }
     
@@ -555,7 +553,7 @@ public class InitInterRefiningTest {
         return parameterToAdjust;
     }
     
-    @After
+    @AfterEach
     public void tearDown() {
     }
 }

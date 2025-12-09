@@ -21,10 +21,10 @@ Same case as the tutorial [Direct location with a DEM](./direct-location-with-DE
 **WARNING**
 
 This tutorial will not be able to compile under
-[Rugged gitlab CI](https://gitlab.orekit.org/orekit/rugged/-/pipelines) as
-GDAL is not authorized in Rugged official releases. Don't commit under
-official branches (master, develop, release, ...) of Rugged, a pom.xml with
-the dependency to GDAL.
+[Rugged gitlab CI](https://gitlab.orekit.org/orekit/rugged/-/pipelines) as GDAL
+is not authorized in Rugged official releases. Don't commit under official
+branches (main, develop, release...) of Rugged, a pom.xml with the dependency
+to GDAL.
 
 ## Needs
 

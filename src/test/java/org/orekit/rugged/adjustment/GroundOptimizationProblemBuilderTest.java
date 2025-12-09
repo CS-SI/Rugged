@@ -10,10 +10,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.hipparchus.optim.nonlinear.vector.leastsquares.LeastSquaresOptimizer.Optimum;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.rugged.TestUtils;
 import org.orekit.rugged.adjustment.measurements.Observables;
@@ -28,7 +28,7 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 public class GroundOptimizationProblemBuilderTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         try {
@@ -44,7 +44,7 @@ public class GroundOptimizationProblemBuilderTest {
             numberOfParameters = refiningTest.getParameterToAdjust();
 
         }  catch (RuggedException re) {
-            Assert.fail(re.getLocalizedMessage());
+            Assertions.fail(re.getLocalizedMessage());
         }
     }
     
@@ -56,31 +56,31 @@ public class GroundOptimizationProblemBuilderTest {
         final double convergenceThreshold = 1.e-11;
         Optimum optimum = adjustmentContext.estimateFreeParameters(Collections.singletonList(rugged.getName()), maxIterations, convergenceThreshold);
         
-        Assert.assertTrue(optimum.getIterations() < maxIterations);
+        Assertions.assertTrue(optimum.getIterations() < maxIterations);
 
         // The default optimizer is a Gauss Newton.
         // For Gauss Newton, the number of evaluations is equal to the number of iterations
-        Assert.assertTrue(optimum.getEvaluations() == optimum.getIterations());
+        Assertions.assertTrue(optimum.getEvaluations() == optimum.getIterations());
 
         final double expectedMaxValue = 39200.0;
-        Assert.assertEquals(expectedMaxValue, optimum.getResiduals().getMaxValue(), 1.0e-6);
+        Assertions.assertEquals(expectedMaxValue, optimum.getResiduals().getMaxValue(), 1.0e-6);
 
         final double expectedRMS = 5067.112098;
-        Assert.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
+        Assertions.assertEquals(expectedRMS, optimum.getRMS(), 1.0e-6);
 
         final double expectedCost = 286639.1460351976;
-        Assert.assertEquals(expectedCost, optimum.getCost(), 1.0e-6);
+        Assertions.assertEquals(expectedCost, optimum.getCost(), 1.0e-6);
 
-        Assert.assertTrue(numberOfParameters == optimum.getPoint().getDimension());
+        Assertions.assertTrue(numberOfParameters == optimum.getPoint().getDimension());
 
         final int sensorToGroundMappingSize = 1600;
         Collection<SensorToGroundMapping> ssm = measurements.getGroundMappings();
         Iterator<SensorToGroundMapping> it = ssm.iterator();
         while (it.hasNext()) {
             SensorToGroundMapping ssmit = it.next();
-            Assert.assertTrue(sensorToGroundMappingSize == ssmit.getMapping().size());
+            Assertions.assertTrue(sensorToGroundMappingSize == ssmit.getMapping().size());
         }        
-        Assert.assertTrue(sensorToGroundMappingSize*2 == optimum.getResiduals().getDimension());
+        Assertions.assertTrue(sensorToGroundMappingSize*2 == optimum.getResiduals().getDimension());
     }
 
     @Test
@@ -94,10 +94,10 @@ public class GroundOptimizationProblemBuilderTest {
             final double convergenceThreshold = 1.e-11;
             
             adjustmentContext.estimateFreeParameters(Collections.singletonList(rugged.getName()), maxIterations, convergenceThreshold);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
 
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.NO_PARAMETERS_SELECTED,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.NO_PARAMETERS_SELECTED,re.getSpecifier());
         }
     }
     
@@ -119,10 +119,10 @@ public class GroundOptimizationProblemBuilderTest {
             sensorToGroundMapping.set(groundOptimizationProblem,new ArrayList<SensorToGroundMapping>());
 
             groundOptimizationProblem.build(maxIterations, convergenceThreshold);
-            Assert.fail("An exception should have been thrown");
+            Assertions.fail("An exception should have been thrown");
 
         } catch  (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.NO_REFERENCE_MAPPINGS,re.getSpecifier());
+            Assertions.assertEquals(RuggedMessages.NO_REFERENCE_MAPPINGS,re.getSpecifier());
         }
     }
     
@@ -139,9 +139,9 @@ public class GroundOptimizationProblemBuilderTest {
         int nbModelsWithWeight = measurementsNoName.getNbModels();
         
         // Compare the two collections of measurements
-        Assert.assertEquals(nbModels, nbModelsWithWeight);
+        Assertions.assertEquals(nbModels, nbModelsWithWeight);
 
-        Assert.assertEquals(sensorToGroundMapping.size(), sensorToGroundMappingNoName.size());
+        Assertions.assertEquals(sensorToGroundMapping.size(), sensorToGroundMappingNoName.size());
 
         // There is only one item
         SensorToGroundMapping arraySensorToGroundMapping          = (SensorToGroundMapping) sensorToGroundMapping.toArray()[0];
@@ -175,16 +175,16 @@ public class GroundOptimizationProblemBuilderTest {
             } // end iteration on mappingNoName
 
             if (!found) { // the current (key,value) of the mapping was not found in the mappingNoName
-                Assert.assertTrue(found);
+                Assertions.assertTrue(found);
             }
         } // end on iteration on mapping
 
-        Assert.assertEquals(arraySensorToGroundMapping.getRuggedName(),arraySensorToGroundMappingNoName.getRuggedName());
-        Assert.assertEquals(arraySensorToGroundMapping.getSensorName(),arraySensorToGroundMappingNoName.getSensorName());;
+        Assertions.assertEquals(arraySensorToGroundMapping.getRuggedName(),arraySensorToGroundMappingNoName.getRuggedName());
+        Assertions.assertEquals(arraySensorToGroundMapping.getSensorName(),arraySensorToGroundMappingNoName.getSensorName());;
     }
     
     
-    @After
+    @AfterEach
     public void tearDown() {
         measurements = null;
     }

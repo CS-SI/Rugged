@@ -22,10 +22,10 @@ import java.net.URISyntaxException;
 import org.hipparchus.geometry.euclidean.threed.Line;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
@@ -48,7 +48,7 @@ public class ExtendedEllipsoidTest {
         for (double longitude = -1.0; longitude < 1.0; longitude += 0.01) {
             GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtLongitude(p, d, longitude),
                                                    ellipsoid.getBodyFrame(), null);
-            Assert.assertEquals(longitude, gp.getLongitude(), 1.0e-15);
+            Assertions.assertEquals(longitude, gp.getLongitude(), 1.0e-15);
         }
 
     }
@@ -63,10 +63,10 @@ public class ExtendedEllipsoidTest {
                                                          -2.4);
         try {
             ellipsoid.pointAtLongitude(p, parallelToLongitudePlane, longitude);
-            Assert.fail("an error should have been triggered");
+            Assertions.fail("an error should have been triggered");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE, re.getSpecifier());
-            Assert.assertEquals(FastMath.toDegrees(longitude), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LONGITUDE, re.getSpecifier());
+            Assertions.assertEquals(FastMath.toDegrees(longitude), re.getParts()[0]);
         }
 
     }
@@ -81,7 +81,7 @@ public class ExtendedEllipsoidTest {
         for (double latitude = -d.getDelta() + 1.0e-5; latitude < d.getDelta(); latitude += 0.1) {
             GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtLatitude(p, d, latitude, p),
                                                    ellipsoid.getBodyFrame(), null);
-            Assert.assertEquals(latitude, gp.getLatitude(), epsilon);
+            Assertions.assertEquals(latitude, gp.getLatitude(), epsilon);
         }
 
     }
@@ -103,22 +103,22 @@ public class ExtendedEllipsoidTest {
         double lTarget        = 0.6978408125890662;
 
         // spacecraft is in LEO
-        Assert.assertEquals(h, 794652.782, 0.001);
+        Assertions.assertEquals(h, 794652.782, 0.001);
 
         Vector3D pHigh        = ellipsoid.pointAtLatitude(position, los, lTarget, position);
         GeodeticPoint gpHigh  = ellipsoid.transform(pHigh, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(lTarget, gpHigh.getLatitude(), 1.0e-12);
+        Assertions.assertEquals(lTarget, gpHigh.getLatitude(), 1.0e-12);
         // first crossing point is high, but below spacecraft and along positive line of sight
-        Assert.assertEquals(724335.409, gpHigh.getAltitude(), 0.001);
-        Assert.assertTrue(Vector3D.dotProduct(pHigh.subtract(position), los) > 0);
+        Assertions.assertEquals(724335.409, gpHigh.getAltitude(), 0.001);
+        Assertions.assertTrue(Vector3D.dotProduct(pHigh.subtract(position), los) > 0);
 
         Vector3D pLow         = ellipsoid.pointAtLatitude(position, los, lTarget,
                                                           new Vector3D(1, position, 900000, los));
         GeodeticPoint gpLow   = ellipsoid.transform(pLow, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(lTarget, gpLow.getLatitude(), 1.0e-12);
+        Assertions.assertEquals(lTarget, gpLow.getLatitude(), 1.0e-12);
         // second crossing point is almost on ground, also along positive line of sight
-        Assert.assertEquals(492.804, gpLow.getAltitude(), 0.001);
-        Assert.assertTrue(Vector3D.dotProduct(pLow.subtract(position), los) > 0);
+        Assertions.assertEquals(492.804, gpLow.getAltitude(), 0.001);
+        Assertions.assertTrue(Vector3D.dotProduct(pLow.subtract(position), los) > 0);
 
     }
 
@@ -131,13 +131,13 @@ public class ExtendedEllipsoidTest {
 
         Vector3D pPlus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, +2.0e7, d));
         GeodeticPoint gpPlus = ellipsoid.transform(pPlus, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(latitude, gpPlus.getLatitude(), 4.0e-16);
-        Assert.assertEquals(20646364.047, Vector3D.dotProduct(d, pPlus.subtract(p)), 0.001);
+        Assertions.assertEquals(latitude, gpPlus.getLatitude(), 4.0e-16);
+        Assertions.assertEquals(20646364.047, Vector3D.dotProduct(d, pPlus.subtract(p)), 0.001);
 
         Vector3D pMinus = ellipsoid.pointAtLatitude(p, d, latitude, new Vector3D(1, p, -3.0e7, d));
         GeodeticPoint gpMinus = ellipsoid.transform(pMinus, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(latitude, gpMinus.getLatitude(), 3.0e-16);
-        Assert.assertEquals(-31797895.234, Vector3D.dotProduct(d, pMinus.subtract(p)), 0.001);
+        Assertions.assertEquals(latitude, gpMinus.getLatitude(), 3.0e-16);
+        Assertions.assertEquals(-31797895.234, Vector3D.dotProduct(d, pMinus.subtract(p)), 0.001);
 
     }
 
@@ -149,8 +149,8 @@ public class ExtendedEllipsoidTest {
         Vector3D      closeReference = new Vector3D(5177991.74844521, 3726070.452427455, 90.88067547897226);
         Vector3D      intersection   = ellipsoid.pointAtLatitude(p, d, latitude, closeReference);
         GeodeticPoint gp             = ellipsoid.transform(intersection, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(latitude, gp.getLatitude(), 1.0e-10);
-        Assert.assertEquals(2866.297, gp.getAltitude(), 1.0e-3);
+        Assertions.assertEquals(latitude, gp.getLatitude(), 1.0e-10);
+        Assertions.assertEquals(2866.297, gp.getAltitude(), 1.0e-3);
     }
 
     @Test
@@ -162,10 +162,10 @@ public class ExtendedEllipsoidTest {
 
         try {
             ellipsoid.pointAtLatitude(p, d, latitude, p);
-            Assert.fail("an error should have been triggered");
+            Assertions.fail("an error should have been triggered");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
-            Assert.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
+            Assertions.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
         }
 
     }
@@ -179,10 +179,10 @@ public class ExtendedEllipsoidTest {
 
         try {
             ellipsoid.pointAtLatitude(p, d, latitude, p);
-            Assert.fail("an error should have been triggered");
+            Assertions.fail("an error should have been triggered");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
-            Assert.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
+            Assertions.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
         }
 
     }
@@ -195,7 +195,7 @@ public class ExtendedEllipsoidTest {
         for (double altitude = -500000; altitude < 800000.0; altitude += 100) {
             GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtAltitude(p, d, altitude),
                                                    ellipsoid.getBodyFrame(), null);
-            Assert.assertEquals(altitude, gp.getAltitude(), 1.0e-3);
+            Assertions.assertEquals(altitude, gp.getAltitude(), 1.0e-3);
         }
 
     }
@@ -208,7 +208,7 @@ public class ExtendedEllipsoidTest {
         for (double altitude = -500000; altitude < 800000.0; altitude += 100) {
             GeodeticPoint gp = ellipsoid.transform(ellipsoid.pointAtAltitude(p, d, altitude),
                                                    ellipsoid.getBodyFrame(), null);
-            Assert.assertEquals(altitude, gp.getAltitude(), 1.0e-3);
+            Assertions.assertEquals(altitude, gp.getAltitude(), 1.0e-3);
         }
 
     }
@@ -221,10 +221,10 @@ public class ExtendedEllipsoidTest {
         double altitude = -580000.0;
         try {
             ellipsoid.pointAtAltitude(p, d, altitude);
-            Assert.fail("an error should have been triggered");
+            Assertions.fail("an error should have been triggered");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, re.getSpecifier());
-            Assert.assertEquals(altitude, re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_ALTITUDE, re.getSpecifier());
+            Assertions.assertEquals(altitude, re.getParts()[0]);
         }
 
     }
@@ -243,8 +243,8 @@ public class ExtendedEllipsoidTest {
                                                       gp.getLongitude() + delta * converted.getX(),
                                                       gp.getAltitude()  + delta * converted.getZ());
             Vector3D converted2 = ellipsoid.convertLos(p, ellipsoid.transform(shifted));
-            Assert.assertEquals(0.0, Vector3D.distance(converted, converted2), 3.0e-5 * converted.getNorm());
-            Assert.assertEquals(0.0, line.distance(ellipsoid.transform(shifted)), 8.0e-4);
+            Assertions.assertEquals(0.0, Vector3D.distance(converted, converted2), 3.0e-5 * converted.getNorm());
+            Assertions.assertEquals(0.0, line.distance(ellipsoid.transform(shifted)), 8.0e-4);
         }
 
     }
@@ -259,10 +259,10 @@ public class ExtendedEllipsoidTest {
 
         try {
             ellipsoid.pointAtLatitude(p, d, latitude, c);
-            Assert.fail("an error should have been triggered");
+            Assertions.fail("an error should have been triggered");
         } catch (RuggedException re) {
-            Assert.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
-            Assert.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
+            Assertions.assertEquals(RuggedMessages.LINE_OF_SIGHT_NEVER_CROSSES_LATITUDE, re.getSpecifier());
+            Assertions.assertEquals(FastMath.toDegrees(latitude), re.getParts()[0]);
         }
 
     }
@@ -277,11 +277,11 @@ public class ExtendedEllipsoidTest {
 
         Vector3D s = ellipsoid.pointAtLatitude(position, los, latitude, close);
         GeodeticPoint gp = ellipsoid.transform(s, ellipsoid.getBodyFrame(), null);
-        Assert.assertEquals(latitude, gp.getLatitude(), 1.0e-15);
+        Assertions.assertEquals(latitude, gp.getLatitude(), 1.0e-15);
 
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         try {
 
@@ -293,13 +293,13 @@ public class ExtendedEllipsoidTest {
                                               Constants.WGS84_EARTH_FLATTENING,
                                               itrf);
         } catch (OrekitException oe) {
-            Assert.fail(oe.getLocalizedMessage());
+            Assertions.fail(oe.getLocalizedMessage());
         } catch (URISyntaxException use) {
-            Assert.fail(use.getLocalizedMessage());
+            Assertions.fail(use.getLocalizedMessage());
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         ellipsoid = null;
     }

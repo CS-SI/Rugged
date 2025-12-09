@@ -16,7 +16,8 @@
  */
 package org.orekit.rugged.errors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,9 +30,8 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
 import org.orekit.data.DirectoryCrawler;
@@ -43,31 +43,33 @@ import org.orekit.rugged.linesensor.SensorPixel;
 
 public class DumpTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
     
     @Test
     public void testGetKeyOrNameCoverage() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
                                           IllegalArgumentException, InvocationTargetException, IOException {
-        File tempFile = tempFolder.newFile();
-        PrintWriter pw = new PrintWriter(tempFile, "UTF-8");
-        Dump dump = new Dump(pw);
-        
-        Method getKeyOrName = dump.getClass().getDeclaredMethod("getKeyOrName", Frame.class);
-        getKeyOrName.setAccessible(true);
-        
-        String dummyName = "dummy";
-        Frame frame = new Frame(FramesFactory.getEME2000(), Transform.IDENTITY, dummyName);
-        
-        String foundName = (String) getKeyOrName.invoke(dump, frame);
-        
-        assertTrue(foundName.equals(dummyName));
+        File tempFile = File.createTempFile("junit", null, tempFolder);
+        try (PrintWriter pw = new PrintWriter(tempFile, "UTF-8")) {
+
+            Dump dump = new Dump(pw);
+
+            Method getKeyOrName = dump.getClass().getDeclaredMethod("getKeyOrName", Frame.class);
+            getKeyOrName.setAccessible(true);
+
+            String dummyName = "dummy";
+            Frame frame = new Frame(FramesFactory.getEME2000(), Transform.IDENTITY, dummyName);
+
+            String foundName = (String) getKeyOrName.invoke(dump, frame);
+
+            assertEquals(dummyName, foundName);
+        }
     }
     
     @Test
     public void testInverseLocNull() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
                                             IllegalArgumentException, InvocationTargetException, IOException {
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         PrintWriter pw = new PrintWriter(tempFile, "UTF-8");
         Dump dump = new Dump(pw);
         
@@ -86,7 +88,7 @@ public class DumpTest {
              BufferedReader    br  = new BufferedReader(isr)) {
                for (String line = br.readLine(); line != null; line = br.readLine()) {
                    final String trimmed = line.trim();
-                   if (!(trimmed.length() == 0 || trimmed.startsWith("#"))) {
+                   if (!(trimmed.isEmpty() || trimmed.startsWith("#"))) {
                        assertTrue(line.contains("inverse location result: NULL"));
                    }
                }
@@ -96,7 +98,7 @@ public class DumpTest {
     @Test
     public void testDirectLocNull() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
                                             IllegalArgumentException, InvocationTargetException, IOException {
-        File tempFile = tempFolder.newFile();
+        File tempFile = File.createTempFile("junit", null, tempFolder);
         PrintWriter pw = new PrintWriter(tempFile, "UTF-8");
         Dump dump = new Dump(pw);
         
@@ -114,7 +116,7 @@ public class DumpTest {
              BufferedReader    br  = new BufferedReader(isr)) {
                for (String line = br.readLine(); line != null; line = br.readLine()) {
                    final String trimmed = line.trim();
-                   if (!(trimmed.length() == 0 || trimmed.startsWith("#"))) {
+                   if (!(trimmed.isEmpty() || trimmed.startsWith("#"))) {
                        assertTrue(line.contains("direct location result: NULL"));
                    }
                }
@@ -122,8 +124,8 @@ public class DumpTest {
     }
     
     @Test
-    public void testSetMeanPlane() throws NoSuchMethodException, SecurityException, IllegalAccessException, 
-                                            IllegalArgumentException, InvocationTargetException, IOException, URISyntaxException {
+    public void testSetMeanPlane() throws SecurityException,
+            IllegalArgumentException, IOException, URISyntaxException {
 
         String orekitPath = getClass().getClassLoader().getResource("orekit-data").toURI().getPath();
         DataContext.getDefault().getDataProvidersManager().addProvider(new DirectoryCrawler(new File(orekitPath)));
@@ -131,7 +133,7 @@ public class DumpTest {
         String dumpPath = getClass().getClassLoader().getResource("replay/replay-inverse-loc-02.txt").toURI().getPath();
         
         // Regenerate a dump in order to write the "sensor mean plane: sensorName xxx lineNumber xxx targetDirection xxx targetDirection xxx ...."
-        File dummyDump = tempFolder.newFile();
+        File dummyDump = File.createTempFile("junit", null, tempFolder);
         DumpManager.activate(dummyDump);
         
         DumpReplayer replayer = new DumpReplayer();
@@ -147,9 +149,9 @@ public class DumpTest {
              BufferedReader    br  = new BufferedReader(isr)) {
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 final String trimmed = line.trim();
-                if (!(trimmed.length() == 0 || trimmed.startsWith("#"))) {
+                if (!(trimmed.isEmpty() || trimmed.startsWith("#"))) {
                     if (line.contains("lineNumber ")&& line.contains("targetDirection ")) {
-                        assertTrue(line.split("targetDirection").length == 6);
+                        assertEquals(6, line.split("targetDirection").length);
                     }
                 }
             }

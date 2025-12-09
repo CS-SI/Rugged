@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.orekit</groupId>
   <artifactId>rugged</artifactId>
-  <version>4.1-SNAPSHOT</version>
+  <version>4.0.1</version>
   <packaging>jar</packaging>
   <name>Rugged</name>
   <url>https://www.orekit.org/rugged</url>
@@ -21,12 +21,12 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- COTS version -->
-    <rugged.orekit.version>13.0.3</rugged.orekit.version>
-    <rugged.junit.version>4.13.2</rugged.junit.version>
+    <rugged.orekit.version>13.1.2</rugged.orekit.version>
 
     <!-- Compilers and Tools version -->
     <rugged.compiler.source>1.8</rugged.compiler.source>
     <rugged.compiler.target>1.8</rugged.compiler.target>
+    <rugged.junit.jupiter.version>5.13.4</rugged.junit.jupiter.version>
     <rugged.implementation.build>${git.revision}; ${maven.build.timestamp}</rugged.implementation.build>
     <rugged.spotbugs-maven-plugin.version>4.2.3</rugged.spotbugs-maven-plugin.version>
     <rugged.jacoco-maven-plugin.version>0.8.12</rugged.jacoco-maven-plugin.version>
@@ -37,7 +37,7 @@
     <rugged.checkstyle.version>9.3</rugged.checkstyle.version>
     <rugged.maven-clean-plugin.version>3.4.1</rugged.maven-clean-plugin.version>
     <rugged.maven-compiler-plugin.version>3.14.0</rugged.maven-compiler-plugin.version>
-    <rugged.maven-javadoc-plugin.version>3.11.2</rugged.maven-javadoc-plugin.version>
+    <rugged.maven-javadoc-plugin.version>3.11.3</rugged.maven-javadoc-plugin.version>
     <rugged.maven-jar-plugin.version>3.4.2</rugged.maven-jar-plugin.version>
     <rugged.maven-jxr-plugin.version>3.6.0</rugged.maven-jxr-plugin.version>
     <rugged.plantuml-maven-plugin.version>1.2</rugged.plantuml-maven-plugin.version>
@@ -46,14 +46,13 @@
     <rugged.maven-resources-plugin.version>3.3.1</rugged.maven-resources-plugin.version>
     <rugged.maven-site-plugin.version>3.21.0</rugged.maven-site-plugin.version>
     <rugged.maven-wagon-ssh-external-plugin.version>3.5.3</rugged.maven-wagon-ssh-external-plugin.version>
-    <rugged.maven-source-plugin.version>3.3.1</rugged.maven-source-plugin.version>
-    <rugged.maven-surefire-plugin.version>2.22.2</rugged.maven-surefire-plugin.version>
+    <rugged.maven-surefire-plugin.version>3.5.3</rugged.maven-surefire-plugin.version>
     <rugged.maven-surefire-report-plugin.version>3.5.2</rugged.maven-surefire-report-plugin.version>
     <rugged.jgit.buildnumber.version>1.2.12</rugged.jgit.buildnumber.version>
     <rugged.build-helper-maven-plugin.version>3.6.0</rugged.build-helper-maven-plugin.version>
-    <rugged.nexus-staging-maven-plugin.version>1.7.0</rugged.nexus-staging-maven-plugin.version>
     <rugged.maven-gpg-plugin.version>3.2.7</rugged.maven-gpg-plugin.version>
     <rugged.maven-install-plugin.version>3.1.4</rugged.maven-install-plugin.version>
+    <rugged.cyclonedx-maven-plugin.version>2.9.1</rugged.cyclonedx-maven-plugin.version>
 
   </properties>
 
@@ -98,6 +97,9 @@
 
   <contributors>
     <contributor>
+      <name>Sébastien Dinot</name>
+    </contributor>
+    <contributor>
       <name>Lucian B&#259;rbulescu</name>
     </contributor>
     <contributor>
@@ -141,30 +143,32 @@
   <scm>
     <connection>scm:git:https://gitlab.orekit.org/orekit/rugged.git</connection>
     <developerConnection>scm:git:ssh://git@gitlab.orekit.org/orekit/rugged.git</developerConnection>
-    <url>https://gitlab.orekit.org/orekit/rugged/tree/master</url>
+    <url>https://gitlab.orekit.org/orekit/rugged/tree/main</url>
   </scm>
 
   <issueManagement>
-      <system>Gitlab</system>
-      <url>https://gitlab.orekit.org/orekit/rugged/issues</url>
+    <system>Gitlab</system>
+    <url>https://gitlab.orekit.org/orekit/rugged/issues</url>
   </issueManagement>
 
   <dependencies>
+
     <dependency>
-        <groupId>org.orekit</groupId>
-        <artifactId>orekit</artifactId>
-        <version>${rugged.orekit.version}</version>
-        <type>jar</type>
-        <optional>false</optional>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${rugged.junit.version}</version>
+      <groupId>org.orekit</groupId>
+      <artifactId>orekit</artifactId>
+      <version>${rugged.orekit.version}</version>
       <type>jar</type>
-      <scope>test</scope>
       <optional>false</optional>
     </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${rugged.junit.jupiter.version}</version>
+      <optional>false</optional>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -207,7 +211,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-		      <!-- Ensure LICENSE and NOTICE are shipped with binary jar -->
+		          <!-- Ensure LICENSE and NOTICE are shipped with binary jar -->
               <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
               <resources>
                 <resource>
@@ -240,7 +244,7 @@
             </goals>
             <configuration>
               <excludes>
-               <exclude>fr/cs/examples/**/*.class</exclude>
+                <exclude>fr/cs/examples/**/*.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -252,7 +256,7 @@
             </goals>
             <configuration>
               <excludes>
-               <exclude>fr/cs/examples/**/*.class</exclude>
+                <exclude>fr/cs/examples/**/*.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -301,7 +305,7 @@
               </rules>
               <haltOnFailure>false</haltOnFailure>
               <excludes>
-               <exclude>fr/cs/examples/**/*.class</exclude>
+                <exclude>fr/cs/examples/**/*.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -311,13 +315,23 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${rugged.maven-site-plugin.version}</version>
-          <dependencies>
-            <dependency><!-- add support for ssh/scp -->
-              <groupId>org.apache.maven.wagon</groupId>
-              <artifactId>wagon-ssh</artifactId>
-              <version>${rugged.maven-wagon-ssh-external-plugin.version}</version>
-            </dependency>
-          </dependencies>
+        <dependencies>
+          <dependency><!-- add support for ssh/scp -->
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-ssh</artifactId>
+            <version>${rugged.maven-wagon-ssh-external-plugin.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${rugged.maven-surefire-plugin.version}</version>
+        <configuration>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${tools.jar.path}</additionalClasspathElement>
+          </additionalClasspathElements>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -405,6 +419,19 @@
           <headerLocation>${basedir}/license-header.txt</headerLocation>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <version>${rugged.cyclonedx-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>makeAggregateBom</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -462,7 +489,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changes-plugin</artifactId>
         <version>${rugged.maven-changes-plugin.version}</version>
-         <configuration>
+        <configuration>
           <teamlist>team.html</teamlist>
         </configuration>
         <reportSets>
@@ -516,9 +543,9 @@
     <profile>
       <id>git</id>
       <activation>
-      <file>
-        <exists>.git</exists>
-      </file>
+        <file>
+          <exists>.git</exists>
+        </file>
       </activation>
       <build>
         <plugins>
@@ -529,60 +556,37 @@
             <executions>
               <execution>
                 <phase>prepare-package</phase>
-                  <goals>
-                   <goal>extract-buildnumber</goal>
-                  </goals>
+                <goals>
+                  <goal>extract-buildnumber</goal>
+                </goals>
               </execution>
             </executions>
             <configuration>
             </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>${rugged.maven-jar-plugin.version}</version>
-          <configuration>
-           <archive>
-            <manifestFile>${project.build.directory}/osgi/MANIFEST.MF</manifestFile>
-            <manifestEntries>
-              <Implementation-Build>${rugged.implementation.build}</Implementation-Build>
-              <X-Compile-Source-JDK>${rugged.compiler.source}</X-Compile-Source-JDK>
-              <X-Compile-Target-JDK>${rugged.compiler.target}</X-Compile-Target-JDK>
-              <Automatic-Module-Name>org.orekit.rugged</Automatic-Module-Name>
-            </manifestEntries>
-           </archive>
-          </configuration>
-        </plugin>
-       </plugins>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>${rugged.maven-jar-plugin.version}</version>
+            <configuration>
+              <archive>
+                <manifestFile>${project.build.directory}/osgi/MANIFEST.MF</manifestFile>
+                <manifestEntries>
+                  <Implementation-Build>${rugged.implementation.build}</Implementation-Build>
+                  <X-Compile-Source-JDK>${rugged.compiler.source}</X-Compile-Source-JDK>
+                  <X-Compile-Target-JDK>${rugged.compiler.target}</X-Compile-Target-JDK>
+                  <Automatic-Module-Name>org.orekit.rugged</Automatic-Module-Name>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
     <profile>
       <id>release</id>
-      <!-- distributionManagement>
-        <repository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-      </distributionManagement-->
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>${rugged.maven-source-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
@@ -595,17 +599,6 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>${rugged.nexus-staging-maven-plugin.version}</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>false</autoReleaseAfterClose>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
@@ -634,10 +627,8 @@
             <artifactId>maven-gpg-plugin</artifactId>
             <version>${rugged.maven-gpg-plugin.version}</version>
             <configuration>
-              <gpgArguments>
-                <arg>--digest-algo=SHA512</arg>
-              </gpgArguments>
-              <!-- keyname>0802AB8C87B0B1AEC1C1C5871550FDBD6375C33B</keyname-->
+              <signer>bc</signer>
+              <useAgent>false</useAgent>
             </configuration>
             <executions>
               <execution>
@@ -655,7 +646,7 @@
             <version>${rugged.maven-install-plugin.version}</version>
           </plugin>
         </plugins>
-     </build>
+      </build>
     </profile>
     <profile>
       <!-- A profile to configure staging deployment (for continuous integration process) -->
@@ -666,8 +657,8 @@
           <url>https://packages.orekit.org/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>ci-snapshots</id>
-            <url>https://packages.orekit.org/repository/maven-snapshots/</url>
+          <id>ci-snapshots</id>
+          <url>https://packages.orekit.org/repository/maven-snapshots/</url>
         </snapshotRepository>
       </distributionManagement>
     </profile>
@@ -701,7 +692,7 @@
                       <action>
                         <ignore/>
                       </action>
-                     </pluginExecution>
+                    </pluginExecution>
                   </pluginExecutions>
                 </lifecycleMappingMetadata>
               </configuration>

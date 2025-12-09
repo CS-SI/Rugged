@@ -1,10 +1,9 @@
 package org.orekit.rugged.adjustment;
 
-import org.junit.Assert;
-
 import java.lang.reflect.Field;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class LeastSquareAdjusterTest {
 
@@ -22,6 +21,6 @@ public class LeastSquareAdjusterTest {
         optimizerIdWithDefaultOptimizer.setAccessible(true);
         OptimizerId getOptimizerIdWithDefaultOptimizer = (OptimizerId) optimizerIdWithDefaultOptimizer.get(adjusterWithDefaultOptimizer);
 
-        Assert.assertTrue(getOptimizerIdWithDefaultOptimizer == getOptimizerIdWithOptimizer);
+        Assertions.assertTrue(getOptimizerIdWithDefaultOptimizer == getOptimizerIdWithOptimizer);
     }
 }

@@ -34,9 +34,9 @@ import org.hipparchus.random.UncorrelatedRandomVectorGenerator;
 import org.hipparchus.random.UniformRandomGenerator;
 import org.hipparchus.random.Well19937a;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.orekit.rugged.los.FixedRotation;
 import org.orekit.rugged.los.LOSBuilder;
 import org.orekit.rugged.los.TimeDependentLOS;
@@ -59,13 +59,13 @@ public class FixedRotationTest {
                                                    0.0));
             TimeDependentLOS tdl = builder.build();
             for (int i = 0; i < raw.size(); ++i) {
-                Assert.assertEquals(0.0,
+                Assertions.assertEquals(0.0,
                                     Vector3D.distance(raw.get(i), tdl.getLOS(i, AbsoluteDate.J2000_EPOCH)),
                                     2.0e-15);
             }
 
-            Assert.assertEquals(1, tdl.getParametersDrivers().count());
-            Assert.assertEquals("identity", tdl.getParametersDrivers().findFirst().get().getName());
+            Assertions.assertEquals(1, tdl.getParametersDrivers().count());
+            Assertions.assertEquals("identity", tdl.getParametersDrivers().findFirst().get().getName());
 
         }
     }
@@ -97,36 +97,36 @@ public class FixedRotationTest {
             Rotation combined = r3.applyTo(r2.applyTo(r1));
 
             for (int i = 0; i < raw.size(); ++i) {
-                Assert.assertEquals(0.0,
+                Assertions.assertEquals(0.0,
                                     Vector3D.distance(combined.applyTo(raw.get(i)),
                                                       tdl.getLOS(i, AbsoluteDate.J2000_EPOCH)),
                                     2.0e-15);
             }
 
             List<ParameterDriver> drivers = tdl.getParametersDrivers().collect(Collectors.toList());
-            Assert.assertEquals(3, drivers.size());
+            Assertions.assertEquals(3, drivers.size());
             ParameterDriver driver1 = drivers.get(0);
             ParameterDriver driver2 = drivers.get(1);
             ParameterDriver driver3 = drivers.get(2);
-            Assert.assertEquals("r1", driver1.getName());
-            Assert.assertEquals(-2 * FastMath.PI, driver1.getMinValue(), 2.0e-15);
-            Assert.assertEquals(+2 * FastMath.PI, driver1.getMaxValue(), 2.0e-15);
-            Assert.assertEquals(angle1, driver1.getValue(), 2.0e-15);
-            Assert.assertEquals("r2", driver2.getName());
-            Assert.assertEquals(-2 * FastMath.PI, driver2.getMinValue(), 2.0e-15);
-            Assert.assertEquals(+2 * FastMath.PI, driver2.getMaxValue(), 2.0e-15);
-            Assert.assertEquals(angle2, driver2.getValue(), 2.0e-15);
-            Assert.assertEquals("r3", driver3.getName());
-            Assert.assertEquals(-2 * FastMath.PI, driver3.getMinValue(), 2.0e-15);
-            Assert.assertEquals(+2 * FastMath.PI, driver3.getMaxValue(), 2.0e-15);
-            Assert.assertEquals(angle3, driver3.getValue(), 2.0e-15);
+            Assertions.assertEquals("r1", driver1.getName());
+            Assertions.assertEquals(-2 * FastMath.PI, driver1.getMinValue(), 2.0e-15);
+            Assertions.assertEquals(+2 * FastMath.PI, driver1.getMaxValue(), 2.0e-15);
+            Assertions.assertEquals(angle1, driver1.getValue(), 2.0e-15);
+            Assertions.assertEquals("r2", driver2.getName());
+            Assertions.assertEquals(-2 * FastMath.PI, driver2.getMinValue(), 2.0e-15);
+            Assertions.assertEquals(+2 * FastMath.PI, driver2.getMaxValue(), 2.0e-15);
+            Assertions.assertEquals(angle2, driver2.getValue(), 2.0e-15);
+            Assertions.assertEquals("r3", driver3.getName());
+            Assertions.assertEquals(-2 * FastMath.PI, driver3.getMinValue(), 2.0e-15);
+            Assertions.assertEquals(+2 * FastMath.PI, driver3.getMaxValue(), 2.0e-15);
+            Assertions.assertEquals(angle3, driver3.getValue(), 2.0e-15);
 
             driver1.setValue(0.0);
             driver2.setValue(0.0);
             driver3.setValue(0.0);
 
             for (int i = 0; i < raw.size(); ++i) {
-                Assert.assertEquals(0.0,
+                Assertions.assertEquals(0.0,
                                     Vector3D.distance(raw.get(i),
                                                       tdl.getLOS(i, AbsoluteDate.J2000_EPOCH)),
                                     2.0e-15);
@@ -186,7 +186,7 @@ public class FixedRotationTest {
                 }
 
             };
-            Assert.assertEquals(3, generator.getSelected().size());
+            Assertions.assertEquals(3, generator.getSelected().size());
 
             FiniteDifferencesDifferentiator differentiator =
                             new FiniteDifferencesDifferentiator(4, 0.001);
@@ -211,12 +211,12 @@ public class FixedRotationTest {
                     Vector3D los = tdl.getLOS(i, AbsoluteDate.J2000_EPOCH);
                     FieldVector3D<DerivativeStructure> losDS =
                                     tdl.getLOSDerivatives(i, AbsoluteDate.J2000_EPOCH, generator);
-                    Assert.assertEquals(los.getX(), losDS.getX().getValue(), 2.0e-15);
-                    Assert.assertEquals(los.getY(), losDS.getY().getValue(), 2.0e-15);
-                    Assert.assertEquals(los.getZ(), losDS.getZ().getValue(), 2.0e-15);
-                    Assert.assertEquals(mDS[i][0].getPartialDerivative(1), losDS.getX().getPartialDerivative(orders), 2.0e-12);
-                    Assert.assertEquals(mDS[i][1].getPartialDerivative(1), losDS.getY().getPartialDerivative(orders), 2.0e-12);
-                    Assert.assertEquals(mDS[i][2].getPartialDerivative(1), losDS.getZ().getPartialDerivative(orders), 2.0e-12);
+                    Assertions.assertEquals(los.getX(), losDS.getX().getValue(), 2.0e-15);
+                    Assertions.assertEquals(los.getY(), losDS.getY().getValue(), 2.0e-15);
+                    Assertions.assertEquals(los.getZ(), losDS.getZ().getValue(), 2.0e-15);
+                    Assertions.assertEquals(mDS[i][0].getPartialDerivative(1), losDS.getX().getPartialDerivative(orders), 2.0e-12);
+                    Assertions.assertEquals(mDS[i][1].getPartialDerivative(1), losDS.getY().getPartialDerivative(orders), 2.0e-12);
+                    Assertions.assertEquals(mDS[i][2].getPartialDerivative(1), losDS.getZ().getPartialDerivative(orders), 2.0e-12);
                 }
                 ++index;
             }
@@ -224,7 +224,7 @@ public class FixedRotationTest {
 
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws URISyntaxException {
 
         final Vector3D normal    = Vector3D.PLUS_I;

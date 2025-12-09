@@ -27,10 +27,9 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.data.DataContext;
@@ -58,13 +57,13 @@ import org.orekit.utils.Constants;
 
 public class DumpManagerTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
 
     @Test
     public void testDump() throws URISyntaxException, IOException {
 
-        File dump = tempFolder.newFile();
+        File dump = File.createTempFile("junit", null, tempFolder);
         DumpManager.activate(dump);
         variousRuggedCalls();
         DumpManager.deactivate();
@@ -120,27 +119,27 @@ public class DumpManagerTest {
                     } else if (trimmed.startsWith("sensor rate:")) {
                         ++countSensorRate;
                     } else {
-                        Assert.fail(line);
+                        Assertions.fail(line);
                     }
                 }
             }
         }
 
-        Assert.assertEquals(1,   countAlgorithm);
-        Assert.assertEquals(1,   countEllipsoid);
-        Assert.assertEquals(400, countDirectLoc);
-        Assert.assertEquals(400, countDirectLocResult);
-        Assert.assertEquals(1,   countSpan);
-        Assert.assertEquals(2,   countTransform);
-        Assert.assertEquals(2,   countDEMTile);
-        Assert.assertEquals(812, countDEMCell);
-        Assert.assertEquals(5,   countInverseLoc);
-        Assert.assertEquals(5,   countInverseLocResult);
-        Assert.assertEquals(1,   countSensor);
-        Assert.assertEquals(1,   countSensorMeanPlane);
-        Assert.assertEquals(422, countSensorLOS);
-        Assert.assertEquals(19,  countSensorDatation);
-        Assert.assertEquals(6,   countSensorRate);
+        Assertions.assertEquals(1,   countAlgorithm);
+        Assertions.assertEquals(1,   countEllipsoid);
+        Assertions.assertEquals(400, countDirectLoc);
+        Assertions.assertEquals(400, countDirectLocResult);
+        Assertions.assertEquals(1,   countSpan);
+        Assertions.assertEquals(2,   countTransform);
+        Assertions.assertEquals(2,   countDEMTile);
+        Assertions.assertEquals(812, countDEMCell);
+        Assertions.assertEquals(5,   countInverseLoc);
+        Assertions.assertEquals(5,   countInverseLocResult);
+        Assertions.assertEquals(1,   countSensor);
+        Assertions.assertEquals(1,   countSensorMeanPlane);
+        Assertions.assertEquals(422, countSensorLOS);
+        Assertions.assertEquals(19,  countSensorDatation);
+        Assertions.assertEquals(6,   countSensorRate);
 
     }
 
@@ -194,14 +193,14 @@ public class DumpManagerTest {
            GeodeticPoint gpPixel =
                    rugged.directLocation(lineSensor.getDate(100), lineSensor.getPosition(),
                                              lineSensor.getLOS(lineSensor.getDate(100), i));
-           Assert.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
-           Assert.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
-           Assert.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
+           Assertions.assertEquals(gpLine[i].getLatitude(),  gpPixel.getLatitude(),  1.0e-10);
+           Assertions.assertEquals(gpLine[i].getLongitude(), gpPixel.getLongitude(), 1.0e-10);
+           Assertions.assertEquals(gpLine[i].getAltitude(),  gpPixel.getAltitude(),  1.0e-10);
 
            if (i % 45 == 0) {
                SensorPixel sp = rugged.inverseLocation(lineSensor.getName(), gpPixel, 0, 179);
-               Assert.assertEquals(100, sp.getLineNumber(), 1.0e-5);
-               Assert.assertEquals(i, sp.getPixelNumber(), 6.0e-9);
+               Assertions.assertEquals(100, sp.getLineNumber(), 1.0e-5);
+               Assertions.assertEquals(i, sp.getPixelNumber(), 6.0e-9);
            }
        }
 
@@ -210,12 +209,12 @@ public class DumpManagerTest {
    @Test
    public void testAlreadyActive() throws URISyntaxException, IOException {
 
-       DumpManager.activate(tempFolder.newFile());
+       DumpManager.activate(File.createTempFile("junit", null, tempFolder));
        try {
-           DumpManager.activate(tempFolder.newFile());
-           Assert.fail("an exception should have been thrown");
+           DumpManager.activate(File.createTempFile("junit", null, tempFolder));
+           Assertions.fail("an exception should have been thrown");
        } catch (RuggedException re) {
-           Assert.assertEquals(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE, re.getSpecifier());
+           Assertions.assertEquals(RuggedMessages.DEBUG_DUMP_ALREADY_ACTIVE, re.getSpecifier());
        } finally {
            DumpManager.deactivate();
        }
@@ -225,19 +224,19 @@ public class DumpManagerTest {
    public void testNotActive() throws URISyntaxException, IOException {
        try {
            DumpManager.deactivate();
-           Assert.fail("an exception should have been thrown");
+           Assertions.fail("an exception should have been thrown");
        } catch (RuggedException re) {
-           Assert.assertEquals(RuggedMessages.DEBUG_DUMP_NOT_ACTIVE, re.getSpecifier());
+           Assertions.assertEquals(RuggedMessages.DEBUG_DUMP_NOT_ACTIVE, re.getSpecifier());
        }
    }
 
    @Test
    public void testWriteError() throws URISyntaxException, IOException {
        try {
-           DumpManager.activate(tempFolder.getRoot());
-           Assert.fail("an exception should have been thrown");
+           DumpManager.activate(tempFolder);
+           Assertions.fail("an exception should have been thrown");
        } catch (RuggedException re) {
-           Assert.assertEquals(RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, re.getSpecifier());
+           Assertions.assertEquals(RuggedMessages.DEBUG_DUMP_ACTIVATION_ERROR, re.getSpecifier());
        }
    }
 
